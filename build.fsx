@@ -53,7 +53,8 @@ Target "Clean" (fun _ ->
 )
 
 Target "RestorePackages" (fun _ -> 
-  DotNetCli.Restore (fun p -> { p with Project = "./src/" } )
+  DotNetCli.Restore (fun p -> { p with Project = "./src/"
+                                       AdditionalArgs = versionArgs })
 )
 
 Target "Build" (fun _ ->
