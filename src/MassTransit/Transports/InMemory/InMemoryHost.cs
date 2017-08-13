@@ -138,6 +138,11 @@ namespace MassTransit.Transports.InMemory
             return _receiveEndpoints.ConnectReceiveEndpointObserver(observer);
         }
 
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _receiveEndpoints.ConnectPublishObserver(observer);
+        }
+        
         public async Task<ISendTransport> GetSendTransport(Uri address)
         {
             if (_sendEndpointProvider == null || _publishEndpointProvider == null || _topology == null)

@@ -413,6 +413,11 @@ namespace MassTransit.AzureServiceBusTransport
             return _receiveEndpoints.ConnectReceiveEndpointObserver(observer);
         }
 
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _receiveEndpoints.ConnectPublishObserver(observer);
+        }
+
         Task<MessagingFactory> CreateMessagingFactory()
         {
             var mfs = new MessagingFactorySettings

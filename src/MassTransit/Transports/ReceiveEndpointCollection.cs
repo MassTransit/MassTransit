@@ -15,6 +15,7 @@ namespace MassTransit.Transports
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -31,6 +32,7 @@ namespace MassTransit.Transports
         readonly object _mutateLock = new object();
         readonly ReceiveEndpointObservable _receiveEndpointObservers;
         readonly ReceiveObservable _receiveObservers;
+        readonly PublishObservable _publishObservers;
 
         public ReceiveEndpointCollection()
         {
@@ -39,6 +41,7 @@ namespace MassTransit.Transports
             _receiveObservers = new ReceiveObservable();
             _receiveEndpointObservers = new ReceiveEndpointObservable();
             _consumeObservers = new ConsumeObservable();
+            _publishObservers = new PublishObservable();
         }
 
         public void Add(string endpointName, IReceiveEndpoint endpoint)
@@ -118,6 +121,11 @@ namespace MassTransit.Transports
             return _consumeObservers.Connect(observer);
         }
 
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishObservers.Connect(observer);
+        }
+
         async Task<HostReceiveEndpointHandle> StartEndpoint(string endpointName, IReceiveEndpoint endpoint)
         {
             try
@@ -127,10 +135,11 @@ namespace MassTransit.Transports
                 var consumeObserver = endpoint.ConnectConsumeObserver(_consumeObservers);
                 var receiveObserver = endpoint.ConnectReceiveObserver(_receiveObservers);
                 var receiveEndpointObserver = endpoint.ConnectReceiveEndpointObserver(_receiveEndpointObservers);
+                var publishObserver = endpoint.ConnectPublishObserver(_publishObservers);
                 var endpointHandle = endpoint.Start();
 
                 var handle = new Handle(endpointHandle, endpoint, endpointReady.Ready, () => Remove(endpointName),
-                    receiveObserver, receiveEndpointObserver, consumeObserver);
+                    receiveObserver, receiveEndpointObserver, consumeObserver, publishObserver);
 
                 await handle.Ready.ConfigureAwait(false);
 
