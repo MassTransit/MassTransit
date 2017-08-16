@@ -5,11 +5,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     using MassTransit.Tests.Saga;
 
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.EntityFrameworkCore.Design;
 
-    public class ContextFactory : IDbContextFactory<SagaDbContext<SimpleSaga, SimpleSagaMap>>
+    public class ContextFactory : IDesignTimeDbContextFactory<SagaDbContext<SimpleSaga, SimpleSagaMap>>
     {
-        public SagaDbContext<SimpleSaga, SimpleSagaMap> Create(DbContextFactoryOptions options)
+        public SagaDbContext<SimpleSaga, SimpleSagaMap> CreateDbContext(string[] args)
         {
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<SagaDbContext<SimpleSaga, SimpleSagaMap>>();
 

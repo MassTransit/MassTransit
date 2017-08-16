@@ -65,12 +65,12 @@
             // dotnet ef migrations add --context "SagaDbContext``2" Init  -v
             var contextFactory = new ContextFactory();
 
-            using (var context = contextFactory.Create(new DbContextFactoryOptions()))
+            using (var context = contextFactory.CreateDbContext(Array.Empty<string>()))
             {
                 context.Database.Migrate();
             }
 
-            this._sagaDbContextFactory = () => contextFactory.Create(new DbContextFactoryOptions());
+            this._sagaDbContextFactory = () => contextFactory.CreateDbContext(Array.Empty<string>());
             this._sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => 
                 new EntityFrameworkSagaRepository<SimpleSaga>(this._sagaDbContextFactory));
         }

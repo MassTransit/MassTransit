@@ -5,11 +5,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     using MassTransit.EntityFrameworkCoreIntegration.Audit;
 
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.EntityFrameworkCore.Design;
 
-    public class AuditContextFactory : IDbContextFactory<AuditDbContext>
+    public class AuditContextFactory : IDesignTimeDbContextFactory<AuditDbContext>
     {
-        public AuditDbContext Create(DbContextFactoryOptions options)
+        public AuditDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AuditDbContext>().
                 UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString(),
@@ -22,6 +22,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                         });
 
             return new AuditDbContext(optionsBuilder.Options, "EfCoreAudit");
+
         }
     }
 }
