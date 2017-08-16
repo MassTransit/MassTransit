@@ -66,7 +66,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                 {
                     Persistence = "entityFramework",
                     Entities = dbContext.Model.GetEntityTypes().Select(type => type.Name)
-                    //Entities = workspace.GetItems<EntityType>(DataSpace.SSpace).Select(x => x.Name)
                 });
             }
         }
@@ -89,7 +88,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                         // Hack for locking row for the duration of the transaction.
                         var tableName = dbContext.GetTableName<TSaga>();
                         await dbContext.Database.ExecuteSqlCommandAsync(
-                            $"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", CancellationToken.None, sagaId)
+                            $"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId)
                             .ConfigureAwait(false);
                     }
                     catch (Exception e)
@@ -221,7 +220,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                                     await
                                         dbContext.Database.ExecuteSqlCommandAsync(
                                             $"select 2 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0",
-                                            CancellationToken.None,
                                             correlationId).ConfigureAwait(false);
                                 }
 
