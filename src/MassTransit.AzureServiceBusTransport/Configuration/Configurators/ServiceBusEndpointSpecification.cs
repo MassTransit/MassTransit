@@ -141,7 +141,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
                     x.UseFilter(new MessageReceiverFilter(receivePipe, receiveEndpointTopology));
             });
 
-            var transport = new ReceiveTransport(Host, _settings, _publishEndpointProvider, pipe);
+            var transport = new ReceiveTransport(Host, _settings, _publishEndpointProvider, _sendEndpointProvider, pipe);
 
             var serviceBusHost = Host as ServiceBusHost;
             if (serviceBusHost == null)

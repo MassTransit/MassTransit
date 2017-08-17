@@ -224,7 +224,7 @@ namespace MassTransit
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _sendEndpointProvider.ConnectSendObserver(observer);
+            return new MultipleConnectHandle(_hosts.Select(h => h.ConnectSendObserver(observer)));
         }
 
         void IProbeSite.Probe(ProbeContext context)

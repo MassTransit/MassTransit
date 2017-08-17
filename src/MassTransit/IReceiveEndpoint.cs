@@ -28,6 +28,7 @@ namespace MassTransit
         IConsumeObserverConnector,
         IConsumeMessageObserverConnector,
         IPublishObserverConnector,
+        ISendObserverConnector,
         IProbeSite
     {
         /// <summary>

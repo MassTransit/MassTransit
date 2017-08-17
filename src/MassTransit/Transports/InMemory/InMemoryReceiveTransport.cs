@@ -140,6 +140,10 @@ namespace MassTransit.Transports.InMemory
         {
             return _topology.PublishEndpointProvider.ConnectPublishObserver(observer);
         }
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _topology.SendEndpointProvider.ConnectSendObserver(observer);
+        }
 
         void HandleDeliveryComplete()
         {

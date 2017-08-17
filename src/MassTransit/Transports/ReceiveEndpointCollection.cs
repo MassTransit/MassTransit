@@ -33,6 +33,7 @@ namespace MassTransit.Transports
         readonly ReceiveEndpointObservable _receiveEndpointObservers;
         readonly ReceiveObservable _receiveObservers;
         readonly PublishObservable _publishObservers;
+        readonly SendObservable _sendObservers;
 
         public ReceiveEndpointCollection()
         {
@@ -42,6 +43,7 @@ namespace MassTransit.Transports
             _receiveEndpointObservers = new ReceiveEndpointObservable();
             _consumeObservers = new ConsumeObservable();
             _publishObservers = new PublishObservable();
+            _sendObservers = new SendObservable();
         }
 
         public void Add(string endpointName, IReceiveEndpoint endpoint)
@@ -126,6 +128,11 @@ namespace MassTransit.Transports
             return _publishObservers.Connect(observer);
         }
 
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendObservers.Connect(observer);
+        }
+
         async Task<HostReceiveEndpointHandle> StartEndpoint(string endpointName, IReceiveEndpoint endpoint)
         {
             try
@@ -136,10 +143,11 @@ namespace MassTransit.Transports
                 var receiveObserver = endpoint.ConnectReceiveObserver(_receiveObservers);
                 var receiveEndpointObserver = endpoint.ConnectReceiveEndpointObserver(_receiveEndpointObservers);
                 var publishObserver = endpoint.ConnectPublishObserver(_publishObservers);
+                var sendObserver = endpoint.ConnectSendObserver(_sendObservers);
                 var endpointHandle = endpoint.Start();
 
                 var handle = new Handle(endpointHandle, endpoint, endpointReady.Ready, () => Remove(endpointName),
-                    receiveObserver, receiveEndpointObserver, consumeObserver, publishObserver);
+                    receiveObserver, receiveEndpointObserver, consumeObserver, publishObserver, sendObserver);
 
                 await handle.Ready.ConfigureAwait(false);
 

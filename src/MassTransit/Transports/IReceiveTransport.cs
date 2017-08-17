@@ -19,6 +19,7 @@ namespace MassTransit.Transports
         IReceiveObserverConnector,
         IReceiveTransportObserverConnector,
         IPublishObserverConnector,
+        ISendObserverConnector,
         IProbeSite
     {
         /// <summary>

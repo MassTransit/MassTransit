@@ -157,6 +157,11 @@ namespace MassTransit.HttpTransport.Transport
         {
             return ReceiveEndpoints.ConnectPublishObserver(observer);
         }
+
+        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        {
+            return ReceiveEndpoints.ConnectSendObserver(observer);
+        }
         
         string DebuggerDisplay => $"{Address}";
 

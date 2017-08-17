@@ -76,6 +76,11 @@ namespace MassTransit.HttpTransport.Transport
             return _topology.PublishEndpointProvider.ConnectPublishObserver(observer);
         }
 
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _topology.SendEndpointProvider.ConnectSendObserver(observer);
+        }
+
 
         class Handle :
             ReceiveTransportHandle
