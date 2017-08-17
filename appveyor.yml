@@ -58,6 +58,19 @@ test:
 artifacts:
 - path: build_artifacts/*.nupkg
   name: Packages
+deploy:
+- provider: NuGet
+  name: Prerelease
+  api_key:
+    secure: 1hPeINzu7/7sZj1aX7UwoqzdraOa6uZuJtS0yqYEY85p7PcAU2Xd+E3pjE+q8P33
+  on:
+    branch: develop
+- provider: NuGet
+  name: Release
+  api_key:
+    secure: 1hPeINzu7/7sZj1aX7UwoqzdraOa6uZuJtS0yqYEY85p7PcAU2Xd+E3pjE+q8P33
+  on:
+    branch: master
 notifications:
 - provider: Webhook
   url: https://webhooks.gitter.im/e/27919bcbf1f770b0befd
