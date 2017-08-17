@@ -36,10 +36,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     {
         static readonly ILog _log = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
         readonly IsolationLevel _isolationLevel;
-        readonly SagaDbContextFactory _sagaDbContextFactory;
+        readonly Func<DbContext> _sagaDbContextFactory;
         readonly bool _optimistic;
 
-        public EntityFrameworkSagaRepository(SagaDbContextFactory sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, bool optimistic = false)
+        public EntityFrameworkSagaRepository(Func<DbContext> sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, bool optimistic = false)
         {
             this._sagaDbContextFactory = sagaDbContextFactory;
             this._isolationLevel = isolationLevel;
