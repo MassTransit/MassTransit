@@ -55,7 +55,7 @@
             foundId.HasValue.ShouldBe(true);
         }
 
-        readonly SagaDbContextFactory _sagaDbContextFactory;
+        readonly Func<DbContext> _sagaDbContextFactory;
 
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;
 
