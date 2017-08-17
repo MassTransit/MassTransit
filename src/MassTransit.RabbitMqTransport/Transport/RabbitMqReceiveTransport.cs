@@ -96,6 +96,11 @@ namespace MassTransit.RabbitMqTransport.Transport
             return _topology.PublishEndpointProvider.ConnectPublishObserver(observer);
         }
 
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _topology.SendEndpointProvider.ConnectSendObserver(observer);
+        }
+
         async Task Receiver(IPipe<ConnectionContext> transportPipe, TaskSupervisor supervisor)
         {
             try

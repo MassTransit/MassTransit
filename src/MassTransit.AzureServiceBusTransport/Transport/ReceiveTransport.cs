@@ -33,14 +33,17 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly IServiceBusHost _host;
         readonly IPipe<NamespaceContext> _pipe;
         readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ReceiveObservable _receiveObservers;
         readonly ClientSettings _settings;
 
-        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IPublishEndpointProvider publishEndpointProvider, IPipe<NamespaceContext> pipe)
+        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IPublishEndpointProvider publishEndpointProvider, 
+            ISendEndpointProvider sendEndpointProvider, IPipe<NamespaceContext> pipe)
         {
             _host = host;
             _settings = settings;
             _publishEndpointProvider = publishEndpointProvider;
+            _sendEndpointProvider = sendEndpointProvider;
             _pipe = pipe;
 
             _receiveObservers = new ReceiveObservable();
@@ -86,6 +89,11 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return _publishEndpointProvider.ConnectPublishObserver(observer);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendEndpointProvider.ConnectSendObserver(observer);
         }
 
         async Task Receiver(IPipe<NamespaceContext> pipe, TaskSupervisor supervisor)

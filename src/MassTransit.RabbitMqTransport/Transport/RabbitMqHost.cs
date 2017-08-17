@@ -162,6 +162,11 @@ namespace MassTransit.RabbitMqTransport.Transport
         {
             return ReceiveEndpoints.ConnectPublishObserver(observer);
         }
+        
+        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        {
+            return ReceiveEndpoints.ConnectSendObserver(observer);
+        }
 
 
         class Handle :
