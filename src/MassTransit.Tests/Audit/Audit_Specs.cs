@@ -52,7 +52,7 @@ namespace MassTransit.Audit.Tests
         {
             var expected = _harness.Sent.Select<A>().Any();
             var expectedB = _harness.Sent.Select<B>().Any();
-            _store.Count(x => x.Metadata.ContextType == "Send").ShouldBe(2);
+            _store.Count(x => x.Metadata.ContextType == "Send").ShouldBe(3);
         }
 
         [Test]
