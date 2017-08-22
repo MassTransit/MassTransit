@@ -92,7 +92,7 @@
             {
                 try
                 {
-                    IList<TSaga> instances = await session.Query<TSaga>()
+                    var instances = await session.Query<TSaga>()
                         .Where(context.Query.FilterExpression)
                         .ToListAsync().ConfigureAwait(false);
 
