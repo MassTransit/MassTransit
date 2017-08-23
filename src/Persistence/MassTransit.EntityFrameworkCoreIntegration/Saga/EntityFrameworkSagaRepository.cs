@@ -41,14 +41,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         public EntityFrameworkSagaRepository(Func<DbContext> sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, bool optimistic = false)
         {
-            this._sagaDbContextFactory = sagaDbContextFactory;
-            this._isolationLevel = isolationLevel;
-            this._optimistic = optimistic;
+            _sagaDbContextFactory = sagaDbContextFactory;
+            _isolationLevel = isolationLevel;
+            _optimistic = optimistic;
         }
 
         async Task<IEnumerable<Guid>> IQuerySagaRepository<TSaga>.Find(ISagaQuery<TSaga> query)
         {
-            using (var dbContext = this._sagaDbContextFactory())
+            using (var dbContext = _sagaDbContextFactory())
             {
                 return await dbContext.Set<TSaga>()
                     .Where(query.FilterExpression)
@@ -60,7 +60,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("sagaRepository");
-            using (var dbContext = this._sagaDbContextFactory())
+            using (var dbContext = _sagaDbContextFactory())
             {
                 scope.Set(new
                 {
@@ -78,25 +78,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
             var sagaId = context.CorrelationId.Value;
 
-            using (var dbContext = this._sagaDbContextFactory())
-            using (var transaction = dbContext.Database.BeginTransaction(this._isolationLevel))
+            using (var dbContext = _sagaDbContextFactory())
+            using (var transaction = await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
             {
-                if (!this._optimistic)
+                if (!_optimistic)
                 {
-                    try
-                    {
-                        // Hack for locking row for the duration of the transaction.
-                        var tableName = dbContext.GetTableName<TSaga>();
-                        await dbContext.Database.ExecuteSqlCommandAsync(
-                            $"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId)
-                            .ConfigureAwait(false);
-                    }
-                    catch (Exception e)
-                    {
-                        // todo: schema is empty??
-                        Console.WriteLine(e);
-                        throw;
-                    }
+                    // Hack for locking row for the duration of the transaction.
+                    var tableName = dbContext.GetTableName<TSaga>();
+                    await dbContext.Database.ExecuteSqlCommandAsync(
+                        $"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0",
+                        new object[] { sagaId },
+                        context.CancellationToken).ConfigureAwait(false);
                 }
 
                 var inserted = false;
@@ -110,7 +102,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                 try
                 {
                     if (instance == null)
-                        instance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == sagaId);
+                        instance =
+                            await dbContext.Set<TSaga>().SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken).ConfigureAwait(false);
                     if (instance == null)
                     {
                         var missingSagaPipe = new MissingPipe<T>(dbContext, next);
@@ -130,7 +123,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                         await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
                     }
 
-                    await dbContext.SaveChangesAsync().ConfigureAwait(false);
+                    await dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
 
                     transaction.Commit();
                 }
@@ -194,16 +187,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
-            using (var dbContext = this._sagaDbContextFactory())
+            using (var dbContext = _sagaDbContextFactory())
             {
                 // We just get the correlation ids related to our Filter.
                 // We do this outside of the transaction to make sure we don't create a range lock.
-                List<Guid> correlationIds = await dbContext.Set<TSaga>().Where(context.Query.FilterExpression)
+                List<Guid> correlationIds = await dbContext.Set<TSaga>()
+                    .Where(context.Query.FilterExpression)
                     .Select(x => x.CorrelationId)
-                    .ToListAsync()
+                    .ToListAsync(context.CancellationToken)
                     .ConfigureAwait(false);
 
-                using (var transaction = dbContext.Database.BeginTransaction(this._isolationLevel))
+                using (var transaction = 
+                    await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
                 {
                     try
                     {
@@ -213,21 +208,23 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                             var tableName = dbContext.GetTableName<TSaga>();
                             foreach (var correlationId in correlationIds)
                             {
-                                if (!this._optimistic)
+                                if (!_optimistic)
                                 {
                                     // Hack for locking row for the duration of the transaction. 
                                     // We only lock one at a time, since we don't want an accidental range lock.
                                     await
                                         dbContext.Database.ExecuteSqlCommandAsync(
                                             $"select 2 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0",
-                                            correlationId).ConfigureAwait(false);
+                                            new object[] {correlationId}, context.CancellationToken).ConfigureAwait(false);
                                 }
 
-                                var instance = dbContext.Set<TSaga>().SingleOrDefault(x => x.CorrelationId == correlationId);
+                                var instance = 
+                                    await dbContext.Set<TSaga>().SingleOrDefaultAsync(x => x.CorrelationId == correlationId, context.CancellationToken)
+                                        .ConfigureAwait(false);
 
                                 if (instance != null)
                                 {
-                                    await this.SendToInstance(context, dbContext, policy, instance, next).ConfigureAwait(false);
+                                    await SendToInstance(context, dbContext, policy, instance, next).ConfigureAwait(false);
                                 }
                                 else
                                 {
@@ -244,7 +241,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                             await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
                         }
 
-                        await dbContext.SaveChangesAsync().ConfigureAwait(false);
+                        await dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
 
                         transaction.Commit();
                     }
@@ -389,13 +386,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
             public MissingPipe(DbContext dbContext, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
             {
-                this._dbContext = dbContext;
-                this._next = next;
+                _dbContext = dbContext;
+                _next = next;
             }
 
             void IProbeSite.Probe(ProbeContext context)
             {
-                this._next.Probe(context);
+                _next.Probe(context);
             }
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
@@ -407,14 +404,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                         TypeMetadataCache<TMessage>.ShortName);
                 }
 
-                var proxy = new EntityFrameworkSagaConsumeContext<TSaga, TMessage>(this._dbContext, context, context.Saga, false);
+                var proxy = new EntityFrameworkSagaConsumeContext<TSaga, TMessage>(_dbContext, context, context.Saga, false);
 
-                await this._next.Send(proxy).ConfigureAwait(false);
+                await _next.Send(proxy).ConfigureAwait(false);
 
                 if (!proxy.IsCompleted)
-                    this._dbContext.Set<TSaga>().Add(context.Saga);
+                    _dbContext.Set<TSaga>().Add(context.Saga);
 
-                await this._dbContext.SaveChangesAsync().ConfigureAwait(false);
+                await _dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
             }
         }
     }
