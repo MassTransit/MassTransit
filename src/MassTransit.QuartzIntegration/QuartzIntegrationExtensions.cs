@@ -23,7 +23,7 @@ namespace MassTransit
 
     public static class QuartzIntegrationExtensions
     {
-        public static void UseInMemoryScheduler(this IBusFactoryConfigurator configurator)
+        public static void UseInMemoryScheduler(this IBusFactoryConfigurator configurator, string queueName = "quartz")
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
@@ -31,7 +31,7 @@ namespace MassTransit
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
             var scheduler = schedulerFactory.GetScheduler();
 
-            configurator.ReceiveEndpoint("quartz", e =>
+            configurator.ReceiveEndpoint(queueName, e =>
             {
                 var partitioner = configurator.CreatePartitioner(16);
 
