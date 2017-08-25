@@ -193,13 +193,6 @@ namespace MassTransit.Util.Scanning
             return _assemblies.Any();
         }
 
-#if NETCORE
-        public void TheCallingAssembly()
-        {
-            throw new ConfigurationException("Could not determine the calling assembly, you may need to explicitly call IAssemblyScanner.Assembly()");
-        }
-
-#else
         public void TheCallingAssembly()
         {
             var callingAssembly = FindTheCallingAssembly();
@@ -237,6 +230,5 @@ namespace MassTransit.Util.Scanning
             }
             return callingAssembly;
         }
-#endif
     }
 }
