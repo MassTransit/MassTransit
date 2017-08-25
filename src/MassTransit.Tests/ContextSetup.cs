@@ -27,14 +27,13 @@ namespace MassTransit.Tests
         [OneTimeSetUp]
         public void Before_any()
         {
-#if NETCORE
-            string path = AppContext.BaseDirectory;
+            string path = AppDomain.CurrentDomain.BaseDirectory;
             string file = Path.Combine(path, "masstransit.tests.log4net.xml");
+
+#if NETCORE
             var logRepository = LogManager.GetRepository(System.Reflection.Assembly.GetEntryAssembly());
             XmlConfigurator.Configure(logRepository, new FileInfo(file));
 #else
-            string path = AppDomain.CurrentDomain.BaseDirectory;
-            string file = Path.Combine(path, "masstransit.tests.log4net.xml");
             XmlConfigurator.Configure(new FileInfo(file));
 #endif
             Trace.WriteLine("Loading Log4net: " + file);

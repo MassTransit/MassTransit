@@ -27,15 +27,9 @@ namespace MassTransit.Util
 
         public BusHostInfo(bool initialize)
         {
-#if NETCORE
-            FrameworkVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
-            OperatingSystemVersion = System.Runtime.InteropServices.RuntimeInformation.OSDescription;            
-            var entryAssembly = System.Reflection.Assembly.GetEntryAssembly();
-#else
             FrameworkVersion = Environment.Version.ToString();
             OperatingSystemVersion = Environment.OSVersion.ToString();
             var entryAssembly = System.Reflection.Assembly.GetEntryAssembly() ?? System.Reflection.Assembly.GetCallingAssembly();
-#endif
             var currentProcess = Process.GetCurrentProcess();
             MachineName = Environment.MachineName;
             MassTransitVersion = FileVersionInfo.GetVersionInfo(typeof(IBus).GetTypeInfo().Assembly.Location).FileVersion;

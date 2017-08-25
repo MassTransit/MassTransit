@@ -72,11 +72,8 @@ namespace MassTransit.Tests.MessageData
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
-#if NETCORE
-                string baseDirectory = AppContext.BaseDirectory;
-#else
                 string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-#endif
+                
                 string messageDataPath = Path.Combine(baseDirectory, "MessageData");
 
                 var dataDirectory = new DirectoryInfo(messageDataPath);
