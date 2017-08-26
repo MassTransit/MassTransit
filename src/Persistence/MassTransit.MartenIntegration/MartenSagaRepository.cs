@@ -92,11 +92,11 @@
             {
                 try
                 {
-                    var instances = await session.Query<TSaga>()
+                    IEnumerable<TSaga> instances = await session.Query<TSaga>()
                         .Where(context.Query.FilterExpression)
                         .ToListAsync().ConfigureAwait(false);
 
-                    if (instances.Count == 0)
+                    if (!instances.Any())
                     {
                         var missingSagaPipe = new MissingPipe<T>(session, next);
                         await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
