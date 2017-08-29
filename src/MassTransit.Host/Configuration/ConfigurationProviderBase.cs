@@ -38,7 +38,7 @@ namespace MassTransit.Host.Configuration
                 return false;
             }
 
-            value = element.Value;
+            value = Environment.ExpandEnvironmentVariables(element.Value);
             return element.ElementInformation.IsPresent;
         }
 
