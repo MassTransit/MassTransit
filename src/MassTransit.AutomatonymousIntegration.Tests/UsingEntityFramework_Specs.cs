@@ -24,6 +24,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using Saga;
     using TestFramework;
     using System.Collections.Generic;
+    using Testing;
+
 
     [TestFixture]
     public class When_using_EntityFramework :

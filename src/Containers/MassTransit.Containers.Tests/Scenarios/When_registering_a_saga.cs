@@ -18,6 +18,7 @@ namespace MassTransit.Containers.Tests.Scenarios
     using Saga;
     using Shouldly;
     using TestFramework;
+    using Testing;
 
 
     public abstract class When_registering_a_saga :

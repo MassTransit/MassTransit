@@ -15,6 +15,7 @@
     using NUnit.Framework;
 
     using Shouldly;
+    using Testing;
 
 
     [TestFixture, Category("Integration")]

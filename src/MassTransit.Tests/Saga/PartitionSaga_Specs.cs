@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Saga
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Saga;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using Util;

@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Saga
     using GreenPipes;
     using GreenPipes.Introspection;
     using MassTransit.Saga;
+    using MassTransit.Testing;
     using Messages;
     using NUnit.Framework;
     using Shouldly;
