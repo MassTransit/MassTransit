@@ -19,6 +19,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using Request_Specs;
     using Saga;
     using TestFramework;
+    using Testing;
 
 
     [TestFixture]

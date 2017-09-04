@@ -22,6 +22,7 @@ namespace MassTransit.NHibernateIntegration.Tests
     using Saga;
     using Shouldly;
     using TestFramework;
+    using Testing;
 
 
     [TestFixture, Category("Integration")]

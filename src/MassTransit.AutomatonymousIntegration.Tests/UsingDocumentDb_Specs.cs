@@ -25,6 +25,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System.Data.Entity.Infrastructure;
     using System.Threading.Tasks;
     using TestFramework;
+    using Testing;
+
 
     [TestFixture]
     public class When_using_DocumentDB :

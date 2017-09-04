@@ -9,7 +9,8 @@
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.TestFramework</PackageId><Title>MassTransit.TestFramework</Title>
+    <PackageId>MassTransit.TestFramework</PackageId>
+    <Title>MassTransit.TestFramework</Title>
     <Description>MassTransit Test Framework (NUnit); $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.TestFramework.xml</DocumentationFile>
   </PropertyGroup>
@@ -18,6 +19,6 @@
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="NUnit" Version="3.7.1" />
-	  <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

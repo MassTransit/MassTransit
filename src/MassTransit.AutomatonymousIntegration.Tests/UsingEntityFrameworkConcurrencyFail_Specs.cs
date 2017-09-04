@@ -22,6 +22,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System.Data.Entity;
     using System.Threading.Tasks;
     using TestFramework;
+    using Testing;
+
 
     [TestFixture]
     public class When_using_EntityFrameworkConcurrencyFail :

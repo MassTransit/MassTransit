@@ -9,6 +9,8 @@
     using Saga;
     using Shouldly;
     using TestFramework;
+    using Testing;
+
 
     [TestFixture, Category("Integration")]
     public class Locating_an_existing_ef_saga :

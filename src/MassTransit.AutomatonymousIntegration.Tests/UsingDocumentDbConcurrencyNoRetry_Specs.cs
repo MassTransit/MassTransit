@@ -24,6 +24,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using TestFramework;
+    using Testing;
+
 
     [TestFixture]
     public class When_using_DocumentDbConcurrencyNoRetry :
