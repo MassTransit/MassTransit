@@ -25,3 +25,8 @@ In order to use and understand MassTransit, a set of recipe-based usage examples
 * [Observe messages](observers.md)
 * [Observe lifecycle](lifecycle-observers.md)
 * [Connect endpoints](connect-endpoint.md)
+* [Logging](logging.md)
+* [Testing](testing/README.md)
+   * [Bus harness](testing/bus-harness.md)
+   * [Testing consumers](testing/testing-consumers.md)
+   * [Testing sagas](testing/testing-sagas.md)
