@@ -63,7 +63,7 @@ Target "Build" (fun _ ->
                                     AdditionalArgs = versionArgs })
 )
 
-let gitLink = (packagesPath @@ "gitlink" @@ "lib" @@ "net45" @@ "GitLink.exe")
+let gitLink = (packagesPath @@ "gitlink" @@ "build" @@ "GitLink.exe")
 
 Target "GitLink" (fun _ ->
 
