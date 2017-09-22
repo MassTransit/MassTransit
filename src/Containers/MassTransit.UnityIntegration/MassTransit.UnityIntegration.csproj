@@ -1,13 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;net452</TargetFrameworks>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
     <DebugType>portable</DebugType>
-    <PackageTargetFallback Condition="'$(TargetFramework)'=='netstandard1.6'">
-      $(PackageTargetFallback);portable-net45+win8+wp8+wpa81
-    </PackageTargetFallback>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>MassTransit.Unity</PackageId><Title>MassTransit.Unity</Title>

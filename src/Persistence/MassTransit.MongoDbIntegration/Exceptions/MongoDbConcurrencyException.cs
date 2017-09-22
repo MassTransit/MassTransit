@@ -33,11 +33,10 @@ namespace MassTransit.MongoDbIntegration
             : base(message, inner)
         {
         }
-#if !NETCORE
+        
         public MongoDbConcurrencyException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-#endif
     }
 }

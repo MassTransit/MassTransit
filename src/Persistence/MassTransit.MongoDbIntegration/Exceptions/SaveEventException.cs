@@ -24,7 +24,7 @@
         {
             TrackingNumber = trackingNumber;
         }
-#if !NETCORE
+        
         protected SaveEventException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -37,6 +37,5 @@
 
             info.AddValue("TrackingNumber", TrackingNumber);
         }
-#endif
     }
 }

@@ -35,11 +35,9 @@ namespace MassTransit.Courier.Exceptions
         {
         }
 
-#if !NETCORE
         protected ActivityExecutionFaultedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-#endif
     }
 }

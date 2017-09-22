@@ -29,11 +29,9 @@ namespace MassTransit
         {
         }
 
-#if !NETCORE
         protected JobAlreadyExistsException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-#endif
     }
 }
