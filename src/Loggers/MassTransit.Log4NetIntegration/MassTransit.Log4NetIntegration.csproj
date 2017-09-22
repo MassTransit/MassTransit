@@ -2,8 +2,8 @@
   <PropertyGroup>
     <RootNamespace>MassTransit.Log4NetIntegration</RootNamespace>
     <AssemblyName>MassTransit.Log4NetIntegration</AssemblyName>
-    <TargetFrameworks>net452;netstandard1.6</TargetFrameworks>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -14,7 +14,7 @@
     <Description>MassTransit Log4Net logger support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Log4NetIntegration.xml</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>

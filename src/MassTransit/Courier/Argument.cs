@@ -59,11 +59,7 @@ namespace MassTransit.Courier
     {
         public void Encrypted(byte[] key, byte[] iv)
         {
-#if NETCORE
-            using (var x = Aes.Create())
-#else
             using (var x = new AesCryptoServiceProvider())
-#endif
             {
                 x.Key = key;
                 x.IV = iv;

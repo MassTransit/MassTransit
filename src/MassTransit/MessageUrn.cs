@@ -37,12 +37,10 @@ namespace MassTransit
 		{
 		}
 
-#if !NETCORE
 		protected MessageUrn(SerializationInfo serializationInfo, StreamingContext streamingContext)
 			: base(serializationInfo, streamingContext)
 		{
 		}
-#endif
 
 		public Type GetType(bool throwOnError = true, bool ignoreCase = true)
 		{

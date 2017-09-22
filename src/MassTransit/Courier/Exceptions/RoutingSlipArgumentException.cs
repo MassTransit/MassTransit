@@ -34,11 +34,9 @@ namespace MassTransit.Courier.Exceptions
         {
         }
 
-#if !NETCORE
         protected RoutingSlipArgumentException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-#endif
     }
 }

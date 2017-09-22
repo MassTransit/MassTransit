@@ -24,12 +24,10 @@ namespace MassTransit
         {
         }
 
-#if !NETCORE
         protected MessageRetryLimitExceededException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-#endif
 
         public MessageRetryLimitExceededException(Uri uri)
             : base(uri)

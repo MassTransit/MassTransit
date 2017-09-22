@@ -87,16 +87,8 @@ namespace MassTransit.Serialization
             }
         }
 
-        private Aes CreateAes()
-#if NETCORE
-        {
-            var aes = Aes.Create();
-            aes.Padding = _paddingMode;
-            return aes;
-        }
-#else
+        Aes CreateAes()
             => new AesCryptoServiceProvider {Padding = _paddingMode};
-#endif
 
         class DisposingCryptoStream :
             CryptoStream

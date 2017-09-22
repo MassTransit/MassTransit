@@ -34,11 +34,9 @@ namespace MassTransit.Exceptions
         {
         }
 
-#if !NETCORE
         protected NinjectCantHandleThis(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-#endif
     }
 }

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net452;netcoreapp1.1.1</TargetFrameworks>
+    <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
@@ -21,7 +21,7 @@
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp1.1.1'">
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp2.0'">
     <Compile Remove="Diagnostics/**" />
     <Compile Remove="Pipeline/Transaction_Specs.cs" />
     <Compile Remove="BinarySerializer_Specs.cs" />
@@ -34,7 +34,7 @@
   <ItemGroup>
     <Reference Include="System.Transactions" Condition="'$(TargetFramework)' == 'net452'" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1.1' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
 </Project>

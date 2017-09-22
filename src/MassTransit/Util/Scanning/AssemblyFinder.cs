@@ -32,11 +32,10 @@ namespace MassTransit.Util.Scanning
 
         public static IEnumerable<Assembly> FindAssemblies(AssemblyLoadFailure loadFailure, bool includeExeFiles, AssemblyFilter filter)
         {
+            var assemblyPath = AppDomain.CurrentDomain.BaseDirectory;
 #if NETCORE
-            var assemblyPath = AppContext.BaseDirectory;
             var binPath = string.Empty;            
 #else
-            var assemblyPath = AppDomain.CurrentDomain.BaseDirectory;
             var binPath = AppDomain.CurrentDomain.SetupInformation.PrivateBinPath;
 #endif
 
@@ -87,7 +86,6 @@ namespace MassTransit.Util.Scanning
                     continue;
                 }
 
-#if !NETCORE
                 Assembly assembly = null;
                 try
                 {
@@ -112,17 +110,11 @@ namespace MassTransit.Util.Scanning
                 }
 
                 if (assembly != null)
-#endif
                 {
                     Assembly loadedAssembly = null;
                     try
                     {
-#if NETCORE
-                            var assemblyName = new AssemblyName(name);
-                            loadedAssembly = System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyName(assemblyName);
-#else
-                            loadedAssembly = Assembly.Load(name);
-#endif
+                        loadedAssembly = Assembly.Load(name);
                     }
                     catch (BadImageFormatException exception)
                     {
@@ -133,11 +125,7 @@ namespace MassTransit.Util.Scanning
                     {
                         try
                         {
-#if NETCORE
-                            loadedAssembly = System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(file);
-#else
                             loadedAssembly = Assembly.Load(file);
-#endif
                         }
                         catch (Exception)
                         {

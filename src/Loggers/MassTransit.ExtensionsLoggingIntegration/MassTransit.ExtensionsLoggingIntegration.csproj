@@ -2,8 +2,8 @@
   <PropertyGroup>
     <RootNamespace>MassTransit.ExtensionsLoggingIntegration</RootNamespace>
     <AssemblyName>MassTransit.ExtensionsLoggingIntegration</AssemblyName>
-    <TargetFrameworks>net452;netstandard1.6</TargetFrameworks>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
