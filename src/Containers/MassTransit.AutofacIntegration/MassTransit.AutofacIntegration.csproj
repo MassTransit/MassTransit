@@ -1,5 +1,4 @@
-﻿
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>MassTransit.AutofacIntegration</RootNamespace>
     <AssemblyName>MassTransit.AutofacIntegration</AssemblyName>
@@ -9,14 +8,15 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Autofac</PackageId><Title>MassTransit.Autofac</Title>
+    <PackageId>MassTransit.Autofac</PackageId>
+    <Title>MassTransit.Autofac</Title>
     <Description>MassTransit Autofac container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AutofacIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.6.0" />
+    <PackageReference Include="Autofac" Version="4.6.1" />
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-  	<ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

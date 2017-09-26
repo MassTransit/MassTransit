@@ -5,14 +5,15 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.StructureMap</PackageId><Title>MassTransit.StructureMap</Title>
+    <PackageId>MassTransit.StructureMap</PackageId>
+    <Title>MassTransit.StructureMap</Title>
     <Description>MassTransit StructureMap container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.StructureMapIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="StructureMap" Version="4.5.1" />
+    <PackageReference Include="StructureMap" Version="4.5.2" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

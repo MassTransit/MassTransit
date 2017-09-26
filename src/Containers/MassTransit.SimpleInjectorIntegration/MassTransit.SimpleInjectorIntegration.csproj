@@ -7,14 +7,15 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.SimpleInjector</PackageId><Title>MassTransit.SimpleInjector</Title>
+    <PackageId>MassTransit.SimpleInjector</PackageId>
+    <Title>MassTransit.SimpleInjector</Title>
     <Description>MassTransit SimpleInjector container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.SimpleInjectorIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="SimpleInjector" Version="4.0.8" />
-	<ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <PackageReference Include="SimpleInjector" Version="4.0.11" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

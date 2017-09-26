@@ -6,12 +6,13 @@
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Host</PackageId><Title>MassTransit.Host</Title>
+    <PackageId>MassTransit.Host</PackageId>
+    <Title>MassTransit.Host</Title>
     <Description>MassTransit Host Service; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Host.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.6.0" />
+    <PackageReference Include="Autofac" Version="4.6.1" />
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />

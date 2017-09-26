@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Testing
 
             NameFormatter = new RabbitMqMessageNameFormatter();
 
-            HostAddress = new Uri("rabbitmq://[::1]/test/");
+            HostAddress = new Uri("rabbitmq://localhost/test/");
         }
 
         public Uri HostAddress
