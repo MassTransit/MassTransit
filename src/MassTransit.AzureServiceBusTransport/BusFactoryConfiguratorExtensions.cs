@@ -15,8 +15,11 @@ namespace MassTransit
     using System;
     using AzureServiceBusTransport;
     using AzureServiceBusTransport.Configurators;
+#if !NETCORE
     using Microsoft.ServiceBus;
-
+#else
+    using Microsoft.Azure.ServiceBus;
+#endif
 
     public static class BusFactoryConfiguratorExtensions
     {

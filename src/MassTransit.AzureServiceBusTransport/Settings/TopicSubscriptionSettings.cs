@@ -12,8 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Settings
 {
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#else
+    using Microsoft.Azure.ServiceBus;
+#endif
 
     /// <summary>
     /// Settings for a subscription to be bound into the RabbitMQ exchanges

@@ -25,7 +25,11 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using Logging;
     using MassTransit.Pipeline.Observables;
     using MassTransit.Scheduling;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
+#else
+    using Microsoft.Azure.ServiceBus;
+#endif
     using Serialization;
     using Transports;
     using Util;

@@ -15,8 +15,12 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+#if !NETCORE
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+#else
+    using Microsoft.Azure.ServiceBus;
+#endif
     using Transports;
     using Util;
 

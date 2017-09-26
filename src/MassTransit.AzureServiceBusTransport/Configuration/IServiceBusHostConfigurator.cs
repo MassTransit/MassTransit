@@ -13,9 +13,12 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+#if !NETCORE
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
-
+#else
+    using Microsoft.Azure.ServiceBus;
+#endif
 
     public interface IServiceBusHostConfigurator
     {

@@ -15,9 +15,12 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
+#if !NETCORE
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
-
+#else
+    using Microsoft.Azure.ServiceBus;
+#endif
 
     public static class NamespaceManagerExtensions
     {

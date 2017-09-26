@@ -16,7 +16,11 @@ namespace MassTransit.AzureServiceBusTransport.Settings
     using System.Collections.Generic;
     using System.Reflection;
     using GreenPipes.Internals.Reflection;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
+#else
+    using Microsoft.Azure.ServiceBus;
+#endif
     using Transport;
 
 

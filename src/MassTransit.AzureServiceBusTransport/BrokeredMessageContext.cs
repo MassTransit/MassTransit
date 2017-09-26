@@ -15,8 +15,9 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+#if !NETCORE
     using Microsoft.ServiceBus.Messaging;
-
+#endif
 
     /// <summary>
     /// The context of a BrokeredMessage from AzureServiceBus - gives access to the transport

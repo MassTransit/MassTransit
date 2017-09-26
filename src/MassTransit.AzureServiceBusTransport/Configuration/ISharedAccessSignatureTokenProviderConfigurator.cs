@@ -13,8 +13,11 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+#if !NETCORE
     using Microsoft.ServiceBus;
-
+#else
+    using Microsoft.Azure.ServiceBus;
+#endif
 
     public interface ISharedAccessSignatureTokenProviderConfigurator :
         ITokenProviderConfigurator
