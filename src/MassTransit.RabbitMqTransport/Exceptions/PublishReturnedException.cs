@@ -37,11 +37,9 @@ namespace MassTransit.RabbitMqTransport
         {
         }
 
-#if !NETCORE
         protected PublishReturnedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-#endif
     }
 }
