@@ -30,11 +30,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
         IServiceBusMessagePublishTopologyConfigurator<T> IServiceBusMessagePublishTopologyConfigurator.GetMessageTopology<T>()
         {
-            var result = this as IServiceBusMessagePublishTopologyConfigurator<T>;
-            if (result == null)
+            return this as IServiceBusMessagePublishTopologyConfigurator<T> ??
                 throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
-
-            return result;
         }
 
         public override bool TryGetPublishAddress(Uri baseAddress, TMessage message, out Uri publishAddress)

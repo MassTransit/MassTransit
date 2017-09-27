@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,14 +15,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
-    using MassTransit.Util;
     using Microsoft.Extensions.DependencyInjection;
+    using Util;
+
 
     public class ExtensionsDependencyInjectionConsumerFactory<TConsumer> : IConsumerFactory<TConsumer>
         where TConsumer : class
     {
-        private readonly IServiceProvider _services;
+        readonly IServiceProvider _services;
 
         public ExtensionsDependencyInjectionConsumerFactory(IServiceProvider services)
         {
@@ -37,11 +37,9 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
             {
                 var consumer = scope.ServiceProvider.GetService<TConsumer>();
                 if (consumer == null)
-                {
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
-                }
 
-                var consumerConsumeContext = context.PushConsumer(consumer);
+                ConsumerConsumeContext<TConsumer, T> consumerConsumeContext = context.PushConsumerScope(consumer, scope);
 
                 await next.Send(consumerConsumeContext).ConfigureAwait(false);
             }

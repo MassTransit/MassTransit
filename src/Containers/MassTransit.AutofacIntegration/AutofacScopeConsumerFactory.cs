@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.AutofacIntegration
     using System.Threading.Tasks;
     using Autofac;
     using GreenPipes;
-    using Pipeline;
     using Util;
 
 
@@ -48,11 +47,11 @@ namespace MassTransit.AutofacIntegration
             {
                 var consumer = innerScope.Resolve<TConsumer>();
                 if (consumer == null)
-                {
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
-                }
 
-                await next.Send(context.PushConsumer(consumer)).ConfigureAwait(false);
+                ConsumerConsumeContext<TConsumer, TMessage> consumerConsumeContext = context.PushConsumerScope(consumer, innerScope);
+
+                await next.Send(consumerConsumeContext).ConfigureAwait(false);
             }
         }
 
@@ -69,11 +68,8 @@ namespace MassTransit.AutofacIntegration
             var scopeId = default(TId);
 
             // first, try to use the message-based scopeId provider
-            ILifetimeScopeIdAccessor<TMessage, TId> provider;
-            if (_registry.TryResolve(out provider) && provider.TryGetScopeId(context.Message, out scopeId))
-            {
+            if (_registry.TryResolve(out ILifetimeScopeIdAccessor<TMessage, TId> provider) && provider.TryGetScopeId(context.Message, out scopeId))
                 return scopeId;
-            }
 
             // second, try to use the consume context based message version
             var idProvider = _registry.ResolveOptional<ILifetimeScopeIdProvider<TId>>(TypedParameter.From(context), TypedParameter.From<ConsumeContext>(context));

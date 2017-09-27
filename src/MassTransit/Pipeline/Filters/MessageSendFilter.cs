@@ -45,8 +45,7 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         async Task IFilter<SendContext>.Send(SendContext context, IPipe<SendContext> next)
         {
-            var sendContext = context as SendContext<TMessage>;
-            if (sendContext != null)
+            if (context is SendContext<TMessage> sendContext)
             {
                 if (_messageObservers.Count > 0)
                     await _messageObservers.PreSend(sendContext).ConfigureAwait(false);

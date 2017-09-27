@@ -60,15 +60,13 @@ namespace MassTransit.Pipeline.Filters
             {
                 if (context.CancellationToken.IsCancellationRequested)
                 {
-                    var canceledException = exception as OperationCanceledException;
-                    if (canceledException != null && canceledException.CancellationToken == context.CancellationToken)
+                    if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == context.CancellationToken)
                         throw;
 
                     context.CancellationToken.ThrowIfCancellationRequested();
                 }
 
-                RetryContext<ConsumeContext<T>> payloadRetryContext;
-                if (context.TryGetPayload(out payloadRetryContext))
+                if (context.TryGetPayload(out RetryContext<ConsumeContext<T>> payloadRetryContext))
                 {
                     await policyContext.RetryFaulted(exception).ConfigureAwait(false);
 
@@ -77,8 +75,7 @@ namespace MassTransit.Pipeline.Filters
                     throw;
                 }
 
-                RetryContext genericRetryContext;
-                if (context.TryGetPayload(out genericRetryContext))
+                if (context.TryGetPayload(out RetryContext genericRetryContext))
                 {
                     await policyContext.RetryFaulted(exception).ConfigureAwait(false);
 
@@ -87,8 +84,7 @@ namespace MassTransit.Pipeline.Filters
                     throw;
                 }
 
-                RetryContext<ConsumeContext<T>> retryContext;
-                if (!policyContext.CanRetry(exception, out retryContext))
+                if (!policyContext.CanRetry(exception, out RetryContext<ConsumeContext<T>> retryContext))
                 {
                     await retryContext.RetryFaulted(exception).ConfigureAwait(false);
 

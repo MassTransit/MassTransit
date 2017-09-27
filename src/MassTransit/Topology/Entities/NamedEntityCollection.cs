@@ -35,8 +35,7 @@ namespace MassTransit.Topology.Entities
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            TEntity existingEntity;
-            if (_entityNames.TryGetValue(entity, out existingEntity))
+            if (_entityNames.TryGetValue(entity, out var existingEntity))
             {
                 // if it's exactly the same exchange
                 if (Entities.TryGetValue(entity, out existingEntity))

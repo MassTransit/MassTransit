@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.WindsorIntegration
     using Castle.MicroKernel;
     using Castle.MicroKernel.Lifestyle;
     using GreenPipes;
-    using Pipeline;
     using Util;
 
 
@@ -38,9 +37,7 @@ namespace MassTransit.WindsorIntegration
             {
                 var consumer = _container.Resolve<TConsumer>();
                 if (consumer == null)
-                {
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
-                }
 
                 try
                 {

@@ -6,7 +6,8 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Ninject</PackageId><Title>MassTransit.Ninject</Title>
+    <PackageId>MassTransit.Ninject</PackageId>
+    <Title>MassTransit.Ninject</Title>
     <Description>MassTransit Ninject container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.NinjectIntegration.xml</DocumentationFile>
   </PropertyGroup>
@@ -17,6 +18,6 @@
     <PackageReference Include="Ninject.Extensions.NamedScope" Version="3.2.0" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-	<ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>
