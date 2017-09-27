@@ -17,6 +17,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Observers;
+    using Util;
 
 
     /// <summary>
@@ -57,6 +58,15 @@ namespace MassTransit.Pipeline.Filters
             }
             catch (Exception exception)
             {
+                if (context.CancellationToken.IsCancellationRequested)
+                {
+                    var canceledException = exception as OperationCanceledException;
+                    if (canceledException != null && canceledException.CancellationToken == context.CancellationToken)
+                        throw;
+
+                    context.CancellationToken.ThrowIfCancellationRequested();
+                }
+
                 RetryContext<ConsumeContext<T>> payloadRetryContext;
                 if (context.TryGetPayload(out payloadRetryContext))
                 {
@@ -84,7 +94,9 @@ namespace MassTransit.Pipeline.Filters
 
                     await _observers.RetryFault(retryContext).ConfigureAwait(false);
 
-                    context.GetOrAddPayload(() => retryContext);
+                    if (_retryPolicy.IsHandled(exception))
+                        context.GetOrAddPayload(() => retryContext);
+                    
                     throw;
                 }
 
@@ -97,7 +109,9 @@ namespace MassTransit.Pipeline.Filters
 
                         await _observers.RetryFault(retryContext).ConfigureAwait(false);
 
-                        context.GetOrAddPayload(() => retryContext);
+                        if (_retryPolicy.IsHandled(exception))
+                            context.GetOrAddPayload(() => retryContext);
+                        
                         throw;
                     }
                 }
@@ -106,13 +120,14 @@ namespace MassTransit.Pipeline.Filters
 
                 try
                 {
-                    MessageRedeliveryContext redeliveryContext;
-                    if (!context.TryGetPayload(out redeliveryContext))
+                    if (!context.TryGetPayload(out MessageRedeliveryContext redeliveryContext))
                         throw new ContextException("The message redelivery context was not available to delay the message", exception);
 
                     var delay = retryContext.Delay ?? TimeSpan.Zero;
 
                     await redeliveryContext.ScheduleRedelivery(delay).ConfigureAwait(false);
+
+                    await context.NotifyConsumed(context, context.ReceiveContext.ElapsedTime, TypeMetadataCache<RedeliveryRetryFilter<T>>.ShortName).ConfigureAwait(false);
                 }
                 catch (Exception redeliveryException)
                 {
