@@ -33,7 +33,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Win32.Primitives" Version="4.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="Npgsql" Version="3.2.2" />
+    <PackageReference Include="Npgsql" Version="3.2.5" />
     <PackageReference Include="Remotion.Linq" Version="2.1.1" />
     <PackageReference Include="System.AppContext" Version="4.3.0" />
     <PackageReference Include="System.Console" Version="4.3.0" />
