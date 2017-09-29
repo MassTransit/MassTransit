@@ -7,7 +7,8 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.CastleWindsor</PackageId><Title>MassTransit.CastleWindsor</Title>
+    <PackageId>MassTransit.CastleWindsor</PackageId>
+    <Title>MassTransit.CastleWindsor</Title>
     <Description>MassTransit Castle Windsor container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.WindsorIntegration.xml</DocumentationFile>
   </PropertyGroup>
@@ -15,8 +16,8 @@
     <Compile Remove="MassTransitReleasePolicy.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="4.1.1" />
-    <PackageReference Include="Castle.Windsor" Version="4.0.0" />
+    <PackageReference Include="Castle.Core" Version="4.2.0" />
+    <PackageReference Include="Castle.Windsor" Version="4.1.0" />
     <PackageReference Include="GreenPipes" Version="1.0.10" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
