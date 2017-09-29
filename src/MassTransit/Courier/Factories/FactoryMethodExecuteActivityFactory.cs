@@ -48,5 +48,10 @@ namespace MassTransit.Courier.Factories
                 disposable?.Dispose();
             }
         }
+
+        public void Probe(ProbeContext context)
+        {
+            context.CreateScope("factoryMethod");
+        }
     }
 }

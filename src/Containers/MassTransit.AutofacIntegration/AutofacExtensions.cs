@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -22,10 +22,14 @@ namespace MassTransit
     using AutofacIntegration;
     using ConsumeConfigurators;
     using Courier;
+    using GreenPipes;
+    using GreenPipes.Specifications;
     using Internals.Extensions;
     using PipeConfigurators;
+    using Pipeline.Filters;
     using Saga;
     using Saga.SubscriptionConfigurators;
+    using Scoping;
 
 
     public static class AutofacExtensions
@@ -36,22 +40,23 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="scope">The LifetimeScope of the container</param>
         /// <param name="name">The name to use for the scope created for each message</param>
-        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope,
-            string name = "message")
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name = "message")
         {
+            var lifetimeScopeProvider = new SingleLifetimeScopeProvider(scope);
+            
+            IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(lifetimeScopeProvider, name);
+            
             IList<Type> concreteTypes = FindTypes(scope, r => !r.HasInterface<ISaga>(), typeof(IConsumer));
             if (concreteTypes.Count > 0)
-            {
                 foreach (var concreteType in concreteTypes)
-                    ConsumerConfiguratorCache.Configure(concreteType, configurator, scope, name);
-            }
+                    ConsumerConfiguratorCache.Configure(concreteType, configurator, scopeProvider);
 
+            var sagaRepositoryFactory = new AutofacSagaRepositoryFactory(lifetimeScopeProvider, name);
+            
             IList<Type> sagaTypes = FindTypes(scope, x => true, typeof(ISaga));
             if (sagaTypes.Count > 0)
-            {
                 foreach (var sagaType in sagaTypes)
-                    SagaConfiguratorCache.Configure(sagaType, configurator, scope, name);
-            }
+                    SagaConfiguratorCache.Configure(sagaType, configurator, sagaRepositoryFactory);
         }
 
         /// <summary>
@@ -60,12 +65,25 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="context">The component context of the container</param>
         /// <param name="name">The name to use for the scope created for each message</param>
-        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IComponentContext context,
-            string name = "message")
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IComponentContext context, string name = "message")
         {
             var scope = context.Resolve<ILifetimeScope>();
 
             LoadFrom(configurator, scope, name);
+        }
+
+        /// <summary>
+        /// Creates a lifetime scope which is shared by any downstream filters (rather than creating a new one).
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="lifetimeScope"></param>
+        /// <param name="name">The name of the lifetime scope</param>
+        public static void UseLifetimeScope(this IPipeConfigurator<ConsumeContext> configurator, ILifetimeScope lifetimeScope, string name = "message")
+        {
+            var scopeProvider = new AutofacConsumerScopeProvider(new SingleLifetimeScopeProvider(lifetimeScope), name);
+            var specification = new FilterPipeSpecification<ConsumeContext>(new ScopeFilter(scopeProvider));
+
+            configurator.AddPipeSpecification(specification);
         }
 
         /// <summary>
@@ -76,11 +94,12 @@ namespace MassTransit
         /// <param name="scope">The LifetimeScope of the container</param>
         /// <param name="name">The name of the scope created per-message</param>
         /// <returns></returns>
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator,
-            ILifetimeScope scope, string name = "message")
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name = "message")
             where T : class, IConsumer
         {
-            var consumerFactory = new AutofacConsumerFactory<T>(scope, name);
+            IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new SingleLifetimeScopeProvider(scope), name);
+
+            var consumerFactory = new ScopeConsumerFactory<T>(scopeProvider);
 
             configurator.Consumer(consumerFactory);
         }
@@ -94,11 +113,14 @@ namespace MassTransit
         /// <param name="context">The component context containing the registry</param>
         /// <param name="name">The name of the scope created per-message</param>
         /// <returns></returns>
-        public static void ConsumerInScope<T, TId>(this IReceiveEndpointConfigurator configurator,
-            IComponentContext context, string name = "message")
+        public static void ConsumerInScope<T, TId>(this IReceiveEndpointConfigurator configurator, IComponentContext context, string name = "message")
             where T : class, IConsumer
         {
-            var consumerFactory = new AutofacScopeConsumerFactory<T, TId>(context.Resolve<ILifetimeScopeRegistry<TId>>(), name);
+            ILifetimeScopeRegistry<TId> registry = context.Resolve<ILifetimeScopeRegistry<TId>>();
+
+            IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new RegistryLifetimeScopeProvider<TId>(registry), name);
+
+            var consumerFactory = new ScopeConsumerFactory<T>(scopeProvider);
 
             configurator.Consumer(consumerFactory);
         }
@@ -111,11 +133,14 @@ namespace MassTransit
         /// <param name="context">The LifetimeScope of the container</param>
         /// <param name="name">The name of the scope created per-message</param>
         /// <returns></returns>
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator,
-            IComponentContext context, string name = "message")
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IComponentContext context, string name = "message")
             where T : class, IConsumer
         {
-            var consumerFactory = new AutofacConsumerFactory<T>(context.Resolve<ILifetimeScope>(), name);
+            var lifetimeScope = context.Resolve<ILifetimeScope>();
+
+            IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new SingleLifetimeScopeProvider(lifetimeScope), name);
+
+            var consumerFactory = new ScopeConsumerFactory<T>(scopeProvider);
 
             configurator.Consumer(consumerFactory);
         }
@@ -129,11 +154,12 @@ namespace MassTransit
         /// <param name="configure"></param>
         /// <param name="name">The name of the scope created per-message</param>
         /// <returns></returns>
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator,
-            ILifetimeScope scope, Action<IConsumerConfigurator<T>> configure, string name = "message")
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope, Action<IConsumerConfigurator<T>> configure, string name = "message")
             where T : class, IConsumer
         {
-            var consumerFactory = new AutofacConsumerFactory<T>(scope, name);
+            IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new SingleLifetimeScopeProvider(scope), name);
+
+            var consumerFactory = new ScopeConsumerFactory<T>(scopeProvider);
 
             configurator.Consumer(consumerFactory, configure);
         }
@@ -147,11 +173,15 @@ namespace MassTransit
         /// <param name="configure"></param>
         /// <param name="name">The name of the scope created per-message</param>
         /// <returns></returns>
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator,
-            IComponentContext context, Action<IConsumerConfigurator<T>> configure, string name = "message")
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IComponentContext context, Action<IConsumerConfigurator<T>> configure,
+            string name = "message")
             where T : class, IConsumer
         {
-            var consumerFactory = new AutofacConsumerFactory<T>(context.Resolve<ILifetimeScope>(), name);
+            var scope = context.Resolve<ILifetimeScope>();
+
+            IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new SingleLifetimeScopeProvider(scope), name);
+
+            var consumerFactory = new ScopeConsumerFactory<T>(scopeProvider);
 
             configurator.Consumer(consumerFactory, configure);
         }
@@ -164,15 +194,16 @@ namespace MassTransit
         /// <param name="scope"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope,
-            string name = "message")
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name = "message")
             where T : class, ISaga
         {
-            var sagaRepository = scope.Resolve<ISagaRepository<T>>();
+            var repository = scope.Resolve<ISagaRepository<T>>();
 
-            var autofacSagaRepository = new AutofacSagaRepository<T>(sagaRepository, scope, name);
+            ISagaScopeProvider<T> scopeProvider = new AutofacSagaScopeProvider<T>(new SingleLifetimeScopeProvider(scope), name);
 
-            configurator.Saga(autofacSagaRepository);
+            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+
+            configurator.Saga(sagaRepository);
         }
 
         /// <summary>
@@ -183,15 +214,18 @@ namespace MassTransit
         /// <param name="context"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IComponentContext context,
-            string name = "message")
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IComponentContext context, string name = "message")
             where T : class, ISaga
         {
-            var sagaRepository = context.Resolve<ISagaRepository<T>>();
+            var scope = context.Resolve<ILifetimeScope>();
 
-            var autofacSagaRepository = new AutofacSagaRepository<T>(sagaRepository, context.Resolve<ILifetimeScope>(), name);
+            var repository = scope.Resolve<ISagaRepository<T>>();
 
-            configurator.Saga(autofacSagaRepository);
+            ISagaScopeProvider<T> scopeProvider = new AutofacSagaScopeProvider<T>(new SingleLifetimeScopeProvider(scope), name);
+
+            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+
+            configurator.Saga(sagaRepository);
         }
 
         /// <summary>
@@ -203,15 +237,16 @@ namespace MassTransit
         /// <param name="configure"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope,
-            Action<ISagaConfigurator<T>> configure, string name = "message")
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope, Action<ISagaConfigurator<T>> configure, string name = "message")
             where T : class, ISaga
         {
-            var sagaRepository = scope.Resolve<ISagaRepository<T>>();
+            var repository = scope.Resolve<ISagaRepository<T>>();
 
-            var autofacSagaRepository = new AutofacSagaRepository<T>(sagaRepository, scope, name);
+            ISagaScopeProvider<T> scopeProvider = new AutofacSagaScopeProvider<T>(new SingleLifetimeScopeProvider(scope), name);
 
-            configurator.Saga(autofacSagaRepository, configure);
+            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+
+            configurator.Saga(sagaRepository, configure);
         }
 
         /// <summary>
@@ -223,46 +258,61 @@ namespace MassTransit
         /// <param name="configure"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IComponentContext context,
-            Action<ISagaConfigurator<T>> configure, string name = "message")
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IComponentContext context, Action<ISagaConfigurator<T>> configure, string name = "message")
             where T : class, ISaga
         {
-            var sagaRepository = context.Resolve<ISagaRepository<T>>();
+            var scope = context.Resolve<ILifetimeScope>();
 
-            var autofacSagaRepository = new AutofacSagaRepository<T>(sagaRepository, context.Resolve<ILifetimeScope>(), name);
+            var repository = scope.Resolve<ISagaRepository<T>>();
 
+            ISagaScopeProvider<T> scopeProvider = new AutofacSagaScopeProvider<T>(new SingleLifetimeScopeProvider(scope), name);
 
-            configurator.Saga(autofacSagaRepository, configure);
+            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+
+            configurator.Saga(sagaRepository, configure);
         }
 
-        public static void ExecuteActivityHost<TActivity, TArguments>(
-            this IReceiveEndpointConfigurator configurator,
-            Uri compensateAddress, ILifetimeScope lifetimeScope)
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress, ILifetimeScope lifetimeScope,
+            string name = "message")
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            var factory = new AutofacExecuteActivityFactory<TActivity, TArguments>(lifetimeScope);
+            var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
+
+            var executeActivityScopeProvider = new AutofacExecuteActivityScopeProvider<TActivity, TArguments>(lifetimeScopeProvider, name);
+
+            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
+
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
 
             configurator.AddEndpointSpecification(specification);
         }
 
-        public static void ExecuteActivityHost<TActivity, TArguments>(
-            this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope)
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope, string name = "message")
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            var factory = new AutofacExecuteActivityFactory<TActivity, TArguments>(lifetimeScope);
+            var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
+
+            var executeActivityScopeProvider = new AutofacExecuteActivityScopeProvider<TActivity, TArguments>(lifetimeScopeProvider, name);
+
+            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
+
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
 
             configurator.AddEndpointSpecification(specification);
         }
 
-        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope)
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope, string name = "message")
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class
         {
-            var factory = new AutofacCompensateActivityFactory<TActivity, TLog>(lifetimeScope);
+            var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
+
+            var compensateActivityScopeProvider = new AutofacCompensateActivityScopeProvider<TActivity, TLog>(lifetimeScopeProvider, name);
+
+            var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
+
             var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
 
             configurator.AddEndpointSpecification(specification);

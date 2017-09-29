@@ -20,7 +20,8 @@ namespace MassTransit.Courier
     /// Should be implemented by containers that support generic object resolution in order to 
     /// provide a common lifetime management policy for all activities
     /// </summary>
-    public interface ActivityFactory
+    public interface ActivityFactory :
+        IProbeSite
     {
         /// <summary>
         /// Create and execute the activity

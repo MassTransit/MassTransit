@@ -16,7 +16,8 @@ namespace MassTransit.Courier
     using GreenPipes;
 
 
-    public interface CompensateActivityFactory<out TActivity, TLog>
+    public interface CompensateActivityFactory<out TActivity, TLog> :
+        IProbeSite
         where TLog : class
         where TActivity : class, CompensateActivity<TLog>
     {

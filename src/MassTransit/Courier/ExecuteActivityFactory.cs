@@ -21,7 +21,8 @@ namespace MassTransit.Courier
     /// </summary>
     /// <typeparam name="TArguments"></typeparam>
     /// <typeparam name="TActivity"></typeparam>
-    public interface ExecuteActivityFactory<out TActivity, TArguments>
+    public interface ExecuteActivityFactory<out TActivity, TArguments> :
+        IProbeSite
         where TArguments : class
         where TActivity : class, ExecuteActivity<TArguments>
     {

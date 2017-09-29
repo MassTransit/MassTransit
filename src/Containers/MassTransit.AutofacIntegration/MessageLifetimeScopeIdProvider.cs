@@ -12,6 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration
 {
+    /// <summary>
+    /// Gets the LifetimeScope Id using the message
+    /// </summary>
+    /// <typeparam name="TMessage"></typeparam>
+    /// <typeparam name="TId"></typeparam>
     public class MessageLifetimeScopeIdProvider<TMessage, TId> :
         ILifetimeScopeIdProvider<TId>
         where TMessage : class

@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,10 +15,8 @@ namespace MassTransit.AutofacIntegration
     using System.Threading.Tasks;
     using Autofac;
     using Courier;
-    using Courier.Hosts;
     using GreenPipes;
-    using Logging;
-    using Util;
+    using Scoping;
 
 
     /// <summary>
@@ -31,37 +29,26 @@ namespace MassTransit.AutofacIntegration
         where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
-        static readonly ILog _log = Logger.Get<AutofacExecuteActivityFactory<TActivity, TArguments>>();
-        readonly ILifetimeScope _lifetimeScope;
+        readonly ExecuteActivityFactory<TActivity, TArguments> _factory;
 
-        public AutofacExecuteActivityFactory(ILifetimeScope lifetimeScope)
+        public AutofacExecuteActivityFactory(ILifetimeScope lifetimeScope, string name)
         {
-            _lifetimeScope = lifetimeScope;
+            var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
+
+            var executeActivityScopeProvider = new AutofacExecuteActivityScopeProvider<TActivity, TArguments>(lifetimeScopeProvider, name);
+
+            _factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
         }
 
-        public async Task<ResultContext<ExecutionResult>> Execute(ExecuteContext<TArguments> context,
+        public Task<ResultContext<ExecutionResult>> Execute(ExecuteContext<TArguments> context,
             IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> next)
         {
-            using (var scope = _lifetimeScope.BeginLifetimeScope(x => ConfigureScope(x, context)))
-            {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("ExecuteActivityFactory: Executing: {0}", TypeMetadataCache<TActivity>.ShortName);
-
-                var activity = scope.Resolve<TActivity>(TypedParameter.From(context.Arguments));
-
-                ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
-
-                var consumerLifetimeScope = scope;
-                activityContext.GetOrAddPayload(() => consumerLifetimeScope);
-
-                return await next.Send(activityContext).ConfigureAwait(false);
-            }
+            return _factory.Execute(context, next);
         }
 
-        static void ConfigureScope(ContainerBuilder containerBuilder, ExecuteContext<TArguments> executeContext)
+        public void Probe(ProbeContext context)
         {
-            containerBuilder.RegisterInstance(executeContext.ConsumeContext)
-                .ExternallyOwned();
+            _factory.Probe(context);
         }
     }
 }

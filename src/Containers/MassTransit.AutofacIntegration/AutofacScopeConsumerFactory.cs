@@ -36,23 +36,17 @@ namespace MassTransit.AutofacIntegration
             _name = name;
         }
 
-        public async Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
+        public Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
-            var scopeId = GetScopeId(context);
-
-            var outerScope = _registry.GetLifetimeScope(scopeId);
-
-            using (var innerScope = outerScope.BeginLifetimeScope(_name))
+            if (context.TryGetPayload<ILifetimeScope>(out var existingScope))
             {
-                var consumer = innerScope.Resolve<TConsumer>();
-                if (consumer == null)
-                    throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
+                ConsumerConsumeContext<TConsumer, TMessage> consumerContext = existingScope.GetConsumer<TConsumer, TMessage>(context);
 
-                ConsumerConsumeContext<TConsumer, TMessage> consumerConsumeContext = context.PushConsumerScope(consumer, innerScope);
-
-                await next.Send(consumerConsumeContext).ConfigureAwait(false);
+                return next.Send(consumerContext);
             }
+
+            return SendInScope(context, next);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -62,22 +56,16 @@ namespace MassTransit.AutofacIntegration
             scope.Add("scopeType", TypeMetadataCache<TId>.ShortName);
         }
 
-        TId GetScopeId<TMessage>(ConsumeContext<TMessage> context)
-            where TMessage : class
+        async Task SendInScope<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next) where TMessage : class
         {
-            var scopeId = default(TId);
+            var scope = _registry.GetLifetimeScope(context);
 
-            // first, try to use the message-based scopeId provider
-            if (_registry.TryResolve(out ILifetimeScopeIdAccessor<TMessage, TId> provider) && provider.TryGetScopeId(context.Message, out scopeId))
-                return scopeId;
+            using (var consumerScope = scope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context)))
+            {
+                ConsumerConsumeContext<TConsumer, TMessage> consumerContext = consumerScope.GetConsumerScope<TConsumer, TMessage>(context);
 
-            // second, try to use the consume context based message version
-            var idProvider = _registry.ResolveOptional<ILifetimeScopeIdProvider<TId>>(TypedParameter.From(context), TypedParameter.From<ConsumeContext>(context));
-            if (idProvider != null && idProvider.TryGetScopeId(out scopeId))
-                return scopeId;
-
-            // okay, give up, default it is
-            return scopeId;
+                await next.Send(consumerContext).ConfigureAwait(false);
+            }
         }
     }
 }

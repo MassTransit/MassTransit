@@ -56,5 +56,10 @@ namespace MassTransit.UnityIntegration
                 return await next.Send(activityContext).ConfigureAwait(false);
             }
         }
+
+        public void Probe(ProbeContext context)
+        {
+            context.CreateScope("unity");
+        }
     }
 }
