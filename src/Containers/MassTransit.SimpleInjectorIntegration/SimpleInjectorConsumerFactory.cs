@@ -14,39 +14,29 @@ namespace MassTransit.SimpleInjectorIntegration
 {
     using System.Threading.Tasks;
     using GreenPipes;
+    using Scoping;
     using SimpleInjector;
-    using SimpleInjector.Lifestyles;
-    using Util;
 
 
     public class SimpleInjectorConsumerFactory<TConsumer> :
         IConsumerFactory<TConsumer>
         where TConsumer : class
     {
-        readonly Container _container;
+        readonly IConsumerFactory<TConsumer> _factory;
 
         public SimpleInjectorConsumerFactory(Container container)
         {
-            _container = container;
+            _factory = new ScopeConsumerFactory<TConsumer>(new SimpleInjectorConsumerScopeProvider(container));
         }
 
-        async Task IConsumerFactory<TConsumer>.Send<T>(ConsumeContext<T> context, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
+        Task IConsumerFactory<TConsumer>.Send<T>(ConsumeContext<T> context, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
         {
-            using (var scope = AsyncScopedLifestyle.BeginScope(_container))
-            {
-                var consumer = _container.GetInstance<TConsumer>();
-                if (consumer == null)
-                    throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
-
-                ConsumerConsumeContext<TConsumer, T> consumerConsumeContext = context.PushConsumerScope(consumer, scope);
-
-                await next.Send(consumerConsumeContext).ConfigureAwait(false);
-            }
+            return _factory.Send(context, next);
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            context.CreateConsumerFactoryScope<TConsumer>("simpleinjector");
+            _factory.Probe(context);
         }
     }
 }
