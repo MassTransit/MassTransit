@@ -16,6 +16,7 @@ namespace MassTransit.ConsumePipeSpecifications
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.WebSockets;
     using Configuration;
     using ConsumeConfigurators;
     using Context;
@@ -40,10 +41,12 @@ namespace MassTransit.ConsumePipeSpecifications
         readonly ConsumePipeSpecificationObservable _observers;
         readonly SagaConfigurationObservable _sagaObservers;
         readonly IList<IPipeSpecification<ConsumeContext>> _specifications;
+        readonly IList<IPipeSpecification<ConsumeContext>> _consumeContextSpecifications;
 
         public ConsumePipeSpecification()
         {
             _specifications = new List<IPipeSpecification<ConsumeContext>>();
+            _consumeContextSpecifications = new List<IPipeSpecification<ConsumeContext>>();
             _messageSpecifications = new ConcurrentDictionary<Type, IMessageConsumePipeSpecification>();
             _observers = new ConsumePipeSpecificationObservable();
             _consumerObservers = new ConsumerConfigurationObservable();
@@ -54,6 +57,12 @@ namespace MassTransit.ConsumePipeSpecifications
         {
             lock (_lock)
             {
+                if (_messageSpecifications.Count == 0)
+                {
+                    _consumeContextSpecifications.Add(specification);
+                    return;
+                }
+
                 _specifications.Add(specification);
 
                 foreach (var messageSpecification in _messageSpecifications.Values)
@@ -135,6 +144,10 @@ namespace MassTransit.ConsumePipeSpecifications
             }
 
             var builder = new PipeBuilder<ConsumeContext>();
+            foreach (var specification in _consumeContextSpecifications)
+            {
+                specification.Apply(builder);
+            }
             builder.AddFilter(filter);
 
             return new ConsumePipe(filter, builder.Build());

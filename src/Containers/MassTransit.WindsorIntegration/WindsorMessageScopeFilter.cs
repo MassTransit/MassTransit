@@ -13,6 +13,7 @@
 namespace MassTransit.WindsorIntegration
 {
     using System.Threading.Tasks;
+    using Castle.MicroKernel.Lifestyle.Scoped;
     using GreenPipes;
 
 
@@ -20,21 +21,23 @@ namespace MassTransit.WindsorIntegration
     /// Calls by the inbound message pipeline to begin and end a message scope
     /// in the container.
     /// </summary>
-    public class WindsorMessageScopeFilter<T> :
-        IFilter<T>
-        where T : class, PipeContext
+    public class WindsorMessageScopeFilter :
+        IFilter<ConsumeContext>
     {
         void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("windsorMessageScope");
         }
 
-        async Task IFilter<T>.Send(T context, IPipe<T> next)
+        async Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
-            using (var lifetimeScope = new MessageLifetimeScope())
-            {
+            if (CallContextLifetimeScope.ObtainCurrentScope() is MessageLifetimeScope)
                 await next.Send(context).ConfigureAwait(false);
-            }
+            else
+                using (new MessageLifetimeScope())
+                {
+                    await next.Send(context).ConfigureAwait(false);
+                }
         }
     }
 }

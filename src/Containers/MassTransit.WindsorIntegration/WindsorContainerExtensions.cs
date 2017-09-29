@@ -156,8 +156,7 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         [Obsolete("Change to UseMessageScope - method was renamed to match middleware conventions")]
-        public static void EnableMessageScope<T>(this IPipeConfigurator<T> configurator)
-            where T : class, PipeContext
+        public static void EnableMessageScope(this IPipeConfigurator<ConsumeContext> configurator)
         {
             UseMessageScope(configurator);
         }
@@ -165,17 +164,15 @@ namespace MassTransit
         /// <summary>
         /// Enables message scope lifetime for windsor containers
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
-        public static void UseMessageScope<T>(this IPipeConfigurator<T> configurator)
-            where T : class, PipeContext
+        public static void UseMessageScope(this IPipeConfigurator<ConsumeContext> configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var pipeBuilderConfigurator = new WindsorMessageScopePipeSpecification<T>();
+            var specification = new WindsorMessageScopePipeSpecification();
 
-            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+            configurator.AddPipeSpecification(specification);
         }
 
         static IList<Type> FindTypes<T>(IKernel container, Func<Type, bool> filter)

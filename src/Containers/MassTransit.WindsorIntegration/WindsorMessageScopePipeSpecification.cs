@@ -16,13 +16,12 @@ namespace MassTransit.WindsorIntegration
     using GreenPipes;
 
 
-    public class WindsorMessageScopePipeSpecification<T> :
-        IPipeSpecification<T>
-        where T : class, PipeContext
+    public class WindsorMessageScopePipeSpecification :
+        IPipeSpecification<ConsumeContext>
     {
-        public void Apply(IPipeBuilder<T> builder)
+        public void Apply(IPipeBuilder<ConsumeContext> builder)
         {
-            builder.AddFilter(new WindsorMessageScopeFilter<T>());
+            builder.AddFilter(new WindsorMessageScopeFilter());
         }
 
         public IEnumerable<ValidationResult> Validate()
