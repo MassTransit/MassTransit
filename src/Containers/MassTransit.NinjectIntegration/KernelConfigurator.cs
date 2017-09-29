@@ -21,12 +21,16 @@ namespace MassTransit.NinjectIntegration
         IKernelConfigurator
     {
         readonly IConsumerRegistry _consumerRegistry;
-        readonly ISagaRegistry _sagaRegistry;
         readonly IKernel _kernel;
+        readonly ISagaRegistry _sagaRegistry;
 
         public KernelConfigurator(IKernel kernel)
         {
             _kernel = kernel;
+
+            var namedScopeModule = new NamedScopeModule();
+            if (!kernel.HasModule(namedScopeModule.Name))
+                kernel.Load(namedScopeModule);
 
             _consumerRegistry = kernel.TryGet<IConsumerRegistry>();
             if (_consumerRegistry == null)
