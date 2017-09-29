@@ -33,8 +33,9 @@ namespace MassTransit.Containers.Tests
         public Ninject_Consumer()
         {
             _container = new StandardKernel();
-            _container.Bind<SimpleConsumer>()
-                .ToSelf().DefinesNamedScope("message");
+            
+            _container.ConfigureMassTransit(x => x.AddConsumer<SimpleConsumer>());
+            
             _container.Bind<ISimpleConsumerDependency>()
                 .To<SimpleConsumerDependency>().InNamedScope("message");
             _container.Bind<AnotherMessageConsumer>()
@@ -50,7 +51,7 @@ namespace MassTransit.Containers.Tests
     /// <summary>
     /// This works, but fails in the test fixture for some reason.
     /// </summary>
-    [TestFixture, Explicit]
+    [TestFixture]
     public class Ninject_Saga :
         When_registering_a_saga
     {
@@ -65,6 +66,9 @@ namespace MassTransit.Containers.Tests
         public Ninject_Saga()
         {
             _container = new StandardKernel();
+            
+            _container.ConfigureMassTransit(x => x.AddSaga<SimpleSaga>());
+            
             _container.Bind<ISagaRepository<SimpleSaga>>()
                 .To<InMemorySagaRepository<SimpleSaga>>()
                 .InSingletonScope();
@@ -72,8 +76,7 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            // we have to do this explicitly, since the metadata is not exposed by Ninject
-            configurator.Saga<SimpleSaga>(_container);
+            configurator.LoadFrom(_container);
         }
 
         protected override ISagaRepository<T> GetSagaRepository<T>()

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,21 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.NinjectIntegration
 {
-    using System;
     using Ninject;
 
 
-    public static class SagaConfiguratorCache
+    public class ConsumerCachedConfigurator<T> :
+        ICachedConfigurator
+        where T : class, IConsumer
     {
-        public static void Configure(Type sagaType, IReceiveEndpointConfigurator configurator, IKernel kernel)
+        public void Configure(IReceiveEndpointConfigurator configurator, IKernel kernel)
         {
-            Cached.Registry.Add(sagaType).Configure(configurator, kernel);
-        }
-
-
-        static class Cached
-        {
-            internal static readonly ISagaRegistry Registry = new SagaRegistry();
+            configurator.Consumer(new NinjectConsumerFactory<T>(kernel));
         }
     }
 }

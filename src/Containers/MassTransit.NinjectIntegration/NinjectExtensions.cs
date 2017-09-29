@@ -39,22 +39,51 @@ namespace MassTransit
         /// <param name="kernel">The Ninject kernel.</param>
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IKernel kernel)
         {
-            IList<Type> consumerTypes = FindTypes<IConsumer>(kernel, x => !x.HasInterface<ISaga>());
-            if (consumerTypes.Count > 0)
+            var consumerCache = kernel.TryGet<IConsumerRegistry>();
+            if (consumerCache != null)
             {
-                foreach (Type type in consumerTypes)
-                    ConsumerConfiguratorCache.Configure(type, configurator, kernel);
+                foreach (var cachedConfigurator in consumerCache.GetConfigurators())
+                {
+                    cachedConfigurator.Configure(configurator, kernel);
+                }
+            }
+            else
+            {
+                IList<Type> consumerTypes = FindTypes<IConsumer>(kernel, x => !x.HasInterface<ISaga>());
+                if (consumerTypes.Count > 0)
+                {
+                    foreach (Type type in consumerTypes)
+                        ConsumerConfiguratorCache.Configure(type, configurator, kernel);
+                }
             }
 
-            IList<Type> sagaTypes = FindTypes<ISaga>(kernel, x => true);
-            if (sagaTypes.Count > 0)
+            var sagaCache = kernel.TryGet<ISagaRegistry>();
+            if (sagaCache != null)
             {
-                foreach (Type sagaType in sagaTypes)
-                    SagaConfiguratorCache.Configure(sagaType, configurator, kernel);
+                foreach (var cachedConfigurator in sagaCache.GetConfigurators())
+                {
+                    cachedConfigurator.Configure(configurator, kernel);
+                }
+            }
+            else
+            {
+                IList<Type> sagaTypes = FindTypes<ISaga>(kernel, x => true);
+                if (sagaTypes.Count > 0)
+                {
+                    foreach (Type sagaType in sagaTypes)
+                        SagaConfiguratorCache.Configure(sagaType, configurator, kernel);
+                }
             }
         }
 
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator,IKernel kernel, Action<IConsumerConfigurator<T>> configure = null)
+        public static void ConfigureMassTransit(this IKernel kernel, Action<IKernelConfigurator> configure = null)
+        {
+            var configurator = new KernelConfigurator(kernel);
+
+            configure?.Invoke(configurator);
+        }
+
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IKernel kernel, Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
             var consumerFactory = new NinjectConsumerFactory<T>(kernel);
@@ -67,7 +96,7 @@ namespace MassTransit
         {
             var sagaRepository = kernel.Get<ISagaRepository<T>>();
 
-            var ninjectSagaRepository = new NinjectSagaRepository<T>(sagaRepository, kernel);
+            var ninjectSagaRepository = new NinjectSagaRepository<T>(sagaRepository);
 
             configurator.Saga(ninjectSagaRepository, configure);
         }
