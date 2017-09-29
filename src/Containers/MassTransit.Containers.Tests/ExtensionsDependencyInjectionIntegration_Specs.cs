@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,13 +13,11 @@
 namespace MassTransit.Containers.Tests
 {
     using System;
-    using NUnit.Framework;
+    using ExtensionsDependencyInjectionIntegration;
+    using Microsoft.Extensions.DependencyInjection;
     using Saga;
     using Scenarios;
-    using SimpleInjector;
-    using SimpleInjector.Lifestyles;
-    using SimpleInjectorIntegration;
-    using Microsoft.Extensions.DependencyInjection;
+
 
     public class ExtensionsDependencyInjectionIntegration_Consumer :
         When_registering_a_consumer
@@ -32,9 +30,9 @@ namespace MassTransit.Containers.Tests
 
             collection.AddScoped<SimpleConsumer>();
 
-            collection.AddMassTransit(options =>
+            collection.AddMassTransit(x =>
             {
-                options.AddConsumer<SimpleConsumer>();
+                x.AddConsumer<SimpleConsumer>();
             });
 
             collection.AddScoped<ISimpleConsumerDependency, SimpleConsumerDependency>();
@@ -59,19 +57,18 @@ namespace MassTransit.Containers.Tests
         {
             var collection = new ServiceCollection();
 
-            collection.AddMassTransit(options =>
+            collection.AddMassTransit(x =>
             {
-                options.AddSaga<SimpleSaga>();
+                x.AddSaga<SimpleSaga>();
             });
 
-            collection.AddSingleton<ISagaRepository<SimpleSaga>, InMemorySagaRepository<SimpleSaga>>();
+            collection.AddSingleton<ISagaRepository<SimpleSaga>,  InMemorySagaRepository<SimpleSaga>>();
 
             _services = collection.BuildServiceProvider();
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            //configurator.Saga<SimpleSaga>(_services);
             configurator.LoadFrom(_services);
         }
 

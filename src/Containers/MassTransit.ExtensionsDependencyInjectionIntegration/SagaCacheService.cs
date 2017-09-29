@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,63 +12,32 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ExtensionsDependencyInjectionIntegration
 {
-    using MassTransit.Saga;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    using Saga;
 
-    public class SagaCacheService : ISagaCacheService
+
+    public class SagaCacheService :
+        ISagaCacheService
     {
-        private static ConcurrentDictionary<Type, ICachedConfigurator> _consumerHandlers = new ConcurrentDictionary<Type, ICachedConfigurator>();
+        readonly ConcurrentDictionary<Type, ICachedConfigurator> _configurators = new ConcurrentDictionary<Type, ICachedConfigurator>();
 
         public void Add<T>()
             where T : class, ISaga
         {
-            _consumerHandlers.GetOrAdd(typeof(T), _ => new CachedEndPointSagaConfigurator<T>());
+            _configurators.GetOrAdd(typeof(T), _ => new SagaCachedConfigurator<T>());
         }
 
-        public IEnumerable<ICachedConfigurator> GetHandlers()
+        public void Add(Type sagaType)
         {
-            return _consumerHandlers.Values.ToList();
+            _configurators.GetOrAdd(sagaType, _ => (ICachedConfigurator)Activator.CreateInstance(typeof(SagaCachedConfigurator<>).MakeGenericType(sagaType)));
         }
 
-        public ConcurrentDictionary<Type, ICachedConfigurator> Instance
+        public IEnumerable<ICachedConfigurator> GetConfigurators()
         {
-            get
-            {
-                return _consumerHandlers;
-            }
+            return _configurators.Values.ToList();
         }
-
-        public void Configure(Type consumerType, IReceiveEndpointConfigurator configurator, IServiceProvider container)
-        {
-            _consumerHandlers
-                .GetOrAdd(consumerType, _ => (ICachedConfigurator)Activator.CreateInstance(typeof(ICachedConfigurator).MakeGenericType(consumerType)))
-                .Configure(configurator, container);
-        }
-    }
-
-    public class CachedEndPointSagaConfigurator<T> : ICachedConfigurator
-        where T : class, ISaga
-    {
-        public void Configure(IReceiveEndpointConfigurator configurator, IServiceProvider services)
-        {
-            var sagaRepository = services.GetService(typeof(ISagaRepository<T>)) as ISagaRepository<T>;
-
-            var structureMapSagaRepository = new ExtensionsDependencyInjectionSagaRepository<T>(sagaRepository, services);
-
-            configurator.Saga(structureMapSagaRepository);
-        }
-    }
-
-    public interface ISagaCacheService
-    {
-        void Add<T>() where T : class, ISaga;
-        IEnumerable<ICachedConfigurator> GetHandlers();
-        ConcurrentDictionary<Type, ICachedConfigurator> Instance { get; }
-        void Configure(Type consumerType, IReceiveEndpointConfigurator configurator, IServiceProvider container);
     }
 }

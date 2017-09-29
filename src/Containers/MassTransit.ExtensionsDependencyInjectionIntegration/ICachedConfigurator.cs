@@ -16,6 +16,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
 
     public interface ICachedConfigurator
     {
-        void Configure(IReceiveEndpointConfigurator configurator, IServiceProvider services);
+        void Configure(IReceiveEndpointConfigurator configurator, IServiceProvider serviceProvider);
     }
 }

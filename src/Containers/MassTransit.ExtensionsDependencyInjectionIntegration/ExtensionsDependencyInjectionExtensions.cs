@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,36 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using MassTransit.ExtensionsDependencyInjectionIntegration;
-    using Microsoft.Extensions.DependencyInjection;
     using System;
+    using System.Collections.Generic;
+    using ExtensionsDependencyInjectionIntegration;
+    using Microsoft.Extensions.DependencyInjection;
+
 
     public static class ExtensionsDependencyInjectionIntegrationExtensions
     {
-        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IServiceProvider services)
+        public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IServiceProvider serviceProvider)
         {
-            // get IConsumerCacheService and pull Consumers
+            var consumerCache = serviceProvider.GetService<IConsumerCacheService>();
 
-            var consumerCache = services.GetService<IConsumerCacheService>();
-
-            var consumers = consumerCache.Instance.Keys;
+            var consumers = consumerCache.GetConfigurators();
 
             foreach (var consumer in consumers)
-            {
-                consumerCache.Configure(consumer, configurator, services);
-            }
+                consumer.Configure(configurator, serviceProvider);
 
-            // get ISagaCacheService and pull Sagas
+            var sagaCache = serviceProvider.GetService<ISagaCacheService>();
 
-            var sagaCache = services.GetService<ISagaCacheService>();
-
-            var sagas = sagaCache.Instance.Keys;
+            IEnumerable<ICachedConfigurator> sagas = sagaCache.GetConfigurators();
 
             foreach (var saga in sagas)
-            {
-                sagaCache.Configure(saga, configurator, services);
-            }
-
+                saga.Configure(configurator, serviceProvider);
         }
     }
 }
