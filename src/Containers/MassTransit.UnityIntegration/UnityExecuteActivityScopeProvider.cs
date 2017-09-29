@@ -10,55 +10,50 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SimpleInjectorIntegration
+namespace MassTransit.UnityIntegration
 {
     using Courier;
     using Courier.Hosts;
     using GreenPipes;
+    using Microsoft.Practices.Unity;
     using Scoping;
     using Scoping.CourierContexts;
-    using SimpleInjector;
-    using SimpleInjector.Lifestyles;
 
 
-    public class SimpleInjectorExecuteActivityScopeProvider<TActivity, TArguments> :
+    public class UnityExecuteActivityScopeProvider<TActivity, TArguments> :
         IExecuteActivityScopeProvider<TActivity, TArguments>
         where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
-        readonly Container _container;
+        readonly IUnityContainer _container;
 
-        public SimpleInjectorExecuteActivityScopeProvider(Container container)
+        public UnityExecuteActivityScopeProvider(IUnityContainer container)
         {
             _container = container;
         }
 
         public IExecuteActivityScopeContext<TActivity, TArguments> GetScope(ExecuteContext<TArguments> context)
         {
-            if (context.TryGetPayload<Scope>(out var existingContainer))
+            if (context.TryGetPayload<IUnityContainer>(out var existingContainer))
             {
-                var activity = existingContainer
-                    .Container
-                    .GetInstance<TActivity>();
+                var activity = existingContainer.Resolve<TActivity>(new DependencyOverride(typeof(TArguments), InjectionParameterValue.ToParameter(context.Arguments)));
 
                 ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
 
                 return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext);
             }
 
-            var scope = AsyncScopedLifestyle.BeginScope(_container);
+            var scope = _container.CreateChildContainer();
             try
             {
-                var activity = scope
-                    .Container
-                    .GetInstance<TActivity>();
+                var activity = scope.Resolve<TActivity>(new DependencyOverride(typeof(TArguments), InjectionParameterValue.ToParameter(context.Arguments)));
 
                 ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
 
                 var contextScope = scope;
                 activityContext.GetOrAddPayload(() => contextScope);
 
-                return new CreatedExecuteActivityScopeContext<Scope, TActivity, TArguments>(contextScope, activityContext);
+                return new CreatedExecuteActivityScopeContext<IUnityContainer, TActivity, TArguments>(contextScope, activityContext);
             }
             catch
             {
@@ -70,7 +65,7 @@ namespace MassTransit.SimpleInjectorIntegration
 
         public void Probe(ProbeContext context)
         {
-            context.Add("provider", "simpleInjector");
+            context.Add("provider", "unity");
         }
     }
 }

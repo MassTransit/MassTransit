@@ -12,31 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.UnityIntegration
 {
-    using System.Threading.Tasks;
-    using GreenPipes;
     using Microsoft.Practices.Unity;
+    using Saga;
     using Scoping;
 
 
-    public class UnityConsumerFactory<TConsumer> :
-        IConsumerFactory<TConsumer>
-        where TConsumer : class
+    public class UnitySagaRepositoryFactory :
+        ISagaRepositoryFactory
     {
-        readonly IConsumerFactory<TConsumer> _factory;
+        readonly IUnityContainer _container;
 
-        public UnityConsumerFactory(IUnityContainer container)
+        public UnitySagaRepositoryFactory(IUnityContainer container)
         {
-            _factory = new ScopeConsumerFactory<TConsumer>(new UnityConsumerScopeProvider(container));
+            _container = container;
         }
 
-        Task IConsumerFactory<TConsumer>.Send<T>(ConsumeContext<T> context, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
+        public ISagaRepository<T> CreateSagaRepository<T>() where T : class, ISaga
         {
-            return _factory.Send(context, next);
-        }
+            var repository = _container.Resolve<ISagaRepository<T>>();
 
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            _factory.Probe(context);
+            var scopeProvider = new UnitySagaScopeProvider<T>(_container);
+
+            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+
+            return sagaRepository;
         }
     }
 }

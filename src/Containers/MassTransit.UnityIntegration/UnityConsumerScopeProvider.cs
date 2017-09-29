@@ -10,38 +10,37 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SimpleInjectorIntegration
+namespace MassTransit.UnityIntegration
 {
     using Context;
     using GreenPipes;
+    using Microsoft.Practices.Unity;
     using Scoping;
     using Scoping.ConsumerContexts;
-    using SimpleInjector;
-    using SimpleInjector.Lifestyles;
     using Util;
 
 
-    public class SimpleInjectorConsumerScopeProvider :
+    public class UnityConsumerScopeProvider :
         IConsumerScopeProvider
     {
-        readonly Container _container;
+        readonly IUnityContainer _container;
 
-        public SimpleInjectorConsumerScopeProvider(Container container)
+        public UnityConsumerScopeProvider(IUnityContainer container)
         {
             _container = container;
         }
 
         public void Probe(ProbeContext context)
         {
-            context.Add("provider", "simpleInjector");
+            context.Add("provider", "unity");
         }
 
         public IConsumerScopeContext GetScope(ConsumeContext context)
         {
-            if (context.TryGetPayload<Scope>(out var existingScope))
+            if (context.TryGetPayload<IUnityContainer>(out var existingScope))
                 return new ExistingConsumerScopeContext(context);
 
-            var scope = AsyncScopedLifestyle.BeginScope(_container);
+            var scope = _container.CreateChildContainer();
             try
             {
                 var proxy = new ConsumeContextProxyScope(context);
@@ -49,7 +48,7 @@ namespace MassTransit.SimpleInjectorIntegration
                 var consumerScope = scope;
                 proxy.GetOrAddPayload(() => consumerScope);
 
-                return new CreatedConsumerScopeContext<Scope>(consumerScope, proxy);
+                return new CreatedConsumerScopeContext<IUnityContainer>(consumerScope, proxy);
             }
             catch
             {
@@ -61,9 +60,9 @@ namespace MassTransit.SimpleInjectorIntegration
 
         public IConsumerScopeContext<TConsumer, T> GetScope<TConsumer, T>(ConsumeContext<T> context) where TConsumer : class where T : class
         {
-            if (context.TryGetPayload<Scope>(out var existingScope))
+            if (context.TryGetPayload<IUnityContainer>(out var existingScope))
             {
-                var consumer = existingScope.Container.GetInstance<TConsumer>();
+                var consumer = existingScope.Resolve<TConsumer>();
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
@@ -72,16 +71,16 @@ namespace MassTransit.SimpleInjectorIntegration
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext);
             }
 
-            var scope = AsyncScopedLifestyle.BeginScope(_container);
+            var scope = _container.CreateChildContainer();
             try
             {
-                var consumer = scope.Container.GetInstance<TConsumer>();
+                var consumer = scope.Resolve<TConsumer>();
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
                 ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, scope);
 
-                return new CreatedConsumerScopeContext<Scope, TConsumer, T>(scope, consumerContext);
+                return new CreatedConsumerScopeContext<IUnityContainer, TConsumer, T>(scope, consumerContext);
             }
             catch
             {

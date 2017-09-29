@@ -22,6 +22,7 @@ namespace MassTransit
     using PipeConfigurators;
     using Saga;
     using Saga.SubscriptionConfigurators;
+    using Scoping;
     using UnityIntegration;
 
 
@@ -29,59 +30,66 @@ namespace MassTransit
     {
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IUnityContainer container)
         {
+            var scopeProvider = new UnityConsumerScopeProvider(container);
+            
             IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.HasInterface<ISaga>());
             if (concreteTypes.Count > 0)
             {
                 foreach (var concreteType in concreteTypes)
-                    ConsumerConfiguratorCache.Configure(concreteType, configurator, container);
+                    ConsumerConfiguratorCache.Configure(concreteType, configurator, scopeProvider);
             }
 
+            var sagaRepositoryFactory = new UnitySagaRepositoryFactory(container);
+            
             IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
             if (sagaTypes.Count > 0)
             {
                 foreach (var sagaType in sagaTypes)
-                    SagaConfiguratorCache.Configure(sagaType, configurator, container);
+                    SagaConfiguratorCache.Configure(sagaType, configurator, sagaRepositoryFactory);
             }
         }
 
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IUnityContainer container,
-            Action<IConsumerConfigurator<T>> configure = null)
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IUnityContainer container, Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
-            var consumerFactory = new UnityConsumerFactory<T>(container);
+            var consumerFactory = new ScopeConsumerFactory<T>(new UnityConsumerScopeProvider(container));
 
             configurator.Consumer(consumerFactory, configure);
         }
 
-        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IUnityContainer container,
-            Action<ISagaConfigurator<T>> configure = null)
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IUnityContainer container, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var sagaRepository = container.Resolve<ISagaRepository<T>>();
+            var repository = container.Resolve<ISagaRepository<T>>();
 
-            var unitySagaRepository = new UnitySagaRepository<T>(sagaRepository, container);
+            var scopeProvider = new UnitySagaScopeProvider<T>(container);
 
-            configurator.Saga(unitySagaRepository, configure);
+            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+
+            configurator.Saga(sagaRepository, configure);
         }
 
-        public static void ExecuteActivityHost<TActivity, TArguments>(
-            this IReceiveEndpointConfigurator configurator,
-            Uri compensateAddress, IUnityContainer container)
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress, IUnityContainer container)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            var factory = new UnityExecuteActivityFactory<TActivity, TArguments>(container);
+            var executeActivityScopeProvider = new UnityExecuteActivityScopeProvider<TActivity, TArguments>(container);
+
+            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
+
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
 
             configurator.AddEndpointSpecification(specification);
         }
 
-        public static void ExecuteActivityHost<TActivity, TArguments>(
-            this IReceiveEndpointConfigurator configurator, IUnityContainer container)
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, IUnityContainer container)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            var factory = new UnityExecuteActivityFactory<TActivity, TArguments>(container);
+            var executeActivityScopeProvider = new UnityExecuteActivityScopeProvider<TActivity, TArguments>(container);
+
+            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
+
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
 
             configurator.AddEndpointSpecification(specification);
@@ -91,7 +99,10 @@ namespace MassTransit
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class
         {
-            var factory = new UnityCompensateActivityFactory<TActivity, TLog>(container);
+            var compensateActivityScopeProvider = new UnityCompensateActivityScopeProvider<TActivity, TLog>(container);
+
+            var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
+
             var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
 
             configurator.AddEndpointSpecification(specification);

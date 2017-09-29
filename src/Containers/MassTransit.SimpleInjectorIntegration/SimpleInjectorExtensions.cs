@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.SimpleInjectorIntegration
+namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
@@ -23,6 +23,7 @@ namespace MassTransit.SimpleInjectorIntegration
     using Saga.SubscriptionConfigurators;
     using Scoping;
     using SimpleInjector;
+    using SimpleInjectorIntegration;
 
 
     public static class SimpleInjectorExtensions
@@ -53,7 +54,7 @@ namespace MassTransit.SimpleInjectorIntegration
         public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, Container container, Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
-            var consumerFactory = new SimpleInjectorConsumerFactory<T>(container);
+            var consumerFactory = new ScopeConsumerFactory<T>(new SimpleInjectorConsumerScopeProvider(container));
 
             configurator.Consumer(consumerFactory, configure);
         }
