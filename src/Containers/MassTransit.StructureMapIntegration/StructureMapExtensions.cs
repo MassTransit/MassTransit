@@ -131,5 +131,32 @@ namespace MassTransit
                 .Distinct()
                 .ToList();
         }
+
+        internal static IContainer CreateNestedContainer(this IContainer container, ConsumeContext context)
+        {
+            var nestedContainer = container.GetNestedContainer();
+            nestedContainer.Configure(x =>
+            {
+                x.For<ConsumeContext>()
+                    .Use(context);
+            });
+
+            return nestedContainer;
+        }
+        
+        internal static IContainer CreateNestedContainer<T>(this IContainer container, ConsumeContext<T> context) 
+            where T : class
+        {
+            var nestedContainer = container.GetNestedContainer();
+            nestedContainer.Configure(x =>
+            {
+                x.For<ConsumeContext>()
+                    .Use(context);
+                x.For<ConsumeContext<T>>()
+                    .Use(context);
+            });
+
+            return nestedContainer;
+        }
     }
 }

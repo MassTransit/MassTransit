@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration
 {
+    using System;
+    using System.Collections.Generic;
     using Autofac;
     using Context;
     using GreenPipes;
@@ -27,11 +29,13 @@ namespace MassTransit.AutofacIntegration
     {
         readonly string _name;
         readonly ILifetimeScopeProvider _scopeProvider;
+        readonly IList<Action<ConsumeContext>> _scopeActions;
 
         public AutofacSagaScopeProvider(ILifetimeScopeProvider scopeProvider, string name)
         {
             _scopeProvider = scopeProvider;
             _name = name;
+            _scopeActions = new List<Action<ConsumeContext>>();
         }
 
         ISagaScopeContext<T> ISagaScopeProvider<TSaga>.GetScope<T>(ConsumeContext<T> context)
@@ -48,6 +52,8 @@ namespace MassTransit.AutofacIntegration
 
                 var scope = lifetimeScope;
                 proxy.GetOrAddPayload(() => scope);
+                foreach (Action<ConsumeContext> scopeAction in _scopeActions)
+                    scopeAction(proxy);
 
                 return new CreatedSagaScopeContext<ILifetimeScope, T>(scope, proxy);
             }
@@ -73,6 +79,8 @@ namespace MassTransit.AutofacIntegration
 
                 var scope = lifetimeScope;
                 proxy.GetOrAddPayload(() => scope);
+                foreach (Action<ConsumeContext> scopeAction in _scopeActions)
+                    scopeAction(proxy);
 
                 return new CreatedSagaQueryScopeContext<ILifetimeScope, TSaga, T>(scope, proxy);
             }
@@ -88,6 +96,11 @@ namespace MassTransit.AutofacIntegration
         {
             context.Add("provider", "autofac");
             context.Add("scopeTag", _name);
+        }
+
+        public void AddScopeAction(Action<ConsumeContext> action)
+        {
+            _scopeActions.Add(action);
         }
     }
 }

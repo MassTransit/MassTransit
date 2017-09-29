@@ -20,5 +20,6 @@
     <PackageReference Include="StructureMap" Version="4.5.2" />
     <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj" />
   </ItemGroup>
 </Project>

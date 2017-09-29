@@ -40,7 +40,7 @@ namespace MassTransit.StructureMapIntegration
             if (context.TryGetPayload<IContainer>(out var existingContainer))
                 return new ExistingConsumerScopeContext(context);
 
-            var container = _container.GetNestedContainer();
+            var container = _container.CreateNestedContainer(context);
             try
             {
                 var proxy = new ConsumeContextProxyScope(context);
@@ -71,7 +71,7 @@ namespace MassTransit.StructureMapIntegration
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext);
             }
 
-            var container = _container.GetNestedContainer();
+            var container = _container.CreateNestedContainer(context);
             try
             {
                 var consumer = container.GetInstance<TConsumer>();

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,13 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AutomatonymousStructureMapIntegration
+namespace Automatonymous.Scoping
 {
     using System;
     using System.Collections.Concurrent;
-    using Automatonymous;
-    using Saga;
-    using StructureMap;
+    using MassTransit;
+    using MassTransit.Scoping;
 
 
     public static class StateMachineSagaConfiguratorCache
@@ -26,9 +25,9 @@ namespace MassTransit.AutomatonymousStructureMapIntegration
             return Cached.Instance.GetOrAdd(type, _ => (CachedConfigurator)Activator.CreateInstance(typeof(CachedConfigurator<>).MakeGenericType(type)));
         }
 
-        public static void Configure(Type sagaType, IReceiveEndpointConfigurator configurator, IContainer container)
+        public static void Configure(Type sagaType, IReceiveEndpointConfigurator configurator, ISagaStateMachineFactory sagaStateMachineFactory, ISagaRepositoryFactory repositoryFactory)
         {
-            GetOrAdd(sagaType).Configure(configurator, container);
+            GetOrAdd(sagaType).Configure(configurator, sagaStateMachineFactory, repositoryFactory);
         }
 
 
@@ -40,7 +39,7 @@ namespace MassTransit.AutomatonymousStructureMapIntegration
 
         interface CachedConfigurator
         {
-            void Configure(IReceiveEndpointConfigurator configurator, IContainer container);
+            void Configure(IReceiveEndpointConfigurator configurator, ISagaStateMachineFactory sagaStateMachineFactory, ISagaRepositoryFactory repositoryFactory);
         }
 
 
@@ -48,14 +47,13 @@ namespace MassTransit.AutomatonymousStructureMapIntegration
             CachedConfigurator
             where T : class, SagaStateMachineInstance
         {
-            public void Configure(IReceiveEndpointConfigurator configurator, IContainer container)
+            public void Configure(IReceiveEndpointConfigurator configurator, ISagaStateMachineFactory sagaStateMachineFactory, ISagaRepositoryFactory repositoryFactory)
             {
-                var sagaRepository = container.GetInstance<ISagaRepository<T>>();
-                var stateMachine = container.GetInstance<SagaStateMachine<T>>();
+                var repository = repositoryFactory.CreateSagaRepository<T>();
 
-                var autofacSagaRepository = new StructureMapStateMachineSagaRepository<T>(sagaRepository, container);
+                var stateMachine = sagaStateMachineFactory.CreateStateMachine<T>();
 
-                configurator.StateMachineSaga(stateMachine, autofacSagaRepository);
+                configurator.StateMachineSaga(stateMachine, repository);
             }
         }
     }

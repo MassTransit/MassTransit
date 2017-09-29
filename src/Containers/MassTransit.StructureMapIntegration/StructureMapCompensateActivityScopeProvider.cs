@@ -45,7 +45,7 @@ namespace MassTransit.StructureMapIntegration
                 return new ExistingCompensateActivityScopeContext<TActivity, TLog>(activityContext);
             }
 
-            var scopeContainer = _container.GetNestedContainer();
+            var scopeContainer = _container.CreateNestedContainer(context.ConsumeContext);
             try
             {
                 var activity = scopeContainer

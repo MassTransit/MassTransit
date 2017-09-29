@@ -33,7 +33,7 @@ namespace MassTransit.StructureMapIntegration
                 return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext);
             }
 
-            var scopeContainer = _container.GetNestedContainer();
+            var scopeContainer = _container.CreateNestedContainer(context.ConsumeContext);
             try
             {
                 var activity = scopeContainer

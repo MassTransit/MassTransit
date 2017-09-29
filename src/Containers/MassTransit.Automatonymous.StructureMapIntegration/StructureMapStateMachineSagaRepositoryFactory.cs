@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,30 +10,32 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AutofacIntegration
+namespace MassTransit.AutomatonymousStructureMapIntegration
 {
-    using Autofac;
+    using Automatonymous;
     using Saga;
     using Scoping;
+    using StructureMap;
+    using StructureMapIntegration;
 
 
-    public class AutofacSagaRepositoryFactory :
+    public class StructureMapStateMachineSagaRepositoryFactory :
         ISagaRepositoryFactory
     {
-        readonly string _name;
-        readonly ILifetimeScopeProvider _scopeProvider;
+        readonly IContainer _container;
 
-        public AutofacSagaRepositoryFactory(ILifetimeScopeProvider scopeProvider, string name)
+        public StructureMapStateMachineSagaRepositoryFactory(IContainer container)
         {
-            _scopeProvider = scopeProvider;
-            _name = name;
+            _container = container;
         }
 
         ISagaRepository<T> ISagaRepositoryFactory.CreateSagaRepository<T>()
         {
-            var repository = _scopeProvider.LifetimeScope.Resolve<ISagaRepository<T>>();
+            var repository = _container.GetInstance<ISagaRepository<T>>();
 
-            var scopeProvider = new AutofacSagaScopeProvider<T>(_scopeProvider, _name);
+            var scopeProvider = new StructureMapSagaScopeProvider<T>(_container);
+
+            scopeProvider.AddScopeAction(x => x.GetOrAddPayload<IStateMachineActivityFactory>(() => new StructureMapStateMachineActivityFactory()));
 
             return new ScopeSagaRepository<T>(repository, scopeProvider);
         }

@@ -21,5 +21,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj" />
   </ItemGroup>
 </Project>

@@ -36,11 +36,8 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         IRabbitMqMessagePublishTopologyConfigurator<T> IRabbitMqMessagePublishTopologyConfigurator.GetMessageTopology<T>()
         {
-            var result = this as IRabbitMqMessagePublishTopologyConfigurator<T>;
-            if (result == null)
-                throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
-
-            return result;
+            return this as IRabbitMqMessagePublishTopologyConfigurator<T>
+                ?? throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
         }
 
         public void ApplyMessageTopology(IRabbitMqPublishTopologyBuilder builder)

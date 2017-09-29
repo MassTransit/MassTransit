@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using Automatonymous;
+    using Automatonymous.Scoping;
     using AutomatonymousStructureMapIntegration;
     using Internals.Extensions;
     using StructureMap;
@@ -24,7 +25,7 @@ namespace MassTransit
     public static class StructureMapStateMachineLoadSagaExtensions
     {
         /// <summary>
-        /// Scans the lifetime scope and registers any state machines sagas which are found in the scope using the Autofac saga repository
+        /// Scans the lifetime scope and registers any state machines sagas which are found in the scope using the StructureMap saga repository
         /// and the appropriate state machine saga repository under the hood.
         /// </summary>
         /// <param name="configurator"></param>
@@ -33,9 +34,13 @@ namespace MassTransit
         {
             IList<Type> sagaTypes = FindStateMachineSagaTypes(container);
 
+            var stateMachineFactory = new StructureMapSagaStateMachineFactory(container);
+
+            var repositoryFactory = new StructureMapStateMachineSagaRepositoryFactory(container);
+
             foreach (var sagaType in sagaTypes)
             {
-                StateMachineSagaConfiguratorCache.Configure(sagaType, configurator, container);
+                StateMachineSagaConfiguratorCache.Configure(sagaType, configurator, stateMachineFactory, repositoryFactory);
             }
         }
 
