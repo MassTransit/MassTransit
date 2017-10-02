@@ -15,7 +15,6 @@ namespace MassTransit.EndpointSpecifications
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using Configuration;
     using ConsumeConfigurators;
     using GreenPipes;
@@ -27,7 +26,6 @@ namespace MassTransit.EndpointSpecifications
     using Pipeline.Pipes;
     using Saga;
     using Saga.SubscriptionConfigurators;
-    using Transports;
 
 
     public abstract class ReceiveEndpointSpecification :
@@ -69,6 +67,11 @@ namespace MassTransit.EndpointSpecifications
             where T : class
         {
             _configuration.ConsumePipeConfigurator.AddPipeSpecification(specification);
+        }
+
+        public void AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        {
+            _configuration.ConsumePipeConfigurator.AddPrePipeSpecification(specification);
         }
 
         public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)

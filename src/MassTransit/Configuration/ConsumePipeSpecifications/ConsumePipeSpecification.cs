@@ -57,12 +57,6 @@ namespace MassTransit.ConsumePipeSpecifications
         {
             lock (_lock)
             {
-                if (_messageSpecifications.Count == 0)
-                {
-                    _consumeContextSpecifications.Add(specification);
-                    return;
-                }
-
                 _specifications.Add(specification);
 
                 foreach (var messageSpecification in _messageSpecifications.Values)
@@ -88,6 +82,11 @@ namespace MassTransit.ConsumePipeSpecifications
             IMessageConsumePipeSpecification<T> messageSpecification = GetMessageSpecification<T>();
 
             messageSpecification.AddPipeSpecification(specification);
+        }
+
+        public void AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        {
+            _consumeContextSpecifications.Add(specification);
         }
 
         public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)

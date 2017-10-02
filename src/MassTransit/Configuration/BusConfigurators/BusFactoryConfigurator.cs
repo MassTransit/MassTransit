@@ -22,7 +22,6 @@ namespace MassTransit.BusConfigurators
     using GreenPipes;
     using Saga;
     using Saga.SubscriptionConfigurators;
-    using Topology.Configuration;
 
 
     public abstract class BusFactoryConfigurator<TBuilder>
@@ -43,6 +42,11 @@ namespace MassTransit.BusConfigurators
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
             _configuration.ConsumePipeConfigurator.AddPipeSpecification(specification);
+        }
+
+        public void AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        {
+            _configuration.ConsumePipeConfigurator.AddPrePipeSpecification(specification);
         }
 
         public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
