@@ -38,7 +38,8 @@ namespace MassTransit.Pipeline.Filters
             RetryContext<ConsumeContext> policyRetryContext;
             var canRetry = _policyContext.CanRetry(exception, out policyRetryContext);
 
-            _context.LogRetry(exception);
+            if (canRetry)
+                _context.LogRetry(exception);
 
             retryContext = new ConsumeContextRetryContext(policyRetryContext, _context);
 
@@ -73,7 +74,8 @@ namespace MassTransit.Pipeline.Filters
             RetryContext<TFilter> policyRetryContext;
             var canRetry = _policyContext.CanRetry(exception, out policyRetryContext);
 
-            _context.LogRetry(exception);
+            if (canRetry)
+                _context.LogRetry(exception);
 
             retryContext = new ConsumeContextRetryContext<TFilter, TContext>(policyRetryContext, _context);
 
