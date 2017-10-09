@@ -267,9 +267,8 @@ Each saga instance will be placed in a collection specific to the instance type.
 
 ### NHibernate
 
-Although NHibernate is not being actively developed recently, it is still widely used and 
-is supported by MassTransit for saga storage. The example below shows the code-first approach 
-to using NHibernate for saga persistence.
+NHibernate is a widely used ORM and it is supported by MassTransit for saga storage. 
+The example below shows the code-first approach to using NHibernate for saga persistence.
 
 #### Concurrency
 
@@ -356,7 +355,7 @@ To resolve this, the saga instance can implement the `IVersionedSaga` interface 
 public int Version { get; set; }
 ```
 
-When version of the instance that is being updated will be lower than the expected version, 
+When the version of the instance that is being updated is lower than the expected version, 
 the saga repository will trow an exception and force the message to be retried, potentially resolving the issue.
 
 #### Redis client initialization
@@ -383,7 +382,7 @@ builder.RegisterGeneric(typeof(RedisSagaRepository<>))
 ### Marten
 
 [Marten][2] is an open-source library that provides an API to the PostgreSQL [JSONB storage][1], influenced by
-RavenDb client API. It allows to use PotgreSQL as schema-less NoSQL document storage. Unlike typical document
+RavenDb client API. It allows to use PostgreSQL as schema-less NoSQL document storage. Unlike typical document
 databases, PostgreSQL JSONB storage provides you the ACID-compliant transactional store with full consistency.
 
 To use Marten and PostgreSQL as saga persistence, you need to install `MassTransit.Marten` NuGet package and
@@ -422,7 +421,7 @@ builder.RegisterGeneric(typeof(MartenSagaRepository<>))
     .As(typeof(ISagaRepository<>)).SingleInstance();
 ```
 
-Marten will create necessary tables for you. This type of saga repository
+Marten will create the necessary tables for you. This type of saga repository
 supports correlation by id and custom expressions.
 
 #### Concurrency
