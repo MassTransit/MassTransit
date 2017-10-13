@@ -37,7 +37,7 @@
     <PackageReference Include="NHibernate" Version="4.1.1.4000" />
     <PackageReference Include="NUnit" Version="3.8.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
-    <PackageReference Include="Quartz" Version="2.6.0" />
+    <PackageReference Include="Quartz" Version="2.6.1" />
     <PackageReference Include="Shouldly" Version="2.8.3" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

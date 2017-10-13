@@ -30,7 +30,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="NUnit" Version="3.8.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
-    <PackageReference Include="Quartz" Version="2.6.0" />
+    <PackageReference Include="Quartz" Version="2.6.1" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj" />
