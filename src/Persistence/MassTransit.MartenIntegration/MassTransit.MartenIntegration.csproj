@@ -27,7 +27,7 @@
   <ItemGroup>
     <PackageReference Include="Baseline" Version="1.3.0" />
     <PackageReference Include="GreenPipes" Version="1.0.10" />
-    <PackageReference Include="Marten" Version="2.3.0" />
+    <PackageReference Include="Marten" Version="2.3.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.2" />
