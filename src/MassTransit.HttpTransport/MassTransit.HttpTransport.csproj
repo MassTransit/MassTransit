@@ -16,7 +16,7 @@
     <Compile Remove="Configuration\Builders\HttpPublishEndpointProvider.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="1.0.10" />
+    <PackageReference Include="GreenPipes" Version="1.2.0" />
     <PackageReference Include="Microsoft.Owin" Version="3.1.0" />
     <PackageReference Include="Microsoft.Owin.Diagnostics" Version="3.1.0" />
     <PackageReference Include="Microsoft.Owin.Host.HttpListener" Version="3.1.0" />

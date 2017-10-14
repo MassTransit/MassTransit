@@ -13,11 +13,11 @@
 namespace MassTransit.Tests.Pipeline
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Transactions;
     using GreenPipes;
-    using MassTransit.Pipeline;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -143,6 +143,66 @@ namespace MassTransit.Tests.Pipeline
             Assert.That(async () => await pipe.Send(context), Throws.TypeOf<TransactionAbortedException>());
 
             //Console.WriteLine(exception.Message);
+        }
+    }
+
+
+    [TestFixture]
+    public class When_a_transaction_throws_an_exception_with_retry :
+        InMemoryTestFixture
+    {
+        Task<ConsumeContext<Fault<Message>>> _faultReceived;
+
+        [Test]
+        public async Task Should_not_reuse_transaction_context_between_retries()
+        {
+            var fault = await _faultReceived;
+
+            Assert.That(fault.Message.Exceptions.First().ExceptionType, Does.Contain(nameof(IntentionalTestException)));
+        }
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            await InputQueueSendEndpoint.Send(new Message {Id = NewId.NextGuid()});
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ReceiveEndpoint("errors", x =>
+            {
+                _faultReceived = Handled<Fault<Message>>(x);
+            });
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseRetry(x => x.Immediate(1));
+            configurator.UseTransaction();
+
+            configurator.Consumer<Consumer>();
+        }
+
+
+        class Consumer : IConsumer<Message>
+        {
+            public Task Consume(ConsumeContext<Message> context)
+            {
+                var transactionContext = context.GetPayload<TransactionContext>();
+
+                var isolationLevel = transactionContext.Transaction.IsolationLevel;
+
+                using (var ts = new TransactionScope(transactionContext.Transaction))
+                {
+                    throw new IntentionalTestException("Then, you, shall, die!");
+                }
+            }
+        }
+
+
+        public class Message
+        {
+            public Guid Id { get; set; }
         }
     }
 }

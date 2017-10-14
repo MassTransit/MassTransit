@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
+    using System;
     using System.Threading.Tasks;
     using Saga;
+    using Util;
 
 
     public class RetrySagaConsumeContext<TSaga> :
@@ -42,5 +44,11 @@ namespace MassTransit.Context
         }
 
         public bool IsCompleted => _context.IsCompleted;
+
+        public override TContext CreateNext<TContext>()
+        {
+            return new RetrySagaConsumeContext<TSaga>(_context) as TContext
+                ?? throw new ArgumentException($"The context type is not valid: {TypeMetadataCache<TContext>.ShortName}");
+        }
     }
 }

@@ -36,15 +36,16 @@ namespace MassTransit.Pipeline.Filters
 
         RetryPolicyContext<T> IRetryPolicy.CreatePolicyContext<T>(T context)
         {
-            var consumeContext = context as ConsumeContext;
-            if (consumeContext == null)
-                throw new ArgumentException("The argument must be a ConsumeContext", nameof(context));
+            if (context is ConsumeContext consumeContext)
+            {
+                RetryPolicyContext<ConsumeContext> retryPolicyContext = _retryPolicy.CreatePolicyContext(consumeContext);
 
-            RetryPolicyContext<ConsumeContext> retryPolicyContext = _retryPolicy.CreatePolicyContext(consumeContext);
+                var retryConsumeContext = new RetryConsumeContext(consumeContext);
 
-            var retryConsumeContext = new RetryConsumeContext(consumeContext);
+                return new ConsumeContextRetryPolicyContext(retryPolicyContext, retryConsumeContext) as RetryPolicyContext<T>;
+            }
 
-            return new ConsumeContextRetryPolicyContext(retryPolicyContext, retryConsumeContext) as RetryPolicyContext<T>;
+            throw new ArgumentException("The argument must be a ConsumeContext", nameof(context));
         }
 
         public bool IsHandled(Exception exception)

@@ -16,7 +16,7 @@
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="1.0.10" />
+    <PackageReference Include="GreenPipes" Version="1.2.0" />
     <PackageReference Include="Microsoft.Azure.DocumentDB" Version="1.17.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />

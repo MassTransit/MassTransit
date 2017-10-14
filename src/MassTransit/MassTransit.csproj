@@ -25,7 +25,7 @@
     <Compile Remove="Configuration/PerformanceCounterExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="1.0.10" />
+    <PackageReference Include="GreenPipes" Version="1.2.0" />
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.1" />
