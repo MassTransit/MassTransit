@@ -131,6 +131,7 @@
     <Compile Include="Publish_Specs.cs" />
     <Compile Include="RemoveWhen_Specs.cs" />
     <Compile Include="Request_Specs.cs" />
+    <Compile Include="Reschedule_Specs.cs" />
     <Compile Include="Respond_Specs.cs" />
     <Compile Include="SagaConfigurationObserver_Specs.cs" />
     <Compile Include="SagaDbContextFactoryProvider.cs" />
