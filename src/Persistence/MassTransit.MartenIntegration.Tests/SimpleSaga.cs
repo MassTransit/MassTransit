@@ -2,11 +2,13 @@
 using System.Threading.Tasks;
 using Marten.Schema;
 using MassTransit.Saga;
+using System.Linq.Expressions;
 
 namespace MassTransit.MartenIntegration.Tests
 {
     public class SimpleSaga :
         InitiatedBy<InitiateSimpleSaga>,
+        Observes<ObservableSagaMessage, SimpleSaga>,
         Orchestrates<CompleteSimpleSaga>,
         ISaga
     {
@@ -24,15 +26,15 @@ namespace MassTransit.MartenIntegration.Tests
         [Identity]
         public Guid CorrelationId { get; set; }
 
-        //public async Task Consume(ConsumeContext<ObservableSagaMessage> message)
-        //{
-        //    Observed = true;
-        //}
+        public async Task Consume(ConsumeContext<ObservableSagaMessage> message)
+        {
+            Observed = true;
+        }
 
-        //public Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> CorrelationExpression
-        //{
-        //    get { return (saga, message) => saga.Name == message.Name; }
-        //}
+        Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> Observes<ObservableSagaMessage, SimpleSaga>.CorrelationExpression
+        {
+            get { return (saga, message) => saga.Name == message.Name; }
+        }
 
         public async Task Consume(ConsumeContext<CompleteSimpleSaga> message)
         {
