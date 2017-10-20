@@ -88,7 +88,7 @@
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
-            using (var session = _store.LightweightSession())
+            using (var session = _store.DirtyTrackedSession())
             {
                 try
                 {
