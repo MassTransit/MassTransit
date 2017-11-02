@@ -27,7 +27,7 @@ misrouted to the queue, the message is moved to a skipped queue.
 
 ### Serialization
 C# is a statically typed language, and developers work with types. RabbitMQ works with bytes. So how do you format
-a message over the wire? How do you handle different date/time formats (local, UTC, unspecified)? How do your deal
+a message over the wire? How do you handle different date/time formats (local, UTC, unspecified)? How do you deal
 with numbers, are they integers, longs, or decimals? MassTransit has already thought about this and implemented 
 sensible defaults for you. And there are many serializers provided out of the box, including JSON, BSON, and XML as
 well as the .NET binary formatter as a last resort.
