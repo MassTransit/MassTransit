@@ -5,7 +5,7 @@ branches:
 skip_tags: true
 skip_commits:
   files:
-    - docs/*
+    - docs/**/*
     - '**/*.html'
 image: Visual Studio 2015
 configuration: Release
