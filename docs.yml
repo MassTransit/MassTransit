@@ -3,7 +3,7 @@ branches:
     - master
 only_commits:
   files:
-    - docs/*
+    - docs/**/*
     - '**/*.md'
     - '**/*.html'
     - docs.yml
