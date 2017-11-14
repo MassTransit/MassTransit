@@ -14,8 +14,8 @@ namespace MassTransit.UnityIntegration
 {
     using System.Threading.Tasks;
     using GreenPipes;
-    using Microsoft.Practices.Unity;
     using Scoping;
+    using Unity;
 
 
     public class UnityConsumerFactory<TConsumer> :

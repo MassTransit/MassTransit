@@ -15,9 +15,11 @@ namespace MassTransit.UnityIntegration
     using Courier;
     using Courier.Hosts;
     using GreenPipes;
-    using Microsoft.Practices.Unity;
     using Scoping;
     using Scoping.CourierContexts;
+    using Unity;
+    using Unity.Injection;
+    using Unity.Resolution;
 
 
     public class UnityCompensateActivityScopeProvider<TActivity, TLog> :

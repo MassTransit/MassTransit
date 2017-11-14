@@ -15,10 +15,10 @@ namespace MassTransit.UnityIntegration
     using Context;
     using GreenPipes;
     using GreenPipes.Payloads;
-    using Microsoft.Practices.Unity;
     using Saga;
     using Scoping;
     using Scoping.SagaContexts;
+    using Unity;
 
 
     public class UnitySagaScopeProvider<TSaga> :

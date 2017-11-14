@@ -14,9 +14,9 @@ namespace MassTransit.UnityIntegration
 {
     using Context;
     using GreenPipes;
-    using Microsoft.Practices.Unity;
     using Scoping;
     using Scoping.ConsumerContexts;
+    using Unity;
     using Util;
 
 
