@@ -12,9 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.UnityIntegration
 {
-    using Microsoft.Practices.Unity;
     using Saga;
     using Scoping;
+    using Unity;
 
 
     public class UnitySagaRepositoryFactory :

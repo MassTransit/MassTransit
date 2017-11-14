@@ -12,10 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests
 {
-    using Microsoft.Practices.Unity;
     using NUnit.Framework;
     using Saga;
     using Scenarios;
+    using Unity;
+    using Unity.Lifetime;
+
 
     public class Unity_Consumer :
         When_registering_a_consumer

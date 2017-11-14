@@ -18,11 +18,11 @@ namespace MassTransit
     using ConsumeConfigurators;
     using Courier;
     using Internals.Extensions;
-    using Microsoft.Practices.Unity;
     using PipeConfigurators;
     using Saga;
     using Saga.SubscriptionConfigurators;
     using Scoping;
+    using Unity;
     using UnityIntegration;
 
 

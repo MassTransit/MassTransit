@@ -14,9 +14,9 @@ namespace MassTransit.UnityIntegration
 {
     using System.Threading.Tasks;
     using GreenPipes;
-    using Microsoft.Practices.Unity;
     using Saga;
     using Scoping;
+    using Unity;
 
 
     public class UnitySagaRepository<TSaga> :
