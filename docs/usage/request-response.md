@@ -47,7 +47,7 @@ public interface IRequestClient<TRequest, TResponse>
 The interface is simple, a single method that accepts the request and returns a Task that can be awaited. The interface
 declares the request and response types, making it useful for dependency management using dependency injection. In fact,
 by using the request client, an application can be completely free of any MassTransit concerns such as message contexts
-and endpoints. The configuration of the application can defined the endpoints and connections and register them in
+and endpoints. The configuration of the application can define the endpoints and connections and register them in
 a dependency injection container, keeping the configuration complexity at the outer edge of the application.
 
 To create a request client, the provided `MessageRequestClient` can be used.
