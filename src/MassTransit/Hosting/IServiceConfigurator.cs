@@ -13,6 +13,7 @@
 namespace MassTransit.Hosting
 {
     using System;
+    using Turnout.Configuration;
 
 
     /// <summary>
@@ -22,5 +23,9 @@ namespace MassTransit.Hosting
         IBusFactoryConfigurator
     {
         void ReceiveEndpoint(string queueName, int consumerLimit, Action<IReceiveEndpointConfigurator> configureEndpoint);
+
+        void TurnoutEndpoint<T>(string queueName, Action<ITurnoutServiceConfigurator<T>> configureTurnout)
+            where T : class;
+
     }
 }
