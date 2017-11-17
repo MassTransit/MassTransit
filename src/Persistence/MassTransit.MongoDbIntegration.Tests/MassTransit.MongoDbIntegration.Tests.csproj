@@ -8,7 +8,7 @@
     <Compile Remove="MongoMessageDataRepositoryTestsForPuttingMessageDataWithExpiration.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="4.1.1" />
+    <PackageReference Include="Castle.Core" Version="4.2.1" />
     <PackageReference Include="GreenPipes" Version="1.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
     <PackageReference Include="MongoDB.Bson" Version="2.4.4" />
