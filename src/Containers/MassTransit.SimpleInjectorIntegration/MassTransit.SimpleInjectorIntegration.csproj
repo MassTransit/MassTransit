@@ -15,7 +15,7 @@
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="1.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="SimpleInjector" Version="4.0.11" />
+    <PackageReference Include="SimpleInjector" Version="4.0.12" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

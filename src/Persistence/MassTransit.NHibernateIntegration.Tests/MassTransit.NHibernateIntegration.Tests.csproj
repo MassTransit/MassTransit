@@ -8,12 +8,12 @@
     <PackageReference Include="GreenPipes" Version="1.2.0" />
     <PackageReference Include="Iesi.Collections" Version="4.0.1.4000" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="NHibernate" Version="4.1.1.4000" />
-    <PackageReference Include="NUnit" Version="3.8.1" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
+    <PackageReference Include="NUnit" Version="3.9.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
     <PackageReference Include="Shouldly" Version="2.8.3" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
