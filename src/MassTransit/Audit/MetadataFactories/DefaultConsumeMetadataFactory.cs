@@ -23,7 +23,7 @@ namespace MassTransit.Audit.MetadataFactories
             return CreateMetadata(context, "Consume");
         }
 
-        static MessageAuditMetadata CreateMetadata(MessageContext context, string contextType)
+        static MessageAuditMetadata CreateMetadata(ConsumeContext context, string contextType)
         {
             return new MessageAuditMetadata
             {
@@ -37,6 +37,7 @@ namespace MassTransit.Audit.MetadataFactories
                 SourceAddress = context.SourceAddress?.AbsoluteUri,
                 FaultAddress = context.FaultAddress?.AbsoluteUri,
                 ResponseAddress = context.ResponseAddress?.AbsoluteUri,
+                InputAddress = context.ReceiveContext.InputAddress?.AbsoluteUri,
                 Headers = context.Headers?.GetAll()?.ToDictionary(k => k.Key, v => v.Value.ToString())
             };
         }
