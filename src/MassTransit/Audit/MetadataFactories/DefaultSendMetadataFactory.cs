@@ -42,6 +42,7 @@ namespace MassTransit.Audit.MetadataFactories
                 SourceAddress = context.SourceAddress?.AbsoluteUri,
                 FaultAddress = context.FaultAddress?.AbsoluteUri,
                 ResponseAddress = context.ResponseAddress?.AbsoluteUri,
+                InputAddress = "",
                 Headers = context.Headers?.GetAll()?.ToDictionary(k => k.Key, v => v.Value.ToString())
             };
         }

@@ -20,20 +20,20 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Audit
 
         protected AuditDbContext(string auditTableName)
         {
-            this._auditTableName = auditTableName;
+            _auditTableName = auditTableName;
         }
 
         public AuditDbContext(DbContextOptions options, string auditTableName)
             : base(options)
         {
-            this._auditTableName = auditTableName;
+            _auditTableName = auditTableName;
         }
 
         public DbSet<AuditRecord> AuditRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ConfigureAuditMapping(this._auditTableName);
+            modelBuilder.ConfigureAuditMapping(_auditTableName);
         }
     }
 }

@@ -37,6 +37,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Audit
             typeBuilder.Property(x => x.DestinationAddress);
             typeBuilder.Property(x => x.ResponseAddress);
             typeBuilder.Property(x => x.FaultAddress);
+            typeBuilder.Property(x => x.InputAddress);
             typeBuilder.Property(x => x.MessageType);
             typeBuilder.Property(x => x._headers).HasColumnName("Headers");
             typeBuilder.Property(x => x._custom).HasColumnName("Custom");

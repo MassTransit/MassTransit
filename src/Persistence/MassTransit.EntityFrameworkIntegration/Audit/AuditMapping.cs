@@ -37,6 +37,7 @@ namespace MassTransit.EntityFrameworkIntegration
             Property(x => x.DestinationAddress);
             Property(x => x.ResponseAddress);
             Property(x => x.FaultAddress);
+            Property(x => x.InputAddress);
 
             Property(x => x.MessageType);
             Property(x => x._headers).HasColumnName("Headers");
