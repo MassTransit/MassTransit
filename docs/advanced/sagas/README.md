@@ -7,7 +7,7 @@ sagas orchestrate events, and sagas maintain the state of the overall transactio
 Sagas are designed to manage the complexity of a distributed transaction without locking and 
 immediate consistency. They manage state and track any compensations required if a partial failure occurs.
 
-We didn’t create it, we learned it from the [original Cornell paper][1] and from Arnon Rotem-Gal-Oz's [description][2].
+We didn’t create it, we learned it from the [original Princeton paper][1] and from Arnon Rotem-Gal-Oz's [description][2].
 
 [1]: http://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf
 [2]: http://www.rgoarchitects.com/Files/SOAPatterns/Saga.pdf
