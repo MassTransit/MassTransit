@@ -22,9 +22,11 @@ namespace MassTransit.Transports.InMemory.Topology
         PublishTopology,
         IInMemoryPublishTopologyConfigurator
     {
-        public InMemoryPublishTopology(IEntityNameFormatter entityNameFormatter)
-            : base(entityNameFormatter)
+        readonly IMessageTopology _messageTopology;
+
+        public InMemoryPublishTopology(IMessageTopology messageTopology)
         {
+            _messageTopology = messageTopology;
         }
 
         IInMemoryMessagePublishTopologyConfigurator<T> IInMemoryPublishTopology.GetMessageTopology<T>()
@@ -34,17 +36,15 @@ namespace MassTransit.Transports.InMemory.Topology
 
         protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var entityNameFormatter = new MessageEntityNameFormatter<T>(EntityNameFormatter);
+            var topology = new InMemoryMessagePublishTopology<T>(_messageTopology.GetMessageTopology<T>());
 
-            var messageTopology = new InMemoryMessagePublishTopology<T>(entityNameFormatter);
-
-            var connector = new ImplementedMessageTypeConnector<T>(this, messageTopology);
+            var connector = new ImplementedMessageTypeConnector<T>(this, topology);
 
             ImplementedMessageTypeCache<T>.EnumerateImplementedTypes(connector);
 
-            OnMessageTopologyCreated(messageTopology);
+            OnMessageTopologyCreated(topology);
 
-            return messageTopology;
+            return topology;
         }
 
 

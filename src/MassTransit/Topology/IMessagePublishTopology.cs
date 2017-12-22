@@ -23,11 +23,6 @@ namespace MassTransit.Topology
     public interface IMessagePublishTopology<TMessage>
         where TMessage : class
     {
-        /// <summary>
-        /// Used to format the entity name on the broker for the message type
-        /// </summary>
-        IMessageEntityNameFormatter<TMessage> EntityNameFormatter { get; }
-
         void Apply(ITopologyPipeBuilder<PublishContext<TMessage>> builder);
 
         /// <summary>

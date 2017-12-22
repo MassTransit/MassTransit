@@ -84,7 +84,7 @@ namespace MassTransit.Tests.Topology
             }
             finally
             {
-                harness.Stop();
+                await harness.Stop();
             }
         }
 

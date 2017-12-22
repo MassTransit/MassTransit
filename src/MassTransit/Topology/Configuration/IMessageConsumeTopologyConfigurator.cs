@@ -21,10 +21,11 @@ namespace MassTransit.Topology.Configuration
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
     public interface IMessageConsumeTopologyConfigurator<TMessage> :
+        IMessageConsumeTopologyConfigurator,
         IMessageConsumeTopology<TMessage>
         where TMessage : class
     {
-        void Add(IMessageConsumeTopology<TMessage> ConsumeTopology);
+        void Add(IMessageConsumeTopology<TMessage> consumeTopology);
 
         /// <summary>
         /// Adds a delegated configuration to the Consume topology, which is called before any topologies
@@ -63,7 +64,5 @@ namespace MassTransit.Topology.Configuration
 
     public interface IMessageConsumeTopologyConfigurator
     {
-        IMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
-            where T : class;
     }
 }

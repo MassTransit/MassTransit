@@ -33,9 +33,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology
     public interface IServiceBusMessageConsumeTopologyConfigurator :
         IMessageConsumeTopologyConfigurator
     {
-        new IServiceBusMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
-            where T : class;
-
         /// <summary>
         /// Apply the message topology to the builder
         /// </summary>

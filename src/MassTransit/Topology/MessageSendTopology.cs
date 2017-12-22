@@ -15,12 +15,10 @@ namespace MassTransit.Topology
     using System;
     using System.Collections.Generic;
     using Configuration;
-    using Util;
 
 
     public class MessageSendTopology<TMessage> :
-        IMessageSendTopologyConfigurator<TMessage>,
-        IMessageSendTopologyConfigurator
+        IMessageSendTopologyConfigurator<TMessage>
         where TMessage : class
     {
         readonly IList<IMessageSendTopologyConvention<TMessage>> _conventions;
@@ -32,15 +30,6 @@ namespace MassTransit.Topology
             _conventions = new List<IMessageSendTopologyConvention<TMessage>>();
             _topologies = new List<IMessageSendTopology<TMessage>>();
             _delegateConfigurations = new List<IMessageSendTopology<TMessage>>();
-        }
-
-        IMessageSendTopologyConfigurator<T> IMessageSendTopologyConfigurator.GetMessageTopology<T>()
-        {
-            var result = this as IMessageSendTopologyConfigurator<T>;
-            if (result == null)
-                throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
-
-            return result;
         }
 
         public void Add(IMessageSendTopology<TMessage> sendTopology)

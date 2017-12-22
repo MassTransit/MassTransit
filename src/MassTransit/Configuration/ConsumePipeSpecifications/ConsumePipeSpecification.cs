@@ -16,7 +16,6 @@ namespace MassTransit.ConsumePipeSpecifications
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Net.WebSockets;
     using Configuration;
     using ConsumeConfigurators;
     using Context;

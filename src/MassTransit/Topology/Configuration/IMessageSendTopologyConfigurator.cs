@@ -21,6 +21,7 @@ namespace MassTransit.Topology.Configuration
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
     public interface IMessageSendTopologyConfigurator<TMessage> :
+        IMessageSendTopologyConfigurator,
         IMessageSendTopology<TMessage>
         where TMessage : class
     {
@@ -63,7 +64,5 @@ namespace MassTransit.Topology.Configuration
 
     public interface IMessageSendTopologyConfigurator
     {
-        IMessageSendTopologyConfigurator<T> GetMessageTopology<T>()
-            where T : class;
     }
 }

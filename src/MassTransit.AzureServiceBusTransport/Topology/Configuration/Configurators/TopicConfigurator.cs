@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology.Configurators
 {
+    using System;
     using Microsoft.ServiceBus.Messaging;
 
 
@@ -19,9 +20,14 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configurators
         MessageEntityConfigurator,
         ITopicConfigurator
     {
-        public TopicConfigurator(string topicPath)
+        public TopicConfigurator(string topicPath, bool temporary)
             : base(topicPath)
         {
+            if (temporary)
+            {
+                AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
+                EnableExpress = true;
+            }
         }
 
         public bool? EnableFilteringMessagesBeforePublishing { get; set; }

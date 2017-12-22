@@ -10,15 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Topology
+namespace MassTransit.Topology.Observers
 {
     using Configuration;
+    using GreenPipes.Util;
 
 
-    public interface IGlobalMessageTopology<TMessage>
-        where TMessage : class
+    public class ConsumeTopologyConfigurationObservable :
+        Connectable<IConsumeTopologyConfigurationObserver>,
+        IConsumeTopologyConfigurationObserver
     {
-        IMessageSendTopologyConfigurator<TMessage> Send { get; }
-        IMessagePublishTopologyConfigurator<TMessage> Publish { get; }
+        public void MessageTopologyCreated<T>(IMessageConsumeTopologyConfigurator<T> configuration)
+            where T : class
+        {
+            All(observer =>
+            {
+                observer.MessageTopologyCreated(configuration);
+
+                return true;
+            });
+        }
     }
 }

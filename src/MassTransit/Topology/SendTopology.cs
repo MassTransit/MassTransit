@@ -53,7 +53,7 @@ namespace MassTransit.Topology
 
             var specification = _messageSpecifications.GetOrAdd(typeof(T), CreateMessageTopology<T>);
 
-            return specification.GetMessageTopology<T>();
+            return specification as IMessageSendTopologyConfigurator<T>;
         }
 
         public ConnectHandle Connect(ISendTopologyConfigurationObserver observer)
@@ -96,12 +96,13 @@ namespace MassTransit.Topology
         {
             IMessageSendTopologyConvention[] conventions;
             lock (_lock)
+            {
                 conventions = _conventions.ToArray();
+            }
 
             foreach (var convention in conventions)
             {
-                IMessageSendTopologyConvention<T> messageSendTopologyConvention;
-                if (convention.TryGetMessageSendTopologyConvention(out messageSendTopologyConvention))
+                if (convention.TryGetMessageSendTopologyConvention(out IMessageSendTopologyConvention<T> messageSendTopologyConvention))
                     messageTopology.AddConvention(messageSendTopologyConvention);
             }
         }

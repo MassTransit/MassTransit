@@ -15,7 +15,6 @@ namespace MassTransit.Transports.InMemory.Topology
     using System;
     using System.Collections.Generic;
     using MassTransit.Topology;
-    using Util;
 
 
     public class InMemoryMessagePublishTopology<TMessage> :
@@ -23,21 +22,13 @@ namespace MassTransit.Transports.InMemory.Topology
         IInMemoryMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
+        readonly IMessageTopology<TMessage> _messageTopology;
         readonly IList<IInMemoryPublishTopologySpecification> _implementedMessageTypes;
 
-        public InMemoryMessagePublishTopology(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
-            : base(entityNameFormatter)
+        public InMemoryMessagePublishTopology(IMessageTopology<TMessage> messageTopology)
         {
+            _messageTopology = messageTopology;
             _implementedMessageTypes = new List<IInMemoryPublishTopologySpecification>();
-        }
-
-        IInMemoryMessagePublishTopologyConfigurator<T> IInMemoryMessagePublishTopologyConfigurator.GetMessageTopology<T>()
-        {
-            var result = this as IInMemoryMessagePublishTopologyConfigurator<T>;
-            if (result == null)
-                throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
-
-            return result;
         }
 
         public void Apply(IInMemoryPublishTopologyBuilder builder)
@@ -45,23 +36,17 @@ namespace MassTransit.Transports.InMemory.Topology
             var exchangeHandle = ExchangeDeclare(builder);
 
             if (builder.ExchangeName != null)
-            {
                 builder.ExchangeBind(builder.ExchangeName, exchangeHandle);
-            }
             else
-            {
                 builder.ExchangeName = exchangeHandle;
-            }
 
             foreach (IInMemoryPublishTopologySpecification configurator in _implementedMessageTypes)
-            {
                 configurator.Apply(builder);
-            }
         }
 
         public override bool TryGetPublishAddress(Uri baseAddress, TMessage message, out Uri publishAddress)
         {
-            var exchangeName = EntityNameFormatter.FormatEntityName();
+            var exchangeName = _messageTopology.EntityName;
 
             publishAddress = new Uri($"{baseAddress}{exchangeName}");
             return true;
@@ -69,7 +54,7 @@ namespace MassTransit.Transports.InMemory.Topology
 
         string ExchangeDeclare(IInMemoryTopologyBuilder builder)
         {
-            var exchangeName = EntityNameFormatter.FormatEntityName();
+            var exchangeName = _messageTopology.EntityName;
 
             builder.ExchangeDeclare(exchangeName);
 

@@ -23,28 +23,26 @@ namespace MassTransit.RabbitMqTransport.Specifications
         EndpointConfiguration<IRabbitMqEndpointConfiguration, IRabbitMqConsumeTopologyConfigurator, IRabbitMqSendTopologyConfigurator, IRabbitMqPublishTopologyConfigurator>,
         IRabbitMqEndpointConfiguration
     {
-        public RabbitMqEndpointConfiguration()
-            : base(CreateConsume(), CreateSend(GlobalTopology.Send), CreatePublish(GlobalTopology.Publish))
+        public RabbitMqEndpointConfiguration(IMessageTopology messageTopology)
+            : base(messageTopology, CreateConsume(messageTopology), CreateSend(GlobalTopology.Send), CreatePublish(messageTopology, GlobalTopology.Publish))
         {
         }
 
-        public RabbitMqEndpointConfiguration(IRabbitMqConsumeTopologyConfigurator consumeTopology, IRabbitMqSendTopologyConfigurator sendTopology,
+        public RabbitMqEndpointConfiguration(IMessageTopology messageTopology, IRabbitMqConsumeTopologyConfigurator consumeTopology, IRabbitMqSendTopologyConfigurator sendTopology,
             IRabbitMqPublishTopologyConfigurator publishTopology)
-            : base(consumeTopology, sendTopology, publishTopology)
+            : base(messageTopology, consumeTopology, sendTopology, publishTopology)
         {
         }
 
-        public RabbitMqEndpointConfiguration(IRabbitMqConsumeTopologyConfigurator consumeTopology, IRabbitMqSendTopologyConfigurator sendTopology,
+        public RabbitMqEndpointConfiguration(IMessageTopology messageTopology, IRabbitMqConsumeTopologyConfigurator consumeTopology, IRabbitMqSendTopologyConfigurator sendTopology,
             IRabbitMqPublishTopologyConfigurator publishTopology, IRabbitMqEndpointConfiguration configuration, IConsumePipe consumePipe = null)
-            : base(consumeTopology, sendTopology, publishTopology, configuration, consumePipe)
+            : base(messageTopology, consumeTopology, sendTopology, publishTopology, configuration, consumePipe)
         {
         }
 
-        static IRabbitMqConsumeTopologyConfigurator CreateConsume()
+        static IRabbitMqConsumeTopologyConfigurator CreateConsume(IMessageTopology messageTopology)
         {
-            var messageNameFormatter = new RabbitMqMessageNameFormatter();
-            var entityNameFormatter = new MessageNameFormatterEntityNameFormatter(messageNameFormatter);
-            var consumeTopology = new RabbitMqConsumeTopology(entityNameFormatter);
+            var consumeTopology = new RabbitMqConsumeTopology(messageTopology);
 
             return consumeTopology;
         }
@@ -59,11 +57,9 @@ namespace MassTransit.RabbitMqTransport.Specifications
             return sendTopology;
         }
 
-        static IRabbitMqPublishTopologyConfigurator CreatePublish(IPublishTopology delegatePublishTopology)
+        static IRabbitMqPublishTopologyConfigurator CreatePublish(IMessageTopology messageTopology, IPublishTopology delegatePublishTopology)
         {
-            var messageNameFormatter = new RabbitMqMessageNameFormatter();
-            var entityNameFormatter = new MessageNameFormatterEntityNameFormatter(messageNameFormatter);
-            var publishTopology = new RabbitMqPublishTopology(entityNameFormatter);
+            var publishTopology = new RabbitMqPublishTopology(messageTopology);
 
             var observer = new DelegatePublishTopologyConfigurationObserver(delegatePublishTopology);
             publishTopology.Connect(observer);
@@ -73,7 +69,8 @@ namespace MassTransit.RabbitMqTransport.Specifications
 
         public override IRabbitMqEndpointConfiguration CreateConfiguration(IConsumePipe consumePipe = null)
         {
-            return new RabbitMqEndpointConfiguration(CreateConsume(), CreateSend(SendTopology), CreatePublish(PublishTopology), this, consumePipe);
+            return new RabbitMqEndpointConfiguration(MessageTopology, CreateConsume(MessageTopology), CreateSend(SendTopology), CreatePublish(MessageTopology, PublishTopology),
+                this, consumePipe);
         }
     }
 }

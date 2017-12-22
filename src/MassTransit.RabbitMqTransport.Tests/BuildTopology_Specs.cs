@@ -90,7 +90,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _nameFormatter = new RabbitMqMessageNameFormatter();
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
-            _consumeTopology = new RabbitMqConsumeTopology(_entityNameFormatter);
+            _consumeTopology = new RabbitMqConsumeTopology(RabbitMqBusFactory.MessageTopology);
 
             _builder = new ReceiveEndpointConsumeTopologyBuilder();
 
@@ -151,7 +151,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _nameFormatter = new RabbitMqMessageNameFormatter();
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
-            _publishTopology = new RabbitMqPublishTopology(_entityNameFormatter);
+            _publishTopology = new RabbitMqPublishTopology(RabbitMqBusFactory.MessageTopology);
 
             _builder = new PublishEndpointTopologyBuilder();
         }
@@ -229,7 +229,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _nameFormatter = new RabbitMqMessageNameFormatter();
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
-            _publishTopology = new RabbitMqPublishTopology(_entityNameFormatter);
+            _publishTopology = new RabbitMqPublishTopology(RabbitMqBusFactory.MessageTopology);
 
             _builder = new PublishEndpointTopologyBuilder(PublishEndpointTopologyBuilder.Options.MaintainHierarchy);
         }

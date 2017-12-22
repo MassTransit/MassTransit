@@ -18,8 +18,6 @@ namespace MassTransit.Topology
     public interface IPublishTopology :
         IConnectPublishTopologyConfigurationObserver
     {
-        IEntityNameFormatter EntityNameFormatter { get; }
-
         /// <summary>
         /// Returns the specification for the message type
         /// </summary>

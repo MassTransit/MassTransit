@@ -33,15 +33,15 @@ namespace MassTransit.Topology
         IGlobalTopology
     {
         readonly IPublishTopologyConfigurator _publish;
-        readonly ISendTopologyConfigurator _send;
         readonly ConnectHandle _publishToSendHandle;
+        readonly ISendTopologyConfigurator _send;
 
         GlobalTopology()
         {
             _send = new SendTopology();
             _send.AddConvention(new CorrelationIdSendTopologyConvention());
 
-            _publish = new PublishTopology(new MessageUrnEntityNameFormatter());
+            _publish = new PublishTopology();
 
             var observer = new PublishToSendTopologyConfigurationObserver(_send);
             _publishToSendHandle = _publish.Connect(observer);

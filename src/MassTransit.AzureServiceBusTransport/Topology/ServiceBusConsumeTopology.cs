@@ -15,7 +15,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology
     using System;
     using System.Collections.Generic;
     using Builders;
-    using Configurators;
     using MassTransit.Topology;
     using MassTransit.Topology.Configuration;
 
@@ -24,11 +23,12 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         ConsumeTopology,
         IServiceBusConsumeTopologyConfigurator
     {
+        readonly IMessageTopology _messageTopology;
         readonly IList<IServiceBusConsumeTopologySpecification> _specifications;
 
-        public ServiceBusConsumeTopology(IEntityNameFormatter entityNameFormatter)
-            : base(entityNameFormatter)
+        public ServiceBusConsumeTopology(IMessageTopology messageTopology)
         {
+            _messageTopology = messageTopology;
             _specifications = new List<IServiceBusConsumeTopologySpecification>();
         }
 
@@ -42,32 +42,14 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         public void Apply(IReceiveEndpointConsumeTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
-            {
                 specification.Apply(builder);
-            }
 
             ForEach<IServiceBusMessageConsumeTopologyConfigurator>(x => x.Apply(builder));
         }
 
-        public void Subscribe(string topicPath, string subscriptionName, Action<ISubscriptionConfigurator> configure = null)
-        {
-            var topicConfigurator = new TopicConfigurator(topicPath);
-
-            var subscriptionConfigurator = new SubscriptionConfigurator(topicPath, subscriptionName);
-
-            configure?.Invoke(subscriptionConfigurator);
-
-            var specification = new SubscriptionConsumeTopologySpecification(topicConfigurator.GetTopicDescription(),
-                subscriptionConfigurator.GetSubscriptionDescription());
-
-            _specifications.Add(specification);
-        }
-
         protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var entityNameFormatter = new MessageEntityNameFormatter<T>(EntityNameFormatter);
-
-            var messageTopology = new ServiceBusMessageConsumeTopology<T>(entityNameFormatter);
+            var messageTopology = new ServiceBusMessageConsumeTopology<T>(_messageTopology.GetMessageTopology<T>());
 
             OnMessageTopologyCreated(messageTopology);
 

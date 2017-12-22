@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory.Topology
 {
-    using System;
     using System.Collections.Generic;
     using Builders;
     using MassTransit.Topology;
@@ -26,31 +25,22 @@ namespace MassTransit.Transports.InMemory.Topology
         IInMemoryMessageConsumeTopologyConfigurator
         where TMessage : class
     {
+        readonly IMessageTopology<TMessage> _messageTopology;
         readonly IList<IInMemoryConsumeTopologySpecification> _specifications;
 
-        public InMemoryMessageConsumeTopology(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
-            : base(entityNameFormatter)
+        public InMemoryMessageConsumeTopology(IMessageTopology<TMessage> messageTopology)
+            : base()
         {
+            _messageTopology = messageTopology;
             _specifications = new List<IInMemoryConsumeTopologySpecification>();
         }
 
         bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
 
-        IInMemoryMessageConsumeTopologyConfigurator<T> IInMemoryMessageConsumeTopologyConfigurator.GetMessageTopology<T>()
-        {
-            var result = this as IInMemoryMessageConsumeTopologyConfigurator<T>;
-            if (result == null)
-                throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
-
-            return result;
-        }
-
         public void Apply(IInMemoryConsumeTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
-            {
                 specification.Apply(builder);
-            }
         }
 
         public void Bind()
@@ -61,9 +51,7 @@ namespace MassTransit.Transports.InMemory.Topology
                 return;
             }
 
-            var exchangeName = EntityNameFormatter.FormatEntityName();
-
-            var specification = new ExchangeBindingConsumeTopologySpecification(exchangeName);
+            var specification = new ExchangeBindingConsumeTopologySpecification(_messageTopology.EntityName);
 
             _specifications.Add(specification);
         }

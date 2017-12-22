@@ -27,12 +27,12 @@ namespace MassTransit.RabbitMqTransport.Topology
         IRabbitMqMessageConsumeTopologyConfigurator
         where TMessage : class
     {
+        readonly IMessageTopology<TMessage> _messageTopology;
         readonly IList<IRabbitMqConsumeTopologySpecification> _specifications;
 
-        public RabbitMqMessageConsumeTopology(IMessageEntityNameFormatter<TMessage> entityNameFormatter,
-            IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector)
-            : base(entityNameFormatter)
+        public RabbitMqMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector)
         {
+            _messageTopology = messageTopology;
             ExchangeTypeSelector = exchangeTypeSelector;
 
             _specifications = new List<IRabbitMqConsumeTopologySpecification>();
@@ -41,12 +41,6 @@ namespace MassTransit.RabbitMqTransport.Topology
         IMessageExchangeTypeSelector<TMessage> ExchangeTypeSelector { get; }
 
         bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
-
-        IRabbitMqMessageConsumeTopologyConfigurator<T> IRabbitMqMessageConsumeTopologyConfigurator.GetMessageTopology<T>()
-        {
-            return this as IRabbitMqMessageConsumeTopologyConfigurator<T>
-                ?? throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
-        }
 
         public void Apply(IRabbitMqConsumeTopologyBuilder builder)
         {
@@ -64,7 +58,7 @@ namespace MassTransit.RabbitMqTransport.Topology
                 return;
             }
 
-            var exchangeName = EntityNameFormatter.FormatEntityName();
+            var exchangeName = _messageTopology.EntityName;
             var exchangeType = ExchangeTypeSelector.GetExchangeType(exchangeName);
 
             var temporary = TypeMetadataCache<TMessage>.IsTemporaryMessageType;

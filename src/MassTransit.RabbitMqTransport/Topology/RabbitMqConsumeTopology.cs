@@ -27,11 +27,13 @@ namespace MassTransit.RabbitMqTransport.Topology
         ConsumeTopology,
         IRabbitMqConsumeTopologyConfigurator
     {
+        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
+        readonly IMessageTopology _messageTopology;
         readonly IList<IRabbitMqConsumeTopologySpecification> _specifications;
 
-        public RabbitMqConsumeTopology(IEntityNameFormatter entityNameFormatter)
-            : base(entityNameFormatter)
+        public RabbitMqConsumeTopology(IMessageTopology messageTopology)
         {
+            _messageTopology = messageTopology;
             ExchangeTypeSelector = new FanoutExchangeTypeSelector();
 
             _specifications = new List<IRabbitMqConsumeTopologySpecification>();
@@ -49,9 +51,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         public void Apply(IRabbitMqConsumeTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
-            {
                 specification.Apply(builder);
-            }
 
             ForEach<IRabbitMqMessageConsumeTopologyConfigurator>(x => x.Apply(builder));
         }
@@ -60,28 +60,13 @@ namespace MassTransit.RabbitMqTransport.Topology
         {
             var exchangeType = ExchangeTypeSelector.DefaultExchangeType;
 
-            var autoDelete = false;
-            var durable = true;
-
-            var binding = new ExchangeBindingConfigurator(exchangeName, exchangeType, durable, autoDelete, "");
+            var binding = new ExchangeBindingConfigurator(exchangeName, exchangeType, true, false, "");
 
             configure?.Invoke(binding);
 
             var specification = new ExchangeBindingConsumeTopologySpecification(binding);
 
             _specifications.Add(specification);
-        }
-
-        protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
-        {
-            var entityNameFormatter = new MessageEntityNameFormatter<T>(EntityNameFormatter);
-            var exchangeTypeSelector = new MessageExchangeTypeSelector<T>(ExchangeTypeSelector);
-
-            var messageTopology = new RabbitMqMessageConsumeTopology<T>(entityNameFormatter, exchangeTypeSelector);
-
-            OnMessageTopologyCreated(messageTopology);
-
-            return messageTopology;
         }
 
         public string CreateTemporaryQueueName(string prefix)
@@ -91,26 +76,31 @@ namespace MassTransit.RabbitMqTransport.Topology
             var host = HostMetadataCache.Host;
 
             foreach (var c in host.MachineName)
-            {
                 if (char.IsLetterOrDigit(c))
                     sb.Append(c);
                 else if (c == '.' || c == '_' || c == '-' || c == ':')
                     sb.Append(c);
-            }
             sb.Append('-');
             foreach (var c in host.ProcessName)
-            {
                 if (char.IsLetterOrDigit(c))
                     sb.Append(c);
                 else if (c == '.' || c == '_' || c == '-' || c == ':')
                     sb.Append(c);
-            }
             sb.Append('-');
             sb.Append(NewId.Next().ToString(_formatter));
 
             return sb.ToString();
         }
 
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
+        protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
+        {
+            var exchangeTypeSelector = new MessageExchangeTypeSelector<T>(ExchangeTypeSelector);
+
+            var messageTopology = new RabbitMqMessageConsumeTopology<T>(_messageTopology.GetMessageTopology<T>(), exchangeTypeSelector);
+
+            OnMessageTopologyCreated(messageTopology);
+
+            return messageTopology;
+        }
     }
 }

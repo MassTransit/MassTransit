@@ -22,9 +22,11 @@ namespace MassTransit.RabbitMqTransport.Topology
         PublishTopology,
         IRabbitMqPublishTopologyConfigurator
     {
-        public RabbitMqPublishTopology(IEntityNameFormatter entityNameFormatter)
-            : base(entityNameFormatter)
+        readonly IMessageTopology _messageTopology;
+
+        public RabbitMqPublishTopology(IMessageTopology messageTopology)
         {
+            _messageTopology = messageTopology;
             ExchangeTypeSelector = new FanoutExchangeTypeSelector();
         }
 
@@ -37,10 +39,9 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var entityNameFormatter = new MessageEntityNameFormatter<T>(EntityNameFormatter);
             var exchangeTypeSelector = new MessageExchangeTypeSelector<T>(ExchangeTypeSelector);
 
-            var messageTopology = new RabbitMqMessagePublishTopology<T>(entityNameFormatter, exchangeTypeSelector);
+            var messageTopology = new RabbitMqMessagePublishTopology<T>(_messageTopology.GetMessageTopology<T>(), exchangeTypeSelector);
 
             var connector = new ImplementedMessageTypeConnector<T>(this, messageTopology);
 

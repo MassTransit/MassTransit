@@ -23,36 +23,29 @@ namespace MassTransit.AzureServiceBusTransport.Specifications
         EndpointConfiguration<IServiceBusEndpointConfiguration, IServiceBusConsumeTopologyConfigurator, IServiceBusSendTopologyConfigurator, IServiceBusPublishTopologyConfigurator>,
         IServiceBusEndpointConfiguration
     {
-        public ServiceBusEndpointConfiguration()
-            : this(CreateConsume(), CreateSend(GlobalTopology.Send), CreatePublish(GlobalTopology.Publish))
+        public ServiceBusEndpointConfiguration(IMessageTopology messageTopology)
+            : this(messageTopology, CreateConsume(messageTopology), CreateSend(GlobalTopology.Send), CreatePublish(messageTopology, GlobalTopology.Publish))
         {
         }
 
-        public ServiceBusEndpointConfiguration(IServiceBusConsumeTopologyConfigurator consumeTopology, IServiceBusSendTopologyConfigurator sendTopology,
+        public ServiceBusEndpointConfiguration(IMessageTopology messageTopology, IServiceBusConsumeTopologyConfigurator consumeTopology,
+            IServiceBusSendTopologyConfigurator sendTopology,
             IServiceBusPublishTopologyConfigurator publishTopology)
-            : base(consumeTopology, sendTopology, publishTopology)
+            : base(messageTopology, consumeTopology, sendTopology, publishTopology)
         {
         }
 
-        public ServiceBusEndpointConfiguration(IServiceBusConsumeTopologyConfigurator consumeTopology, IServiceBusSendTopologyConfigurator sendTopology,
+        public ServiceBusEndpointConfiguration(IMessageTopology messageTopology, IServiceBusConsumeTopologyConfigurator consumeTopology,
+            IServiceBusSendTopologyConfigurator sendTopology,
             IServiceBusPublishTopologyConfigurator publishTopology,
             IServiceBusEndpointConfiguration configuration, IConsumePipe consumePipe = null)
-            : base(consumeTopology, sendTopology, publishTopology, configuration, consumePipe)
+            : base(messageTopology, consumeTopology, sendTopology, publishTopology, configuration, consumePipe)
         {
         }
 
-        static readonly ServiceBusMessageNameFormatter _messageNameFormatter;
-        static readonly MessageNameFormatterEntityNameFormatter _entityNameFormatter;
-
-        static ServiceBusEndpointConfiguration()
+        static IServiceBusConsumeTopologyConfigurator CreateConsume(IMessageTopology messageTopology)
         {
-            _messageNameFormatter = new ServiceBusMessageNameFormatter();
-            _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_messageNameFormatter);
-        }
-
-        static IServiceBusConsumeTopologyConfigurator CreateConsume()
-        {
-            return new ServiceBusConsumeTopology(_entityNameFormatter);
+            return new ServiceBusConsumeTopology(messageTopology);
         }
 
         static IServiceBusSendTopologyConfigurator CreateSend(ISendTopology delegateSendTopology)
@@ -65,9 +58,9 @@ namespace MassTransit.AzureServiceBusTransport.Specifications
             return sendTopology;
         }
 
-        static IServiceBusPublishTopologyConfigurator CreatePublish(IPublishTopology delegatePublishTopology)
+        static IServiceBusPublishTopologyConfigurator CreatePublish(IMessageTopology messageTopology, IPublishTopology delegatePublishTopology)
         {
-            var publishTopology = new ServiceBusPublishTopology(_entityNameFormatter);
+            var publishTopology = new ServiceBusPublishTopology(messageTopology);
 
             var observer = new DelegatePublishTopologyConfigurationObserver(delegatePublishTopology);
             publishTopology.Connect(observer);
@@ -77,7 +70,8 @@ namespace MassTransit.AzureServiceBusTransport.Specifications
 
         public override IServiceBusEndpointConfiguration CreateConfiguration(IConsumePipe consumePipe = null)
         {
-            return new ServiceBusEndpointConfiguration(CreateConsume(), CreateSend(SendTopology), CreatePublish(PublishTopology), this, consumePipe);
+            return new ServiceBusEndpointConfiguration(MessageTopology, CreateConsume(MessageTopology), CreateSend(SendTopology), CreatePublish(MessageTopology, PublishTopology),
+                this, consumePipe);
         }
     }
 }

@@ -32,9 +32,6 @@ namespace MassTransit.RabbitMqTransport.Topology
     public interface IRabbitMqMessageConsumeTopologyConfigurator :
         IMessageConsumeTopologyConfigurator
     {
-        new IRabbitMqMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
-            where T : class;
-
         /// <summary>
         /// Apply the message topology to the builder
         /// </summary>

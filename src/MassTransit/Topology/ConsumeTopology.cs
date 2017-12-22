@@ -18,6 +18,7 @@ namespace MassTransit.Topology
     using System.Linq;
     using Configuration;
     using GreenPipes;
+    using Observers;
     using Util;
 
 
@@ -30,13 +31,8 @@ namespace MassTransit.Topology
         readonly ConcurrentDictionary<Type, IMessageConsumeTopologyConfigurator> _messageConfigurators;
         readonly ConsumeTopologyConfigurationObservable _observers;
 
-        public ConsumeTopology(IEntityNameFormatter entityNameFormatter)
+        public ConsumeTopology()
         {
-            if (entityNameFormatter == null)
-                throw new ArgumentNullException(nameof(entityNameFormatter));
-
-            EntityNameFormatter = entityNameFormatter;
-
             _messageConfigurators = new ConcurrentDictionary<Type, IMessageConsumeTopologyConfigurator>();
 
             _observers = new ConsumeTopologyConfigurationObservable();
@@ -50,8 +46,6 @@ namespace MassTransit.Topology
             ApplyConventionsToMessageTopology(messageTopology);
         }
 
-        public IEntityNameFormatter EntityNameFormatter { get; }
-
         public IMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class
         {
@@ -60,7 +54,7 @@ namespace MassTransit.Topology
 
             var specification = _messageConfigurators.GetOrAdd(typeof(T), CreateMessageTopology<T>);
 
-            return specification.GetMessageTopology<T>();
+            return specification as IMessageConsumeTopologyConfigurator<T>;
         }
 
         public ConnectHandle Connect(IConsumeTopologyConfigurationObserver observer)
@@ -87,7 +81,9 @@ namespace MassTransit.Topology
         {
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
+            {
                 configurators = _messageConfigurators.Values.ToArray();
+            }
 
             if (configurators.Length == 0)
                 return true;
@@ -103,7 +99,9 @@ namespace MassTransit.Topology
         {
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
+            {
                 configurators = _messageConfigurators.Values.ToArray();
+            }
 
             if (configurators.Length == 0)
                 return Enumerable.Empty<TResult>();
@@ -119,7 +117,9 @@ namespace MassTransit.Topology
         {
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
+            {
                 configurators = _messageConfigurators.Values.ToArray();
+            }
 
             switch (configurators.Length)
             {
@@ -138,7 +138,7 @@ namespace MassTransit.Topology
         protected virtual IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
             where T : class
         {
-            var messageTopology = new MessageConsumeTopology<T>(new MessageEntityNameFormatter<T>(EntityNameFormatter));
+            var messageTopology = new MessageConsumeTopology<T>();
 
             OnMessageTopologyCreated(messageTopology);
             return messageTopology;
@@ -155,12 +155,13 @@ namespace MassTransit.Topology
         {
             IMessageConsumeTopologyConvention[] conventions;
             lock (_lock)
+            {
                 conventions = _conventions.ToArray();
+            }
 
             foreach (var convention in conventions)
             {
-                IMessageConsumeTopologyConvention<T> messageConsumeTopologyConvention;
-                if (convention.TryGetMessageConsumeTopologyConvention(out messageConsumeTopologyConvention))
+                if (convention.TryGetMessageConsumeTopologyConvention(out IMessageConsumeTopologyConvention<T> messageConsumeTopologyConvention))
                     messageTopology.AddConvention(messageConsumeTopologyConvention);
             }
         }

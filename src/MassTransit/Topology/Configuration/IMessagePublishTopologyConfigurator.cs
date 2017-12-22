@@ -21,6 +21,7 @@ namespace MassTransit.Topology.Configuration
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
     public interface IMessagePublishTopologyConfigurator<TMessage> :
+        IMessagePublishTopologyConfigurator,
         IImplementedMessagePublishTopologyConfigurator<TMessage>,
         IMessagePublishTopology<TMessage>
         where TMessage : class
@@ -50,24 +51,10 @@ namespace MassTransit.Topology.Configuration
         /// <returns></returns>
         void AddOrUpdateConvention<TConvention>(Func<TConvention> add, Func<TConvention, TConvention> update)
             where TConvention : class, IMessagePublishTopologyConvention<TMessage>;
-
-        /// <summary>
-        /// Sets the entity name formatter used for this message type
-        /// </summary>
-        /// <param name="entityNameFormatter"></param>
-        void SetEntityNameFormatter(IMessageEntityNameFormatter<TMessage> entityNameFormatter);
-
-        /// <summary>
-        /// Sets the entity name for this message type
-        /// </summary>
-        /// <param name="entityName">The entity name</param>
-        void SetEntityName(string entityName);
     }
 
 
     public interface IMessagePublishTopologyConfigurator
     {
-        IMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
-            where T : class;
     }
 }

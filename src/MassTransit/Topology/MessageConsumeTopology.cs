@@ -15,41 +15,26 @@ namespace MassTransit.Topology
     using System;
     using System.Collections.Generic;
     using Configuration;
-    using Util;
 
 
     public class MessageConsumeTopology<TMessage> :
-        IMessageConsumeTopologyConfigurator<TMessage>,
-        IMessageConsumeTopologyConfigurator
+        IMessageConsumeTopologyConfigurator<TMessage>
         where TMessage : class
     {
         readonly IList<IMessageConsumeTopologyConvention<TMessage>> _conventions;
         readonly IList<IMessageConsumeTopology<TMessage>> _delegateConfigurations;
         readonly IList<IMessageConsumeTopology<TMessage>> _topologies;
 
-        public MessageConsumeTopology(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
+        public MessageConsumeTopology()
         {
-            if (entityNameFormatter == null)
-                throw new ArgumentNullException(nameof(entityNameFormatter));
-
-            EntityNameFormatter = entityNameFormatter;
             _conventions = new List<IMessageConsumeTopologyConvention<TMessage>>();
             _topologies = new List<IMessageConsumeTopology<TMessage>>();
             _delegateConfigurations = new List<IMessageConsumeTopology<TMessage>>();
         }
 
-        IMessageConsumeTopologyConfigurator<T> IMessageConsumeTopologyConfigurator.GetMessageTopology<T>()
+        public void Add(IMessageConsumeTopology<TMessage> consumeTopology)
         {
-            var result = this as IMessageConsumeTopologyConfigurator<T>;
-            if (result == null)
-                throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
-
-            return result;
-        }
-
-        public void Add(IMessageConsumeTopology<TMessage> ConsumeTopology)
-        {
-            _topologies.Add(ConsumeTopology);
+            _topologies.Add(consumeTopology);
         }
 
         public void AddDelegate(IMessageConsumeTopology<TMessage> configuration)
@@ -62,9 +47,7 @@ namespace MassTransit.Topology
             ITopologyPipeBuilder<ConsumeContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
             foreach (IMessageConsumeTopology<TMessage> topology in _delegateConfigurations)
-            {
                 topology.Apply(delegatedBuilder);
-            }
 
             foreach (IMessageConsumeTopologyConvention<TMessage> convention in _conventions)
             {
@@ -74,12 +57,8 @@ namespace MassTransit.Topology
             }
 
             foreach (IMessageConsumeTopology<TMessage> topology in _topologies)
-            {
                 topology.Apply(builder);
-            }
         }
-
-        public IMessageEntityNameFormatter<TMessage> EntityNameFormatter { get; private set; }
 
         public void AddConvention(IMessageConsumeTopologyConvention<TMessage> convention)
         {

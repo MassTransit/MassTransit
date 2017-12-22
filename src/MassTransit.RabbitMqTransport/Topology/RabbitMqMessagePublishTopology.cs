@@ -24,11 +24,11 @@ namespace MassTransit.RabbitMqTransport.Topology
         where TMessage : class
     {
         readonly IList<IRabbitMqImplementedMessagePublishTopologyConfigurator<TMessage>> _implementedMessageTypes;
+        readonly IMessageTopology<TMessage> _messageTopology;
 
-        public RabbitMqMessagePublishTopology(IMessageEntityNameFormatter<TMessage> entityNameFormatter,
-            IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector)
-            : base(entityNameFormatter)
+        public RabbitMqMessagePublishTopology(IMessageTopology<TMessage> messageTopology, IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector)
         {
+            _messageTopology = messageTopology;
             ExchangeTypeSelector = exchangeTypeSelector;
 
             _implementedMessageTypes = new List<IRabbitMqImplementedMessagePublishTopologyConfigurator<TMessage>>();
@@ -45,25 +45,19 @@ namespace MassTransit.RabbitMqTransport.Topology
             var exchangeHandle = ExchangeDeclare(builder);
 
             if (builder.Exchange != null)
-            {
                 builder.ExchangeBind(builder.Exchange, exchangeHandle, "", new Dictionary<string, object>());
-            }
             else
-            {
                 builder.Exchange = exchangeHandle;
-            }
 
             foreach (IRabbitMqImplementedMessagePublishTopologyConfigurator<TMessage> configurator in _implementedMessageTypes)
-            {
                 configurator.Apply(builder);
-            }
         }
 
         public IMessageExchangeTypeSelector<TMessage> ExchangeTypeSelector { get; }
 
         public override bool TryGetPublishAddress(Uri baseAddress, TMessage message, out Uri publishAddress)
         {
-            var exchangeName = EntityNameFormatter.FormatEntityName();
+            var exchangeName = _messageTopology.EntityName;
             var exchangeType = ExchangeTypeSelector.GetExchangeType(exchangeName);
 
             var sendSettings = GetSendSettings(exchangeName, exchangeType);
@@ -74,7 +68,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public SendSettings GetSendSettings()
         {
-            var exchangeName = EntityNameFormatter.FormatEntityName();
+            var exchangeName = _messageTopology.EntityName;
             var exchangeType = ExchangeTypeSelector.GetExchangeType(exchangeName);
 
             return GetSendSettings(exchangeName, exchangeType);
@@ -82,7 +76,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         ExchangeHandle ExchangeDeclare(IRabbitMqTopologyBuilder builder)
         {
-            var exchangeName = EntityNameFormatter.FormatEntityName();
+            var exchangeName = _messageTopology.EntityName;
             var exchangeType = ExchangeTypeSelector.GetExchangeType(exchangeName);
 
             var temporary = TypeMetadataCache<TMessage>.IsTemporaryMessageType;

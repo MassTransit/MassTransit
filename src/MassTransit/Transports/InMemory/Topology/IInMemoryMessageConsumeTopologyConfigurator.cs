@@ -19,9 +19,6 @@
     public interface IInMemoryMessageConsumeTopologyConfigurator :
         IMessageConsumeTopologyConfigurator
     {
-        new IInMemoryMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
-            where T : class;
-
         /// <summary>
         /// Apply the message topology to the builder
         /// </summary>

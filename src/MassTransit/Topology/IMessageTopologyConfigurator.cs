@@ -12,13 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology
 {
-    public interface IHostTopology
+    public interface IMessageTopologyConfigurator<TMessage> :
+        IMessageTopologyConfigurator,
+        IMessageTopology<TMessage>
+        where TMessage : class
     {
         /// <summary>
-        /// Returns a unique temporary queue name for the host/topology.
+        /// Sets the entity name formatter used for this message type
         /// </summary>
-        /// <param name="prefix">A prefix to distinguish the queue for the purpose</param>
-        /// <returns></returns>
-        string CreateTemporaryQueueName(string prefix);
+        /// <param name="entityNameFormatter"></param>
+        void SetEntityNameFormatter(IMessageEntityNameFormatter<TMessage> entityNameFormatter);
+
+        /// <summary>
+        /// Sets the entity name for this message type
+        /// </summary>
+        /// <param name="entityName">The entity name</param>
+        void SetEntityName(string entityName);
+    }
+
+
+    public interface IMessageTopologyConfigurator
+    {
     }
 }

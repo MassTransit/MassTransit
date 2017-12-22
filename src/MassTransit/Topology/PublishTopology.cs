@@ -27,18 +27,12 @@ namespace MassTransit.Topology
         IPublishTopologyConfigurationObserver
     {
         readonly IList<IMessagePublishTopologyConvention> _conventions;
-        readonly IEntityNameFormatter _entityNameFormatter;
         readonly object _lock = new object();
         readonly ConcurrentDictionary<Type, IMessagePublishTopologyConfigurator> _messageSpecifications;
         readonly PublishTopologyConfigurationObservable _observers;
 
-        public PublishTopology(IEntityNameFormatter entityNameFormatter)
+        public PublishTopology()
         {
-            if (entityNameFormatter == null)
-                throw new ArgumentNullException(nameof(entityNameFormatter));
-
-            _entityNameFormatter = entityNameFormatter;
-
             _messageSpecifications = new ConcurrentDictionary<Type, IMessagePublishTopologyConfigurator>();
 
             _observers = new PublishTopologyConfigurationObservable();
@@ -52,8 +46,6 @@ namespace MassTransit.Topology
             ApplyConventionsToMessageTopology(configurator);
         }
 
-        public IEntityNameFormatter EntityNameFormatter => _entityNameFormatter;
-
         public IMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class
         {
@@ -62,7 +54,7 @@ namespace MassTransit.Topology
 
             var specification = _messageSpecifications.GetOrAdd(typeof(T), CreateMessageTopology<T>);
 
-            return specification.GetMessageTopology<T>();
+            return specification as IMessagePublishTopologyConfigurator<T>;
         }
 
         public ConnectHandle Connect(IPublishTopologyConfigurationObserver observer)
@@ -88,7 +80,7 @@ namespace MassTransit.Topology
         protected virtual IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
             where T : class
         {
-            var messageTopology = new MessagePublishTopology<T>(new MessageEntityNameFormatter<T>(_entityNameFormatter));
+            var messageTopology = new MessagePublishTopology<T>();
 
             var connector = new ImplementedMessageTypeConnector<T>(this, messageTopology);
 
@@ -110,14 +102,13 @@ namespace MassTransit.Topology
         {
             IMessagePublishTopologyConvention[] conventions;
             lock (_lock)
+            {
                 conventions = _conventions.ToArray();
+            }
 
             foreach (var convention in conventions)
-            {
-                IMessagePublishTopologyConvention<T> messagePublishTopologyConvention;
-                if (convention.TryGetMessagePublishTopologyConvention(out messagePublishTopologyConvention))
+                if (convention.TryGetMessagePublishTopologyConvention(out IMessagePublishTopologyConvention<T> messagePublishTopologyConvention))
                     messageTopology.AddConvention(messagePublishTopologyConvention);
-            }
         }
 
 

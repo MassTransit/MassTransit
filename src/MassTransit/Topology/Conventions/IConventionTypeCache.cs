@@ -12,8 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology.Conventions
 {
-    public interface IConventionTypeCache<in TValue>
-        where TValue : class
+    /// <summary>
+    /// A convention cache for type specified, which converts to the generic type requested
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IConventionTypeCache<in T>
+        where T : class
     {
         /// <summary>
         /// Returns the cached item for the specified type key, creating a new value
@@ -24,6 +28,6 @@ namespace MassTransit.Topology.Conventions
         /// <returns></returns>
         TResult GetOrAdd<TKey, TResult>()
             where TKey : class
-            where TResult : class, TValue;
+            where TResult : class, T;
     }
 }

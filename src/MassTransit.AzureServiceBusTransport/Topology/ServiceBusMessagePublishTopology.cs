@@ -23,9 +23,11 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         IServiceBusMessagePublishTopologyConfigurator
         where TMessage : class
     {
-        public ServiceBusMessagePublishTopology(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
-            : base(entityNameFormatter)
+        readonly IMessageTopology<TMessage> _messageTopology;
+
+        public ServiceBusMessagePublishTopology(IMessageTopology<TMessage> messageTopology)
         {
+            _messageTopology = messageTopology;
         }
 
         IServiceBusMessagePublishTopologyConfigurator<T> IServiceBusMessagePublishTopologyConfigurator.GetMessageTopology<T>()
@@ -36,7 +38,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
         public override bool TryGetPublishAddress(Uri baseAddress, TMessage message, out Uri publishAddress)
         {
-            var entityName = EntityNameFormatter.FormatEntityName();
+            var entityName = _messageTopology.EntityName;
 
             var builder = new UriBuilder(baseAddress)
             {

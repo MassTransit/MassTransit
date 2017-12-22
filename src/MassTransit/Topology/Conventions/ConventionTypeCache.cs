@@ -23,7 +23,6 @@ namespace MassTransit.Topology.Conventions
         where TValue : class
     {
         readonly ConcurrentDictionary<Type, Cached> _dictionary;
-        readonly Type _genericType;
         readonly IConventionTypeCacheFactory<TValue> _typeFactory;
 
         public ConventionTypeCache(Type genericType, IConventionTypeCacheFactory<TValue> typeFactory)
@@ -43,7 +42,6 @@ namespace MassTransit.Topology.Conventions
                 throw new ArgumentException("The generic type must be assignable to T", nameof(genericType));
 
             _dictionary = new ConcurrentDictionary<Type, Cached>();
-            _genericType = genericType;
             _typeFactory = typeFactory;
         }
 

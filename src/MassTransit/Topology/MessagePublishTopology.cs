@@ -15,44 +15,24 @@ namespace MassTransit.Topology
     using System;
     using System.Collections.Generic;
     using Configuration;
-    using Util;
 
 
     public class MessagePublishTopology<TMessage> :
-        IMessagePublishTopologyConfigurator<TMessage>,
-        IMessagePublishTopologyConfigurator
+        IMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
         readonly IList<IMessagePublishTopologyConvention<TMessage>> _conventions;
-        readonly IMessageEntityNameFormatter<TMessage> _defaultEntityNameFormatter;
         readonly IList<IMessagePublishTopology<TMessage>> _delegateConfigurations;
         readonly IList<IImplementedMessagePublishTopologyConfigurator<TMessage>> _implementedMessageTypes;
         readonly IList<IMessagePublishTopology<TMessage>> _topologies;
 
-        public MessagePublishTopology(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
+        public MessagePublishTopology()
         {
-            if (entityNameFormatter == null)
-                throw new ArgumentNullException(nameof(entityNameFormatter));
-
-            EntityNameFormatter = entityNameFormatter;
-            _defaultEntityNameFormatter = entityNameFormatter;
-
             _conventions = new List<IMessagePublishTopologyConvention<TMessage>>();
             _topologies = new List<IMessagePublishTopology<TMessage>>();
             _delegateConfigurations = new List<IMessagePublishTopology<TMessage>>();
             _implementedMessageTypes = new List<IImplementedMessagePublishTopologyConfigurator<TMessage>>();
         }
-
-        IMessagePublishTopologyConfigurator<T> IMessagePublishTopologyConfigurator.GetMessageTopology<T>()
-        {
-            var result = this as IMessagePublishTopologyConfigurator<T>;
-            if (result == null)
-                throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
-
-            return result;
-        }
-
-        public IMessageEntityNameFormatter<TMessage> EntityNameFormatter { get; private set; }
 
         public void Add(IMessagePublishTopology<TMessage> publishTopology)
         {
@@ -69,9 +49,7 @@ namespace MassTransit.Topology
             ITopologyPipeBuilder<PublishContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
             foreach (IMessagePublishTopology<TMessage> topology in _delegateConfigurations)
-            {
                 topology.Apply(delegatedBuilder);
-            }
 
             foreach (IMessagePublishTopologyConvention<TMessage> convention in _conventions)
             {
@@ -81,9 +59,7 @@ namespace MassTransit.Topology
             }
 
             foreach (IMessagePublishTopology<TMessage> topology in _topologies)
-            {
                 topology.Apply(builder);
-            }
         }
 
         public virtual bool TryGetPublishAddress(Uri baseAddress, TMessage message, out Uri publishAddress)
@@ -114,16 +90,6 @@ namespace MassTransit.Topology
             var addedConvention = add();
             if (addedConvention != null)
                 _conventions.Add(addedConvention);
-        }
-
-        public void SetEntityNameFormatter(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
-        {
-            EntityNameFormatter = entityNameFormatter ?? _defaultEntityNameFormatter;
-        }
-
-        public void SetEntityName(string entityName)
-        {
-            EntityNameFormatter = new StaticEntityNameFormatter<TMessage>(entityName);
         }
 
         public void AddImplementedMessageConfigurator<T>(IMessagePublishTopologyConfigurator<T> configurator)

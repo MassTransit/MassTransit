@@ -21,10 +21,5 @@ namespace MassTransit.Topology
         where TMessage : class
     {
         void Apply(ITopologyPipeBuilder<ConsumeContext<TMessage>> builder);
-
-        /// <summary>
-        /// Used to format the entity name on the broker for the message type
-        /// </summary>
-        IMessageEntityNameFormatter<TMessage> EntityNameFormatter { get; }
     }
 }

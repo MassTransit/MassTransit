@@ -17,6 +17,7 @@ namespace MassTransit.EndpointSpecifications
     using Pipeline;
     using PublishPipeSpecifications;
     using SendPipeSpecifications;
+    using Topology;
     using Topology.Configuration;
 
 
@@ -46,6 +47,7 @@ namespace MassTransit.EndpointSpecifications
         where TPublishTopology : IPublishTopologyConfigurator
         where TSendTopology : ISendTopologyConfigurator
     {
+        IMessageTopology MessageTopology { get; }
         TConsumeTopology ConsumeTopology { get; }
         TSendTopology SendTopology { get; }
         TPublishTopology PublishTopology { get; }

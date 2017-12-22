@@ -13,11 +13,16 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Threading;
     using Configurators;
+    using MassTransit.Topology;
+    using Specifications;
 
 
     public static class AzureBusFactory
     {
+        public static IMessageTopology MessageTopology => Cached.MessageTopologyValue.Value;
+
         /// <summary>
         /// Configure and create a bus for Azure Service Bus (later, we'll use Event Hubs instead)
         /// </summary>
@@ -25,11 +30,25 @@ namespace MassTransit.AzureServiceBusTransport
         /// <returns></returns>
         public static IBusControl CreateUsingServiceBus(Action<IServiceBusBusFactoryConfigurator> configure)
         {
-            var configurator = new ServiceBusBusFactoryConfigurator(new Specifications.ServiceBusEndpointConfiguration());
+            var configurator = new ServiceBusBusFactoryConfigurator(new ServiceBusEndpointConfiguration(MessageTopology));
 
             configure(configurator);
 
             return configurator.Build();
+        }
+
+
+        static class Cached
+        {
+            internal static readonly Lazy<IMessageTopology> MessageTopologyValue = new Lazy<IMessageTopology>(() => new MessageTopology(_entityNameFormatter),
+                LazyThreadSafetyMode.PublicationOnly);
+
+            static readonly IEntityNameFormatter _entityNameFormatter;
+
+            static Cached()
+            {
+                _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(new ServiceBusMessageNameFormatter());
+            }
         }
     }
 }

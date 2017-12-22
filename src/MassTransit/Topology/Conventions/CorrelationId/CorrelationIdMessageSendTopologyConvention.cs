@@ -44,8 +44,7 @@ namespace MassTransit.Topology.Conventions.CorrelationId
         {
             foreach (ICorrelationIdSelector<TMessage> selector in _selectors)
             {
-                ISetCorrelationId<TMessage> setCorrelationId;
-                if (selector.TryGetSetCorrelationId(out setCorrelationId))
+                if (selector.TryGetSetCorrelationId(out ISetCorrelationId<TMessage> setCorrelationId))
                 {
                     messageSendTopology = new SetCorrelationIdMessageSendTopology<TMessage>(setCorrelationId);
                     return true;

@@ -19,8 +19,6 @@ namespace MassTransit.Transports.InMemory.Topology
         IMessagePublishTopologyConfigurator,
         IInMemoryPublishTopologySpecification
     {
-        new IInMemoryMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
-            where T : class;
     }
 
 

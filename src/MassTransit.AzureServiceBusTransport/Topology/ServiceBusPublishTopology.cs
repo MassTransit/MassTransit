@@ -21,9 +21,11 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         PublishTopology,
         IServiceBusPublishTopologyConfigurator
     {
-        public ServiceBusPublishTopology(IEntityNameFormatter entityNameFormatter)
-            : base(entityNameFormatter)
+        readonly IMessageTopology _messageTopology;
+
+        public ServiceBusPublishTopology(IMessageTopology messageTopology)
         {
+            _messageTopology = messageTopology;
         }
 
         IServiceBusMessagePublishTopologyConfigurator<T> IServiceBusPublishTopology.GetMessageTopology<T>()
@@ -33,9 +35,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
         protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var entityNameFormatter = new MessageEntityNameFormatter<T>(EntityNameFormatter);
-
-            var messageTopology = new ServiceBusMessagePublishTopology<T>(entityNameFormatter);
+            var messageTopology = new ServiceBusMessagePublishTopology<T>(_messageTopology.GetMessageTopology<T>());
 
             OnMessageTopologyCreated(messageTopology);
 

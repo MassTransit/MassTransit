@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,22 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology.Configuration
 {
-    using GreenPipes.Util;
+    using GreenPipes;
 
 
-    public class ConsumeTopologyConfigurationObservable :
-        Connectable<IConsumeTopologyConfigurationObserver>,
-        IConsumeTopologyConfigurationObserver
+    public interface IConnectMessageTopologyConfigurationObserver
     {
-        public void MessageTopologyCreated<T>(IMessageConsumeTopologyConfigurator<T> configuration)
-            where T : class
-        {
-            All(observer =>
-            {
-                observer.MessageTopologyCreated(configuration);
-
-                return true;
-            });
-        }
+        ConnectHandle Connect(IMessageTopologyConfigurationObserver observer);
     }
 }

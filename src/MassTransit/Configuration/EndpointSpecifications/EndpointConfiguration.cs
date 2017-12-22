@@ -20,6 +20,7 @@ namespace MassTransit.EndpointSpecifications
     using Pipeline.Pipes;
     using PublishPipeSpecifications;
     using SendPipeSpecifications;
+    using Topology;
     using Topology.Configuration;
     using Topology.Observers;
 
@@ -37,10 +38,11 @@ namespace MassTransit.EndpointSpecifications
         readonly ConnectHandle _publishToSendTopologyHandle;
         readonly SendPipeSpecification _sendPipeSpecification;
 
-        protected EndpointConfiguration(TConsumeTopology consumeTopology, TSendTopology sendTopology, TPublishTopology publishTopology)
+        protected EndpointConfiguration(IMessageTopology messageTopology, TConsumeTopology consumeTopology, TSendTopology sendTopology, TPublishTopology publishTopology)
         {
             _consumePipeSpecification = new ConsumePipeSpecification();
 
+            MessageTopology = messageTopology;
             ConsumeTopology = consumeTopology;
 
             SendTopology = sendTopology;
@@ -57,10 +59,10 @@ namespace MassTransit.EndpointSpecifications
             _publishPipeSpecification.Connect(new TopologyPublishPipeSpecificationObserver(publishTopology));
         }
 
-        protected EndpointConfiguration(TConsumeTopology consumeTopology, TSendTopology sendTopology,
+        protected EndpointConfiguration(IMessageTopology messageTopology, TConsumeTopology consumeTopology, TSendTopology sendTopology,
             TPublishTopology publishTopology,
             TConfiguration parentConfiguration, IConsumePipe consumePipe = null)
-            : this(consumeTopology, sendTopology, publishTopology)
+            : this(messageTopology, consumeTopology, sendTopology, publishTopology)
         {
             _consumePipe = consumePipe;
 
@@ -71,6 +73,7 @@ namespace MassTransit.EndpointSpecifications
             _publishPipeSpecification.Connect(new ParentPublishPipeSpecificationObserver(parentConfiguration.PublishPipeSpecification));
         }
 
+        public IMessageTopology MessageTopology { get; }
         public TPublishTopology PublishTopology { get; }
         public TConsumeTopology ConsumeTopology { get; }
         public TSendTopology SendTopology { get; }

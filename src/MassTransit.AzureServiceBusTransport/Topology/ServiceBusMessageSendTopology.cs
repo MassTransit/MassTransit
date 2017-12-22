@@ -12,24 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology
 {
-    using System;
     using MassTransit.Topology;
-    using Util;
 
 
     public class ServiceBusMessageSendTopology<TMessage> :
         MessageSendTopology<TMessage>,
-        IServiceBusMessageSendTopologyConfigurator<TMessage>,
-        IServiceBusMessageSendTopologyConfigurator
+        IServiceBusMessageSendTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        IServiceBusMessageSendTopologyConfigurator<T> IServiceBusMessageSendTopologyConfigurator.GetMessageTopology<T>()
-        {
-            var result = this as IServiceBusMessageSendTopologyConfigurator<T>;
-            if (result == null)
-                throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
-
-            return result;
-        }
     }
 }
