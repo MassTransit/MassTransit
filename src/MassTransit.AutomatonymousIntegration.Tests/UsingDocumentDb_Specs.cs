@@ -89,7 +89,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        [Test, Explicit]
+        [Test]
         public async Task Should_have_removed_the_state_machine()
         {
             Guid correlationId = Guid.NewGuid();
@@ -111,7 +111,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsFalse(sagaId.HasValue);
         }
 
-        [Test, Explicit]
+        [Test]
         public async Task Should_have_the_state_machine()
         {
             Guid correlationId = Guid.NewGuid();
