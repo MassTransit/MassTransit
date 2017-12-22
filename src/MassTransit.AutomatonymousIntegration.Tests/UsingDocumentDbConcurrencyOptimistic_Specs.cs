@@ -132,7 +132,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        [Test]
+        [Test, Explicit]
         public async Task Should_capture_all_events_single_saga()
         {
             Guid correlationId = Guid.NewGuid();

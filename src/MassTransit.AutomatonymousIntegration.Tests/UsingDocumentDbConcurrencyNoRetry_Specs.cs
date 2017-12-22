@@ -128,7 +128,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsTrue(someNotInFinalState);
         }
 
-        [Test]
+        [Test, Explicit]
         public async Task Should_not_be_in_final_state()
         {
             Guid correlationId = Guid.NewGuid();
