@@ -13,6 +13,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration
 {
     using System;
+    using System.Collections.Generic;
     using Context;
     using GreenPipes;
     using GreenPipes.Payloads;
@@ -27,10 +28,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
         where TSaga : class, ISaga
     {
         readonly IServiceProvider _serviceProvider;
+        readonly IList<Action<ConsumeContext>> _scopeActions;
 
         public DependencyInjectionSagaScopeProvider(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
+            _scopeActions = new List<Action<ConsumeContext>>();
         }
 
         public void Probe(ProbeContext context)
@@ -51,6 +54,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
 
                 var sagaScope = scope;
                 proxy.GetOrAddPayload(() => sagaScope);
+                foreach (Action<ConsumeContext> scopeAction in _scopeActions)
+                    scopeAction(proxy);
 
                 return new CreatedSagaScopeContext<IServiceScope, T>(sagaScope, proxy);
             }
@@ -75,6 +80,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
 
                 var sagaScope = scope;
                 proxy.GetOrAddPayload(() => sagaScope);
+                foreach (Action<ConsumeContext> scopeAction in _scopeActions)
+                    scopeAction(proxy);
 
                 return new CreatedSagaQueryScopeContext<IServiceScope, TSaga, T>(sagaScope, proxy);
             }
@@ -84,6 +91,11 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
 
                 throw;
             }
+        }
+
+        public void AddScopeAction(Action<ConsumeContext> action)
+        {
+            _scopeActions.Add(action);
         }
     }
 }
