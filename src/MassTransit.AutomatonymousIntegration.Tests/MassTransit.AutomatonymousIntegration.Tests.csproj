@@ -22,8 +22,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Automatonymous" Version="3.6.0" />
-    <PackageReference Include="Automatonymous.NHibernate" Version="3.6.0" />
+    <PackageReference Include="Automatonymous" Version="3.6.1" />
+    <PackageReference Include="Automatonymous.NHibernate" Version="3.6.1" />
     <PackageReference Include="Common.Logging" Version="3.3.1" />
     <PackageReference Include="Common.Logging.Core" Version="3.3.1" />
     <PackageReference Include="EntityFramework" Version="6.2.0" />

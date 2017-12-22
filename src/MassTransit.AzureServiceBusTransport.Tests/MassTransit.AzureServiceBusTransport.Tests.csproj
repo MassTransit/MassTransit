@@ -20,7 +20,7 @@
     <NoWarn>1587,1591,1998,3008,3001</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Automatonymous" Version="3.6.0" />
+    <PackageReference Include="Automatonymous" Version="3.6.1" />
     <PackageReference Include="GreenPipes" Version="1.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
     <PackageReference Include="Microsoft.WindowsAzure.ConfigurationManager" Version="3.2.3" />
