@@ -50,6 +50,7 @@ test:
   - src/MassTransit.AutomatonymousIntegration.Tests/bin/Release/net452/MassTransit.AutomatonymousIntegration.Tests.dll
   - src/Persistence/MassTransit.MongoDbIntegration.Tests/bin/Release/net452/MassTransit.MongoDbIntegration.Tests.dll
   - src/Persistence/MassTransit.MartenIntegration.Tests/bin/Release/net452/MassTransit.MartenIntegration.Tests.dll
+  - src/Persistence/MassTransit.DocumentDbIntegration.Tests/bin/Release/MassTransit.DocumentDbIntegration.Tests.dll
   - src/MassTransit.HttpTransport.Tests/bin/Release/net452/MassTransit.HttpTransport.Tests.dll
   categories:
     except:
