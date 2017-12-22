@@ -22,35 +22,36 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Settings;
     using Specifications;
     using Transport;
-    using Transports;
 
 
     public class ServiceBusReceiveEndpointSpecification :
         ServiceBusEndpointSpecification,
         IServiceBusReceiveEndpointConfigurator
     {
-        readonly ReceiveEndpointSettings _settings;
         readonly IServiceBusEndpointConfiguration _configuration;
+        readonly ISendTransportProvider _sendTransportProvider;
+        readonly ReceiveEndpointSettings _settings;
         bool _subscribeMessageTopics;
 
-        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts, string queueName,
-            IServiceBusEndpointConfiguration configuration)
-            : this(host, hosts, new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName)), configuration)
+        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, string queueName, IServiceBusEndpointConfiguration configuration,
+            ISendTransportProvider sendTransportProvider)
+            : this(host, new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName)), configuration, sendTransportProvider)
         {
         }
 
-        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts, ReceiveEndpointSettings settings,
-            IServiceBusEndpointConfiguration configuration)
-            : base(host, hosts, settings, configuration)
+        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, ReceiveEndpointSettings settings, IServiceBusEndpointConfiguration configuration,
+            ISendTransportProvider sendTransportProvider)
+            : base(host, settings, configuration)
         {
             _settings = settings;
             _configuration = configuration;
+            _sendTransportProvider = sendTransportProvider;
             _subscribeMessageTopics = true;
         }
 
         public bool SubscribeMessageTopics
         {
-            set { _subscribeMessageTopics = value; }
+            set => _subscribeMessageTopics = value;
         }
 
         public bool EnableExpress
@@ -65,7 +66,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public TimeSpan DuplicateDetectionHistoryTimeWindow
         {
-            set { _settings.DuplicateDetectionHistoryTimeWindow = value; }
+            set => _settings.DuplicateDetectionHistoryTimeWindow = value;
         }
 
         public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
@@ -76,32 +77,32 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public bool EnablePartitioning
         {
-            set { _settings.EnablePartitioning = value; }
+            set => _settings.EnablePartitioning = value;
         }
 
         public bool IsAnonymousAccessible
         {
-            set { _settings.IsAnonymousAccessible = value; }
+            set => _settings.IsAnonymousAccessible = value;
         }
 
         public int MaxSizeInMegabytes
         {
-            set { _settings.MaxSizeInMegabytes = value; }
+            set => _settings.MaxSizeInMegabytes = value;
         }
 
         public bool RequiresDuplicateDetection
         {
-            set { _settings.RequiresDuplicateDetection = value; }
+            set => _settings.RequiresDuplicateDetection = value;
         }
 
         public bool SupportOrdering
         {
-            set { _settings.SupportOrdering = value; }
+            set => _settings.SupportOrdering = value;
         }
 
         public bool RemoveSubscriptions
         {
-            set { _settings.RemoveSubscriptions = value; }
+            set => _settings.RemoveSubscriptions = value;
         }
 
         public override void SelectBasicTier()
@@ -113,7 +114,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         TimeSpan IServiceBusQueueEndpointConfigurator.MessageWaitTimeout
         {
-            set { _settings.MessageWaitTimeout = value; }
+            set => _settings.MessageWaitTimeout = value;
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -131,7 +132,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public override void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new ServiceBusReceiveEndpointBuilder(builder, Host, Hosts, _subscribeMessageTopics, _configuration);
+            var receiveEndpointBuilder = new ServiceBusReceiveEndpointBuilder(builder, Host, _subscribeMessageTopics, _configuration, _sendTransportProvider);
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 

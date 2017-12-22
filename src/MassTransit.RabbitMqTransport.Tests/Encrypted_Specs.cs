@@ -25,7 +25,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     {
         Task<ConsumeContext<PingMessage>> _handler;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _handler = Handled<PingMessage>(configurator);
         }

@@ -25,7 +25,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     {
         Task<ConsumeContext<A>> _received;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _received = Handled<A>(configurator);
         }

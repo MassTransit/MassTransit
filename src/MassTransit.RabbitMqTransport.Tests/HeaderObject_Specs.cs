@@ -54,7 +54,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<PingMessage>> _handled;
         TaskCompletionSource<ClaimsIdentity> _header;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _header = GetTask<ClaimsIdentity>();
 
@@ -136,9 +136,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureRabbitMqReceiveEndoint(configurator);
+            base.ConfigureRabbitMqReceiveEndpoint(configurator);
 
             _handled = Handled<PingMessage>(configurator);
         }

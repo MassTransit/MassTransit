@@ -14,13 +14,11 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 {
     using System;
     using MassTransit.Topology;
-    using Util;
 
 
     public class ServiceBusMessagePublishTopology<TMessage> :
         MessagePublishTopology<TMessage>,
-        IServiceBusMessagePublishTopologyConfigurator<TMessage>,
-        IServiceBusMessagePublishTopologyConfigurator
+        IServiceBusMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
         readonly IMessageTopology<TMessage> _messageTopology;
@@ -28,12 +26,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         public ServiceBusMessagePublishTopology(IMessageTopology<TMessage> messageTopology)
         {
             _messageTopology = messageTopology;
-        }
-
-        IServiceBusMessagePublishTopologyConfigurator<T> IServiceBusMessagePublishTopologyConfigurator.GetMessageTopology<T>()
-        {
-            return this as IServiceBusMessagePublishTopologyConfigurator<T> ??
-                throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
         }
 
         public override bool TryGetPublishAddress(Uri baseAddress, TMessage message, out Uri publishAddress)

@@ -21,27 +21,29 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Settings;
     using Specifications;
     using Transport;
-    using Transports;
 
 
     public class ServiceBusSubscriptionEndpointSpecification :
         ServiceBusEndpointSpecification,
         IServiceBusSubscriptionEndpointConfigurator
     {
-        readonly SubscriptionEndpointSettings _settings;
         readonly IServiceBusEndpointConfiguration _configuration;
+        readonly ISendTransportProvider _sendTransportProvider;
+        readonly SubscriptionEndpointSettings _settings;
 
-        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host,BusHostCollection<ServiceBusHost> hosts, string subscriptionName, string topicName,
-            IServiceBusEndpointConfiguration configuration)
-            : this(host, hosts, new SubscriptionEndpointSettings(topicName, subscriptionName), configuration)
+        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, string subscriptionName, string topicName, IServiceBusEndpointConfiguration configuration,
+            ISendTransportProvider sendTransportProvider)
+            : this(host, new SubscriptionEndpointSettings(topicName, subscriptionName), configuration, sendTransportProvider)
         {
         }
 
-        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts, SubscriptionEndpointSettings settings, IServiceBusEndpointConfiguration configuration)
-            : base(host, hosts, settings, configuration)
+        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, SubscriptionEndpointSettings settings, IServiceBusEndpointConfiguration configuration,
+            ISendTransportProvider sendTransportProvider)
+            : base(host, settings, configuration)
         {
             _settings = settings;
             _configuration = configuration;
+            _sendTransportProvider = sendTransportProvider;
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -52,7 +54,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public override void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new ServiceBusSubscriptionEndpointBuilder(builder, Host, Hosts, _configuration);
+            var receiveEndpointBuilder = new ServiceBusSubscriptionEndpointBuilder(builder, Host, _configuration, _sendTransportProvider);
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
@@ -65,7 +67,6 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             });
         }
 
-
         protected override ReceiveEndpointSettings GetReceiveEndpointSettings(string queueName)
         {
             var description = new QueueDescription(queueName)
@@ -77,9 +78,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             };
 
             if (_settings.UsingBasicTier == false)
-            {
                 description.AutoDeleteOnIdle = _settings.AutoDeleteOnIdle;
-            }
 
 
             return new ReceiveEndpointSettings(description);

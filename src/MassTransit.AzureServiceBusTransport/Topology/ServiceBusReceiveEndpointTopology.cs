@@ -24,25 +24,24 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         IServiceBusReceiveEndpointTopology
     {
         readonly IServiceBusHost _host;
-        readonly BusHostCollection<ServiceBusHost> _hosts;
         readonly IServiceBusPublishTopology _publish;
         readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
         readonly IPublishPipe _publishPipe;
         readonly IServiceBusSendTopology _send;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ISendPipe _sendPipe;
-        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
+        readonly ISendTransportProvider _sendTransportProvider;
         readonly IMessageSerializer _serializer;
         readonly TopologyLayout _topologyLayout;
 
         public ServiceBusReceiveEndpointTopology(IServiceBusEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer,
-            IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts, TopologyLayout topologyLayout)
+            IServiceBusHost host, ISendTransportProvider sendTransportProvider, TopologyLayout topologyLayout)
         {
             InputAddress = inputAddress;
             _serializer = serializer;
             _host = host;
-            _hosts = hosts;
             _topologyLayout = topologyLayout;
+            _sendTransportProvider = sendTransportProvider;
 
             _send = configuration.SendTopology;
             _publish = configuration.PublishTopology;
@@ -52,7 +51,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
-            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
         }
 
         public TopologyLayout TopologyLayout => _topologyLayout;
@@ -63,16 +61,11 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
         ISendEndpointProvider IReceiveEndpointTopology.SendEndpointProvider => _sendEndpointProvider.Value;
         IPublishEndpointProvider IReceiveEndpointTopology.PublishEndpointProvider => _publishEndpointProvider.Value;
-        ISendTransportProvider IReceiveEndpointTopology.SendTransportProvider => _sendTransportProvider.Value;
-
-        ISendTransportProvider CreateSendTransportProvider()
-        {
-            return new ServiceBusSendTransportProvider(_hosts);
-        }
+        ISendTransportProvider IReceiveEndpointTopology.SendTransportProvider => _sendTransportProvider;
 
         ISendEndpointProvider CreateSendEndpointProvider()
         {
-            var provider = new ServiceBusSendEndpointProvider(_serializer, InputAddress, _sendTransportProvider.Value, _sendPipe);
+            var provider = new ServiceBusSendEndpointProvider(_serializer, InputAddress, _sendTransportProvider, _sendPipe);
 
             return new SendEndpointCache(provider);
         }

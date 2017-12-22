@@ -33,7 +33,6 @@ namespace MassTransit
 
         IInMemoryHost Host { get; }
 
-
         /// <summary>
         /// Configure the send topology of the message type
         /// </summary>

@@ -100,7 +100,7 @@ namespace MassTransit.Transports
             return _observer.PostPublish(_context ?? new FaultedPublishContext<T>(_message, CancellationToken.None)
             {
                 SourceAddress = _sourceAddress,
-                CorrelationId = _correlationId,
+                InitiatorId = _correlationId,
                 ConversationId = _conversationId,
                 Mandatory = _context?.Mandatory ?? false
             });
@@ -111,7 +111,7 @@ namespace MassTransit.Transports
             return _observer.PublishFault(_context ?? new FaultedPublishContext<T>(_message, CancellationToken.None)
             {
                 SourceAddress = _sourceAddress,
-                CorrelationId = _correlationId,
+                InitiatorId = _correlationId,
                 ConversationId = _conversationId,
                 Mandatory = _context?.Mandatory ?? false
             }, exception);

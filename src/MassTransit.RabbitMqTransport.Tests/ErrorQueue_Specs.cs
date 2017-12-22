@@ -123,7 +123,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, context =>
             {
@@ -189,7 +189,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _host = host;
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             Handled<PingMessage>(configurator);
         }
@@ -289,7 +289,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, context =>
             {

@@ -42,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Stopwatch _timer;
         int _count;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 
@@ -92,7 +92,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         int _count;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 
@@ -125,7 +125,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         int _count;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 
@@ -158,7 +158,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         int _count;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 
@@ -191,7 +191,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Stopwatch _timer;
         int _count;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 

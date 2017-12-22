@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.ComponentModel;
     using MassTransit.Builders;
+    using Topology;
 
 
     public interface IServiceBusBusFactoryConfigurator :
@@ -33,6 +34,29 @@ namespace MassTransit.AzureServiceBusTransport
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
+
+        /// <summary>
+        /// Configure the send topology of the message type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configureTopology"></param>
+        void SendTopology<T>(Action<IServiceBusMessageSendTopologyConfigurator<T>> configureTopology)
+            where T : class;
+
+        /// <summary>
+        /// Configure the send topology of the message type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="configureTopology"></param>
+        void PublishTopology<T>(Action<IServiceBusMessagePublishTopologyConfigurator<T>> configureTopology)
+            where T : class;
+
+        /// <summary>
+        /// Before configuring any topology options, calling this will make it so that send and publish
+        /// topologies are completely separated for this bus. This means that some types may not properly
+        /// follow the topology rules, so use with caution.
+        /// </summary>
+        void SeparatePublishFromSendTopology();
 
         /// <summary>
         /// Configures a host

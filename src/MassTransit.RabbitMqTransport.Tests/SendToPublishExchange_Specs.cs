@@ -43,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _host = host;
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _handled = Handled<A>(configurator);
         }
