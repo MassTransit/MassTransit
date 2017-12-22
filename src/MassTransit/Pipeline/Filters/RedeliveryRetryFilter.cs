@@ -66,20 +66,24 @@ namespace MassTransit.Pipeline.Filters
                     context.CancellationToken.ThrowIfCancellationRequested();
                 }
 
-                if (context.TryGetPayload(out RetryContext<ConsumeContext<T>> payloadRetryContext))
+                if (policyContext.Context.TryGetPayload(out RetryContext<ConsumeContext<T>> payloadRetryContext))
                 {
                     await policyContext.RetryFaulted(exception).ConfigureAwait(false);
 
                     await _observers.RetryFault(payloadRetryContext).ConfigureAwait(false);
 
+                    context.GetOrAddPayload(() => payloadRetryContext);
+
                     throw;
                 }
 
-                if (context.TryGetPayload(out RetryContext genericRetryContext))
+                if (policyContext.Context.TryGetPayload(out RetryContext genericRetryContext))
                 {
                     await policyContext.RetryFaulted(exception).ConfigureAwait(false);
 
                     await _observers.RetryFault(genericRetryContext).ConfigureAwait(false);
+                    
+                    context.GetOrAddPayload(() => genericRetryContext);
 
                     throw;
                 }
