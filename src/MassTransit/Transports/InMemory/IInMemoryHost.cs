@@ -28,6 +28,6 @@ namespace MassTransit.Transports.InMemory
         /// <param name="queueName"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure = null);
+        HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure = null);
     }
 }

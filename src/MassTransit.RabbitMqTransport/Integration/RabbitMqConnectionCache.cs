@@ -86,6 +86,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         Task SendUsingNewConnection(IPipe<ConnectionContext> connectionPipe, ConnectionScope scope, CancellationToken cancellationToken)
         {
+            IConnection connection = null;
             try
             {
                 if (_cacheTaskScope.StoppingToken.IsCancellationRequested)
@@ -94,7 +95,6 @@ namespace MassTransit.RabbitMqTransport.Integration
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting: {0}", _description);
 
-                IConnection connection;
                 if (_settings.ClusterMembers?.Any() ?? false)
                 {
                     connection = _connectionFactory.Value.CreateConnection(_settings.ClusterMembers, _settings.ClientProvidedName);
@@ -105,7 +105,6 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                     connection = _connectionFactory.Value.CreateConnection(hostNames, _settings.ClientProvidedName);
                 }
-
 
                 if (_log.IsDebugEnabled)
                 {
@@ -132,11 +131,29 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
             catch (BrokerUnreachableException ex)
             {
+                if (_log.IsDebugEnabled)
+                    _log.Debug("The broker was unreachable", ex);
+                
+                Interlocked.CompareExchange(ref _scope, null, scope);
+
+                scope.ConnectFaulted(ex);
+                
+                connection?.Dispose();
+
+                throw new RabbitMqConnectionException("Connect failed: " + _description, ex);
+            }
+            catch (OperationInterruptedException ex)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.Debug("The RabbitMQ operation was interrupted", ex);
+
                 Interlocked.CompareExchange(ref _scope, null, scope);
 
                 scope.ConnectFaulted(ex);
 
-                throw new RabbitMqConnectionException("Connect failed: " + _description, ex);
+                connection?.Dispose();
+
+                throw new RabbitMqConnectionException("Operation interrupted: " + _description, ex);
             }
 
             return SendUsingExistingConnection(connectionPipe, scope, cancellationToken);
@@ -164,6 +181,17 @@ namespace MassTransit.RabbitMqTransport.Integration
                 scope.ConnectFaulted(ex);
 
                 throw new RabbitMqConnectionException("Connect failed: " + _description, ex);
+            }
+            catch (OperationInterruptedException ex)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.Debug("The RabbitMQ operation was interrupted", ex);
+
+                Interlocked.CompareExchange(ref _scope, null, scope);
+
+                scope.ConnectFaulted(ex);
+
+                throw new RabbitMqConnectionException("Operation interrupted: " + _description, ex);
             }
             catch (Exception ex)
             {

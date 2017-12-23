@@ -33,7 +33,8 @@ namespace MassTransit.Tests
         {
             var consumer = new PingPongConsumer(TestTimeout);
 
-            var handle = await Host.ConnectReceiveEndpoint("boring", x => consumer.Configure(x));
+            var handle = Host.ConnectReceiveEndpoint("boring", x => consumer.Configure(x));
+            await handle.Ready;
             try
             {
                 var pingMessage = new PingMessage();
@@ -56,7 +57,9 @@ namespace MassTransit.Tests
             var multiConsumer = new MultiTestConsumer(TestTimeout);
             ReceivedMessageList<PingMessage> received = multiConsumer.Consume<PingMessage>();
 
-            var handle = await Host.ConnectReceiveEndpoint("boring2", x => multiConsumer.Configure(x));
+            var handle = Host.ConnectReceiveEndpoint("boring2", x => multiConsumer.Configure(x));
+            await handle.Ready;
+
             try
             {
                 Bus.Publish(new PingMessage());
@@ -74,7 +77,9 @@ namespace MassTransit.Tests
         {
             var consumer = new PingPongConsumer(TestTimeout);
 
-            var handle = await Host.ConnectReceiveEndpoint("boring3", x => consumer.Configure(x));
+            var handle = Host.ConnectReceiveEndpoint("boring3", x => consumer.Configure(x));
+            await handle.Ready;
+
             try
             {
                 var pingMessage = new PingMessage();

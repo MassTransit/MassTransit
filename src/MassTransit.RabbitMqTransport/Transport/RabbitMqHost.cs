@@ -75,8 +75,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             var connectionTask = _connectionRetryPolicy.RetryUntilCancelled(() => _connectionCache.Send(connectionPipe, _supervisor.StoppingToken),
                 _supervisor.StoppingToken);
 
-            HostReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
-
+            HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints();
 
             return new Handle(connectionTask, handles, _supervisor, this);
         }
@@ -121,12 +120,12 @@ namespace MassTransit.RabbitMqTransport.Transport
         public IRetryPolicy ConnectionRetryPolicy => _connectionRetryPolicy;
         public ITaskSupervisor Supervisor => _supervisor;
 
-        public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure)
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
         {
             return ConnectReceiveEndpoint(_settings.Topology.CreateTemporaryQueueName("endpoint"), configure);
         }
 
-        public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
         {
             if (ReceiveEndpointFactory == null)
                 throw new ConfigurationException("The receive endpoint factory was not specified");

@@ -76,7 +76,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public async Task<HostHandle> Start()
         {
-            HostReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
+            HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints();
 
             return new Handle(this, _supervisor, handles);
         }
@@ -332,14 +332,14 @@ namespace MassTransit.AzureServiceBusTransport
                 _log.DebugFormat("Subscription Deleted: {0} ({1} -> {2})", description.Name, description.TopicPath, description.ForwardTo);
         }
 
-        public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure)
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure = null)
         {
             var queueName = this.GetTemporaryQueueName("endpoint");
 
             return ConnectReceiveEndpoint(queueName, configure);
         }
 
-        public Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure = null)
         {
             if (ReceiveEndpointFactory == null)
                 throw new ConfigurationException("The receive endpoint factory was not specified");
@@ -349,15 +349,15 @@ namespace MassTransit.AzureServiceBusTransport
             return _receiveEndpoints.Start(queueName);
         }
 
-        public Task<HostReceiveEndpointHandle> ConnectSubscriptionEndpoint<T>(string subscriptionName,
-            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+        public HostReceiveEndpointHandle ConnectSubscriptionEndpoint<T>(string subscriptionName,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
             where T : class
         {
             return ConnectSubscriptionEndpoint(subscriptionName, MessageNameFormatter.GetTopicAddress(this, typeof(T)).AbsolutePath.Trim('/'), configure);
         }
 
-        public Task<HostReceiveEndpointHandle> ConnectSubscriptionEndpoint(string subscriptionName, string topicName,
-            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+        public HostReceiveEndpointHandle ConnectSubscriptionEndpoint(string subscriptionName, string topicName,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
         {
             if (SubscriptionEndpointFactory == null)
                 throw new ConfigurationException("The subscription endpoint factory was not specified");

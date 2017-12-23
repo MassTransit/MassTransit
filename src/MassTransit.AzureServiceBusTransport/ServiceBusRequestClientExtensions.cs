@@ -37,7 +37,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = await host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response")).ConfigureAwait(false);
+            var endpoint = host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response"));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
@@ -61,7 +61,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = await host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response")).ConfigureAwait(false);
+            var endpoint = host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response"));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
@@ -84,7 +84,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = await host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response")).ConfigureAwait(false);
+            var endpoint = host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response"));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 

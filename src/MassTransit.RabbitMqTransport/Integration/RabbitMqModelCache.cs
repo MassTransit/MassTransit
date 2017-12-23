@@ -83,12 +83,13 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
+                IModel model = null;
                 try
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Creating model: {0}", connectionContext.HostSettings.ToDebugString());
 
-                    var model = await connectionContext.CreateModel().ConfigureAwait(false);
+                    model = await connectionContext.CreateModel().ConfigureAwait(false);
 
                     EventHandler<ShutdownEventArgs> modelShutdown = null;
                     modelShutdown = (obj, reason) =>
@@ -111,6 +112,8 @@ namespace MassTransit.RabbitMqTransport.Integration
                     Interlocked.CompareExchange(ref _scope, null, scope);
 
                     scope.CreateFaulted(ex);
+
+                    model?.Dispose();
 
                     throw;
                 }

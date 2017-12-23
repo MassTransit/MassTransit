@@ -92,7 +92,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Console.WriteLine("Sending");
 
-            Assert.Throws<RabbitMqConnectionException>(async () => await Bus.Publish(new ReconnectMessage { Value = "Before" }));
+            Assert.That(async () => await Bus.Publish(new ReconnectMessage { Value = "Before" }), Throws.TypeOf<RabbitMqConnectionException>());
 
             Console.WriteLine("Start it back up");
 

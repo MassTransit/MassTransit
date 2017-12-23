@@ -62,16 +62,16 @@ namespace MassTransit.Transports
             }
         }
 
-        public Task<HostReceiveEndpointHandle[]> StartEndpoints()
+        public HostReceiveEndpointHandle[] StartEndpoints()
         {
             KeyValuePair<string, IReceiveEndpoint>[] startable;
             lock (_mutateLock)
                 startable = _endpoints.Where(x => !_handles.ContainsKey(x.Key)).ToArray();
 
-            return Task.WhenAll(startable.Select(x => StartEndpoint(x.Key, x.Value)));
+            return startable.Select(x => StartEndpoint(x.Key, x.Value)).ToArray();
         }
 
-        public Task<HostReceiveEndpointHandle> Start(string endpointName)
+        public HostReceiveEndpointHandle Start(string endpointName)
         {
             if (string.IsNullOrWhiteSpace(endpointName))
                 throw new ArgumentException($"The {nameof(endpointName)} must not be null or empty", nameof(endpointName));
@@ -133,7 +133,7 @@ namespace MassTransit.Transports
             return _sendObservers.Connect(observer);
         }
 
-        async Task<HostReceiveEndpointHandle> StartEndpoint(string endpointName, IReceiveEndpoint endpoint)
+        HostReceiveEndpointHandle StartEndpoint(string endpointName, IReceiveEndpoint endpoint)
         {
             try
             {
@@ -148,8 +148,6 @@ namespace MassTransit.Transports
 
                 var handle = new Handle(endpointHandle, endpoint, endpointReady.Ready, () => Remove(endpointName),
                     receiveObserver, receiveEndpointObserver, consumeObserver, publishObserver, sendObserver);
-
-                await handle.Ready.ConfigureAwait(false);
 
                 lock (_mutateLock)
                     _handles.Add(endpointName, handle);

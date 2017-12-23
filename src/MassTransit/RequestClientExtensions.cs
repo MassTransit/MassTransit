@@ -98,7 +98,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = await host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N")).ConfigureAwait(false);
+            var endpoint = host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N"));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
@@ -122,7 +122,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = await host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N")).ConfigureAwait(false);
+            var endpoint = host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N"));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
@@ -184,7 +184,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = await host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N")).ConfigureAwait(false);
+            var endpoint = host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N"));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
