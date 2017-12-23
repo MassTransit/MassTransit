@@ -17,7 +17,7 @@ namespace MassTransit
     using GreenPipes;
 
 
-    public static class ScheduleMessageExtensions
+    public static class ServiceBusScheduleMessageExtensions
     {
         /// <summary>
         /// Uses the Enqueue time of Service Bus messages to schedule future delivery of messages instead

@@ -18,7 +18,7 @@ namespace MassTransit
     using Microsoft.ServiceBus;
 
 
-    public static class BusFactoryConfiguratorExtensions
+    public static class ServiceBusBusFactoryConfiguratorExtensions
     {
         /// <summary>
         /// Adds a service bus host using the MassTransit style URI host name

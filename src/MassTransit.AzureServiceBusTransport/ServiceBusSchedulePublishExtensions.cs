@@ -22,7 +22,7 @@ namespace MassTransit
     using Util;
 
 
-    public static class SchedulePublishExtensions
+    public static class ServiceBusSchedulePublishExtensions
     {
         /// <summary>
         /// Send a message
