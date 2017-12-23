@@ -2,8 +2,7 @@
   <PropertyGroup>
     <RootNamespace>MassTransit.ExtensionsLoggingIntegration</RootNamespace>
     <AssemblyName>MassTransit.ExtensionsLoggingIntegration</AssemblyName>
-    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
-    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -15,7 +14,7 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.ExtensionsLoggingIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
 	  <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

@@ -69,6 +69,9 @@ namespace MassTransit.AutofacIntegration
         public static void ConfigureScope(this ContainerBuilder builder, ConsumeContext context)
         {
             builder.RegisterInstance(context)
+                .As<ConsumeContext>()
+                .As<IPublishEndpoint>()
+                .As<ISendEndpointProvider>()
                 .ExternallyOwned();
         }
 
@@ -78,6 +81,8 @@ namespace MassTransit.AutofacIntegration
             builder.RegisterInstance(context)
                 .As<ConsumeContext>()
                 .As<ConsumeContext<T>>()
+                .As<IPublishEndpoint>()
+                .As<ISendEndpointProvider>()
                 .ExternallyOwned();
         }
     }
