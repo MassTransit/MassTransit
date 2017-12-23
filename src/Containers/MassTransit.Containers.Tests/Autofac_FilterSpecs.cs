@@ -105,8 +105,6 @@ namespace MassTransit.Containers.Tests
             _consumer = _harness.Consumer(new AutofacConsumerFactory<MyConsumer>(_container, "message"));
 
             await _harness.Start();
-
-            Console.WriteLine(_harness.Bus.GetProbeResult().ToJsonString());
         }
 
         void ConfigureBus(IBusFactoryConfigurator configurator)

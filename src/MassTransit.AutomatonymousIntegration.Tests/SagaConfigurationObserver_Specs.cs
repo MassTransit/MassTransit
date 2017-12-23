@@ -20,7 +20,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using NUnit.Framework;
     using Saga;
     using Saga.SubscriptionConfigurators;
-    using TestFramework;
     using Util;
 
 
@@ -60,8 +59,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                     });
                 });
             });
-
-            Console.WriteLine(bus.GetProbeResult().ToJsonString());
 
             Assert.That(observer.SagaTypes.Contains(typeof(Instance)));
             Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(Instance), typeof(Start))));

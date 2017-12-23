@@ -44,7 +44,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
 
-        [Test]
+        [Test, Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
             ProbeResult result = Bus.GetProbeResult();

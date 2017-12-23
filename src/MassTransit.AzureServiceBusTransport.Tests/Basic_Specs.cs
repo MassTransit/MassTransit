@@ -25,7 +25,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     public class Sending_a_message_to_a_basic_endpoint :
         AzureServiceBusTestFixture
     {
-        [Test]
+        [Test, Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
             var result = Bus.GetProbeResult();

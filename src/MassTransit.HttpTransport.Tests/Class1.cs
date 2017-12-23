@@ -10,16 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.HottpTransport.Tests
+namespace MassTransit.HttpTransport.Tests
 {
     using System;
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using HttpTransport;
     using NUnit.Framework;
-    using TestFramework;
 
 
     public class Class1
@@ -45,10 +43,6 @@ namespace MassTransit.HottpTransport.Tests
                     ep.Consumer<HttpEater>();
                 });
             });
-
-
-            var p = bus.GetProbeResult();
-            Console.WriteLine(p.ToJsonString());
         }
 
         [Test]
