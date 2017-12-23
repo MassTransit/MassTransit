@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,6 +16,7 @@ namespace MassTransit.Context
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using GreenPipes.Payloads;
     using Util;
 
 
@@ -27,13 +28,25 @@ namespace MassTransit.Context
         readonly IList<PendingFault> _pendingFaults;
 
         public RetryConsumeContext(ConsumeContext context)
-            : base(context)
+            : base(context, new PayloadCacheScope(context))
         {
             _context = context;
             _pendingFaults = new List<PendingFault>();
         }
 
         public int RetryAttempt { get; set; }
+
+        public override bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
+        {
+            if (base.TryGetMessage(out ConsumeContext<T> messageContext))
+            {
+                consumeContext = new MessageConsumeContext<T>(this, messageContext.Message);
+                return true;
+            }
+
+            consumeContext = null;
+            return false;
+        }
 
         public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
@@ -42,11 +55,15 @@ namespace MassTransit.Context
             return TaskUtil.Completed;
         }
 
-        public Task ClearPendingFaults()
+        public RetryConsumeContext CreateNext()
         {
-            _pendingFaults.Clear();
+            return new RetryConsumeContext(_context);
+        }
 
-            return TaskUtil.Completed;
+        public virtual TContext CreateNext<TContext>()
+            where TContext : RetryConsumeContext
+        {
+            throw new InvalidOperationException("This is only supported by a derived type");
         }
 
         public Task NotifyPendingFaults()
@@ -103,12 +120,18 @@ namespace MassTransit.Context
 
         public Task NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            return _context.NotifyConsumed(duration, consumerType);
+            return NotifyConsumed(_context, duration, consumerType);
         }
 
         public Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
             return NotifyFaulted(_context, duration, consumerType, exception);
+        }
+
+        public override TContext CreateNext<TContext>()
+        {
+            return new RetryConsumeContext<T>(_context) as TContext
+                ?? throw new ArgumentException($"The context type is not valid: {TypeMetadataCache<T>.ShortName}");
         }
     }
 }

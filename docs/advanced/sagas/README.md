@@ -1,6 +1,6 @@
 # Using Sagas
 
-The ability to ochestrate a series of events is a powerful feature, and MassTransit makes this possible.
+The ability to orchestrate a series of events is a powerful feature, and MassTransit makes this possible.
 
 A saga is a long-lived transaction managed by a coordinator. Sagas are initiated by an event, 
 sagas orchestrate events, and sagas maintain the state of the overall transaction. 

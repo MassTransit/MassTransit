@@ -16,9 +16,10 @@ namespace MassTransit.Tests
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using GreenPipes;
+    using MassTransit.Testing;
+    using MassTransit.Testing.Indicators;
     using NUnit.Framework;
     using TestFramework;
-    using TestFramework.Indicators;
     using TestFramework.Messages;
     using Util;
 

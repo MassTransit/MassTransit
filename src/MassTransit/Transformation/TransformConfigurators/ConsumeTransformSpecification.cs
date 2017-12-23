@@ -13,7 +13,6 @@
 namespace MassTransit.Transformation.TransformConfigurators
 {
     using GreenPipes;
-    using PipeConfigurators;
     using Pipeline.Filters;
 
 

@@ -102,7 +102,7 @@ namespace MassTransit.Tests.Transforms
         [Test]
         public async Task Should_have_the_message_property()
         {
-            Task<ConsumeContext<IA>> unmodified = SubscribeHandler<IA>();
+            Task<ConsumeContext<IA>> unmodified = ConnectPublishHandler<IA>();
 
             await Bus.Publish(new A {First = "Hello"});
 
@@ -154,7 +154,7 @@ namespace MassTransit.Tests.Transforms
         [Test]
         public async Task Should_have_the_message_property()
         {
-            Task<ConsumeContext<IA>> unmodified = SubscribeHandler<IA>();
+            Task<ConsumeContext<IA>> unmodified = ConnectPublishHandler<IA>();
 
             await Bus.Publish(new A {First = "Hello"});
 

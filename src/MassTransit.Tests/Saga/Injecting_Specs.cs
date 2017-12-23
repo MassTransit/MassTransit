@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Saga
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Saga;
+    using MassTransit.Testing;
     using Messages;
     using NUnit.Framework;
     using Shouldly;
@@ -42,7 +43,7 @@ namespace MassTransit.Tests.Saga
         Dependency _dependency;
         Guid _sagaId;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             _sagaId = NewId.NextGuid();
 

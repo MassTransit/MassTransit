@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using GreenPipes;
     using Internals.Extensions;
     using Logging;
+    using MassTransit.Topology;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using Topology;
@@ -41,8 +42,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly ITaskParticipant _participant;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly IReceiveObserver _receiveObserver;
-        readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly IReceiveEndpointTopology _topology;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         readonly IDeliveryTracker _tracker;
@@ -57,16 +57,14 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// <param name="receivePipe">The receive pipe to dispatch messages</param>
         /// <param name="receiveObserver">The observer for receive events</param>
         /// <param name="taskSupervisor">The token used to cancel/stop the consumer at shutdown</param>
-        /// <param name="sendEndpointProvider"></param>
-        /// <param name="publishEndpointProvider"></param>
-        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, ITaskScope taskSupervisor, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        /// <param name="topology">The topology</param>
+        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, ITaskScope taskSupervisor, IReceiveEndpointTopology topology)
         {
             _model = model;
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
+            _topology = topology;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
@@ -151,7 +149,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             using (var delivery = _tracker.BeginDelivery())
             {
                 var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
-                    _receiveObserver, _sendEndpointProvider, _publishEndpointProvider);
+                    _receiveObserver, _topology);
 
                 context.GetOrAddPayload(() => _receiveSettings);
                 context.GetOrAddPayload(() => _model);

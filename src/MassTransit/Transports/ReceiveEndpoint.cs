@@ -88,9 +88,14 @@ namespace MassTransit.Transports
             return _receivePipe.ConsumePipe.ConnectRequestPipe(requestId, pipe);
         }
 
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
             return _receiveTransport.ConnectPublishObserver(observer);
+        }
+
+        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        {
+            return _receiveTransport.ConnectSendObserver(observer);
         }
 
 

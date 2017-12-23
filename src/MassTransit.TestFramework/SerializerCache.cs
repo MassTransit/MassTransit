@@ -14,6 +14,7 @@ namespace MassTransit.TestFramework
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Threading;
     using GreenPipes.Internals.Extensions;
     using GreenPipes.Internals.Reflection;
@@ -78,7 +79,7 @@ namespace MassTransit.TestFramework
 
             public override bool CanConvert(Type objectType)
             {
-                return objectType.IsInterface;
+                return objectType.GetTypeInfo().IsInterface;
             }
         }
     }

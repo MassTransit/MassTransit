@@ -51,7 +51,7 @@ namespace MassTransit.Tests.Testing
         [Test]
         public void Should_have_sent_the_response_from_the_consumer()
         {
-            _harness.Sent.Select<B>().Any().ShouldBe(true);
+            _harness.Published.Select<B>().Any().ShouldBe(true);
         }
 
         [Test]

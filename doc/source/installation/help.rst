@@ -1,6 +1,14 @@
 Getting Help
 ============
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/introduction/getting-help.html
+
 Writing distributed applications is hard, and sometimes you need help. There are several ways to get in
 touch with the developers behind MassTransit. In most cases, you can expect a response within a few days,
 sometimes sooner. The speed of the response is going to depend upon how well you've done your homework

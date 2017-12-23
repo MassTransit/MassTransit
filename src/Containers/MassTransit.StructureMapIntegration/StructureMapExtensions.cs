@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,9 +16,12 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using ConsumeConfigurators;
+    using Courier;
     using Internals.Extensions;
+    using PipeConfigurators;
     using Saga;
     using Saga.SubscriptionConfigurators;
+    using Scoping;
     using StructureMap;
     using StructureMapIntegration;
 
@@ -32,19 +35,19 @@ namespace MassTransit
         /// <param name="container">The StructureMap container.</param>
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IContainer container)
         {
+            var scopeProvider = new StructureMapConsumerScopeProvider(container);
+
             IList<Type> concreteTypes = FindTypes<IConsumer>(container, x => !x.HasInterface<ISaga>());
             if (concreteTypes.Count > 0)
-            {
-                foreach (Type concreteType in concreteTypes)
-                    ConsumerConfiguratorCache.Configure(concreteType, configurator, container);
-            }
+                foreach (var concreteType in concreteTypes)
+                    ConsumerConfiguratorCache.Configure(concreteType, configurator, scopeProvider);
+
+            var sagaRepositoryFactory = new StructureMapSagaRepositoryFactory(container);
 
             IList<Type> sagaTypes = FindTypes<ISaga>(container, x => true);
             if (sagaTypes.Count > 0)
-            {
-                foreach (Type sagaType in sagaTypes)
-                    SagaConfiguratorCache.Configure(sagaType, configurator, container);
-            }
+                foreach (var sagaType in sagaTypes)
+                    SagaConfiguratorCache.Configure(sagaType, configurator, sagaRepositoryFactory);
         }
 
         /// <summary>
@@ -62,7 +65,7 @@ namespace MassTransit
         public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
-            var consumerFactory = new StructureMapConsumerFactory<T>(container);
+            var consumerFactory = new ScopeConsumerFactory<T>(new StructureMapConsumerScopeProvider(container));
 
             configurator.Consumer(consumerFactory, configure);
         }
@@ -70,11 +73,50 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var sagaRepository = container.GetInstance<ISagaRepository<T>>();
+            var repository = container.GetInstance<ISagaRepository<T>>();
 
-            var structureMapSagaRepository = new StructureMapSagaRepository<T>(sagaRepository, container);
+            var sagaRepository = new ScopeSagaRepository<T>(repository, new StructureMapSagaScopeProvider<T>(container));
 
-            configurator.Saga(structureMapSagaRepository, configure);
+            configurator.Saga(sagaRepository, configure);
+        }
+
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress, IContainer container)
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var executeActivityScopeProvider = new StructureMapExecuteActivityScopeProvider<TActivity, TArguments>(container);
+
+            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
+
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, IContainer container)
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var executeActivityScopeProvider = new StructureMapExecuteActivityScopeProvider<TActivity, TArguments>(container);
+
+            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
+
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IContainer container)
+            where TActivity : class, CompensateActivity<TLog>
+            where TLog : class
+        {
+            var compensateActivityScopeProvider = new StructureMapCompensateActivityScopeProvider<TActivity, TLog>(container);
+
+            var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
+
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+
+            configurator.AddEndpointSpecification(specification);
         }
 
         static IList<Type> FindTypes<T>(IContainer container, Func<Type, bool> filter)
@@ -88,6 +130,33 @@ namespace MassTransit
                 .Where(filter)
                 .Distinct()
                 .ToList();
+        }
+
+        internal static IContainer CreateNestedContainer(this IContainer container, ConsumeContext context)
+        {
+            var nestedContainer = container.GetNestedContainer();
+            nestedContainer.Configure(x =>
+            {
+                x.For<ConsumeContext>()
+                    .Use(context);
+            });
+
+            return nestedContainer;
+        }
+        
+        internal static IContainer CreateNestedContainer<T>(this IContainer container, ConsumeContext<T> context) 
+            where T : class
+        {
+            var nestedContainer = container.GetNestedContainer();
+            nestedContainer.Configure(x =>
+            {
+                x.For<ConsumeContext>()
+                    .Use(context);
+                x.For<ConsumeContext<T>>()
+                    .Use(context);
+            });
+
+            return nestedContainer;
         }
     }
 }

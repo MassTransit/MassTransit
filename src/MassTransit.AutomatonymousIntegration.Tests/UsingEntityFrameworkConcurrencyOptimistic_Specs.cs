@@ -24,6 +24,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System.Data.Entity.Infrastructure;
     using System.Threading.Tasks;
     using TestFramework;
+    using Testing;
+
 
     [TestFixture]
     public class When_using_EntityFrameworkConcurrencyOptimistic :
@@ -131,9 +133,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.TransportConcurrencyLimit = 16;
         }

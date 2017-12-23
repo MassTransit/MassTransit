@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,23 +14,29 @@ namespace MassTransit.Transports.InMemory
 {
     using System;
     using Builders;
+    using Configuration;
     using Configurators;
-    using EndpointConfigurators;
 
 
     public class InMemoryReceiveEndpointFactory :
         IInMemoryReceiveEndpointFactory
     {
         readonly InMemoryBusBuilder _builder;
+        readonly ISendTransportProvider _sendTransportProvider;
+        readonly IInMemoryEndpointConfiguration _configuration;
 
-        public InMemoryReceiveEndpointFactory(InMemoryBusBuilder builder)
+        public InMemoryReceiveEndpointFactory(InMemoryBusBuilder builder, ISendTransportProvider sendTransportProvider, IInMemoryEndpointConfiguration configuration)
         {
             _builder = builder;
+            _sendTransportProvider = sendTransportProvider;
+            _configuration = configuration;
         }
 
         public void CreateReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure)
         {
-            var specification = new InMemoryReceiveEndpointSpecification(_builder.InMemoryHost.Address, queueName);
+            var endpointSpecification = _configuration.CreateConfiguration();
+
+            var specification = new InMemoryReceiveEndpointSpecification(_builder.InMemoryHost.Address, queueName, _sendTransportProvider, endpointSpecification);
 
             configure?.Invoke(specification);
 

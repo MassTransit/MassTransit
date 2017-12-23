@@ -14,13 +14,10 @@ namespace MassTransit.RedisIntegration.Tests
 {
     using System;
     using Saga;
-    using ServiceStack.DesignPatterns.Model;
 
 
-    public class TestSaga : ISaga,
-        IHasGuidId
+    public class TestSaga : ISaga
     {
-        public Guid Id => CorrelationId;
         public Guid CorrelationId { get; set; }
     }
 }

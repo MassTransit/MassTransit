@@ -20,7 +20,6 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using MassTransit.Saga;
     using Util;
 
-
     public class EntityFrameworkSagaConsumeContext<TSaga, TMessage> :
         ConsumeContextProxyScope<TMessage>,
         SagaConsumeContext<TSaga, TMessage>

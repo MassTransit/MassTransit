@@ -33,7 +33,7 @@ namespace MassTransit.TestFramework
             JEnumerable<JToken> receiveEndpoints = probeJObject["results"]["bus"]["host"]["receiveEndpoint"].Children();
 
             IEnumerable<ReceiveTransportProbeResult> probeResults = receiveEndpoints.Select(result =>
-                JsonConvert.DeserializeObject<ReceiveTransportProbeResult>(result["transport"].ToString()))
+                JsonConvert.DeserializeObject<ReceiveTransportProbeResult>(result["inMemoryReceiveTransport"].ToString()))
                 .Where(x => x.Address != null);
 
             return probeResults.Select(result => new Uri(result.Address));

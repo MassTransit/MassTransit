@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,6 +20,7 @@ namespace MassTransit.Util.Scanning
     using System.Threading.Tasks;
     using Internals.Extensions;
 
+
     public class AssemblyScanner :
         IAssemblyScanner
     {
@@ -39,7 +40,8 @@ namespace MassTransit.Util.Scanning
 
         public void Assembly(string assemblyName)
         {
-            Assembly(System.Reflection.Assembly.Load(assemblyName));
+            var asm = System.Reflection.Assembly.Load(assemblyName);
+            Assembly(asm);
         }
 
         public void AssemblyContainingType<T>()
@@ -85,20 +87,6 @@ namespace MassTransit.Util.Scanning
         public void ExcludeType<T>()
         {
             Exclude(type => type == typeof(T));
-        }
-
-        public void TheCallingAssembly()
-        {
-            var callingAssembly = FindTheCallingAssembly();
-
-            if (callingAssembly != null)
-            {
-                Assembly(callingAssembly);
-            }
-            else
-            {
-                throw new ConfigurationException("Could not determine the calling assembly, you may need to explicitly call IAssemblyScanner.Assembly()");
-            }
         }
 
         public void AssembliesFromApplicationBaseDirectory()
@@ -205,12 +193,25 @@ namespace MassTransit.Util.Scanning
             return _assemblies.Any();
         }
 
+        public void TheCallingAssembly()
+        {
+            var callingAssembly = FindTheCallingAssembly();
+
+            if (callingAssembly != null)
+            {
+                Assembly(callingAssembly);
+            }
+            else
+            {
+                throw new ConfigurationException("Could not determine the calling assembly, you may need to explicitly call IAssemblyScanner.Assembly()");
+            }
+        }
+
         static Assembly FindTheCallingAssembly()
         {
             var trace = new StackTrace(false);
-
             var thisAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-            var mtAssembly = typeof(IBus).Assembly;
+            var mtAssembly = typeof(IBus).GetTypeInfo().Assembly;
 
             Assembly callingAssembly = null;
             for (var i = 0; i < trace.FrameCount; i++)
@@ -219,7 +220,7 @@ namespace MassTransit.Util.Scanning
                 var declaringType = frame.GetMethod().DeclaringType;
                 if (declaringType != null)
                 {
-                    var assembly = declaringType.Assembly;
+                    var assembly = declaringType.GetTypeInfo().Assembly;
                     if (assembly != thisAssembly && assembly != mtAssembly)
                     {
                         callingAssembly = assembly;

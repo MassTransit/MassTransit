@@ -16,7 +16,6 @@ namespace MassTransit.RabbitMqTransport
     using System.Linq;
     using System.Collections.Generic;
     using System.Globalization;
-    using System.Net;
     using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
@@ -91,7 +90,7 @@ namespace MassTransit.RabbitMqTransport
 
             if (name == "*")
             {
-                string uri = address.GetLeftPart(UriPartial.Path);
+                string uri = address.GetComponents(UriComponents.Scheme | UriComponents.StrongAuthority | UriComponents.Path, UriFormat.UriEscaped);
                 if (uri.EndsWith("*"))
                 {
                     name = NewId.Next().ToString("NS");
@@ -119,10 +118,8 @@ namespace MassTransit.RabbitMqTransport
             bool exclusive = address.Query.GetValueFromQueryString("exclusive", isTemporary);
             bool autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
 
-            ReceiveSettings settings = new RabbitMqReceiveSettings
+            ReceiveSettings settings = new RabbitMqReceiveSettings(name, ExchangeType.Fanout, durable, autoDelete)
             {
-                AutoDelete = autoDelete,
-                Durable = durable,
                 Exclusive = exclusive,
                 QueueName = name,
                 PrefetchCount = prefetch,
@@ -132,66 +129,6 @@ namespace MassTransit.RabbitMqTransport
                 settings.QueueArguments.Add("x-message-ttl", timeToLive.ToString("F0", CultureInfo.InvariantCulture));
 
             return settings;
-        }
-
-        /// <summary>
-        /// Return the send settings for the address
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        public static SendSettings GetSendSettings(this Uri address)
-        {
-            if (string.Compare("rabbitmq", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
-                throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme);
-
-            string name = address.AbsolutePath.Substring(1);
-            string[] pathSegments = name.Split('/');
-            if (pathSegments.Length == 2)
-                name = pathSegments[1];
-
-
-            if (name == "*")
-                throw new ArgumentException("Cannot send to a dynamic address");
-
-            VerifyQueueOrExchangeNameIsLegal(name);
-
-            bool isTemporary = address.Query.GetValueFromQueryString("temporary", false);
-
-            bool durable = address.Query.GetValueFromQueryString("durable", !isTemporary);
-            bool autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
-
-            string exchangeType = address.Query.GetValueFromQueryString("type") ?? ExchangeType.Fanout;
-
-            var settings = new RabbitMqSendSettings(name, exchangeType, durable, autoDelete);
-
-            bool bindToQueue = address.Query.GetValueFromQueryString("bind", false);
-            if (bindToQueue)
-            {
-                string queueName = WebUtility.UrlDecode(address.Query.GetValueFromQueryString("queue"));
-                settings.BindToQueue(queueName);
-            }
-
-            string delayedType = address.Query.GetValueFromQueryString("delayedType");
-            if (!string.IsNullOrWhiteSpace(delayedType))
-                settings.SetExchangeArgument("x-delayed-type", delayedType);
-
-            string bindExchange = address.Query.GetValueFromQueryString("bindexchange");
-            if (!string.IsNullOrWhiteSpace(bindExchange))
-                settings.BindToExchange(bindExchange);
-
-            return settings;
-        }
-
-        public static SendSettings GetSendSettings(this RabbitMqHostSettings hostSettings, Type messageType)
-        {
-            bool isTemporary = messageType.IsTemporaryMessageType();
-
-            bool durable = !isTemporary;
-            bool autoDelete = isTemporary;
-
-            string name = hostSettings.MessageNameFormatter.GetMessageName(messageType).ToString();
-
-            return new RabbitMqSendSettings(name, ExchangeType.Fanout, durable, autoDelete);
         }
 
         public static ConnectionFactory GetConnectionFactory(this RabbitMqHostSettings settings)

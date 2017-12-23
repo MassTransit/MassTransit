@@ -15,6 +15,7 @@ namespace Automatonymous.SubscriptionConnectors
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using GreenPipes;
     using MassTransit;
     using MassTransit.Pipeline;
@@ -86,7 +87,7 @@ namespace Automatonymous.SubscriptionConnectors
 
             foreach (var correlation in correlations)
             {
-                if (correlation.DataType.IsValueType)
+                if (correlation.DataType.GetTypeInfo().IsValueType)
                     continue;
 
                 var genericType = typeof(StateMachineInterfaceType<,>).MakeGenericType(typeof(TInstance), correlation.DataType);

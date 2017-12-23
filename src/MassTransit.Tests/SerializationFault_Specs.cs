@@ -43,7 +43,7 @@ namespace MassTransit.Tests
             _response = _requestClient.Request(new PingMessage());
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
         }
 
@@ -55,6 +55,8 @@ namespace MassTransit.Tests
             });
         }
     }
+
+#if !NETCORE
 
     [TestFixture]
     public class When_a_message_response_fails_to_serialize_properly_and_is_using_the_binary_serializer :
@@ -90,7 +92,7 @@ namespace MassTransit.Tests
             _response = _requestClient.Request(new PingMessage2());
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseBinarySerializer();
         }
@@ -104,8 +106,9 @@ namespace MassTransit.Tests
 
             _faulted = Handled<ReceiveFault>(configurator);
         }
-
     }
+
+    #endif
 
     /// <summary>
     /// this requires debugger tricks to make it work

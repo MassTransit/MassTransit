@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
+    using System.IO;
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
@@ -122,7 +123,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, context =>
             {
@@ -188,9 +189,112 @@ namespace MassTransit.RabbitMqTransport.Tests
             _host = host;
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             Handled<PingMessage>(configurator);
+        }
+    }
+
+
+    [TestFixture]
+    public class A_request_client_exception :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_have_the_correlation_id()
+        {
+            Assert.That(async () => await _responseTask, Throws.TypeOf<RequestFaultException>());
+        }
+
+        [Test]
+        public async Task Should_have_the_exception()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get("MT-Fault-Message", (string)null), Is.EqualTo("Request is so bad, I'm dying here!"));
+        }
+
+        [Test]
+        public async Task Should_have_the_original_destination_address()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.DestinationAddress, Is.EqualTo(InputQueueAddress));
+        }
+
+        [Test]
+        public async Task Should_have_the_original_response_address()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ResponseAddress, Is.EqualTo(BusAddress));
+        }
+
+        [Test]
+        public async Task Should_have_the_original_source_address()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.SourceAddress, Is.EqualTo(BusAddress));
+        }
+
+        [Test]
+        public async Task Should_have_the_reason()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get("MT-Reason", (string)null), Is.EqualTo("fault"));
+        }
+
+        [Test]
+        public async Task Write_out_message_body()
+        {
+            var context = await _errorHandler;
+
+            using (var body = context.ReceiveContext.GetBody())
+            using (var output = new MemoryStream())
+            {
+                await body.CopyToAsync(output);
+                await output.FlushAsync();
+
+                var text = Encoding.UTF8.GetString(output.ToArray());
+                Console.WriteLine(text);
+            }
+        }
+
+        [Test]
+        public async Task Should_move_the_message_to_the_error_queue()
+        {
+            await _errorHandler;
+        }
+
+        Task<ConsumeContext<PingMessage>> _errorHandler;
+        Task<PongMessage> _responseTask;
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            var client = Bus.CreateRequestClient<PingMessage, PongMessage>(InputQueueAddress, TestTimeout);
+
+            _responseTask = client.Request(new PingMessage());
+        }
+
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        {
+            configurator.ReceiveEndpoint(host, "input_queue_error", x =>
+            {
+                x.PurgeOnStartup = true;
+
+                _errorHandler = Handled<PingMessage>(x);
+            });
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            Handler<PingMessage>(configurator, context =>
+            {
+                throw new Exception("Request is so bad, I'm dying here!");
+            });
         }
     }
 }

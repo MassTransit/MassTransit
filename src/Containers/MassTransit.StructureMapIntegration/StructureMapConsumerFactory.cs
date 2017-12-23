@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,40 +14,29 @@ namespace MassTransit.StructureMapIntegration
 {
     using System.Threading.Tasks;
     using GreenPipes;
+    using Scoping;
     using StructureMap;
-    using Util;
 
 
     public class StructureMapConsumerFactory<TConsumer> :
         IConsumerFactory<TConsumer>
         where TConsumer : class
     {
-        readonly IContainer _container;
+        readonly IConsumerFactory<TConsumer> _factory;
 
         public StructureMapConsumerFactory(IContainer container)
         {
-            _container = container;
+            _factory = new ScopeConsumerFactory<TConsumer>(new StructureMapConsumerScopeProvider(container));
         }
 
-        async Task IConsumerFactory<TConsumer>.Send<T>(ConsumeContext<T> context, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
+        Task IConsumerFactory<TConsumer>.Send<T>(ConsumeContext<T> context, IPipe<ConsumerConsumeContext<TConsumer, T>> next)
         {
-            using (var nestedContainer = _container.GetNestedContainer())
-            {
-                var consumer = nestedContainer.GetInstance<TConsumer>();
-                if (consumer == null)
-                {
-                    throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
-                }
-
-                ConsumerConsumeContext<TConsumer, T> consumerConsumeContext = context.PushConsumerScope(consumer, nestedContainer);
-
-                await next.Send(consumerConsumeContext).ConfigureAwait(false);
-            }
+            return _factory.Send(context, next);
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            context.CreateConsumerFactoryScope<TConsumer>("structuremap");
+            _factory.Probe(context);
         }
     }
 }

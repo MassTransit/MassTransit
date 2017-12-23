@@ -16,8 +16,7 @@ namespace MassTransit.RedisIntegration
     using System.Threading.Tasks;
     using Context;
     using Logging;
-    using ServiceStack.DesignPatterns.Model;
-    using ServiceStack.Redis;
+    using StackExchange.Redis;
     using Util;
 
 
@@ -25,16 +24,16 @@ namespace MassTransit.RedisIntegration
         ConsumeContextProxyScope<TMessage>,
         SagaConsumeContext<TSaga, TMessage>
         where TMessage : class
-        where TSaga : class, IVersionedSaga, IHasGuidId
+        where TSaga : class, IVersionedSaga
     {
         static readonly ILog Log = Logger.Get<RedisSagaRepository<TSaga>>();
-        readonly IRedisClientsManager _redis;
+        readonly IDatabase _redisDb;
 
-        public RedisSagaConsumeContext(IRedisClientsManager redis, ConsumeContext<TMessage> context, TSaga instance)
+        public RedisSagaConsumeContext(IDatabase redisDb, ConsumeContext<TMessage> context, TSaga instance)
             : base(context)
         {
             Saga = instance;
-            _redis = redis;
+            _redisDb = redisDb;
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;
@@ -48,19 +47,15 @@ namespace MassTransit.RedisIntegration
             return context;
         }
 
-        Task SagaConsumeContext<TSaga>.SetCompleted()
+        async Task SagaConsumeContext<TSaga>.SetCompleted()
         {
-            using (var client = _redis.GetClient())
-            {
-                client.As<TSaga>().Delete(Saga);
-            }
+            ITypedDatabase<TSaga> db = _redisDb.As<TSaga>();
+            await db.Delete(Saga.CorrelationId).ConfigureAwait(false);
 
             IsCompleted = true;
             if (Log.IsDebugEnabled)
                 Log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName,
                     Saga.CorrelationId);
-
-            return TaskUtil.Completed;
         }
 
         public TSaga Saga { get; }

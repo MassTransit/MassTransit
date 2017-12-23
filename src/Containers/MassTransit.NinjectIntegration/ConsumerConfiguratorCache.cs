@@ -13,45 +13,20 @@
 namespace MassTransit.NinjectIntegration
 {
     using System;
-    using System.Collections.Concurrent;
     using Ninject;
 
 
     public static class ConsumerConfiguratorCache
     {
-        static CachedConfigurator GetOrAdd(Type type)
-        {
-            return Cached.Instance.GetOrAdd(type, _ =>
-                (CachedConfigurator)Activator.CreateInstance(typeof(CachedConfigurator<>).MakeGenericType(type)));
-        }
-
         public static void Configure(Type consumerType, IReceiveEndpointConfigurator configurator, IKernel kernel)
         {
-            GetOrAdd(consumerType).Configure(configurator, kernel);
+            Cached.Registry.Add(consumerType).Configure(configurator, kernel);
         }
 
 
         static class Cached
         {
-            internal static readonly ConcurrentDictionary<Type, CachedConfigurator> Instance =
-                new ConcurrentDictionary<Type, CachedConfigurator>();
-        }
-
-
-        interface CachedConfigurator
-        {
-            void Configure(IReceiveEndpointConfigurator configurator, IKernel kernel);
-        }
-
-
-        class CachedConfigurator<T> :
-            CachedConfigurator
-            where T : class, IConsumer
-        {
-            public void Configure(IReceiveEndpointConfigurator configurator, IKernel kernel)
-            {
-                configurator.Consumer(new NinjectConsumerFactory<T>(kernel));
-            }
+            internal static readonly IConsumerRegistry Registry = new ConsumerRegistry();
         }
     }
 }

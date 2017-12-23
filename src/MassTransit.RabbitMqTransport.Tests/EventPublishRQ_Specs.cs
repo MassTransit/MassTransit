@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             await InputQueueSendEndpoint.Send(new PingMessage());
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             configurator.Consumer<Consumar>();
 

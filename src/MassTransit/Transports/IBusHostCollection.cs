@@ -18,5 +18,12 @@ namespace MassTransit.Transports
     public interface IBusHostCollection :
         IEnumerable<IBusHostControl>
     {
+        /// <summary>
+        /// Return the hosts of the specified type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        IEnumerable<T> GetHosts<T>()
+            where T : class, IHost;
     }
 }

@@ -17,6 +17,9 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using BusConfigurators;
     using MassTransit.Builders;
     using Settings;
+    using Specifications;
+    using Topology;
+    using Transport;
     using Transports;
 
 
@@ -25,12 +28,18 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         IServiceBusBusFactoryConfigurator,
         IBusFactory
     {
+        readonly IServiceBusEndpointConfiguration _configuration;
         readonly BusHostCollection<ServiceBusHost> _hosts;
+        readonly ISendTransportProvider _sendTransportProvider;
         readonly ReceiveEndpointSettings _settings;
 
-        public ServiceBusBusFactoryConfigurator()
+        public ServiceBusBusFactoryConfigurator(IServiceBusEndpointConfiguration configuration)
+            : base(configuration)
         {
+            _configuration = configuration;
             _hosts = new BusHostCollection<ServiceBusHost>();
+
+            _sendTransportProvider = new ServiceBusSendTransportProvider(_hosts);
 
             var queueName = ((IServiceBusHost)null).GetTemporaryQueueName("bus");
             _settings = new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName))
@@ -45,7 +54,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public IBusControl CreateBus()
         {
-            var builder = new ServiceBusBusBuilder(_hosts, ConsumePipeFactory, SendPipeFactory, PublishPipeFactory, _settings);
+            var builder = new ServiceBusBusBuilder(_hosts, _settings, _configuration, _sendTransportProvider);
 
             ApplySpecifications(builder);
 
@@ -54,37 +63,37 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public TimeSpan DuplicateDetectionHistoryTimeWindow
         {
-            set { _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = value; }
+            set => _settings.QueueDescription.DuplicateDetectionHistoryTimeWindow = value;
         }
 
         public bool EnableExpress
         {
-            set { _settings.QueueDescription.EnableExpress = value; }
+            set => _settings.QueueDescription.EnableExpress = value;
         }
 
         public bool EnablePartitioning
         {
-            set { _settings.QueueDescription.EnablePartitioning = value; }
+            set => _settings.QueueDescription.EnablePartitioning = value;
         }
 
         public bool IsAnonymousAccessible
         {
-            set { _settings.QueueDescription.IsAnonymousAccessible = value; }
+            set => _settings.QueueDescription.IsAnonymousAccessible = value;
         }
 
         public int MaxSizeInMegabytes
         {
-            set { _settings.QueueDescription.MaxSizeInMegabytes = value; }
+            set => _settings.QueueDescription.MaxSizeInMegabytes = value;
         }
 
         public bool RequiresDuplicateDetection
         {
-            set { _settings.QueueDescription.RequiresDuplicateDetection = value; }
+            set => _settings.QueueDescription.RequiresDuplicateDetection = value;
         }
 
         public bool SupportOrdering
         {
-            set { _settings.QueueDescription.SupportOrdering = value; }
+            set => _settings.QueueDescription.SupportOrdering = value;
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
@@ -98,6 +107,22 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         public void OverrideDefaultBusEndpointQueueName(string value)
         {
             _settings.QueueDescription.Path = value;
+        }
+
+        public void SendTopology<T>(Action<IServiceBusMessageSendTopologyConfigurator<T>> configureTopology)
+            where T : class
+        {
+            var configurator = _configuration.SendTopology.GetMessageTopology<T>();
+
+            configureTopology?.Invoke(configurator);
+        }
+
+        public void PublishTopology<T>(Action<IServiceBusMessagePublishTopologyConfigurator<T>> configureTopology)
+            where T : class
+        {
+            var configurator = _configuration.PublishTopology.GetMessageTopology<T>();
+
+            configureTopology?.Invoke(configurator);
         }
 
         public IServiceBusHost Host(ServiceBusHostSettings settings)
@@ -123,7 +148,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public int PrefetchCount
         {
-            set { _settings.PrefetchCount = value; }
+            set => _settings.PrefetchCount = value;
         }
 
         public void ReceiveEndpoint(IServiceBusHost host, string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
@@ -132,7 +157,9 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             if (serviceBusHost == null)
                 throw new ArgumentException("Must be a ServiceBusHost", nameof(host));
 
-            var specification = new ServiceBusReceiveEndpointSpecification(serviceBusHost, queueName);
+            var endpointTopologySpecification = _configuration.CreateConfiguration();
+
+            var specification = new ServiceBusReceiveEndpointSpecification(serviceBusHost, queueName, endpointTopologySpecification, _sendTransportProvider);
 
             specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);
@@ -151,7 +178,9 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         public void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName,
             Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
-            var specification = new ServiceBusSubscriptionEndpointSpecification(host, subscriptionName, topicName);
+            var endpointTopologySpecification = _configuration.CreateConfiguration();
+
+            var specification = new ServiceBusSubscriptionEndpointSpecification(host, subscriptionName, topicName, endpointTopologySpecification, _sendTransportProvider);
 
             specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);
@@ -163,47 +192,47 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public TimeSpan AutoDeleteOnIdle
         {
-            set { _settings.QueueDescription.AutoDeleteOnIdle = value; }
+            set => _settings.QueueDescription.AutoDeleteOnIdle = value;
         }
 
         public TimeSpan DefaultMessageTimeToLive
         {
-            set { _settings.QueueDescription.DefaultMessageTimeToLive = value; }
+            set => _settings.QueueDescription.DefaultMessageTimeToLive = value;
         }
 
         public bool EnableBatchedOperations
         {
-            set { _settings.QueueDescription.EnableBatchedOperations = value; }
+            set => _settings.QueueDescription.EnableBatchedOperations = value;
         }
 
         public bool EnableDeadLetteringOnMessageExpiration
         {
-            set { _settings.QueueDescription.EnableDeadLetteringOnMessageExpiration = value; }
+            set => _settings.QueueDescription.EnableDeadLetteringOnMessageExpiration = value;
         }
 
         public string ForwardDeadLetteredMessagesTo
         {
-            set { _settings.QueueDescription.ForwardDeadLetteredMessagesTo = value; }
+            set => _settings.QueueDescription.ForwardDeadLetteredMessagesTo = value;
         }
 
         public TimeSpan LockDuration
         {
-            set { _settings.QueueDescription.LockDuration = value; }
+            set => _settings.QueueDescription.LockDuration = value;
         }
 
         public int MaxDeliveryCount
         {
-            set { _settings.QueueDescription.MaxDeliveryCount = value; }
+            set => _settings.QueueDescription.MaxDeliveryCount = value;
         }
 
         public bool RequiresSession
         {
-            set { _settings.QueueDescription.RequiresSession = value; }
+            set => _settings.QueueDescription.RequiresSession = value;
         }
 
         public string UserMetadata
         {
-            set { _settings.QueueDescription.UserMetadata = value; }
+            set => _settings.QueueDescription.UserMetadata = value;
         }
 
         public void SelectBasicTier()
@@ -219,7 +248,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         TimeSpan IServiceBusQueueEndpointConfigurator.MessageWaitTimeout
         {
-            set { _settings.MessageWaitTimeout = value; }
+            set => _settings.MessageWaitTimeout = value;
         }
     }
 }

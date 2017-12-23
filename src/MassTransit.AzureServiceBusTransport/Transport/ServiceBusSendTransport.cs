@@ -23,7 +23,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using Contexts;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
     using MassTransit.Scheduling;
     using Microsoft.ServiceBus.Messaging;
@@ -57,7 +56,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
         {
-            var context = new ServiceBusSendContextImpl<T>(message, cancelSend);
+            var context = new AzureServiceBusSendContext<T>(message, cancelSend);
 
             try
             {
@@ -92,6 +91,8 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 }
                 else
                 {
+                    await _observers.PreSend(context).ConfigureAwait(false);
+
                     using (var messageBodyStream = context.GetBodyStream())
                     {
                         using (var brokeredMessage = new BrokeredMessage(messageBodyStream))
@@ -147,8 +148,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                             }
                             else
                             {
-                                await _observers.PreSend(context).ConfigureAwait(false);
-
                                 await _client.Send(brokeredMessage).ConfigureAwait(false);
 
                                 context.LogSent();

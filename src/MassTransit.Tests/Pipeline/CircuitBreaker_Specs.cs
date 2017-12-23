@@ -19,7 +19,6 @@ namespace MassTransit.Tests.Pipeline
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
-    using Transports.InMemoryTransport_Specs;
 
 
     [TestFixture]
@@ -29,7 +28,7 @@ namespace MassTransit.Tests.Pipeline
         public async Task Should_allow_the_first_call()
         {
             var count = 0;
-            IPipe<ConsumeContext<A>> pipe = Pipe.New<ConsumeContext<A>>(x =>
+            IPipe<ConsumeContext<Running_two_in_memory_transports.A>> pipe = Pipe.New<ConsumeContext<Running_two_in_memory_transports.A>>(x =>
             {
                 x.UseCircuitBreaker(v =>
                 {
@@ -44,7 +43,7 @@ namespace MassTransit.Tests.Pipeline
                 });
             });
 
-            var context = new TestConsumeContext<A>(new A());
+            var context = new TestConsumeContext<Running_two_in_memory_transports.A>(new Running_two_in_memory_transports.A());
 
             for (var i = 0; i < 100; i++)
                 Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());

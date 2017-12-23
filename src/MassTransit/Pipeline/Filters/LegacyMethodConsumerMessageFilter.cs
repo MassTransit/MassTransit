@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -38,18 +38,16 @@ namespace MassTransit.Pipeline.Filters
         Task IFilter<ConsumerConsumeContext<TConsumer, TMessage>>.Send(ConsumerConsumeContext<TConsumer, TMessage> context,
             IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
         {
-            var messageConsumer = context.Consumer as IMessageConsumer<TMessage>;
-            if (messageConsumer == null)
+            if (context.Consumer is IMessageConsumer<TMessage> messageConsumer)
             {
-                string message =
-                    $"Consumer type {TypeMetadataCache<TConsumer>.ShortName} is not a consumer of message type {TypeMetadataCache<TMessage>.ShortName}";
+                messageConsumer.Consume(context.Message);
 
-                throw new ConsumerMessageException(message);
+                return TaskUtil.Completed;
             }
 
-            messageConsumer.Consume(context.Message);
+            var message = $"Consumer type {TypeMetadataCache<TConsumer>.ShortName} is not a consumer of message type {TypeMetadataCache<TMessage>.ShortName}";
 
-            return TaskUtil.Completed;
+            throw new ConsumerMessageException(message);
         }
     }
 }

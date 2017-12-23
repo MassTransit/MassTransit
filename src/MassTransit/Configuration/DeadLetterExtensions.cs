@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using GreenPipes;
     using PipeConfigurators;
-    using Pipeline;
 
 
     public static class DeadLetterExtensions

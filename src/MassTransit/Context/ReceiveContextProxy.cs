@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,6 +18,7 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Topology;
 
 
     public abstract class ReceiveContextProxy :
@@ -82,7 +83,8 @@ namespace MassTransit.Context
         }
 
         ISendEndpointProvider ReceiveContext.SendEndpointProvider => _context.SendEndpointProvider;
-
         IPublishEndpointProvider ReceiveContext.PublishEndpointProvider => _context.PublishEndpointProvider;
+        ISendTransportProvider ReceiveContext.SendTransportProvider => _context.SendTransportProvider;
+        IReceiveEndpointTopology ReceiveContext.Topology => _context.Topology;
     }
 }

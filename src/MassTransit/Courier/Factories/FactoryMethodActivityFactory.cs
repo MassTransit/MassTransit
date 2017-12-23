@@ -42,5 +42,10 @@ namespace MassTransit.Courier.Factories
         {
             return _compensateFactory.Compensate(context, next);
         }
+
+        public void Probe(ProbeContext context)
+        {
+            context.CreateScope("factoryMethod");
+        }
     }
 }

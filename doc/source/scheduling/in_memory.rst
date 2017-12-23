@@ -1,6 +1,14 @@
 Hosting Quartz In-Memory
 ------------------------
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/scheduling/in-memory.html
+
 One of the nice features of quartz is that it can run entirely in memory without any additional dependencies.
 
 To use Quartz in-memory for message scheduling:

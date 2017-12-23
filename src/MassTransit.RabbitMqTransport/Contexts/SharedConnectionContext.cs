@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _context = context;
             _cancellationToken = cancellationToken;
 
-            _participant = scope.CreateParticipant($"{TypeMetadataCache<SharedConnectionContext>.ShortName} - {context.HostSettings.ToDebugString()}");
+            _participant = scope.CreateParticipant($"{TypeMetadataCache<SharedConnectionContext>.ShortName} - {context.Description}");
 
             _participant.SetReady();
         }
@@ -56,6 +56,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
         }
 
         IConnection ConnectionContext.Connection => _context.Connection;
+        public string Description => _context.Description;
+        public Uri HostAddress => _context.HostAddress;
+
         RabbitMqHostSettings ConnectionContext.HostSettings => _context.HostSettings;
 
         Task<IModel> ConnectionContext.CreateModel()

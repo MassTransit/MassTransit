@@ -1,6 +1,14 @@
 Crafting a request/response conversation
 ========================================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/request-response.html
+
 Request/response is a common pattern in application development, where a component sends a request to a service and
 continues once the response is received. In a distributed system, this can increase the latency of an application
 since the service many be hosted in another process, on another machine, or may even be a remote service in another

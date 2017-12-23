@@ -23,7 +23,12 @@ namespace MassTransit.Log4NetIntegration.Logging
     {
         public MassTransit.Logging.ILog Get(string name)
         {
-            return new Log4NetLog(LogManager.GetLogger(name));
+#if NETCORE
+            var logger = LogManager.GetLogger(System.Reflection.Assembly.GetEntryAssembly(), name);            
+#else
+            var logger = LogManager.GetLogger(name);
+#endif
+            return new Log4NetLog(logger);
         }
 
         public void Shutdown()
@@ -40,9 +45,14 @@ namespace MassTransit.Log4NetIntegration.Logging
         {
             Logger.UseLogger(new Log4NetLogger());
 
+#if NETCORE
+            file = Path.Combine(AppContext.BaseDirectory, file);
+            var logRepository = LogManager.GetRepository(System.Reflection.Assembly.GetEntryAssembly());
+            XmlConfigurator.Configure(logRepository, new FileInfo(file));
+#else
             file = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, file);
-            var configFile = new FileInfo(file);
-            XmlConfigurator.Configure(configFile);
+            XmlConfigurator.Configure(new FileInfo(file));
+#endif
         }
     }
 }

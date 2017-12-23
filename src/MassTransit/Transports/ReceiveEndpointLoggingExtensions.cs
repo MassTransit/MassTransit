@@ -64,7 +64,8 @@ namespace MassTransit.Transports
                 var faultMessage = GetFaultMessage(exception);
 
                 _messages.Error(
-                    $"R-FAULT {context.ReceiveContext.InputAddress} {GetMessageId(context.ReceiveContext)} {TypeMetadataCache<T>.ShortName} {consumerType}({duration}) {faultMessage}");
+                    $"R-FAULT {context.ReceiveContext.InputAddress} {GetMessageId(context.ReceiveContext)} {TypeMetadataCache<T>.ShortName} {consumerType}({duration}) {faultMessage}",
+                    exception);
             }
         }
 
@@ -74,7 +75,7 @@ namespace MassTransit.Transports
             {
                 var faultMessage = GetFaultMessage(exception);
 
-                _messages.Warn($"R-RETRY {context.ReceiveContext.InputAddress} {GetMessageId(context.ReceiveContext)} {faultMessage}");
+                _messages.Warn($"R-RETRY {context.ReceiveContext.InputAddress} {GetMessageId(context.ReceiveContext)} {faultMessage}", exception);
             }
         }
 
@@ -85,7 +86,7 @@ namespace MassTransit.Transports
             {
                 var faultMessage = GetFaultMessage(exception);
 
-                _messages.Warn($"S-FAULT {context.DestinationAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName} {faultMessage}");
+                _messages.Warn($"S-FAULT {context.DestinationAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName} {faultMessage}", exception);
             }
         }
 

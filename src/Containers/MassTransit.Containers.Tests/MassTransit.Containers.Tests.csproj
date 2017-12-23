@@ -1,231 +1,42 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{9CE51963-9E51-48EE-A75F-62C9CB0CF23C}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.Containers.Tests</RootNamespace>
-    <AssemblyName>MassTransit.Containers.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
+    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac">
-      <HintPath>..\..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
-    </Reference>
-    <Reference Include="Automatonymous, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Automatonymous.3.5.11\lib\net452\Automatonymous.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Castle.Core">
-      <HintPath>..\..\packages\Castle.Core.3.3.3\lib\net45\Castle.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Castle.Windsor, Version=3.4.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Castle.Windsor.3.4.0\lib\net45\Castle.Windsor.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\GreenPipes.1.0.9\lib\net452\GreenPipes.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Practices.Unity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Practices.Unity.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Practices.Unity.RegistrationByConvention, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NewId, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NewId.3.0.0\lib\net452\NewId.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Ninject">
-      <HintPath>..\..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
-    </Reference>
-    <Reference Include="Ninject.Extensions.NamedScope">
-      <HintPath>..\..\packages\Ninject.Extensions.NamedScope.3.2.0.0\lib\net45-full\Ninject.Extensions.NamedScope.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework, Version=3.6.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NUnit.3.6.1\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Serilog.2.2.1\lib\net45\Serilog.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Serilog.Sinks.Console, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Serilog.Sinks.Console.2.1.0\lib\net45\Serilog.Sinks.Console.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Shouldly, Version=2.8.2.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Shouldly.2.8.2\lib\net451\Shouldly.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="SimpleInjector, Version=3.3.2.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SimpleInjector.3.3.2\lib\net45\SimpleInjector.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="SimpleInjector.Extensions.ExecutionContextScoping, Version=3.3.2.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SimpleInjector.Extensions.ExecutionContextScoping.3.3.2\lib\net45\SimpleInjector.Extensions.ExecutionContextScoping.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="StructureMap, Version=4.4.3.564, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\StructureMap.4.4.3\lib\net45\StructureMap.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="Autofac" Version="4.6.2" />
+    <PackageReference Include="Automatonymous" Version="3.6.1" />
+    <PackageReference Include="Castle.Core" Version="4.2.0" />
+    <PackageReference Include="Castle.Windsor" Version="4.1.0" />
+    <PackageReference Include="GreenPipes" Version="1.2.0" />
+    <PackageReference Include="microsoft.net.test.sdk" Version="15.0.0" />
+    <PackageReference Include="NUnit" Version="3.9.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
+    <PackageReference Include="NewId" Version="3.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Shouldly" Version="2.8.3" />
+    <PackageReference Include="SimpleInjector" Version="4.0.12" />
+    <PackageReference Include="StructureMap" Version="4.5.3" />
+    <PackageReference Include="Unity" Version="5.5.0" />
+    <ProjectReference Include="..\..\Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj" />
+    <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
+    <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.Automatonymous.AutofacIntegration\MassTransit.Automatonymous.AutofacIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.Automatonymous.StructureMapIntegration\MassTransit.Automatonymous.StructureMapIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.SimpleInjectorIntegration\MassTransit.SimpleInjectorIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.UnityIntegration\MassTransit.UnityIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutofacRegistrationExtension_Specs.cs" />
-    <Compile Include="AutofacRegistration_Specs.cs" />
-    <Compile Include="Autofac_FilterSpecs.cs" />
-    <Compile Include="StructureMapStateMachineSaga_Specs.cs" />
-    <Compile Include="AutofacStateMachineSaga_Specs.cs" />
-    <Compile Include="Autofac_TenantContainerSpecs.cs" />
-    <Compile Include="CastleWindsor_Specs.cs" />
-    <Compile Include="ContextSetup.cs" />
-    <Compile Include="Ninject_Specs.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Autofac_Specs.cs" />
-    <Compile Include="Scenarios\AnotherMessageInterface.cs" />
-    <Compile Include="Scenarios\FirstSagaMessage.cs" />
-    <Compile Include="Scenarios\ISimpleConsumerDependency.cs" />
-    <Compile Include="Scenarios\SecondSagaMessage.cs" />
-    <Compile Include="Scenarios\AnotherMessageConsumer.cs" />
-    <Compile Include="Scenarios\AnotherMessageConsumerImpl.cs" />
-    <Compile Include="Scenarios\SimpleConsumerDependency.cs" />
-    <Compile Include="Scenarios\SimpleSaga.cs" />
-    <Compile Include="Scenarios\StateMachines\PublishTestStartedActivity.cs" />
-    <Compile Include="Scenarios\StateMachines\StartTest.cs" />
-    <Compile Include="Scenarios\StateMachines\TestInstance.cs" />
-    <Compile Include="Scenarios\StateMachines\TestStarted.cs" />
-    <Compile Include="Scenarios\StateMachines\TestStateMachineSaga.cs" />
-    <Compile Include="Scenarios\StateMachines\TestUpdated.cs" />
-    <Compile Include="Scenarios\StateMachines\UpdateTest.cs" />
-    <Compile Include="Scenarios\ThirdSagaMessage.cs" />
-    <Compile Include="Scenarios\When_registering_a_saga.cs" />
-    <Compile Include="Scenarios\When_registering_a_consumer.cs" />
-    <Compile Include="Scenarios\Given_a_service_bus_instance.cs" />
-    <Compile Include="Scenarios\SimpleConsumer.cs" />
-    <Compile Include="Scenarios\SimpleMessageClass.cs" />
-    <Compile Include="Scenarios\SimpleMessageInterface.cs" />
-    <Compile Include="SimpleInjector_Specs.cs" />
-    <Compile Include="StructureMap_Idiomatic.cs" />
-    <Compile Include="StructureMap_Specs.cs" />
-    <Compile Include="Unity_Specs.cs" />
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj">
-      <Project>{0e90afe6-99e8-43cf-995e-e99466dd6807}</Project>
-      <Name>MassTransit.SerilogIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj">
-      <Project>{a852511b-2742-4f4d-bd4e-adddbf3bd4b3}</Project>
-      <Name>MassTransit.AutomatonymousIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
-      <Project>{3c4b5f1a-69ad-415e-9f40-a7fdbd7a3012}</Project>
-      <Name>MassTransit.TestFramework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj">
-      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
-      <Name>MassTransit</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj">
-      <Project>{A31F2C6B-C806-46FD-A4F3-C54209DD495C}</Project>
-      <Name>MassTransit.AutofacIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Automatonymous.AutofacIntegration\MassTransit.Automatonymous.AutofacIntegration.csproj">
-      <Project>{b2c9f22a-459a-4828-8017-0db76f81f1a1}</Project>
-      <Name>MassTransit.Automatonymous.AutofacIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Automatonymous.StructureMapIntegration\MassTransit.Automatonymous.StructureMapIntegration.csproj">
-      <Project>{4a042032-21a2-40ca-bbe7-5d47f786a949}</Project>
-      <Name>MassTransit.Automatonymous.StructureMapIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj">
-      <Project>{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}</Project>
-      <Name>MassTransit.NinjectIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.SimpleInjectorIntegration\MassTransit.SimpleInjectorIntegration.csproj">
-      <Project>{259e9f30-40ec-47b0-83ae-a2271ef3421d}</Project>
-      <Name>MassTransit.SimpleInjectorIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj">
-      <Project>{F5E67502-2B30-484C-88C3-97710291F5AA}</Project>
-      <Name>MassTransit.StructureMapIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.UnityIntegration\MassTransit.UnityIntegration.csproj">
-      <Project>{8AB71E2F-3210-45AF-982F-FC782D9C06B7}</Project>
-      <Name>MassTransit.UnityIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj">
-      <Project>{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}</Project>
-      <Name>MassTransit.WindsorIntegration</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+  </PropertyGroup>
 </Project>

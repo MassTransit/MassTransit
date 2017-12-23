@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,10 +13,11 @@
 namespace MassTransit.HttpTransport.Builders
 {
     using System;
-    using Clients;
     using MassTransit.Builders;
-    using MassTransit.Pipeline;
+    using Topology;
+    using Transport;
     using Transports;
+    using Transports.InMemory;
 
 
     public class HttpReceiveEndpointBuilder :
@@ -24,29 +25,20 @@ namespace MassTransit.HttpTransport.Builders
         IHttpReceiveEndpointBuilder
     {
         readonly IHttpHost _host;
+        readonly IInMemoryEndpointConfiguration _configuration;
+        readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpReceiveEndpointBuilder(IHttpHost host, IConsumePipe consumePipe, IBusBuilder busBuilder)
-            : base(consumePipe, busBuilder)
+        public HttpReceiveEndpointBuilder(IBusBuilder busBuilder, IHttpHost host, BusHostCollection<HttpHost> hosts, IInMemoryEndpointConfiguration configuration)
+            : base(busBuilder, configuration)
         {
             _host = host;
+            _configuration = configuration;
+            _hosts = hosts;
         }
 
-        public ISendEndpointProvider CreateSendEndpointProvider(Uri sourceAddress, params ISendPipeSpecification[] specifications)
+        public IHttpReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress)
         {
-            var pipe = CreateSendPipe(specifications);
-
-            var provider = new HttpSendEndpointProvider(MessageSerializer, sourceAddress, SendTransportProvider, pipe);
-
-            return new SendEndpointCache(provider);
-        }
-
-        public IPublishEndpointProvider CreatePublishEndpointProvider(Uri sourceAddress, params IPublishPipeSpecification[] specifications)
-        {
-            var publishPipe = CreatePublishPipe(specifications);
-
-            var sendPipe = CreateSendPipe();
-
-            return new HttpPublishEndpointProvider(_host, MessageSerializer, SendTransportProvider, publishPipe, sendPipe);
+            return new HttpReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _host, _hosts);
         }
     }
 }

@@ -60,6 +60,7 @@ namespace MassTransit
         /// <param name="connector"></param>
         /// <param name="requestId"></param>
         /// <param name="handler"></param>
+        /// <param name="specifications"></param>
         /// <returns></returns>
         public static ConnectHandle ConnectRequestHandler<T>(this IRequestPipeConnector connector, Guid requestId, MessageHandler<T> handler,
             params IPipeSpecification<ConsumeContext<T>>[] specifications)

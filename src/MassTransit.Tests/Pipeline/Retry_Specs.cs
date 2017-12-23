@@ -13,6 +13,7 @@
 namespace MassTransit.Tests.Pipeline
 {
     using System;
+    using Context;
     using GreenPipes;
     using MassTransit.Pipeline;
     using NUnit.Framework;
@@ -62,6 +63,43 @@ namespace MassTransit.Tests.Pipeline
                 {
                     count++;
                     throw new IntentionalTestException("Kaboom!");
+                });
+            });
+
+            var context = new TestConsumeContext<A>(new A());
+
+            Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
+
+            count.ShouldBe(1);
+        }
+
+        [Test]
+        public void Should_support_overloading_downstream_on_cc()
+        {
+            int count = 0;
+            IPipe<ConsumeContext> pipe = Pipe.New<ConsumeContext>(x =>
+            {
+                x.UseRetry(r =>
+                {
+                    r.Handle<IntentionalTestException>();
+                    r.Interval(4, TimeSpan.FromMilliseconds(2));
+                });
+                x.UseRetry(r =>
+                {
+                    r.Handle<IntentionalTestException>();
+                    r.None();
+                });
+                x.UseDispatch(new ConsumeContextConverterFactory(), d =>
+                {
+                    d.Pipe<ConsumeContext<A>>(a =>
+                    {
+                        a.UseExecute(payload =>
+                        {
+                            count++;
+                            throw new IntentionalTestException("Kaboom!");
+                        });
+
+                    });
                 });
             });
 

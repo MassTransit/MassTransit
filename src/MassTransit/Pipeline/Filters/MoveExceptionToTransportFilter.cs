@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading.Tasks;
     using Events;
     using GreenPipes;
-    using Logging;
     using Transports;
     using Util;
 
@@ -29,16 +28,9 @@ namespace MassTransit.Pipeline.Filters
         IFilter<ExceptionReceiveContext>
     {
         readonly Uri _destinationAddress;
-        readonly Lazy<Task<ISendTransport>> _getDestinationTransport;
 
-        readonly ILog _log = Logger.Get<MoveExceptionToTransportFilter>();
-        readonly IPublishEndpointProvider _publishEndpoint;
-
-        public MoveExceptionToTransportFilter(IPublishEndpointProvider publishEndpoint, Uri destinationAddress,
-            Func<Task<ISendTransport>> getDestinationTransport)
+        public MoveExceptionToTransportFilter(Uri destinationAddress)
         {
-            _getDestinationTransport = new Lazy<Task<ISendTransport>>(getDestinationTransport);
-            _publishEndpoint = publishEndpoint;
             _destinationAddress = destinationAddress;
         }
 
@@ -50,7 +42,7 @@ namespace MassTransit.Pipeline.Filters
 
         async Task IFilter<ExceptionReceiveContext>.Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)
         {
-            var transport = await _getDestinationTransport.Value.ConfigureAwait(false);
+            var transport = await context.SendTransportProvider.GetSendTransport(_destinationAddress).ConfigureAwait(false);
 
             var exception = context.Exception.GetBaseException() ?? context.Exception;
 
@@ -86,7 +78,7 @@ namespace MassTransit.Pipeline.Filters
 
             ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType.MediaType, faultedMessageId);
 
-            var publishEndpoint = _publishEndpoint.CreatePublishEndpoint(context.InputAddress);
+            var publishEndpoint = context.PublishEndpointProvider.CreatePublishEndpoint(context.InputAddress);
 
             var publishTask = publishEndpoint.Publish(fault, context.CancellationToken);
 

@@ -24,6 +24,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         using NUnit.Framework;
         using Saga;
         using TestFramework;
+        using Testing;
 
 
         class InstanceMap : NHibernateIntegration.SagaClassMapping<Instance>
@@ -158,7 +159,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             [Test]
             public async Task Should_receive_the_published_message()
             {
-                Task<ConsumeContext<StartupComplete>> messageReceived = SubscribeHandler<StartupComplete>();
+                Task<ConsumeContext<StartupComplete>> messageReceived = ConnectPublishHandler<StartupComplete>();
 
                 var message = new Start("Joe");
 
@@ -242,7 +243,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             [Test]
             public async Task Should_receive_the_published_message()
             {
-                Task<ConsumeContext<StartupComplete>> messageReceived = SubscribeHandler<StartupComplete>();
+                Task<ConsumeContext<StartupComplete>> messageReceived = ConnectPublishHandler<StartupComplete>();
 
                 Guid sagaId = NewId.NextGuid();
 
@@ -348,7 +349,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             [Test]
             public async Task Should_receive_the_published_message()
             {
-                Task<ConsumeContext<StartupComplete>> messageReceived = SubscribeHandler<StartupComplete>();
+                Task<ConsumeContext<StartupComplete>> messageReceived = ConnectPublishHandler<StartupComplete>();
 
                 Guid sagaId = NewId.NextGuid();
 

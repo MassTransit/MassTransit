@@ -11,7 +11,7 @@ of the task, and appropriately handles failure and handing off to other nodes in
 > Turnout is an early-access feature, and it's only been tested with some basic scenarios. It works, but there 
 > are rough edges, so consider it like running with scissors.
 
-## Configurating a Turnout
+## Configuring a Turnout
 
 To configure a turnout, a turnout endpoint is created for the command message type.
 

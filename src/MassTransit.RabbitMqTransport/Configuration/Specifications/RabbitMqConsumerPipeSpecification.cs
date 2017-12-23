@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,8 @@
 namespace MassTransit.RabbitMqTransport.Specifications
 {
     using System.Collections.Generic;
-    using System.Linq;
     using GreenPipes;
-    using MassTransit.Pipeline.Pipes;
+    using MassTransit.Pipeline;
     using Pipeline;
     using Topology;
     using Util;
@@ -24,44 +23,44 @@ namespace MassTransit.RabbitMqTransport.Specifications
     public class RabbitMqConsumerPipeSpecification :
         IPipeSpecification<ConnectionContext>
     {
-        readonly ExchangeBindingSettings[] _exchangeBindings;
-        readonly IManagementPipe _managementPipe;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly IRabbitMqHost _host;
+        readonly IConsumePipeConnector _managementPipe;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ReceiveSettings _settings;
         readonly ITaskSupervisor _supervisor;
+        readonly IRabbitMqReceiveEndpointTopology _topology;
         readonly IReceiveTransportObserver _transportObserver;
-        readonly IRabbitMqHost _host;
 
         public RabbitMqConsumerPipeSpecification(IPipe<ReceiveContext> receivePipe, ReceiveSettings settings, IReceiveObserver receiveObserver,
-            IReceiveTransportObserver transportObserver, IEnumerable<ExchangeBindingSettings> exchangeBindings, ITaskSupervisor supervisor,
-            IManagementPipe managementPipe, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider, IRabbitMqHost host)
+            IReceiveTransportObserver transportObserver, ITaskSupervisor supervisor, IConsumePipeConnector managementPipe, IRabbitMqHost host,
+            IRabbitMqReceiveEndpointTopology topology)
         {
             _settings = settings;
             _receiveObserver = receiveObserver;
             _transportObserver = transportObserver;
             _supervisor = supervisor;
-            _exchangeBindings = exchangeBindings.Distinct().ToArray();
             _receivePipe = receivePipe;
             _managementPipe = managementPipe;
-            _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
             _host = host;
+            _topology = topology;
         }
 
         public void Apply(IPipeBuilder<ConnectionContext> builder)
         {
             IPipe<ModelContext> pipe = Pipe.New<ModelContext>(x =>
             {
-                x.UseFilter(new PrepareReceiveQueueFilter(_settings, _managementPipe, _exchangeBindings));
+                x.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, _topology.TopologyLayout));
 
-                x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor, _sendEndpointProvider,
-                    _publishEndpointProvider));
+                if (_settings.PurgeOnStartup)
+                    x.UseFilter(new PurgeOnStartupFilter(_settings.QueueName));
+
+                x.UseFilter(new PrefetchCountFilter(_managementPipe, _settings.PrefetchCount));
+
+                x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor, _topology));
             });
 
-            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe, _supervisor, _host);
+            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe, _supervisor, _host, _topology);
 
             builder.AddFilter(modelFilter);
         }
@@ -69,7 +68,7 @@ namespace MassTransit.RabbitMqTransport.Specifications
         public IEnumerable<ValidationResult> Validate()
         {
             if (_settings == null)
-                yield return this.Failure("Filter", "must not be null");
+                yield return this.Failure("Settings", "must not be null");
         }
     }
 }

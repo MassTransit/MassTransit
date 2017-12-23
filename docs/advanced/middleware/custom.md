@@ -81,7 +81,7 @@ public class ExceptionLoggerFilter<T> :
         {
             Interlocked.Increment(ref _attemptCount);
             await next.Send(context);
-            Interlocked.Increment(ref _successCount)
+            Interlocked.Increment(ref _successCount);
         }
         catch (Exception ex)
         {

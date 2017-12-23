@@ -20,7 +20,7 @@ namespace MassTransit.RabbitMqTransport
     /// </summary>
     public interface IRabbitMqReceiveEndpointConfigurator :
         IReceiveEndpointConfigurator,
-        IQueueConfigurator
+        IQueueEndpointConfigurator
     {
         /// <summary>
         /// The host on which the endpoint is being configured

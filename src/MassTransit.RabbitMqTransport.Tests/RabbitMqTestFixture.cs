@@ -43,11 +43,13 @@ namespace MassTransit.RabbitMqTransport.Tests
                 RabbitMqTestHarness.HostAddress = logicalHostAddress;
             }
 
+            RabbitMqTestHarness.OnConfigureRabbitMqHost += ConfigureRabbitMqHost;
             RabbitMqTestHarness.OnConfigureRabbitMqBus += ConfigureRabbitMqBus;
             RabbitMqTestHarness.OnConfigureRabbitMqBusHost += ConfigureRabbitMqBusHost;
-            RabbitMqTestHarness.OnConfigureRabbitMqReceiveEndoint += ConfigureRabbitMqReceiveEndoint;
+            RabbitMqTestHarness.OnConfigureRabbitMqReceiveEndoint += ConfigureRabbitMqReceiveEndpoint;
             RabbitMqTestHarness.OnCleanupVirtualHost += OnCleanupVirtualHost;
         }
+
 
         /// <summary>
         /// The sending endpoint for the InputQueue
@@ -79,6 +81,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             return RabbitMqTestHarness.Stop();
         }
 
+        protected virtual void ConfigureRabbitMqHost(IRabbitMqHostConfigurator configurator)
+        {
+        }
+
         protected virtual void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
         }
@@ -87,7 +93,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
         }
 
-        protected virtual void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
         }
 

@@ -13,6 +13,7 @@
 namespace MassTransit.Serialization.JsonConverters
 {
     using System;
+    using System.Reflection;
     using GreenPipes.Internals.Reflection;
     using Newtonsoft.Json;
     using Util;
@@ -27,6 +28,7 @@ namespace MassTransit.Serialization.JsonConverters
         {
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
+            
             _builder = builder;
         }
 
@@ -44,7 +46,7 @@ namespace MassTransit.Serialization.JsonConverters
 
         public override bool CanConvert(Type objectType)
         {
-            return objectType.IsInterface && TypeMetadataCache.IsValidMessageType(objectType);
+            return objectType.GetTypeInfo().IsInterface && TypeMetadataCache.IsValidMessageType(objectType);
         }
     }
 }

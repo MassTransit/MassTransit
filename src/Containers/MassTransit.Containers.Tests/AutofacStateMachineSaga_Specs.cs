@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests
 {
+    using System.Reflection;
     using System.Threading.Tasks;
     using Autofac;
     using NUnit.Framework;
@@ -26,8 +27,8 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_receive_the_first_event_successfully()
         {
-            Task<ConsumeContext<TestStarted>> started = SubscribeHandler<TestStarted>();
-            Task<ConsumeContext<TestUpdated>> updated = SubscribeHandler<TestUpdated>();
+            Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
+            Task<ConsumeContext<TestUpdated>> updated = ConnectPublishHandler<TestUpdated>();
 
             await InputQueueSendEndpoint.Send(new StartTest {CorrelationId = NewId.NextGuid(), TestKey = "Unique"});
 
@@ -50,7 +51,7 @@ namespace MassTransit.Containers.Tests
 
             builder.RegisterType<PublishTestStartedActivity>();
 
-            builder.RegisterStateMachineSagas(typeof(TestStateMachineSaga).Assembly);
+            builder.RegisterStateMachineSagas(typeof(TestStateMachineSaga).GetTypeInfo().Assembly);
 
             _container = builder.Build();
 

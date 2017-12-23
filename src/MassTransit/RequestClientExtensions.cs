@@ -13,13 +13,32 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Pipeline;
     using Transports.InMemory;
+    using Util;
 
 
     public static class RequestClientExtensions
     {
+        /// <summary>
+        /// Send the request, and complete the response task when the response is received. If
+        /// the request times out, a RequestTimeoutException is thrown. If the remote service 
+        /// returns a fault, the task is set to exception status.
+        /// </summary>
+        /// <param name="client">The request client</param>
+        /// <param name="values">The values to initialize the request object, anonymously</param>
+        /// <param name="cancellationToken">A cancellation token for the request</param>
+        /// <returns>The response Task</returns>
+        public static Task<TResponse> Request<TRequest, TResponse>(this IRequestClient<TRequest, TResponse> client, object values,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            TRequest request = TypeMetadataCache<TRequest>.InitializeFromObject(values);
+
+            return client.Request(request, cancellationToken);
+        }
+
         /// <summary>
         /// Creates a request client that uses the bus to retrieve the endpoint and send the request.
         /// </summary>
@@ -79,7 +98,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = await host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N")).ConfigureAwait(false);
+            var endpoint = host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N"));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
@@ -103,7 +122,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = await host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N")).ConfigureAwait(false);
+            var endpoint = host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N"));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
@@ -165,7 +184,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = await host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N")).ConfigureAwait(false);
+            var endpoint = host.ConnectReceiveEndpoint(NewId.NextGuid().ToString("N"));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 

@@ -25,9 +25,9 @@ namespace MassTransit.RabbitMqTransport.Tests
     {
         ReconnectConsumer _consumer;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureRabbitMqReceiveEndoint(configurator);
+            base.ConfigureRabbitMqReceiveEndpoint(configurator);
 
             _consumer = new ReconnectConsumer(TestTimeout);
 
@@ -92,7 +92,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Console.WriteLine("Sending");
 
-            Assert.Throws<RabbitMqConnectionException>(async () => await Bus.Publish(new ReconnectMessage { Value = "Before" }));
+            Assert.That(async () => await Bus.Publish(new ReconnectMessage { Value = "Before" }), Throws.TypeOf<RabbitMqConnectionException>());
 
             Console.WriteLine("Start it back up");
 

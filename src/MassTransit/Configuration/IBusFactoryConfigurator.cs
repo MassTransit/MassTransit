@@ -15,8 +15,6 @@ namespace MassTransit
     using System;
     using System.ComponentModel;
     using Builders;
-    using Configuration;
-    using GreenPipes;
 
 
     public interface IBusFactoryConfigurator :

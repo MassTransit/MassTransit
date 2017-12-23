@@ -1,6 +1,14 @@
 Observing messages
 ==================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/usage/observers.html
+
 MassTransit supports a number of message observes, making it possible to monitoring when messages are received, 
 consumed, sent, and published. Each type of observer is configured separately, keeping the interfaces lean and
 focused.

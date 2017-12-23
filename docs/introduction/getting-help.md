@@ -17,13 +17,13 @@ else has already experienced the same issue.
 
 Before you just post your question, however, spend a few moments to compose your thoughts and formulate your
 question. There is nothing as pointless as simply telling us "MassTransit does not work for me" with no further
-information to give any clue to why. Before you post, search the web to see if your question hass already been
+information to give any clue to why. Before you post, search the web to see if your question has already been
 asked or even answered. And if it has been, you will already have your answer.
 
 ## Mailing List
 
 A long history of support is available on the mailing list, which is hosted on [Google Groups][2]. There are
-a wide vareity of developers using MassTransit on the list, and often times they can help. If you are going to
+a wide variety of developers using MassTransit on the list, and often times they can help. If you are going to
 use MassTransit, joining the mailing list is a great way to participate in the community.
 
 When posting on the mailing list, pick a good subject line, and if the subject of the thread changes, please
@@ -50,9 +50,10 @@ If it is complex, it's likely you'll be pushed to hit the mailing list.
 
 ## GitHub Issues
 
-Please do not open an issue on github, unless you have spotted an actual bug in MassTransit. If you are unsure,
-ask on the mailing list, and if we confirm it's a bug, we'll ask you to [create the issue][3]. Issues are not
-the place for questions, and they'll likely be closed.
+Please **do not open an issue on GitHub**, unless you have spotted an actual bug in MassTransit. If you are unsure,
+ask on the [mailing list][2] or on [StackOverflow][1], and if we confirm it's a bug, we'll ask you to [create the issue][3]. 
+
+**Issues are not the place for questions, and they'll likely be closed.**
 
 This policy is in place to avoid bugs being drowned out in a pile of sensible suggestions for future enhancements
 and calls for help from people who forget to check back if they get it and so on.

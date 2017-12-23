@@ -1,6 +1,14 @@
 How to report bugs
 ==================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/introduction/how-to-report-bugs.html
+
 MassTransit can be a tricky beast to debug, with a multi-threaded system,
 trying to track down the issue can be a bit painful.
 

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit.Serialization.JsonConverters
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Reflection;
     using Internals.Extensions;
     using Newtonsoft.Json;
 
@@ -45,18 +46,19 @@ namespace MassTransit.Serialization.JsonConverters
 
         public override bool CanConvert(Type objectType)
         {
-            if (objectType.IsArray)
+            var typeInfo = objectType.GetTypeInfo();
+            if (typeInfo.IsArray)
             {
-                if (objectType.HasElementType && objectType.GetElementType() == typeof(byte))
+                if (typeInfo.HasElementType && typeInfo.GetElementType() == typeof(byte))
                     return false;
 
                 return objectType.HasInterface<IEnumerable>();
             }
 
-            if (objectType.IsGenericType)
+            if (typeInfo.IsGenericType)
             {
-                Type definition = objectType.GetGenericTypeDefinition();
-                if ((definition == typeof(IList<>) || definition == typeof(List<>) || definition == typeof(IEnumerable<>)))
+                Type definition = typeInfo.GetGenericTypeDefinition();
+                if (definition == typeof(IList<>) || definition == typeof(List<>) || definition == typeof(IEnumerable<>))
                     return true;
             }
 

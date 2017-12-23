@@ -23,6 +23,7 @@ namespace MassTransit.Context
     using GreenPipes;
     using GreenPipes.Payloads;
     using Serialization;
+    using Topology;
     using Transports;
     using Util;
 
@@ -40,19 +41,18 @@ namespace MassTransit.Context
         readonly IReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
-            : this(inputAddress, redelivered, receiveObserver, new CancellationTokenSource(), sendEndpointProvider, publishEndpointProvider)
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, IReceiveEndpointTopology topology)
+            : this(inputAddress, redelivered, receiveObserver, new CancellationTokenSource(), topology)
         {
         }
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, CancellationTokenSource source, ISendEndpointProvider sendEndpointProvider, IPublishEndpointProvider publishEndpointProvider)
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, CancellationTokenSource source, IReceiveEndpointTopology topology)
             : base(new PayloadCache(), source.Token)
         {
             _receiveTimer = Stopwatch.StartNew();
 
             _cancellationTokenSource = source;
-            SendEndpointProvider = sendEndpointProvider;
-            PublishEndpointProvider = publishEndpointProvider;
+            Topology = topology;
             InputAddress = inputAddress;
             Redelivered = redelivered;
             _receiveObserver = receiveObserver;
@@ -67,8 +67,11 @@ namespace MassTransit.Context
         protected abstract IHeaderProvider HeaderProvider { get; }
         public bool IsDelivered { get; private set; }
         public bool IsFaulted { get; private set; }
-        public ISendEndpointProvider SendEndpointProvider { get; }
-        public IPublishEndpointProvider PublishEndpointProvider { get; }
+
+        public ISendEndpointProvider SendEndpointProvider => Topology.SendEndpointProvider;
+        public IPublishEndpointProvider PublishEndpointProvider => Topology.PublishEndpointProvider;
+        public ISendTransportProvider SendTransportProvider => Topology.SendTransportProvider;
+        public IReceiveEndpointTopology Topology { get; }
 
         public Task CompleteTask
         {

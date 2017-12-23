@@ -1,6 +1,14 @@
 What is MassTransit?
 ====================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/
+
 MassTransit is a free, open source, lightweight message bus for creating distributed applications using the .NET
 framework. MassTransit provides an `extensive set of features`_ on top existing message transports, resulting in
 a developer friendly way to asynchronously connect services using message-based conversation patterns.

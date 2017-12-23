@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistence", "Persistence", "{56F516D7-BC3C-49E1-A639-83C5F14953F8}"
 EndProject
@@ -9,41 +9,41 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transports", "Transports", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Containers", "Containers", "{6C61507E-FF16-45C8-8FE4-350069D9B4C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit", "MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit", "MassTransit\MassTransit.csproj", "{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Tests", "MassTransit.Tests\MassTransit.Tests.csproj", "{76646B96-936B-4D31-A053-35CD630E3C68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Tests", "MassTransit.Tests\MassTransit.Tests.csproj", "{76646B96-936B-4D31-A053-35CD630E3C68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WindsorIntegration", "Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.WindsorIntegration", "Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj", "{98D5A59C-96FA-4A1B-A653-EA5A35C45FC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.StructureMapIntegration", "Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.StructureMapIntegration", "Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj", "{F5E67502-2B30-484C-88C3-97710291F5AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NHibernateIntegration", "Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.NHibernateIntegration", "Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj", "{073A90FD-9A3E-4704-B3B5-6D8A9F4B442E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NHibernateIntegration.Tests", "Persistence\MassTransit.NHibernateIntegration.Tests\MassTransit.NHibernateIntegration.Tests.csproj", "{44E6D06D-B60E-434B-981D-D8139062A6EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.NHibernateIntegration.Tests", "Persistence\MassTransit.NHibernateIntegration.Tests\MassTransit.NHibernateIntegration.Tests.csproj", "{44E6D06D-B60E-434B-981D-D8139062A6EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.UnityIntegration", "Containers\MassTransit.UnityIntegration\MassTransit.UnityIntegration.csproj", "{8AB71E2F-3210-45AF-982F-FC782D9C06B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.UnityIntegration", "Containers\MassTransit.UnityIntegration\MassTransit.UnityIntegration.csproj", "{8AB71E2F-3210-45AF-982F-FC782D9C06B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NinjectIntegration", "Containers\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj", "{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.NinjectIntegration", "Containers\MassTransit.NinjectIntegration\MassTransit.NinjectIntegration.csproj", "{25A2A3C3-27D0-4C55-A9E9-0B82D6B6913F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.TestFramework", "MassTransit.TestFramework\MassTransit.TestFramework.csproj", "{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.TestFramework", "MassTransit.TestFramework\MassTransit.TestFramework.csproj", "{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RabbitMqTransport", "MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj", "{6C7149D7-4D97-45DF-A05D-61EC7374491D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.RabbitMqTransport", "MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj", "{6C7149D7-4D97-45DF-A05D-61EC7374491D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RabbitMqTransport.Tests", "MassTransit.RabbitMqTransport.Tests\MassTransit.RabbitMqTransport.Tests.csproj", "{E4C3F51F-B7CE-4521-80BC-E91A9B0F6FFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.RabbitMqTransport.Tests", "MassTransit.RabbitMqTransport.Tests\MassTransit.RabbitMqTransport.Tests.csproj", "{E4C3F51F-B7CE-4521-80BC-E91A9B0F6FFD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Reactive", "MassTransit.Reactive\MassTransit.Reactive.csproj", "{BAE719BF-A142-4EF4-84DC-788742ED7FF8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Reactive", "MassTransit.Reactive\MassTransit.Reactive.csproj", "{BAE719BF-A142-4EF4-84DC-788742ED7FF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AutofacIntegration", "Containers\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj", "{A31F2C6B-C806-46FD-A4F3-C54209DD495C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.AutofacIntegration", "Containers\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj", "{A31F2C6B-C806-46FD-A4F3-C54209DD495C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Containers.Tests", "Containers\MassTransit.Containers.Tests\MassTransit.Containers.Tests.csproj", "{9CE51963-9E51-48EE-A75F-62C9CB0CF23C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Containers.Tests", "Containers\MassTransit.Containers.Tests\MassTransit.Containers.Tests.csproj", "{9CE51963-9E51-48EE-A75F-62C9CB0CF23C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Loggers", "Loggers", "{6A938565-BEE9-434C-9A1A-CD2905907554}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Log4NetIntegration", "Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj", "{8D2BE372-A756-4676-B2EA-ED7846809BFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Log4NetIntegration", "Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj", "{8D2BE372-A756-4676-B2EA-ED7846809BFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.NLogIntegration", "Loggers\MassTransit.NLogIntegration\MassTransit.NLogIntegration.csproj", "{F802655A-D5EC-4031-B21F-A3EECCBE02A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.NLogIntegration", "Loggers\MassTransit.NLogIntegration\MassTransit.NLogIntegration.csproj", "{F802655A-D5EC-4031-B21F-A3EECCBE02A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Reactive.Tests", "MassTransit.Reactive.Tests\MassTransit.Reactive.Tests.csproj", "{038A8635-7105-4BF7-9DE9-8610A4E58A61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Reactive.Tests", "MassTransit.Reactive.Tests\MassTransit.Reactive.Tests.csproj", "{038A8635-7105-4BF7-9DE9-8610A4E58A61}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2C8A15FA-A445-4916-AAC2-3BE53AA247A7}"
 	ProjectSection(SolutionItems) = preProject
@@ -53,69 +53,77 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2C8A15
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AzureServiceBusTransport", "MassTransit.AzureServiceBusTransport\MassTransit.AzureServiceBusTransport.csproj", "{A84B8D78-6592-4340-9E78-4AC608F53EFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.AzureServiceBusTransport", "MassTransit.AzureServiceBusTransport\MassTransit.AzureServiceBusTransport.csproj", "{A84B8D78-6592-4340-9E78-4AC608F53EFD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AzureServiceBusTransport.Tests", "MassTransit.AzureServiceBusTransport.Tests\MassTransit.AzureServiceBusTransport.Tests.csproj", "{6C9F5793-6DE0-4330-B3F9-6D3AC2A22E30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.AzureServiceBusTransport.Tests", "MassTransit.AzureServiceBusTransport.Tests\MassTransit.AzureServiceBusTransport.Tests.csproj", "{6C9F5793-6DE0-4330-B3F9-6D3AC2A22E30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host", "MassTransit.Host\MassTransit.Host.csproj", "{D1172BB0-EF5F-4D56-9A3F-13A63DBD4D22}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Host", "MassTransit.Host\MassTransit.Host.csproj", "{D1172BB0-EF5F-4D56-9A3F-13A63DBD4D22}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Automatonymous", "Automatonymous", "{D93DF222-8719-4B8F-A1EC-26C850D637DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AutomatonymousIntegration", "MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj", "{A852511B-2742-4F4D-BD4E-ADDDBF3BD4B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.AutomatonymousIntegration", "MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj", "{A852511B-2742-4F4D-BD4E-ADDDBF3BD4B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AutomatonymousIntegration.Tests", "MassTransit.AutomatonymousIntegration.Tests\MassTransit.AutomatonymousIntegration.Tests.csproj", "{1DAB3D46-3386-48F8-8381-2F5B678D1DB6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.AutomatonymousIntegration.Tests", "MassTransit.AutomatonymousIntegration.Tests\MassTransit.AutomatonymousIntegration.Tests.csproj", "{1DAB3D46-3386-48F8-8381-2F5B678D1DB6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Quartz", "Quartz", "{FDC1A760-D4E5-44F4-B0D9-C19F2E14253A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.QuartzIntegration", "MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj", "{2F7DB49B-B650-4B57-BB9D-5D1B913CCACC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.QuartzIntegration", "MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj", "{2F7DB49B-B650-4B57-BB9D-5D1B913CCACC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.QuartzIntegration.Tests", "MassTransit.QuartzIntegration.Tests\MassTransit.QuartzIntegration.Tests.csproj", "{CC243B02-0542-48CB-B175-C8035075E376}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.QuartzIntegration.Tests", "MassTransit.QuartzIntegration.Tests\MassTransit.QuartzIntegration.Tests.csproj", "{CC243B02-0542-48CB-B175-C8035075E376}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.QuartzService", "MassTransit.QuartzService\MassTransit.QuartzService.csproj", "{989BA511-C126-4C88-A74B-BAD83DF2291B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.QuartzService", "MassTransit.QuartzService\MassTransit.QuartzService.csproj", "{989BA511-C126-4C88-A74B-BAD83DF2291B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Futures", "MassTransit.Futures\MassTransit.Futures.csproj", "{29BC6AB5-2697-45EC-8172-475AB8ACE834}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Futures", "MassTransit.Futures\MassTransit.Futures.csproj", "{29BC6AB5-2697-45EC-8172-475AB8ACE834}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Futures.Tests", "MassTransit.Futures.Tests\MassTransit.Futures.Tests.csproj", "{941A22AD-C791-4111-9B67-CD576977C95A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Futures.Tests", "MassTransit.Futures.Tests\MassTransit.Futures.Tests.csproj", "{941A22AD-C791-4111-9B67-CD576977C95A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.EntityFrameworkIntegration", "Persistence\MassTransit.EntityFrameworkIntegration\MassTransit.EntityFrameworkIntegration.csproj", "{442E2B78-0237-458D-B32B-CEC94413F44D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EntityFrameworkIntegration", "Persistence\MassTransit.EntityFrameworkIntegration\MassTransit.EntityFrameworkIntegration.csproj", "{442E2B78-0237-458D-B32B-CEC94413F44D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.EntityFrameworkIntegration.Tests", "Persistence\MassTransit.EntityFrameworkIntegration.Tests\MassTransit.EntityFrameworkIntegration.Tests.csproj", "{B6EA7211-7706-4EB1-B91C-B4C959F0CB29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EntityFrameworkIntegration.Tests", "Persistence\MassTransit.EntityFrameworkIntegration.Tests\MassTransit.EntityFrameworkIntegration.Tests.csproj", "{B6EA7211-7706-4EB1-B91C-B4C959F0CB29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SimpleInjectorIntegration", "Containers\MassTransit.SimpleInjectorIntegration\MassTransit.SimpleInjectorIntegration.csproj", "{259E9F30-40EC-47B0-83AE-A2271EF3421D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.SimpleInjectorIntegration", "Containers\MassTransit.SimpleInjectorIntegration\MassTransit.SimpleInjectorIntegration.csproj", "{259E9F30-40EC-47B0-83AE-A2271EF3421D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.SerilogIntegration", "Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj", "{0E90AFE6-99E8-43CF-995E-E99466DD6807}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.SerilogIntegration", "Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj", "{0E90AFE6-99E8-43CF-995E-E99466DD6807}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MongoDbIntegration", "Persistence\MassTransit.MongoDbIntegration\MassTransit.MongoDbIntegration.csproj", "{2406B6D6-09DF-4BC3-AEFC-068AACA77567}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.MongoDbIntegration", "Persistence\MassTransit.MongoDbIntegration\MassTransit.MongoDbIntegration.csproj", "{2406B6D6-09DF-4BC3-AEFC-068AACA77567}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MongoDbIntegration.Tests", "Persistence\MassTransit.MongoDbIntegration.Tests\MassTransit.MongoDbIntegration.Tests.csproj", "{BACA6A81-D395-48C5-B2BD-0995B241E1CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.MongoDbIntegration.Tests", "Persistence\MassTransit.MongoDbIntegration.Tests\MassTransit.MongoDbIntegration.Tests.csproj", "{BACA6A81-D395-48C5-B2BD-0995B241E1CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RapidTransit.Sample", "RapidTransit\RapidTransit.Sample\RapidTransit.Sample.csproj", "{12C840BF-1A87-443A-BA17-052A60ED4F51}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Serializers", "Serializers", "{40AD8EF9-3B80-49B2-91DF-6DA2FC438055}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ProtocolBuffers", "Serialization\MassTransit.ProtocolBuffers\MassTransit.ProtocolBuffers.csproj", "{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ProtocolBuffers.Tests", "Serialization\MassTransit.ProtocolBuffers.Tests\MassTransit.ProtocolBuffers.Tests.csproj", "{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RapidTransit.Sample", "RapidTransit\RapidTransit.Sample\RapidTransit.Sample.csproj", "{12C840BF-1A87-443A-BA17-052A60ED4F51}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{C0CD5A16-BD57-429A-8E9A-0DED4DD507F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.HttpTransport", "MassTransit.HttpTransport\MassTransit.HttpTransport.csproj", "{BC27D21A-7586-4263-942E-157B2CD682B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.HttpTransport", "MassTransit.HttpTransport\MassTransit.HttpTransport.csproj", "{BC27D21A-7586-4263-942E-157B2CD682B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.HttpTransport.Tests", "MassTransit.HttpTransport.Tests\MassTransit.HttpTransport.Tests.csproj", "{0FBD4832-5DE1-41AA-8E63-6CFBF9999CC2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.HttpTransport.Tests", "MassTransit.HttpTransport.Tests\MassTransit.HttpTransport.Tests.csproj", "{0FBD4832-5DE1-41AA-8E63-6CFBF9999CC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Host.Quartz", "MassTransit.Host.Quartz\MassTransit.Host.Quartz.csproj", "{E390AD5C-61D3-4EF4-9858-5DBE0F0849D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Host.Quartz", "MassTransit.Host.Quartz\MassTransit.Host.Quartz.csproj", "{E390AD5C-61D3-4EF4-9858-5DBE0F0849D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Automatonymous.AutofacIntegration", "Containers\MassTransit.Automatonymous.AutofacIntegration\MassTransit.Automatonymous.AutofacIntegration.csproj", "{B2C9F22A-459A-4828-8017-0DB76F81F1A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Automatonymous.AutofacIntegration", "Containers\MassTransit.Automatonymous.AutofacIntegration\MassTransit.Automatonymous.AutofacIntegration.csproj", "{B2C9F22A-459A-4828-8017-0DB76F81F1A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Automatonymous.StructureMapIntegration", "Containers\MassTransit.Automatonymous.StructureMapIntegration\MassTransit.Automatonymous.StructureMapIntegration.csproj", "{4A042032-21A2-40CA-BBE7-5D47F786A949}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Automatonymous.StructureMapIntegration", "Containers\MassTransit.Automatonymous.StructureMapIntegration\MassTransit.Automatonymous.StructureMapIntegration.csproj", "{4A042032-21A2-40CA-BBE7-5D47F786A949}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RedisIntegration", "Persistence\MassTransit.RedisIntegration\MassTransit.RedisIntegration.csproj", "{3016A502-4855-477F-9113-1A6B224BD9E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.RedisIntegration", "Persistence\MassTransit.RedisIntegration\MassTransit.RedisIntegration.csproj", "{3016A502-4855-477F-9113-1A6B224BD9E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.RedisIntegration.Tests", "Persistence\MassTransit.RedisIntegration.Tests\MassTransit.RedisIntegration.Tests.csproj", "{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.RedisIntegration.Tests", "Persistence\MassTransit.RedisIntegration.Tests\MassTransit.RedisIntegration.Tests.csproj", "{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MartenIntegration", "Persistence\MassTransit.MartenIntegration\MassTransit.MartenIntegration.csproj", "{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.MartenIntegration", "Persistence\MassTransit.MartenIntegration\MassTransit.MartenIntegration.csproj", "{0D261888-4187-43BB-9EE2-9C04EEC4AAC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.MartenIntegration.Tests", "Persistence\MassTransit.MartenIntegration.Tests\MassTransit.MartenIntegration.Tests.csproj", "{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.MartenIntegration.Tests", "Persistence\MassTransit.MartenIntegration.Tests\MassTransit.MartenIntegration.Tests.csproj", "{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.DocumentDbIntegration", "Persistence\MassTransit.DocumentDbIntegration\MassTransit.DocumentDbIntegration.csproj", "{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.DocumentDbIntegration.Tests", "Persistence\MassTransit.DocumentDbIntegration.Tests\MassTransit.DocumentDbIntegration.Tests.csproj", "{54363F5F-A51A-489B-8BE7-71C10104A0A5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.ExtensionsLoggingIntegration", "Loggers\MassTransit.ExtensionsLoggingIntegration\MassTransit.ExtensionsLoggingIntegration.csproj", "{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.ExtensionsDependencyInjectionIntegration", "Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj", "{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EntityFrameworkCoreIntegration", "Persistence\MassTransit.EntityFrameworkCoreIntegration\MassTransit.EntityFrameworkCoreIntegration.csproj", "{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.EntityFrameworkCoreIntegration.Tests", "Persistence\MassTransit.EntityFrameworkCoreIntegration.Tests\MassTransit.EntityFrameworkCoreIntegration.Tests.csproj", "{5991CFE3-F59B-4563-982B-371E1B03EC53}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Automatonymous.ExtensionsDependencyInjectionIntegration", "Containers\MassTransit.Automatonymous.ExtensionsDependencyInjectionIntegration\MassTransit.Automatonymous.ExtensionsDependencyInjectionIntegration.csproj", "{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -323,15 +331,15 @@ Global
 		{CC243B02-0542-48CB-B175-C8035075E376}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|x86.ActiveCfg = Debug|x86
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|x86.Build.0 = Debug|x86
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Debug|x86.Build.0 = Debug|Any CPU
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|x86.ActiveCfg = Release|x86
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|x86.Build.0 = Release|x86
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|x86.ActiveCfg = Release|Any CPU
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.Release|x86.Build.0 = Release|Any CPU
 		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|x86.ActiveCfg = Release|x86
-		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|x86.Build.0 = Release|x86
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{989BA511-C126-4C88-A74B-BAD83DF2291B}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29BC6AB5-2697-45EC-8172-475AB8ACE834}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -425,28 +433,6 @@ Global
 		{12C840BF-1A87-443A-BA17-052A60ED4F51}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
 		{12C840BF-1A87-443A-BA17-052A60ED4F51}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{12C840BF-1A87-443A-BA17-052A60ED4F51}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}.Debug|x86.Build.0 = Debug|Any CPU
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}.Release|x86.ActiveCfg = Release|Any CPU
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}.Release|x86.Build.0 = Release|Any CPU
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}.Debug|x86.Build.0 = Debug|Any CPU
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}.Release|x86.ActiveCfg = Release|Any CPU
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}.Release|x86.Build.0 = Release|Any CPU
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 		{BC27D21A-7586-4263-942E-157B2CD682B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BC27D21A-7586-4263-942E-157B2CD682B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC27D21A-7586-4263-942E-157B2CD682B3}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -554,6 +540,90 @@ Global
 		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.Debug|x86.Build.0 = Debug|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.Release|x86.ActiveCfg = Release|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.Release|x86.Build.0 = Release|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.Debug|x86.Build.0 = Debug|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.Release|x86.ActiveCfg = Release|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.Release|x86.Build.0 = Release|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.Debug|x86.Build.0 = Debug|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.Release|x86.ActiveCfg = Release|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.Release|x86.Build.0 = Release|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.Debug|x86.Build.0 = Debug|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.Release|x86.ActiveCfg = Release|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.Release|x86.Build.0 = Release|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.Debug|x86.Build.0 = Debug|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.Release|x86.ActiveCfg = Release|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.Release|x86.Build.0 = Release|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.Debug|x86.Build.0 = Debug|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.Release|x86.ActiveCfg = Release|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.Release|x86.Build.0 = Release|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.ReleaseUnsigned|Any CPU.ActiveCfg = Debug|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
+		{5991CFE3-F59B-4563-982B-371E1B03EC53}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.Debug|x86.Build.0 = Debug|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.Release|x86.ActiveCfg = Release|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.Release|x86.Build.0 = Release|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.ReleaseUnsigned|Any CPU.ActiveCfg = Debug|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -585,8 +655,6 @@ Global
 		{2406B6D6-09DF-4BC3-AEFC-068AACA77567} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{BACA6A81-D395-48C5-B2BD-0995B241E1CC} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{12C840BF-1A87-443A-BA17-052A60ED4F51} = {C0CD5A16-BD57-429A-8E9A-0DED4DD507F3}
-		{82586835-CC1A-4DDE-AF8F-A8EEEF84E8C1} = {40AD8EF9-3B80-49B2-91DF-6DA2FC438055}
-		{FD3E8EA7-3180-468C-94EE-9EA2D15188ED} = {40AD8EF9-3B80-49B2-91DF-6DA2FC438055}
 		{BC27D21A-7586-4263-942E-157B2CD682B3} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{0FBD4832-5DE1-41AA-8E63-6CFBF9999CC2} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{E390AD5C-61D3-4EF4-9858-5DBE0F0849D9} = {FDC1A760-D4E5-44F4-B0D9-C19F2E14253A}
@@ -596,6 +664,13 @@ Global
 		{F3D11920-BA34-4EDB-91A6-C8B5EFCE1F98} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{0D261888-4187-43BB-9EE2-9C04EEC4AAC0} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{92BE64BB-FF25-4CC8-B64F-3BF02F18F089} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{54363F5F-A51A-489B-8BE7-71C10104A0A5} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{BE55A559-03CC-4C96-BEDD-F832B07F8D1C} = {6A938565-BEE9-434C-9A1A-CD2905907554}
+		{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
+		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{5991CFE3-F59B-4563-982B-371E1B03EC53} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35

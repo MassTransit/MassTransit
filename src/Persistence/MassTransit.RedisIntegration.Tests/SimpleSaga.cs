@@ -15,23 +15,17 @@ namespace MassTransit.RedisIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Saga;
-    using ServiceStack.DesignPatterns.Model;
 
 
     public class SimpleSaga :
         InitiatedBy<InitiateSimpleSaga>,
         Orchestrates<CompleteSimpleSaga>,
-        //Observes<ObservableSagaMessage, SimpleSaga>,
-        ISaga,
-        IHasGuidId,
         IVersionedSaga
     {
-        public bool Completed { get; private set; }
+        public bool Moved { get; private set; }
         public bool Initiated { get; private set; }
         public bool Observed { get; private set; }
         public string Name { get; private set; }
-
-        public Guid Id => CorrelationId;
 
         public async Task Consume(ConsumeContext<InitiateSimpleSaga> context)
         {
@@ -42,19 +36,9 @@ namespace MassTransit.RedisIntegration.Tests
         public Guid CorrelationId { get; set; }
         public int Version { get; set; }
 
-        //public async Task Consume(ConsumeContext<ObservableSagaMessage> message)
-        //{
-        //    Observed = true;
-        //}
-
-        //public Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> CorrelationExpression
-        //{
-        //    get { return (saga, message) => saga.Name == message.Name; }
-        //}
-
         public async Task Consume(ConsumeContext<CompleteSimpleSaga> message)
         {
-            Completed = true;
+            Moved = true;
         }
     }
 }

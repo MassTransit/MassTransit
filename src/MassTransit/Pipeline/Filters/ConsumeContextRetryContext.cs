@@ -13,7 +13,6 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
@@ -48,8 +47,6 @@ namespace MassTransit.Pipeline.Filters
         public async Task PreRetry()
         {
             await _retryContext.PreRetry().ConfigureAwait(false);
-
-            await _context.ClearPendingFaults().ConfigureAwait(false);
         }
 
         public async Task RetryFaulted(Exception exception)
@@ -61,30 +58,12 @@ namespace MassTransit.Pipeline.Filters
 
         public bool CanRetry(Exception exception, out RetryContext<ConsumeContext> retryContext)
         {
-            RetryContext<ConsumeContext> policyRetryContext;
-            var canRetry = _retryContext.CanRetry(exception, out policyRetryContext);
+            var canRetry = _retryContext.CanRetry(exception, out RetryContext<ConsumeContext> policyRetryContext);
 
-            retryContext = new ConsumeContextRetryContext(policyRetryContext, _context);
+            retryContext = new ConsumeContextRetryContext(policyRetryContext, canRetry ? _context.CreateNext() : _context);
 
             return canRetry;
         }
-
-        bool PipeContext.HasPayloadType(Type payloadType)
-        {
-            return _retryContext.HasPayloadType(payloadType);
-        }
-
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            return _retryContext.TryGetPayload(out payload);
-        }
-
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            return _retryContext.GetOrAddPayload(payloadFactory);
-        }
-
-        CancellationToken PipeContext.CancellationToken => _retryContext.CancellationToken;
     }
 
 
@@ -119,8 +98,6 @@ namespace MassTransit.Pipeline.Filters
         public async Task PreRetry()
         {
             await _retryContext.PreRetry().ConfigureAwait(false);
-
-            await _context.ClearPendingFaults().ConfigureAwait(false);
         }
 
         public async Task RetryFaulted(Exception exception)
@@ -132,29 +109,11 @@ namespace MassTransit.Pipeline.Filters
 
         public bool CanRetry(Exception exception, out RetryContext<TFilter> retryContext)
         {
-            RetryContext<TFilter> policyRetryContext;
-            var canRetry = _retryContext.CanRetry(exception, out policyRetryContext);
+            var canRetry = _retryContext.CanRetry(exception, out RetryContext<TFilter> policyRetryContext);
 
-            retryContext = new ConsumeContextRetryContext<TFilter, TContext>(policyRetryContext, _context);
+            retryContext = new ConsumeContextRetryContext<TFilter, TContext>(policyRetryContext, canRetry ? _context.CreateNext<TContext>() : _context);
 
             return canRetry;
         }
-
-        bool PipeContext.HasPayloadType(Type payloadType)
-        {
-            return _retryContext.HasPayloadType(payloadType);
-        }
-
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            return _retryContext.TryGetPayload(out payload);
-        }
-
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            return _retryContext.GetOrAddPayload(payloadFactory);
-        }
-
-        CancellationToken PipeContext.CancellationToken => _retryContext.CancellationToken;
     }
 }

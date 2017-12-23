@@ -37,7 +37,7 @@ namespace MassTransit.Tests.Courier
         readonly Uri _executeUri;
         readonly Uri _compensateUri;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("execute_testactivity", x =>
             {

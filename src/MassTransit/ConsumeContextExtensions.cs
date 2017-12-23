@@ -26,7 +26,7 @@ namespace MassTransit
             where T : class
             where TConsumer : class
         {
-            return new ConsumerConsumeContextProxy<TConsumer, T>(context, consumer);
+            return new ConsumerConsumeContextProxy<TConsumer, T>(context, new PayloadCacheScope(context), consumer);
         }
 
         public static ConsumerConsumeContext<TConsumer, TMessage> PushConsumerScope<TConsumer, TMessage, T>(this ConsumeContext<TMessage> context,

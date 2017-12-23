@@ -86,14 +86,14 @@ namespace MassTransit.Serialization
                     jsonWriter.Flush();
                     stringWriter.Flush();
                 }
-
+                
                 using (var stringReader = new StringReader(json.ToString()))
                 using (var jsonReader = new JsonTextReader(stringReader))
                 {
-                    var document = (XDocument)XmlSerializer.Deserialize(jsonReader, typeof(XDocument));
+                    var document = (XDocument)XmlSerializer.Deserialize(jsonReader, typeof(XDocument));                    
 
                     using (var writer = new StreamWriter(stream, _encoding.Value, 1024, true))
-                    using (var xmlWriter = new XmlTextWriter(writer))
+                    using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings { CheckCharacters = false }))
                     {
                         document.WriteTo(xmlWriter);
                     }

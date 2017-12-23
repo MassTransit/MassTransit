@@ -19,6 +19,16 @@ namespace MassTransit.Context
     using GreenPipes.Payloads;
 
 
+    public class ConsumeContextProxyScope :
+        ConsumeContextProxy
+    {
+        public ConsumeContextProxyScope(ConsumeContext context)
+            : base(context, new PayloadCacheScope(context))
+        {
+        }
+    }
+
+
     public abstract class ConsumeContextProxyScope<TMessage> :
         ConsumeContextProxy<TMessage>
         where TMessage : class

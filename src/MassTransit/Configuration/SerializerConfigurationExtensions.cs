@@ -13,7 +13,7 @@
 namespace MassTransit
 {
     using System;
-    using EndpointConfigurators;
+    using EndpointSpecifications;
     using Newtonsoft.Json;
     using Serialization;
 
@@ -106,6 +106,7 @@ namespace MassTransit
             configurator.AddEndpointSpecification(new SetMessageSerializerReceiveEndpointSpecification<XmlMessageSerializer>());
         }
 
+#if !NETCORE
         /// <summary>
         /// Serialize message using the .NET binary formatter (also adds support for the binary deserializer)
         /// </summary>
@@ -151,5 +152,6 @@ namespace MassTransit
             configurator.AddEndpointSpecification(new SupportMessageDeserializerReceiveEndpointSpecification(BinaryMessageSerializer.BinaryContentType,
                 () => new BinaryMessageDeserializer()));
         }
+#endif
     }
 }

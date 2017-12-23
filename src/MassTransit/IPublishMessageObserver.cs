@@ -26,7 +26,6 @@ namespace MassTransit
         /// <summary>
         /// Called before the message is sent to the transport
         /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
         /// <param name="context">The message send context</param>
         /// <returns></returns>
         Task PrePublish(PublishContext<T> context);
@@ -34,7 +33,6 @@ namespace MassTransit
         /// <summary>
         /// Called after the message is sent to the transport (and confirmed by the transport if supported)
         /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
         /// <param name="context">The message send context</param>
         /// <returns></returns>
         Task PostPublish(PublishContext<T> context);
@@ -42,7 +40,6 @@ namespace MassTransit
         /// <summary>
         /// Called when the message fails to send to the transport, including the exception that was thrown
         /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
         /// <param name="context">The message send context</param>
         /// <param name="exception">The exception from the transport</param>
         /// <returns></returns>

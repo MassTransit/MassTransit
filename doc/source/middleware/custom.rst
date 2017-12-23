@@ -1,6 +1,14 @@
 Creating your own middleware
 ============================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/middleware/custom.html
+
 Middleware components are configured using extension methods, to make them easy to discover.
 By default, a middleware configuration method should start with Use.
 

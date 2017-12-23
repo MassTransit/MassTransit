@@ -29,12 +29,10 @@ namespace MassTransit.ConsumeConfigurators
         where TMessage : class
     {
         /// <summary>
-        /// Configure a message type for the consumer, such as adding middleware to the pipeline for
-        /// the message type.
+        /// Add middleware to the consumer pipeline, for the specified message type, which is
+        /// invoked after the consumer factory.
         /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
         /// <param name="configure">The callback to configure the message pipeline</param>
         void Message(Action<IConsumerMessageConfigurator<TMessage>> configure);
-
     }
 }

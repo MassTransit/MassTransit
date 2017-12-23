@@ -13,7 +13,6 @@
 namespace MassTransit.Saga.Pipeline.Filters
 {
     using GreenPipes;
-    using MassTransit.Pipeline;
 
 
     /// <summary>

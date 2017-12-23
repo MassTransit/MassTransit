@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -30,14 +30,15 @@ namespace MassTransit.RabbitMqTransport.Topology
         string QueueName { get; }
 
         /// <summary>
+        /// The legacy exchange bindings, this needs to be upgraded asap
+        /// TODO: UPgrade
+        /// </summary>
+        IEnumerable<IRabbitMqPublishTopologySpecification> PublishTopologySpecifications { get; }
+
+        /// <summary>
         /// Arguments passed to QueueDeclare
         /// </summary>
         IDictionary<string, object> QueueArguments { get; }
-
-        /// <summary>
-        /// The exchange bindings for the send
-        /// </summary>
-        IEnumerable<ExchangeBindingSettings> ExchangeBindings { get; }
 
         /// <summary>
         /// Returns the send address for the settings

@@ -39,5 +39,10 @@ namespace MassTransit.Courier.Factories
         {
             return _activityFactory.Compensate(context, next);
         }
+
+        public void Probe(ProbeContext context)
+        {
+            _activityFactory.Probe(context);
+        }
     }
 }

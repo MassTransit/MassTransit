@@ -13,7 +13,7 @@
 namespace MassTransit.ConsumeConnectors
 {
     using System;
-    using ConsumeConfigurators;
+    using ConsumerSpecifications;
     using GreenPipes;
     using Pipeline;
 

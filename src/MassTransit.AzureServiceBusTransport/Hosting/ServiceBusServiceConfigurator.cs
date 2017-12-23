@@ -59,6 +59,11 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             _configurator.AddPipeSpecification(specification);
         }
 
+        public void AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        {
+            _configurator.AddPrePipeSpecification(specification);
+        }
+
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
             _configurator.AddBusFactorySpecification(specification);

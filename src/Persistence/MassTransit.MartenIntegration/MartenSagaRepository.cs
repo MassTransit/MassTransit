@@ -40,6 +40,12 @@
             using (var session = _store.QuerySession())
                 return session.Load<TSaga>(correlationId);
         }
+        
+        public async Task<TSaga> GetSagaAsync(Guid correlationId)
+        {
+            using (var session = _store.QuerySession())
+                return await session.LoadAsync<TSaga>(correlationId).ConfigureAwait(false);
+        }
 
         void IProbeSite.Probe(ProbeContext context)
         {
@@ -62,7 +68,7 @@
             {
                 TSaga instance;
                 if (policy.PreInsertInstance(context, out instance))
-                    PreInsertSagaInstance<T>(session, instance);
+                    await PreInsertSagaInstance<T>(session, instance).ConfigureAwait(false);
 
                 if (instance == null)
                     instance = session.Load<TSaga>(sagaId);
@@ -82,15 +88,15 @@
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
-            using (var session = _store.LightweightSession())
+            using (var session = _store.DirtyTrackedSession())
             {
                 try
                 {
-                    IList<TSaga> instances = await session.Query<TSaga>()
+                    IEnumerable<TSaga> instances = await session.Query<TSaga>()
                         .Where(context.Query.FilterExpression)
                         .ToListAsync().ConfigureAwait(false);
 
-                    if (instances.Count == 0)
+                    if (!instances.Any())
                     {
                         var missingSagaPipe = new MissingPipe<T>(session, next);
                         await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
@@ -118,13 +124,13 @@
             }
         }
 
-        static bool PreInsertSagaInstance<T>(IDocumentSession session, TSaga instance)
+        static async Task<bool> PreInsertSagaInstance<T>(IDocumentSession session, TSaga instance)
         {
             var inserted = false;
             try
             {
                 session.Store(instance);
-                session.SaveChanges();
+                await session.SaveChangesAsync().ConfigureAwait(false);
                 inserted = true;
 
                 _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
@@ -158,10 +164,7 @@
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
                 if (!sagaConsumeContext.IsCompleted)
-                {
-                    session.Store(instance);
-                    session.SaveChanges();
-                }
+                    await session.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (SagaException)
             {
@@ -213,7 +216,7 @@
                 if (!proxy.IsCompleted)
                 {
                     _session.Store(context.Saga);
-                    _session.SaveChanges();
+                    await _session.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
         }

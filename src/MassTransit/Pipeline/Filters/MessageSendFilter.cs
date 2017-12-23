@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,7 +20,6 @@ namespace MassTransit.Pipeline.Filters
     using GreenPipes;
     using GreenPipes.Pipes;
     using Observables;
-    using Pipes;
     using Util;
 
 
@@ -46,8 +45,7 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         async Task IFilter<SendContext>.Send(SendContext context, IPipe<SendContext> next)
         {
-            var sendContext = context as SendContext<TMessage>;
-            if (sendContext != null)
+            if (context is SendContext<TMessage> sendContext)
             {
                 if (_messageObservers.Count > 0)
                     await _messageObservers.PreSend(sendContext).ConfigureAwait(false);
@@ -74,7 +72,7 @@ namespace MassTransit.Pipeline.Filters
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateMessageScope(TypeMetadataCache<TMessage>.ShortName);
+            var scope = context.CreateMessageScope(TypeMetadataCache<TMessage>.ShortName);
 
             _outputPipe.Probe(scope);
         }
@@ -96,7 +94,7 @@ namespace MassTransit.Pipeline.Filters
 
             IPipe<SendContext<TMessage>> current = new LastPipe<SendContext<TMessage>>(filters[filters.Length - 1]);
 
-            for (int i = filters.Length - 2; i >= 0; i--)
+            for (var i = filters.Length - 2; i >= 0; i--)
                 current = new FilterPipe<SendContext<TMessage>>(filters[i], current);
 
             return current;

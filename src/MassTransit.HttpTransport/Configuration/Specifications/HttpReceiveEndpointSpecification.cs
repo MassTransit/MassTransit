@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,12 +17,12 @@ namespace MassTransit.HttpTransport.Specifications
     using System.Net.Http;
     using Builders;
     using Clients;
-    using EndpointConfigurators;
+    using EndpointSpecifications;
     using GreenPipes;
     using MassTransit.Builders;
-    using MassTransit.Pipeline;
     using Transport;
     using Transports;
+    using Transports.InMemory;
 
 
     public class HttpReceiveEndpointSpecification :
@@ -32,18 +32,27 @@ namespace MassTransit.HttpTransport.Specifications
     {
         readonly IHttpHost _host;
         readonly string _pathMatch;
+        readonly IInMemoryEndpointConfiguration _configuration;
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
+        readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpReceiveEndpointSpecification(IHttpHost host, string pathMatch, IConsumePipe consumePipe = null)
-            : base(consumePipe)
+        public HttpReceiveEndpointSpecification(IHttpHost host, BusHostCollection<HttpHost> hosts, string pathMatch, IInMemoryEndpointConfiguration configuration)
+            : base(configuration)
         {
             _host = host;
+            _hosts = hosts;
             _pathMatch = pathMatch;
+            _configuration = configuration;
         }
 
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider;
+
+        public IInMemoryEndpointConfiguration     Configuration
+        {
+            get { return _configuration; }
+        }
 
         public override IEnumerable<ValidationResult> Validate()
         {
@@ -56,18 +65,18 @@ namespace MassTransit.HttpTransport.Specifications
 
         public void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new HttpReceiveEndpointBuilder(_host, CreateConsumePipe(builder), builder);
+            var receiveEndpointBuilder = new HttpReceiveEndpointBuilder(builder, _host, _hosts,  _configuration);
+
+            var receiveEndpointTopology = receiveEndpointBuilder.CreateReceiveEndpointTopology(InputAddress);
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
-            _sendEndpointProvider = CreateSendEndpointProvider(receiveEndpointBuilder);
-            _publishEndpointProvider = CreatePublishEndpointProvider(receiveEndpointBuilder);
+            _sendEndpointProvider = receiveEndpointTopology.SendEndpointProvider;
+            _publishEndpointProvider = receiveEndpointTopology.PublishEndpointProvider;
 
-            var sendPipe = builder.CreateSendPipe();
+            var receiveSettings = new Settings(_pathMatch);
 
-            var receiveSettings = new Settings(_pathMatch, receiveEndpointBuilder.MessageSerializer, _sendEndpointProvider, _publishEndpointProvider);
-
-            var transport = new HttpReceiveTransport(_host, receiveSettings, _publishEndpointProvider, sendPipe);
+            var transport = new HttpReceiveTransport(_host, receiveSettings, receiveEndpointTopology);
 
             var httpHost = _host as HttpHost;
             if (httpHost == null)
@@ -101,19 +110,12 @@ namespace MassTransit.HttpTransport.Specifications
         class Settings :
             ReceiveSettings
         {
-            public Settings(string pathMatch, IMessageSerializer messageSerializer, ISendEndpointProvider sendEndpointProvider,
-                IPublishEndpointProvider publishEndpointProvider)
+            public Settings(string pathMatch)
             {
                 PathMatch = pathMatch;
-                MessageSerializer = messageSerializer;
-                SendEndpointProvider = sendEndpointProvider;
-                PublishEndpointProvider = publishEndpointProvider;
             }
 
             public string PathMatch { get; }
-            public IMessageSerializer MessageSerializer { get; }
-            public ISendEndpointProvider SendEndpointProvider { get; }
-            public IPublishEndpointProvider PublishEndpointProvider { get; }
         }
     }
 }

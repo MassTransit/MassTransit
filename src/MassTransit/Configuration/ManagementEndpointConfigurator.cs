@@ -45,6 +45,11 @@ namespace MassTransit
             _configurator.AddPipeSpecification(specification);
         }
 
+        void IConsumePipeConfigurator.AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        {
+            _configurator.AddPrePipeSpecification(specification);
+        }
+
         ConnectHandle IConsumerConfigurationObserverConnector.ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
             return _configurator.ConnectConsumerConfigurationObserver(observer);

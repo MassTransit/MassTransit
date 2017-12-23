@@ -7,7 +7,7 @@
   </root>
 
   <logger name="MassTransit">
-    <level value="DEBUG" />
+    <level value="WARN" />
   </logger>
 
   <logger name="MassTransit.Messages" additivity="false">

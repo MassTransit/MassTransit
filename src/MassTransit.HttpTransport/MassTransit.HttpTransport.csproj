@@ -1,149 +1,35 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BC27D21A-7586-4263-942E-157B2CD682B3}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.HttpTransport</RootNamespace>
-    <AssemblyName>MassTransit.HttpTransport</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>portable</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+  <PropertyGroup>
+    <PackageId>MassTransit.Http</PackageId>
+    <Title>MassTransit.Http</Title>
+    <Description>MassTransit HTTP transport support; $(Description)</Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.HttpTransport.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.9\lib\net452\GreenPipes.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Owin.Diagnostics, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Diagnostics.3.0.1\lib\net45\Microsoft.Owin.Diagnostics.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Owin.Host.HttpListener, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Host.HttpListener.3.0.1\lib\net45\Microsoft.Owin.Host.HttpListener.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Owin.Hosting, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Hosting.3.0.1\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NewId, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <HintPath>..\packages\NewId.3.0.0\lib\net452\NewId.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
-      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <Compile Remove="Configuration\Builders\HttpPublishEndpointProvider.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="GreenPipes" Version="1.2.0" />
+    <PackageReference Include="Microsoft.Owin" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Owin.Diagnostics" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Owin.Host.HttpListener" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Owin.Hosting" Version="3.1.0" />
+    <PackageReference Include="NewId" Version="3.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Owin" Version="1.0" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Clients\ClientCache.cs" />
-    <Compile Include="Clients\HttpHeaders.cs" />
-    <Compile Include="Clients\HttpResponseSendEndpointProvider.cs" />
-    <Compile Include="Clients\HttpResponseTransport.cs" />
-    <Compile Include="Configuration\Builders\HttpBusBuilder.cs" />
-    <Compile Include="Contexts\HttpClientReceiveContext.cs" />
-    <Compile Include="Contexts\HttpOwinHostContext.cs" />
-    <Compile Include="Hosting\HttpClientHeaderProvider.cs" />
-    <Compile Include="HttpPublishEndpointProvider.cs" />
-    <Compile Include="Configuration\Builders\HttpReceiveEndpointBuilder.cs" />
-    <Compile Include="Configuration\Specifications\HttpReceiveEndpointSpecification.cs" />
-    <Compile Include="Testing\HttpTestHarness.cs" />
-    <Compile Include="Transport\HttpReceiveEndpointFactory.cs" />
-    <Compile Include="Transport\HttpReceiveTransport.cs" />
-    <Compile Include="Configuration\IHttpReceiveEndpointBuilder.cs" />
-    <Compile Include="Configuration\IHttpReceiveEndpointConfigurator.cs" />
-    <Compile Include="OwinHostContext.cs" />
-    <Compile Include="Contexts\SharedHttpOwinHostContext.cs" />
-    <Compile Include="Configuration\Specifications\HttpBusFactoryConfigurator.cs" />
-    <Compile Include="Configuration\HttpBusFactoryConfiguratorExtensions.cs" />
-    <Compile Include="Configuration\HttpBusFactorySelectorExtensions.cs" />
-    <Compile Include="Configuration\Specifications\HttpHostConfigurator.cs" />
-    <Compile Include="Configuration\IHttpBusFactoryConfigurator.cs" />
-    <Compile Include="Configuration\IHttpHostConfigurator.cs" />
-    <Compile Include="ConsumerPipeConfiguratorExtensions.cs" />
-    <Compile Include="Hosting\HttpHeaderProvider.cs" />
-    <Compile Include="Contexts\HttpReceiveContext.cs" />
-    <Compile Include="HttpAddressExtensions.cs" />
-    <Compile Include="Configuration\HttpBusFactory.cs" />
-    <Compile Include="Clients\HttpClientSettingsImpl.cs" />
-    <Compile Include="Exceptions\HttpConnectionException.cs" />
-    <Compile Include="Transport\HttpHost.cs" />
-    <Compile Include="Hosting\HttpHostEqualityComparer.cs" />
-    <Compile Include="Hosting\HttpHostSettings.cs" />
-    <Compile Include="HttpHostSettingsExtensions.cs" />
-    <Compile Include="Hosting\ConfigurationHostSettings.cs" />
-    <Compile Include="Transport\IHttpReceiveEndpointFactory.cs" />
-    <Compile Include="Transport\IOwinHostCache.cs" />
-    <Compile Include="Transport\OwinHostCache.cs" />
-    <Compile Include="Clients\HttpSendContextImpl.cs" />
-    <Compile Include="Clients\ClientContext.cs" />
-    <Compile Include="Clients\HttpClientCache.cs" />
-    <Compile Include="Clients\HttpClientContext.cs" />
-    <Compile Include="Clients\HttpSendContext.cs" />
-    <Compile Include="Clients\HttpSendEndpointProvider.cs" />
-    <Compile Include="Clients\HttpSendSettings.cs" />
-    <Compile Include="Clients\HttpSendSettingsImpl.cs" />
-    <Compile Include="Clients\HttpSendTransport.cs" />
-    <Compile Include="Clients\HttpClientSettings.cs" />
-    <Compile Include="Clients\HttpSendTransportProvider.cs" />
-    <Compile Include="HttpConsumerAction.cs" />
-    <Compile Include="HttpConsumerFilter.cs" />
-    <Compile Include="HttpConsumerPipeSpecification.cs" />
-    <Compile Include="HttpMessageDeserializerProxy.cs" />
-    <Compile Include="IHttpHost.cs" />
-    <Compile Include="Pipeline\HttpConsumerMetrics.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Transport\ReceiveSettings.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
-      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
-      <Name>MassTransit</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

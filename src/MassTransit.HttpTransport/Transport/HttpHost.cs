@@ -92,7 +92,7 @@ namespace MassTransit.HttpTransport.Transport
 
             var connectionTask = OwinHostCache.Send(connectionPipe, _supervisor.StoppingToken);
 
-            HostReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
+            HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints();
 
             handlesReady.TrySetResult(handles);
 
@@ -153,6 +153,16 @@ namespace MassTransit.HttpTransport.Transport
             return ReceiveEndpoints.ConnectReceiveEndpointObserver(observer);
         }
 
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        {
+            return ReceiveEndpoints.ConnectPublishObserver(observer);
+        }
+
+        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        {
+            return ReceiveEndpoints.ConnectSendObserver(observer);
+        }
+        
         string DebuggerDisplay => $"{Address}";
 
         class Handle :

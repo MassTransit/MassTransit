@@ -121,7 +121,7 @@ namespace MassTransit.Tests.Testing
 		[Test]
 		public void Should_have_sent_a_message_of_type_a()
 		{
-            _harness.Sent.Select<A>().Any().ShouldBe(true);
+            _harness.Published.Select<A>().Any().ShouldBe(true);
 		}
 
 		[Test]

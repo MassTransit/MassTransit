@@ -3,6 +3,14 @@
 MassTransit
 ===========
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/
+
 .. image:: mt-logo.png
 
 MassTransit is a free, open source, lightweight message bus for creating distributed applications using the .NET

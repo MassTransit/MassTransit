@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Testing
 
             NameFormatter = new RabbitMqMessageNameFormatter();
 
-            HostAddress = new Uri("rabbitmq://[::1]/test/");
+            HostAddress = new Uri("rabbitmq://localhost/test/");
         }
 
         public Uri HostAddress
@@ -59,6 +59,7 @@ namespace MassTransit.RabbitMqTransport.Testing
         public event Action<IRabbitMqBusFactoryConfigurator> OnConfigureRabbitMqBus;
         public event Action<IRabbitMqBusFactoryConfigurator, IRabbitMqHost> OnConfigureRabbitMqBusHost;
         public event Action<IRabbitMqReceiveEndpointConfigurator> OnConfigureRabbitMqReceiveEndoint;
+        public event Action<IRabbitMqHostConfigurator> OnConfigureRabbitMqHost;
         public event Action<IModel> OnCleanupVirtualHost;
 
         protected virtual void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
@@ -76,6 +77,11 @@ namespace MassTransit.RabbitMqTransport.Testing
             OnConfigureRabbitMqReceiveEndoint?.Invoke(configurator);
         }
 
+        protected virtual void ConfigureRabbitMqHost(IRabbitMqHostConfigurator configurator)
+        {
+            OnConfigureRabbitMqHost?.Invoke(configurator);
+        }
+
         protected virtual void CleanupVirtualHost(IModel model)
         {
             OnCleanupVirtualHost?.Invoke(model);
@@ -90,6 +96,8 @@ namespace MassTransit.RabbitMqTransport.Testing
 
                 if (!string.IsNullOrWhiteSpace(NodeHostName))
                     h.UseCluster(c => c.Node(NodeHostName));
+
+                ConfigureRabbitMqHost(h);
             });
         }
 

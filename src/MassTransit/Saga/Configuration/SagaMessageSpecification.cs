@@ -18,6 +18,7 @@ namespace MassTransit.Saga.Configuration
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using Observables;
+    using SubscriptionConfigurators;
     using Util;
 
 
@@ -34,11 +35,13 @@ namespace MassTransit.Saga.Configuration
         where TSaga : class, ISaga
     {
         readonly IBuildPipeConfigurator<SagaConsumeContext<TSaga, TMessage>> _configurator;
+        readonly IBuildPipeConfigurator<ConsumeContext<TMessage>> _messagePipeConfigurator;
         readonly SagaConfigurationObservable _observers;
 
         public SagaMessageSpecification()
         {
             _configurator = new PipeConfigurator<SagaConsumeContext<TSaga, TMessage>>();
+            _messagePipeConfigurator = new PipeConfigurator<ConsumeContext<TMessage>>();
             _observers = new SagaConfigurationObservable();
         }
 
@@ -65,10 +68,10 @@ namespace MassTransit.Saga.Configuration
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext<TMessage>> specification)
         {
-            _configurator.AddPipeSpecification(new SagaPipeSpecificationProxy<TSaga, TMessage>(specification));
+            _messagePipeConfigurator.AddPipeSpecification(specification);
         }
 
-        public IPipe<SagaConsumeContext<TSaga, TMessage>> Build(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter)
+        public IPipe<SagaConsumeContext<TSaga, TMessage>> BuildConsumerPipe(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter)
         {
             _observers.All(observer =>
             {
@@ -81,6 +84,13 @@ namespace MassTransit.Saga.Configuration
             return _configurator.Build();
         }
 
+        public IPipe<ConsumeContext<TMessage>> BuildMessagePipe(Action<IPipeConfigurator<ConsumeContext<TMessage>>> configure)
+        {
+            configure?.Invoke(_messagePipeConfigurator);
+
+            return _messagePipeConfigurator.Build();
+        }
+
         public void AddPipeSpecification(IPipeSpecification<SagaConsumeContext<TSaga>> specification)
         {
             _configurator.AddPipeSpecification(new SagaPipeSpecificationProxy<TSaga, TMessage>(specification));
@@ -89,6 +99,28 @@ namespace MassTransit.Saga.Configuration
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
         {
             return _observers.Connect(observer);
+        }
+
+        public void Message(Action<ISagaMessageConfigurator<TMessage>> configure)
+        {
+            configure?.Invoke(new SagaMessageConfigurator(_configurator));
+        }
+
+
+        class SagaMessageConfigurator :
+            ISagaMessageConfigurator<TMessage>
+        {
+            readonly IPipeConfigurator<SagaConsumeContext<TSaga, TMessage>> _configurator;
+
+            public SagaMessageConfigurator(IPipeConfigurator<SagaConsumeContext<TSaga, TMessage>> configurator)
+            {
+                _configurator = configurator;
+            }
+
+            public void AddPipeSpecification(IPipeSpecification<ConsumeContext<TMessage>> specification)
+            {
+                _configurator.AddPipeSpecification(new SagaPipeSpecificationProxy<TSaga, TMessage>(specification));
+            }
         }
     }
 }

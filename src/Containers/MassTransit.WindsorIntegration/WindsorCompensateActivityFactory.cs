@@ -59,5 +59,10 @@ namespace MassTransit.WindsorIntegration
                 return await next.Send(activityContext).ConfigureAwait(false);
             }
         }
+
+        public void Probe(ProbeContext context)
+        {
+            context.CreateScope("windsor");
+        }
     }
 }

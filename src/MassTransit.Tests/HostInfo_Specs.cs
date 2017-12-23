@@ -50,17 +50,19 @@ namespace MassTransit.Tests
         }
     }
 
+#if !NETCORE
+
     [TestFixture]
     public class Host_info_should_be_included_on_binary_serialization :
         InMemoryTestFixture
     {
         Task<ConsumeContext<PingMessage>> _handled;
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseBinarySerializer();
 
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -87,4 +89,6 @@ namespace MassTransit.Tests
             Assert.AreEqual(HostMetadataCache.Host.ProcessId, context.Host.ProcessId);
         }
     }
+
+#endif
 }

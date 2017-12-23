@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.MongoDbIntegration
 {
+    using System.Reflection;
     using MassTransit.Saga;
     using MongoDB.Bson.Serialization;
     using MongoDB.Bson.Serialization.Conventions;
@@ -23,7 +24,7 @@ namespace MassTransit.MongoDbIntegration
     {
         public void Apply(BsonClassMap classMap)
         {
-            if (classMap.ClassType.IsClass && typeof(ISaga).IsAssignableFrom(classMap.ClassType))
+            if (classMap.ClassType.GetTypeInfo().IsClass && typeof(ISaga).IsAssignableFrom(classMap.ClassType))
             {
                 classMap.MapIdProperty(nameof(ISaga.CorrelationId));
             }

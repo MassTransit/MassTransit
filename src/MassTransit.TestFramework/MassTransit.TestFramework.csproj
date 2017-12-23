@@ -1,201 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.TestFramework</RootNamespace>
-    <AssemblyName>MassTransit.TestFramework</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
-    <DocumentationFile>
-    </DocumentationFile>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\MassTransit.TestFramework.XML</DocumentationFile>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackageId>MassTransit.TestFramework</PackageId>
+    <Title>MassTransit.TestFramework</Title>
+    <Description>MassTransit Test Framework (NUnit); $(Description)</Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.TestFramework.xml</DocumentationFile>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.9\lib\net452\GreenPipes.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NewId, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <HintPath>..\packages\NewId.3.0.0\lib\net452\NewId.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="nunit.framework, Version=3.6.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.6.1\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core">
-    </Reference>
+    <PackageReference Include="GreenPipes" Version="1.2.0" />
+    <PackageReference Include="NewId" Version="3.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="NUnit" Version="3.9.0" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\SolutionVersion.cs">
-      <Link>Properties\SolutionVersion.cs</Link>
-    </Compile>
-    <Compile Include="ActivityTestContext.cs" />
-    <Compile Include="ActivityTestContextConfigurator.cs" />
-    <Compile Include="Courier\AddressActivity.cs" />
-    <Compile Include="Courier\AddressArguments.cs" />
-    <Compile Include="Courier\AddressLog.cs" />
-    <Compile Include="ExtensionMethodsForBuses.cs" />
-    <Compile Include="Indicators\BusActivityConsumeIndicator.cs" />
-    <Compile Include="Indicators\BaseBusActivityIndicatorConnectable.cs" />
-    <Compile Include="Indicators\BusActivityMonitor.cs" />
-    <Compile Include="Indicators\BusActivityPublishIndicator.cs" />
-    <Compile Include="Indicators\BusActivityReceiveIndicator.cs" />
-    <Compile Include="Indicators\BusActivitySendIndicator.cs" />
-    <Compile Include="Indicators\ConditionExpression.cs" />
-    <Compile Include="Indicators\IBusActivityMonitor.cs" />
-    <Compile Include="Indicators\ICondition.cs" />
-    <Compile Include="Indicators\IConditionObserver.cs" />
-    <Compile Include="Indicators\IObservableCondition.cs" />
-    <Compile Include="Indicators\ISignalResource.cs" />
-    <Compile Include="InMemoryActivityTestFixture.cs" />
-    <Compile Include="AsyncTestFixture.cs" />
-    <Compile Include="Courier\FaultyActivity.cs" />
-    <Compile Include="Courier\FaultyArguments.cs" />
-    <Compile Include="Courier\FaultyCompensateActivity.cs" />
-    <Compile Include="Courier\FaultyLog.cs" />
-    <Compile Include="Courier\NastyFaultyActivity.cs" />
-    <Compile Include="Courier\ObjectGraphActivityArguments.cs" />
-    <Compile Include="Courier\ObjectGraphTestActivity.cs" />
-    <Compile Include="Courier\OuterObject.cs" />
-    <Compile Include="Courier\OuterObjectImpl.cs" />
-    <Compile Include="Courier\ReviseItineraryActivity.cs" />
-    <Compile Include="Courier\ReviseToEmptyItineraryActivity.cs" />
-    <Compile Include="Courier\ReviseWithNoChangeItineraryActivity.cs" />
-    <Compile Include="Courier\SecondTestActivity.cs" />
-    <Compile Include="Courier\SetVariableActivity.cs" />
-    <Compile Include="Courier\SetVariableArguments.cs" />
-    <Compile Include="Courier\TestActivity.cs" />
-    <Compile Include="Courier\TestArguments.cs" />
-    <Compile Include="Courier\TestLog.cs" />
-    <Compile Include="IntentionalTestException.cs" />
-    <Compile Include="InMemoryTestFixture.cs" />
-    <Compile Include="BusTestFixture.cs" />
-    <Compile Include="InterfaceExtensions.cs" />
-    <Compile Include="InterfaceReflectionCache.cs" />
-    <Compile Include="IntrospectionExtensions.cs" />
-    <Compile Include="Messages\DeleteMessage.cs" />
-    <Compile Include="Messages\IMessageA.cs" />
-    <Compile Include="Messages\MessageA.cs" />
-    <Compile Include="Messages\MessageB.cs" />
-    <Compile Include="Messages\PingMessage.cs" />
-    <Compile Include="Messages\PingNotSupported.cs" />
-    <Compile Include="Messages\PongMessage.cs" />
-    <Compile Include="ExtensionMethodsForSagas.cs" />
-    <Compile Include="SerializerCache.cs" />
-    <Compile Include="TestConsumeContext.cs" />
-    <Compile Include="TestSymmetricKeyProvider.cs" />
-    <Compile Include="ThreadSafeRandom.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="MassTransit.TestFramework.log4net.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
-      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
-      <Name>MassTransit</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Fixtures\" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

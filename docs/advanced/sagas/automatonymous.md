@@ -195,7 +195,7 @@ message identifier. Message scheduling within sagas is a powerful feature, which
 }
 ```
 
-The remainder of the properites are relevant to the application, and are saved when properly mapped 
+The remainder of the properties are relevant to the application, and are saved when properly mapped 
 using the saga repository (which can be any supported storage engine, Entity Framework and NHibernate 
 are supported out of the box).
 
@@ -242,6 +242,65 @@ Once both events have been delivered to the state machine, the third event, *Ord
     That way, the composite events will be raised <i>after</i> the dependent event behaviors.
 </div>
 
+
+### Ignoring events
+
+In some cases you may want to ignore events, which can not be handled by the saga, because of inapropriate state. Without
+ additional configuration handling of such events end with exception and messages being moved to the error queue.
+ State machine can be configured to ignore events if they can not be handled. This can be done with the use of <i>Ignore()</i> method:
+
+```csharp
+    public State Intermediate { get; set; }
+    public Event Start { get; private set; }
+
+    public MyMachine()
+    {
+        Initially(
+            When(Start)
+                .ThenAsync(context => Console.Out.WriteAsync("Initially"))
+                .TransitionTo(Intermediate)
+            );
+
+        During(Intermediate,
+            When(AllowedEvent)
+                .Then(context => Console.Out.WriteAsync("AllowedEvent"))
+                .TransitionTo(SomeState),
+            Ignore(Start)
+            );
+    }
+```
+
+In the example above MyMachine will only handle Start event in <i>Initial</i> state. If Start event is correlated with the saga,
+    which is in the state <i>Intermediate</i>, such event will be ignored without moving message to the error queue.
+
+Another approach to configure ignorance is to use <i>Ignore()</i> method inside <i>DuringAny()</i>. This approach is more 
+suitable when a sufficiently large number of states is defined:
+
+```csharp
+    public State Intermediate { get; set; }
+    public State AnotherState { get; set; }
+    public State SomeAnotherState { get; set; }
+    public Event Start { get; private set; }
+
+    public MyMachine()
+    {
+        DuringAny(Ignore(Start));
+
+        Initially(
+            When(Start)
+                .ThenAsync(context => Console.Out.WriteAsync("Initially"))
+                .TransitionTo(Intermediate)
+            );
+
+        During(Intermediate,
+            When(AllowedEvent)
+                .Then(context => Console.Out.WriteAsync("AllowedEvent"))
+            Ignore(Start)
+            );
+    }
+```
+
+In the example above MyMachine is configured to ignore <i>Start</i> event during any state, except <i>Initial</i> state.
 
 [1]: https://github.com/MassTransit/Automatonymous
 [2]: https://github.com/MassTransit/Sample-ShoppingWeb

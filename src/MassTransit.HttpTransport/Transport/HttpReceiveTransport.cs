@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,8 +15,8 @@ namespace MassTransit.HttpTransport.Transport
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
+    using Topology;
     using Transports;
     using Util;
 
@@ -25,18 +25,16 @@ namespace MassTransit.HttpTransport.Transport
         IReceiveTransport
     {
         readonly IHttpHost _host;
-        readonly ReceiveSettings _receiveSettings;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ReceiveObservable _receiveObservable;
+        readonly ReceiveSettings _receiveSettings;
         readonly ReceiveTransportObservable _receiveTransportObservable;
-        readonly ISendPipe _sendPipe;
+        readonly IHttpReceiveEndpointTopology _topology;
 
-        public HttpReceiveTransport(IHttpHost host, ReceiveSettings receiveSettings, IPublishEndpointProvider publishEndpointProvider, ISendPipe sendPipe)
+        public HttpReceiveTransport(IHttpHost host, ReceiveSettings receiveSettings, IHttpReceiveEndpointTopology topology)
         {
             _host = host;
             _receiveSettings = receiveSettings;
-            _publishEndpointProvider = publishEndpointProvider;
-            _sendPipe = sendPipe;
+            _topology = topology;
 
             _receiveObservable = new ReceiveObservable();
             _receiveTransportObservable = new ReceiveTransportObservable();
@@ -65,12 +63,22 @@ namespace MassTransit.HttpTransport.Transport
 
             IPipe<OwinHostContext> hostPipe = Pipe.New<OwinHostContext>(cxt =>
             {
-                cxt.HttpConsumer(receivePipe, _host.Settings, _receiveSettings, _receiveObservable, _receiveTransportObservable, supervisor, _sendPipe);
+                cxt.HttpConsumer(receivePipe, _host.Settings, _receiveSettings, _receiveObservable, _receiveTransportObservable, supervisor, _topology);
             });
 
             var hostTask = _host.OwinHostCache.Send(hostPipe, supervisor.StoppingToken);
 
             return new Handle(supervisor, hostTask);
+        }
+
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _topology.PublishEndpointProvider.ConnectPublishObserver(observer);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _topology.SendEndpointProvider.ConnectSendObserver(observer);
         }
 
 
@@ -92,12 +100,6 @@ namespace MassTransit.HttpTransport.Transport
 
                 await _connectionTask.ConfigureAwait(false);
             }
-        }
-
-
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
-        {
-            return _publishEndpointProvider.ConnectPublishObserver(observer);
         }
     }
 }

@@ -34,12 +34,12 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             base.ConfigureRabbitMqBusHost(configurator, host);
 
-            configurator.OverrideDefaultBusEndpointQueueName($"super-bus-{NewId.NextGuid().ToString("N")}");
+            configurator.OverrideDefaultBusEndpointQueueName($"super-bus-{NewId.NextGuid():N}");
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureRabbitMqReceiveEndoint(configurator);
+            base.ConfigureRabbitMqReceiveEndpoint(configurator);
 
             configurator.Handler<PingMessage>(context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
         }

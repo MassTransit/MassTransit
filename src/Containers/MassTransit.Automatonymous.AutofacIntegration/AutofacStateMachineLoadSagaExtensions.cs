@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,7 +17,9 @@ namespace MassTransit
     using System.Linq;
     using Autofac;
     using Autofac.Core;
+    using AutofacIntegration;
     using Automatonymous;
+    using Automatonymous.Scoping;
     using AutomatonymousAutofacIntegration;
     using Internals.Extensions;
 
@@ -35,15 +37,20 @@ namespace MassTransit
         {
             var scope = context.Resolve<ILifetimeScope>();
 
-            IList<Type> sagaTypes = FindStateMachineSagaTypes(context);
+            IEnumerable<Type> sagaTypes = FindStateMachineSagaTypes(context);
+
+            var stateMachineFactory = new AutofacSagaStateMachineFactory(scope);
+
+            var scopeProvider = new SingleLifetimeScopeProvider(scope);
+            var repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(scopeProvider, name);
 
             foreach (var sagaType in sagaTypes)
             {
-                StateMachineSagaConfiguratorCache.Configure(sagaType, configurator, scope, name);
+                StateMachineSagaConfiguratorCache.Configure(sagaType, configurator, stateMachineFactory, repositoryFactory);
             }
         }
 
-        public static IList<Type> FindStateMachineSagaTypes(IComponentContext context)
+        static IEnumerable<Type> FindStateMachineSagaTypes(IComponentContext context)
         {
             return context.ComponentRegistry.Registrations
                 .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})

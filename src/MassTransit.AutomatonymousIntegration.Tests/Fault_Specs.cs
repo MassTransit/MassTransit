@@ -20,6 +20,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using NUnit.Framework;
     using Saga;
     using TestFramework;
+    using Testing;
 
 
     [TestFixture]
@@ -50,7 +51,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             var message = new Start();
 
             Task<ConsumeContext<Fault<Start>>> faultReceived =
-                SubscribeHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
+                ConnectPublishHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -65,7 +66,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             var message = new Stop();
 
             Task<ConsumeContext<Fault<Stop>>> faultReceived =
-                SubscribeHandler<Fault<Stop>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
+                ConnectPublishHandler<Fault<Stop>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -80,7 +81,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             var message = new Initialize();
 
             Task<ConsumeContext<Fault<Start>>> faultReceived =
-                SubscribeHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
+                ConnectPublishHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
 
             await InputQueueSendEndpoint.Send(message);
 

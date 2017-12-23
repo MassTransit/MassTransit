@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,8 +24,8 @@ namespace MassTransit.HttpTransport.Clients
     using Contexts;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
+    using MassTransit.Topology;
     using Transports;
     using Util;
 
@@ -35,17 +35,19 @@ namespace MassTransit.HttpTransport.Clients
     {
         static readonly ILog _log = Logger.Get<HttpSendTransport>();
 
-        static readonly string Version = GetAssemblyFileVersion(typeof(IBusControl).Assembly);
+        static readonly string Version = GetAssemblyFileVersion(typeof(IBusControl).GetTypeInfo().Assembly);
         readonly ClientCache _clientCache;
         readonly SendObservable _observers;
-        readonly HttpSendSettings _sendSettings;
         readonly IReceiveObserver _receiveObserver;
+        readonly HttpSendSettings _sendSettings;
+        readonly IReceiveEndpointTopology _topology;
 
-        public HttpSendTransport(ClientCache clientCache, HttpSendSettings sendSettings, IReceiveObserver receiveObserver)
+        public HttpSendTransport(ClientCache clientCache, HttpSendSettings sendSettings, IReceiveObserver receiveObserver, IReceiveEndpointTopology topology)
         {
             _clientCache = clientCache;
             _sendSettings = sendSettings;
             _receiveObserver = receiveObserver;
+            _topology = topology;
             _observers = new SendObservable();
         }
 
@@ -117,11 +119,7 @@ namespace MassTransit.HttpTransport.Clients
 
                                 if (responseStream.Length > 0)
                                 {
-                                    ISendEndpointProvider sendEndpointProvider = new HttpClientSendEndpointProvider();
-                                    IPublishEndpointProvider publishEndpointProvider = new HttpClientPublishEndpointProvider();
-
-                                    var receiveContext = new HttpClientReceiveContext(response, responseStream, false, _receiveObserver, sendEndpointProvider,
-                                        publishEndpointProvider);
+                                    var receiveContext = new HttpClientReceiveContext(response, responseStream, false, _receiveObserver, _topology);
 
                                     await clientContext.ReceiveResponse(receiveContext).ConfigureAwait(false);
                                 }
@@ -143,55 +141,6 @@ namespace MassTransit.HttpTransport.Clients
             });
 
             await _clientCache.DoWith(clientPipe, cancelSend).ConfigureAwait(false);
-        }
-
-
-        class HttpClientSendEndpointProvider :
-            ISendEndpointProvider
-        {
-            readonly SendObservable _observers;
-
-            public HttpClientSendEndpointProvider()
-            {
-                _observers = new SendObservable();
-            }
-
-            public ConnectHandle ConnectSendObserver(ISendObserver observer)
-            {
-                return _observers.Connect(observer);
-            }
-
-            public Task<ISendEndpoint> GetSendEndpoint(Uri address)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-
-        class HttpClientPublishEndpointProvider :
-            IPublishEndpointProvider
-        {
-            readonly PublishObservable _observers;
-
-            public HttpClientPublishEndpointProvider()
-            {
-                _observers = new PublishObservable();
-            }
-
-            public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
-            {
-                return _observers.Connect(observer);
-            }
-
-            public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId = null, Guid? conversationId = null)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<ISendEndpoint> GetPublishSendEndpoint(Type messageType)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         public Task Move(ReceiveContext context, IPipe<SendContext> pipe)

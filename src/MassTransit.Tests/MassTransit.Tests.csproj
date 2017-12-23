@@ -1,345 +1,37 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{76646B96-936B-4D31-A053-35CD630E3C68}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.Tests</RootNamespace>
-    <AssemblyName>MassTransit.Tests</AssemblyName>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;$(DefineConstants)</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;$(DefineConstants)</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
+    <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.9\lib\net452\GreenPipes.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NewId, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <HintPath>..\packages\NewId.3.0.0\lib\net452\NewId.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="nunit.framework, Version=3.6.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.6.1\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Shouldly, Version=2.8.2.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
-      <HintPath>..\packages\Shouldly.2.8.2\lib\net451\Shouldly.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core">
-    </Reference>
-    <Reference Include="System.Management" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
+    <Compile Remove="NewConfigurationModel.cs" />
+    <Compile Remove="Saga\SagaTestContext.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\SolutionVersion.cs">
-      <Link>Properties\SolutionVersion.cs</Link>
-    </Compile>
-    <Compile Include="Audit\AuditFilter_Specs.cs" />
-    <Compile Include="Audit\Audit_Specs.cs" />
-    <Compile Include="Audit\InMemoryAuditStore.cs" />
-    <Compile Include="BusActivityMonitor_Specs.cs" />
-    <Compile Include="CachingTests\Bucket_Specs.cs" />
-    <Compile Include="CachingTests\Endpoint.cs" />
-    <Compile Include="CachingTests\Index_Specs.cs" />
-    <Compile Include="CachingTests\NodeTracker_Specs.cs" />
-    <Compile Include="CachingTests\MissingValueFactory_Specs.cs" />
-    <Compile Include="CachingTests\TestException.cs" />
-    <Compile Include="CachingTests\Tests.cs" />
-    <Compile Include="CachingTests\TwoIndex_Specs.cs" />
-    <Compile Include="CircuitBreaker_Specs.cs" />
-    <Compile Include="ConcurrencyLimitKnob_Specs.cs" />
-    <Compile Include="Configuration\ConfigurationObserver_Specs.cs" />
-    <Compile Include="Configuration\SagaConfigurationObserver_Specs.cs" />
-    <Compile Include="ConsumeJToken_Specs.cs" />
-    <Compile Include="ConsumeObserver_Specs.cs" />
-    <Compile Include="ConsumerFactoryMiddleware_Specs.cs" />
-    <Compile Include="Consumer_Specs.cs" />
-    <Compile Include="ContainedMessage_Specs.cs" />
-    <Compile Include="Conventional\ConventionConsumer_Specs.cs" />
-    <Compile Include="Conventional\CustomConsumeConnectorFactory.cs" />
-    <Compile Include="Conventional\CustomConsumerConvention.cs" />
-    <Compile Include="Conventional\CustomConsumerInterfaceType.cs" />
-    <Compile Include="Conventional\CustomConsumerMessageConvention.cs" />
-    <Compile Include="Conventional\CustomMethodConsumerMessageFilter.cs" />
-    <Compile Include="Conventional\IHandler.cs" />
-    <Compile Include="ConversationId_Specs.cs" />
-    <Compile Include="CorrelationId_Specs.cs" />
-    <Compile Include="Courier\ArgumentOverload_Specs.cs" />
-    <Compile Include="Courier\Builder_Specs.cs" />
-    <Compile Include="Courier\Configuration_Specs.cs" />
-    <Compile Include="Courier\EncryptedArgument_Specs.cs" />
-    <Compile Include="Courier\FaultActivityEvent_Specs.cs" />
-    <Compile Include="Courier\Fault_Specs.cs" />
-    <Compile Include="Courier\ItinerarySubscription_Specs.cs" />
-    <Compile Include="Courier\ObjectGraph_Specs.cs" />
-    <Compile Include="Courier\PartitionActivity_Specs.cs" />
-    <Compile Include="Courier\RanToCompletion_Specs.cs" />
-    <Compile Include="Courier\RequestRoutingSlip_Specs.cs" />
-    <Compile Include="Courier\RetryActivity_Specs.cs" />
-    <Compile Include="Courier\ReviseItinerary_Specs.cs" />
-    <Compile Include="Courier\RoutingSlip_Specs.cs" />
-    <Compile Include="Courier\SendEvent_Specs.cs" />
-    <Compile Include="Courier\SingleActivityEvent_Specs.cs" />
-    <Compile Include="Courier\Subscription_Specs.cs" />
-    <Compile Include="Courier\TwoActivityEvent_Specs.cs" />
-    <Compile Include="Courier\UriArgument_Specs.cs" />
-    <Compile Include="Diagnostics\StatsD_Specs.cs" />
-    <Compile Include="EventPublish_Specs.cs" />
-    <Compile Include="ExcessiveAsyncFault_Specs.cs" />
-    <Compile Include="FaultPublish_Specs.cs" />
-    <Compile Include="HeaderObject_Specs.cs" />
-    <Compile Include="HostInfo_Specs.cs" />
-    <Compile Include="InMemoryDuo_Specs.cs" />
-    <Compile Include="Introspection_Specs.cs" />
-    <Compile Include="MessageData\DataBus_Specs.cs" />
-    <Compile Include="Diagnostics\PerformanceCounter_Specs.cs" />
-    <Compile Include="DictionaryToObject_Specs.cs" />
-    <Compile Include="ErrorQueue_Specs.cs" />
-    <Compile Include="FastProperty_Specs.cs" />
-    <Compile Include="InterceptingConsumer_Specs.cs" />
-    <Compile Include="Diagnostics\Trace_Specs.cs" />
-    <Compile Include="Enrichment_Specs.cs" />
-    <Compile Include="InterfaceProxy_Specs.cs" />
-    <Compile Include="JsonToken_Specs.cs" />
-    <Compile Include="MessageData\FileSystem_Specs.cs" />
-    <Compile Include="MessageUrnSpecs.cs" />
-    <Compile Include="Configuration\ConsumesAll_Specs.cs" />
-    <Compile Include="Configuration\InstanceSubscription_Specs.cs" />
-    <Compile Include="Configuration\SagaConnector_Specs.cs" />
-    <Compile Include="ContextSetup.cs" />
-    <Compile Include="Groups\Group_Specs.cs" />
-    <Compile Include="InterfaceSubscription_Specs.cs" />
-    <Compile Include="MessageContext_Specs.cs" />
-    <Compile Include="Messages\PartialSerializationTestMessage.cs" />
-    <Compile Include="BinarySerializer_Specs.cs" />
-    <Compile Include="MixedConsumer_Specs.cs" />
-    <Compile Include="MultiTestConsumer_Specs.cs" />
-    <Compile Include="ObjectToDictionary_Specs.cs" />
-    <Compile Include="Observer_Specs.cs" />
-    <Compile Include="Outbox_Specs.cs" />
-    <Compile Include="Performance\InMemorySpeed_Specs.cs" />
-    <Compile Include="Pipeline\CircuitBreaker_Specs.cs" />
-    <Compile Include="Pipeline\Concurrency_Specs.cs" />
-    <Compile Include="Pipeline\ConnectConsumer_Specs.cs" />
-    <Compile Include="Pipeline\ConnectHandler_Specs.cs" />
-    <Compile Include="Pipeline\ConnectObserver_Specs.cs" />
-    <Compile Include="Pipeline\ContentFilter_Specs.cs" />
-    <Compile Include="Pipeline\LatestFilter_Specs.cs" />
-    <Compile Include="Pipeline\MessageTestFixture.cs" />
-    <Compile Include="Pipeline\Message_Specs.cs" />
-    <Compile Include="Pipeline\OneMessageConsumer.cs" />
-    <Compile Include="Pipeline\PartitionByKey_Specs.cs" />
-    <Compile Include="Pipeline\Retry_Specs.cs" />
-    <Compile Include="Pipeline\Transaction_Specs.cs" />
-    <Compile Include="Pipeline\TwoMessageConsumer.cs" />
-    <Compile Include="PublishHeader_Specs.cs" />
-    <Compile Include="PublishObserver_Specs.cs" />
-    <Compile Include="ReceiveEndpoint_Specs.cs" />
-    <Compile Include="ReceiveObserver_Specs.cs" />
-    <Compile Include="RequestClient_Specs.cs" />
-    <Compile Include="Retry_Specs.cs" />
-    <Compile Include="Saga\InjectingSampleSaga.cs" />
-    <Compile Include="Saga\Injecting_Specs.cs" />
-    <Compile Include="Saga\MessageSaga_Specs.cs" />
-    <Compile Include="Saga\PartitionSaga_Specs.cs" />
-    <Compile Include="Saga\Using_correlated_messages_to_start_sagas.cs" />
-    <Compile Include="SendByConvention_Specs.cs" />
-    <Compile Include="SendEndpointCache_Specs.cs" />
-    <Compile Include="SendObserver_Specs.cs" />
-    <Compile Include="SendProxy_Specs.cs" />
-    <Compile Include="SendReceive_Specs.cs" />
-    <Compile Include="SerializationFault_Specs.cs" />
-    <Compile Include="SerializationSupport_Specs.cs" />
-    <Compile Include="Serialization\Array_Specs.cs" />
-    <Compile Include="Serialization\DateTimeFormat_Specs.cs" />
-    <Compile Include="Serialization\IEnumerable_Specs.cs" />
-    <Compile Include="Serialization\MessageDataSerialization_Specs.cs" />
-    <Compile Include="Serialization\PolymorphicProperty_Specs.cs" />
-    <Compile Include="Serialization\ReceiveFault_Serialization_Specs.cs" />
-    <Compile Include="Serialization\SeparateSerializer_Specs.cs" />
-    <Compile Include="Serialization\SerializationException_Specs.cs" />
-    <Compile Include="InMemoryTest_Specs.cs" />
-    <Compile Include="Serialization\TypeHandling_Specs.cs" />
-    <Compile Include="ServiceBusExtensions.cs" />
-    <Compile Include="SimpleConfiguration_Specs.cs" />
-    <Compile Include="StaticProperty_Specs.cs" />
-    <Compile Include="Supervisor_Specs.cs" />
-    <Compile Include="Testing\ConsumerMultiple_Specs.cs" />
-    <Compile Include="Testing\ConsumerTest_Specs.cs" />
-    <Compile Include="Testing\HandlerRespond_Specs.cs" />
-    <Compile Include="Testing\HandlerTest_Specs.cs" />
-    <Compile Include="Testing\NewTest_Specs.cs" />
-    <Compile Include="Testing\SagaTest_Specs.cs" />
-    <Compile Include="Testing\StandaloneConsumer_Specs.cs" />
-    <Compile Include="Threading_Specs.cs" />
-    <Compile Include="Transforms\SendTransform_Specs.cs" />
-    <Compile Include="Transforms\SetProperty_Specs.cs" />
-    <Compile Include="Transforms\TransformClass_Specs.cs" />
-    <Compile Include="Transports\InMemoryTransport_Specs.cs" />
-    <Compile Include="Uri_Specs.cs" />
-    <Compile Include="Saga\Messages\CompleteSimpleSaga.cs" />
-    <Compile Include="Saga\Messages\InitiateSimpleSaga.cs" />
-    <Compile Include="Saga\Locator\SagaExpression_Specs.cs" />
-    <Compile Include="Saga\Messages\ObservableSagaMessage.cs" />
-    <Compile Include="Saga\SimpleSaga.cs" />
-    <Compile Include="Saga\Messages\SimpleSagaMessageBase.cs" />
-    <Compile Include="Messages\ResponseMessage.cs" />
-    <Compile Include="Messages\RequestMessage.cs" />
-    <Compile Include="Messages\SerializationTestMessage.cs" />
-    <Compile Include="Serialization\GivenAComplexMessage.cs" />
-    <Compile Include="Serialization\Interface_Specs.cs" />
-    <Compile Include="Serialization\JsonSerialization_Specs.cs" />
-    <Compile Include="Serialization\MoreSerialization_Specs.cs" />
-    <Compile Include="Serialization\Performance_Specs.cs" />
-    <Compile Include="Serialization\PropertyType_Specs.cs" />
-    <Compile Include="Serialization\SerializationTest.cs" />
-    <Compile Include="Saga\InitiateSaga_Specs.cs" />
-    <Compile Include="PublishSubscribe_Specs.cs" />
-    <Compile Include="Saga\Messages\CorrelatedMessage.cs" />
-    <Compile Include="Saga\Messages\RegisterUser.cs" />
-    <Compile Include="Saga\Messages\SendUserVerificationEmail.cs" />
-    <Compile Include="Saga\Messages\SendValidationEmail.cs" />
-    <Compile Include="Saga\Messages\UserRegistrationComplete.cs" />
-    <Compile Include="Saga\Messages\UserRegistrationPending.cs" />
-    <Compile Include="Saga\Messages\UserValidated.cs" />
-    <Compile Include="Saga\Messages\UserVerificationEmailSent.cs" />
-    <Compile Include="Saga\RegisterUserController.cs" />
-    <Compile Include="Saga\RegisterUserSaga.cs" />
-    <Compile Include="Saga\RegisterUser_Specs.cs" />
-    <Compile Include="Messages\ClientMessage.cs" />
-    <Compile Include="Messages\DeleteMessage.cs" />
-    <Compile Include="Messages\UpdateMessage.cs" />
-    <Compile Include="Messages\UpdateAcceptedMessage.cs" />
-    <None Include="packages.config" />
+    <PackageReference Include="GreenPipes" Version="1.2.0" />
+    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
+    <PackageReference Include="NewId" Version="3.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.1" />
+    <PackageReference Include="NUnit" Version="3.9.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
+    <PackageReference Include="Shouldly" Version="2.8.3" />
+    <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp2.0'">
+    <Compile Remove="Diagnostics/**" />
+    <Compile Remove="BinarySerializer_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj">
-      <Project>{8D2BE372-A756-4676-B2EA-ED7846809BFE}</Project>
-      <Name>MassTransit.Log4NetIntegration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.Audit\MassTransit.Audit.csproj">
-      <Project>{AE85151C-C049-47B2-BD8B-9915A3103299}</Project>
-      <Name>MassTransit.Audit</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj">
-      <Project>{3C4B5F1A-69AD-415E-9F40-A7FDBD7A3012}</Project>
-      <Name>MassTransit.TestFramework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
-      <Project>{6EFD69FC-CBCC-4F85-AEE0-EFBA73F4D273}</Project>
-      <Name>MassTransit</Name>
-    </ProjectReference>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="masstransit.tests.log4net.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
+    <Reference Include="System.Transactions" Condition="'$(TargetFramework)' == 'net452'" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Saga\RegisterUserSaga.hbm.xml" />
-    <Content Include="Saga\saga.nhibernate.cfg.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="subscriptions.castle.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+  </PropertyGroup>
 </Project>

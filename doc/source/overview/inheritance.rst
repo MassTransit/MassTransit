@@ -1,6 +1,14 @@
 Inheritance and message class design
 ====================================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/understand/message-contracts.html
+
 That said, I would advise you to think about the following things:
 #. Interface-based inheritance is OK
 #. Class-based inheritance is to be approached with caution

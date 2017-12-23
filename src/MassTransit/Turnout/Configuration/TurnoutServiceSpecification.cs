@@ -78,6 +78,11 @@ namespace MassTransit.Turnout.Configuration
             _configurator.AddPipeSpecification(specification);
         }
 
+        void IConsumePipeConfigurator.AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification)
+        {
+            _configurator.AddPrePipeSpecification(specification);
+        }
+
         public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
             return _configurator.ConnectConsumerConfigurationObserver(observer);

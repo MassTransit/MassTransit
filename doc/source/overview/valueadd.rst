@@ -1,6 +1,14 @@
 What does MassTransit add to RabbitMQ?
 ======================================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/understand/additions-to-transport.html
+
 MassTransit is a lightweight service bus for building distributed .NET applications. The main goal is to provide
 a consistent, .NET friendly abstraction over the message transport (whether it is RabbitMQ, Azure Service Bus, etc.).
 To meet this goal, MassTransit brings a lot of the application-specific logic closer to the developer in an easy to 

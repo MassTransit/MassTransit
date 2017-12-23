@@ -1,24 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{29BC6AB5-2697-45EC-8172-475AB8ACE834}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MassTransit</RootNamespace>
     <AssemblyName>MassTransit.Futures</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
+    <IsPackable>false</IsPackable>
+    <TargetFrameworks>net452</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -27,7 +17,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -36,109 +25,17 @@
     <DocumentationFile>bin\Release\MassTransit.Futures.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+	<SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.9\lib\net452\GreenPipes.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NewId, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <HintPath>..\packages\NewId.3.0.0\lib\net452\NewId.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <PackageReference Include="GreenPipes" Version="1.2.0" />
+    <PackageReference Include="NewId" Version="3.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+	<ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\SolutionVersion.cs">
-      <Link>Properties\SolutionVersion.cs</Link>
-    </Compile>
-    <Compile Include="Steward\Contracts\Availability\Heartbeat.cs" />
-    <Compile Include="Steward\Contracts\Availability\Node.cs" />
-    <Compile Include="Steward\Contracts\Availability\RequestVote.cs" />
-    <Compile Include="Steward\Contracts\Availability\VoteAgainst.cs" />
-    <Compile Include="Steward\Contracts\Availability\VoteFor.cs" />
-    <Compile Include="Steward\Contracts\CancelDispatch.cs" />
-    <Compile Include="Steward\Contracts\DisableResource.cs" />
-    <Compile Include="Steward\Contracts\DispatchAccepted.cs" />
-    <Compile Include="Steward\Contracts\DispatchCanceled.cs" />
-    <Compile Include="Steward\Contracts\DispatchDelayed.cs" />
-    <Compile Include="Steward\Contracts\DispatchDiscarded.cs" />
-    <Compile Include="Steward\Contracts\DispatchMessage.cs" />
-    <Compile Include="Steward\Contracts\DispatchRefused.cs" />
-    <Compile Include="Steward\Contracts\DispatchRejected.cs" />
-    <Compile Include="Steward\Contracts\EnableResource.cs" />
-    <Compile Include="Steward\Contracts\Events\ResourceUsageCompleted.cs" />
-    <Compile Include="Steward\Contracts\ResourceDisabled.cs" />
-    <Compile Include="Steward\Contracts\ResourceImpaired.cs" />
-    <Compile Include="Steward\Contracts\ResourceRestored.cs" />
-    <Compile Include="Steward\Contracts\ResourceUsageFailed.cs" />
-    <Compile Include="Steward\Contracts\UnavailableResource.cs" />
-    <Compile Include="Steward\Core\Agents\MessageDispatchAgent.cs" />
-    <Compile Include="Steward\Core\Consumers\ConsumerDispatchContext.cs" />
-    <Compile Include="Steward\Core\Consumers\DispatchMessageConsumer.cs" />
-    <Compile Include="Steward\Core\DispatchAgent.cs" />
-    <Compile Include="Steward\Core\DispatchContext.cs" />
-    <Compile Include="Steward\Core\DispatchPolicy.cs" />
-    <Compile Include="Steward\Core\DispatchResult.cs" />
-    <Compile Include="Steward\Core\Distribution\ConsistentHashing\ConsistentHashDistributionStrategy.cs" />
-    <Compile Include="Steward\Core\Distribution\ConsistentHashing\HashGenerator.cs" />
-    <Compile Include="Steward\Core\Distribution\ConsistentHashing\HashKeyProvider.cs" />
-    <Compile Include="Steward\Core\Distribution\ConsistentHashing\Murmur3AUnsafe.cs" />
-    <Compile Include="Steward\Core\Distribution\DistributionStrategy.cs" />
-    <Compile Include="Steward\Core\MessageDispatchContext.cs" />
-    <Compile Include="Steward\Core\MessageDispatchPolicy.cs" />
-    <Compile Include="Steward\Core\Policies\AcceptDispatchPolicy.cs" />
-    <Compile Include="Steward\Core\Policies\DelegateMessageDispatchPolicy.cs" />
-    <Compile Include="Steward\Core\RefuseDispatchResult.cs" />
-    <Compile Include="Steward\Core\Results\AcceptDispatchResult.cs" />
-    <Compile Include="Steward\Core\Results\DelayDispatchResult.cs" />
-    <Compile Include="Steward\Core\Results\DiscardDispatchResult.cs" />
-    <Compile Include="Steward\Core\Results\RejectDispatchResult.cs" />
-    <Compile Include="Steward\DispatchCommandExtensions.cs" />
-    <Compile Include="Steward\DispatchConsumerFactory.cs" />
-    <Compile Include="Steward\DispatchException.cs" />
-    <Compile Include="Steward\DispatchHandle.cs" />
-    <Compile Include="Steward\DispatchMessageHandle.cs" />
-    <Compile Include="Steward\Messages\ResourceUsageCompletedEvent.cs" />
-    <Compile Include="Steward\Messages\ResourceUsageFailedEvent.cs" />
-    <Compile Include="Steward\ResourceUsageExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
-      <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
-      <Name>MassTransit</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Steward\Core\Contexts\" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

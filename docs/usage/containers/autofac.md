@@ -182,6 +182,8 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 
 Below you find samples of how to register different saga persistence implementations with Autofac.
 
+> Saga repositories must be registered as singletons (`SingleInstance()`).
+
 ### NHibernate
 
 For NHibernate you can scan an assembly where your saga instance mappings are defined to find
@@ -216,7 +218,8 @@ separately like this:
 
 ```csharp
 builder.Register(c => new EntityFrameworkSagaRepository<MySaga>(
-    () => new SagaDbContext<MySaga, MySagaMapping>(connectionString)));
+    () => new SagaDbContext<MySaga, MySagaMapping>(connectionString)))
+        .As<ISagaRepository<MySaga>>().SingleInstance();
 ```
 
 You can use your own context implementation and register the repository as generic like this:

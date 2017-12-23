@@ -13,11 +13,15 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.Threading;
     using Configurators;
+    using MassTransit.Topology;
 
 
     public static class RabbitMqBusFactory
     {
+        public static IMessageTopology MessageTopology => Cached.MessageTopologyValue.Value;
+
         /// <summary>
         /// Configure and create a bus for RabbitMQ
         /// </summary>
@@ -25,11 +29,25 @@ namespace MassTransit.RabbitMqTransport
         /// <returns></returns>
         public static IBusControl Create(Action<IRabbitMqBusFactoryConfigurator> configure)
         {
-            var configurator = new RabbitMqBusFactoryConfigurator();
+            var configurator = new RabbitMqBusFactoryConfigurator(new Specifications.RabbitMqEndpointConfiguration(MessageTopology));
 
             configure(configurator);
 
             return configurator.Build();
+        }
+
+
+        static class Cached
+        {
+            internal static readonly Lazy<IMessageTopology> MessageTopologyValue = new Lazy<IMessageTopology>(() => new MessageTopology(_entityNameFormatter),
+                LazyThreadSafetyMode.PublicationOnly);
+
+            static readonly IEntityNameFormatter _entityNameFormatter;
+
+            static Cached()
+            {
+                _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(new RabbitMqMessageNameFormatter());
+            }
         }
     }
 }

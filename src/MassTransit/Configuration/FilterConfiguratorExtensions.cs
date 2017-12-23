@@ -35,7 +35,6 @@ namespace MassTransit
         /// <summary>
         /// Adds a filter to the send pipeline
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="filter"></param>
         public static void UseSendFilter(this ISendPipeConfigurator configurator, IFilter<SendContext> filter)

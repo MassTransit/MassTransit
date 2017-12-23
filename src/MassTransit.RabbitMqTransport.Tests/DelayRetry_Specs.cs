@@ -42,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Stopwatch _timer;
         int _count;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 
@@ -92,7 +92,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         int _count;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 
@@ -102,6 +102,72 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 throw new IntentionalTestException();
             }, x => x.UseDelayedRedelivery(r => r.Intervals(100, 200)));
+        }
+    }
+    
+    [TestFixture]
+    public class Retrying_a_message_retry_with_policy :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_only_retry_up_to_the_retry_count()
+        {
+            var pingMessage = new PingMessage();
+
+            var fault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+
+            await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
+
+            ConsumeContext<Fault<PingMessage>> faultContext = await fault;
+
+            Assert.That(_count, Is.EqualTo(3));
+        }
+
+        int _count;
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _count = 0;
+
+            configurator.Handler<PingMessage>(context =>
+            {
+                Interlocked.Increment(ref _count);
+
+                throw new IntentionalTestException();
+            }, x => x.UseRetry(r => r.Intervals(100, 200)));
+        }
+    }
+    
+    [TestFixture]
+    public class Delaying_a_message_retry_with_policy_but_no_retries :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_immediately_fault_with_no_delay()
+        {
+            var pingMessage = new PingMessage();
+
+            var fault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+
+            await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
+
+            ConsumeContext<Fault<PingMessage>> faultContext = await fault;
+
+            Assert.That(_count, Is.EqualTo(1));
+        }
+
+        int _count;
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _count = 0;
+
+            configurator.Handler<PingMessage>(context =>
+            {
+                Interlocked.Increment(ref _count);
+
+                throw new IntentionalTestException();
+            }, x => x.UseDelayedRedelivery(r => r.None()));
         }
     }
 
@@ -125,7 +191,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Stopwatch _timer;
         int _count;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _count = 0;
 

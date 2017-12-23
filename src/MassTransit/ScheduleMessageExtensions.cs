@@ -87,7 +87,6 @@ namespace MassTransit
         /// <param name="bus">The bus from which the scheduled message command should be published and delivered</param>
         /// <param name="scheduledTime">The time when the message should be sent to the endpoint</param>
         /// <param name="message">The message to send</param>
-        ///  /// <param name="pipe">Optional: A callback that gives the caller access to the publish context.</param>
         /// <returns>A handled to the scheduled message</returns>
         [Obsolete("Use ScheduleSend instead, it's the future")]
         public static Task<ScheduledMessage<T>> ScheduleMessage<T>(this IBus bus, DateTime scheduledTime, T message)

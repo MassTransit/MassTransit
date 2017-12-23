@@ -22,13 +22,12 @@ namespace MassTransit.WindsorIntegration
     {
         public ILifetimeScope GetScope(CreationContext context)
         {
-            var lifetimeScope = CallContextLifetimeScope.ObtainCurrentScope() as MessageLifetimeScope;
-            if (lifetimeScope == null)
+            if (CallContextLifetimeScope.ObtainCurrentScope() is MessageLifetimeScope lifetimeScope)
             {
-                throw new InvalidOperationException("MessageScope was not available. Add UseMessageScope() to your receive endpoint to enable message scope");
+                return lifetimeScope;
             }
-
-            return lifetimeScope;
+            
+            throw new InvalidOperationException("MessageScope was not available. Add UseMessageScope() to your receive endpoint to enable message scope");
         }
 
         public void Dispose()

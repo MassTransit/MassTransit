@@ -20,7 +20,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class When_a_temporary_queue_is_specified :
         RabbitMqTestFixture
     {
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             Handler<Request>(configurator, x => x.RespondAsync(new Response()));
         }

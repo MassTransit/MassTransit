@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
+    using System;
     using System.Threading.Tasks;
     using MassTransit.Serialization;
     using NUnit.Framework;
@@ -26,17 +27,19 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public async Task Should_handle_both_serializers()
         {
-            Task<ConsumeContext<PongMessage>> ponged = SubscribeHandler<PongMessage>();
+            Task<ConsumeContext<PongMessage>> ponged = ConnectPublishHandler<PongMessage>();
 
-            Bus.Publish(new PingMessage());
+            await Bus.Publish(new PingMessage());
 
             ConsumeContext<PingMessage> pingContext = await _handled;
 
-            Assert.That(pingContext.ReceiveContext.ContentType, Is.EqualTo(JsonMessageSerializer.JsonContentType));
+            Assert.That(pingContext.ReceiveContext.ContentType, Is.EqualTo(JsonMessageSerializer.JsonContentType),
+                $"actual ping type is {pingContext.ReceiveContext.ContentType}");
 
             ConsumeContext<PongMessage> pongContext = await ponged;
 
-            Assert.That(pongContext.ReceiveContext.ContentType, Is.EqualTo(BsonMessageSerializer.BsonContentType));
+            Assert.That(pongContext.ReceiveContext.ContentType, Is.EqualTo(BsonMessageSerializer.BsonContentType),
+                $"actual type is {pongContext.ReceiveContext.ContentType}");
         }
 
         Task<ConsumeContext<PingMessage>> _handled;

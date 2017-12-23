@@ -12,6 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
+    using System;
+    using Util;
+
+
     public class RetryConsumerConsumeContext<TConsumer> :
         RetryConsumeContext,
         ConsumerConsumeContext<TConsumer>
@@ -31,5 +35,11 @@ namespace MassTransit.Context
         }
 
         public TConsumer Consumer => _context.Consumer;
+
+        public override TContext CreateNext<TContext>()
+        {
+            return new RetryConsumerConsumeContext<TConsumer>(_context) as TContext
+                ?? throw new ArgumentException($"The context type is not valid: {TypeMetadataCache<TContext>.ShortName}");
+        }
     }
 }

@@ -20,6 +20,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         using NUnit.Framework;
         using Saga;
         using TestFramework;
+        using Testing;
 
 
         [TestFixture]
@@ -34,9 +35,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 return _machine.GetState(state).Result;
             }
 
-            protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
-                base.PreCreateBus(configurator);
+                base.ConfigureInMemoryBus(configurator);
 
                 configurator.UseMessageScheduler(QuartzQueueAddress);
             }
@@ -55,7 +56,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             [Test]
             public async Task Should_cancel_when_the_order_is_submitted()
             {
-                Task<ConsumeContext<CartRemoved>> handler = SubscribeHandler<CartRemoved>();
+                Task<ConsumeContext<CartRemoved>> handler = ConnectPublishHandler<CartRemoved>();
 
                 CartItemAdded cartItemAdded = new CartItemAddedCommand
                 {
@@ -78,7 +79,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             [Test]
             public async Task Should_receive_the_timeout()
             {
-                Task<ConsumeContext<CartRemoved>> handler = SubscribeHandler<CartRemoved>();
+                Task<ConsumeContext<CartRemoved>> handler = ConnectPublishHandler<CartRemoved>();
 
                 CartItemAdded cartItemAdded = new CartItemAddedCommand
                 {
@@ -93,7 +94,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             [Test]
             public async Task Should_reschedule_the_timeout_when_items_are_added()
             {
-                Task<ConsumeContext<CartRemoved>> handler = SubscribeHandler<CartRemoved>();
+                Task<ConsumeContext<CartRemoved>> handler = ConnectPublishHandler<CartRemoved>();
 
                 CartItemAdded cartItemAdded = new CartItemAddedCommand
                 {

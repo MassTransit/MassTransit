@@ -13,50 +13,20 @@
 namespace MassTransit.NinjectIntegration
 {
     using System;
-    using System.Collections.Concurrent;
     using Ninject;
-    using Saga;
 
 
     public static class SagaConfiguratorCache
     {
-        static CachedConfigurator GetOrAdd(Type type)
-        {
-            return Cached.Instance.GetOrAdd(type, _ =>
-                (CachedConfigurator)Activator.CreateInstance(typeof(CachedConfigurator<>).MakeGenericType(type)));
-        }
-
         public static void Configure(Type sagaType, IReceiveEndpointConfigurator configurator, IKernel kernel)
         {
-            GetOrAdd(sagaType).Configure(configurator, kernel);
+            Cached.Registry.Add(sagaType).Configure(configurator, kernel);
         }
 
 
         static class Cached
         {
-            internal static readonly ConcurrentDictionary<Type, CachedConfigurator> Instance =
-                new ConcurrentDictionary<Type, CachedConfigurator>();
-        }
-
-
-        interface CachedConfigurator
-        {
-            void Configure(IReceiveEndpointConfigurator configurator, IKernel kernel);
-        }
-
-
-        class CachedConfigurator<T> :
-            CachedConfigurator
-            where T : class, ISaga
-        {
-            public void Configure(IReceiveEndpointConfigurator configurator, IKernel kernel)
-            {
-                var sagaRepository = kernel.Get<ISagaRepository<T>>();
-
-                var ninjectSagaRepository = new NinjectSagaRepository<T>(sagaRepository, kernel);
-
-                configurator.Saga(ninjectSagaRepository);
-            }
+            internal static readonly ISagaRegistry Registry = new SagaRegistry();
         }
     }
 }

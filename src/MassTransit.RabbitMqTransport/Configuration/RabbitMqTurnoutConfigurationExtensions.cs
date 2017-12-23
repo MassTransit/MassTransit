@@ -39,7 +39,7 @@ namespace MassTransit
             busFactoryConfigurator.ReceiveEndpoint(host, expiredQueueName, expiredEndpointConfigurator =>
             {
                 // configure the turnout management endpoint
-                var temporaryQueueName = host.GetTemporaryQueueName("turnout-");
+                var temporaryQueueName = busFactoryConfigurator.CreateTemporaryQueueName("turnout-");
                 busFactoryConfigurator.ReceiveEndpoint(host, temporaryQueueName, turnoutEndpointConfigurator =>
                 {
                     turnoutEndpointConfigurator.PrefetchCount = 100;

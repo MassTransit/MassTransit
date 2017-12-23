@@ -7,7 +7,7 @@ skip_commits:
   files:
     - docs/*
     - '**/*.html'
-image: Visual Studio 2015
+image: Visual Studio 2017
 configuration: Release
 platform: Any CPU
 services:
@@ -16,6 +16,12 @@ services:
 nuget:
   project_feed: true
   disable_publish_on_pr: true
+install:
+  # Install DocumentDB Emulator
+  - ps: Start-FileDownload 'https://aka.ms/documentdb-emulator' -FileName 'C:\DocumentDB.Emulator.msi'
+  - msiexec.exe /i C:\DocumentDB.Emulator.msi /quiet /qn /log install.log
+  - ps: >-
+      & "${env:ProgramFiles}\DocumentDB Emulator\DocumentDB.Emulator.exe"
 build_script:
 - cmd: >-
     @echo off
@@ -26,7 +32,7 @@ build_script:
 
     SET PGPASSWORD=Password12!
 
-    PATH=C:\Program Files\PostgreSQL\9.3\bin\;%PATH%
+    PATH=C:\Program Files\PostgreSQL\9.6\bin\;%PATH%
 
     createdb MartenTest
 
@@ -39,18 +45,32 @@ build_script:
     src\packages\FAKE\tools\fake.exe build.fsx %*
 test:
   assemblies:
-  - src/MassTransit.Tests/bin/Release/MassTransit.Tests.dll
-  - src/Containers/MassTransit.Containers.Tests/bin/Release/MassTransit.Containers.Tests.dll
-  - src/MassTransit.AutomatonymousIntegration.Tests/bin/Release/MassTransit.AutomatonymousIntegration.Tests.dll
-  - src/Persistence/MassTransit.MongoDbIntegration.Tests/bin/Release/MassTransit.MongoDbIntegration.Tests.dll
-  - src/Persistence/MassTransit.MartenIntegration.Tests/bin/Release/MassTransit.MartenIntegration.Tests.dll
-  - src/MassTransit.HttpTransport.Tests/bin/Release/MassTransit.HttpTransport.Tests.dll
+  - src/MassTransit.Tests/bin/Release/net452/MassTransit.Tests.dll
+  - src/Containers/MassTransit.Containers.Tests/bin/Release/net452/MassTransit.Containers.Tests.dll
+  - src/MassTransit.AutomatonymousIntegration.Tests/bin/Release/net452/MassTransit.AutomatonymousIntegration.Tests.dll
+  - src/Persistence/MassTransit.MongoDbIntegration.Tests/bin/Release/net452/MassTransit.MongoDbIntegration.Tests.dll
+  - src/Persistence/MassTransit.MartenIntegration.Tests/bin/Release/net452/MassTransit.MartenIntegration.Tests.dll
+  - src/Persistence/MassTransit.DocumentDbIntegration.Tests/bin/Release/MassTransit.DocumentDbIntegration.Tests.dll
+  - src/MassTransit.HttpTransport.Tests/bin/Release/net452/MassTransit.HttpTransport.Tests.dll
   categories:
     except:
     - Flakey
 artifacts:
 - path: build_artifacts/*.nupkg
   name: Packages
+deploy:
+- provider: NuGet
+  name: Prerelease
+  api_key:
+    secure: 1hPeINzu7/7sZj1aX7UwoqzdraOa6uZuJtS0yqYEY85p7PcAU2Xd+E3pjE+q8P33
+  on:
+    branch: develop
+- provider: NuGet
+  name: Release
+  api_key:
+    secure: 1hPeINzu7/7sZj1aX7UwoqzdraOa6uZuJtS0yqYEY85p7PcAU2Xd+E3pjE+q8P33
+  on:
+    branch: master
 notifications:
 - provider: Webhook
   url: https://webhooks.gitter.im/e/27919bcbf1f770b0befd

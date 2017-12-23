@@ -1,6 +1,14 @@
 Automatonymous Quick Start
 ==========================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/Automatonymous/use/
+
 So you've got the chops and want to get started quickly using Automatonymous. Maybe
 you are a bad ass and can't be bothered with reading documentation, or perhaps you
 are already familiar with the Magnum StateMachine and want to see what things have

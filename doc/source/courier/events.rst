@@ -1,6 +1,14 @@
 Monitoring routing slip execution
 =================================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/advanced/courier/events.html
+
 During routing slip execution, events are published when the routing slip completes or faults. Every event message includes the *TrackingNumber* as well as a *Timestamp* (in UTC, of course) indicating when the event occurred:
 
 

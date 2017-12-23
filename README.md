@@ -1,7 +1,7 @@
 MassTransit
 =======
 
-MassTransit is a _free, open-source_ distributed application framework for .NET. MassTransit makes it easy to create applications and services that leverage message-based, loosely-coupled asynchronous communication for higher availability, reliabililty, and scalability.
+MassTransit is a _free, open-source_ distributed application framework for .NET. MassTransit makes it easy to create applications and services that leverage message-based, loosely-coupled asynchronous communication for higher availability, reliability, and scalability.
 
 ![Mass Transit](https://raw.githubusercontent.com/MassTransit/MassTransit/develop/doc/source/mt-logo.png "Mass Transit")
 
@@ -83,9 +83,20 @@ We support RabbitMQ and Azure Service Bus message brokers.
 
 ## Gitter Chat 
 
-While attendence is pretty light, there is a Gitter chat room available:
+While attendance is pretty light, there is a Gitter chat room available:
 
 [![Join the chat at https://gitter.im/MassTransit/MassTransit](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/MassTransit/MassTransit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+## GitHub Issues
+
+**Pay attention**
+
+Please do not open an issue on github, unless you have spotted an actual bug in MassTransit. 
+If you are unsure, ask on the mailing list, and if we confirm it's a bug, we'll ask you to create the issue. 
+Issues are not the place for questions, and they'll likely be closed.
+
+This policy is in place to avoid bugs being drowned out in a pile of sensible suggestions for future 
+enhancements and calls for help from people who forget to check back if they get it and so on.
 
 ## Building from Source
 

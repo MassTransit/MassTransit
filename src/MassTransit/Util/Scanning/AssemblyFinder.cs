@@ -33,7 +33,11 @@ namespace MassTransit.Util.Scanning
         public static IEnumerable<Assembly> FindAssemblies(AssemblyLoadFailure loadFailure, bool includeExeFiles, AssemblyFilter filter)
         {
             var assemblyPath = AppDomain.CurrentDomain.BaseDirectory;
+#if NETCORE
+            var binPath = string.Empty;            
+#else
             var binPath = AppDomain.CurrentDomain.SetupInformation.PrivateBinPath;
+#endif
 
             if (string.IsNullOrEmpty(binPath))
             {

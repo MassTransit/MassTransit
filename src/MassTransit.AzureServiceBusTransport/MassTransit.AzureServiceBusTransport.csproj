@@ -1,193 +1,29 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A84B8D78-6592-4340-9E78-4AC608F53EFD}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MassTransit.AzureServiceBusTransport</RootNamespace>
-    <AssemblyName>MassTransit.AzureServiceBusTransport</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
-    <DocumentationFile>bin\Release\MassTransit.AzureServiceBusTransport.XML</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <TargetFrameworks>net452</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackageId>MassTransit.AzureServiceBus</PackageId>
+    <Title>MassTransit.AzureServiceBus</Title>
+    <Description>MassTransit Azure Service Bus transport support; $(Description)</Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AzureServiceBusTransport.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.9\lib\net452\GreenPipes.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.ServiceBus, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\WindowsAzure.ServiceBus.3.4.6\lib\net45-full\Microsoft.ServiceBus.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Configuration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.3.2.3\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NewId, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <HintPath>..\packages\NewId.3.0.0\lib\net452\NewId.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <PackageReference Include="GreenPipes" Version="1.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Microsoft.WindowsAzure.ConfigurationManager" Version="3.2.3" />
+    <PackageReference Include="NewId" Version="3.0.1" />
+    <PackageReference Include="WindowsAzure.ServiceBus" Version="4.1.6" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\SolutionVersion.cs">
-      <Link>Properties\SolutionVersion.cs</Link>
-    </Compile>
-    <Compile Include="AzureBusFactory.cs" />
-    <Compile Include="Configuration\IServiceBusQueueEndpointConfigurator.cs" />
-    <Compile Include="Configuration\Specifications\RenewLockSpecification.cs" />
-    <Compile Include="Contexts\BrokeredMessageSessionContext.cs" />
-    <Compile Include="MessageLockExpiredException.cs" />
-    <Compile Include="MessageTimeToLiveExpiredException.cs" />
-    <Compile Include="Pipeline\RenewLockFilter.cs" />
-    <Compile Include="RenewLockConfigurationExtensions.cs" />
-    <Compile Include="Testing\AzureServiceBusTestHarness.cs" />
-    <Compile Include="Transport\ClientSettings.cs" />
-    <Compile Include="RequestClientExtensions.cs" />
-    <Compile Include="Settings\BaseClientSettings.cs" />
-    <Compile Include="Settings\ReceiveEndpointSettings.cs" />
-    <Compile Include="Configuration\Configurators\ServiceBusEndpointSpecification.cs" />
-    <Compile Include="Configuration\Configurators\ServiceBusReceiveEndpointSpecification.cs" />
-    <Compile Include="Configuration\Specifications\ServiceBusMessageSchedulerSpecification.cs" />
-    <Compile Include="Configuration\Configurators\ServiceBusSubscriptionEndpointSpecification.cs" />
-    <Compile Include="Settings\SubscriptionEndpointSettings.cs" />
-    <Compile Include="ClientContext.cs" />
-    <Compile Include="Configuration\Defaults.cs" />
-    <Compile Include="Hosting\ServiceBusAmqpTransportSettings.cs" />
-    <Compile Include="Hosting\ServiceBusHostBusFactory.cs" />
-    <Compile Include="Hosting\ServiceBusNetMessagingTransportSettings.cs" />
-    <Compile Include="Hosting\ServiceBusServiceConfigurator.cs" />
-    <Compile Include="Hosting\ServiceBusSettings.cs" />
-    <Compile Include="Configuration\IServiceBusEndpointConfigurator.cs" />
-    <Compile Include="Transport\IReceiveClient.cs" />
-    <Compile Include="Transport\ISendClient.cs" />
-    <Compile Include="Configuration\IServiceBusSubscriptionEndpointConfigurator.cs" />
-    <Compile Include="Transport\IServiceBusSubscriptionEndpointFactory.cs" />
-    <Compile Include="Transport\ISessionReceiver.cs" />
-    <Compile Include="Transport\MessageSessionAsyncHandler.cs" />
-    <Compile Include="Transport\MessageSessionAsyncHandlerFactory.cs" />
-    <Compile Include="MessageSessionContext.cs" />
-    <Compile Include="Saga\MessageSessionSagaConsumeContext.cs" />
-    <Compile Include="Saga\MessageSessionSagaRepository.cs" />
-    <Compile Include="NamespaceManagerExtensions.cs" />
-    <Compile Include="Pipeline\MessageSessionReceiverFilter.cs" />
-    <Compile Include="Pipeline\PrepareQueueClientFilter.cs" />
-    <Compile Include="Pipeline\PrepareSubscriptionClientFilter.cs" />
-    <Compile Include="Pipeline\PrepareSubscriptionEndpointFilter.cs" />
-    <Compile Include="Pipeline\ServiceBusMessageSchedulerFilter.cs" />
-    <Compile Include="Contexts\QueueClientContext.cs" />
-    <Compile Include="Transport\IServiceBusReceiveEndpointFactory.cs" />
-    <Compile Include="Transport\QueueSendClient.cs" />
-    <Compile Include="ScheduleMessageExtensions.cs" />
-    <Compile Include="SchedulePublishExtensions.cs" />
-    <Compile Include="Scheduling\ServiceBusScheduleMessagePipe.cs" />
-    <Compile Include="Scheduling\ServiceBusMessageScheduler.cs" />
-    <Compile Include="ServiceBusAddressExtensions.cs" />
-    <Compile Include="Transport\ServiceBusPublishEndpointProvider.cs" />
-    <Compile Include="ServiceBusSendContext.cs" />
-    <Compile Include="ServiceBusSendContextExtensions.cs" />
-    <Compile Include="Transport\ServiceBusReceiveEndpointFactory.cs" />
-    <Compile Include="Transport\ServiceBusSendEndpointProvider.cs" />
-    <Compile Include="Transport\ServiceBusSendTransport.cs" />
-    <Compile Include="BrokeredMessageContext.cs" />
-    <Compile Include="Configuration\Configurators\AzureServiceBusHostConfigurator.cs" />
-    <Compile Include="Configuration\Builders\ServiceBusBusBuilder.cs" />
-    <Compile Include="Configuration\Configurators\ServiceBusBusFactoryConfigurator.cs" />
-    <Compile Include="Configuration\IServiceBusBusFactoryConfigurator.cs" />
-    <Compile Include="Configuration\ISharedAccessSignatureTokenProviderConfigurator.cs" />
-    <Compile Include="Configuration\ITokenProviderConfigurator.cs" />
-    <Compile Include="Configuration\Builders\ServiceBusReceiveEndpointBuilder.cs" />
-    <Compile Include="Configuration\ServiceBusTopicSubscriptionExtensions.cs" />
-    <Compile Include="Configuration\SharedAccessSignatureTokenProviderConfigurator.cs" />
-    <Compile Include="Settings\TopicSubscriptionSettings.cs" />
-    <Compile Include="Contexts\ServiceBusReceiveContext.cs" />
-    <Compile Include="Contexts\ServiceBusSendContextImpl.cs" />
-    <Compile Include="NamespaceContext.cs" />
-    <Compile Include="Contexts\ServiceBusNamespaceContext.cs" />
-    <Compile Include="IServiceBusHost.cs" />
-    <Compile Include="Configuration\IServiceBusHostConfigurator.cs" />
-    <Compile Include="Configuration\IServiceBusReceiveEndpointConfigurator.cs" />
-    <Compile Include="Pipeline\PrepareReceiveEndpointFilter.cs" />
-    <Compile Include="Transport\PublishSendEndpointProvider.cs" />
-    <Compile Include="ServiceBusHost.cs" />
-    <Compile Include="ServiceBusHostSettings.cs" />
-    <Compile Include="Pipeline\MessageReceiverFilter.cs" />
-    <Compile Include="Transport\Receiver.cs" />
-    <Compile Include="Transport\ReceiveTransport.cs" />
-    <Compile Include="Transport\ServiceBusSendTransportProvider.cs" />
-    <Compile Include="ServiceBusTokenProviderSettings.cs" />
-    <Compile Include="Transport\ReceiveSettings.cs" />
-    <Compile Include="ServiceBusMessageNameFormatter.cs" />
-    <Compile Include="BusFactoryConfiguratorExtensions.cs" />
-    <Compile Include="ServiceBusConfigurationExtensions.cs" />
-    <Compile Include="Transport\ServiceBusSubscriptionEndpointFactory.cs" />
-    <Compile Include="Transport\SessionReceiver.cs" />
-    <Compile Include="Contexts\SubscriptionClientContext.cs" />
-    <Compile Include="Transport\SubscriptionSettings.cs" />
-    <Compile Include="Transport\TopicSendClient.cs" />
-    <Compile Include="ServiceBusTurnoutConfigurationExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
-      <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
-      <Name>MassTransit</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

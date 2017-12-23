@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,36 +13,30 @@
 namespace MassTransit.Tests.Saga
 {
     using System.Diagnostics;
-    using GreenPipes;
+    using System.Threading.Tasks;
     using MassTransit.Saga;
     using Messages;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
 
+
     [TestFixture]
     public class When_a_unknown_user_registers :
         InMemoryTestFixture
     {
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            var sagaRepository = new InMemorySagaRepository<RegisterUserSaga>();
-            configurator.Saga(sagaRepository);
-
-            configurator.Handler<SendUserVerificationEmail>(async x =>
-            {
-                await Bus.Publish(new UserVerificationEmailSent(x.Message.CorrelationId, x.Message.Email));
-            });
-        }
-
         [Test]
-        public void The_user_should_be_pending()
+        public async Task The_user_should_be_pending()
         {
             var timer = Stopwatch.StartNew();
 
             var controller = new RegisterUserController(Bus);
-            using (ConnectHandle unsubscribe = Bus.ConnectInstance(controller))
+            HostReceiveEndpointHandle connectReceiveEndpoint = null;
+            try
             {
+                connectReceiveEndpoint = Host.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), x => x.Instance(controller));
+                await connectReceiveEndpoint.Ready;
+
                 bool complete = controller.RegisterUser("username", "password", "Display Name", "user@domain.com");
 
                 complete.ShouldBe(true); //("The user should be pending");
@@ -54,6 +48,22 @@ namespace MassTransit.Tests.Saga
 
                 complete.ShouldBe(true); //("The user should be complete");
             }
+            finally
+            {
+                if (connectReceiveEndpoint != null)
+                    await connectReceiveEndpoint.StopAsync();
+            }
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            var sagaRepository = new InMemorySagaRepository<RegisterUserSaga>();
+            configurator.Saga(sagaRepository);
+
+            configurator.Handler<SendUserVerificationEmail>(async x =>
+            {
+                await Bus.Publish(new UserVerificationEmailSent(x.Message.CorrelationId, x.Message.Email));
+            });
         }
     }
 }

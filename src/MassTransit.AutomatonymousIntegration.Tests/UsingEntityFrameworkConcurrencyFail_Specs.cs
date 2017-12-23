@@ -22,6 +22,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System.Data.Entity;
     using System.Threading.Tasks;
     using TestFramework;
+    using Testing;
+
 
     [TestFixture]
     public class When_using_EntityFrameworkConcurrencyFail :
@@ -120,9 +122,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsTrue(sagaId.HasValue);
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.TransportConcurrencyLimit = 16;
         }

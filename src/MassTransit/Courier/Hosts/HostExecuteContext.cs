@@ -23,7 +23,6 @@ namespace MassTransit.Courier.Hosts
     using Exceptions;
     using GreenPipes;
     using GreenPipes.Payloads;
-    using MassTransit.Pipeline;
     using Results;
 
 

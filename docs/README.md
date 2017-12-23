@@ -2,11 +2,16 @@
 
 MassTransit is a free, open source, lightweight message bus for creating distributed applications using the .NET framework. MassTransit provides an [extensive set of features](http://docs.masstransit-project.com/en/latest/overview/valueadd.html) on top existing message transports, resulting in a developer friendly way to asynchronously connect services using message-based conversation patterns. Message-based communication is a reliable and scalable way to implement a service oriented architecture.
 
+## Getting help
+
+Please check the [Getting help](introduction/getting-help.md) page to find useful resources if
+you have questions, concerns or issues with MassTransit.
+
 ## A bit of the back story? {#a-bit-of-the-backstory}
 
 We are often asked why MassTransit was created, well here’s the story. :\)
 
-In 2007, Chris Patterson \(@phatboyg\) and Dru Sellers \(@drusellers\) met, for what Dru thinks is the first time, at the first ALT.NET conference in Austin, TX. It was at this conference that Chris and Dru not only realized that they had a lot of the same problems to solve, but also how much the standard tooling provided by Microsoft just didn’t fit their needs. Surrounded by the best and brightest in .NET, the energy was there to build better tooling that supported testable processes. Combined with an awareness of the latest advances in tooling, libraries, and coding practices; they decided that a better option must exist. After searching the .NET ecosystem for a tool that would help them achieve their goals, the only real option was the venerable NServiceBus. After reviewing NServiceBus, it was determined that the only real dependency injection container supported was Spring.NET. It also become obvious that NServiceBus wasn’t quite ready for external contributors to come onboard. For these reasons, they decided to embark on the quixotic trek of building their own service bus \(seriously, how hard could it be?? LOL\).
+In 2007, Chris Patterson \(@phatboyg\) and Dru Sellers \(@drusellers\) met, for what Dru thinks is the first time, at the first ALT.NET conference in Austin, TX. It was at this conference that Chris and Dru not only realized that they had a lot of the same problems to solve, but also how much the standard tooling provided by Microsoft just didn't fit their needs. Surrounded by the best and brightest in .NET, the energy was there to build better tooling that supported testable processes. Combined with an awareness of the latest advances in tooling, libraries, and coding practices; they decided that a better option must exist. After searching the .NET ecosystem for a tool that would help them achieve their goals, the only real option was the venerable NServiceBus. After reviewing NServiceBus, it was determined that the only real dependency injection container supported was Spring.NET. It also become obvious that NServiceBus wasn't quite ready for external contributors to come onboard. For these reasons, they decided to embark on the quixotic trek of building their own service bus \(seriously, how hard could it be?? LOL\).
 
 Initially the goals were as much about learning distributed message based systems, as well as building something both of their companies could use. The first commit was pushed to GoogleCode on 12/26/2007, and shortly there after both Dru and Chris went to production with MassTransit and both of their companies have had success in getting value out of their efforts.
 

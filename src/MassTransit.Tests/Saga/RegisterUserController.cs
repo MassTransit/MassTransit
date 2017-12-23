@@ -66,14 +66,14 @@ namespace MassTransit.Tests.Saga
 
         bool WaitOn(WaitHandle handle, TimeSpan timeout, string message)
         {
-            int result = WaitHandle.WaitAny(new[] { handle }, timeout, true);
+            int result = WaitHandle.WaitAny(new[] { handle }, timeout);
             if (result == 0)
                 return true;
 
             if (result == 1)
                 return false;
 
-            throw new ApplicationException(message);
+            throw new Exception(message);
         }
 	}
 }

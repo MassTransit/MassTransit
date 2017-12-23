@@ -70,8 +70,8 @@ In addition to the correlationId, the default headers include:
 
 #### ConversationId
   The conversation is created by the first message that is sent or published, in which no existing
-  context is available (such as when a message is sent or published from a message consumer). If an
-  existing context is used to send or publish a message, the `ConversationId` is copied to the
+  context is available (such as when a message is sent or published by using `IBus.Send` or `IBus.Publish`). 
+  If an existing context is used to send or publish a message, the `ConversationId` is copied to the
   new message, ensuring that a set of messages within the same *conversation* have the same identifier.
 
 #### InitiatorId

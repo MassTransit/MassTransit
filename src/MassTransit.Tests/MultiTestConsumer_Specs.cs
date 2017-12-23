@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Linq;
+    using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Testing;
     using MassTransit.Testing.MessageObservers;
@@ -28,11 +29,13 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
-        public void Should_distinguish_multiple_events()
+        public async Task Should_distinguish_multiple_events()
         {
             var consumer = new PingPongConsumer(TestTimeout);
 
-            using (ConnectHandle handle = consumer.Connect(Bus))
+            var handle = Host.ConnectReceiveEndpoint("boring", x => consumer.Configure(x));
+            await handle.Ready;
+            try
             {
                 var pingMessage = new PingMessage();
                 var pingMessage2 = new PingMessage();
@@ -42,28 +45,42 @@ namespace MassTransit.Tests
                 consumer.Received.Select<PingMessage>(received => received.Context.Message.CorrelationId == pingMessage.CorrelationId).Any().ShouldBe(true);
                 consumer.Received.Select<PingMessage>(received => received.Context.Message.CorrelationId == pingMessage2.CorrelationId).Any().ShouldBe(true);
             }
+            finally
+            {
+                await handle.StopAsync();
+            }
         }
 
         [Test]
-        public void Should_show_that_the_message_was_received_by_the_consumer()
+        public async Task Should_show_that_the_message_was_received_by_the_consumer()
         {
             var multiConsumer = new MultiTestConsumer(TestTimeout);
             ReceivedMessageList<PingMessage> received = multiConsumer.Consume<PingMessage>();
 
-            using (ConnectHandle handle = multiConsumer.Connect(Bus))
+            var handle = Host.ConnectReceiveEndpoint("boring2", x => multiConsumer.Configure(x));
+            await handle.Ready;
+
+            try
             {
                 Bus.Publish(new PingMessage());
 
                 received.Select().Any().ShouldBe(true);
             }
+            finally
+            {
+                await handle.StopAsync();
+            }
         }
 
         [Test]
-        public void Should_show_that_the_specified_type_was_received()
+        public async Task Should_show_that_the_specified_type_was_received()
         {
             var consumer = new PingPongConsumer(TestTimeout);
 
-            using (ConnectHandle handle = consumer.Connect(Bus))
+            var handle = Host.ConnectReceiveEndpoint("boring3", x => consumer.Configure(x));
+            await handle.Ready;
+
+            try
             {
                 var pingMessage = new PingMessage();
                 Bus.Publish(pingMessage);
@@ -71,6 +88,10 @@ namespace MassTransit.Tests
 
                 consumer.Received.Select<PingMessage>().Any().ShouldBe(true);
                 consumer.Received.Select<PongMessage>(received => received.Context.Message.CorrelationId == pingMessage.CorrelationId).Any().ShouldBe(true);
+            }
+            finally
+            {
+                await handle.StopAsync();
             }
         }
 

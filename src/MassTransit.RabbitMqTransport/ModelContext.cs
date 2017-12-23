@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading.Tasks;
     using GreenPipes;
     using RabbitMQ.Client;
+    using Topology;
 
 
     /// <summary>
@@ -35,6 +36,8 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         ConnectionContext ConnectionContext { get; }
 
+        IRabbitMqPublishTopology PublishTopology { get; }
+
         /// <summary>
         /// Publish a message to the broker, asynchronously
         /// </summary>
@@ -52,6 +55,7 @@ namespace MassTransit.RabbitMqTransport
         Task ExchangeDeclarePassive(string exchange);
         Task QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments);
         Task<QueueDeclareOk> QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments);
+        Task<QueueDeclareOk> QueueDeclarePassive(string queue);
         Task<uint> QueuePurge(string queue);
         Task BasicQos(uint prefetchSize, ushort prefetchCount, bool global);
         void BasicAck(ulong deliveryTag, bool multiple);

@@ -29,11 +29,11 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             var tasks = new List<Task<ConsumeContext<Stopped>>>();
 
-            for (var i = 0; i < 100; i++)
+            for (var i = 0; i < 20; i++)
             {
                 var correlationId = NewId.NextGuid();
 
-                tasks.Add(SubscribeHandler<Stopped>(context => context.Message.CorrelationId == correlationId));
+                tasks.Add(ConnectPublishHandler<Stopped>(context => context.Message.CorrelationId == correlationId));
 
                 await InputQueueSendEndpoint.Send(new Start {CorrelationId = correlationId});
             }

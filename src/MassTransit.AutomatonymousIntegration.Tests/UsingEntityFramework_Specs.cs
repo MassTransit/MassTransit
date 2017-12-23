@@ -24,6 +24,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using Saga;
     using TestFramework;
     using System.Collections.Generic;
+    using Testing;
+
 
     [TestFixture]
     public class When_using_EntityFramework :
@@ -146,9 +148,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsTrue(instance.Screwed);
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.TransportConcurrencyLimit = 16;
         }

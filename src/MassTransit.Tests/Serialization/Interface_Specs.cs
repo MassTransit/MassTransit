@@ -1,28 +1,28 @@
-// Copyright 2007-2008 The Apache Software Foundation.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
 // License at 
 // 
 //     http://www.apache.org/licenses/LICENSE-2.0 
 // 
-// Unless required by applicable law or agreed to in writing, software distributed 
+// Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
-	using System;
-	using System.Linq;
-	using System.Threading.Tasks;
-	using Builders;
-	using BusConfigurators;
-	using MassTransit.Pipeline;
-	using MassTransit.Serialization;
-	using MassTransit.Testing;
-	using NUnit.Framework;
-	using Shouldly;
-	using TestFramework;
+    using System;
+    using System.Linq;
+    using System.Reflection;
+    using System.Threading.Tasks;
+    using Builders;
+    using MassTransit.Serialization;
+    using MassTransit.Testing;
+    using NUnit.Framework;
+    using Shouldly;
+    using TestFramework;
+
 
     [TestFixture(typeof(JsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
@@ -30,172 +30,186 @@ namespace MassTransit.Tests.Serialization
     [TestFixture(typeof(EncryptedMessageSerializer))]
     public class Deserializing_an_interface :
         SerializationTest
-	{
-        public Deserializing_an_interface(Type serializerType)
-            : base(serializerType)
-        {
-        }
-
+    {
         [Test]
-		public void Should_create_a_proxy_for_the_interface()
-		{
-			var user = new UserImpl("Chris", "noone@nowhere.com");
-			ComplaintAdded complaint = new ComplaintAddedImpl(user, "No toilet paper", BusinessArea.Appearance)
-				{
-					Body = "There was no toilet paper in the stall, forcing me to use my treasured issue of .NET Developer magazine."
-				};
+        public void Should_create_a_proxy_for_the_interface()
+        {
+            var user = new UserImpl("Chris", "noone@nowhere.com");
+            ComplaintAdded complaint = new ComplaintAddedImpl(user, "No toilet paper", BusinessArea.Appearance)
+            {
+                Body = "There was no toilet paper in the stall, forcing me to use my treasured issue of .NET Developer magazine."
+            };
 
             var result = SerializeAndReturn(complaint);
 
             complaint.Equals(result).ShouldBe(true);
-		}
+        }
 
-		[Test]
-		public async Task Should_dispatch_an_interface_via_the_pipeline()
-		{
-		    IConsumePipe pipe = new ConsumePipeBuilder().Build();
+        [Test]
+        public async Task Should_dispatch_an_interface_via_the_pipeline()
+        {
+            var pipe = new ConsumePipeBuilder().Build();
 
-		    var consumer = new MultiTestConsumer(TestTimeout);
-		    consumer.Consume<ComplaintAdded>();
+            var consumer = new MultiTestConsumer(TestTimeout);
+            consumer.Consume<ComplaintAdded>();
 
-		    consumer.Connect(pipe);
+            consumer.Connect(pipe);
 
-			var user = new UserImpl("Chris", "noone@nowhere.com");
-			ComplaintAdded complaint = new ComplaintAddedImpl(user, "No toilet paper", BusinessArea.Appearance)
-				{
-					Body = "There was no toilet paper in the stall, forcing me to use my treasured issue of .NET Developer magazine."
-				};
-
-
-			await pipe.Send(new TestConsumeContext<ComplaintAdded>(complaint));
-
-		    consumer.Received.Select<ComplaintAdded>().Any().ShouldBe(true);
-		}
-	}
+            var user = new UserImpl("Chris", "noone@nowhere.com");
+            ComplaintAdded complaint = new ComplaintAddedImpl(user, "No toilet paper", BusinessArea.Appearance)
+            {
+                Body = "There was no toilet paper in the stall, forcing me to use my treasured issue of .NET Developer magazine."
+            };
 
 
+            await pipe.Send(new TestConsumeContext<ComplaintAdded>(complaint));
 
-	public interface ComplaintAdded
-	{
-		User AddedBy { get; }
+            consumer.Received.Select<ComplaintAdded>().Any().ShouldBe(true);
+        }
 
-		DateTime AddedAt { get; }
+        public Deserializing_an_interface(Type serializerType)
+            : base(serializerType)
+        {
+        }
+    }
 
-		string Subject { get; }
 
-		string Body { get; }
+    public interface ComplaintAdded
+    {
+        User AddedBy { get; }
 
-		BusinessArea Area { get; }
-	}
+        DateTime AddedAt { get; }
 
-	public enum BusinessArea
-	{
-		Unknown = 0,
-		Appearance,
-		Courtesy,
-	}
+        string Subject { get; }
 
-	public interface User
-	{
-		string Name { get; }
-		string Email { get; }
-	}
+        string Body { get; }
 
-	public class UserImpl : User
-	{
-		public UserImpl(string name, string email)
-		{
-			Name = name;
-			Email = email;
-		}
+        BusinessArea Area { get; }
+    }
 
-		protected UserImpl()
-		{
-		}
 
-		public string Name { get; set; }
+    public enum BusinessArea
+    {
+        Unknown = 0,
+        Appearance,
+        Courtesy
+    }
 
-		public string Email { get; set; }
 
-		public bool Equals(User other)
-		{
-			if (ReferenceEquals(null, other)) return false;
-			if (ReferenceEquals(this, other)) return true;
-			return Equals(other.Name, Name) && Equals(other.Email, Email);
-		}
+    public interface User
+    {
+        string Name { get; }
+        string Email { get; }
+    }
 
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(null, obj)) return false;
-			if (ReferenceEquals(this, obj)) return true;
-			if(!typeof(User).IsAssignableFrom(obj.GetType())) return false;
-			return Equals((User) obj);
-		}
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				return ((Name != null ? Name.GetHashCode() : 0)*397) ^ (Email != null ? Email.GetHashCode() : 0);
-			}
-		}
-	}
+    public class UserImpl : User
+    {
+        public UserImpl(string name, string email)
+        {
+            Name = name;
+            Email = email;
+        }
 
-	public class ComplaintAddedImpl :
-		ComplaintAdded
-	{
-		public ComplaintAddedImpl(User addedBy, string subject, BusinessArea area)
-		{
-			DateTime dateTime = DateTime.UtcNow;
-			AddedAt = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second,
-				dateTime.Millisecond, DateTimeKind.Utc);
+        protected UserImpl()
+        {
+        }
 
-			AddedBy = addedBy;
-			Subject = subject;
-			Area = area;
-			Body = string.Empty;
-		}
+        public string Name { get; set; }
 
-		protected ComplaintAddedImpl()
-		{
-		}
+        public string Email { get; set; }
 
-		public User AddedBy { get; set; }
+        public bool Equals(User other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return Equals(other.Name, Name) && Equals(other.Email, Email);
+        }
 
-		public DateTime AddedAt { get; set; }
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (!typeof(User).IsAssignableFrom(obj.GetType()))
+                return false;
+            return Equals((User)obj);
+        }
 
-		public string Subject { get; set; }
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Name != null ? Name.GetHashCode() : 0) * 397) ^ (Email != null ? Email.GetHashCode() : 0);
+            }
+        }
+    }
 
-		public string Body { get; set; }
 
-		public BusinessArea Area { get; set; }
+    public class ComplaintAddedImpl :
+        ComplaintAdded
+    {
+        public ComplaintAddedImpl(User addedBy, string subject, BusinessArea area)
+        {
+            var dateTime = DateTime.UtcNow;
+            AddedAt = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second,
+                dateTime.Millisecond, DateTimeKind.Utc);
 
-		public bool Equals(ComplaintAdded other)
-		{
-			if (ReferenceEquals(null, other)) return false;
-			if (ReferenceEquals(this, other)) return true;
-			return AddedBy.Equals(other.AddedBy) && other.AddedAt.Equals(AddedAt) && Equals(other.Subject, Subject) && Equals(other.Body, Body) && Equals(other.Area, Area);
-		}
+            AddedBy = addedBy;
+            Subject = subject;
+            Area = area;
+            Body = string.Empty;
+        }
 
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(null, obj)) return false;
-			if (ReferenceEquals(this, obj)) return true;
-			if (!typeof(ComplaintAdded).IsAssignableFrom(obj.GetType())) return false;
-			return Equals((ComplaintAdded)obj);
-		}
+        protected ComplaintAddedImpl()
+        {
+        }
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int result = (AddedBy != null ? AddedBy.GetHashCode() : 0);
-				result = (result*397) ^ AddedAt.GetHashCode();
-				result = (result*397) ^ (Subject != null ? Subject.GetHashCode() : 0);
-				result = (result*397) ^ (Body != null ? Body.GetHashCode() : 0);
-				result = (result*397) ^ Area.GetHashCode();
-				return result;
-			}
-		}
-	}
+        public User AddedBy { get; set; }
+
+        public DateTime AddedAt { get; set; }
+
+        public string Subject { get; set; }
+
+        public string Body { get; set; }
+
+        public BusinessArea Area { get; set; }
+
+        public bool Equals(ComplaintAdded other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return AddedBy.Equals(other.AddedBy) && other.AddedAt.Equals(AddedAt) && Equals(other.Subject, Subject) && Equals(other.Body, Body)
+                && Equals(other.Area, Area);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (!typeof(ComplaintAdded).GetTypeInfo().IsAssignableFrom(obj.GetType()))
+                return false;
+            return Equals((ComplaintAdded)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var result = (AddedBy != null ? AddedBy.GetHashCode() : 0);
+                result = (result * 397) ^ AddedAt.GetHashCode();
+                result = (result * 397) ^ (Subject != null ? Subject.GetHashCode() : 0);
+                result = (result * 397) ^ (Body != null ? Body.GetHashCode() : 0);
+                result = (result * 397) ^ Area.GetHashCode();
+                return result;
+            }
+        }
+    }
 }

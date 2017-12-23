@@ -43,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         EventObserver _observer;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _observer = new EventObserver(GetTask<SomethingHappened>());
 

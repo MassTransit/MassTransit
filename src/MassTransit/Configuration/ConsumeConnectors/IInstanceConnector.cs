@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConnectors
 {
-    using ConsumeConfigurators;
+    using ConsumerSpecifications;
     using GreenPipes;
     using Pipeline;
 

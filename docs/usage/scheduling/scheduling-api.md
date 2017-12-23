@@ -106,7 +106,7 @@ public class PollExternalSystemSchedule : DefaultRecurringSchedule
 {
     public PollExternalSystemSchedule()
     {
-        CronExpression = "* * * * *"; // this means every minute
+        CronExpression = "0 0/1 * 1/1 * ? *"; // this means every minute
     }
 }
 

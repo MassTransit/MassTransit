@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Threading.Tasks;
     using GreenPipes;
     using RabbitMQ.Client;
+    using Topology;
     using Util;
 
 
@@ -60,6 +61,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         ConnectionContext ModelContext.ConnectionContext => _context.ConnectionContext;
 
+        public IRabbitMqPublishTopology PublishTopology => _context.PublishTopology;
+
         Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body, bool awaitAck)
         {
             return _context.BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body, awaitAck);
@@ -88,6 +91,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
         Task<QueueDeclareOk> ModelContext.QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
         {
             return _context.QueueDeclare(queue, durable, exclusive, autoDelete, arguments);
+        }
+
+        Task<QueueDeclareOk> ModelContext.QueueDeclarePassive(string queue)
+        {
+            return _context.QueueDeclarePassive(queue);
         }
 
         Task<uint> ModelContext.QueuePurge(string queue)

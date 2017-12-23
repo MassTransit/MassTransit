@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,7 @@ namespace MassTransit.Builders
 {
     using System;
     using System.Net.Mime;
-    using BusConfigurators;
+    using EndpointSpecifications;
     using GreenPipes;
     using Pipeline;
     using Pipeline.Observables;
@@ -26,40 +26,32 @@ namespace MassTransit.Builders
         IBusBuilder
     {
         readonly BusObservable _busObservable;
-        readonly Lazy<IConsumePipe> _consumePipe;
-        readonly IConsumePipeFactory _consumePipeFactory;
         readonly IBusHostCollection _hosts;
         readonly Lazy<Uri> _inputAddress;
-        readonly IPublishPipeFactory _publishPipeFactory;
-        readonly ISendPipeFactory _sendPipeFactory;
-        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly SerializerBuilder _serializerBuilder;
+        readonly IEndpointConfiguration _configuration;
+        readonly IConsumePipe _consumePipe;
 
-        protected BusBuilder(IConsumePipeFactory consumePipeFactory, ISendPipeFactory sendPipeFactory,
-            IPublishPipeFactory publishPipeFactory, IBusHostCollection hosts)
+        protected BusBuilder(IBusHostCollection hosts, IEndpointConfiguration configuration)
         {
-            _consumePipeFactory = consumePipeFactory;
-            _sendPipeFactory = sendPipeFactory;
-            _publishPipeFactory = publishPipeFactory;
             _hosts = hosts;
+            _configuration = configuration;
 
             _serializerBuilder = new SerializerBuilder();
 
             _busObservable = new BusObservable();
-            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
 
             _inputAddress = new Lazy<Uri>(GetInputAddress);
-            _consumePipe = new Lazy<IConsumePipe>(GetConsumePipe);
+
+            _consumePipe = _configuration.CreateConsumePipe();
         }
 
         protected BusObservable BusObservable => _busObservable;
         protected Uri InputAddress => _inputAddress.Value;
-        protected IConsumePipe ConsumePipe => _consumePipe.Value;
+        protected IConsumePipe ConsumePipe => _consumePipe;
 
         public abstract ISendEndpointProvider SendEndpointProvider { get; }
         public abstract IPublishEndpointProvider PublishEndpointProvider { get; }
-
-        public ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
 
         public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
@@ -71,14 +63,14 @@ namespace MassTransit.Builders
             _serializerBuilder.SetSerializer(serializerFactory);
         }
 
-        public ISendPipe CreateSendPipe(params ISendPipeSpecification[] specifications)
+        public ISendPipe CreateSendPipe()
         {
-            return _sendPipeFactory.CreateSendPipe(specifications);
+            return _configuration.CreateSendPipe();
         }
 
-        public IConsumePipe CreateConsumePipe(params IConsumePipeSpecification[] specifications)
+        public IConsumePipe CreateConsumePipe()
         {
-            return _consumePipeFactory.CreateConsumePipe(specifications);
+            return _consumePipe;
         }
 
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
@@ -91,13 +83,12 @@ namespace MassTransit.Builders
             return new SerializerBuilder(_serializerBuilder);
         }
 
-        public IPublishPipe CreatePublishPipe(params IPublishPipeSpecification[] specifications)
+        public IPublishPipe CreatePublishPipe()
         {
-            return _publishPipeFactory.CreatePublishPipe(specifications);
+            return _configuration.CreatePublishPipe();
         }
 
         protected abstract Uri GetInputAddress();
-        protected abstract IConsumePipe GetConsumePipe();
 
         public IBusControl Build()
         {
@@ -122,7 +113,5 @@ namespace MassTransit.Builders
         protected virtual void PreBuild()
         {
         }
-
-        protected abstract ISendTransportProvider CreateSendTransportProvider();
     }
 }

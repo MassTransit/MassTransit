@@ -20,7 +20,6 @@ namespace MassTransit.Pipeline.Filters
     using GreenPipes;
     using GreenPipes.Pipes;
     using Observables;
-    using Pipes;
     using Util;
 
 
@@ -63,8 +62,7 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         async Task IFilter<PublishContext>.Send(PublishContext context, IPipe<PublishContext> next)
         {
-            var publishContext = context as PublishContext<TMessage>;
-            if (publishContext != null)
+            if (context is PublishContext<TMessage> publishContext)
             {
                 if (_messageObservers.Count > 0)
                     await _messageObservers.PrePublish(publishContext).ConfigureAwait(false);

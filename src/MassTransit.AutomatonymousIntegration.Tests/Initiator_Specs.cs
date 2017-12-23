@@ -20,6 +20,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using NUnit.Framework;
     using Saga;
     using TestFramework;
+    using Testing;
 
 
     [TestFixture]
@@ -105,7 +106,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         [Test]
         public async Task Should_receive_the_published_message()
         {
-            Task<ConsumeContext<StartupComplete>> messageReceived = SubscribeHandler<StartupComplete>();
+            Task<ConsumeContext<StartupComplete>> messageReceived = ConnectPublishHandler<StartupComplete>();
 
             var message = new Start("Joe");
 

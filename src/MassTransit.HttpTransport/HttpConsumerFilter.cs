@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,8 +17,8 @@ namespace MassTransit.HttpTransport
     using GreenPipes;
     using Hosting;
     using Logging;
-    using MassTransit.Pipeline;
     using Pipeline;
+    using Topology;
     using Transport;
     using Util;
 
@@ -27,12 +27,12 @@ namespace MassTransit.HttpTransport
         IFilter<OwinHostContext>
     {
         static readonly ILog _log = Logger.Get<HttpConsumerFilter>();
+        readonly HttpHostSettings _hostSettings;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ISendPipe _sendPipe;
-        readonly HttpHostSettings _hostSettings;
         readonly ReceiveSettings _receiveSettings;
         readonly ITaskSupervisor _supervisor;
+        readonly IHttpReceiveEndpointTopology _topology;
         readonly IReceiveTransportObserver _transportObserver;
 
         public HttpConsumerFilter(IPipe<ReceiveContext> receivePipe,
@@ -40,8 +40,7 @@ namespace MassTransit.HttpTransport
             IReceiveTransportObserver transportObserver,
             ITaskSupervisor supervisor,
             HttpHostSettings hostSettings,
-            ReceiveSettings receiveSettings,
-            ISendPipe sendPipe)
+            ReceiveSettings receiveSettings, IHttpReceiveEndpointTopology topology)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
@@ -49,7 +48,7 @@ namespace MassTransit.HttpTransport
             _supervisor = supervisor;
             _hostSettings = hostSettings;
             _receiveSettings = receiveSettings;
-            _sendPipe = sendPipe;
+            _topology = topology;
         }
 
         public void Probe(ProbeContext context)
@@ -63,7 +62,7 @@ namespace MassTransit.HttpTransport
 
             using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<HttpConsumerFilter>.ShortName} - {inputAddress}", () => TaskUtil.Completed))
             {
-                var controller = new HttpConsumerAction(_receiveObserver, _hostSettings, _receiveSettings, _receivePipe, scope, _sendPipe);
+                var controller = new HttpConsumerAction(_receiveObserver, _hostSettings, _receivePipe, scope, _topology);
 
                 context.RegisterEndpointHandler(_receiveSettings.PathMatch, controller);
 

@@ -15,10 +15,8 @@ namespace MassTransit.PipeConfigurators
     using System;
     using System.Collections.Generic;
     using System.Transactions;
-    using Configurators;
     using GreenPipes;
     using Pipeline.Filters;
-
 
     public class TransactionPipeSpecification<T> :
         ITransactionConfigurator,

@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
     using Latest;
 

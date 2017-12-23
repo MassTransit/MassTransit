@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using Automatonymous;
+    using Automatonymous.Scoping;
     using Automatonymous.SubscriptionConfigurators;
     using Automatonymous.SubscriptionConnectors;
     using AutomatonymousStructureMapIntegration;
@@ -21,6 +22,7 @@ namespace MassTransit
     using Pipeline;
     using Saga;
     using Saga.SubscriptionConfigurators;
+    using Scoping;
     using StructureMap;
 
 
@@ -39,11 +41,37 @@ namespace MassTransit
             IContainer container, Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            var sagaRepository = container.GetInstance<ISagaRepository<TInstance>>();
+            ISagaRepositoryFactory repositoryFactory = new StructureMapStateMachineSagaRepositoryFactory(container);
 
-            var containerRepository = new StructureMapStateMachineSagaRepository<TInstance>(sagaRepository, container);
+            var sagaRepository = repositoryFactory.CreateSagaRepository<TInstance>();
 
-            var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, containerRepository, configurator);
+            var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, sagaRepository, configurator);
+
+            configure?.Invoke(stateMachineConfigurator);
+
+            configurator.AddEndpointSpecification(stateMachineConfigurator);
+        }
+
+        /// <summary>
+        /// Subscribe a state machine saga to the endpoint
+        /// </summary>
+        /// <typeparam name="TInstance">The state machine instance type</typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="container">The StructureMap Container to resolve the repository</param>
+        /// <param name="configure">Optionally configure the saga</param>
+        /// <returns></returns>
+        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<ISagaConfigurator<TInstance>> configure = null)
+            where TInstance : class, SagaStateMachineInstance
+        {
+            ISagaStateMachineFactory stateMachineFactory = new StructureMapSagaStateMachineFactory(container);
+
+            var stateMachine = stateMachineFactory.CreateStateMachine<TInstance>();
+            
+            ISagaRepositoryFactory repositoryFactory = new StructureMapStateMachineSagaRepositoryFactory(container);
+
+            var sagaRepository = repositoryFactory.CreateSagaRepository<TInstance>();
+
+            var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, sagaRepository, configurator);
 
             configure?.Invoke(stateMachineConfigurator);
 
@@ -56,13 +84,13 @@ namespace MassTransit
         {
             var connector = new StateMachineConnector<TInstance>(stateMachine);
 
-            var sagaRepository = container.GetInstance<ISagaRepository<TInstance>>();
+            ISagaRepositoryFactory repositoryFactory = new StructureMapStateMachineSagaRepositoryFactory(container);
 
-            var containerRepository = new StructureMapStateMachineSagaRepository<TInstance>(sagaRepository, container);
+            var sagaRepository = repositoryFactory.CreateSagaRepository<TInstance>();
 
             ISagaSpecification<TInstance> specification = connector.CreateSagaSpecification<TInstance>();
 
-            return connector.ConnectSaga(bus, containerRepository, specification);
+            return connector.ConnectSaga(bus, sagaRepository, specification);
         }
     }
 }

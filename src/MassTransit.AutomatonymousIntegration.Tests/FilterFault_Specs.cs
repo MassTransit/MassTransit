@@ -19,6 +19,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using NUnit.Framework;
     using Saga;
     using TestFramework;
+    using Testing;
 
 
     [TestFixture]
@@ -28,7 +29,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         [Test]
         public async Task Should_be_able_to_observe_its_own_event_fault()
         {
-            Task<ConsumeContext<Fault<Start>>> faulted = SubscribeHandler<Fault<Start>>();
+            Task<ConsumeContext<Fault<Start>>> faulted = ConnectPublishHandler<Fault<Start>>();
 
             var message = new Initialize();
             await InputQueueSendEndpoint.Send(message);

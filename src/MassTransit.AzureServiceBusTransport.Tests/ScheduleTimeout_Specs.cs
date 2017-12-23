@@ -18,6 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         using System.Threading.Tasks;
         using Automatonymous;
         using MassTransit.Saga;
+        using MassTransit.Testing;
         using NUnit.Framework;
         using TestFramework;
 

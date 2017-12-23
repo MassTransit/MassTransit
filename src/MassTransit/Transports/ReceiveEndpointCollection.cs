@@ -15,10 +15,10 @@ namespace MassTransit.Transports
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
     using Pipeline.Observables;
     using Util;
 
@@ -32,6 +32,8 @@ namespace MassTransit.Transports
         readonly object _mutateLock = new object();
         readonly ReceiveEndpointObservable _receiveEndpointObservers;
         readonly ReceiveObservable _receiveObservers;
+        readonly PublishObservable _publishObservers;
+        readonly SendObservable _sendObservers;
 
         public ReceiveEndpointCollection()
         {
@@ -40,6 +42,8 @@ namespace MassTransit.Transports
             _receiveObservers = new ReceiveObservable();
             _receiveEndpointObservers = new ReceiveEndpointObservable();
             _consumeObservers = new ConsumeObservable();
+            _publishObservers = new PublishObservable();
+            _sendObservers = new SendObservable();
         }
 
         public void Add(string endpointName, IReceiveEndpoint endpoint)
@@ -58,16 +62,16 @@ namespace MassTransit.Transports
             }
         }
 
-        public Task<HostReceiveEndpointHandle[]> StartEndpoints()
+        public HostReceiveEndpointHandle[] StartEndpoints()
         {
             KeyValuePair<string, IReceiveEndpoint>[] startable;
             lock (_mutateLock)
                 startable = _endpoints.Where(x => !_handles.ContainsKey(x.Key)).ToArray();
 
-            return Task.WhenAll(startable.Select(x => StartEndpoint(x.Key, x.Value)));
+            return startable.Select(x => StartEndpoint(x.Key, x.Value)).ToArray();
         }
 
-        public Task<HostReceiveEndpointHandle> Start(string endpointName)
+        public HostReceiveEndpointHandle Start(string endpointName)
         {
             if (string.IsNullOrWhiteSpace(endpointName))
                 throw new ArgumentException($"The {nameof(endpointName)} must not be null or empty", nameof(endpointName));
@@ -119,7 +123,17 @@ namespace MassTransit.Transports
             return _consumeObservers.Connect(observer);
         }
 
-        async Task<HostReceiveEndpointHandle> StartEndpoint(string endpointName, IReceiveEndpoint endpoint)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishObservers.Connect(observer);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendObservers.Connect(observer);
+        }
+
+        HostReceiveEndpointHandle StartEndpoint(string endpointName, IReceiveEndpoint endpoint)
         {
             try
             {
@@ -128,12 +142,12 @@ namespace MassTransit.Transports
                 var consumeObserver = endpoint.ConnectConsumeObserver(_consumeObservers);
                 var receiveObserver = endpoint.ConnectReceiveObserver(_receiveObservers);
                 var receiveEndpointObserver = endpoint.ConnectReceiveEndpointObserver(_receiveEndpointObservers);
+                var publishObserver = endpoint.ConnectPublishObserver(_publishObservers);
+                var sendObserver = endpoint.ConnectSendObserver(_sendObservers);
                 var endpointHandle = endpoint.Start();
 
                 var handle = new Handle(endpointHandle, endpoint, endpointReady.Ready, () => Remove(endpointName),
-                    receiveObserver, receiveEndpointObserver, consumeObserver);
-
-                await handle.Ready.ConfigureAwait(false);
+                    receiveObserver, receiveEndpointObserver, consumeObserver, publishObserver, sendObserver);
 
                 lock (_mutateLock)
                     _handles.Add(endpointName, handle);

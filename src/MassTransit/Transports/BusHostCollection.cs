@@ -15,6 +15,7 @@ namespace MassTransit.Transports
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
 
 
     public class BusHostCollection<THost> :
@@ -39,6 +40,17 @@ namespace MassTransit.Transports
             }
         }
 
+        public IEnumerable<T> GetHosts<T>()
+            where T : class, IHost
+        {
+            foreach (var host in _hosts)
+            {
+                T result = host as T;
+                if (result != null)
+                    yield return result;
+            }
+        }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _hosts.GetEnumerator();
@@ -53,6 +65,15 @@ namespace MassTransit.Transports
         }
 
         public IEnumerable<THost> Hosts => _hosts;
+
+        public THost GetHost(Uri address)
+        {
+            var host = _hosts.SingleOrDefault(x => x.Matches(address));
+            if(host == null)
+                throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
+
+            return host;
+        }
 
         public IEnumerable<THost> GetHosts(Uri address)
         {

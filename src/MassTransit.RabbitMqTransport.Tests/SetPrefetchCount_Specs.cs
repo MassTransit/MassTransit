@@ -35,9 +35,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             _management = configurator.ManagementEndpoint(host);
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureRabbitMqReceiveEndoint(configurator);
+            base.ConfigureRabbitMqReceiveEndpoint(configurator);
 
             configurator.ConnectManagementEndpoint(_management);
 

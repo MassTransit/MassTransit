@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             await Task.Delay(10000);
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             configurator.Bind<PingMessage>();
         }

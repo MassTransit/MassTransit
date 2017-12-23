@@ -16,7 +16,6 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
 
     /// <summary>
     /// A publish endpoint lets the underlying transport determine the actual endpoint to which
@@ -109,7 +108,7 @@ namespace MassTransit
         Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
-        /// <see cref="IBus.Publish{T}(T,CancellationToken)"/>: this is a "dynamically"
+        /// <see cref="IPublishEndpoint.Publish{T}(T,CancellationToken)"/>: this is a "dynamically"
         /// typed overload - give it an interface as its type parameter,
         /// and a loosely typed dictionary of values and the MassTransit
         /// underlying infrastructure will populate an object instance
@@ -125,9 +124,9 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        /// <see cref="IBus.Publish{T}(T,CancellationToken)"/>: this
+        /// <see cref="IPublishEndpoint.Publish{T}(T,CancellationToken)"/>: this
         /// overload further takes an action; it allows you to set <see cref="PublishContext"/>
-        /// meta-data. Also <see cref="IBus.Publish{T}(T,CancellationToken)"/>.
+        /// meta-data. Also <see cref="IPublishEndpoint.Publish{T}(T,CancellationToken)"/>.
         /// </summary>
         /// <typeparam name="T">The type of the message to publish</typeparam>
         /// <param name="values">The dictionary of values to become hydrated and
@@ -138,9 +137,9 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        /// <see cref="IBus.Publish{T}(T,CancellationToken)"/>: this
+        /// <see cref="IPublishEndpoint.Publish{T}(T,CancellationToken)"/>: this
         /// overload further takes an action; it allows you to set <see cref="PublishContext"/>
-        /// meta-data. Also <see cref="IBus.Publish{T}(T,CancellationToken)"/>.
+        /// meta-data. Also <see cref="IPublishEndpoint.Publish{T}(T,CancellationToken)"/>.
         /// </summary>
         /// <typeparam name="T">The type of the message to publish</typeparam>
         /// <param name="values">The dictionary of values to become hydrated and

@@ -73,7 +73,7 @@ namespace MassTransit.Tests.MessageData
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-
+                
                 string messageDataPath = Path.Combine(baseDirectory, "MessageData");
 
                 var dataDirectory = new DirectoryInfo(messageDataPath);

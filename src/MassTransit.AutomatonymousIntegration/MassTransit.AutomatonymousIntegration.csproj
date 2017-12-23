@@ -1,171 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{A852511B-2742-4F4D-BD4E-ADDDBF3BD4B3}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Automatonymous</RootNamespace>
     <AssemblyName>MassTransit.AutomatonymousIntegration</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\src\</SolutionDir>
-    <TargetFrameworkProfile />
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
-    <DocumentationFile>bin\Release\MassTransit.AutomatonymousIntegration.xml</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackageId>MassTransit.Automatonymous</PackageId>
+    <Title>MassTransit.Automatonymous</Title>
+    <Description>MassTransit Automatonymous state machine support; $(Description)</Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AutomatonymousIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Automatonymous, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\Automatonymous.3.5.11\lib\net452\Automatonymous.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
-      <HintPath>..\packages\GreenPipes.1.0.9\lib\net452\GreenPipes.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NewId, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
-      <HintPath>..\packages\NewId.3.0.0\lib\net452\NewId.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
+    <PackageReference Include="Automatonymous" Version="3.6.1" />
+    <PackageReference Include="GreenPipes" Version="1.2.0" />
+    <PackageReference Include="NewId" Version="3.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\SolutionVersion.cs">
-      <Link>Properties\SolutionVersion.cs</Link>
-    </Compile>
-    <Compile Include="Activities\CancelRequestTimeoutActivity.cs" />
-    <Compile Include="Activities\ClearRequestActivity.cs" />
-    <Compile Include="Activities\ContainerFactoryActivity.cs" />
-    <Compile Include="Activities\FaultedPublishActivity.cs" />
-    <Compile Include="Activities\FaultedRequestActivity.cs" />
-    <Compile Include="Activities\FaultedRespondActivity.cs" />
-    <Compile Include="Activities\FaultedScheduleActivity.cs" />
-    <Compile Include="Activities\FaultedSendActivity.cs" />
-    <Compile Include="Activities\FaultedUnscheduleActivity.cs" />
-    <Compile Include="Activities\SendActivity.cs" />
-    <Compile Include="Activities\UnscheduleActivity.cs" />
-    <Compile Include="Activities\PublishActivity.cs" />
-    <Compile Include="Activities\RequestActivityImpl.cs" />
-    <Compile Include="Activities\ScheduleActivity.cs" />
-    <Compile Include="BehaviorContextExtensions.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\UncorrelatedEventCorrelation.cs" />
-    <Compile Include="Configuration\EventMissingInstanceConfigurator.cs" />
-    <Compile Include="Configuration\MissingInstanceConfigurator.cs" />
-    <Compile Include="Configuration\SagaFilterFactory.cs" />
-    <Compile Include="Configuration\StateMachineActivitySelector.cs" />
-    <Compile Include="Configuration\StateMachineConfigurationResult.cs" />
-    <Compile Include="Configuration\ScheduleConfigurator.cs" />
-    <Compile Include="Configuration\StateMachineScheduleConfigurator.cs" />
-    <Compile Include="ConsumeExceptionEventContext.cs" />
-    <Compile Include="ContainerActivityExtensions.cs" />
-    <Compile Include="ContextExtensions.cs" />
-    <Compile Include="Contexts\AutomatonymousConsumeExceptionEventContext.cs" />
-    <Compile Include="EventExceptionMessageFactory.cs" />
-    <Compile Include="EventMessageFactory.cs" />
-    <Compile Include="Activities\RequestActivity.cs" />
-    <Compile Include="Activities\RespondActivity.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\CorrelatedByEventCorrelationBuilder.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\EventCorrelationBuilder.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\EventCorrelationExpressionConverter.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\ExpressionCorrelationSagaQueryFactory.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\MassTransitEventCorrelation.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\PropertyExpressionSagaQueryFactory.cs" />
-    <Compile Include="Configuration\EventCorrelation.cs" />
-    <Compile Include="Configuration\EventCorrelationConfigurator.cs" />
-    <Compile Include="Configuration\IStateMachineInterfaceType.cs" />
-    <Compile Include="Configuration\CorrelationConfigurators\MassTransitEventCorrelationConfigurator.cs" />
-    <Compile Include="Configuration\RequestConfigurator.cs" />
-    <Compile Include="Configuration\StateMachineInterfaceType.cs" />
-    <Compile Include="Configuration\StateMachineRequestConfigurator.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\StateMachineEventConnectorFactory.cs" />
-    <Compile Include="ConsumeEventContext.cs" />
-    <Compile Include="Contexts\AutomatonymousConsumeEventContext.cs" />
-    <Compile Include="Events\RequestTimeoutExpired.cs" />
-    <Compile Include="Exceptions\NotAcceptedStateMachineException.cs" />
-    <Compile Include="IStateMachineActivityFactory.cs" />
-    <Compile Include="IStateMachineActivitySelector.cs" />
-    <Compile Include="MassTransitStateMachine.cs" />
-    <Compile Include="DestinationAddressProvider.cs" />
-    <Compile Include="ServiceAddressProvider.cs" />
-    <Compile Include="ScheduleDelayProvider.cs" />
-    <Compile Include="PublishExtensions.cs" />
-    <Compile Include="Request.cs" />
-    <Compile Include="RequestExtensions.cs" />
-    <Compile Include="RequestSettings.cs" />
-    <Compile Include="Requests\StateMachineRequest.cs" />
-    <Compile Include="Schedules\StateMachineSchedule.cs" />
-    <Compile Include="RespondExtensions.cs" />
-    <Compile Include="SagaStateMachine.cs" />
-    <Compile Include="Schedule.cs" />
-    <Compile Include="SchedulerExtensions.cs" />
-    <Compile Include="ScheduleSettings.cs" />
-    <Compile Include="SendExtensions.cs" />
-    <Compile Include="Testing\StateMachineSagaTestHarness.cs" />
-    <Compile Include="Testing\StateMachineSagaTestingExtensions.cs" />
-    <Compile Include="Configuration\StateMachineSubscriptionExtensions.cs" />
-    <Compile Include="Configuration\SubscriptionConfigurators\StateMachineSagaConfigurator.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\StateMachineSagaMessageConnector.cs" />
-    <Compile Include="Configuration\SubscriptionConnectors\StateMachineConnector.cs" />
-    <Compile Include="SagaStateMachineInstance.cs" />
-    <Compile Include="Pipeline\StateMachineSagaMessageFilter.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj">
-      <Project>{6efd69fc-cbcc-4f85-aee0-efba73f4d273}</Project>
-      <Name>MassTransit</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

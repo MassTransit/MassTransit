@@ -19,6 +19,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using Request_Specs;
     using Saga;
     using TestFramework;
+    using Testing;
 
 
     [TestFixture]
@@ -69,9 +70,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        protected override void PreCreateBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            base.PreCreateBus(configurator);
+            base.ConfigureInMemoryBus(configurator);
 
             configurator.ReceiveEndpoint("service_queue", ConfigureServiceQueueEndpoint);
         }

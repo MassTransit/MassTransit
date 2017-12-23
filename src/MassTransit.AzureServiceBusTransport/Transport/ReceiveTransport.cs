@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -31,25 +31,28 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         static readonly ILog _log = Logger.Get<ReceiveTransport>();
         readonly ReceiveTransportObservable _endpointObservers;
         readonly IServiceBusHost _host;
+        readonly IPipe<NamespaceContext> _pipe;
         readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ReceiveObservable _receiveObservers;
         readonly ClientSettings _settings;
-        readonly IPipeSpecification<NamespaceContext>[] _specifications;
 
-        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IPublishEndpointProvider publishEndpointProvider,
-            IPipeSpecification<NamespaceContext>[] specifications)
+        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IPublishEndpointProvider publishEndpointProvider, 
+            ISendEndpointProvider sendEndpointProvider, IPipe<NamespaceContext> pipe)
         {
             _host = host;
             _settings = settings;
             _publishEndpointProvider = publishEndpointProvider;
-            _specifications = specifications;
+            _sendEndpointProvider = sendEndpointProvider;
+            _pipe = pipe;
+
             _receiveObservers = new ReceiveObservable();
             _endpointObservers = new ReceiveTransportObservable();
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("transport");
+            var scope = context.CreateScope("transport");
             scope.Set(new
             {
                 Type = "Azure Service Bus",
@@ -61,22 +64,14 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
         {
-            Uri inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri);
+            var inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting receive transport: {0}", inputAddress);
 
             var supervisor = new TaskSupervisor($"{TypeMetadataCache<ReceiveTransport>.ShortName} - {inputAddress}");
 
-            IPipe<NamespaceContext> pipe = Pipe.New<NamespaceContext>(x =>
-            {
-                for (var i = 0; i < _specifications.Length; i++)
-                {
-                    x.AddPipeSpecification(_specifications[i]);
-                }
-            });
-
-            Task.Factory.StartNew(() => Receiver(pipe, supervisor), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+            Task.Factory.StartNew(() => Receiver(_pipe, supervisor), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
 
             return new Handle(supervisor);
         }
@@ -96,9 +91,14 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             return _publishEndpointProvider.ConnectPublishObserver(observer);
         }
 
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendEndpointProvider.ConnectSendObserver(observer);
+        }
+
         async Task Receiver(IPipe<NamespaceContext> pipe, TaskSupervisor supervisor)
         {
-            Uri inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri);
+            var inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri);
 
             try
             {

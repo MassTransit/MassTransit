@@ -81,7 +81,7 @@ namespace MassTransit.Serialization
 
             var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypeNames);
 
-            using (var jsonWriter = new BsonWriter(stream))
+            using (var jsonWriter = new BsonDataWriter(stream))
             {
                 _serializer.Value.Serialize(jsonWriter, envelope, typeof(MessageEnvelope));
 

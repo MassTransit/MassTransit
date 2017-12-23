@@ -1,6 +1,14 @@
 Under the hood
 ===========================================
 
+.. attention:: **This page is obsolete!**
+
+   New documentation is located at http://masstransit-project.com/MassTransit.
+
+   The latest version of this page can be found here_.
+
+.. _here: http://masstransit-project.com/MassTransit/understand/under-the-hood.html
+
 MassTransit hides all the details of messages and delivery from the developer.  However, when there are issues it is important to know how it works so you can troubleshoot the issues.  
 
 

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,11 +13,16 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Threading;
     using Configurators;
+    using MassTransit.Topology;
+    using Specifications;
 
 
     public static class AzureBusFactory
     {
+        public static IMessageTopology MessageTopology => Cached.MessageTopologyValue.Value;
+
         /// <summary>
         /// Configure and create a bus for Azure Service Bus (later, we'll use Event Hubs instead)
         /// </summary>
@@ -25,11 +30,25 @@ namespace MassTransit.AzureServiceBusTransport
         /// <returns></returns>
         public static IBusControl CreateUsingServiceBus(Action<IServiceBusBusFactoryConfigurator> configure)
         {
-            var configurator = new ServiceBusBusFactoryConfigurator();
+            var configurator = new ServiceBusBusFactoryConfigurator(new ServiceBusEndpointConfiguration(MessageTopology));
 
             configure(configurator);
 
             return configurator.Build();
+        }
+
+
+        static class Cached
+        {
+            internal static readonly Lazy<IMessageTopology> MessageTopologyValue = new Lazy<IMessageTopology>(() => new MessageTopology(_entityNameFormatter),
+                LazyThreadSafetyMode.PublicationOnly);
+
+            static readonly IEntityNameFormatter _entityNameFormatter;
+
+            static Cached()
+            {
+                _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(new ServiceBusMessageNameFormatter());
+            }
         }
     }
 }

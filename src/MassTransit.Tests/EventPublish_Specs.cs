@@ -14,7 +14,6 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Transports.InMemory;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -34,8 +33,6 @@ namespace MassTransit.Tests
         public async Task Should_publish_fourth_event()
         {
             ConsumeContext<PingCompleted> consumed = await _completed;
-
-            Assert.That(consumed.Message.QueueDepth, Is.GreaterThanOrEqualTo(1));
         }
 
         [Test]
@@ -63,7 +60,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.Consumer(() => new Consumar(GetTransport(InputQueueName)));
+            configurator.Consumer(() => new Consumar());
 
             _received = Handled<PingReceived>(configurator);
             _processing = Handled<PingProcessing>(configurator);
@@ -75,13 +72,6 @@ namespace MassTransit.Tests
         class Consumar :
             IConsumer<PingMessage>
         {
-            readonly IInMemoryTransport _transport;
-
-            public Consumar(IInMemoryTransport transport)
-            {
-                _transport = transport;
-            }
-
             public async Task Consume(ConsumeContext<PingMessage> context)
             {
                 await context.Publish<PingReceived>(new
@@ -110,7 +100,6 @@ namespace MassTransit.Tests
                 {
                     PingId = context.Message.CorrelationId,
                     Timestamp = DateTime.UtcNow,
-                    QueueDepth = _transport.QueueDepth
                 });
             }
         }
@@ -145,8 +134,6 @@ namespace MassTransit.Tests
             Guid PingId { get; }
 
             DateTime Timestamp { get; }
-
-            int QueueDepth { get; }
         }
     }
 }

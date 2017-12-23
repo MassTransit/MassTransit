@@ -219,7 +219,12 @@ namespace MassTransit
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _publishEndpointProvider.ConnectPublishObserver(observer);
+            return new MultipleConnectHandle(_hosts.Select(h => h.ConnectPublishObserver(observer)));
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return new MultipleConnectHandle(_hosts.Select(h => h.ConnectSendObserver(observer)));
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -232,11 +237,6 @@ namespace MassTransit
 
             foreach (var host in _hosts)
                 host.Probe(scope);
-        }
-
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
-        {
-            return _sendEndpointProvider.ConnectSendObserver(observer);
         }
 
         void IDisposable.Dispose()

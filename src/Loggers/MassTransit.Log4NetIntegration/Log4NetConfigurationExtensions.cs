@@ -41,7 +41,6 @@ namespace MassTransit.Log4NetIntegration
             Log4NetLogger.Use();
 
             string path = AppDomain.CurrentDomain.BaseDirectory;
-
             string file = Path.Combine(path, configFileName);
 
             var configFile = new FileInfo(file);

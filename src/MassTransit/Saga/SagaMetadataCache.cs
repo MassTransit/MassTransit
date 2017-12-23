@@ -15,6 +15,7 @@ namespace MassTransit.Saga
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -134,28 +135,28 @@ namespace MassTransit.Saga
         static IEnumerable<SagaInterfaceType> GetInitiatingTypes()
         {
             return typeof(TSaga).GetInterfaces()
-                .Where(x => x.IsGenericType)
+                .Where(x => x.GetTypeInfo().IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(InitiatedBy<>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
-                .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
+                .Where(x => x.MessageType.GetTypeInfo().IsValueType == false && x.MessageType != typeof(string));
         }
 
         static IEnumerable<SagaInterfaceType> GetOrchestratingTypes()
         {
             return typeof(TSaga).GetInterfaces()
-                .Where(x => x.IsGenericType)
+                .Where(x => x.GetTypeInfo().IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(Orchestrates<>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
-                .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
+                .Where(x => x.MessageType.GetTypeInfo().IsValueType == false && x.MessageType != typeof(string));
         }
 
         static IEnumerable<SagaInterfaceType> GetObservingTypes()
         {
             return typeof(TSaga).GetInterfaces()
-                .Where(x => x.IsGenericType)
+                .Where(x => x.GetTypeInfo().IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(Observes<,>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
-                .Where(x => x.MessageType.IsValueType == false && x.MessageType != typeof(string));
+                .Where(x => x.MessageType.GetTypeInfo().IsValueType == false && x.MessageType != typeof(string));
         }
 
 

@@ -107,7 +107,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _completed = Handled<RoutingSlipCompleted>(configurator);
 
@@ -171,7 +171,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _completed = Handled<RoutingSlipCompleted>(configurator);
         }
@@ -234,7 +234,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _allDone = GetTask<int>();
 
@@ -302,7 +302,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _allDone = GetTask<int>();
 
