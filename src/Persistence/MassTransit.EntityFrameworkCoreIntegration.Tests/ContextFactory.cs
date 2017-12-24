@@ -7,6 +7,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Design;
 
+
     public class ContextFactory : IDesignTimeDbContextFactory<SagaDbContext<SimpleSaga, SimpleSagaMap>>
     {
         public SagaDbContext<SimpleSaga, SimpleSagaMap> CreateDbContext(string[] args)
@@ -17,7 +18,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 m =>
                     {
                         var executingAssembly = typeof(ContextFactory).GetTypeInfo().Assembly;
-
                         m.MigrationsAssembly(executingAssembly.GetName().Name);
                     });
 

@@ -27,7 +27,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     using MassTransit.Util;
 
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Metadata.Internal;
+
 
     public class EntityFrameworkSagaRepository<TSaga> :
         ISagaRepository<TSaga>,
@@ -38,12 +38,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         readonly IsolationLevel _isolationLevel;
         readonly Func<DbContext> _sagaDbContextFactory;
         readonly bool _optimistic;
+        readonly Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
 
-        public EntityFrameworkSagaRepository(Func<DbContext> sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, bool optimistic = false)
+        public EntityFrameworkSagaRepository(
+            Func<DbContext> sagaDbContextFactory, 
+            IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, 
+            bool optimistic = false,
+            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
             _sagaDbContextFactory = sagaDbContextFactory;
             _isolationLevel = isolationLevel;
             _optimistic = optimistic;
+            _queryCustomization = queryCustomization;
         }
 
         async Task<IEnumerable<Guid>> IQuerySagaRepository<TSaga>.Find(ISagaQuery<TSaga> query)
@@ -102,8 +108,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                 try
                 {
                     if (instance == null)
+                    {
                         instance =
-                            await dbContext.Set<TSaga>().SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken).ConfigureAwait(false);
+                            await QuerySagas<T>(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken).ConfigureAwait(false);
+                    }
                     if (instance == null)
                     {
                         var missingSagaPipe = new MissingPipe<T>(dbContext, next);
@@ -219,7 +227,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                                 }
 
                                 var instance = 
-                                    await dbContext.Set<TSaga>().SingleOrDefaultAsync(x => x.CorrelationId == correlationId, context.CancellationToken)
+                                    await QuerySagas<T>(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == correlationId, context.CancellationToken)
                                         .ConfigureAwait(false);
 
                                 if (instance != null)
@@ -413,6 +421,19 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
                 await _dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
             }
+        }
+
+
+        IQueryable<TSaga> QuerySagas<T>(DbContext dbContext)
+        {
+            IQueryable<TSaga> query = dbContext.Set<TSaga>();
+            
+            if (_queryCustomization != null)
+            {
+                query = _queryCustomization(query);
+            }
+            
+            return query;
         }
     }
 }
