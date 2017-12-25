@@ -11,7 +11,8 @@
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.RabbitMQ</PackageId><Title>MassTransit.RabbitMQ</Title>
+    <PackageId>MassTransit.RabbitMQ</PackageId>
+    <Title>MassTransit.RabbitMQ</Title>
     <Description>MassTransit RabbitMQ transport support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.RabbitMqTransport.xml</DocumentationFile>
   </PropertyGroup>

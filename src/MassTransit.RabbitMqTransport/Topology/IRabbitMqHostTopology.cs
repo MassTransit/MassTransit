@@ -19,6 +19,10 @@ namespace MassTransit.RabbitMqTransport.Topology
     public interface IRabbitMqHostTopology :
         IHostTopology
     {
+        new IRabbitMqPublishTopology PublishTopology { get; }
+
+        IRabbitMqSendTopology SendTopology { get; }
+
         /// <summary>
         /// Returns the destination address for the specified exchange
         /// </summary>
@@ -43,5 +47,11 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <param name="address">The RabbitMQ endpoint address</param>
         /// <returns>The send settings for the address</returns>
         SendSettings GetSendSettings(Uri address);
+
+        new IRabbitMqMessagePublishTopology<T> Publish<T>()
+            where T : class;
+
+        new IRabbitMqMessageSendTopology<T> Send<T>()
+            where T : class;
     }
 }

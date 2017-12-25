@@ -13,14 +13,13 @@
 namespace MassTransit.Transports.InMemory
 {
     using System;
-    using System.Threading.Tasks;
     using MassTransit.Topology;
 
 
     public interface IInMemoryHost :
         IHost
     {
-        IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit, IReceiveEndpointTopology topology);
+        IReceiveTransport GetReceiveTransport(string queueName, IReceiveEndpointTopology topology);
 
         /// <summary>
         /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint
@@ -28,6 +27,6 @@ namespace MassTransit.Transports.InMemory
         /// <param name="queueName"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure = null);
+        HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure = null);
     }
 }

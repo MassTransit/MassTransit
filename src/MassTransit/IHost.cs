@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using GreenPipes;
     using Pipeline;
+    using Topology;
     using Transports;
 
 
@@ -34,5 +35,7 @@ namespace MassTransit
         /// An address that identifies the host
         /// </summary>
         Uri Address { get; }
+        
+        IHostTopology Topology { get; }
     }
 }

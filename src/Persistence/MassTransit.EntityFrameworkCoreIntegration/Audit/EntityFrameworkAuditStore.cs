@@ -27,16 +27,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Audit
 
         public EntityFrameworkAuditStore(DbContextOptions contextOptions, string auditTableName)
         {
-            this._contextOptions = contextOptions;
-            this._auditTableName = auditTableName;
+            _contextOptions = contextOptions;
+            _auditTableName = auditTableName;
         }
 
         public DbContext AuditContext =>
-            new AuditDbContext(this._contextOptions, this._auditTableName);
+            new AuditDbContext(_contextOptions, _auditTableName);
 
         async Task IMessageAuditStore.StoreMessage<T>(T message, MessageAuditMetadata metadata)
         {
-            using (var dbContext = this.AuditContext)
+            using (var dbContext = AuditContext)
             {
                 var auditRecord = AuditRecord.Create(message, TypeMetadataCache<T>.ShortName, metadata);
 

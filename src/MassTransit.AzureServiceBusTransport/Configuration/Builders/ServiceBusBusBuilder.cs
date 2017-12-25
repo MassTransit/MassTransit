@@ -25,30 +25,26 @@ namespace MassTransit.AzureServiceBusTransport.Builders
         BusBuilder
     {
         readonly ServiceBusReceiveEndpointSpecification _busEndpointSpecification;
-        readonly BusHostCollection<ServiceBusHost> _hosts;
 
         public ServiceBusBusBuilder(BusHostCollection<ServiceBusHost> hosts, ReceiveEndpointSettings settings,
-            IServiceBusEndpointConfiguration configuration)
+            IServiceBusEndpointConfiguration configuration, ISendTransportProvider sendTransportProvider)
             : base(hosts, configuration)
         {
             if (hosts == null)
                 throw new ArgumentNullException(nameof(hosts));
 
-            _hosts = hosts;
-
             var endpointTopologySpecification = configuration.CreateConfiguration(ConsumePipe);
 
-            _busEndpointSpecification = new ServiceBusReceiveEndpointSpecification(_hosts[0], _hosts, settings, endpointTopologySpecification);
+            _busEndpointSpecification = new ServiceBusReceiveEndpointSpecification(hosts[0], settings, endpointTopologySpecification, sendTransportProvider);
 
             foreach (var host in hosts.Hosts)
             {
-                host.ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(this, host, _hosts, configuration);
-                host.SubscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(this, host, _hosts, configuration);
+                host.ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(this, host, configuration, sendTransportProvider);
+                host.SubscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(this, host, configuration, sendTransportProvider);
             }
         }
 
         public override IPublishEndpointProvider PublishEndpointProvider => _busEndpointSpecification.PublishEndpointProvider;
-
         public override ISendEndpointProvider SendEndpointProvider => _busEndpointSpecification.SendEndpointProvider;
 
         protected override Uri GetInputAddress()

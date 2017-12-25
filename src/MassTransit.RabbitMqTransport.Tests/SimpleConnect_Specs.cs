@@ -39,7 +39,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             await response;
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
         }
@@ -67,7 +67,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             await response;
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
         }

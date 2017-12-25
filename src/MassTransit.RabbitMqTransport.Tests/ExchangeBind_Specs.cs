@@ -26,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_deliver_the_message()
         {
-            var endpoint = await Bus.GetSendEndpoint(_host.Settings.Topology.GetDestinationAddress(_boundExchange));
+            var endpoint = await Bus.GetSendEndpoint(_host.Topology.GetDestinationAddress(_boundExchange));
 
             await endpoint.Send(new A());
 
@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _host = host;
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _handled = Handled<A>(configurator);
 
@@ -67,7 +67,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_deliver_the_message()
         {
-            Uri sendAddress = _host.Settings.Topology.GetDestinationAddress(BoundExchange, x =>
+            Uri sendAddress = _host.Topology.GetDestinationAddress(BoundExchange, x =>
             {
                 x.Durable = false;
                 x.AutoDelete = true;
@@ -92,7 +92,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _host = host;
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _handled = Handled<A>(configurator);
 

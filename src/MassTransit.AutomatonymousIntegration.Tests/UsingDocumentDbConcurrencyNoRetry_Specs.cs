@@ -42,8 +42,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _machine = new ChoirStateMachine();
 
             configurator.StateMachineSaga(_machine, _repository.Value);
-
-            configurator.TransportConcurrencyLimit = 16;
         }
 
         public When_using_DocumentDbConcurrencyNoRetry()
@@ -128,7 +126,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsTrue(someNotInFinalState);
         }
 
-        [Test, Explicit]
+        [Test]
         public async Task Should_not_be_in_final_state()
         {
             Guid correlationId = Guid.NewGuid();

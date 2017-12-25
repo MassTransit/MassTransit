@@ -19,7 +19,7 @@ namespace MassTransit.Testing
     public class InMemoryTestHarness :
         BusTestHarness
     {
-        InMemoryHost _inMemoryHost;
+        IInMemoryHost _inMemoryHost;
 
         public InMemoryTestHarness(string virtualHost = null)
         {
@@ -52,15 +52,13 @@ namespace MassTransit.Testing
 
         protected override IBusControl CreateBus()
         {
-            return MassTransit.Bus.Factory.CreateUsingInMemory(x =>
+            return MassTransit.Bus.Factory.CreateUsingInMemory(BaseAddress, x =>
             {
-                _inMemoryHost = new InMemoryHost(Environment.ProcessorCount, BaseAddress);
-
-                x.SetHost(_inMemoryHost);
-
                 ConfigureBus(x);
 
                 ConfigureInMemoryBus(x);
+
+                _inMemoryHost = x.Host;
 
                 x.ReceiveEndpoint(InputQueueName, configurator =>
                 {

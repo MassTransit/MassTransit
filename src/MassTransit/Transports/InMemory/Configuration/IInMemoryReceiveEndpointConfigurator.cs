@@ -15,6 +15,5 @@ namespace MassTransit
     public interface IInMemoryReceiveEndpointConfigurator :
         IReceiveEndpointConfigurator
     {
-        int TransportConcurrencyLimit { set; }
     }
 }

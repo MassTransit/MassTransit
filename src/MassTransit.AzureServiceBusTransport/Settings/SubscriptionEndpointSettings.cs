@@ -31,6 +31,16 @@ namespace MassTransit.AzureServiceBusTransport.Settings
             MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
             PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
         }
+        
+        public SubscriptionEndpointSettings(TopicDescription topicDescription, string subscriptionName)
+        {
+            TopicDescription = topicDescription;
+            SubscriptionDescription = Defaults.CreateSubscriptionDescription(topicDescription.Path, subscriptionName);
+            Path = string.Join("/", SubscriptionDescription.TopicPath, SubscriptionDescription.Name);
+
+            MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
+            PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
+        }
 
         public override TimeSpan AutoDeleteOnIdle
         {

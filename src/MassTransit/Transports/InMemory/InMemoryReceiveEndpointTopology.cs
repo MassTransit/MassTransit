@@ -68,7 +68,7 @@ namespace MassTransit.Transports.InMemory
 
             var sendEndpointCache = new SendEndpointCache(sendEndpointProvider);
 
-            return new InMemoryPublishEndpointProvider(sendEndpointCache, _sendTransportProvider, _publishPipe, _configuration.PublishTopology,
+            return new InMemoryPublishEndpointProvider(_sendTransportProvider, _publishPipe, _configuration.PublishTopology,
                 _serializer, InputAddress);
         }
     }

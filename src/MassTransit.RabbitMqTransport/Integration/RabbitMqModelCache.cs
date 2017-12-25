@@ -19,8 +19,6 @@ namespace MassTransit.RabbitMqTransport.Integration
     using GreenPipes;
     using Logging;
     using RabbitMQ.Client;
-    using Specifications;
-    using Topology;
     using Util;
 
 
@@ -35,14 +33,12 @@ namespace MassTransit.RabbitMqTransport.Integration
         readonly ITaskScope _cacheTaskScope;
 
         readonly IRabbitMqHost _host;
-        readonly IRabbitMqTopology _topology;
         readonly object _scopeLock = new object();
         ModelScope _scope;
 
-        public RabbitMqModelCache(IRabbitMqHost host, IRabbitMqTopology topology)
+        public RabbitMqModelCache(IRabbitMqHost host)
         {
             _host = host;
-            _topology = topology;
 
             _cacheTaskScope = host.Supervisor.CreateScope($"{TypeMetadataCache<RabbitMqModelCache>.ShortName}", CloseScope);
         }
@@ -83,12 +79,13 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
+                IModel model = null;
                 try
                 {
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Creating model: {0}", connectionContext.HostSettings.ToDebugString());
 
-                    var model = await connectionContext.CreateModel().ConfigureAwait(false);
+                    model = await connectionContext.CreateModel().ConfigureAwait(false);
 
                     EventHandler<ShutdownEventArgs> modelShutdown = null;
                     modelShutdown = (obj, reason) =>
@@ -102,7 +99,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                     model.ModelShutdown += modelShutdown;
 
-                    var modelContext = new RabbitMqModelContext(connectionContext, model, _cacheTaskScope, _host, _topology);
+                    var modelContext = new RabbitMqModelContext(connectionContext, model, _cacheTaskScope, _host);
 
                     scope.Created(modelContext);
                 }
@@ -111,6 +108,8 @@ namespace MassTransit.RabbitMqTransport.Integration
                     Interlocked.CompareExchange(ref _scope, null, scope);
 
                     scope.CreateFaulted(ex);
+
+                    model?.Dispose();
 
                     throw;
                 }

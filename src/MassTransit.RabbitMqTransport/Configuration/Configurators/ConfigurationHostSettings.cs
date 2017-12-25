@@ -37,7 +37,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             ClientProvidedName = HostMetadataCache.Host.ProcessName;
 
-            _topology = new Lazy<IRabbitMqHostTopology>(() => new RabbitMqTopology(new FanoutExchangeTypeSelector(), MessageNameFormatter, HostAddress));
+//            _topology = new Lazy<IRabbitMqHostTopology>(() => new RabbitMqTopology(new FanoutExchangeTypeSelector(), MessageNameFormatter, HostAddress, TODO, TODO, TODO));
         }
 
         readonly Lazy<IRabbitMqHostTopology> _topology;
@@ -60,7 +60,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public string[] ClusterMembers { get; set; }
         public IRabbitMqEndpointResolver HostNameSelector { get; set; }
         public string ClientProvidedName { get; set; }
-        public IRabbitMqHostTopology Topology => _topology.Value;
+  //      public IRabbitMqHostTopology Topology => _topology.Value;
 
         public Uri HostAddress
         {

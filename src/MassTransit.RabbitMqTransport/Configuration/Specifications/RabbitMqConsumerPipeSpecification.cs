@@ -60,7 +60,7 @@ namespace MassTransit.RabbitMqTransport.Specifications
                 x.UseFilter(new RabbitMqConsumerFilter(_receivePipe, _receiveObserver, _transportObserver, _supervisor, _topology));
             });
 
-            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe, _supervisor, _host, _topology);
+            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(pipe, _supervisor, _host);
 
             builder.AddFilter(modelFilter);
         }

@@ -49,8 +49,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 x.Interval(5, 100);
             });
             configurator.StateMachineSaga(_machine, _repository.Value);
-
-            configurator.TransportConcurrencyLimit = 16;
         }
 
         public When_using_DocumentDbConcurrencyOptimistic()
@@ -132,7 +130,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        [Test, Explicit]
+        [Test]
         public async Task Should_capture_all_events_single_saga()
         {
             Guid correlationId = Guid.NewGuid();

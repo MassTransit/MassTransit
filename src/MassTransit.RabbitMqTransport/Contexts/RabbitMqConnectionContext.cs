@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using GreenPipes.Payloads;
     using Logging;
     using RabbitMQ.Client;
+    using Topology;
     using Util;
 
 
@@ -31,9 +32,10 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly ITaskParticipant _participant;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
-        public RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, string description, ITaskSupervisor supervisor)
+        public RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, IRabbitMqHostTopology topology, string description, ITaskSupervisor supervisor)
             : this(connection, hostSettings, description, supervisor.CreateParticipant($"{TypeMetadataCache<RabbitMqConnectionContext>.ShortName} - {description}"))
         {
+            Topology = topology;
         }
 
         RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, string description, ITaskParticipant participant)
@@ -50,6 +52,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             connection.ConnectionShutdown += OnConnectionShutdown;
         }
 
+        public IRabbitMqHostTopology Topology { get; }
         public RabbitMqHostSettings HostSettings { get; }
         public string Description { get; }
         public Uri HostAddress => HostSettings.HostAddress;

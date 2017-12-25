@@ -42,9 +42,16 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public string Path => _topicClient.Path;
 
-        public Task Send(BrokeredMessage message)
+        public async Task Send(BrokeredMessage message)
         {
-            return _retryPolicy.Retry(() => _topicClient.SendAsync(message));
+            try
+            {
+                await _retryPolicy.Retry(() => _topicClient.SendAsync(message)).ConfigureAwait(false);
+            }
+            catch (InvalidOperationException exception) when (exception.Message.Contains("been consumed"))
+            {
+                // this is okay, it means we timed out and upon retry the message was accepted
+            }
         }
 
         public Task Close()

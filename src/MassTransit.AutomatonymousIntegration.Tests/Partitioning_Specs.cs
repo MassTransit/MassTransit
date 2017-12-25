@@ -49,8 +49,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             timer.Stop();
 
             Console.WriteLine("Total time: {0}", timer.Elapsed);
-
-            Console.WriteLine(Bus.GetProbeResult().ToJsonString());
         }
 
         InMemorySagaRepository<Instance> _repository;

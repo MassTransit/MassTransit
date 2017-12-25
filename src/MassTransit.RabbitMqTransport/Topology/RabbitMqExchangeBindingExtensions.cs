@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,10 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Entities;
 
 
     public static class RabbitMqExchangeBindingExtensions
@@ -31,8 +31,8 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public static bool IsTemporaryMessageType(this TypeInfo messageTypeInfo)
         {
-            return (!messageTypeInfo.IsVisible && messageTypeInfo.IsClass)
-                || (messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => IsTemporaryMessageType(x.GetTypeInfo())));
+            return !messageTypeInfo.IsVisible && messageTypeInfo.IsClass
+                || messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => IsTemporaryMessageType(x.GetTypeInfo()));
         }
 
 

@@ -31,10 +31,5 @@ namespace MassTransit
         ISendObserverConnector,
         IProbeSite
     {
-        /// <summary>
-        /// Starts recieving from the inbound transport.
-        /// </summary>
-        /// <returns>A handle to the receiving endpoint, which is used to stop it</returns>
-        ReceiveEndpointHandle Start();
     }
 }

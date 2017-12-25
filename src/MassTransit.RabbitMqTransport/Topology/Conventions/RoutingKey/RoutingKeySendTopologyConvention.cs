@@ -41,7 +41,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Conventions.RoutingKey
         class CacheFactory :
             IConventionTypeCacheFactory<IMessageSendTopologyConvention>
         {
-            IRoutingKeySendTopologyConvention _convention;
+            readonly IRoutingKeySendTopologyConvention _convention;
 
             public CacheFactory(IRoutingKeySendTopologyConvention convention)
             {

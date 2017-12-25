@@ -260,7 +260,7 @@ namespace MassTransit.Tests
             message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
 
-        [Test]
+        [Test, Explicit]
         public async Task Should_wonderful_display()
         {
             ProbeResult result = Bus.GetProbeResult();

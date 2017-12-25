@@ -48,10 +48,9 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message) where T : class
         {
-            IServiceBusMessagePublishTopologyConfigurator<T> messageTopology = _publishTopology.GetMessageTopology<T>();
+            IServiceBusMessagePublishTopology<T> messageTopology = _publishTopology.GetMessageTopology<T>();
 
-            Uri publishAddress;
-            if (!messageTopology.TryGetPublishAddress(_host.Address, message, out publishAddress))
+            if (!messageTopology.TryGetPublishAddress(_host.Address, out var publishAddress))
                 throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
 
             return _sendEndpointProvider.GetSendEndpoint(publishAddress);

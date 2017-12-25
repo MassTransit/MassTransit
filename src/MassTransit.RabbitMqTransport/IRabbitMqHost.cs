@@ -13,9 +13,9 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using System.Threading.Tasks;
     using GreenPipes;
     using Integration;
+    using Topology;
     using Util;
 
 
@@ -25,6 +25,11 @@ namespace MassTransit.RabbitMqTransport
         IConnectionCache ConnectionCache { get; }
 
         RabbitMqHostSettings Settings { get; }
+
+        /// <summary>
+        /// Returns the topology of the RabbitMQ host
+        /// </summary>
+        IRabbitMqHostTopology Topology { get; }
 
         /// <summary>
         /// The connection retry policy used for connecting to the host
@@ -41,7 +46,7 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         /// <param name="configure"></param>
         /// <returns></returns>
-        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
+        HostReceiveEndpointHandle ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
 
         /// <summary>
         /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint
@@ -49,6 +54,6 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="queueName"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
+        HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
     }
 }

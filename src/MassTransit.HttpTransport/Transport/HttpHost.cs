@@ -20,6 +20,7 @@ namespace MassTransit.HttpTransport.Transport
     using Hosting;
     using Logging;
     using MassTransit.Pipeline;
+    using MassTransit.Topology;
     using Transports;
     using Util;
 
@@ -36,9 +37,10 @@ namespace MassTransit.HttpTransport.Transport
         readonly TaskSupervisor _supervisor;
         Uri _address;
 
-        public HttpHost(HttpHostSettings hostSettings)
+        public HttpHost(HttpHostSettings hostSettings, IHostTopology topology)
         {
             _settings = hostSettings;
+            Topology = topology;
 
             //exception Filter
             ReceiveEndpoints = new ReceiveEndpointCollection();
@@ -92,7 +94,7 @@ namespace MassTransit.HttpTransport.Transport
 
             var connectionTask = OwinHostCache.Send(connectionPipe, _supervisor.StoppingToken);
 
-            HostReceiveEndpointHandle[] handles = await ReceiveEndpoints.StartEndpoints().ConfigureAwait(false);
+            HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints();
 
             handlesReady.TrySetResult(handles);
 
@@ -127,11 +129,12 @@ namespace MassTransit.HttpTransport.Transport
 
         public IOwinHostCache OwinHostCache => _owinHostCache;
         public HttpHostSettings Settings => _settings;
-        // Retry
         public ITaskSupervisor Supervisor => _supervisor;
 
 
         public Uri Address => new Uri($"{_settings.Scheme}://{_settings.Host}:{_settings.Port}");
+
+        public IHostTopology Topology { get; }
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {

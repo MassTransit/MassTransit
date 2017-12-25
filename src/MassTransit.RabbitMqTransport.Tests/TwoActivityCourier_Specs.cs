@@ -88,7 +88,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.AreEqual(_routingSlip.TrackingNumber, activityCompleted.TrackingNumber);
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
             ProbeResult result = Bus.GetProbeResult();
@@ -107,7 +107,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _completed = Handled<RoutingSlipCompleted>(configurator);
 
@@ -171,7 +171,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _completed = Handled<RoutingSlipCompleted>(configurator);
         }
@@ -234,7 +234,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _allDone = GetTask<int>();
 
@@ -302,7 +302,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _allDone = GetTask<int>();
 

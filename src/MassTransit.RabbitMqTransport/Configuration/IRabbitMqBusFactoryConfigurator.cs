@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport
     using System.ComponentModel;
     using MassTransit.Builders;
     using Topology;
+    using Topology.Configuration;
 
 
     public interface IRabbitMqBusFactoryConfigurator :
@@ -44,7 +45,6 @@ namespace MassTransit.RabbitMqTransport
         /// follow the topology rules, so use with caution.
         /// </summary>
         void SeparatePublishFromSendTopology();
-
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IBusFactorySpecification<IBusBuilder> specification);

@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await InputQueueSendEndpoint.Send(new B());
             }
 
-            protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
                 _testConsumer = new TestConsumer(GetTask<A>(), GetTask<B>());
 
@@ -96,7 +96,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await InputQueueSendEndpoint.Send(new B());
             }
 
-            protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
                 _testConsumer = new TestConsumer(GetTask<A>(), GetTask<B>());
 
@@ -131,7 +131,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await InputQueueSendEndpoint.Send(new B());
             }
 
-            protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
                 _a = Handled<A>(configurator);
                 _b = Handled<B>(configurator);
@@ -164,7 +164,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await InputQueueSendEndpoint.Send(new B());
             }
 
-            protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
                 configurator.BindMessageExchanges = false;
 
@@ -214,7 +214,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await InputQueueSendEndpoint.Send(new A {CorrelationId = _sagaId});
             }
 
-            protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
                 _repository = new InMemorySagaRepository<TestSaga>();
 

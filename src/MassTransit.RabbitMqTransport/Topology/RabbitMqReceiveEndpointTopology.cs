@@ -84,12 +84,12 @@ namespace MassTransit.RabbitMqTransport.Topology
         {
             IPublishPipe publishPipe = _configuration.CreatePublishPipe();
 
-            return new RabbitMqPublishEndpointProvider(_host, _serializer, InputAddress, publishPipe, this);
+            return new RabbitMqPublishEndpointProvider(_host, _serializer, InputAddress, publishPipe);
         }
 
         ISendTransportProvider CreateSendTransportProvider()
         {
-            return new RabbitMqSendTransportProvider(_hosts, this);
+            return new RabbitMqSendTransportProvider(_hosts);
         }
     }
 }

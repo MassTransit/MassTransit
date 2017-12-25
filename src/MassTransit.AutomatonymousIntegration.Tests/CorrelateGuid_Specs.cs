@@ -126,8 +126,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             saga = await _repository.ShouldContainSaga(state => state.TransactionId == id && state.CurrentState == _machine.Final, TestTimeout);
             Assert.IsTrue(saga.HasValue);
-
-            Console.WriteLine(Bus.GetProbeResult().ToJsonString());
         }
     }
 }

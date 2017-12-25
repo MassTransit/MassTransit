@@ -25,6 +25,7 @@ namespace MassTransit.Audit
         public Guid? RequestId { get; set; }
         public string SourceAddress { get; set; }
         public string DestinationAddress { get; set; }
+        public string InputAddress { get; set; }
         public string ResponseAddress { get; set; }
         public string FaultAddress { get; set; }
         public string ContextType { get; set; }

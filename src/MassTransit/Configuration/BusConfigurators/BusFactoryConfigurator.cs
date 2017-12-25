@@ -22,6 +22,8 @@ namespace MassTransit.BusConfigurators
     using GreenPipes;
     using Saga;
     using Saga.SubscriptionConfigurators;
+    using Topology.Configuration;
+    using Transports.InMemory.Topology;
 
 
     public abstract class BusFactoryConfigurator<TBuilder>
@@ -71,6 +73,21 @@ namespace MassTransit.BusConfigurators
             callback(_configuration.PublishPipeConfigurator);
         }
 
+        public void SendTopology<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology)
+            where T : class
+        {
+            IMessageSendTopologyConfigurator<T> configurator = _configuration.SendTopology.GetMessageTopology<T>();
+
+            configureTopology?.Invoke(configurator);
+        }
+
+        public void PublishTopology<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology)
+            where T : class
+        {
+            var configurator = _configuration.PublishTopology.GetMessageTopology<T>();
+
+            configureTopology?.Invoke(configurator);
+        }
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
             _specifications.Add(CreateSpecificationProxy(specification));

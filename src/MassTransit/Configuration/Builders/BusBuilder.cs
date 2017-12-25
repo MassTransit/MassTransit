@@ -96,7 +96,9 @@ namespace MassTransit.Builders
             {
                 PreBuild();
 
-                var bus = new MassTransitBus(InputAddress, ConsumePipe, SendEndpointProvider, PublishEndpointProvider, _hosts, BusObservable);
+                var hostTopology = _hosts.GetHost(InputAddress).Topology;
+
+                var bus = new MassTransitBus(InputAddress, ConsumePipe, SendEndpointProvider, PublishEndpointProvider, _hosts, BusObservable, hostTopology);
 
                 TaskUtil.Await(() => _busObservable.PostCreate(bus));
 

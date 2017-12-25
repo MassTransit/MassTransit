@@ -14,6 +14,7 @@ namespace MassTransit.Courier
 {
     using Contracts;
     using Topology;
+    using Topology.Topologies;
 
 
     public static class RoutingSlipEventCorrelation

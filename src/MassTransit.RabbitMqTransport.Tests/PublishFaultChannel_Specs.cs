@@ -71,7 +71,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, context =>
             {

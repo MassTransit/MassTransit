@@ -54,7 +54,8 @@ namespace MassTransit.Topology.Configuration
     }
 
 
-    public interface IMessagePublishTopologyConfigurator
+    public interface IMessagePublishTopologyConfigurator :
+        IMessagePublishTopology
     {
     }
 }

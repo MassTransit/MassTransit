@@ -15,10 +15,10 @@ namespace MassTransit
     using System;
     using System.ComponentModel;
     using Builders;
-    using Topology.Configuration;
     using Transports.InMemory;
     using Transports.InMemory.Builders;
     using Transports.InMemory.Topology;
+    using Transports.InMemory.Topology.Configurators;
 
 
     public interface IInMemoryBusFactoryConfigurator :
@@ -32,15 +32,6 @@ namespace MassTransit
         int TransportConcurrencyLimit { set; }
 
         IInMemoryHost Host { get; }
-
-
-        /// <summary>
-        /// Configure the send topology of the message type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="configureTopology"></param>
-        void SendTopology<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology)
-            where T : class;
 
         /// <summary>
         /// Configure the send topology of the message type
@@ -63,7 +54,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="transportProvider"></param>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        void SetHost(InMemoryHost transportProvider);
+        void SetHost(IInMemoryHost transportProvider);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IBusFactorySpecification<IInMemoryBusBuilder> specification);

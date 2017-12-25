@@ -40,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {
@@ -86,7 +86,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {
@@ -132,7 +132,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {

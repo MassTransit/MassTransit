@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading.Tasks;
     using GreenPipes;
     using RabbitMQ.Client;
+    using Topology;
 
 
     /// <summary>
@@ -39,6 +40,8 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         Uri HostAddress { get; }
 
+        IRabbitMqHostTopology Topology { get; }
+        
         /// <summary>
         /// The host settings for the connection
         /// </summary>

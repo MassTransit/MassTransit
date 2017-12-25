@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Transport
     using MassTransit.Pipeline.Observables;
     using MassTransit.Pipeline.Pipes;
     using Pipeline;
-    using Specifications;
     using Topology;
     using Topology.Builders;
     using Transports;
@@ -35,18 +34,15 @@ namespace MassTransit.RabbitMqTransport.Transport
         readonly IIndex<TypeKey, CachedSendEndpoint<TypeKey>> _index;
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
-        readonly IRabbitMqTopology _topology;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
 
-        public RabbitMqPublishEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress, IPublishPipe publishPipe,
-            IRabbitMqTopology topology)
+        public RabbitMqPublishEndpointProvider(IRabbitMqHost host, IMessageSerializer serializer, Uri sourceAddress, IPublishPipe publishPipe)
         {
             _host = host;
             _serializer = serializer;
             _sourceAddress = sourceAddress;
             _publishPipe = publishPipe;
-            _topology = topology;
 
             _publishObservable = new PublishObservable();
 
@@ -62,10 +58,9 @@ namespace MassTransit.RabbitMqTransport.Transport
         public async Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
             where T : class
         {
-            IRabbitMqMessagePublishTopologyConfigurator<T> messageTopology = _topology.PublishTopology.GetMessageTopology<T>();
+            IRabbitMqMessagePublishTopology<T> messageTopology = _host.Topology.Publish<T>();
 
-            Uri publishAddress;
-            if (!messageTopology.TryGetPublishAddress(_host.Address, message, out publishAddress))
+            if (!messageTopology.TryGetPublishAddress(_host.Address, out var publishAddress))
                 throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
 
             return await _index.Get(new TypeKey(typeof(T), publishAddress), typeKey => CreateSendEndpoint<T>(typeKey)).ConfigureAwait(false);
@@ -79,16 +74,16 @@ namespace MassTransit.RabbitMqTransport.Transport
         Task<CachedSendEndpoint<TypeKey>> CreateSendEndpoint<T>(TypeKey typeKey)
             where T : class
         {
-            IRabbitMqMessagePublishTopologyConfigurator<T> messageTopology = _topology.PublishTopology.GetMessageTopology<T>();
+            IRabbitMqMessagePublishTopology<T> messageTopology = _host.Topology.Publish<T>();
 
             var sendSettings = messageTopology.GetSendSettings();
 
             var builder = new PublishEndpointTopologyBuilder();
-            messageTopology.ApplyMessageTopology(builder);
+            messageTopology.Apply(builder);
 
             var topology = builder.BuildTopologyLayout();
 
-            var modelCache = new RabbitMqModelCache(_host, _topology);
+            var modelCache = new RabbitMqModelCache(_host);
 
             var sendTransport = new RabbitMqSendTransport(modelCache, new ConfigureTopologyFilter<SendSettings>(sendSettings, topology), sendSettings.ExchangeName);
 

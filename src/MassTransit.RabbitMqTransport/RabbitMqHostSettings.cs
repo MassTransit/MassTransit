@@ -100,14 +100,6 @@ namespace MassTransit.RabbitMqTransport
         bool UseClientCertificateAsAuthenticationIdentity { get; }
 
         /// <summary>
-        /// The message name formatter for the publisher
-        /// </summary>
-        IMessageNameFormatter MessageNameFormatter { get; }
-
-
-        IRabbitMqHostTopology Topology { get; }
-
-        /// <summary>
         /// When using a RabbitMQ cluster, this contains the host names which make up the cluster. In the event of a connection failure, the next host in the array will be connected to.
         /// </summary>
         string[] ClusterMembers { get; }

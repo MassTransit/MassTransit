@@ -63,7 +63,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             configurator.PrefetchCount = 100;
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             configurator.PrefetchCount = 100;
 

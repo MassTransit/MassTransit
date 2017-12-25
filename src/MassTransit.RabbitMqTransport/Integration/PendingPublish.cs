@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         public Task Task => _source.Task;
 
-        Uri DestinationAddress => _connectionContext.HostSettings.Topology.GetDestinationAddress(_exchange);
+        Uri DestinationAddress => _connectionContext.Topology.GetDestinationAddress(_exchange);
 
         public void Ack()
         {

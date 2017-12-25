@@ -327,7 +327,8 @@ namespace Automatonymous
 
                         await ((StateMachine<TInstance>)this).RaiseEvent(eventContext).ConfigureAwait(false);
 
-                        schedule.SetTokenId(context.Instance, default(Guid?));
+                        if(schedule.GetTokenId(context.Instance) == tokenId)
+                            schedule.SetTokenId(context.Instance, default(Guid?));
                     }));
         }
 

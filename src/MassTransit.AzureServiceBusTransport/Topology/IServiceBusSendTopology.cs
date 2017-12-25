@@ -18,7 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
     public interface IServiceBusSendTopology :
         ISendTopology
     {
-        new IServiceBusMessageSendTopologyConfigurator<T> GetMessageTopology<T>()
+        new IServiceBusMessageSendTopology<T> GetMessageTopology<T>()
             where T : class;
     }
 }

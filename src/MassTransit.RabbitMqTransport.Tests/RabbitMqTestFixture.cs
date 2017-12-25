@@ -46,7 +46,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             RabbitMqTestHarness.OnConfigureRabbitMqHost += ConfigureRabbitMqHost;
             RabbitMqTestHarness.OnConfigureRabbitMqBus += ConfigureRabbitMqBus;
             RabbitMqTestHarness.OnConfigureRabbitMqBusHost += ConfigureRabbitMqBusHost;
-            RabbitMqTestHarness.OnConfigureRabbitMqReceiveEndoint += ConfigureRabbitMqReceiveEndoint;
+            RabbitMqTestHarness.OnConfigureRabbitMqReceiveEndoint += ConfigureRabbitMqReceiveEndpoint;
             RabbitMqTestHarness.OnCleanupVirtualHost += OnCleanupVirtualHost;
         }
 
@@ -93,7 +93,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
         }
 
-        protected virtual void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected virtual void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
         }
 

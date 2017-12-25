@@ -24,7 +24,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_arrive_on_the_receive_endpoint()
         {
-            var destinationAddress = _host.Settings.Topology.GetDestinationAddress(typeof(A));
+            var destinationAddress = _host.Topology.GetDestinationAddress(typeof(A));
 
             var endpoint = await Bus.GetSendEndpoint(destinationAddress);
 
@@ -43,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _host = host;
         }
 
-        protected override void ConfigureRabbitMqReceiveEndoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _handled = Handled<A>(configurator);
         }

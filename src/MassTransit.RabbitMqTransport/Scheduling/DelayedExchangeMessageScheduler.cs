@@ -24,13 +24,15 @@ namespace MassTransit.RabbitMqTransport.Scheduling
     public class DelayedExchangeMessageScheduler :
         IMessageScheduler
     {
-        readonly RabbitMqHostSettings _hostSettings;
+        readonly IRabbitMqHostTopology _topology;
         readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly Uri _hostAddress;
 
-        public DelayedExchangeMessageScheduler(ISendEndpointProvider sendEndpointProvider, RabbitMqHostSettings hostSettings)
+        public DelayedExchangeMessageScheduler(ISendEndpointProvider sendEndpointProvider, IRabbitMqHostTopology topology, Uri hostAddress)
         {
             _sendEndpointProvider = sendEndpointProvider;
-            _hostSettings = hostSettings;
+            _topology = topology;
+            _hostAddress = hostAddress;
         }
 
         Task<ScheduledMessage<T>> IMessageScheduler.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken)
@@ -172,7 +174,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
         async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
-            var destinationSettings = _hostSettings.Topology.GetSendSettings(destinationAddress);
+            var destinationSettings = _topology.GetSendSettings(destinationAddress);
 
             var sendSettings = new RabbitMqSendSettings(destinationSettings.ExchangeName + "_delay", "x-delayed-message", destinationSettings.Durable,
                 destinationSettings.AutoDelete);
@@ -181,7 +183,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
 
             sendSettings.BindToExchange(destinationSettings.ExchangeName);
 
-            var delayExchangeAddress = sendSettings.GetSendAddress(_hostSettings.HostAddress);
+            var delayExchangeAddress = sendSettings.GetSendAddress(_hostAddress);
 
             var delayEndpoint = await _sendEndpointProvider.GetSendEndpoint(delayExchangeAddress).ConfigureAwait(false);
 

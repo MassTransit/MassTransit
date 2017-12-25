@@ -43,7 +43,7 @@ namespace MassTransit.Tests
             _attempts.ShouldBe(1);
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
             ProbeResult result = Bus.GetProbeResult();
@@ -87,7 +87,7 @@ namespace MassTransit.Tests
             _attempts.ShouldBe(1);
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
             ProbeResult result = Bus.GetProbeResult();
@@ -128,7 +128,7 @@ namespace MassTransit.Tests
             Consumer.Attempts.ShouldBe(6);
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
             ProbeResult result = Bus.GetProbeResult();
@@ -182,7 +182,7 @@ namespace MassTransit.Tests
             _attempts.ShouldBe(2);
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
             ProbeResult result = Bus.GetProbeResult();
@@ -229,7 +229,7 @@ namespace MassTransit.Tests
             _attempts.ShouldBe(2);
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
             ProbeResult result = Bus.GetProbeResult();
@@ -289,7 +289,7 @@ namespace MassTransit.Tests
             _lastAttempt.ShouldBe(3);
         }
 
-        [Test]
+        [Test, Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
             ProbeResult result = Bus.GetProbeResult();

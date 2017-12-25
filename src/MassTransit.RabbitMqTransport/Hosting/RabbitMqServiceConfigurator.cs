@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
     using GreenPipes;
     using MassTransit.Builders;
     using MassTransit.Hosting;
+    using MassTransit.Topology.Configuration;
     using Saga;
     using Saga.SubscriptionConfigurators;
 
@@ -68,6 +69,16 @@ namespace MassTransit.RabbitMqTransport.Hosting
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
             _configurator.AddBusFactorySpecification(specification);
+        }
+
+        public void SendTopology<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology) where T : class
+        {
+            ((IBusFactoryConfigurator)_configurator).SendTopology<T>(configureTopology);
+        }
+
+        public void PublishTopology<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology) where T : class
+        {
+            ((IBusFactoryConfigurator)_configurator).PublishTopology<T>(configureTopology);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)

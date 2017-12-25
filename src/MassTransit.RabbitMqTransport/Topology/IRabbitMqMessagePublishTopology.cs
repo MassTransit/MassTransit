@@ -12,19 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology
 {
+    using Builders;
     using MassTransit.Topology;
 
 
     public interface IRabbitMqMessagePublishTopology<TMessage> :
-        IMessagePublishTopology<TMessage>
+        IMessagePublishTopology<TMessage>,
+        IRabbitMqMessagePublishTopology
         where TMessage : class
     {
-        IMessageExchangeTypeSelector<TMessage> ExchangeTypeSelector { get; }
-
         /// <summary>
         /// Returns the send settings for a publish endpoint, which are mostly unused now with topology
         /// </summary>
         /// <returns></returns>
         SendSettings GetSendSettings();
+    }
+
+
+    public interface IRabbitMqMessagePublishTopology
+    {
+        /// <summary>
+        /// Apply the message topology to the builder, including any implemented types
+        /// </summary>
+        /// <param name="builder">The topology builder</param>
+        void Apply(IRabbitMqPublishTopologyBuilder builder);
     }
 }

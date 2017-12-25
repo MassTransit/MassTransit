@@ -19,7 +19,6 @@ namespace MassTransit.Tests.Configuration
     using GreenPipes;
     using MassTransit.Configuration;
     using NUnit.Framework;
-    using TestFramework;
     using TestFramework.Messages;
     using Util;
 
@@ -49,8 +48,6 @@ namespace MassTransit.Tests.Configuration
                     });
                 });
             });
-
-            Console.WriteLine(bus.GetProbeResult().ToJsonString());
 
             Assert.That(observer.ConsumerTypes.Contains(typeof(MyConsumer)));
             Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PingMessage))));

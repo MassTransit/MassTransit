@@ -16,11 +16,14 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading;
     using Configurators;
     using MassTransit.Topology;
+    using MassTransit.Topology.Configuration;
+    using MassTransit.Topology.EntityNameFormatters;
+    using MassTransit.Topology.Topologies;
 
 
     public static class RabbitMqBusFactory
     {
-        public static IMessageTopology MessageTopology => Cached.MessageTopologyValue.Value;
+        public static IMessageTopologyConfigurator MessageTopology => Cached.MessageTopologyValue.Value;
 
         /// <summary>
         /// Configure and create a bus for RabbitMQ
@@ -39,7 +42,7 @@ namespace MassTransit.RabbitMqTransport
 
         static class Cached
         {
-            internal static readonly Lazy<IMessageTopology> MessageTopologyValue = new Lazy<IMessageTopology>(() => new MessageTopology(_entityNameFormatter),
+            internal static readonly Lazy<IMessageTopologyConfigurator> MessageTopologyValue = new Lazy<IMessageTopologyConfigurator>(() => new MessageTopology(_entityNameFormatter),
                 LazyThreadSafetyMode.PublicationOnly);
 
             static readonly IEntityNameFormatter _entityNameFormatter;

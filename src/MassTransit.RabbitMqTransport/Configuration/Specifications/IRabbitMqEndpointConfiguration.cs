@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Specifications
 {
     using EndpointSpecifications;
     using Topology;
+    using Topology.Configuration;
 
 
     public interface IRabbitMqEndpointConfiguration :

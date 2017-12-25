@@ -20,6 +20,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
     using MassTransit.Builders;
     using Specifications;
     using Topology;
+    using Topology.Configuration;
+    using Topology.Topologies;
     using Transport;
     using Transports;
 
@@ -133,7 +135,10 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public IRabbitMqHost Host(RabbitMqHostSettings settings)
         {
-            var host = new RabbitMqHost(settings);
+            var hostTopology = new RabbitMqHostTopology(new FanoutExchangeTypeSelector(), new RabbitMqMessageNameFormatter(), settings.HostAddress, _configuration.MessageTopology,
+                _configuration.SendTopology, _configuration.PublishTopology);
+            
+            var host = new RabbitMqHost(settings, hostTopology);
             _hosts.Add(host);
 
             return host;

@@ -24,10 +24,10 @@ namespace MassTransit.Tests.Configuration
     using GreenPipes.Policies.ExceptionFilters;
     using MassTransit.Topology;
     using MassTransit.Topology.Observers;
+    using MassTransit.Topology.Topologies;
     using MassTransit.Transports.InMemory;
     using NUnit.Framework;
     using SendPipeSpecifications;
-    using TestFramework;
     using Util;
 
 
@@ -63,8 +63,6 @@ namespace MassTransit.Tests.Configuration
             var sendContext = new InMemorySendContext<MyMessage>(new MyMessage());
 
             await pipe.Send(sendContext).ConfigureAwait(false);
-
-            Console.WriteLine(pipe.GetProbeResult().ToJsonString());
         }
 
         [Test]
@@ -88,8 +86,6 @@ namespace MassTransit.Tests.Configuration
             var sendContext = new InMemorySendContext<MyMessage>(new MyMessage());
 
             await pipe.Send(sendContext).ConfigureAwait(false);
-
-            Console.WriteLine(pipe.GetProbeResult().ToJsonString());
         }
 
         [Test]
@@ -119,8 +115,6 @@ namespace MassTransit.Tests.Configuration
             var sendContext = new InMemorySendContext<MyMessage>(new MyMessage());
 
             await pipe.Send(sendContext).ConfigureAwait(false);
-
-            Console.WriteLine(pipe.GetProbeResult().ToJsonString());
         }
 
         [Test]
@@ -156,8 +150,6 @@ namespace MassTransit.Tests.Configuration
             var sendContext = new InMemorySendContext<MyMessage>(new MyMessage());
 
             await pipe.Send(sendContext).ConfigureAwait(false);
-
-            Console.WriteLine(pipe.GetProbeResult().ToJsonString());
         }
 
         [Test]
@@ -192,8 +184,6 @@ namespace MassTransit.Tests.Configuration
             var sendContext = new InMemorySendContext<MyMessage>(new MyMessage());
 
             await pipe.Send(sendContext).ConfigureAwait(false);
-
-            Console.WriteLine(pipe.GetProbeResult().ToJsonString());
         }
 
         static IEnumerable<Type> GetMessageTypes<TMessage>()

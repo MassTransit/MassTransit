@@ -12,11 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology
 {
+    using Configuration;
+
+
     public interface IGlobalTopology
     {
-        ISendTopology Send { get; }
+        ISendTopologyConfigurator Send { get; }
 
-        IPublishTopology Publish { get; }
+        IPublishTopologyConfigurator Publish { get; }
 
         /// <summary>
         /// This must be called early, methinks

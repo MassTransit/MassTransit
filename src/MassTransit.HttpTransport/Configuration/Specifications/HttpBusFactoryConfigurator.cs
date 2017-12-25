@@ -19,6 +19,8 @@ namespace MassTransit.HttpTransport.Specifications
     using GreenPipes;
     using Hosting;
     using MassTransit.Builders;
+    using MassTransit.Topology.Topologies;
+    using Topology;
     using Transport;
     using Transports;
     using Transports.InMemory;
@@ -61,7 +63,9 @@ namespace MassTransit.HttpTransport.Specifications
 
         public IHttpHost Host(HttpHostSettings settings)
         {
-            var httpHost = new HttpHost(settings);
+            var hostTopology = new HttpHostTopology(_configuration.MessageTopology, _configuration.SendTopology, _configuration.PublishTopology);
+            
+            var httpHost = new HttpHost(settings, hostTopology);
 
             _hosts.Add(httpHost);
 

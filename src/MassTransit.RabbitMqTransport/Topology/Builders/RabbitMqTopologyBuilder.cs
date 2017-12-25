@@ -15,7 +15,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
     using System.Collections.Generic;
     using System.Threading;
     using Entities;
-    using MassTransit.Topology;
     using MassTransit.Topology.Entities;
 
 

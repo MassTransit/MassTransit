@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Threading.Tasks;
     using GreenPipes;
     using RabbitMQ.Client;
+    using Topology;
     using Util;
 
 
@@ -58,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         IConnection ConnectionContext.Connection => _context.Connection;
         public string Description => _context.Description;
         public Uri HostAddress => _context.HostAddress;
-
+        public IRabbitMqHostTopology Topology => _context.Topology;
         RabbitMqHostSettings ConnectionContext.HostSettings => _context.HostSettings;
 
         Task<IModel> ConnectionContext.CreateModel()

@@ -14,6 +14,7 @@ namespace MassTransit.Context
 {
     using System;
     using Topology;
+    using Topology.Topologies;
 
 
     public static class MessageCorrelation

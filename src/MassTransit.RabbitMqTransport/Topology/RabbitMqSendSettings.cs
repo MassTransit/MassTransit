@@ -15,8 +15,9 @@ namespace MassTransit.RabbitMqTransport.Topology
     using System;
     using System.Collections.Generic;
     using System.Net;
-    using Configurators;
-    using Specifications;
+    using Configuration;
+    using Configuration.Configurators;
+    using Configuration.Specifications;
 
 
     public class RabbitMqSendSettings :

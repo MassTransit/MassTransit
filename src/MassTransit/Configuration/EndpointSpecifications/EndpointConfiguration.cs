@@ -34,23 +34,26 @@ namespace MassTransit.EndpointSpecifications
     {
         readonly IConsumePipe _consumePipe;
         readonly ConsumePipeSpecification _consumePipeSpecification;
+        readonly IMessageTopologyConfigurator _messageTopology;
         readonly PublishPipeSpecification _publishPipeSpecification;
+        readonly TPublishTopology _publishTopology;
         readonly ConnectHandle _publishToSendTopologyHandle;
         readonly SendPipeSpecification _sendPipeSpecification;
+        readonly TSendTopology _sendTopology;
 
-        protected EndpointConfiguration(IMessageTopology messageTopology, TConsumeTopology consumeTopology, TSendTopology sendTopology, TPublishTopology publishTopology)
+        protected EndpointConfiguration(IMessageTopologyConfigurator messageTopology, TConsumeTopology consumeTopology, TSendTopology sendTopology, TPublishTopology publishTopology)
         {
             _consumePipeSpecification = new ConsumePipeSpecification();
 
-            MessageTopology = messageTopology;
+            _messageTopology = messageTopology;
             ConsumeTopology = consumeTopology;
 
-            SendTopology = sendTopology;
+            _sendTopology = sendTopology;
 
             _sendPipeSpecification = new SendPipeSpecification();
             _sendPipeSpecification.Connect(new TopologySendPipeSpecificationObserver(sendTopology));
 
-            PublishTopology = publishTopology;
+            _publishTopology = publishTopology;
 
             var observer = new PublishToSendTopologyConfigurationObserver(sendTopology);
             _publishToSendTopologyHandle = publishTopology.Connect(observer);
@@ -59,7 +62,7 @@ namespace MassTransit.EndpointSpecifications
             _publishPipeSpecification.Connect(new TopologyPublishPipeSpecificationObserver(publishTopology));
         }
 
-        protected EndpointConfiguration(IMessageTopology messageTopology, TConsumeTopology consumeTopology, TSendTopology sendTopology,
+        protected EndpointConfiguration(IMessageTopologyConfigurator messageTopology, TConsumeTopology consumeTopology, TSendTopology sendTopology,
             TPublishTopology publishTopology,
             TConfiguration parentConfiguration, IConsumePipe consumePipe = null)
             : this(messageTopology, consumeTopology, sendTopology, publishTopology)
@@ -73,10 +76,15 @@ namespace MassTransit.EndpointSpecifications
             _publishPipeSpecification.Connect(new ParentPublishPipeSpecificationObserver(parentConfiguration.PublishPipeSpecification));
         }
 
-        public IMessageTopology MessageTopology { get; }
-        public TPublishTopology PublishTopology { get; }
+        public IMessageTopologyConfigurator MessageTopology => _messageTopology;
+        public IPublishTopologyConfigurator PublishTopology => _publishTopology;
+        public ISendTopologyConfigurator SendTopology => _sendTopology;
+
+        IMessageTopology IEndpointConfiguration<TConfiguration, TConsumeTopology, TSendTopology, TPublishTopology>.MessageTopology => _messageTopology;
+        TPublishTopology IEndpointConfiguration<TConfiguration, TConsumeTopology, TSendTopology, TPublishTopology>.PublishTopology => _publishTopology;
+        TSendTopology IEndpointConfiguration<TConfiguration, TConsumeTopology, TSendTopology, TPublishTopology>.SendTopology => _sendTopology;
+
         public TConsumeTopology ConsumeTopology { get; }
-        public TSendTopology SendTopology { get; }
 
         public IConsumePipeSpecification ConsumePipeSpecification => _consumePipeSpecification;
         public ISendPipeSpecification SendPipeSpecification => _sendPipeSpecification;
