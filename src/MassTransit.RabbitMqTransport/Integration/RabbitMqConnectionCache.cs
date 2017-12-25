@@ -22,6 +22,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
+    using Topology;
     using Util;
 
 
@@ -34,12 +35,14 @@ namespace MassTransit.RabbitMqTransport.Integration
         readonly Lazy<ConnectionFactory> _connectionFactory;
         readonly object _scopeLock = new object();
         readonly RabbitMqHostSettings _settings;
+        readonly IRabbitMqHostTopology _topology;
         ConnectionScope _scope;
         readonly string _description;
 
-        public RabbitMqConnectionCache(RabbitMqHostSettings settings, ITaskSupervisor supervisor)
+        public RabbitMqConnectionCache(RabbitMqHostSettings settings, IRabbitMqHostTopology topology, ITaskSupervisor supervisor)
         {
             _settings = settings;
+            _topology = topology;
             _connectionFactory = new Lazy<ConnectionFactory>(settings.GetConnectionFactory);
 
             _description = settings.ToDebugString();
@@ -123,7 +126,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                 connection.ConnectionShutdown += connectionShutdown;
 
-                var connectionContext = new RabbitMqConnectionContext(connection, _settings, _description, _cacheTaskScope);
+                var connectionContext = new RabbitMqConnectionContext(connection, _settings, _topology, _description, _cacheTaskScope);
 
                 connectionContext.GetOrAddPayload(() => _settings);
 
@@ -133,11 +136,11 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 if (_log.IsDebugEnabled)
                     _log.Debug("The broker was unreachable", ex);
-                
+
                 Interlocked.CompareExchange(ref _scope, null, scope);
 
                 scope.ConnectFaulted(ex);
-                
+
                 connection?.Dispose();
 
                 throw new RabbitMqConnectionException("Connect failed: " + _description, ex);

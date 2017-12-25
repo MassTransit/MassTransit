@@ -17,7 +17,7 @@ namespace MassTransit.AzureServiceBusTransport
     using GreenPipes;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
-    using Transports;
+    using Topology;
     using Util;
 
 
@@ -28,6 +28,11 @@ namespace MassTransit.AzureServiceBusTransport
         IHost
     {
         ServiceBusHostSettings Settings { get; }
+        
+        /// <summary>
+        /// Returns the topology of the service bus host
+        /// </summary>
+        IServiceBusHostTopology Topology { get; }
 
         Task<MessagingFactory> MessagingFactory { get; }
 
@@ -39,8 +44,6 @@ namespace MassTransit.AzureServiceBusTransport
         NamespaceManager NamespaceManager { get; }
 
         NamespaceManager RootNamespaceManager { get; }
-
-        IMessageNameFormatter MessageNameFormatter { get; }
 
         /// <summary>
         /// The supervisor for the host, which indicates when it's being stopped

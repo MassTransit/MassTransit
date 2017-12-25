@@ -449,7 +449,7 @@ namespace MassTransit
             var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
 
             Uri destinationAddress;
-            if (modelContext.PublishTopology.GetMessageTopology<T>().TryGetPublishAddress(modelContext.ConnectionContext.HostAddress, message, out destinationAddress))
+            if (modelContext.PublishTopology.GetMessageTopology<T>().TryGetPublishAddress(modelContext.ConnectionContext.HostAddress, out destinationAddress))
                 return destinationAddress;
 
             throw new ArgumentException($"The publish address for the message was not found: {TypeMetadataCache<T>.ShortName}", nameof(message));

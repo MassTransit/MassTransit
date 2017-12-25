@@ -23,7 +23,7 @@ namespace MassTransit.Topology
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <returns></returns>
-        IMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
+        IMessageConsumeTopology<T> GetMessageTopology<T>()
             where T : class;
     }
 }

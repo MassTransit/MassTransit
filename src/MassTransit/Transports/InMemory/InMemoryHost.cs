@@ -35,7 +35,6 @@ namespace MassTransit.Transports.InMemory
     {
         readonly ILog _log = Logger.Get<InMemoryHost>();
         readonly Uri _baseUri;
-        readonly int _concurrencyLimit;
         readonly IReceiveEndpointCollection _receiveEndpoints;
         readonly IMessageFabric _messageFabric;
         IPublishEndpointProvider _publishEndpointProvider;
@@ -43,9 +42,9 @@ namespace MassTransit.Transports.InMemory
         IReceiveEndpointTopology _topology;
         IIndex<string, InMemorySendTransport> _index;
 
-        public InMemoryHost(int concurrencyLimit, Uri baseAddress = null)
+        public InMemoryHost(int concurrencyLimit, IHostTopology topology, Uri baseAddress = null)
         {
-            _concurrencyLimit = concurrencyLimit;
+            Topology = topology;
             _baseUri = baseAddress ?? new Uri("loopback://localhost/");
 
             _messageFabric = new MessageFabric(concurrencyLimit);
@@ -54,7 +53,6 @@ namespace MassTransit.Transports.InMemory
 
             var cache = new GreenCache<InMemorySendTransport>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
             _index = cache.AddIndex("exchangeName", x => x.ExchangeName);
-
         }
 
         public IInMemoryReceiveEndpointFactory ReceiveEndpointFactory { private get; set; }
@@ -86,11 +84,8 @@ namespace MassTransit.Transports.InMemory
             _receiveEndpoints.Probe(scope);
         }
 
-        public IReceiveTransport GetReceiveTransport(string queueName, int concurrencyLimit, IReceiveEndpointTopology topology)
+        public IReceiveTransport GetReceiveTransport(string queueName, IReceiveEndpointTopology topology)
         {
-            if (concurrencyLimit <= 0)
-                concurrencyLimit = _concurrencyLimit;
-
             if (_sendEndpointProvider == null)
                 _sendEndpointProvider = topology.SendEndpointProvider;
             if (_publishEndpointProvider == null)
@@ -117,6 +112,8 @@ namespace MassTransit.Transports.InMemory
         }
 
         public Uri Address => _baseUri;
+
+        public IHostTopology Topology { get; }
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
@@ -147,7 +144,7 @@ namespace MassTransit.Transports.InMemory
         {
             return _receiveEndpoints.ConnectSendObserver(observer);
         }
-        
+
         public async Task<ISendTransport> GetSendTransport(Uri address)
         {
             if (_sendEndpointProvider == null || _publishEndpointProvider == null || _topology == null)
@@ -166,8 +163,8 @@ namespace MassTransit.Transports.InMemory
 
                 return inMemorySendTransport;
             });
-
         }
+
 
         class Handle :
             BaseHostHandle
@@ -187,7 +184,8 @@ namespace MassTransit.Transports.InMemory
         }
 
 
-        public IInMemoryPublishTopologyBuilder CreatePublishTopologyBuilder(PublishEndpointTopologyBuilder.Options options = PublishEndpointTopologyBuilder.Options.MaintainHierarchy)
+        public IInMemoryPublishTopologyBuilder CreatePublishTopologyBuilder(
+            PublishEndpointTopologyBuilder.Options options = PublishEndpointTopologyBuilder.Options.MaintainHierarchy)
         {
             return new PublishEndpointTopologyBuilder(_messageFabric, options);
         }

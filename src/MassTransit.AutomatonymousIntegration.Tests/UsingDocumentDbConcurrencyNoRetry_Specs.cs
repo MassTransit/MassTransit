@@ -42,8 +42,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _machine = new ChoirStateMachine();
 
             configurator.StateMachineSaga(_machine, _repository.Value);
-
-            configurator.TransportConcurrencyLimit = 16;
         }
 
         public When_using_DocumentDbConcurrencyNoRetry()

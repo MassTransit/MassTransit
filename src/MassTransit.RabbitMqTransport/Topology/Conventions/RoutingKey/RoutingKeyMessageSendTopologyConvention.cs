@@ -13,7 +13,6 @@
 namespace MassTransit.RabbitMqTransport.Topology.Conventions.RoutingKey
 {
     using MassTransit.Topology;
-    using RabbitMqTransport.Builders;
 
 
     public class RoutingKeyMessageSendTopologyConvention<TMessage> :
@@ -28,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Conventions.RoutingKey
                 SetFormatter(formatter);
         }
 
-        public bool TryGetMessageSendTopology(out IMessageSendTopology<TMessage> messageSendTopology)
+        bool IMessageSendTopologyConvention<TMessage>.TryGetMessageSendTopology(out IMessageSendTopology<TMessage> messageSendTopology)
         {
             if (_formatter != null)
             {
@@ -40,7 +39,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Conventions.RoutingKey
             return false;
         }
 
-        public bool TryGetMessageSendTopologyConvention<T>(out IMessageSendTopologyConvention<T> convention) where T : class
+        bool IMessageSendTopologyConvention.TryGetMessageSendTopologyConvention<T>(out IMessageSendTopologyConvention<T> convention)
         {
             convention = this as IMessageSendTopologyConvention<T>;
 

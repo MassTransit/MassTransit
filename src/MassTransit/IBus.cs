@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using GreenPipes;
     using Pipeline;
+    using Topology;
     using Transports;
 
 
@@ -33,8 +34,13 @@ namespace MassTransit
         IProbeSite
     {
         /// <summary>
-        /// The receive address of the bus itself, versus any receive endpoints that were created
+        /// The InputAddress of the default bus endpoint
         /// </summary>
         Uri Address { get; }
+        
+        /// <summary>
+        /// The bus topology
+        /// </summary>
+        IBusTopology Topology { get; }
     }
 }

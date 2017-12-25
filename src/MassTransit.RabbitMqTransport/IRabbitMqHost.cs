@@ -13,9 +13,9 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using System.Threading.Tasks;
     using GreenPipes;
     using Integration;
+    using Topology;
     using Util;
 
 
@@ -25,6 +25,11 @@ namespace MassTransit.RabbitMqTransport
         IConnectionCache ConnectionCache { get; }
 
         RabbitMqHostSettings Settings { get; }
+
+        /// <summary>
+        /// Returns the topology of the RabbitMQ host
+        /// </summary>
+        IRabbitMqHostTopology Topology { get; }
 
         /// <summary>
         /// The connection retry policy used for connecting to the host

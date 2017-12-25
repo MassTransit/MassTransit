@@ -56,13 +56,11 @@ namespace MassTransit.Topology.Observers
                 _topology.Apply(sendBuilder);
             }
 
-            public bool TryGetPublishAddress(Uri baseAddress, TMessage message, out Uri publishAddress)
+            public bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
             {
                 publishAddress = null;
                 return false;
             }
-
-            public IMessageEntityNameFormatter<TMessage> EntityNameFormatter => null;
 
 
             class Builder :

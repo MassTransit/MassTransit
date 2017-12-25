@@ -24,6 +24,7 @@ namespace MassTransit.Tests.Configuration
     using GreenPipes.Policies.ExceptionFilters;
     using MassTransit.Topology;
     using MassTransit.Topology.Observers;
+    using MassTransit.Topology.Topologies;
     using MassTransit.Transports.InMemory;
     using NUnit.Framework;
     using SendPipeSpecifications;

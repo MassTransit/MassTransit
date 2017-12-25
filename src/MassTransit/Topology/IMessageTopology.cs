@@ -27,7 +27,7 @@ namespace MassTransit.Topology
     public interface IMessageTopology :
         IConnectMessageTopologyConfigurationObserver
     {
-        IMessageTopologyConfigurator<T> GetMessageTopology<T>()
+        IMessageTopology<T> GetMessageTopology<T>()
             where T : class;
     }
 }

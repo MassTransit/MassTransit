@@ -30,7 +30,7 @@ namespace MassTransit.Transports
         /// </summary>
         /// <param name="endpointName"></param>
         /// <param name="endpoint"></param>
-        void Add(string endpointName, IReceiveEndpoint endpoint);
+        void Add(string endpointName, IReceiveEndpointControl endpoint);
 
         /// <summary>
         /// Start all endpoints in the collection which have not been started, and return the handles

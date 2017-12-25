@@ -23,6 +23,7 @@ namespace MassTransit
     using Internals.Extensions;
     using Logging;
     using Pipeline;
+    using Topology;
     using Transports;
     using Util;
 
@@ -42,13 +43,14 @@ namespace MassTransit
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpointProvider, IBusHostCollection hosts,
-            IBusObserver busObservable)
+            IBusObserver busObservable, IBusTopology topology)
         {
             Address = address;
             _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpointProvider = publishEndpointProvider;
             _busObservable = busObservable;
+            Topology = topology;
             _hosts = hosts;
 
             _publishEndpoint = new Lazy<IPublishEndpoint>(() => publishEndpointProvider.CreatePublishEndpoint(address));
@@ -116,6 +118,8 @@ namespace MassTransit
         }
 
         public Uri Address { get; }
+
+        public IBusTopology Topology { get; }
 
         Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {

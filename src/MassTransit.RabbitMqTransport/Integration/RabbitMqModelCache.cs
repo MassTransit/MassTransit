@@ -19,8 +19,6 @@ namespace MassTransit.RabbitMqTransport.Integration
     using GreenPipes;
     using Logging;
     using RabbitMQ.Client;
-    using Specifications;
-    using Topology;
     using Util;
 
 
@@ -35,14 +33,12 @@ namespace MassTransit.RabbitMqTransport.Integration
         readonly ITaskScope _cacheTaskScope;
 
         readonly IRabbitMqHost _host;
-        readonly IRabbitMqTopology _topology;
         readonly object _scopeLock = new object();
         ModelScope _scope;
 
-        public RabbitMqModelCache(IRabbitMqHost host, IRabbitMqTopology topology)
+        public RabbitMqModelCache(IRabbitMqHost host)
         {
             _host = host;
-            _topology = topology;
 
             _cacheTaskScope = host.Supervisor.CreateScope($"{TypeMetadataCache<RabbitMqModelCache>.ShortName}", CloseScope);
         }
@@ -103,7 +99,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                     model.ModelShutdown += modelShutdown;
 
-                    var modelContext = new RabbitMqModelContext(connectionContext, model, _cacheTaskScope, _host, _topology);
+                    var modelContext = new RabbitMqModelContext(connectionContext, model, _cacheTaskScope, _host);
 
                     scope.Created(modelContext);
                 }

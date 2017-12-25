@@ -33,9 +33,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
 
-            var scheduler = new DelayedExchangeMessageScheduler(context, modelContext.ConnectionContext.HostSettings);
+            var scheduler = new DelayedExchangeMessageScheduler(context, modelContext.ConnectionContext.Topology, modelContext.ConnectionContext.HostAddress);
 
-            MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(context, scheduler);
+            MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(scheduler, context.ReceiveContext.InputAddress);
 
             context.GetOrAddPayload(() => schedulerContext);
 

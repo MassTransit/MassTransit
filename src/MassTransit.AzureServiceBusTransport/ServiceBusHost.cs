@@ -20,9 +20,11 @@ namespace MassTransit.AzureServiceBusTransport
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
+    using MassTransit.Topology;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Settings;
+    using Topology;
     using Transport;
     using Transports;
     using Util;
@@ -40,15 +42,15 @@ namespace MassTransit.AzureServiceBusTransport
         readonly Lazy<Task<MessagingFactory>> _sessionMessagingFactory;
         readonly TaskSupervisor _supervisor;
 
-        public ServiceBusHost(ServiceBusHostSettings settings)
+        public ServiceBusHost(ServiceBusHostSettings settings, IServiceBusHostTopology hostTopology)
         {
             Settings = settings;
+            Topology = hostTopology;
 
             _messagingFactory = new Lazy<Task<MessagingFactory>>(CreateMessagingFactory);
             _sessionMessagingFactory = new Lazy<Task<MessagingFactory>>(CreateNetMessagingFactory);
             _namespaceManager = new Lazy<NamespaceManager>(CreateNamespaceManager);
             _rootNamespaceManager = new Lazy<NamespaceManager>(CreateRootNamespaceManager);
-            MessageNameFormatter = new ServiceBusMessageNameFormatter();
             _receiveEndpoints = new ReceiveEndpointCollection();
 
             _supervisor = new TaskSupervisor($"{TypeMetadataCache<ServiceBusHost>.ShortName} - {Settings.ServiceUri}");
@@ -88,8 +90,16 @@ namespace MassTransit.AzureServiceBusTransport
         }
 
         public IRetryPolicy RetryPolicy { get; }
-
         Task<MessagingFactory> IServiceBusHost.SessionMessagingFactory => _sessionMessagingFactory.Value;
+        public ServiceBusHostSettings Settings { get; }
+
+        public IServiceBusHostTopology Topology { get; }
+        IHostTopology IHost.Topology => Topology;
+
+        Task<MessagingFactory> IServiceBusHost.MessagingFactory => _messagingFactory.Value;
+        public NamespaceManager NamespaceManager => _namespaceManager.Value;
+        public NamespaceManager RootNamespaceManager => _rootNamespaceManager.Value;
+        public ITaskSupervisor Supervisor => _supervisor;
 
         void IProbeSite.Probe(ProbeContext context)
         {
@@ -103,18 +113,6 @@ namespace MassTransit.AzureServiceBusTransport
 
             _receiveEndpoints.Probe(scope);
         }
-
-        public ServiceBusHostSettings Settings { get; }
-
-        Task<MessagingFactory> IServiceBusHost.MessagingFactory => _messagingFactory.Value;
-
-        public NamespaceManager NamespaceManager => _namespaceManager.Value;
-
-        public NamespaceManager RootNamespaceManager => _rootNamespaceManager.Value;
-
-        public IMessageNameFormatter MessageNameFormatter { get; }
-
-        public ITaskSupervisor Supervisor => _supervisor;
 
         public string GetQueuePath(QueueDescription queueDescription)
         {
@@ -353,7 +351,14 @@ namespace MassTransit.AzureServiceBusTransport
             Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
             where T : class
         {
-            return ConnectSubscriptionEndpoint(subscriptionName, MessageNameFormatter.GetTopicAddress(this, typeof(T)).AbsolutePath.Trim('/'), configure);
+            if (SubscriptionEndpointFactory == null)
+                throw new ConfigurationException("The subscription endpoint factory was not specified");
+
+            var settings = new SubscriptionEndpointSettings(Topology.Publish<T>().TopicDescription, subscriptionName);
+
+            SubscriptionEndpointFactory.CreateSubscriptionEndpoint(settings, configure);
+
+            return _receiveEndpoints.Start(settings.Path);
         }
 
         public HostReceiveEndpointHandle ConnectSubscriptionEndpoint(string subscriptionName, string topicName,

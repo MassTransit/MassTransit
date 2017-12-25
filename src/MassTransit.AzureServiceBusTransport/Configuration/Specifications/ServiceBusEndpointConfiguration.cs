@@ -16,26 +16,28 @@ namespace MassTransit.AzureServiceBusTransport.Specifications
     using MassTransit.Pipeline;
     using MassTransit.Topology;
     using MassTransit.Topology.Configuration;
+    using MassTransit.Topology.Topologies;
     using Topology;
+    using Topology.Topologies;
 
 
     public class ServiceBusEndpointConfiguration :
         EndpointConfiguration<IServiceBusEndpointConfiguration, IServiceBusConsumeTopologyConfigurator, IServiceBusSendTopologyConfigurator, IServiceBusPublishTopologyConfigurator>,
         IServiceBusEndpointConfiguration
     {
-        public ServiceBusEndpointConfiguration(IMessageTopology messageTopology)
+        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology)
             : this(messageTopology, CreateConsume(messageTopology), CreateSend(GlobalTopology.Send), CreatePublish(messageTopology, GlobalTopology.Publish))
         {
         }
 
-        public ServiceBusEndpointConfiguration(IMessageTopology messageTopology, IServiceBusConsumeTopologyConfigurator consumeTopology,
+        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IServiceBusConsumeTopologyConfigurator consumeTopology,
             IServiceBusSendTopologyConfigurator sendTopology,
             IServiceBusPublishTopologyConfigurator publishTopology)
             : base(messageTopology, consumeTopology, sendTopology, publishTopology)
         {
         }
 
-        public ServiceBusEndpointConfiguration(IMessageTopology messageTopology, IServiceBusConsumeTopologyConfigurator consumeTopology,
+        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IServiceBusConsumeTopologyConfigurator consumeTopology,
             IServiceBusSendTopologyConfigurator sendTopology,
             IServiceBusPublishTopologyConfigurator publishTopology,
             IServiceBusEndpointConfiguration configuration, IConsumePipe consumePipe = null)
@@ -58,7 +60,7 @@ namespace MassTransit.AzureServiceBusTransport.Specifications
             return sendTopology;
         }
 
-        static IServiceBusPublishTopologyConfigurator CreatePublish(IMessageTopology messageTopology, IPublishTopology delegatePublishTopology)
+        static IServiceBusPublishTopologyConfigurator CreatePublish(IMessageTopology messageTopology, IPublishTopologyConfigurator delegatePublishTopology)
         {
             var publishTopology = new ServiceBusPublishTopology(messageTopology);
 

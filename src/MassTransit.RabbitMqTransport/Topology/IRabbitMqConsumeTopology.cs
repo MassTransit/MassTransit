@@ -13,16 +13,17 @@
 namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
+    using Builders;
     using MassTransit.Topology;
 
 
     public interface IRabbitMqConsumeTopology :
         IConsumeTopology
     {
-        new IRabbitMqMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
-            where T : class;
-
         IExchangeTypeSelector ExchangeTypeSelector { get; }
+
+        new IRabbitMqMessageConsumeTopology<T> GetMessageTopology<T>()
+            where T : class;
 
         /// <summary>
         /// Apply the entire topology to the builder

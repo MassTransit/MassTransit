@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Topology
 {
     using System.Collections.Generic;
+    using Entities;
 
 
     public interface IRabbitMqTopologyBuilder

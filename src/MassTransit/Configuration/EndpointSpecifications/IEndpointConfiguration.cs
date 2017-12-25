@@ -37,6 +37,10 @@ namespace MassTransit.EndpointSpecifications
         IPublishPipe CreatePublishPipe();
 
         void SeparatePublishFromSendTopology();
+
+        IMessageTopologyConfigurator MessageTopology { get; }
+        ISendTopologyConfigurator SendTopology { get; }
+        IPublishTopologyConfigurator PublishTopology { get; }
     }
 
 
@@ -47,10 +51,10 @@ namespace MassTransit.EndpointSpecifications
         where TPublishTopology : IPublishTopologyConfigurator
         where TSendTopology : ISendTopologyConfigurator
     {
-        IMessageTopology MessageTopology { get; }
+        new IMessageTopology MessageTopology { get; }
         TConsumeTopology ConsumeTopology { get; }
-        TSendTopology SendTopology { get; }
-        TPublishTopology PublishTopology { get; }
+        new TSendTopology SendTopology { get; }
+        new TPublishTopology PublishTopology { get; }
 
         /// <summary>
         /// Create a specification based upon this specification. All of the specifications and topologies will

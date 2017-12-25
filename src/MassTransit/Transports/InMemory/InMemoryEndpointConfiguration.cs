@@ -15,27 +15,31 @@ namespace MassTransit.Transports.InMemory
     using EndpointSpecifications;
     using MassTransit.Topology;
     using MassTransit.Topology.Configuration;
+    using MassTransit.Topology.Topologies;
     using Pipeline;
     using Topology;
+    using Topology.Configurators;
+    using Topology.Topologies;
 
 
     public class InMemoryEndpointConfiguration :
         EndpointConfiguration<IInMemoryEndpointConfiguration, IInMemoryConsumeTopologyConfigurator, ISendTopologyConfigurator, IInMemoryPublishTopologyConfigurator>,
         IInMemoryEndpointConfiguration
     {
-        public InMemoryEndpointConfiguration(IMessageTopology messageTopology)
+        public InMemoryEndpointConfiguration(IMessageTopologyConfigurator messageTopology)
             : this(messageTopology, CreateConsume(messageTopology), CreateSend(GlobalTopology.Send), CreatePublish(messageTopology, GlobalTopology.Publish))
         {
         }
 
-        InMemoryEndpointConfiguration(IMessageTopology messageTopology, IInMemoryConsumeTopologyConfigurator consumeTopology, ISendTopologyConfigurator sendTopology,
+        InMemoryEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IInMemoryConsumeTopologyConfigurator consumeTopology, ISendTopologyConfigurator sendTopology,
             IInMemoryPublishTopologyConfigurator publishTopology)
             : base(messageTopology, consumeTopology, sendTopology, publishTopology)
         {
         }
 
-        public InMemoryEndpointConfiguration(IMessageTopology messageTopology, IInMemoryConsumeTopologyConfigurator consumeTopology, ISendTopologyConfigurator sendTopology,
-            IInMemoryPublishTopologyConfigurator publishTopology, IInMemoryEndpointConfiguration configuration, IConsumePipe consumePipe = null)
+        public InMemoryEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IInMemoryConsumeTopologyConfigurator consumeTopology,
+            ISendTopologyConfigurator sendTopology, IInMemoryPublishTopologyConfigurator publishTopology, IInMemoryEndpointConfiguration configuration,
+            IConsumePipe consumePipe = null)
             : base(messageTopology, consumeTopology, sendTopology, publishTopology, configuration, consumePipe)
         {
         }
@@ -46,14 +50,14 @@ namespace MassTransit.Transports.InMemory
                 PublishTopology), this, consumePipe);
         }
 
-        static IInMemoryConsumeTopologyConfigurator CreateConsume(IMessageTopology messageTopology)
+        static IInMemoryConsumeTopologyConfigurator CreateConsume(IMessageTopologyConfigurator messageTopology)
         {
             var consumeTopology = new InMemoryConsumeTopology(messageTopology);
 
             return consumeTopology;
         }
 
-        static ISendTopologyConfigurator CreateSend(ISendTopology delegateSendTopology)
+        static ISendTopologyConfigurator CreateSend(ISendTopologyConfigurator delegateSendTopology)
         {
             var sendTopology = new SendTopology();
 
@@ -63,7 +67,7 @@ namespace MassTransit.Transports.InMemory
             return sendTopology;
         }
 
-        static IInMemoryPublishTopologyConfigurator CreatePublish(IMessageTopology messageTopology, IPublishTopology delegatePublishTopology)
+        static IInMemoryPublishTopologyConfigurator CreatePublish(IMessageTopologyConfigurator messageTopology, IPublishTopologyConfigurator delegatePublishTopology)
         {
             var publishTopology = new InMemoryPublishTopology(messageTopology);
 

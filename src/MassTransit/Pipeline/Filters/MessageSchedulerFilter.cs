@@ -45,7 +45,7 @@ namespace MassTransit.Pipeline.Filters
         {
             var scheduler = new EndpointMessageScheduler(context, _schedulerAddress);
 
-            MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(context, scheduler);
+            MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(scheduler, context.ReceiveContext.InputAddress);
 
             context.GetOrAddPayload(() => schedulerContext);
 

@@ -13,11 +13,16 @@
 namespace MassTransit.AzureServiceBusTransport.Topology
 {
     using MassTransit.Topology;
+    using Microsoft.ServiceBus.Messaging;
 
 
     public interface IServiceBusMessagePublishTopology<TMessage> :
         IMessagePublishTopology<TMessage>
         where TMessage : class
     {
+        /// <summary>
+        /// Returns the topic description for the message type
+        /// </summary>
+        TopicDescription TopicDescription { get; }
     }
 }

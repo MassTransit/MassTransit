@@ -16,6 +16,14 @@ namespace MassTransit.Topology.Configuration
         IConsumeTopology
     {
         /// <summary>
+        /// Returns the specification for the message type
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <returns></returns>
+        new IMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
+            where T : class;
+
+        /// <summary>
         /// Adds a convention to the topology, which will be applied to every message type
         /// requested, to determine if a convention for the message type is available.
         /// </summary>

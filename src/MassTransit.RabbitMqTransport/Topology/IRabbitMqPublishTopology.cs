@@ -18,7 +18,7 @@ namespace MassTransit.RabbitMqTransport.Topology
     public interface IRabbitMqPublishTopology :
         IPublishTopology
     {
-        new IRabbitMqMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
+        new IRabbitMqMessagePublishTopology<T> GetMessageTopology<T>()
             where T : class;
 
         IExchangeTypeSelector ExchangeTypeSelector { get; }

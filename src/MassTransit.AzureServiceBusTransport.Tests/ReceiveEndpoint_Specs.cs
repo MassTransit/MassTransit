@@ -100,7 +100,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 ConsumeContext<PingMessage> pinged = await pingHandled;
 
                 Assert.That(pinged.ReceiveContext.InputAddress,
-                    Is.EqualTo(new Uri(Host.Address, string.Join("/", Host.MessageNameFormatter.GetMessageName(typeof(PingMessage)), "second_subscription"))));
+                    Is.EqualTo(new Uri(Host.Address, string.Join("/", Host.Topology.Message<PingMessage>().EntityName, "second_subscription"))));
             }
             finally
             {

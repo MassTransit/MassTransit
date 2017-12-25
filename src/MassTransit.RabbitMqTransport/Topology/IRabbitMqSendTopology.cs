@@ -14,7 +14,8 @@ namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using Builders;
-    using Configurators;
+    using Configuration;
+    using Configuration.Configurators;
     using MassTransit.Topology;
 
 

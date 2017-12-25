@@ -12,7 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology
 {
-    public interface IHostTopology
+    public interface IHostTopology :
+        IBusTopology
     {
         /// <summary>
         /// Returns a unique temporary queue name for the host/topology.

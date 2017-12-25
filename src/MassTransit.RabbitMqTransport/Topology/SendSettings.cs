@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using System.Collections.Generic;
+    using Configuration;
 
 
     public interface SendSettings :

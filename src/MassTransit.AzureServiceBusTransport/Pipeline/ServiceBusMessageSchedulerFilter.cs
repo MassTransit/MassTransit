@@ -37,7 +37,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             {
                 var scheduler = new ServiceBusMessageScheduler(context);
 
-                return new ConsumeMessageSchedulerContext(context, scheduler);
+                return new ConsumeMessageSchedulerContext(scheduler, context.ReceiveContext.InputAddress);
             });
 
             return next.Send(context);

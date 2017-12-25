@@ -20,6 +20,7 @@ namespace MassTransit.HttpTransport.Transport
     using Hosting;
     using Logging;
     using MassTransit.Pipeline;
+    using MassTransit.Topology;
     using Transports;
     using Util;
 
@@ -132,6 +133,11 @@ namespace MassTransit.HttpTransport.Transport
 
 
         public Uri Address => new Uri($"{_settings.Scheme}://{_settings.Host}:{_settings.Port}");
+
+        public IHostTopology Topology
+        {
+            get { throw new NotImplementedException(); }
+        }
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {

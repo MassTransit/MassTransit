@@ -31,21 +31,18 @@ namespace MassTransit.Transports.InMemory
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
         readonly IInMemoryPublishTopology _publishTopology;
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
 
-        public InMemoryPublishEndpointProvider(ISendEndpointProvider sendEndpointProvider, ISendTransportProvider transportProvider, IPublishPipe publishPipe,
-            IInMemoryPublishTopology publishTopology, IMessageSerializer serializer, Uri sourceAddress)
+        public InMemoryPublishEndpointProvider(ISendTransportProvider transportProvider, IPublishPipe publishPipe, IInMemoryPublishTopology publishTopology,
+            IMessageSerializer serializer, Uri sourceAddress)
         {
-            _sendEndpointProvider = sendEndpointProvider;
             _publishPipe = publishPipe;
             _publishTopology = publishTopology;
             _serializer = serializer;
             _sourceAddress = sourceAddress;
             _host = transportProvider as InMemoryHost;
             _publishObservable = new PublishObservable();
-
 
             var cache = new GreenCache<CachedSendEndpoint<TypeKey>>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
             _index = cache.AddIndex("type", x => x.Key);
@@ -59,9 +56,7 @@ namespace MassTransit.Transports.InMemory
         public async Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
             where T : class
         {
-            Uri publishAddress;
-            if (!_publishTopology.GetMessageTopology<T>()
-                .TryGetPublishAddress(_host.Address, message, out publishAddress))
+            if (!_publishTopology.GetMessageTopology<T>().TryGetPublishAddress(_host.Address, out var publishAddress))
                 throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
 
             return await _index.Get(new TypeKey(typeof(T), publishAddress), typeKey => CreateSendEndpoint<T>(typeKey)).ConfigureAwait(false);

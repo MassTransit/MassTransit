@@ -24,23 +24,21 @@ namespace MassTransit.RabbitMqTransport.Transport
         ISendTransportProvider
     {
         readonly BusHostCollection<RabbitMqHost> _hosts;
-        readonly IRabbitMqTopology _topology;
 
-        public RabbitMqSendTransportProvider(BusHostCollection<RabbitMqHost> hosts, IRabbitMqTopology topology)
+        public RabbitMqSendTransportProvider(BusHostCollection<RabbitMqHost> hosts)
         {
             _hosts = hosts;
-            _topology = topology;
         }
 
         public Task<ISendTransport> GetSendTransport(Uri address)
         {
             var host = _hosts.GetHost(address);
 
-            var sendSettings = _topology.SendTopology.GetSendSettings(address);
+            var sendSettings = host.Topology.GetSendSettings(address);
 
-            var topology = _topology.SendTopology.GetTopologyLayout(address);
+            var topology = host.Topology.SendTopology.GetTopologyLayout(address);
 
-            var modelCache = new RabbitMqModelCache(host, _topology);
+            var modelCache = new RabbitMqModelCache(host);
 
             var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(sendSettings, topology);
 

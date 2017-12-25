@@ -49,8 +49,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 x.Interval(5, 100);
             });
             configurator.StateMachineSaga(_machine, _repository.Value);
-
-            configurator.TransportConcurrencyLimit = 16;
         }
 
         public When_using_DocumentDbConcurrencyOptimistic()

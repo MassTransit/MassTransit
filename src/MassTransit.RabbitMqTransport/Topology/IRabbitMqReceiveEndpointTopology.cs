@@ -17,8 +17,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
 
     public interface IRabbitMqReceiveEndpointTopology :
-        IReceiveEndpointTopology,
-        IRabbitMqTopology
+        IReceiveEndpointTopology
     {
         TopologyLayout TopologyLayout { get; }
     }

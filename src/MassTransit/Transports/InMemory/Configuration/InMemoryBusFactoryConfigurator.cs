@@ -16,12 +16,13 @@ namespace MassTransit.BusConfigurators
     using System.Collections.Generic;
     using Builders;
     using GreenPipes;
-    using Topology.Configuration;
     using Transports;
     using Transports.InMemory;
     using Transports.InMemory.Builders;
     using Transports.InMemory.Configuration;
     using Transports.InMemory.Topology;
+    using Transports.InMemory.Topology.Configurators;
+    using Transports.InMemory.Topology.Topologies;
 
 
     public class InMemoryBusFactoryConfigurator :
@@ -29,17 +30,20 @@ namespace MassTransit.BusConfigurators
         IInMemoryBusFactoryConfigurator,
         IBusFactory
     {
+        readonly Uri _baseAddress;
         readonly IInMemoryEndpointConfiguration _configuration;
         readonly BusHostCollection<IBusHostControl> _hosts;
-        int _concurrencyLimit;
         InMemoryHost _inMemoryHost;
         ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryBusFactoryConfigurator(IInMemoryEndpointConfiguration configuration)
+        public InMemoryBusFactoryConfigurator(IInMemoryEndpointConfiguration configuration, Uri baseAddress = null)
             : base(configuration)
         {
             _configuration = configuration;
-            _concurrencyLimit = Environment.ProcessorCount;
+            _baseAddress = baseAddress;
+            TransportConcurrencyLimit = Environment.ProcessorCount;
+
+            _baseAddress = baseAddress ?? new Uri("loopback://localhost/");
 
             _hosts = new BusHostCollection<IBusHostControl>();
         }
@@ -50,7 +54,8 @@ namespace MassTransit.BusConfigurators
             {
                 if (_inMemoryHost == null || _sendTransportProvider == null)
                 {
-                    var host = new InMemoryHost(_concurrencyLimit);
+                    var hostTopology = new InMemoryHostTopology(_configuration.MessageTopology, _configuration.SendTopology, _configuration.PublishTopology);
+                    var host = new InMemoryHost(TransportConcurrencyLimit, hostTopology, _baseAddress);
                     _hosts.Add(host);
 
                     _inMemoryHost = _inMemoryHost ?? host;
@@ -72,14 +77,6 @@ namespace MassTransit.BusConfigurators
             return builder.Build();
         }
 
-        public void SendTopology<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology)
-            where T : class
-        {
-            IMessageSendTopologyConfigurator<T> configurator = _configuration.SendTopology.GetMessageTopology<T>();
-
-            configureTopology?.Invoke(configurator);
-        }
-
         public void PublishTopology<T>(Action<IInMemoryMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class
         {
@@ -88,10 +85,7 @@ namespace MassTransit.BusConfigurators
             configureTopology?.Invoke(configurator);
         }
 
-        public int TransportConcurrencyLimit
-        {
-            set { _concurrencyLimit = value; }
-        }
+        public int TransportConcurrencyLimit { get; set; }
 
         public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
@@ -112,14 +106,14 @@ namespace MassTransit.BusConfigurators
             ReceiveEndpoint(queueName, configureEndpoint);
         }
 
-        void IInMemoryBusFactoryConfigurator.SetHost(InMemoryHost host)
+        void IInMemoryBusFactoryConfigurator.SetHost(IInMemoryHost host)
         {
             if (_inMemoryHost != null)
                 throw new ConfigurationException("The host has already been configured");
 
-            _inMemoryHost = host;
-            _sendTransportProvider = host;
-            _hosts.Add(host);
+            _inMemoryHost = host as InMemoryHost;
+            _sendTransportProvider = _inMemoryHost;
+            _hosts.Add(_inMemoryHost);
         }
 
         public IInMemoryHost Host => InMemoryHost;

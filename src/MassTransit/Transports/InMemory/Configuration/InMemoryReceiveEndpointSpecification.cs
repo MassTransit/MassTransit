@@ -23,12 +23,11 @@ namespace MassTransit.Transports.InMemory.Configuration
         IInMemoryReceiveEndpointSpecification
     {
         readonly Uri _baseAddress;
+        readonly IInMemoryEndpointConfiguration _configuration;
         readonly string _queueName;
         readonly ISendTransportProvider _sendTransportProvider;
-        readonly IInMemoryEndpointConfiguration _configuration;
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
-        int _transportConcurrencyLimit;
 
         public InMemoryReceiveEndpointSpecification(Uri baseAddress, string queueName, ISendTransportProvider sendTransportProvider, IInMemoryEndpointConfiguration configuration)
             : base(configuration)
@@ -37,17 +36,11 @@ namespace MassTransit.Transports.InMemory.Configuration
             _queueName = queueName;
             _sendTransportProvider = sendTransportProvider;
             _configuration = configuration;
-            _transportConcurrencyLimit = 0;
         }
 
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
 
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider;
-
-        public int TransportConcurrencyLimit
-        {
-            set { _transportConcurrencyLimit = value; }
-        }
 
         public void Apply(IInMemoryBusBuilder builder)
         {
@@ -68,7 +61,7 @@ namespace MassTransit.Transports.InMemory.Configuration
             _sendEndpointProvider = receiveEndpointTopology.SendEndpointProvider;
             _publishEndpointProvider = receiveEndpointTopology.PublishEndpointProvider;
 
-            var transport = inMemoryBusBuilder.InMemoryHost.GetReceiveTransport(_queueName, _transportConcurrencyLimit, receiveEndpointTopology);
+            var transport = inMemoryBusBuilder.InMemoryHost.GetReceiveTransport(_queueName, receiveEndpointTopology);
 
             inMemoryHost.ReceiveEndpoints.Add(_queueName, new ReceiveEndpoint(transport, receivePipe));
         }

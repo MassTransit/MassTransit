@@ -16,6 +16,14 @@ namespace MassTransit.Topology.Configuration
         IPublishTopology
     {
         /// <summary>
+        /// Returns the specification for the message type
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <returns></returns>
+        new IMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
+            where T : class;
+
+        /// <summary>
         /// Adds a convention to the topology, which will be applied to every message type
         /// requested, to determine if a convention for the message type is available.
         /// </summary>
@@ -29,22 +37,5 @@ namespace MassTransit.Topology.Configuration
         /// <param name="topology">The topology</param>
         void AddMessagePublishTopology<T>(IMessagePublishTopology<T> topology)
             where T : class;
-    }
-
-
-    public interface IPublishTopologyConfigurator<T>
-        where T : class
-    {
-        /// <summary>
-        /// Sets the entity name to a static value (using the static entity name provider)
-        /// </summary>
-        string EntityName { set; }
-
-        /// <summary>
-        /// Sets the entity name provider to the specified class, which will be used to format
-        /// the entity name
-        /// </summary>
-        /// <param name="formatter">The entity name provider</param>
-        void SetEntityNameProvider(IEntityNameFormatter formatter);
     }
 }

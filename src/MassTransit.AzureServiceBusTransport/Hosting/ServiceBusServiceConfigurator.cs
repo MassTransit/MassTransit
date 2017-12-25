@@ -20,6 +20,7 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
     using MassTransit.Hosting;
     using MassTransit.Saga;
     using MassTransit.Saga.SubscriptionConfigurators;
+    using MassTransit.Topology.Configuration;
 
 
     /// <summary>
@@ -67,6 +68,16 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
             _configurator.AddBusFactorySpecification(specification);
+        }
+
+        public void SendTopology<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology) where T : class
+        {
+            ((IBusFactoryConfigurator)_configurator).SendTopology<T>(configureTopology);
+        }
+
+        public void PublishTopology<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology) where T : class
+        {
+            ((IBusFactoryConfigurator)_configurator).PublishTopology<T>(configureTopology);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)

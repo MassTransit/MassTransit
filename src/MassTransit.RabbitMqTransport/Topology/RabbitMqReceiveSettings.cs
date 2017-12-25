@@ -13,7 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
-    using Configurators;
+    using Configuration.Configurators;
 
 
     public class RabbitMqReceiveSettings :

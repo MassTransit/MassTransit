@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology.Observers
 {
+    using Configuration;
     using GreenPipes.Util;
 
 

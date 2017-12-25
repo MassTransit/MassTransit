@@ -15,9 +15,9 @@ namespace MassTransit.Topology.Configuration
     public class DelegatePublishTopologyConfigurationObserver :
         IPublishTopologyConfigurationObserver
     {
-        readonly IPublishTopology _publishTopology;
+        readonly IPublishTopologyConfigurator _publishTopology;
 
-        public DelegatePublishTopologyConfigurationObserver(IPublishTopology publishTopology)
+        public DelegatePublishTopologyConfigurationObserver(IPublishTopologyConfigurator publishTopology)
         {
             _publishTopology = publishTopology;
         }

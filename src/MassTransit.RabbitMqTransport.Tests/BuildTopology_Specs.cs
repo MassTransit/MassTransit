@@ -15,9 +15,12 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Collections.Generic;
     using System.Linq;
     using MassTransit.Topology;
+    using MassTransit.Topology.EntityNameFormatters;
     using NUnit.Framework;
     using Topology;
     using Topology.Builders;
+    using Topology.Configuration;
+    using Topology.Topologies;
     using TopologyTestTypes;
 
     namespace TopologyTestTypes
@@ -116,7 +119,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         public void Should_include_a_binding_for_the_second_interface_only()
         {
             _publishTopology.GetMessageTopology<SecondInterface>()
-                .ApplyMessageTopology(_builder);
+                .Apply(_builder);
 
             var topology = _builder.BuildTopologyLayout();
 
@@ -135,7 +138,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         public void Should_include_a_binding_for_the_single_interface()
         {
             _publishTopology.GetMessageTopology<SingleInterface>()
-                .ApplyMessageTopology(_builder);
+                .Apply(_builder);
 
             var topology = _builder.BuildTopologyLayout();
 
@@ -170,7 +173,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         public void Should_include_a_binding_for_the_second_interface_only()
         {
             _publishTopology.GetMessageTopology<SecondInterface>()
-                .ApplyMessageTopology(_builder);
+                .Apply(_builder);
 
             var topology = _builder.BuildTopologyLayout();
             topology.LogResult();
@@ -190,7 +193,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         public void Should_include_a_binding_for_the_third_interface_as_well()
         {
             _publishTopology.GetMessageTopology<ThirdInterface>()
-                .ApplyMessageTopology(_builder);
+                .Apply(_builder);
 
             var topology = _builder.BuildTopologyLayout();
             topology.LogResult();
@@ -212,7 +215,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         public void Should_include_a_binding_for_the_single_interface()
         {
             _publishTopology.GetMessageTopology<SingleInterface>()
-                .ApplyMessageTopology(_builder);
+                .Apply(_builder);
 
             var topology = _builder.BuildTopologyLayout();
             topology.LogResult();

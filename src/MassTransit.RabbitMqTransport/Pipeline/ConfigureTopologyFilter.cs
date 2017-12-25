@@ -19,6 +19,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using MassTransit.Pipeline;
     using Topology;
     using Topology.Builders;
+    using Topology.Entities;
 
 
     /// <summary>

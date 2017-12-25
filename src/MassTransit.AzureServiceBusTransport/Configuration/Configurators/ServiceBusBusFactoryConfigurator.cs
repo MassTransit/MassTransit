@@ -19,6 +19,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Settings;
     using Specifications;
     using Topology;
+    using Topology.Topologies;
     using Transport;
     using Transports;
 
@@ -130,7 +131,8 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             if (settings == null)
                 throw new ArgumentNullException(nameof(settings));
 
-            var host = new ServiceBusHost(settings);
+            var hostTopology = new ServiceBusHostTopology(_configuration.MessageTopology, _configuration.SendTopology, _configuration.PublishTopology);
+            var host = new ServiceBusHost(settings, hostTopology);
             _hosts.Add(host);
 
             return host;
@@ -172,7 +174,18 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         public void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
             where T : class
         {
-            SubscriptionEndpoint(host, subscriptionName, host.MessageNameFormatter.GetTopicAddress(host, typeof(T)).AbsolutePath.Trim('/'), configure);
+            var endpointTopologySpecification = _configuration.CreateConfiguration();
+
+            var settings = new SubscriptionEndpointSettings(_configuration.PublishTopology.GetMessageTopology<T>().TopicDescription, subscriptionName);
+
+            var specification = new ServiceBusSubscriptionEndpointSpecification(host, settings, endpointTopologySpecification, _sendTransportProvider);
+
+            specification.ConnectConsumerConfigurationObserver(this);
+            specification.ConnectSagaConfigurationObserver(this);
+
+            AddReceiveEndpointSpecification(specification);
+
+            configure?.Invoke(specification);
         }
 
         public void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName,

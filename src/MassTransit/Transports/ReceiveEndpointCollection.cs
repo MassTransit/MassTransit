@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,6 @@ namespace MassTransit.Transports
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -27,17 +26,17 @@ namespace MassTransit.Transports
         IReceiveEndpointCollection
     {
         readonly ConsumeObservable _consumeObservers;
-        readonly Dictionary<string, IReceiveEndpoint> _endpoints;
+        readonly Dictionary<string, IReceiveEndpointControl> _endpoints;
         readonly Dictionary<string, HostReceiveEndpointHandle> _handles;
         readonly object _mutateLock = new object();
+        readonly PublishObservable _publishObservers;
         readonly ReceiveEndpointObservable _receiveEndpointObservers;
         readonly ReceiveObservable _receiveObservers;
-        readonly PublishObservable _publishObservers;
         readonly SendObservable _sendObservers;
 
         public ReceiveEndpointCollection()
         {
-            _endpoints = new Dictionary<string, IReceiveEndpoint>(StringComparer.OrdinalIgnoreCase);
+            _endpoints = new Dictionary<string, IReceiveEndpointControl>(StringComparer.OrdinalIgnoreCase);
             _handles = new Dictionary<string, HostReceiveEndpointHandle>(StringComparer.OrdinalIgnoreCase);
             _receiveObservers = new ReceiveObservable();
             _receiveEndpointObservers = new ReceiveEndpointObservable();
@@ -46,7 +45,7 @@ namespace MassTransit.Transports
             _sendObservers = new SendObservable();
         }
 
-        public void Add(string endpointName, IReceiveEndpoint endpoint)
+        public void Add(string endpointName, IReceiveEndpointControl endpoint)
         {
             if (endpoint == null)
                 throw new ArgumentNullException(nameof(endpoint));
@@ -64,9 +63,11 @@ namespace MassTransit.Transports
 
         public HostReceiveEndpointHandle[] StartEndpoints()
         {
-            KeyValuePair<string, IReceiveEndpoint>[] startable;
+            KeyValuePair<string, IReceiveEndpointControl>[] startable;
             lock (_mutateLock)
+            {
                 startable = _endpoints.Where(x => !_handles.ContainsKey(x.Key)).ToArray();
+            }
 
             return startable.Select(x => StartEndpoint(x.Key, x.Value)).ToArray();
         }
@@ -76,7 +77,7 @@ namespace MassTransit.Transports
             if (string.IsNullOrWhiteSpace(endpointName))
                 throw new ArgumentException($"The {nameof(endpointName)} must not be null or empty", nameof(endpointName));
 
-            IReceiveEndpoint endpoint;
+            IReceiveEndpointControl endpoint;
             lock (_mutateLock)
             {
                 if (!_endpoints.TryGetValue(endpointName, out endpoint))
@@ -91,14 +92,12 @@ namespace MassTransit.Transports
 
         public void Probe(ProbeContext context)
         {
-            foreach (KeyValuePair<string, IReceiveEndpoint> receiveEndpoint in _endpoints)
+            foreach (KeyValuePair<string, IReceiveEndpointControl> receiveEndpoint in _endpoints)
             {
                 var endpointScope = context.CreateScope("receiveEndpoint");
                 endpointScope.Add("name", receiveEndpoint.Key);
                 if (_handles.ContainsKey(receiveEndpoint.Key))
-                {
                     endpointScope.Add("started", true);
-                }
                 receiveEndpoint.Value.Probe(endpointScope);
             }
         }
@@ -133,7 +132,7 @@ namespace MassTransit.Transports
             return _sendObservers.Connect(observer);
         }
 
-        HostReceiveEndpointHandle StartEndpoint(string endpointName, IReceiveEndpoint endpoint)
+        HostReceiveEndpointHandle StartEndpoint(string endpointName, IReceiveEndpointControl endpoint)
         {
             try
             {
@@ -150,14 +149,18 @@ namespace MassTransit.Transports
                     receiveObserver, receiveEndpointObserver, consumeObserver, publishObserver, sendObserver);
 
                 lock (_mutateLock)
+                {
                     _handles.Add(endpointName, handle);
+                }
 
                 return handle;
             }
             catch
             {
                 lock (_mutateLock)
+                {
                     _endpoints.Remove(endpointName);
+                }
 
                 throw;
             }
@@ -196,7 +199,6 @@ namespace MassTransit.Transports
             }
 
             public IReceiveEndpoint ReceiveEndpoint { get; }
-
             public Task<ReceiveEndpointReady> Ready { get; }
 
             public async Task StopAsync(CancellationToken cancellationToken)
@@ -205,9 +207,7 @@ namespace MassTransit.Transports
                     return;
 
                 foreach (var handle in _handles)
-                {
                     handle.Disconnect();
-                }
 
                 await _endpointHandle.Stop(cancellationToken).ConfigureAwait(false);
 

@@ -65,8 +65,6 @@ namespace MassTransit
             IInMemoryReceiveEndpointConfigurator specification = null;
             configurator.ReceiveEndpoint(queueName, x =>
             {
-                x.TransportConcurrencyLimit = 1;
-
                 specification = x;
             });
 

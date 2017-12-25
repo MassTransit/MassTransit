@@ -66,10 +66,15 @@ namespace MassTransit.Transports
 
         public IEnumerable<THost> Hosts => _hosts;
 
+        IHost IBusHostCollection.GetHost(Uri address)
+        {
+            return GetHost(address);
+        }
+
         public THost GetHost(Uri address)
         {
             var host = _hosts.SingleOrDefault(x => x.Matches(address));
-            if(host == null)
+            if (host == null)
                 throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
 
             return host;
