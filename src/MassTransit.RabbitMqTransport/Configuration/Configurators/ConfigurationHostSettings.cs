@@ -31,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             var defaultOptions = new SslOption();
             SslProtocol = defaultOptions.Version;
-            AcceptablePolicyErrors = defaultOptions.AcceptablePolicyErrors;
+            AcceptablePolicyErrors = defaultOptions.AcceptablePolicyErrors | SslPolicyErrors.RemoteCertificateChainErrors;
 
             PublisherConfirmation = true;
 
