@@ -25,6 +25,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using Contexts;
     using GreenPipes;
     using Integration;
+    using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline.Observables;
     using RabbitMQ.Client;
@@ -105,8 +106,10 @@ namespace MassTransit.RabbitMqTransport.Transport
 
                         await _observers.PreSend(context).ConfigureAwait(false);
 
-                        await modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
-                            context.BasicProperties, body, context.AwaitAck).ConfigureAwait(false);
+                        var publishTask = modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
+                            context.BasicProperties, body, context.AwaitAck);
+                        
+                        await publishTask.WithCancellation(context.CancellationToken).ConfigureAwait(false);
 
                         context.LogSent();
 
@@ -114,10 +117,9 @@ namespace MassTransit.RabbitMqTransport.Transport
                     }
                     catch (Exception ex)
                     {
-                        await _observers.SendFault(context, ex).ConfigureAwait(false);
+                        context.LogFaulted(ex);
 
-                        if (_log.IsErrorEnabled)
-                            _log.Error("Send Fault: " + context.DestinationAddress, ex);
+                        await _observers.SendFault(context, ex).ConfigureAwait(false);
 
                         throw;
                     }
