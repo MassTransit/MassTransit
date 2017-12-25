@@ -64,5 +64,18 @@ namespace MassTransit.RabbitMqTransport
         /// Whether to use client certificate to authenticate the client. If false, client certificate is used only for SSL encryption.
         /// </summary>
         bool UseCertificateAsAuthenticationIdentity { get; set; }
+
+        /// <summary>
+        /// An optional client specified SSL certificate selection callback.  If this is not specified,
+        /// the first valid certificate found will be used.
+        /// </summary>
+        LocalCertificateSelectionCallback CertificateSelectionCallback { get; set; }
+
+        /// <summary>
+        /// An optional client specified SSL certificate validation callback.  If this is not specified,
+        /// the default callback will be used in conjunction with the <see cref="P:RabbitMQ.Client.SslOption.AcceptablePolicyErrors" /> property to
+        /// determine if the remote server certificate is valid.
+        /// </summary>
+        RemoteCertificateValidationCallback CertificateValidationCallback { get; set; }
     }
 }

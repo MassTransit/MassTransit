@@ -31,6 +31,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
             ServerName = settings.SslServerName;
             Protocol = settings.SslProtocol;
             _acceptablePolicyErrors = settings.AcceptablePolicyErrors;
+            CertificateSelectionCallback = settings.CertificateSelectionCallback;
+            CertificateValidationCallback = settings.CertificateValidationCallback;
         }
 
         public SslPolicyErrors AcceptablePolicyErrors => _acceptablePolicyErrors;
@@ -56,6 +58,10 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public SslProtocols Protocol { get; set; }
 
         public bool UseCertificateAsAuthenticationIdentity { get; set; }
+
+        public LocalCertificateSelectionCallback CertificateSelectionCallback { get; set; }
+
+        public RemoteCertificateValidationCallback CertificateValidationCallback { get; set; }
 
         /// <summary>
         /// Configures the rabbit mq client connection for Sll properties.

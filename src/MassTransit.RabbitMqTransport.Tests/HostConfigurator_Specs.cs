@@ -91,5 +91,37 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             configurator.Settings.AcceptablePolicyErrors.ShouldNotHaveFlag(SslPolicyErrors.RemoteCertificateChainErrors);
         }
+
+        [Test, Description("Custom client certificate selector should be used when set.")]
+        public void Should_use_custom_client_certificate_selector_when_set()
+        {
+            LocalCertificateSelectionCallback customSelector =
+                (sender, targetHost, localCertificates, remoteCertificate, acceptableIssuers)
+                    => null;
+
+            var configurator = new RabbitMqHostConfigurator(new Uri("rabbitmq://localhost"));
+            configurator.UseSsl(sslConfigurator =>
+            {
+                sslConfigurator.CertificateSelectionCallback = customSelector;
+            });
+
+            configurator.Settings.CertificateSelectionCallback.ShouldBeSameAs(customSelector);
+        }
+
+        [Test, Description("Custom remote certificate validator should be used when set.")]
+        public void Should_use_custom_remote_certificate_validator_when_set()
+        {
+            RemoteCertificateValidationCallback customValidator =
+                (sender, certificate, chain, sslPolicyErrors)
+                    => false;
+
+            var configurator = new RabbitMqHostConfigurator(new Uri("rabbitmq://localhost"));
+            configurator.UseSsl(sslConfigurator =>
+            {
+                sslConfigurator.CertificateValidationCallback = customValidator;
+            });
+
+            configurator.Settings.CertificateValidationCallback.ShouldBeSameAs(customValidator);
+        }
     }
 }

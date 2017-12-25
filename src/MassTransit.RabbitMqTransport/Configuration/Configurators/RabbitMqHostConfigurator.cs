@@ -61,6 +61,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
             _settings.AcceptablePolicyErrors = configurator.AcceptablePolicyErrors;
             _settings.SslServerName = configurator.ServerName ?? _settings.Host;
             _settings.SslProtocol = configurator.Protocol;
+            _settings.CertificateSelectionCallback = configurator.CertificateSelectionCallback;
+            _settings.CertificateValidationCallback = configurator.CertificateValidationCallback;
         }
 
         public void Heartbeat(ushort requestedHeartbeat)
