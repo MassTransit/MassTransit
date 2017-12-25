@@ -30,18 +30,22 @@ namespace MassTransit.RabbitMqTransport.Configurators
             UseCertificateAsAuthenticationIdentity = settings.UseClientCertificateAsAuthenticationIdentity;
             ServerName = settings.SslServerName;
             Protocol = settings.SslProtocol;
-            _acceptablePolicyErrors = settings.AcceptablePolicyErrors | SslPolicyErrors.RemoteCertificateChainErrors;
+            _acceptablePolicyErrors = settings.AcceptablePolicyErrors;
         }
 
         public SslPolicyErrors AcceptablePolicyErrors => _acceptablePolicyErrors;
-
-
-        public string CertificatePath { get; set; }
 
         public void AllowPolicyErrors(SslPolicyErrors policyErrors)
         {
             _acceptablePolicyErrors |= policyErrors;
         }
+
+        public void EnforcePolicyErrors(SslPolicyErrors policyErrors)
+        {
+            _acceptablePolicyErrors &= ~policyErrors;
+        }
+
+        public string CertificatePath { get; set; }
 
         public string CertificatePassphrase { get; set; }
 

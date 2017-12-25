@@ -23,21 +23,46 @@ namespace MassTransit.RabbitMqTransport
     /// </summary>
     public interface IRabbitMqSslConfigurator
     {
+        /// <summary>
+        ///The SSL protocol version.
+        /// </summary>
         SslProtocols Protocol { get; set; }
+
+        /// <summary>
+        /// The server canonical name. The name has to match CN in the server certificate.
+        /// </summary>
         string ServerName { get; set; }
+
         /// <summary>
         /// The path to a file containing a certificate to use for client authentication, not required if <see cref="Certificate"/> is populated
         /// </summary>
         string CertificatePath { get; set; }
+
         /// <summary>
         /// The password for the certificate file at <see cref="CertificatePath"/>
         /// </summary>
         string CertificatePassphrase { get; set; }
+
         /// <summary>
         /// A certficate instance to use for client authentication, if provided then <see cref="CertificatePath"/> and <see cref="CertificatePassphrase"/> are not required
         /// </summary>
         X509Certificate Certificate { get; set; }
+
+        /// <summary>
+        /// Disables SSL policy checks.
+        /// </summary>
+        /// <param name="policyErrors">The checks to disable.</param>
         void AllowPolicyErrors(SslPolicyErrors policyErrors);
+
+        /// <summary>
+        /// Enables SSL policy checks.
+        /// </summary>
+        /// <param name="policyErrors">The checks to enable.</param>
+        void EnforcePolicyErrors(SslPolicyErrors policyErrors);
+
+        /// <summary>
+        /// Whether to use client certificate to authenticate the client. If false, client certificate is used only for SSL encryption.
+        /// </summary>
         bool UseCertificateAsAuthenticationIdentity { get; set; }
     }
 }
