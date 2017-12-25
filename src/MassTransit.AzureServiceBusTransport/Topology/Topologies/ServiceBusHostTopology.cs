@@ -15,7 +15,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
     using System.Text;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
-    using NewIdFormatters;
     using Util;
 
 
@@ -23,7 +22,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         HostTopology,
         IServiceBusHostTopology
     {
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly IServiceBusPublishTopology _publishTopology;
         readonly IServiceBusSendTopology _sendTopology;
 
@@ -55,7 +53,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
                 else if (c == '_')
                     sb.Append(c);
             sb.AppendFormat("_{0}_", prefix);
-            sb.Append(NewId.Next().ToString(_formatter));
+            sb.Append(NewId.Next().ToString(Formatter));
 
             return sb.ToString();
         }

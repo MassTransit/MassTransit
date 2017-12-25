@@ -18,7 +18,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
     using System.Text;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
-    using NewIdFormatters;
     using Transports;
     using Util;
 
@@ -27,8 +26,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         HostTopology,
         IRabbitMqHostTopology
     {
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
-
         readonly IExchangeTypeSelector _exchangeTypeSelector;
         readonly Uri _hostAddress;
         readonly IMessageNameFormatter _messageNameFormatter;
@@ -141,7 +138,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
                 else if (c == '.' || c == '_' || c == '-' || c == ':')
                     sb.Append(c);
             sb.Append('-');
-            sb.Append(NewId.Next().ToString(_formatter));
+            sb.Append(NewId.Next().ToString(Formatter));
 
             return sb.ToString();
         }

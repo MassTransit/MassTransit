@@ -12,9 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology.Topologies
 {
+    using System.Text;
+    using NewIdFormatters;
+    using Util;
+
+
     public abstract class HostTopology :
         IHostTopology
     {
+        protected static readonly INewIdFormatter Formatter = new ZBase32Formatter();
         readonly IMessageTopology _messageTopology;
         readonly IPublishTopology _publishTopology;
         readonly ISendTopology _sendTopology;
@@ -26,7 +32,28 @@ namespace MassTransit.Topology.Topologies
             _publishTopology = publishTopology;
         }
 
-        public abstract string CreateTemporaryQueueName(string prefix);
+        public virtual string CreateTemporaryQueueName(string prefix)
+        {
+            var sb = new StringBuilder();
+
+            var host = HostMetadataCache.Host;
+
+            foreach (var c in host.MachineName)
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+                else if (c == '_')
+                    sb.Append(c);
+            sb.Append('_');
+            foreach (var c in host.ProcessName)
+                if (char.IsLetterOrDigit(c))
+                    sb.Append(c);
+                else if (c == '_')
+                    sb.Append(c);
+            sb.AppendFormat("_{0}_", prefix);
+            sb.Append(NewId.Next().ToString(Formatter));
+
+            return sb.ToString();
+        }
 
         public IPublishTopology PublishTopology => _publishTopology;
 

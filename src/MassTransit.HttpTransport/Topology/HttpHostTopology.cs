@@ -10,27 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.InMemory.Topology.Topologies
+namespace MassTransit.HttpTransport.Topology
 {
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
 
 
-    public class InMemoryHostTopology :
+    public class HttpHostTopology :
         HostTopology
     {
-        readonly IInMemoryPublishTopology _publishTopology;
-
-        public InMemoryHostTopology(IMessageTopology messageTopology, ISendTopology sendTopology, IInMemoryPublishTopology publishTopology)
+        public HttpHostTopology(IMessageTopology messageTopology, ISendTopology sendTopology, IPublishTopology publishTopology)
             : base(messageTopology, sendTopology, publishTopology)
         {
-            _publishTopology = publishTopology;
-        }
-
-        public new IInMemoryMessagePublishTopology<T> Publish<T>()
-            where T : class
-        {
-            return _publishTopology.GetMessageTopology<T>();
         }
     }
 }
