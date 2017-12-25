@@ -171,7 +171,9 @@ namespace MassTransit.RabbitMqTransport
             factory.Ssl.AcceptablePolicyErrors = settings.AcceptablePolicyErrors;
             factory.Ssl.ServerName = settings.SslServerName;
             factory.Ssl.Certs = settings.ClientCertificate == null ? null : new X509Certificate2Collection {settings.ClientCertificate};
-            
+            factory.Ssl.CertificateSelectionCallback = settings.CertificateSelectionCallback;
+            factory.Ssl.CertificateValidationCallback = settings.CertificateValidationCallback;
+
             if (string.IsNullOrWhiteSpace(factory.Ssl.ServerName))
                 factory.Ssl.AcceptablePolicyErrors |= SslPolicyErrors.RemoteCertificateNameMismatch;
 

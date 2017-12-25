@@ -56,6 +56,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public string ClientCertificatePassphrase { get; set; }
         public X509Certificate ClientCertificate { get; set; }
         public bool UseClientCertificateAsAuthenticationIdentity { get; set; }
+        public LocalCertificateSelectionCallback CertificateSelectionCallback { get; set; }
+        public RemoteCertificateValidationCallback CertificateValidationCallback { get; set; }
         public IMessageNameFormatter MessageNameFormatter { get; set; }
         public string[] ClusterMembers { get; set; }
         public IRabbitMqEndpointResolver HostNameSelector { get; set; }
