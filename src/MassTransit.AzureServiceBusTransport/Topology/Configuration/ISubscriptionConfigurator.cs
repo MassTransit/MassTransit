@@ -16,7 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
 
 
     public interface ISubscriptionConfigurator :
-        IEntityConfigurator
+        IEndpointEntityConfigurator
     {
         /// <summary>
         /// The path of the subscription's topic
@@ -29,39 +29,14 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
         string SubscriptionName { get; }
 
         /// <summary>
-        /// Move messages to the dead letter queue on expiration (time to live exceeded)
-        /// </summary>
-        bool? EnableDeadLetteringOnMessageExpiration { set; }
-
-        /// <summary>
-        /// Move messages to the dead letter queue on filter evaluation exception
-        /// </summary>
-        bool? EnableDeadLetteringOnFilterEvaluationExceptions { set; }
-
-        /// <summary>
-        /// Sets the path to the recipient to which the dead lettered message is forwarded.
-        /// </summary>
-        string ForwardDeadLetteredMessagesTo { set; }
-
-        /// <summary>
         /// Sets the path where messages are forwarded to
         /// </summary>
         string ForwardTo { set; }
 
         /// <summary>
-        /// Specify the lock duration for messages read from the queue
+        /// Move messages to the dead letter queue on filter evaluation exception
         /// </summary>
-        TimeSpan? LockDuration { set; }
-
-        /// <summary>
-        /// Sets the maximum delivery count. A message is automatically deadlettered after this number of deliveries.
-        /// </summary>
-        int? MaxDeliveryCount { set; }
-
-        /// <summary>
-        /// Sets the subscription in session mode, requiring a session for inbound messages
-        /// </summary>
-        bool? RequiresSession { set; }
+        bool? EnableDeadLetteringOnFilterEvaluationExceptions { set; }
     }
 
 

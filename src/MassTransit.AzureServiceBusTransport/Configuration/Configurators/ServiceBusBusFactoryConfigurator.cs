@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Configurators
+namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
 {
     using System;
     using Builders;
@@ -19,6 +19,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Settings;
     using Specifications;
     using Topology.Configuration;
+    using Topology.Configuration.Configurators;
     using Topology.Topologies;
     using Transport;
     using Transports;
@@ -43,8 +44,9 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             _sendTransportProvider = new ServiceBusSendTransportProvider(_hosts);
 
             var queueName = ((IServiceBusHost)null).GetTemporaryQueueName("bus");
-            _settings = new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName))
+            _settings = new ReceiveEndpointSettings(new QueueConfigurator(queueName))
             {
+                
                 QueueDescription =
                 {
                     EnableExpress = true,

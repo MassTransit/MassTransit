@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -29,22 +29,6 @@ namespace MassTransit.AzureServiceBusTransport.Settings
             MessageWaitTimeout = TimeSpan.FromDays(1);
         }
 
-        public abstract TimeSpan AutoDeleteOnIdle { get; set; }
-
-        public abstract TimeSpan DefaultMessageTimeToLive { get; set; }
-
-        public abstract bool EnableBatchedOperations { set; }
-
-        public abstract bool EnableDeadLetteringOnMessageExpiration { set; }
-
-        public abstract string ForwardDeadLetteredMessagesTo { set; }
-
-        public abstract int MaxDeliveryCount { get; set; }
-
-        public abstract string UserMetadata { set; }
-
-        public abstract bool RequiresSession { get; set; }
-
         public bool UsingBasicTier { get; private set; }
 
         public int MaxConcurrentCalls { get; set; }
@@ -52,15 +36,16 @@ namespace MassTransit.AzureServiceBusTransport.Settings
         public TimeSpan AutoRenewTimeout { get; set; }
         public TimeSpan MessageWaitTimeout { get; set; }
 
-        public abstract TimeSpan LockDuration { get; set; }
+        public abstract TimeSpan LockDuration { get; }
+        public abstract bool RequiresSession { get; }
 
         public abstract string Path { get; }
 
-        public Uri GetInputAddress(Uri serviceUri)
+        public Uri GetInputAddress(Uri serviceUri, string path)
         {
             var builder = new UriBuilder(serviceUri);
 
-            builder.Path += Path;
+            builder.Path += path;
             builder.Query += string.Join("&", GetQueryStringOptions());
 
             return builder.Uri;

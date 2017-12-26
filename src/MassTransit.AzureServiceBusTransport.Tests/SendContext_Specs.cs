@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Configuration;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework.Messages;

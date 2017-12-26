@@ -64,7 +64,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
         {
-            var inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri);
+            var inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri, _settings.Path);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting receive transport: {0}", inputAddress);
@@ -98,7 +98,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         async Task Receiver(IPipe<NamespaceContext> pipe, TaskSupervisor supervisor)
         {
-            var inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri);
+            var inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri, _settings.Path);
 
             try
             {

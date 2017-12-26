@@ -23,10 +23,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
         public TopicConfigurator(string topicPath, bool temporary)
             : base(topicPath)
         {
-            AutoDeleteOnIdle = TimeSpan.FromDays(427);
-            DefaultMessageTimeToLive = TimeSpan.FromDays(365 + 1);
-            EnableBatchedOperations = true;
-
             if (temporary)
             {
                 AutoDeleteOnIdle = TimeSpan.FromMinutes(5);

@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Configuration.Specifications
 {
-    using AzureServiceBusTransport.Specifications;
     using EndpointSpecifications;
     using MassTransit.Pipeline;
     using MassTransit.Topology;

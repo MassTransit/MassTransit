@@ -10,13 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Configurators
+namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
 {
     using System.Collections.Generic;
     using Builders;
     using GreenPipes;
     using MassTransit.Builders;
-    using Microsoft.ServiceBus.Messaging;
     using Pipeline;
     using Settings;
     using Specifications;
@@ -31,15 +30,15 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         readonly ISendTransportProvider _sendTransportProvider;
         readonly SubscriptionEndpointSettings _settings;
 
-        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, string subscriptionName, string topicName, IServiceBusEndpointConfiguration configuration,
-            ISendTransportProvider sendTransportProvider)
+        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, string subscriptionName, string topicName,
+            IServiceBusEndpointConfiguration configuration, ISendTransportProvider sendTransportProvider)
             : this(host, new SubscriptionEndpointSettings(topicName, subscriptionName), configuration, sendTransportProvider)
         {
         }
 
-        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, SubscriptionEndpointSettings settings, IServiceBusEndpointConfiguration configuration,
-            ISendTransportProvider sendTransportProvider)
-            : base(host, settings, configuration)
+        public ServiceBusSubscriptionEndpointSpecification(IServiceBusHost host, SubscriptionEndpointSettings settings,
+            IServiceBusEndpointConfiguration configuration, ISendTransportProvider sendTransportProvider)
+            : base(host, settings, settings.SubscriptionConfigurator, configuration)
         {
             _settings = settings;
             _configuration = configuration;
@@ -65,23 +64,6 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
                 x.UseFilter(new ConfigureTopologyFilter<SubscriptionSettings>(_settings, receiveEndpointTopology.TopologyLayout, false));
                 x.UseFilter(new PrepareSubscriptionClientFilter(_settings));
             });
-        }
-
-        protected override ReceiveEndpointSettings GetReceiveEndpointSettings(string queueName)
-        {
-            var description = new QueueDescription(queueName)
-            {
-                AutoDeleteOnIdle = _settings.AutoDeleteOnIdle,
-                DefaultMessageTimeToLive = _settings.DefaultMessageTimeToLive,
-                MaxDeliveryCount = _settings.MaxDeliveryCount,
-                RequiresSession = _settings.RequiresSession
-            };
-
-            if (_settings.UsingBasicTier == false)
-                description.AutoDeleteOnIdle = _settings.AutoDeleteOnIdle;
-
-
-            return new ReceiveEndpointSettings(description);
         }
     }
 }

@@ -39,7 +39,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
             var queuePath = context.GetQueuePath(_settings.QueueDescription);
 
-            var inputAddress = _settings.GetInputAddress(context.ServiceAddress);
+            var inputAddress = _settings.GetInputAddress(context.ServiceAddress, _settings.Path);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating queue client for {0}", inputAddress);

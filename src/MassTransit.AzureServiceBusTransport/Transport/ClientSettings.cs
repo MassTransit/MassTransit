@@ -60,6 +60,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         /// <summary>
         /// Get the input address for the client on the specified host
         /// </summary>
-        Uri GetInputAddress(Uri serviceUri);
+        Uri GetInputAddress(Uri serviceUri, string path);
     }
 }

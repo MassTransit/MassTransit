@@ -15,27 +15,32 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
     using System;
 
 
-    public interface IEntityConfigurator
+    public interface IEndpointEntityConfigurator :
+        IEntityConfigurator
     {
         /// <summary>
-        /// True if the queue should be deleted if idle
+        /// Specify the lock duration for messages read from the queue
         /// </summary>
-        TimeSpan? AutoDeleteOnIdle { set; }
+        TimeSpan? LockDuration { set; }
 
         /// <summary>
-        /// Set the default message time to live in the queue
+        /// Sets the maximum delivery count. A message is automatically deadlettered after this number of deliveries.
         /// </summary>
-        TimeSpan? DefaultMessageTimeToLive { set; }
+        int? MaxDeliveryCount { set; }
 
         /// <summary>
-        /// Sets a value that indicates whether server-side batched operations are enabled
+        /// Sets the subscription in session mode, requiring a session for inbound messages
         /// </summary>
-        bool? EnableBatchedOperations { set; }
+        bool? RequiresSession { set; }
 
         /// <summary>
-        /// Sets the user metadata.
+        /// Move messages to the dead letter queue on expiration (time to live exceeded)
         /// </summary>
-        string UserMetadata { set; }
+        bool? EnableDeadLetteringOnMessageExpiration { set; }
 
+        /// <summary>
+        /// Sets the path to the recipient to which the dead lettered message is forwarded.
+        /// </summary>
+        string ForwardDeadLetteredMessagesTo { set; }
     }
 }

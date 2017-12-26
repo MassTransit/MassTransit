@@ -10,17 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Configurators
+namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
 {
     using System;
     using System.Collections.Generic;
     using Builders;
     using GreenPipes;
     using MassTransit.Builders;
-    using Microsoft.ServiceBus.Messaging;
     using Pipeline;
     using Settings;
     using Specifications;
+    using Topology.Configuration.Configurators;
     using Transport;
 
 
@@ -35,13 +35,13 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, string queueName, IServiceBusEndpointConfiguration configuration,
             ISendTransportProvider sendTransportProvider)
-            : this(host, new ReceiveEndpointSettings(Defaults.CreateQueueDescription(queueName)), configuration, sendTransportProvider)
+            : this(host, new ReceiveEndpointSettings(new QueueConfigurator(queueName)), configuration, sendTransportProvider)
         {
         }
 
         public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, ReceiveEndpointSettings settings, IServiceBusEndpointConfiguration configuration,
             ISendTransportProvider sendTransportProvider)
-            : base(host, settings, configuration)
+            : base(host, settings, settings.QueueConfigurator, configuration)
         {
             _settings = settings;
             _configuration = configuration;
@@ -60,44 +60,44 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             {
                 _settings.QueueDescription.EnableExpress = value;
 
-                Changed("EnableExpress");
+                Changed(nameof(EnableExpress));
             }
         }
 
         public TimeSpan DuplicateDetectionHistoryTimeWindow
         {
-            set => _settings.DuplicateDetectionHistoryTimeWindow = value;
+            set => _settings.QueueConfigurator.DuplicateDetectionHistoryTimeWindow = value;
         }
 
         public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
         {
-            _settings.RequiresDuplicateDetection = true;
-            _settings.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
+            _settings.QueueConfigurator.RequiresDuplicateDetection = true;
+            _settings.QueueConfigurator.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
         }
 
         public bool EnablePartitioning
         {
-            set => _settings.EnablePartitioning = value;
+            set => _settings.QueueConfigurator.EnablePartitioning = value;
         }
 
         public bool IsAnonymousAccessible
         {
-            set => _settings.IsAnonymousAccessible = value;
+            set => _settings.QueueConfigurator.IsAnonymousAccessible = value;
         }
 
         public int MaxSizeInMegabytes
         {
-            set => _settings.MaxSizeInMegabytes = value;
+            set => _settings.QueueConfigurator.MaxSizeInMegabytes = value;
         }
 
         public bool RequiresDuplicateDetection
         {
-            set => _settings.RequiresDuplicateDetection = value;
+            set => _settings.QueueConfigurator.RequiresDuplicateDetection = value;
         }
 
         public bool SupportOrdering
         {
-            set => _settings.SupportOrdering = value;
+            set => _settings.QueueConfigurator.SupportOrdering = value;
         }
 
         public bool RemoveSubscriptions
@@ -143,25 +143,6 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
                 x.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointTopology.TopologyLayout, _settings.RemoveSubscriptions));
                 x.UseFilter(new PrepareQueueClientFilter(_settings));
             });
-        }
-
-        protected override ReceiveEndpointSettings GetReceiveEndpointSettings(string queueName)
-        {
-            var description = new QueueDescription(queueName)
-            {
-                DefaultMessageTimeToLive = _settings.QueueDescription.DefaultMessageTimeToLive,
-                MaxDeliveryCount = _settings.QueueDescription.MaxDeliveryCount,
-                RequiresSession = _settings.QueueDescription.RequiresSession,
-                EnablePartitioning = _settings.QueueDescription.EnablePartitioning
-            };
-
-            if (_settings.UsingBasicTier == false)
-            {
-                description.AutoDeleteOnIdle = _settings.QueueDescription.AutoDeleteOnIdle;
-                description.EnableExpress = _settings.QueueDescription.EnableExpress;
-            }
-
-            return new ReceiveEndpointSettings(description);
         }
     }
 }

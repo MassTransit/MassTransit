@@ -14,13 +14,13 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Threading;
+    using Configuration;
+    using Configuration.Configurators;
     using Configuration.Specifications;
-    using Configurators;
     using MassTransit.Topology;
     using MassTransit.Topology.Configuration;
     using MassTransit.Topology.EntityNameFormatters;
     using MassTransit.Topology.Topologies;
-    using Specifications;
 
 
     public static class AzureBusFactory

@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Configuration;
     using GreenPipes;
     using Microsoft.ServiceBus;
     using NUnit.Framework;
@@ -42,8 +43,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         public Sending_a_message_to_a_basic_endpoint()
-            : base(
-                "input_queue", ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-basic", "MassTransit.AzureServiceBusTransport.Tests"),
+            : base("input_queue", ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-basic", "MassTransit.AzureServiceBusTransport.Tests"),
                 new BasicAzureServiceBusAccountSettings())
         {
         }

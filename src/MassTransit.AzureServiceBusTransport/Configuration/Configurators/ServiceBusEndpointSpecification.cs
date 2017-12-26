@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Configurators
+namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
 {
     using System;
     using System.Collections.Generic;
@@ -22,6 +22,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Settings;
     using Specifications;
     using Topology;
+    using Topology.Configuration;
     using Transport;
     using Transports;
 
@@ -32,14 +33,16 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         IReceiveEndpointSpecification<IBusBuilder>
     {
         readonly BaseClientSettings _settings;
+        readonly IEndpointEntityConfigurator _configurator;
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
 
-        protected ServiceBusEndpointSpecification(IServiceBusHost host, BaseClientSettings settings, IServiceBusEndpointConfiguration configuration)
+        protected ServiceBusEndpointSpecification(IServiceBusHost host, BaseClientSettings settings, IEndpointEntityConfigurator configurator, IServiceBusEndpointConfiguration configuration)
             : base(configuration)
         {
             Host = host;
             _settings = settings;
+            _configurator = configurator;
         }
 
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
@@ -67,53 +70,49 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public int PrefetchCount
         {
-            set { _settings.PrefetchCount = value; }
-        }
+            set => _settings.PrefetchCount = value; }
 
         public TimeSpan AutoDeleteOnIdle
         {
-            set { _settings.AutoDeleteOnIdle = value; }
+            set
+            {
+                _configurator.AutoDeleteOnIdle = value;
+                
+                Changed(nameof(AutoDeleteOnIdle));
+            }
         }
 
         public TimeSpan DefaultMessageTimeToLive
         {
-            set { _settings.DefaultMessageTimeToLive = value; }
-        }
+            set => _configurator.DefaultMessageTimeToLive = value; }
 
         public bool EnableBatchedOperations
         {
-            set { _settings.EnableBatchedOperations = value; }
-        }
+            set => _configurator.EnableBatchedOperations = value; }
 
         public bool EnableDeadLetteringOnMessageExpiration
         {
-            set { _settings.EnableDeadLetteringOnMessageExpiration = value; }
-        }
+            set => _configurator.EnableDeadLetteringOnMessageExpiration = value; }
 
         public string ForwardDeadLetteredMessagesTo
         {
-            set { _settings.ForwardDeadLetteredMessagesTo = value; }
-        }
+            set => _configurator.ForwardDeadLetteredMessagesTo = value; }
 
         public TimeSpan LockDuration
         {
-            set { _settings.LockDuration = value; }
-        }
+            set => _configurator.LockDuration = value; }
 
         public int MaxDeliveryCount
         {
-            set { _settings.MaxDeliveryCount = value; }
-        }
+            set => _configurator.MaxDeliveryCount = value; }
 
         public bool RequiresSession
         {
-            set { _settings.RequiresSession = value; }
-        }
+            set => _configurator.RequiresSession = value; }
 
         public string UserMetadata
         {
-            set { _settings.UserMetadata = value; }
-        }
+            set => _configurator.UserMetadata = value; }
 
         public virtual void SelectBasicTier()
         {
@@ -147,27 +146,21 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         protected override Uri GetInputAddress()
         {
-            return _settings.GetInputAddress(Host.Settings.ServiceUri);
+            return _settings.GetInputAddress(Host.Settings.ServiceUri, _settings.Path);
         }
 
         protected override Uri GetErrorAddress()
         {
             var errorQueueName = _settings.Path + "_error";
 
-            var endpointSettings = GetReceiveEndpointSettings(errorQueueName);
-
-            return endpointSettings.GetInputAddress(Host.Settings.ServiceUri);
+            return _settings.GetInputAddress(Host.Settings.ServiceUri, errorQueueName);
         }
 
         protected override Uri GetDeadLetterAddress()
         {
             var skippedQueueName = _settings.Path + "_skipped";
 
-            var endpointSettings = GetReceiveEndpointSettings(skippedQueueName);
-
-            return endpointSettings.GetInputAddress(Host.Settings.ServiceUri);
+            return _settings.GetInputAddress(Host.Settings.ServiceUri, skippedQueueName);
         }
-
-        protected abstract ReceiveEndpointSettings GetReceiveEndpointSettings(string queueName);
     }
 }

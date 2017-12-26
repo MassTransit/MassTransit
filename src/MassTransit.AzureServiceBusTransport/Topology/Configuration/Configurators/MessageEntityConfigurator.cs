@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurators
 {
     using System;
+    using AzureServiceBusTransport.Configuration;
 
 
     public abstract class MessageEntityConfigurator :
@@ -22,6 +23,10 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
         protected MessageEntityConfigurator(string path)
         {
             Path = path;
+
+            AutoDeleteOnIdle = Defaults.AutoDeleteOnIdle;
+            DefaultMessageTimeToLive = Defaults.DefaultMessageTimeToLive;
+            EnableBatchedOperations = true;
         }
 
         public string Path { get; }

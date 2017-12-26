@@ -37,7 +37,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         async Task IFilter<NamespaceContext>.Send(NamespaceContext context, IPipe<NamespaceContext> next)
         {
-            var inputAddress = _settings.GetInputAddress(context.ServiceAddress);
+            var inputAddress = _settings.GetInputAddress(context.ServiceAddress, _settings.Path);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating subscription client for {0}", inputAddress);

@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,10 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 {
     using System;
     using System.Collections.Generic;
+    using Configuration;
     using Microsoft.ServiceBus.Messaging;
+    using Topology.Configuration;
+    using Topology.Configuration.Configurators;
     using Transport;
 
 
@@ -22,91 +25,47 @@ namespace MassTransit.AzureServiceBusTransport.Settings
         BaseClientSettings,
         SubscriptionSettings
     {
-        public SubscriptionEndpointSettings(string topicName, string subscriptionName)
-        {
-            TopicDescription = Defaults.CreateTopicDescription(topicName);
-            SubscriptionDescription = Defaults.CreateSubscriptionDescription(topicName, subscriptionName);
-            Path = string.Join("/", SubscriptionDescription.TopicPath, SubscriptionDescription.Name);
+        readonly SubscriptionConfigurator _subscriptionConfigurator;
+        readonly TopicDescription _topicDescription;
 
-            MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
-            PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
+        public SubscriptionEndpointSettings(string topicName, string subscriptionName)
+            : this(Defaults.CreateTopicDescription(topicName), subscriptionName)
+        {
         }
-        
+
         public SubscriptionEndpointSettings(TopicDescription topicDescription, string subscriptionName)
         {
-            TopicDescription = topicDescription;
-            SubscriptionDescription = Defaults.CreateSubscriptionDescription(topicDescription.Path, subscriptionName);
-            Path = string.Join("/", SubscriptionDescription.TopicPath, SubscriptionDescription.Name);
+            _topicDescription = topicDescription;
+            _subscriptionConfigurator = new SubscriptionConfigurator(topicDescription.Path, subscriptionName);
+
+            Path = string.Join("/", _subscriptionConfigurator.TopicPath, _subscriptionConfigurator.SubscriptionName);
 
             MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
             PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
         }
 
-        public override TimeSpan AutoDeleteOnIdle
-        {
-            get { return SubscriptionDescription.AutoDeleteOnIdle; }
-            set { SubscriptionDescription.AutoDeleteOnIdle = value; }
-        }
+        TopicDescription SubscriptionSettings.TopicDescription => _topicDescription;
+        SubscriptionDescription SubscriptionSettings.SubscriptionDescription => _subscriptionConfigurator.GetSubscriptionDescription();
 
-        public override TimeSpan DefaultMessageTimeToLive
-        {
-            get { return SubscriptionDescription.DefaultMessageTimeToLive; }
-            set { SubscriptionDescription.DefaultMessageTimeToLive = value; }
-        }
-
-        public override bool EnableBatchedOperations
-        {
-            set { SubscriptionDescription.EnableBatchedOperations = value; }
-        }
-
-        public override bool EnableDeadLetteringOnMessageExpiration
-        {
-            set { SubscriptionDescription.EnableDeadLetteringOnMessageExpiration = value; }
-        }
-
-        public override string ForwardDeadLetteredMessagesTo
-        {
-            set { SubscriptionDescription.ForwardDeadLetteredMessagesTo = value; }
-        }
-
-        public override int MaxDeliveryCount
-        {
-            get { return SubscriptionDescription.MaxDeliveryCount; }
-            set { SubscriptionDescription.MaxDeliveryCount = value; }
-        }
-
-        public override bool RequiresSession
-        {
-            get { return SubscriptionDescription.RequiresSession; }
-            set { SubscriptionDescription.RequiresSession = value; }
-        }
-
-        public override string UserMetadata
-        {
-            set { SubscriptionDescription.UserMetadata = value; }
-        }
-
-        public TopicDescription TopicDescription { get; }
-
-        public SubscriptionDescription SubscriptionDescription { get; }
-
-        public override TimeSpan LockDuration
-        {
-            get { return SubscriptionDescription.LockDuration; }
-            set { SubscriptionDescription.LockDuration = value; }
-        }
+        public override TimeSpan LockDuration => _subscriptionConfigurator.LockDuration ?? Defaults.LockDuration;
 
         public override string Path { get; }
 
+        public override bool RequiresSession => _subscriptionConfigurator.RequiresSession ?? false;
+
         protected override IEnumerable<string> GetQueryStringOptions()
         {
-            if (SubscriptionDescription.AutoDeleteOnIdle > TimeSpan.Zero && SubscriptionDescription.AutoDeleteOnIdle != Defaults.AutoDeleteOnIdle)
-                yield return $"autodelete={SubscriptionDescription.AutoDeleteOnIdle.TotalSeconds}";
+            if (_subscriptionConfigurator.AutoDeleteOnIdle.HasValue && _subscriptionConfigurator.AutoDeleteOnIdle.Value > TimeSpan.Zero
+                && _subscriptionConfigurator.AutoDeleteOnIdle.Value != Defaults.AutoDeleteOnIdle)
+                yield return $"autodelete={_subscriptionConfigurator.AutoDeleteOnIdle.Value.TotalSeconds}";
         }
 
         public override void SelectBasicTier()
         {
-            
+            _subscriptionConfigurator.AutoDeleteOnIdle = default(TimeSpan?);
+            _subscriptionConfigurator.DefaultMessageTimeToLive = Defaults.BasicMessageTimeToLive;
         }
+
+        public ISubscriptionConfigurator SubscriptionConfigurator => _subscriptionConfigurator;
     }
 }

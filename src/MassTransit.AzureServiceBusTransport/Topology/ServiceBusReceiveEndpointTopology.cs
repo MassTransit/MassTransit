@@ -13,7 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Topology
 {
     using System;
-    using AzureServiceBusTransport.Specifications;
+    using AzureServiceBusTransport.Configuration.Specifications;
     using MassTransit.Pipeline;
     using MassTransit.Topology;
     using Transport;

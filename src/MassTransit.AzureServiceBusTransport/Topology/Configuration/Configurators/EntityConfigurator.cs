@@ -13,11 +13,17 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurators
 {
     using System;
+    using AzureServiceBusTransport.Configuration;
 
 
     public abstract class EntityConfigurator :
         IEntityConfigurator
     {
+        protected EntityConfigurator()
+        {
+            DefaultMessageTimeToLive = Defaults.DefaultMessageTimeToLive;
+        }
+
         public TimeSpan? AutoDeleteOnIdle { get; set; }
 
         public TimeSpan? DefaultMessageTimeToLive { get; set; }

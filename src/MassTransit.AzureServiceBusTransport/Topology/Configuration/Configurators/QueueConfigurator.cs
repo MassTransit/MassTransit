@@ -23,6 +23,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
         public QueueConfigurator(string path)
             : base(path)
         {
+            EnableDeadLetteringOnMessageExpiration = true;
+            LockDuration = TimeSpan.FromMinutes(5);
+            MaxDeliveryCount = 5;
         }
 
         public bool? EnableDeadLetteringOnMessageExpiration { get; set; }

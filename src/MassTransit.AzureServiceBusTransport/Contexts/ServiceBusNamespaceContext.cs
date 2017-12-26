@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 {
     using System;
     using System.Threading.Tasks;
+    using Configuration;
     using GreenPipes;
     using GreenPipes.Payloads;
     using Microsoft.ServiceBus;

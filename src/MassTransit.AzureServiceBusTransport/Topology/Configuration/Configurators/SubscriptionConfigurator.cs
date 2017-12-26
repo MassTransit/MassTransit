@@ -12,12 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurators
 {
-    using System;
     using Microsoft.ServiceBus.Messaging;
 
 
     public class SubscriptionConfigurator :
-        EntityConfigurator,
+        EndpointEntityConfigurator,
         ISubscriptionConfigurator
     {
         public SubscriptionConfigurator(string topicPath, string subscriptionName)
@@ -26,19 +25,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
             SubscriptionName = subscriptionName;
         }
 
-        public bool? EnableDeadLetteringOnMessageExpiration { private get; set; }
-
         public bool? EnableDeadLetteringOnFilterEvaluationExceptions { private get; set; }
 
-        public string ForwardDeadLetteredMessagesTo { private get; set; }
-
         public string ForwardTo { private get; set; }
-
-        public TimeSpan? LockDuration { private get; set; }
-
-        public int? MaxDeliveryCount { private get; set; }
-
-        public bool? RequiresSession { private get; set; }
 
         public string TopicPath { get; }
 

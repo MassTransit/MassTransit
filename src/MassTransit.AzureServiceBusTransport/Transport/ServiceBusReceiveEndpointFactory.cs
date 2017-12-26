@@ -13,10 +13,11 @@
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
-    using Builders;
-    using Configurators;
+    using Configuration;
+    using Configuration.Builders;
+    using Configuration.Configurators;
+    using Configuration.Specifications;
     using MassTransit.Configurators;
-    using Specifications;
 
 
     public class ServiceBusReceiveEndpointFactory :
