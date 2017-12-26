@@ -17,28 +17,40 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using GreenPipes;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
+    using MassTransit.Pipeline.Pipes;
+    using Microsoft.ServiceBus.Messaging;
+    using Policies;
     using Topology;
     using Transports;
     using Util;
 
 
     public class ServiceBusPublishEndpointProvider :
-        IPublishEndpointProvider
+        IPublishEndpointProvider,
+        ISendObserverConnector
     {
+        readonly ISendEndpointCache _endpointCache;
         readonly IServiceBusHost _host;
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
         readonly IServiceBusPublishTopology _publishTopology;
-        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly SendObservable _sendObservable;
+        readonly IMessageSerializer _serializer;
+        readonly Uri _sourceAddress;
 
         public ServiceBusPublishEndpointProvider(IServiceBusHost host, ISendEndpointProvider sendEndpointProvider, IPublishPipe publishPipe,
-            IServiceBusPublishTopology publishTopology)
+            IServiceBusPublishTopology publishTopology, IMessageSerializer serializer, Uri sourceAddress)
         {
             _host = host;
-            _sendEndpointProvider = sendEndpointProvider;
             _publishPipe = publishPipe;
             _publishTopology = publishTopology;
+            _serializer = serializer;
+            _sourceAddress = sourceAddress;
+
+            _endpointCache = new SendEndpointCache(sendEndpointProvider);
+
             _publishObservable = new PublishObservable();
+            _sendObservable = new SendObservable();
         }
 
         public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId, Guid? conversationId)
@@ -53,12 +65,37 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             if (!messageTopology.TryGetPublishAddress(_host.Address, out var publishAddress))
                 throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
 
-            return _sendEndpointProvider.GetSendEndpoint(publishAddress);
+            return _endpointCache.GetSendEndpoint(publishAddress, x => CreateSendEndpoint(x, messageTopology.TopicDescription));
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return _publishObservable.Connect(observer);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendObservable.Connect(observer);
+        }
+
+        Task<ISendEndpoint> CreateSendEndpoint(Uri address, TopicDescription topicDescription)
+        {
+            return _host.RetryPolicy.Retry<ISendEndpoint>(async () =>
+            {
+                var topic = await _host.RootNamespaceManager.CreateTopicSafeAsync(topicDescription).ConfigureAwait(false);
+
+                var messagingFactory = await _host.MessagingFactory.ConfigureAwait(false);
+
+                var topicClient = messagingFactory.CreateTopicClient(topic.Path);
+
+                var client = new TopicSendClient(topicClient);
+
+                var sendTransport = new ServiceBusSendTransport(client, _host.Supervisor);
+
+                sendTransport.ConnectSendObserver(_sendObservable);
+
+                return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, SendPipe.Empty);
+            });
         }
     }
 }

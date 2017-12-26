@@ -203,7 +203,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 ConsumeContext<GotA> consumeContext = await _receivedGotA;
 
-                consumeContext.SourceAddress.ShouldBe(new Uri("rabbitmq://[::1]/test/input_queue"));
+                consumeContext.SourceAddress.ShouldBe(new Uri("rabbitmq://localhost/test/input_queue"));
             }
 
             Task<ConsumeContext<A>> _receivedA;

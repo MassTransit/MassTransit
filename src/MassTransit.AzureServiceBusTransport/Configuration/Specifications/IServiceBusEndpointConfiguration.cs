@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport.Specifications
 {
     using EndpointSpecifications;
     using Topology;
+    using Topology.Configuration;
 
 
     public interface IServiceBusEndpointConfiguration :

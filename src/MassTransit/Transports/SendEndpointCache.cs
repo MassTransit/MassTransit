@@ -19,11 +19,27 @@ namespace MassTransit.Transports
     using Util.Caching;
 
 
+    public delegate Task<ISendEndpoint> SendEndpointFactory(Uri address);
+
+
+    public interface ISendEndpointCache
+    {
+        /// <summary>
+        /// Return a SendEndpoint from the cache, using the factory to create it if it doesn't exist in the cache.
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="factory"></param>
+        /// <returns></returns>
+        Task<ISendEndpoint> GetSendEndpoint(Uri address, SendEndpointFactory factory);
+    }
+
+
     /// <summary>
     /// Caches SendEndpoint instances by address (ignoring the query string entirely, case insensitive)
     /// </summary>
     public class SendEndpointCache :
-        ISendEndpointProvider
+        ISendEndpointProvider,
+        ISendEndpointCache
     {
         static readonly ILog _log = Logger.Get<SendEndpointCache>();
 
@@ -36,6 +52,13 @@ namespace MassTransit.Transports
 
             var cache = new GreenCache<CachedSendEndpoint<Uri>>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
             _index = cache.AddIndex("address", x => x.Key);
+        }
+
+        public async Task<ISendEndpoint> GetSendEndpoint(Uri address, SendEndpointFactory factory)
+        {
+            CachedSendEndpoint<Uri> sendEndpoint = await _index.Get(address, x => GetSendEndpointFromFactory(x, factory)).ConfigureAwait(false);
+
+            return sendEndpoint;
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
@@ -56,6 +79,16 @@ namespace MassTransit.Transports
                 _log.DebugFormat("GetSendEndpoint: {0}", address);
 
             var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
+
+            return new CachedSendEndpoint<Uri>(address, sendEndpoint);
+        }
+
+        async Task<CachedSendEndpoint<Uri>> GetSendEndpointFromFactory(Uri address, SendEndpointFactory factory)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("GetSendEndpoint (factory): {0}", address);
+
+            var sendEndpoint = await factory(address).ConfigureAwait(false);
 
             return new CachedSendEndpoint<Uri>(address, sendEndpoint);
         }

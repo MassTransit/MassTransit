@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Topology.Configurators
+namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurators
 {
     using System;
     using Microsoft.ServiceBus.Messaging;
@@ -23,6 +23,10 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configurators
         public TopicConfigurator(string topicPath, bool temporary)
             : base(topicPath)
         {
+            AutoDeleteOnIdle = TimeSpan.FromDays(427);
+            DefaultMessageTimeToLive = TimeSpan.FromDays(365 + 1);
+            EnableBatchedOperations = true;
+
             if (temporary)
             {
                 AutoDeleteOnIdle = TimeSpan.FromMinutes(5);

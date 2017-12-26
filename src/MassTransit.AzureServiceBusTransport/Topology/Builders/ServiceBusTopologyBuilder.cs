@@ -71,6 +71,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
 
             var queueEntity = Queues.Get(queue);
 
+            if (topicEntity.TopicDescription.EnablePartitioning)
+                queueEntity.QueueDescription.EnablePartitioning = true;
+
             var binding = new QueueSubscriptionEntity(GetNextId(), GetNextId(), topicEntity, queueEntity, subscriptionDescription);
 
             return QueueSubscriptions.GetOrAdd(binding);
@@ -81,6 +84,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
             var sourceEntity = Topics.Get(source);
 
             var destinationEntity = Topics.Get(destination);
+
+            if (sourceEntity.TopicDescription.EnablePartitioning)
+                destinationEntity.TopicDescription.EnablePartitioning = true;
 
             var subscriptionEntity = new TopicSubscriptionEntity(GetNextId(), GetNextId(), sourceEntity, destinationEntity, subscriptionDescription);
 

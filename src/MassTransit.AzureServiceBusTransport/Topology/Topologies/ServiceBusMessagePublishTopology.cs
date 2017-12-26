@@ -13,6 +13,8 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 {
     using System;
+    using Configuration;
+    using Configuration.Configurators;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Microsoft.ServiceBus.Messaging;
@@ -25,6 +27,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         where TMessage : class
     {
         readonly IMessageTopology<TMessage> _messageTopology;
+        readonly TopicConfigurator _topicConfigurator;
         readonly Lazy<TopicDescription> _topicDescription;
 
         public ServiceBusMessagePublishTopology(IMessageTopology<TMessage> messageTopology)
@@ -32,6 +35,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             _messageTopology = messageTopology;
 
             _topicDescription = new Lazy<TopicDescription>(GetTopicDescription);
+
+            _topicConfigurator = new TopicConfigurator(messageTopology.EntityName, TypeMetadataCache<TMessage>.IsTemporaryMessageType);
         }
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
@@ -49,13 +54,76 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
         public TopicDescription TopicDescription => _topicDescription.Value;
 
+        string IMessageEntityConfigurator.Path => _topicConfigurator.Path;
+
+        TimeSpan? IMessageEntityConfigurator.DuplicateDetectionHistoryTimeWindow
+        {
+            set => _topicConfigurator.DuplicateDetectionHistoryTimeWindow = value;
+        }
+
+        bool? IMessageEntityConfigurator.EnableExpress
+        {
+            set => _topicConfigurator.EnableExpress = value;
+        }
+
+        bool? IMessageEntityConfigurator.EnablePartitioning
+        {
+            set => _topicConfigurator.EnablePartitioning = value;
+        }
+
+        bool? IMessageEntityConfigurator.IsAnonymousAccessible
+        {
+            set => _topicConfigurator.IsAnonymousAccessible = value;
+        }
+
+        long? IMessageEntityConfigurator.MaxSizeInMegabytes
+        {
+            set => _topicConfigurator.MaxSizeInMegabytes = value;
+        }
+
+        bool? IMessageEntityConfigurator.RequiresDuplicateDetection
+        {
+            set => _topicConfigurator.RequiresDuplicateDetection = value;
+        }
+
+        bool? IMessageEntityConfigurator.SupportOrdering
+        {
+            set => _topicConfigurator.SupportOrdering = value;
+        }
+
+        void IMessageEntityConfigurator.EnableDuplicateDetection(TimeSpan historyTimeWindow)
+        {
+            _topicConfigurator.EnableDuplicateDetection(historyTimeWindow);
+        }
+
+        TimeSpan? IEntityConfigurator.AutoDeleteOnIdle
+        {
+            set => _topicConfigurator.AutoDeleteOnIdle = value;
+        }
+
+        TimeSpan? IEntityConfigurator.DefaultMessageTimeToLive
+        {
+            set => _topicConfigurator.DefaultMessageTimeToLive = value;
+        }
+
+        bool? IEntityConfigurator.EnableBatchedOperations
+        {
+            set => _topicConfigurator.EnableBatchedOperations = value;
+        }
+
+        string IEntityConfigurator.UserMetadata
+        {
+            set => _topicConfigurator.UserMetadata = value;
+        }
+
+        bool? ITopicConfigurator.EnableFilteringMessagesBeforePublishing
+        {
+            set => _topicConfigurator.EnableFilteringMessagesBeforePublishing = value;
+        }
+
         TopicDescription GetTopicDescription()
         {
-            var topicDescription = Defaults.CreateTopicDescription(_messageTopology.EntityName);
-            if (TypeMetadataCache<TMessage>.IsTemporaryMessageType)
-                topicDescription.EnableExpress = true;
-
-            return topicDescription;
+            return _topicConfigurator.GetTopicDescription();
         }
     }
 }

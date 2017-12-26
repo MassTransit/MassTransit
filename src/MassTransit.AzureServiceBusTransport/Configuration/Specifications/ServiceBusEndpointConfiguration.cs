@@ -10,44 +10,53 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Specifications
+namespace MassTransit.AzureServiceBusTransport.Configuration.Specifications
 {
+    using AzureServiceBusTransport.Specifications;
     using EndpointSpecifications;
     using MassTransit.Pipeline;
     using MassTransit.Topology;
     using MassTransit.Topology.Configuration;
     using MassTransit.Topology.Topologies;
-    using Topology;
+    using Topology.Configuration;
     using Topology.Topologies;
 
 
     public class ServiceBusEndpointConfiguration :
-        EndpointConfiguration<IServiceBusEndpointConfiguration, IServiceBusConsumeTopologyConfigurator, IServiceBusSendTopologyConfigurator, IServiceBusPublishTopologyConfigurator>,
+        EndpointConfiguration<IServiceBusEndpointConfiguration,
+            IServiceBusConsumeTopologyConfigurator,
+            IServiceBusSendTopologyConfigurator,
+            IServiceBusPublishTopologyConfigurator>,
         IServiceBusEndpointConfiguration
     {
         public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology)
-            : this(messageTopology, CreateConsume(messageTopology), CreateSend(GlobalTopology.Send), CreatePublish(messageTopology, GlobalTopology.Publish))
+            : this(messageTopology, CreateSend(GlobalTopology.Send), CreatePublish(messageTopology, GlobalTopology.Publish))
         {
         }
 
-        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IServiceBusConsumeTopologyConfigurator consumeTopology,
+        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology,
             IServiceBusSendTopologyConfigurator sendTopology,
             IServiceBusPublishTopologyConfigurator publishTopology)
-            : base(messageTopology, consumeTopology, sendTopology, publishTopology)
+            : base(messageTopology, CreateConsume(messageTopology, publishTopology), sendTopology, publishTopology)
         {
         }
 
-        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IServiceBusConsumeTopologyConfigurator consumeTopology,
+        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology,
             IServiceBusSendTopologyConfigurator sendTopology,
             IServiceBusPublishTopologyConfigurator publishTopology,
             IServiceBusEndpointConfiguration configuration, IConsumePipe consumePipe = null)
-            : base(messageTopology, consumeTopology, sendTopology, publishTopology, configuration, consumePipe)
+            : base(messageTopology, CreateConsume(messageTopology, publishTopology), sendTopology, publishTopology, configuration, consumePipe)
         {
         }
 
-        static IServiceBusConsumeTopologyConfigurator CreateConsume(IMessageTopology messageTopology)
+        public override IServiceBusEndpointConfiguration CreateConfiguration(IConsumePipe consumePipe = null)
         {
-            return new ServiceBusConsumeTopology(messageTopology);
+            return new ServiceBusEndpointConfiguration(MessageTopology, SendTopology, PublishTopology, this, consumePipe);
+        }
+
+        static IServiceBusConsumeTopologyConfigurator CreateConsume(IMessageTopology messageTopology, IServiceBusPublishTopologyConfigurator publishTopology)
+        {
+            return new ServiceBusConsumeTopology(messageTopology, publishTopology);
         }
 
         static IServiceBusSendTopologyConfigurator CreateSend(ISendTopology delegateSendTopology)
@@ -68,12 +77,6 @@ namespace MassTransit.AzureServiceBusTransport.Specifications
             publishTopology.Connect(observer);
 
             return publishTopology;
-        }
-
-        public override IServiceBusEndpointConfiguration CreateConfiguration(IConsumePipe consumePipe = null)
-        {
-            return new ServiceBusEndpointConfiguration(MessageTopology, CreateConsume(MessageTopology), CreateSend(SendTopology), CreatePublish(MessageTopology, PublishTopology),
-                this, consumePipe);
         }
     }
 }

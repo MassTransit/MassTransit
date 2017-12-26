@@ -28,11 +28,12 @@ namespace MassTransit.RabbitMqTransport.Tests
         RabbitMqTestFixture
     {
         IManagementEndpointConfigurator _management;
-        TestConsumer _consumer;
+        ConsumerTestHarness<TestConsumer> _consumerA;
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
             _management = configurator.ManagementEndpoint(host);
+            _consumerA = RabbitMqTestHarness.Consumer<TestConsumer>();
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -42,22 +43,18 @@ namespace MassTransit.RabbitMqTransport.Tests
             configurator.ConnectManagementEndpoint(_management);
 
             configurator.UseConcurrencyLimit(32, _management);
-
-            _consumer = new TestConsumer(TestTimeout);
-
-            _consumer.Configure(configurator);
         }
 
 
         class TestConsumer :
-            MultiTestConsumer
+            IConsumer<A>
         {
-            public TestConsumer(TimeSpan timeout)
-                : base(timeout)
+            public Task Consume(ConsumeContext<A> context)
             {
-                Consume<A>();
+                return TaskUtil.Completed;
             }
         }
+
 
         [Test]
         public async Task Should_allow_reconfiguration()
@@ -76,7 +73,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.AreEqual(request.ConcurrencyLimit, concurrencyLimitUpdated.ConcurrencyLimit);
         }
 
-        [Test, Explicit]
+        [Test, Explicit, Category("SlowAF")]
         public async Task Should_allow_reconfiguration_of_prefetch_count()
         {
             IRequestClient<SetPrefetchCount, PrefetchCountUpdated> client = new PublishRequestClient<SetPrefetchCount, PrefetchCountUpdated>(Bus,
@@ -105,9 +102,12 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await Task.Delay(50);
             }
 
-            Assert.IsTrue(_consumer.Received.Select<A>().Any());
+            Assert.IsTrue(_consumerA.Consumed.Select<A>().Any());
         }
 
-        class A { }
+
+        class A
+        {
+        }
     }
 }

@@ -15,11 +15,12 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
     using System;
     using System.Collections.Generic;
     using Builders;
-    using Configurators;
+    using Configuration;
+    using Configuration.Configurators;
+    using Configuration.Specifications;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Newtonsoft.Json.Linq;
-    using Specifications;
     using Util;
 
 
@@ -30,11 +31,14 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         where TMessage : class
     {
         readonly IMessageTopology<TMessage> _messageTopology;
+        readonly IServiceBusMessagePublishTopology<TMessage> _publishTopology;
         readonly IList<IServiceBusConsumeTopologySpecification> _specifications;
 
-        public ServiceBusMessageConsumeTopology(IMessageTopology<TMessage> messageTopology)
+        public ServiceBusMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IServiceBusMessagePublishTopology<TMessage> publishTopology)
         {
             _messageTopology = messageTopology;
+            _publishTopology = publishTopology;
+
             _specifications = new List<IServiceBusConsumeTopologySpecification>();
         }
 
@@ -54,16 +58,13 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
                 return;
             }
 
-            var topicPath = _messageTopology.EntityName;
+            var topicDescription = _publishTopology.TopicDescription;
 
-            var topicConfigurator = new TopicConfigurator(topicPath, TypeMetadataCache<TMessage>.IsTemporaryMessageType);
-
-            var subscriptionConfigurator = new SubscriptionConfigurator(topicPath, subscriptionName);
+            var subscriptionConfigurator = new SubscriptionConfigurator(topicDescription.Path, subscriptionName);
 
             configure?.Invoke(subscriptionConfigurator);
 
-            var specification = new SubscriptionConsumeTopologySpecification(topicConfigurator.GetTopicDescription(),
-                subscriptionConfigurator.GetSubscriptionDescription());
+            var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription());
 
             _specifications.Add(specification);
         }

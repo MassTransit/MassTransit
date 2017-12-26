@@ -74,9 +74,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         {
             var provider = new PublishSendEndpointProvider(_serializer, InputAddress, _host);
 
-            var cache = new SendEndpointCache(provider);
-
-            return new ServiceBusPublishEndpointProvider(_host, cache, _publishPipe, _publish);
+            return new ServiceBusPublishEndpointProvider(_host, provider, _publishPipe, _publish, _serializer, InputAddress);
         }
     }
 }

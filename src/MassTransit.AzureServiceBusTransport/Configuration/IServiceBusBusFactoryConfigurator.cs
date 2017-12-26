@@ -15,7 +15,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System;
     using System.ComponentModel;
     using MassTransit.Builders;
-    using Topology;
+    using Topology.Configuration;
 
 
     public interface IServiceBusBusFactoryConfigurator :

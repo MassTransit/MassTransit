@@ -115,4 +115,112 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             public Guid TransactionId { get; set; }
         }
     }
+
+
+    [TestFixture]
+    public class TopologySetParitioning_Specs :
+        AzureServiceBusTestFixture
+    {
+        [Test]
+        public async Task Should_handle_named_property()
+        {
+            var transactionId = NewId.NextGuid();
+
+            await Bus.Publish<PartitionedMessage>(new
+            {
+                CorrelationId = transactionId
+            });
+
+            ConsumeContext<PartitionedMessage> otherContext = await _otherHandled;
+
+            Assert.IsTrue(otherContext.CorrelationId.HasValue);
+            Assert.That(otherContext.CorrelationId.Value, Is.EqualTo(transactionId));
+        }
+
+        Task<ConsumeContext<PartitionedMessage>> _otherHandled;
+
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        {
+            configurator.SendTopology<PartitionedMessage>(x =>
+            {
+                x.UsePartitionKeyFormatter(p => p.Message.CorrelationId.ToString("N"));
+            });
+
+            configurator.PublishTopology<PartitionedMessage>(x =>
+            {
+                x.EnablePartitioning = true;
+                //x.EnableExpress = true;
+            });
+
+            configurator.ReceiveEndpoint(host, "partitioned-input-queue", x =>
+            {
+                x.EnablePartitioning = true;
+
+                _otherHandled = Handled<PartitionedMessage>(x);
+            });
+        }
+
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+        }
+
+
+        public interface PartitionedMessage
+        {
+            Guid CorrelationId { get; }
+        }
+    }
+
+
+    [TestFixture]
+    public class TopologySetParitioningSubscription_Specs :
+        AzureServiceBusTestFixture
+    {
+        [Test]
+        public async Task Should_handle_named_property()
+        {
+            var transactionId = NewId.NextGuid();
+
+            await Bus.Publish<PartitionedMessage>(new
+            {
+                CorrelationId = transactionId
+            });
+
+            ConsumeContext<PartitionedMessage> otherContext = await _otherHandled;
+
+            Assert.IsTrue(otherContext.CorrelationId.HasValue);
+            Assert.That(otherContext.CorrelationId.Value, Is.EqualTo(transactionId));
+        }
+
+        Task<ConsumeContext<PartitionedMessage>> _otherHandled;
+
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        {
+            configurator.SendTopology<PartitionedMessage>(x =>
+            {
+                x.UsePartitionKeyFormatter(p => p.Message.CorrelationId.ToString("N"));
+            });
+
+            configurator.PublishTopology<PartitionedMessage>(x =>
+            {
+                x.EnablePartitioning = true;
+                //x.EnableExpress = true;
+            });
+
+            configurator.SubscriptionEndpoint<PartitionedMessage>(host, "part-sub", x =>
+            {
+                _otherHandled = Handled<PartitionedMessage>(x);
+            });
+        }
+
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+        }
+
+
+        public interface PartitionedMessage
+        {
+            Guid CorrelationId { get; }
+        }
+    }
 }

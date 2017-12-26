@@ -77,12 +77,12 @@ namespace MassTransit.EndpointSpecifications
         }
 
         public IMessageTopologyConfigurator MessageTopology => _messageTopology;
-        public IPublishTopologyConfigurator PublishTopology => _publishTopology;
-        public ISendTopologyConfigurator SendTopology => _sendTopology;
+        IPublishTopologyConfigurator IEndpointConfiguration.PublishTopology => _publishTopology;
+        ISendTopologyConfigurator IEndpointConfiguration.SendTopology => _sendTopology;
 
         IMessageTopology IEndpointConfiguration<TConfiguration, TConsumeTopology, TSendTopology, TPublishTopology>.MessageTopology => _messageTopology;
-        TPublishTopology IEndpointConfiguration<TConfiguration, TConsumeTopology, TSendTopology, TPublishTopology>.PublishTopology => _publishTopology;
-        TSendTopology IEndpointConfiguration<TConfiguration, TConsumeTopology, TSendTopology, TPublishTopology>.SendTopology => _sendTopology;
+        public TPublishTopology PublishTopology => _publishTopology;
+        public TSendTopology SendTopology => _sendTopology;
 
         public TConsumeTopology ConsumeTopology { get; }
 

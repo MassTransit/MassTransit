@@ -78,7 +78,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.IsTrue(afterFound);
         }
 
-        [Test, Explicit]
+        [Test, Explicit, Category("SlowAF")]
         public async Task Should_not_lock_when_sending_during_unavailable()
         {
             Console.WriteLine("Okay, stop RabbitMQ");

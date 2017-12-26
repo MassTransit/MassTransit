@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading.Tasks;
     using GreenPipes;
     using Topology;
+    using Topology.Conventions;
 
 
     public class SetSessionIdFilter<T> :

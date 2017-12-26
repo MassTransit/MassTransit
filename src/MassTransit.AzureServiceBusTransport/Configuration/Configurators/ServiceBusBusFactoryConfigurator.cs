@@ -18,7 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using MassTransit.Builders;
     using Settings;
     using Specifications;
-    using Topology;
+    using Topology.Configuration;
     using Topology.Topologies;
     using Transport;
     using Transports;

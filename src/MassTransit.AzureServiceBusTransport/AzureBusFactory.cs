@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Threading;
+    using Configuration.Specifications;
     using Configurators;
     using MassTransit.Topology;
     using MassTransit.Topology.Configuration;

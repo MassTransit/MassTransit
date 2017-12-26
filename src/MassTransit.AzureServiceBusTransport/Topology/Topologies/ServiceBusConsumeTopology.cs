@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
     using System;
     using System.Collections.Generic;
     using Builders;
+    using Configuration;
     using MassTransit.Topology;
     using MassTransit.Topology.Configuration;
     using MassTransit.Topology.Topologies;
@@ -25,11 +26,13 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         IServiceBusConsumeTopologyConfigurator
     {
         readonly IMessageTopology _messageTopology;
+        readonly IServiceBusPublishTopology _publishTopology;
         readonly IList<IServiceBusConsumeTopologySpecification> _specifications;
 
-        public ServiceBusConsumeTopology(IMessageTopology messageTopology)
+        public ServiceBusConsumeTopology(IMessageTopology messageTopology, IServiceBusPublishTopology publishTopology)
         {
             _messageTopology = messageTopology;
+            _publishTopology = publishTopology;
             _specifications = new List<IServiceBusConsumeTopologySpecification>();
         }
 
@@ -53,7 +56,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
         protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var messageTopology = new ServiceBusMessageConsumeTopology<T>(_messageTopology.GetMessageTopology<T>());
+            var messageTopology = new ServiceBusMessageConsumeTopology<T>(_messageTopology.GetMessageTopology<T>(), _publishTopology.GetMessageTopology<T>());
 
             OnMessageTopologyCreated(messageTopology);
 
