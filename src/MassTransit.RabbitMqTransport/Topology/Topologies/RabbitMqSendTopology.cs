@@ -93,11 +93,11 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             return settings;
         }
 
-        public TopologyLayout GetTopologyLayout(Uri address)
+        public BrokerTopology GetBrokerTopology(Uri address)
         {
             var settings = GetSendSettings(address);
 
-            var builder = new PublishEndpointTopologyBuilder();
+            var builder = new PublishEndpointBrokerTopologyBuilder();
 
             builder.Exchange = builder.ExchangeDeclare(settings.ExchangeName, settings.ExchangeType, settings.Durable, settings.AutoDelete,
                 settings.ExchangeArguments);

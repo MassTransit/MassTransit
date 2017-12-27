@@ -14,10 +14,9 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 {
     using System;
     using System.Net;
-    using System.Reflection;
     using System.Text;
-    using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
+    using Specifications;
     using Transports;
     using Util;
 
@@ -29,31 +28,29 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         readonly IExchangeTypeSelector _exchangeTypeSelector;
         readonly Uri _hostAddress;
         readonly IMessageNameFormatter _messageNameFormatter;
-        readonly IRabbitMqPublishTopology _publishTopology;
-        readonly IRabbitMqSendTopology _sendTopology;
+        readonly IRabbitMqTopologyConfiguration _topologyConfiguration;
 
         public RabbitMqHostTopology(IExchangeTypeSelector exchangeTypeSelector, IMessageNameFormatter messageNameFormatter,
-            Uri hostAddress, IMessageTopology messageTopology, IRabbitMqSendTopology sendTopology, IRabbitMqPublishTopology publishTopology)
-            : base(messageTopology, sendTopology, publishTopology)
+            Uri hostAddress, IRabbitMqTopologyConfiguration topologyConfiguration)
+            : base(topologyConfiguration)
         {
             _exchangeTypeSelector = exchangeTypeSelector;
             _messageNameFormatter = messageNameFormatter;
             _hostAddress = hostAddress;
-            _sendTopology = sendTopology;
-            _publishTopology = publishTopology;
+            _topologyConfiguration = topologyConfiguration;
         }
 
-        IRabbitMqPublishTopology IRabbitMqHostTopology.PublishTopology => _publishTopology;
-        IRabbitMqSendTopology IRabbitMqHostTopology.SendTopology => _sendTopology;
+        IRabbitMqPublishTopology IRabbitMqHostTopology.PublishTopology => _topologyConfiguration.Publish;
+        IRabbitMqSendTopology IRabbitMqHostTopology.SendTopology => _topologyConfiguration.Send;
 
         IRabbitMqMessagePublishTopology<T> IRabbitMqHostTopology.Publish<T>()
         {
-            return _publishTopology.GetMessageTopology<T>();
+            return _topologyConfiguration.Publish.GetMessageTopology<T>();
         }
 
         IRabbitMqMessageSendTopology<T> IRabbitMqHostTopology.Send<T>()
         {
-            return _sendTopology.GetMessageTopology<T>();
+            return _topologyConfiguration.Send.GetMessageTopology<T>();
         }
 
         public SendSettings GetSendSettings(Uri address)

@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Specifications
             yield break;
         }
 
-        public void Apply(IRabbitMqConsumeTopologyBuilder builder)
+        public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
             var source = _binding.Source;
 

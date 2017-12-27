@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Topology.Builders
+namespace MassTransit.RabbitMqTransport.Topology.Builders
 {
     using Entities;
 
@@ -20,12 +20,17 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
     /// by it can be combined together into a group - so that if a subsequent specification yanks 
     /// something that conflicts, the system can yank the group or warn that it's impacted.
     /// </summary>
-    public interface ISubscriptionEndpointConsumeTopologyBuilder :
-        IServiceBusTopologyBuilder
+    public interface IReceiveEndpointBrokerTopologyBuilder :
+        IBrokerTopologyBuilder
     {
         /// <summary>
-        /// A handle to the subscription topic
+        /// A handle to the consuming queue
         /// </summary>
-        TopicHandle Topic { get; }
+        QueueHandle Queue { get; }
+
+        /// <summary>
+        /// A handle to the exchange which is bound directly to the consuming queue
+        /// </summary>
+        ExchangeHandle Exchange { get; }
     }
 }

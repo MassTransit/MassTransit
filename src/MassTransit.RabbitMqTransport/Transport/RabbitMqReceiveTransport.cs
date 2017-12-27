@@ -58,7 +58,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             scope.Add("type", "RabbitMQ");
             scope.Set(_settings);
             var topologyScope = scope.CreateScope("topology");
-            _topology.TopologyLayout.Probe(topologyScope);
+            _topology.BrokerTopology.Probe(topologyScope);
         }
 
         /// <summary>
@@ -98,7 +98,10 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _topology.SendEndpointProvider.ConnectSendObserver(observer);
+            var sendHandle = _topology.SendEndpointProvider.ConnectSendObserver(observer);
+            var publishHandle = _topology.PublishEndpointProvider.ConnectSendObserver(observer);
+
+            return new MultipleConnectHandle(sendHandle, publishHandle);
         }
 
         async Task Receiver(IPipe<ConnectionContext> transportPipe, TaskSupervisor supervisor)

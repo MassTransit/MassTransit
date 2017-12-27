@@ -14,7 +14,6 @@ namespace MassTransit.HttpTransport
 {
     using System;
     using Specifications;
-    using Transports.InMemory;
 
 
     public static class HttpBusFactory
@@ -26,7 +25,7 @@ namespace MassTransit.HttpTransport
         /// <returns></returns>
         public static IBusControl Create(Action<IHttpBusFactoryConfigurator> configure)
         {
-            var configurator = new HttpBusFactoryConfigurator(new InMemoryEndpointConfiguration(InMemoryBus.MessageTopology));
+            var configurator = new HttpBusFactoryConfigurator(new HttpEndpointConfiguration(new HttpTopologyConfiguration(InMemoryBus.MessageTopology)));
 
             configure(configurator);
 

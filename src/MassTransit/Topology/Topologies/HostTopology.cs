@@ -13,6 +13,7 @@
 namespace MassTransit.Topology.Topologies
 {
     using System.Text;
+    using EndpointSpecifications;
     using NewIdFormatters;
     using Util;
 
@@ -21,15 +22,11 @@ namespace MassTransit.Topology.Topologies
         IHostTopology
     {
         protected static readonly INewIdFormatter Formatter = new ZBase32Formatter();
-        readonly IMessageTopology _messageTopology;
-        readonly IPublishTopology _publishTopology;
-        readonly ISendTopology _sendTopology;
+        readonly ITopologyConfiguration _topologyConfiguration;
 
-        protected HostTopology(IMessageTopology messageTopology, ISendTopology sendTopology, IPublishTopology publishTopology)
+        protected HostTopology(ITopologyConfiguration topologyConfiguration)
         {
-            _messageTopology = messageTopology;
-            _sendTopology = sendTopology;
-            _publishTopology = publishTopology;
+            _topologyConfiguration = topologyConfiguration;
         }
 
         public virtual string CreateTemporaryQueueName(string prefix)
@@ -55,21 +52,21 @@ namespace MassTransit.Topology.Topologies
             return sb.ToString();
         }
 
-        public IPublishTopology PublishTopology => _publishTopology;
+        public IPublishTopology PublishTopology => _topologyConfiguration.Publish;
 
         public IMessagePublishTopology<T> Publish<T>() where T : class
         {
-            return _publishTopology.GetMessageTopology<T>();
+            return _topologyConfiguration.Publish.GetMessageTopology<T>();
         }
 
         public IMessageSendTopology<T> Send<T>() where T : class
         {
-            return _sendTopology.GetMessageTopology<T>();
+            return _topologyConfiguration.Send.GetMessageTopology<T>();
         }
 
         public IMessageTopology<T> Message<T>() where T : class
         {
-            return _messageTopology.GetMessageTopology<T>();
+            return _topologyConfiguration.Message.GetMessageTopology<T>();
         }
     }
 }

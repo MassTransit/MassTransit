@@ -31,9 +31,9 @@ namespace MassTransit.RabbitMqTransport.Configurators
         IRabbitMqBusFactoryConfigurator,
         IBusFactory
     {
+        readonly IRabbitMqEndpointConfiguration _configuration;
         readonly BusHostCollection<RabbitMqHost> _hosts;
         readonly RabbitMqReceiveSettings _settings;
-        readonly IRabbitMqEndpointConfiguration _configuration;
 
         public RabbitMqBusFactoryConfigurator(IRabbitMqEndpointConfiguration configuration)
             : base(configuration)
@@ -42,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             _hosts = new BusHostCollection<RabbitMqHost>();
 
-            var queueName = _configuration.ConsumeTopology.CreateTemporaryQueueName("bus-");
+            var queueName = _configuration.Topology.Consume.CreateTemporaryQueueName("bus-");
             _settings = new RabbitMqReceiveSettings(queueName, "fanout", false, true);
             _settings.SetQueueArgument("x-expires", TimeSpan.FromMinutes(1));
             _settings.SetExchangeArgument("x-expires", TimeSpan.FromMinutes(1));
@@ -135,9 +135,9 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public IRabbitMqHost Host(RabbitMqHostSettings settings)
         {
-            var hostTopology = new RabbitMqHostTopology(new FanoutExchangeTypeSelector(), new RabbitMqMessageNameFormatter(), settings.HostAddress, _configuration.MessageTopology,
-                _configuration.SendTopology, _configuration.PublishTopology);
-            
+            var hostTopology = new RabbitMqHostTopology(new FanoutExchangeTypeSelector(), new RabbitMqMessageNameFormatter(), settings.HostAddress,
+                _configuration.Topology);
+
             var host = new RabbitMqHost(settings, hostTopology);
             _hosts.Add(host);
 
@@ -146,19 +146,19 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public string CreateTemporaryQueueName(string prefix)
         {
-            return _configuration.ConsumeTopology.CreateTemporaryQueueName(prefix);
+            return _configuration.Topology.Consume.CreateTemporaryQueueName(prefix);
         }
 
         void IRabbitMqBusFactoryConfigurator.SendTopology<T>(Action<IRabbitMqMessageSendTopologyConfigurator<T>> configureTopology)
         {
-            IRabbitMqMessageSendTopologyConfigurator<T> configurator = _configuration.SendTopology.GetMessageTopology<T>();
+            IRabbitMqMessageSendTopologyConfigurator<T> configurator = _configuration.Topology.Send.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
 
         void IRabbitMqBusFactoryConfigurator.PublishTopology<T>(Action<IRabbitMqMessagePublishTopologyConfigurator<T>> configureTopology)
         {
-            IRabbitMqMessagePublishTopologyConfigurator<T> configurator = _configuration.PublishTopology.GetMessageTopology<T>();
+            IRabbitMqMessagePublishTopologyConfigurator<T> configurator = _configuration.Topology.Publish.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
@@ -182,7 +182,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
             if (host == null)
                 throw new EndpointNotFoundException("The host address specified was not configured.");
 
-            var endpointTopologySpecification = _configuration.CreateConfiguration();
+            var endpointTopologySpecification = _configuration.CreateNewConfiguration();
 
             var specification = new RabbitMqReceiveEndpointSpecification(host, endpointTopologySpecification, queueName);
 

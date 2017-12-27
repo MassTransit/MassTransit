@@ -113,5 +113,11 @@ namespace MassTransit.Transports.InMemory
                 }
             }
         }
+
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return new EmptyConnectHandle();
+        }
     }
 }

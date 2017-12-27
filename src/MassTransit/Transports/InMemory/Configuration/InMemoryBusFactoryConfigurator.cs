@@ -15,6 +15,7 @@ namespace MassTransit.BusConfigurators
     using System;
     using System.Collections.Generic;
     using Builders;
+    using EndpointSpecifications;
     using GreenPipes;
     using Transports;
     using Transports.InMemory;
@@ -54,7 +55,7 @@ namespace MassTransit.BusConfigurators
             {
                 if (_inMemoryHost == null || _sendTransportProvider == null)
                 {
-                    var hostTopology = new InMemoryHostTopology(_configuration.MessageTopology, _configuration.SendTopology, _configuration.PublishTopology);
+                    var hostTopology = new InMemoryHostTopology(_configuration.Topology);
                     var host = new InMemoryHost(TransportConcurrencyLimit, hostTopology, _baseAddress);
                     _hosts.Add(host);
 
@@ -80,7 +81,7 @@ namespace MassTransit.BusConfigurators
         public void PublishTopology<T>(Action<IInMemoryMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class
         {
-            var configurator = _configuration.PublishTopology.GetMessageTopology<T>();
+            var configurator = _configuration.Topology.Publish.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
@@ -89,7 +90,7 @@ namespace MassTransit.BusConfigurators
 
         public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
-            var endpointSpecification = _configuration.CreateConfiguration();
+            var endpointSpecification = _configuration.CreateNewConfiguration();
 
             var specification = new InMemoryReceiveEndpointSpecification(InMemoryHost.Address, queueName, SendTransportProvider, endpointSpecification);
 

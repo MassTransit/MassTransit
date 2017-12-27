@@ -44,7 +44,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
         static bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
 
-        public void Apply(IReceiveEndpointConsumeTopologyBuilder builder)
+        public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
                 specification.Apply(builder);

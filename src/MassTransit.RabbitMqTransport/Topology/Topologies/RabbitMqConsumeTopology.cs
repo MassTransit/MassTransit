@@ -56,7 +56,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             return base.GetMessageTopology<T>() as IRabbitMqMessageConsumeTopologyConfigurator<T>;
         }
 
-        public void Apply(IRabbitMqConsumeTopologyBuilder builder)
+        public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
                 specification.Apply(builder);

@@ -140,7 +140,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
 
             ApplyReceiveEndpoint(receivePipe, receiveEndpointTopology, x =>
             {
-                x.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointTopology.TopologyLayout, _settings.RemoveSubscriptions));
+                x.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointTopology.BrokerTopology, _settings.RemoveSubscriptions));
                 x.UseFilter(new PrepareQueueClientFilter(_settings));
             });
         }

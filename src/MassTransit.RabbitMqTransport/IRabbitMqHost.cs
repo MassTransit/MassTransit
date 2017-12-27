@@ -29,7 +29,7 @@ namespace MassTransit.RabbitMqTransport
         /// <summary>
         /// Returns the topology of the RabbitMQ host
         /// </summary>
-        IRabbitMqHostTopology Topology { get; }
+        new IRabbitMqHostTopology Topology { get; }
 
         /// <summary>
         /// The connection retry policy used for connecting to the host

@@ -18,10 +18,10 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
     using GreenPipes;
 
 
-    public class ServiceBusTopologyLayout :
-        TopologyLayout
+    public class ServiceBusBrokerTopology :
+        BrokerTopology
     {
-        public ServiceBusTopologyLayout(IEnumerable<Topic> topics, IEnumerable<Subscription> subscriptions, IEnumerable<Queue> queues,
+        public ServiceBusBrokerTopology(IEnumerable<Topic> topics, IEnumerable<Subscription> subscriptions, IEnumerable<Queue> queues,
             IEnumerable<QueueSubscription> queueSubscriptions, IEnumerable<TopicSubscription> topicSubscriptions)
         {
             Topics = topics.ToArray();

@@ -29,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// Apply the entire topology to the builder
         /// </summary>
         /// <param name="builder"></param>
-        void Apply(IRabbitMqConsumeTopologyBuilder builder);
+        void Apply(IReceiveEndpointBrokerTopologyBuilder builder);
 
         /// <summary>
         /// Bind an exchange, using the configurator

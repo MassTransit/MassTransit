@@ -13,12 +13,14 @@
 namespace MassTransit.AzureServiceBusTransport.Configuration.Specifications
 {
     using EndpointSpecifications;
-    using Topology.Configuration;
+    using MassTransit.Pipeline;
 
 
     public interface IServiceBusEndpointConfiguration :
         IEndpointConfiguration
-            <IServiceBusEndpointConfiguration, IServiceBusConsumeTopologyConfigurator, IServiceBusSendTopologyConfigurator, IServiceBusPublishTopologyConfigurator>
     {
+        new IServiceBusTopologyConfiguration Topology { get; }
+
+        IServiceBusEndpointConfiguration CreateNewConfiguration(IConsumePipe consumePipe = null);
     }
 }

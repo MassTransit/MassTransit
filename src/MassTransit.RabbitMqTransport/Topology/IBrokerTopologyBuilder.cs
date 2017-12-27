@@ -16,7 +16,7 @@ namespace MassTransit.RabbitMqTransport.Topology
     using Entities;
 
 
-    public interface IRabbitMqTopologyBuilder
+    public interface IBrokerTopologyBuilder
     {
         /// <summary>
         /// Declares an exchange

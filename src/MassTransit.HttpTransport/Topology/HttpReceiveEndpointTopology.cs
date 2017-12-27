@@ -13,7 +13,6 @@
 namespace MassTransit.HttpTransport.Topology
 {
     using System;
-    using Builders;
     using Clients;
     using GreenPipes;
     using MassTransit.Builders;
@@ -23,15 +22,15 @@ namespace MassTransit.HttpTransport.Topology
     using MassTransit.Pipeline.Pipes;
     using MassTransit.Topology;
     using Microsoft.Owin;
+    using Specifications;
     using Transport;
     using Transports;
-    using Transports.InMemory;
-    using Transports.InMemory.Topology;
 
 
     public class HttpReceiveEndpointTopology :
         IHttpReceiveEndpointTopology
     {
+        readonly IConsumePipe _consumePipe;
         readonly IHttpHost _host;
         readonly BusHostCollection<HttpHost> _hosts;
         readonly IPublishTopology _publish;
@@ -42,22 +41,21 @@ namespace MassTransit.HttpTransport.Topology
         readonly ISendPipe _sendPipe;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly IMessageSerializer _serializer;
-        IConsumePipe _consumePipe;
 
-        public HttpReceiveEndpointTopology(IInMemoryEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer, IHttpHost host, BusHostCollection<HttpHost> hosts)
+        public HttpReceiveEndpointTopology(IHttpEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer, IHttpHost host,
+            BusHostCollection<HttpHost> hosts)
         {
             InputAddress = inputAddress;
             _serializer = serializer;
             _host = host;
             _hosts = hosts;
 
-            _send = configuration.SendTopology;
-            _publish = configuration.PublishTopology;
+            _send = configuration.Topology.Send;
+            _publish = configuration.Topology.Publish;
 
-            _consumePipe = configuration.CreateConsumePipe();
-            _sendPipe = configuration.CreateSendPipe();
-            _publishPipe = configuration.CreatePublishPipe();
-
+            _consumePipe = configuration.Consume.CreatePipe();
+            _sendPipe = configuration.Send.CreatePipe();
+            _publishPipe = configuration.Publish.CreatePipe();
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
@@ -100,10 +98,9 @@ namespace MassTransit.HttpTransport.Topology
                 x.UseFilter(new DeserializeFilter(serializerBuilder.Deserializer, _consumePipe));
             });
 
-            var receivePipe =  new ReceivePipe(pipe, _consumePipe);
+            var receivePipe = new ReceivePipe(pipe, _consumePipe);
 
             return new HttpSendTransportProvider(_hosts, receivePipe, new ReceiveObservable(), this);
-
         }
     }
 }

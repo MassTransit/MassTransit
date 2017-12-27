@@ -19,11 +19,9 @@ namespace MassTransit.HttpTransport.Specifications
     using GreenPipes;
     using Hosting;
     using MassTransit.Builders;
-    using MassTransit.Topology.Topologies;
     using Topology;
     using Transport;
     using Transports;
-    using Transports.InMemory;
 
 
     public class HttpBusFactoryConfigurator :
@@ -31,10 +29,10 @@ namespace MassTransit.HttpTransport.Specifications
         IHttpBusFactoryConfigurator,
         IBusFactory
     {
-        readonly IInMemoryEndpointConfiguration _configuration;
+        readonly IHttpEndpointConfiguration _configuration;
         readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpBusFactoryConfigurator(IInMemoryEndpointConfiguration configuration)
+        public HttpBusFactoryConfigurator(IHttpEndpointConfiguration configuration)
             : base(configuration)
         {
             _configuration = configuration;
@@ -63,7 +61,7 @@ namespace MassTransit.HttpTransport.Specifications
 
         public IHttpHost Host(HttpHostSettings settings)
         {
-            var hostTopology = new HttpHostTopology(_configuration.MessageTopology, _configuration.SendTopology, _configuration.PublishTopology);
+            var hostTopology = new HttpHostTopology(_configuration.Topology);
             
             var httpHost = new HttpHost(settings, hostTopology);
 
@@ -82,7 +80,7 @@ namespace MassTransit.HttpTransport.Specifications
             if (host == null)
                 throw new ArgumentNullException(nameof(host));
 
-            var endpointSpecification = _configuration.CreateConfiguration();
+            var endpointSpecification = _configuration.CreateNewConfiguration();
 
             var specification = new HttpReceiveEndpointSpecification(host, _hosts, pathMatch, endpointSpecification);
 

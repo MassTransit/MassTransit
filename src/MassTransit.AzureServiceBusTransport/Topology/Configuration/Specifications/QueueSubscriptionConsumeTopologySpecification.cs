@@ -42,7 +42,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Specificat
             yield break;
         }
 
-        public void Apply(IReceiveEndpointConsumeTopologyBuilder builder)
+        public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
             var topic = builder.CreateTopic(_topicDescription);
 

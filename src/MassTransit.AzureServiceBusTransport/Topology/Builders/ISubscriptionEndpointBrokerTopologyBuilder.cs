@@ -16,20 +16,16 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
 
 
     /// <summary>
-    /// A builder for creating the topology when publishing a message
+    /// A unique builder context should be created for each specification, so that the items added
+    /// by it can be combined together into a group - so that if a subsequent specification yanks 
+    /// something that conflicts, the system can yank the group or warn that it's impacted.
     /// </summary>
-    public interface IServiceBusPublishTopologyBuilder :
-        IServiceBusTopologyBuilder
+    public interface ISubscriptionEndpointBrokerTopologyBuilder :
+        IBrokerTopologyBuilder
     {
         /// <summary>
-        /// The topic to which the message is published
+        /// A handle to the subscription topic
         /// </summary>
-        TopicHandle Topic { get; set; }
-
-        /// <summary>
-        /// Create an implemented builder which can be passed to implemented types
-        /// </summary>
-        /// <returns></returns>
-        IServiceBusPublishTopologyBuilder CreateImplementedBuilder();
+        TopicHandle Topic { get; }
     }
 }

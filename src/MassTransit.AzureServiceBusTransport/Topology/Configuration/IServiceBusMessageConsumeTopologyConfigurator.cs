@@ -37,6 +37,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
         /// Apply the message topology to the builder
         /// </summary>
         /// <param name="builder"></param>
-        void Apply(IReceiveEndpointConsumeTopologyBuilder builder);
+        void Apply(IReceiveEndpointBrokerTopologyBuilder builder);
     }
 }

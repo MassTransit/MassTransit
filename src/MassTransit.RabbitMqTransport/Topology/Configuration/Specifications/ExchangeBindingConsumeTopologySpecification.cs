@@ -48,7 +48,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Specifications
             yield break;
         }
 
-        public void Apply(IRabbitMqConsumeTopologyBuilder builder)
+        public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
             var exchangeHandle = builder.ExchangeDeclare(_exchangeName, _exchangeType, _durable, _autoDelete, _exchangeArguments);
 

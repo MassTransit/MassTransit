@@ -17,18 +17,17 @@ namespace MassTransit.HttpTransport.Transport
     using Configurators;
     using Specifications;
     using Transports;
-    using Transports.InMemory;
 
 
     public class HttpReceiveEndpointFactory :
         IHttpReceiveEndpointFactory
     {
         readonly HttpBusBuilder _builder;
+        readonly IHttpEndpointConfiguration _configuration;
         readonly IHttpHost _host;
-        readonly IInMemoryEndpointConfiguration _configuration;
         readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpReceiveEndpointFactory(HttpBusBuilder builder, IHttpHost host, BusHostCollection<HttpHost> hosts, IInMemoryEndpointConfiguration configuration)
+        public HttpReceiveEndpointFactory(HttpBusBuilder builder, IHttpHost host, BusHostCollection<HttpHost> hosts, IHttpEndpointConfiguration configuration)
         {
             _builder = builder;
             _host = host;

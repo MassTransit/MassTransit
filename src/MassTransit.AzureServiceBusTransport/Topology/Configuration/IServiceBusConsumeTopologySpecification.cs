@@ -19,6 +19,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
     public interface IServiceBusConsumeTopologySpecification :
         ISpecification
     {
-        void Apply(IReceiveEndpointConsumeTopologyBuilder builder);
+        void Apply(IReceiveEndpointBrokerTopologyBuilder builder);
     }
 }

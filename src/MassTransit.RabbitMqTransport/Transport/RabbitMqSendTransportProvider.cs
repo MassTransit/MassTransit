@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             var sendSettings = host.Topology.GetSendSettings(address);
 
-            var topology = host.Topology.SendTopology.GetTopologyLayout(address);
+            var topology = host.Topology.SendTopology.GetBrokerTopology(address);
 
             var modelCache = new RabbitMqModelCache(host);
 

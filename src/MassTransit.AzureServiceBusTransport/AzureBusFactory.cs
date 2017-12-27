@@ -34,7 +34,7 @@ namespace MassTransit.AzureServiceBusTransport
         /// <returns></returns>
         public static IBusControl CreateUsingServiceBus(Action<IServiceBusBusFactoryConfigurator> configure)
         {
-            var configurator = new ServiceBusBusFactoryConfigurator(new ServiceBusEndpointConfiguration(MessageTopology));
+            var configurator = new ServiceBusBusFactoryConfigurator(new ServiceBusEndpointConfiguration(new ServiceBusTopologyConfiguration(MessageTopology)));
 
             configure(configurator);
 

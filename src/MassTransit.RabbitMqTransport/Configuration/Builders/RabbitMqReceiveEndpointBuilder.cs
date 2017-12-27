@@ -45,7 +45,7 @@ namespace MassTransit.RabbitMqTransport.Builders
         {
             if (_bindMessageExchanges)
             {
-                _configuration.ConsumeTopology
+                _configuration.Topology.Consume
                     .GetMessageTopology<T>()
                     .Bind();
             }
@@ -60,9 +60,9 @@ namespace MassTransit.RabbitMqTransport.Builders
             return new RabbitMqReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _host, _hosts, topologyLayout);
         }
 
-        TopologyLayout BuildTopology(ReceiveSettings settings)
+        BrokerTopology BuildTopology(ReceiveSettings settings)
         {
-            var topologyBuilder = new ReceiveEndpointConsumeTopologyBuilder();
+            var topologyBuilder = new ReceiveEndpointBrokerTopologyBuilder();
 
             topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, settings.AutoDelete, settings.Exclusive, settings.QueueArguments);
 
@@ -71,7 +71,7 @@ namespace MassTransit.RabbitMqTransport.Builders
 
             topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
 
-            _configuration.ConsumeTopology.Apply(topologyBuilder);
+            _configuration.Topology.Consume.Apply(topologyBuilder);
 
             return topologyBuilder.BuildTopologyLayout();
         }

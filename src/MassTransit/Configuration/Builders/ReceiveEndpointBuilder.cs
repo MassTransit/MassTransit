@@ -28,7 +28,7 @@ namespace MassTransit.Builders
         {
             _configuration = configuration;
 
-            _consumePipe = configuration.CreateConsumePipe();
+            _consumePipe = configuration.Consume.CreatePipe();
 
             _serializerBuilder = builder.CreateSerializerBuilder();
         }
@@ -50,7 +50,7 @@ namespace MassTransit.Builders
         public virtual ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
             where T : class
         {
-            IPipe<ConsumeContext<T>> messagePipe = _configuration.ConsumePipeSpecification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
+            IPipe<ConsumeContext<T>> messagePipe = _configuration.Consume.Specification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
 
             return _consumePipe.ConnectConsumePipe(messagePipe);
         }

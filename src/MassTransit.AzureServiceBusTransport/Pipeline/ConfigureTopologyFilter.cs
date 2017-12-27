@@ -30,12 +30,12 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         readonly bool _removeSubscriptions;
 
         readonly TSettings _settings;
-        readonly TopologyLayout _topology;
+        readonly BrokerTopology _brokerTopology;
 
-        public ConfigureTopologyFilter(TSettings settings, TopologyLayout topology, bool removeSubscriptions)
+        public ConfigureTopologyFilter(TSettings settings, BrokerTopology brokerTopology, bool removeSubscriptions)
         {
             _settings = settings;
-            _topology = topology;
+            _brokerTopology = brokerTopology;
             _removeSubscriptions = removeSubscriptions;
         }
 
@@ -73,25 +73,25 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
             var scope = context.CreateFilterScope("configureTopology");
 
-            _topology.Probe(scope);
+            _brokerTopology.Probe(scope);
         }
 
         async Task ConfigureTopology(NamespaceContext context)
         {
-            await Task.WhenAll(_topology.Topics.Select(topic => Create(context, topic))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.Topics.Select(topic => Create(context, topic))).ConfigureAwait(false);
 
-            await Task.WhenAll(_topology.Queues.Select(queue => Create(context, queue))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.Queues.Select(queue => Create(context, queue))).ConfigureAwait(false);
 
-            await Task.WhenAll(_topology.Subscriptions.Select(subscription => Create(context, subscription))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.Subscriptions.Select(subscription => Create(context, subscription))).ConfigureAwait(false);
 
-            await Task.WhenAll(_topology.QueueSubscriptions.Select(subscription => Create(context, subscription))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.QueueSubscriptions.Select(subscription => Create(context, subscription))).ConfigureAwait(false);
 
-            await Task.WhenAll(_topology.TopicSubscriptions.Select(subscription => Create(context, subscription))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.TopicSubscriptions.Select(subscription => Create(context, subscription))).ConfigureAwait(false);
         }
 
         async Task RemoveSubscriptions(NamespaceContext context)
         {
-            await Task.WhenAll(_topology.QueueSubscriptions.Select(subscription => Delete(context, subscription))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.QueueSubscriptions.Select(subscription => Delete(context, subscription))).ConfigureAwait(false);
         }
 
         Task Create(NamespaceContext context, Topic topic)

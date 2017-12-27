@@ -36,7 +36,7 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress<T>(bus);
+            var destinationAddress = GetPublishAddress<T>(bus);
 
             return schedulerEndpoint.ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
         }
@@ -56,7 +56,7 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress<T>(bus);
+            var destinationAddress = GetPublishAddress<T>(bus);
 
             return schedulerEndpoint.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
@@ -76,7 +76,7 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress<T>(bus);
+            var destinationAddress = GetPublishAddress<T>(bus);
 
             return schedulerEndpoint.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
@@ -98,7 +98,7 @@ namespace MassTransit
 
             var messageType = message.GetType();
 
-            var destinationAddress = GetDestinationAddress(bus, messageType);
+            var destinationAddress = GetPublishAddress(bus, messageType);
 
             return schedulerEndpoint.ScheduleSend(destinationAddress, scheduledTime, message, messageType, cancellationToken);
         }
@@ -120,7 +120,7 @@ namespace MassTransit
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
-            var destinationAddress = GetDestinationAddress(bus, messageType);
+            var destinationAddress = GetPublishAddress(bus, messageType);
 
             return schedulerEndpoint.ScheduleSend(destinationAddress, scheduledTime, message, messageType, cancellationToken);
         }
@@ -144,7 +144,7 @@ namespace MassTransit
 
             var messageType = message.GetType();
 
-            var destinationAddress = GetDestinationAddress(bus, messageType);
+            var destinationAddress = GetPublishAddress(bus, messageType);
 
             return schedulerEndpoint.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
@@ -164,7 +164,7 @@ namespace MassTransit
         public static Task<ScheduledMessage> SchedulePublish(this IBus bus, ISendEndpoint schedulerEndpoint, DateTime scheduledTime, object message, Type messageType,
             IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var destinationAddress = GetDestinationAddress(bus, messageType);
+            var destinationAddress = GetPublishAddress(bus, messageType);
 
             return schedulerEndpoint.ScheduleSend(destinationAddress, scheduledTime, message, messageType, pipe, cancellationToken);
         }
@@ -184,7 +184,7 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress<T>(bus);
+            var destinationAddress = GetPublishAddress<T>(bus);
 
             return schedulerEndpoint.ScheduleSend<T>(destinationAddress, scheduledTime, values, cancellationToken);
         }
@@ -205,7 +205,7 @@ namespace MassTransit
             IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress<T>(bus);
+            var destinationAddress = GetPublishAddress<T>(bus);
 
             return schedulerEndpoint.ScheduleSend(destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
@@ -226,7 +226,7 @@ namespace MassTransit
             CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            var destinationAddress = GetDestinationAddress<T>(bus);
+            var destinationAddress = GetPublishAddress<T>(bus);
 
             return schedulerEndpoint.ScheduleSend<T>(destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
@@ -427,7 +427,7 @@ namespace MassTransit
             return SchedulePublish<T>(bus, schedulerEndpoint, scheduledTime, values, pipe, cancellationToken);
         }
 
-        static Uri GetDestinationAddress<T>(IBus bus)
+        static Uri GetPublishAddress<T>(IBus bus)
             where T : class
         {
             if (bus.Topology.Publish<T>().TryGetPublishAddress(bus.Address, out var address))
@@ -436,7 +436,7 @@ namespace MassTransit
             throw new ArgumentException($"The publish address for the specified type was not returned: {TypeMetadataCache<T>.ShortName}");
         }
 
-        static Uri GetDestinationAddress(IBus bus, Type messageType)
+        static Uri GetPublishAddress(IBus bus, Type messageType)
         {
             if (bus.Topology.PublishTopology.TryGetPublishAddress(messageType, bus.Address, out var address))
                 return address;

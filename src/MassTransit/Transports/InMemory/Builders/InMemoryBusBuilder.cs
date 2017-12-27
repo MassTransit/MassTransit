@@ -22,8 +22,8 @@ namespace MassTransit.Transports.InMemory.Builders
         IInMemoryBusBuilder
     {
         readonly InMemoryReceiveEndpointSpecification _busEndpointSpecification;
-        readonly Uri _inputAddress;
         readonly IInMemoryEndpointConfiguration _configuration;
+        readonly Uri _inputAddress;
 
         public InMemoryBusBuilder(InMemoryHost inMemoryHost, ISendTransportProvider sendTransportProvider, BusHostCollection<IBusHostControl> hosts,
             IInMemoryEndpointConfiguration configuration)
@@ -40,9 +40,10 @@ namespace MassTransit.Transports.InMemory.Builders
             InMemoryHost = inMemoryHost;
             _configuration = configuration;
 
-            var busEndpointSpecification = _configuration.CreateConfiguration(ConsumePipe);
+            var busEndpointSpecification = _configuration.CreateNewConfiguration(ConsumePipe);
 
-            _busEndpointSpecification = new InMemoryReceiveEndpointSpecification(inMemoryHost.Address, busQueueName, sendTransportProvider, busEndpointSpecification);
+            _busEndpointSpecification = new InMemoryReceiveEndpointSpecification(inMemoryHost.Address, busQueueName, sendTransportProvider,
+                busEndpointSpecification);
 
             inMemoryHost.ReceiveEndpointFactory = new InMemoryReceiveEndpointFactory(this, sendTransportProvider, configuration);
         }

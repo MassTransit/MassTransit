@@ -44,15 +44,15 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Builders
             return new ServiceBusReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _host, _sendTransportProvider, topologyLayout);
         }
 
-        TopologyLayout BuildTopology(SubscriptionSettings settings)
+        BrokerTopology BuildTopology(SubscriptionSettings settings)
         {
-            var topologyBuilder = new SubscriptionEndpointConsumeTopologyBuilder();
+            var topologyBuilder = new SubscriptionEndpointBrokerTopologyBuilder();
 
             topologyBuilder.Topic = topologyBuilder.CreateTopic(settings.TopicDescription);
 
             topologyBuilder.CreateSubscription(topologyBuilder.Topic, settings.SubscriptionDescription);
 
-            return topologyBuilder.BuildTopologyLayout();
+            return topologyBuilder.BuildBrokerTopology();
         }
     }
 }

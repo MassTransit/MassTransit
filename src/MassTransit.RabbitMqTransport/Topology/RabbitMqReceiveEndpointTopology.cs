@@ -33,24 +33,24 @@ namespace MassTransit.RabbitMqTransport.Topology
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly IRabbitMqEndpointConfiguration _configuration;
         readonly IMessageSerializer _serializer;
-        readonly TopologyLayout _topologyLayout;
+        readonly BrokerTopology _brokerTopology;
         readonly BusHostCollection<RabbitMqHost> _hosts;
 
         public RabbitMqReceiveEndpointTopology(IRabbitMqEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer,
-            IRabbitMqHost host, BusHostCollection<RabbitMqHost> hosts, TopologyLayout topologyLayout)
+            IRabbitMqHost host, BusHostCollection<RabbitMqHost> hosts, BrokerTopology brokerTopology)
         {
             InputAddress = inputAddress;
             _configuration = configuration;
             _serializer = serializer;
             _host = host;
-            _topologyLayout = topologyLayout;
+            _brokerTopology = brokerTopology;
 
             _hosts = hosts;
 
-            _consume = configuration.ConsumeTopology;
+            _consume = configuration.Topology.Consume;
 
-            _send = configuration.SendTopology;
-            _publish = configuration.PublishTopology;
+            _send = configuration.Topology.Send;
+            _publish = configuration.Topology.Publish;
 
             _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
@@ -58,7 +58,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         }
 
         public Uri InputAddress { get; }
-        public TopologyLayout TopologyLayout => _topologyLayout;
+        public BrokerTopology BrokerTopology => _brokerTopology;
 
         public IRabbitMqConsumeTopology ConsumeTopology => _consume;
         public IRabbitMqSendTopology SendTopology => _send;
@@ -73,7 +73,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         ISendEndpointProvider CreateSendEndpointProvider()
         {
-            var sendPipe = _configuration.CreateSendPipe();
+            var sendPipe = _configuration.Send.CreatePipe();
 
             var provider = new RabbitMqSendEndpointProvider(_serializer, InputAddress, _sendTransportProvider.Value, sendPipe);
 
@@ -82,7 +82,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         IPublishEndpointProvider CreatePublishEndpointProvider()
         {
-            IPublishPipe publishPipe = _configuration.CreatePublishPipe();
+            IPublishPipe publishPipe = _configuration.Publish.CreatePipe();
 
             return new RabbitMqPublishEndpointProvider(_host, _serializer, InputAddress, publishPipe);
         }

@@ -18,7 +18,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
     using MassTransit.Topology.Entities;
 
 
-    public abstract class RabbitMqTopologyBuilder
+    public abstract class BrokerTopologyBuilder
     {
         long _nextId;
         protected EntityCollection<ExchangeBindingEntity, ExchangeBindingHandle> ExchangeBindings;
@@ -26,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
         protected EntityCollection<QueueBindingEntity, QueueBindingHandle> QueueBindings;
         protected NamedEntityCollection<QueueEntity, QueueHandle> Queues;
 
-        protected RabbitMqTopologyBuilder()
+        protected BrokerTopologyBuilder()
         {
             Exchanges = new NamedEntityCollection<ExchangeEntity, ExchangeHandle>(ExchangeEntity.EntityComparer, ExchangeEntity.NameComparer);
             Queues = new NamedEntityCollection<QueueEntity, QueueHandle>(QueueEntity.QueueComparer, QueueEntity.NameComparer);

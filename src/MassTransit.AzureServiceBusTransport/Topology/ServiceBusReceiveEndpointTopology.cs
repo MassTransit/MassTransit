@@ -32,29 +32,27 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         readonly ISendPipe _sendPipe;
         readonly ISendTransportProvider _sendTransportProvider;
         readonly IMessageSerializer _serializer;
-        readonly TopologyLayout _topologyLayout;
 
         public ServiceBusReceiveEndpointTopology(IServiceBusEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer,
-            IServiceBusHost host, ISendTransportProvider sendTransportProvider, TopologyLayout topologyLayout)
+            IServiceBusHost host, ISendTransportProvider sendTransportProvider, BrokerTopology brokerTopology)
         {
             InputAddress = inputAddress;
             _serializer = serializer;
             _host = host;
-            _topologyLayout = topologyLayout;
+            BrokerTopology = brokerTopology;
             _sendTransportProvider = sendTransportProvider;
 
-            _send = configuration.SendTopology;
-            _publish = configuration.PublishTopology;
+            _send = configuration.Topology.Send;
+            _publish = configuration.Topology.Publish;
 
-            _sendPipe = configuration.CreateSendPipe();
-            _publishPipe = configuration.CreatePublishPipe();
+            _sendPipe = configuration.Send.CreatePipe();
+            _publishPipe = configuration.Publish.CreatePipe();
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
         }
 
-        public TopologyLayout TopologyLayout => _topologyLayout;
-
+        public BrokerTopology BrokerTopology { get; }
         public Uri InputAddress { get; }
         public ISendTopology Send => _send;
         public IPublishTopology Publish => _publish;

@@ -19,6 +19,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration
     public interface IRabbitMqConsumeTopologySpecification :
         ISpecification
     {
-        void Apply(IRabbitMqConsumeTopologyBuilder builder);
+        void Apply(IReceiveEndpointBrokerTopologyBuilder builder);
     }
 }

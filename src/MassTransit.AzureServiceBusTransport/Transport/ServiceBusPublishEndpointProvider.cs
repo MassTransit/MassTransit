@@ -97,5 +97,22 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, SendPipe.Empty);
             });
         }
+
+
+        /// <summary>
+        /// This will be used for the topology publish broker layout
+        /// </summary>
+        class Settings :
+            PublishSettings
+        {
+            public Settings(TopicDescription topicDescription, BrokerTopology brokerTopology)
+            {
+                TopicDescription = topicDescription;
+                BrokerTopology = brokerTopology;
+            }
+
+            public TopicDescription TopicDescription { get; }
+            public BrokerTopology BrokerTopology { get; }
+        }
     }
 }

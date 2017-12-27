@@ -32,7 +32,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// </summary>
         /// <param name="address">A valid RabbitMQ endpoint address</param>
         /// <returns></returns>
-        TopologyLayout GetTopologyLayout(Uri address);
+        BrokerTopology GetBrokerTopology(Uri address);
 
         /// <summary>
         /// Returns the error address for the specified queue

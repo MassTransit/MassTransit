@@ -93,7 +93,10 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _sendEndpointProvider.ConnectSendObserver(observer);
+            var sendHandle = _sendEndpointProvider.ConnectSendObserver(observer);
+            var publishHandle = _publishEndpointProvider.ConnectSendObserver(observer);
+
+            return new MultipleConnectHandle(sendHandle, publishHandle);
         }
 
         async Task Receiver(IPipe<NamespaceContext> pipe, TaskSupervisor supervisor)

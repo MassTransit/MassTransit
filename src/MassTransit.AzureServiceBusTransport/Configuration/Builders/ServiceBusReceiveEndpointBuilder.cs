@@ -51,7 +51,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Builders
                 if (!string.IsNullOrWhiteSpace(suffix))
                     subscriptionName += $"-{suffix}";
 
-                _configuration.ConsumeTopology
+                _configuration.Topology.Consume
                     .GetMessageTopology<T>()
                     .Subscribe(subscriptionName);
             }
@@ -66,15 +66,15 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Builders
             return new ServiceBusReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _host, _sendTransportProvider, topologyLayout);
         }
 
-        TopologyLayout BuildTopology(ReceiveSettings settings)
+        BrokerTopology BuildTopology(ReceiveSettings settings)
         {
-            var topologyBuilder = new ReceiveEndpointConsumeTopologyBuilder();
+            var topologyBuilder = new ReceiveEndpointBrokerTopologyBuilder();
 
             topologyBuilder.Queue = topologyBuilder.CreateQueue(settings.QueueDescription);
 
-            _configuration.ConsumeTopology.Apply(topologyBuilder);
+            _configuration.Topology.Consume.Apply(topologyBuilder);
 
-            return topologyBuilder.BuildTopologyLayout();
+            return topologyBuilder.BuildBrokerTopology();
         }
     }
 }

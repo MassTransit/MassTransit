@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,68 +14,34 @@ namespace MassTransit.RabbitMqTransport.Specifications
 {
     using EndpointSpecifications;
     using MassTransit.Pipeline;
-    using MassTransit.Topology;
-    using MassTransit.Topology.Configuration;
-    using MassTransit.Topology.Topologies;
-    using Topology;
-    using Topology.Configuration;
-    using Topology.Conventions.RoutingKey;
-    using Topology.Topologies;
 
 
     public class RabbitMqEndpointConfiguration :
-        EndpointConfiguration
-            <IRabbitMqEndpointConfiguration, IRabbitMqConsumeTopologyConfigurator, IRabbitMqSendTopologyConfigurator, IRabbitMqPublishTopologyConfigurator>,
+        EndpointConfiguration,
         IRabbitMqEndpointConfiguration
     {
-        public RabbitMqEndpointConfiguration(IMessageTopologyConfigurator messageTopology)
-            : this(messageTopology, CreateSend(GlobalTopology.Send), CreatePublish(messageTopology, GlobalTopology.Publish))
+        readonly IRabbitMqTopologyConfiguration _topologyConfiguration;
+
+        public RabbitMqEndpointConfiguration(IRabbitMqTopologyConfiguration topologyConfiguration, IConsumePipe consumePipe = null)
+            : base(topologyConfiguration, consumePipe)
         {
+            _topologyConfiguration = topologyConfiguration;
         }
 
-        public RabbitMqEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IRabbitMqSendTopologyConfigurator sendTopology,
-            IRabbitMqPublishTopologyConfigurator publishTopology)
-            : base(messageTopology, CreateConsume(messageTopology, publishTopology), sendTopology, publishTopology)
+        RabbitMqEndpointConfiguration(IEndpointConfiguration parentConfiguration, IRabbitMqTopologyConfiguration topologyConfiguration,
+            IConsumePipe consumePipe = null)
+            : base(parentConfiguration, topologyConfiguration, consumePipe)
         {
+            _topologyConfiguration = topologyConfiguration;
         }
 
-        public RabbitMqEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IRabbitMqSendTopologyConfigurator sendTopology,
-            IRabbitMqPublishTopologyConfigurator publishTopology, IRabbitMqEndpointConfiguration configuration, IConsumePipe consumePipe = null)
-            : base(messageTopology, CreateConsume(messageTopology, publishTopology), sendTopology, publishTopology, configuration, consumePipe)
+        IRabbitMqTopologyConfiguration IRabbitMqEndpointConfiguration.Topology => _topologyConfiguration;
+
+        public IRabbitMqEndpointConfiguration CreateNewConfiguration(IConsumePipe consumePipe = null)
         {
-        }
+            var topologyConfiguration = new RabbitMqTopologyConfiguration(_topologyConfiguration);
 
-        public override IRabbitMqEndpointConfiguration CreateConfiguration(IConsumePipe consumePipe = null)
-        {
-            return new RabbitMqEndpointConfiguration(MessageTopology, SendTopology, PublishTopology, this, consumePipe);
-        }
-
-        static IRabbitMqConsumeTopologyConfigurator CreateConsume(IMessageTopology messageTopology, IRabbitMqPublishTopology publishTopology)
-        {
-            var consumeTopology = new RabbitMqConsumeTopology(messageTopology, publishTopology);
-
-            return consumeTopology;
-        }
-
-        static IRabbitMqSendTopologyConfigurator CreateSend(ISendTopology delegateSendTopology)
-        {
-            var sendTopology = new RabbitMqSendTopology(RabbitMqEntityNameValidator.Validator);
-            sendTopology.AddConvention(new RoutingKeySendTopologyConvention());
-
-            var observer = new DelegateSendTopologyConfigurationObserver(delegateSendTopology);
-            sendTopology.Connect(observer);
-
-            return sendTopology;
-        }
-
-        static IRabbitMqPublishTopologyConfigurator CreatePublish(IMessageTopology messageTopology, IPublishTopologyConfigurator delegatePublishTopology)
-        {
-            var publishTopology = new RabbitMqPublishTopology(messageTopology);
-
-            var observer = new DelegatePublishTopologyConfigurationObserver(delegatePublishTopology);
-            publishTopology.Connect(observer);
-
-            return publishTopology;
+            return new RabbitMqEndpointConfiguration(this, topologyConfiguration, consumePipe);
         }
     }
 }

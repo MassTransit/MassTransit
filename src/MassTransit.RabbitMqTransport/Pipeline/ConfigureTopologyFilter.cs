@@ -32,12 +32,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     {
         readonly ILog _log = Logger.Get<ConfigureTopologyFilter<TSettings>>();
         readonly TSettings _settings;
-        readonly TopologyLayout _topology;
+        readonly BrokerTopology _brokerTopology;
 
-        public ConfigureTopologyFilter(TSettings settings, TopologyLayout topology)
+        public ConfigureTopologyFilter(TSettings settings, BrokerTopology brokerTopology)
         {
             _settings = settings;
-            _topology = topology;
+            _brokerTopology = brokerTopology;
         }
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
@@ -56,18 +56,18 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             var scope = context.CreateFilterScope("configureTopology");
 
-            _topology.Probe(scope);
+            _brokerTopology.Probe(scope);
         }
 
         async Task ConfigureTopology(ModelContext context)
         {
-            await Task.WhenAll(_topology.Exchanges.Select(exchange => Declare(context, exchange))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.Exchanges.Select(exchange => Declare(context, exchange))).ConfigureAwait(false);
 
-            await Task.WhenAll(_topology.ExchangeBindings.Select(binding => Bind(context, binding))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.ExchangeBindings.Select(binding => Bind(context, binding))).ConfigureAwait(false);
 
-            await Task.WhenAll(_topology.Queues.Select(queue => Declare(context, queue))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.Queues.Select(queue => Declare(context, queue))).ConfigureAwait(false);
 
-            await Task.WhenAll(_topology.QueueBindings.Select(binding => Bind(context, binding))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.QueueBindings.Select(binding => Bind(context, binding))).ConfigureAwait(false);
         }
 
         Task Declare(ModelContext context, Exchange exchange)

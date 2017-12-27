@@ -34,6 +34,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         readonly IIndex<TypeKey, CachedSendEndpoint<TypeKey>> _index;
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
+        readonly SendObservable _sendObservable;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
 
@@ -45,6 +46,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             _publishPipe = publishPipe;
 
             _publishObservable = new PublishObservable();
+            _sendObservable = new SendObservable();
 
             var cache = new GreenCache<CachedSendEndpoint<TypeKey>>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
             _index = cache.AddIndex("type", x => x.Key);
@@ -63,7 +65,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             if (!publishTopology.TryGetPublishAddress(_host.Address, out var publishAddress))
                 throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
 
-            return await _index.Get(new TypeKey(typeof(T), publishAddress), typeKey => CreateSendEndpoint<T>(typeKey, publishTopology)).ConfigureAwait(false);
+            return await _index.Get(new TypeKey(typeof(T), publishAddress), typeKey => CreateSendEndpoint(typeKey, publishTopology)).ConfigureAwait(false);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
@@ -71,19 +73,27 @@ namespace MassTransit.RabbitMqTransport.Transport
             return _publishObservable.Connect(observer);
         }
 
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendObservable.Connect(observer);
+        }
+
         Task<CachedSendEndpoint<TypeKey>> CreateSendEndpoint<T>(TypeKey typeKey, IRabbitMqMessagePublishTopology<T> publishTopology)
             where T : class
         {
             var sendSettings = publishTopology.GetSendSettings();
 
-            var builder = new PublishEndpointTopologyBuilder();
+            var builder = new PublishEndpointBrokerTopologyBuilder();
             publishTopology.Apply(builder);
 
             var topology = builder.BuildTopologyLayout();
 
             var modelCache = new RabbitMqModelCache(_host);
 
-            var sendTransport = new RabbitMqSendTransport(modelCache, new ConfigureTopologyFilter<SendSettings>(sendSettings, topology), sendSettings.ExchangeName);
+            var sendTransport = new RabbitMqSendTransport(modelCache, new ConfigureTopologyFilter<SendSettings>(sendSettings, topology),
+                sendSettings.ExchangeName);
+
+            sendTransport.ConnectSendObserver(_sendObservable);
 
             var sendEndpoint = new SendEndpoint(sendTransport, _serializer, typeKey.Address, _sourceAddress, SendPipe.Empty);
 
@@ -111,7 +121,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             {
                 if (ReferenceEquals(null, obj))
                     return false;
-                return obj is TypeKey && Equals((TypeKey)obj);
+                return obj is TypeKey key && Equals(key);
             }
 
             public override int GetHashCode()

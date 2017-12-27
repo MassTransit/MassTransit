@@ -12,56 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.EndpointSpecifications
 {
-    using ConsumePipeSpecifications;
     using GreenPipes;
-    using Pipeline;
-    using PublishPipeSpecifications;
-    using SendPipeSpecifications;
-    using Topology;
-    using Topology.Configuration;
 
 
     public interface IEndpointConfiguration :
         ISpecification
     {
-        IConsumePipeSpecification ConsumePipeSpecification { get; }
-        ISendPipeSpecification SendPipeSpecification { get; }
-        IPublishPipeSpecification PublishPipeSpecification { get; }
+        IConsumePipeConfiguration Consume { get; }
+        ISendPipeConfiguration Send { get; }
+        IPublishPipeConfiguration Publish { get; }
 
-        IConsumePipeConfigurator ConsumePipeConfigurator { get; }
-        ISendPipeConfigurator SendPipeConfigurator { get; }
-        IPublishPipeConfigurator PublishPipeConfigurator { get; }
-
-        IConsumePipe CreateConsumePipe();
-        ISendPipe CreateSendPipe();
-        IPublishPipe CreatePublishPipe();
-
-        void SeparatePublishFromSendTopology();
-
-        IMessageTopologyConfigurator MessageTopology { get; }
-        ISendTopologyConfigurator SendTopology { get; }
-        IPublishTopologyConfigurator PublishTopology { get; }
-    }
-
-
-    public interface IEndpointConfiguration<out TConfiguration, out TConsumeTopology, out TSendTopology, out TPublishTopology> :
-        IEndpointConfiguration
-        where TConfiguration : IEndpointConfiguration<TConfiguration, TConsumeTopology, TSendTopology, TPublishTopology>
-        where TConsumeTopology : IConsumeTopologyConfigurator
-        where TPublishTopology : IPublishTopologyConfigurator
-        where TSendTopology : ISendTopologyConfigurator
-    {
-        new IMessageTopology MessageTopology { get; }
-        TConsumeTopology ConsumeTopology { get; }
-        new TSendTopology SendTopology { get; }
-        new TPublishTopology PublishTopology { get; }
-
-        /// <summary>
-        /// Create a specification based upon this specification. All of the specifications and topologies will
-        /// include what's already configured, EXCEPT for the Consume topology, which is unique per endpoint.
-        /// </summary>
-        /// <param name="consumePipe"></param>
-        /// <returns></returns>
-        TConfiguration CreateConfiguration(IConsumePipe consumePipe = null);
+        ITopologyConfiguration Topology { get; }
     }
 }

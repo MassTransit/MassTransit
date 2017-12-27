@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Specifications
             yield return this.Failure(_key, _message);
         }
 
-        public void Apply(IRabbitMqConsumeTopologyBuilder builder)
+        public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
         }
     }

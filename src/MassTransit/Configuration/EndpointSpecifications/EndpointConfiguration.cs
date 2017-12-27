@@ -14,113 +14,41 @@ namespace MassTransit.EndpointSpecifications
 {
     using System.Collections.Generic;
     using System.Linq;
-    using ConsumePipeSpecifications;
     using GreenPipes;
     using Pipeline;
-    using Pipeline.Pipes;
-    using PublishPipeSpecifications;
-    using SendPipeSpecifications;
-    using Topology;
-    using Topology.Configuration;
-    using Topology.Observers;
 
 
-    public abstract class EndpointConfiguration<TConfiguration, TConsumeTopology, TSendTopology, TPublishTopology> :
-        IEndpointConfiguration<TConfiguration, TConsumeTopology, TSendTopology, TPublishTopology>
-        where TConsumeTopology : IConsumeTopologyConfigurator
-        where TSendTopology : ISendTopologyConfigurator
-        where TPublishTopology : IPublishTopologyConfigurator
-        where TConfiguration : IEndpointConfiguration<TConfiguration, TConsumeTopology, TSendTopology, TPublishTopology>
+    public class EndpointConfiguration :
+        IEndpointConfiguration
     {
-        readonly IConsumePipe _consumePipe;
-        readonly ConsumePipeSpecification _consumePipeSpecification;
-        readonly IMessageTopologyConfigurator _messageTopology;
-        readonly PublishPipeSpecification _publishPipeSpecification;
-        readonly TPublishTopology _publishTopology;
-        readonly ConnectHandle _publishToSendTopologyHandle;
-        readonly SendPipeSpecification _sendPipeSpecification;
-        readonly TSendTopology _sendTopology;
-
-        protected EndpointConfiguration(IMessageTopologyConfigurator messageTopology, TConsumeTopology consumeTopology, TSendTopology sendTopology, TPublishTopology publishTopology)
+        public EndpointConfiguration(ITopologyConfiguration topology, IConsumePipe consumePipe = null)
         {
-            _consumePipeSpecification = new ConsumePipeSpecification();
+            Topology = topology;
 
-            _messageTopology = messageTopology;
-            ConsumeTopology = consumeTopology;
-
-            _sendTopology = sendTopology;
-
-            _sendPipeSpecification = new SendPipeSpecification();
-            _sendPipeSpecification.Connect(new TopologySendPipeSpecificationObserver(sendTopology));
-
-            _publishTopology = publishTopology;
-
-            var observer = new PublishToSendTopologyConfigurationObserver(sendTopology);
-            _publishToSendTopologyHandle = publishTopology.Connect(observer);
-
-            _publishPipeSpecification = new PublishPipeSpecification();
-            _publishPipeSpecification.Connect(new TopologyPublishPipeSpecificationObserver(publishTopology));
+            Consume = new ConsumePipeConfiguration(consumePipe);
+            Send = new SendPipeConfiguration(topology.Send);
+            Publish = new PublishPipeConfiguration(topology.Publish);
         }
 
-        protected EndpointConfiguration(IMessageTopologyConfigurator messageTopology, TConsumeTopology consumeTopology, TSendTopology sendTopology,
-            TPublishTopology publishTopology,
-            TConfiguration parentConfiguration, IConsumePipe consumePipe = null)
-            : this(messageTopology, consumeTopology, sendTopology, publishTopology)
+        protected EndpointConfiguration(IEndpointConfiguration parentConfiguration, ITopologyConfiguration topology, IConsumePipe consumePipe = null)
         {
-            _consumePipe = consumePipe;
+            Topology = topology;
 
-            _consumePipeSpecification.Connect(new ParentConsumePipeSpecificationObserver(parentConfiguration.ConsumePipeSpecification));
-
-            _sendPipeSpecification.Connect(new ParentSendPipeSpecificationObserver(parentConfiguration.SendPipeSpecification));
-
-            _publishPipeSpecification.Connect(new ParentPublishPipeSpecificationObserver(parentConfiguration.PublishPipeSpecification));
+            Consume = new ConsumePipeConfiguration(parentConfiguration.Consume.Specification, consumePipe);
+            Send = new SendPipeConfiguration(parentConfiguration.Send.Specification);
+            Publish = new PublishPipeConfiguration(parentConfiguration.Publish.Specification);
         }
 
-        public IMessageTopologyConfigurator MessageTopology => _messageTopology;
-        IPublishTopologyConfigurator IEndpointConfiguration.PublishTopology => _publishTopology;
-        ISendTopologyConfigurator IEndpointConfiguration.SendTopology => _sendTopology;
-
-        IMessageTopology IEndpointConfiguration<TConfiguration, TConsumeTopology, TSendTopology, TPublishTopology>.MessageTopology => _messageTopology;
-        public TPublishTopology PublishTopology => _publishTopology;
-        public TSendTopology SendTopology => _sendTopology;
-
-        public TConsumeTopology ConsumeTopology { get; }
-
-        public IConsumePipeSpecification ConsumePipeSpecification => _consumePipeSpecification;
-        public ISendPipeSpecification SendPipeSpecification => _sendPipeSpecification;
-        public IPublishPipeSpecification PublishPipeSpecification => _publishPipeSpecification;
-
-        public IConsumePipeConfigurator ConsumePipeConfigurator => _consumePipeSpecification;
-        public ISendPipeConfigurator SendPipeConfigurator => _sendPipeSpecification;
-        public IPublishPipeConfigurator PublishPipeConfigurator => _publishPipeSpecification;
-
-        public IConsumePipe CreateConsumePipe()
+        public IEnumerable<ValidationResult> Validate()
         {
-            return _consumePipe ?? _consumePipeSpecification.BuildConsumePipe();
+            return Consume.Specification.Validate()
+                .Concat(Send.Specification.Validate())
+                .Concat(Publish.Specification.Validate());
         }
 
-        public ISendPipe CreateSendPipe()
-        {
-            return new SendPipe(_sendPipeSpecification);
-        }
-
-        public IPublishPipe CreatePublishPipe()
-        {
-            return new PublishPipe(_publishPipeSpecification);
-        }
-
-        public abstract TConfiguration CreateConfiguration(IConsumePipe consumePipe = null);
-
-        public void SeparatePublishFromSendTopology()
-        {
-            _publishToSendTopologyHandle.Disconnect();
-        }
-
-        public virtual IEnumerable<ValidationResult> Validate()
-        {
-            return _consumePipeSpecification.Validate()
-                .Concat(_sendPipeSpecification.Validate())
-                .Concat(_publishPipeSpecification.Validate());
-        }
+        public IConsumePipeConfiguration Consume { get; }
+        public ISendPipeConfiguration Send { get; }
+        public IPublishPipeConfiguration Publish { get; }
+        public ITopologyConfiguration Topology { get; }
     }
 }

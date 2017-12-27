@@ -18,6 +18,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology
     public interface IServiceBusReceiveEndpointTopology :
         IReceiveEndpointTopology
     {
-        TopologyLayout TopologyLayout { get; }
+        BrokerTopology BrokerTopology { get; }
     }
 }

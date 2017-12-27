@@ -12,17 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology
 {
+    using Builders;
     using MassTransit.Topology;
     using Microsoft.ServiceBus.Messaging;
 
 
     public interface IServiceBusMessagePublishTopology<TMessage> :
-        IMessagePublishTopology<TMessage>
+        IMessagePublishTopology<TMessage>,
+        IServiceBusMessagePublishTopology
         where TMessage : class
     {
         /// <summary>
         /// Returns the topic description for the message type
         /// </summary>
         TopicDescription TopicDescription { get; }
+    }
+
+
+    public interface IServiceBusMessagePublishTopology
+    {
+        /// <summary>
+        /// Apply the message topology to the builder, including any implemented types
+        /// </summary>
+        /// <param name="builder">The topology builder</param>
+        void Apply(IPublishEndpointBrokerTopologyBuilder builder);
     }
 }

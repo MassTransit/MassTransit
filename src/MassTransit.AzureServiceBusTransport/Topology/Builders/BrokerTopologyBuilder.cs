@@ -18,12 +18,12 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
     using Microsoft.ServiceBus.Messaging;
 
 
-    public abstract class ServiceBusTopologyBuilder :
-        IServiceBusTopologyBuilder
+    public abstract class BrokerTopologyBuilder :
+        IBrokerTopologyBuilder
     {
         long _nextId;
 
-        protected ServiceBusTopologyBuilder()
+        protected BrokerTopologyBuilder()
         {
             Topics = new NamedEntityCollection<TopicEntity, TopicHandle>(TopicEntity.EntityComparer, TopicEntity.NameComparer);
             Queues = new NamedEntityCollection<QueueEntity, QueueHandle>(QueueEntity.EntityComparer, QueueEntity.NameComparer);

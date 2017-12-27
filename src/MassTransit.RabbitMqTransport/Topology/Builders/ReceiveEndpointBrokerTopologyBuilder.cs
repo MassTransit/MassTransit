@@ -16,11 +16,11 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
     using MassTransit.Topology.Entities;
 
 
-    public class ReceiveEndpointConsumeTopologyBuilder :
-        RabbitMqTopologyBuilder,
-        IRabbitMqConsumeTopologyBuilder
+    public class ReceiveEndpointBrokerTopologyBuilder :
+        BrokerTopologyBuilder,
+        IReceiveEndpointBrokerTopologyBuilder
     {
-        public ReceiveEndpointConsumeTopologyBuilder()
+        public ReceiveEndpointBrokerTopologyBuilder()
         {
             Exchanges = new NamedEntityCollection<ExchangeEntity, ExchangeHandle>(ExchangeEntity.EntityComparer, ExchangeEntity.NameComparer);
             Queues = new NamedEntityCollection<QueueEntity, QueueHandle>(QueueEntity.QueueComparer, QueueEntity.NameComparer);
@@ -33,9 +33,9 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
 
         public ExchangeHandle Exchange { get; set; }
 
-        public TopologyLayout BuildTopologyLayout()
+        public BrokerTopology BuildTopologyLayout()
         {
-            return new RabbitMqTopologyLayout(Exchanges, ExchangeBindings, Queues, QueueBindings);
+            return new RabbitMqBrokerTopology(Exchanges, ExchangeBindings, Queues, QueueBindings);
         }
     }
 }

@@ -32,12 +32,12 @@ namespace MassTransit.HttpTransport.Specifications
     {
         readonly IHttpHost _host;
         readonly string _pathMatch;
-        readonly IInMemoryEndpointConfiguration _configuration;
+        readonly IHttpEndpointConfiguration _configuration;
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
         readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpReceiveEndpointSpecification(IHttpHost host, BusHostCollection<HttpHost> hosts, string pathMatch, IInMemoryEndpointConfiguration configuration)
+        public HttpReceiveEndpointSpecification(IHttpHost host, BusHostCollection<HttpHost> hosts, string pathMatch, IHttpEndpointConfiguration configuration)
             : base(configuration)
         {
             _host = host;
@@ -48,11 +48,6 @@ namespace MassTransit.HttpTransport.Specifications
 
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider;
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider;
-
-        public IInMemoryEndpointConfiguration     Configuration
-        {
-            get { return _configuration; }
-        }
 
         public override IEnumerable<ValidationResult> Validate()
         {
@@ -65,7 +60,7 @@ namespace MassTransit.HttpTransport.Specifications
 
         public void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new HttpReceiveEndpointBuilder(builder, _host, _hosts,  _configuration);
+            var receiveEndpointBuilder = new HttpReceiveEndpointBuilder(builder, _host, _hosts, _configuration);
 
             var receiveEndpointTopology = receiveEndpointBuilder.CreateReceiveEndpointTopology(InputAddress);
 

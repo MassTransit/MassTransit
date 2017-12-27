@@ -60,51 +60,51 @@ namespace MassTransit.EndpointSpecifications
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _configuration.ConsumePipeConfigurator.AddPipeSpecification(specification);
+            _configuration.Consume.Configurator.AddPipeSpecification(specification);
         }
 
         public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
             where T : class
         {
-            _configuration.ConsumePipeConfigurator.AddPipeSpecification(specification);
+            _configuration.Consume.Configurator.AddPipeSpecification(specification);
         }
 
         public void AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _configuration.ConsumePipeConfigurator.AddPrePipeSpecification(specification);
+            _configuration.Consume.Configurator.AddPrePipeSpecification(specification);
         }
 
         public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
-            return _configuration.ConsumePipeConfigurator.ConnectConsumerConfigurationObserver(observer);
+            return _configuration.Consume.Configurator.ConnectConsumerConfigurationObserver(observer);
         }
 
         void IConsumerConfigurationObserver.ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
         {
-            _configuration.ConsumePipeConfigurator.ConsumerConfigured(configurator);
+            _configuration.Consume.Configurator.ConsumerConfigured(configurator);
         }
 
         void IConsumerConfigurationObserver.ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
         {
-            _configuration.ConsumePipeConfigurator.ConsumerMessageConfigured(configurator);
+            _configuration.Consume.Configurator.ConsumerMessageConfigured(configurator);
         }
 
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
         {
-            return _configuration.ConsumePipeConfigurator.ConnectSagaConfigurationObserver(observer);
+            return _configuration.Consume.Configurator.ConnectSagaConfigurationObserver(observer);
         }
 
         public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
             where TSaga : class, ISaga
         {
-            _configuration.ConsumePipeConfigurator.SagaConfigured(configurator);
+            _configuration.Consume.Configurator.SagaConfigured(configurator);
         }
 
         public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
             where TSaga : class, ISaga
             where TMessage : class
         {
-            _configuration.ConsumePipeConfigurator.SagaMessageConfigured(configurator);
+            _configuration.Consume.Configurator.SagaMessageConfigured(configurator);
         }
 
         public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
@@ -112,7 +112,7 @@ namespace MassTransit.EndpointSpecifications
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            callback(_configuration.PublishPipeConfigurator);
+            callback(_configuration.Publish.Configurator);
         }
 
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
@@ -120,7 +120,7 @@ namespace MassTransit.EndpointSpecifications
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            callback(_configuration.SendPipeConfigurator);
+            callback(_configuration.Send.Configurator);
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace MassTransit.EndpointSpecifications
         /// </summary>
         public void SeparatePublishFromSendTopology()
         {
-            _configuration.SeparatePublishFromSendTopology();
+            _configuration.Topology.SeparatePublishFromSendTopology();
         }
 
         public virtual IEnumerable<ValidationResult> Validate()

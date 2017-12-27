@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Specifications
         {
             IPipe<ModelContext> pipe = Pipe.New<ModelContext>(x =>
             {
-                x.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, _topology.TopologyLayout));
+                x.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, _topology.BrokerTopology));
 
                 if (_settings.PurgeOnStartup)
                     x.UseFilter(new PurgeOnStartupFilter(_settings.QueueName));

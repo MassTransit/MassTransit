@@ -17,9 +17,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
     using Microsoft.ServiceBus.Messaging;
 
 
-    public class PublishEndpointTopologyBuilder :
-        ServiceBusTopologyBuilder,
-        IServiceBusPublishTopologyBuilder
+    public class PublishEndpointBrokerTopologyBuilder :
+        BrokerTopologyBuilder,
+        IPublishEndpointBrokerTopologyBuilder
     {
         [Flags]
         public enum Options
@@ -31,7 +31,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
 
         readonly Options _options;
 
-        public PublishEndpointTopologyBuilder(Options options = Options.FlattenHierarchy)
+        public PublishEndpointBrokerTopologyBuilder(Options options = Options.FlattenHierarchy)
         {
             _options = options;
         }
@@ -41,7 +41,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
         /// </summary>
         public TopicHandle Topic { get; set; }
 
-        public IServiceBusPublishTopologyBuilder CreateImplementedBuilder()
+        public IPublishEndpointBrokerTopologyBuilder CreateImplementedBuilder()
         {
             if (_options.HasFlag(Options.MaintainHierarchy))
             {
@@ -51,20 +51,20 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
             return this;
         }
 
-        public TopologyLayout BuildTopologyLayout()
+        public BrokerTopology BuildBrokerTopology()
         {
-            return new ServiceBusTopologyLayout(Topics, Subscriptions, Queues, QueueSubscriptions, TopicSubscriptions);
+            return new ServiceBusBrokerTopology(Topics, Subscriptions, Queues, QueueSubscriptions, TopicSubscriptions);
         }
 
 
         class ImplementedBuilder :
-            IServiceBusPublishTopologyBuilder
+            IPublishEndpointBrokerTopologyBuilder
         {
-            readonly IServiceBusPublishTopologyBuilder _builder;
+            readonly IPublishEndpointBrokerTopologyBuilder _builder;
             readonly Options _options;
             TopicHandle _topic;
 
-            public ImplementedBuilder(IServiceBusPublishTopologyBuilder builder, Options options)
+            public ImplementedBuilder(IPublishEndpointBrokerTopologyBuilder builder, Options options)
             {
                 _builder = builder;
                 _options = options;
@@ -88,7 +88,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
                 }
             }
 
-            public IServiceBusPublishTopologyBuilder CreateImplementedBuilder()
+            public IPublishEndpointBrokerTopologyBuilder CreateImplementedBuilder()
             {
                 if (_options.HasFlag(Options.MaintainHierarchy))
                 {

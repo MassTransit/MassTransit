@@ -12,13 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology.Configuration
 {
-    using Builders;
     using GreenPipes;
 
 
     public interface IRabbitMqPublishTopologySpecification :
         ISpecification
     {
-        void Apply(IRabbitMqPublishTopologyBuilder builder);
+        void Apply(IPublishEndpointBrokerTopologyBuilder builder);
     }
 }

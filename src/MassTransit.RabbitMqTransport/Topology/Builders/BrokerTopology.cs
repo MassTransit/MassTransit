@@ -16,7 +16,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
     using GreenPipes;
 
 
-    public interface TopologyLayout :
+    public interface BrokerTopology :
         IProbeSite
     {
         Exchange[] Exchanges { get; }

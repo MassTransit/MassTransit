@@ -40,9 +40,9 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public void CreateSubscriptionEndpoint(SubscriptionEndpointSettings settings, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
-            var endpointTopologySpecification = _configuration.CreateConfiguration();
+            var endpointConfiguration = _configuration.CreateNewConfiguration();
 
-            var endpointConfigurator = new ServiceBusSubscriptionEndpointSpecification(_host, settings, endpointTopologySpecification, _sendTransportProvider);
+            var endpointConfigurator = new ServiceBusSubscriptionEndpointSpecification(_host, settings, endpointConfiguration, _sendTransportProvider);
 
             configure?.Invoke(endpointConfigurator);
 

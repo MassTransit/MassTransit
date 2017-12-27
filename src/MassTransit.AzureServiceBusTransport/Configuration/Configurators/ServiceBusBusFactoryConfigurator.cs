@@ -115,7 +115,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
         public void SendTopology<T>(Action<IServiceBusMessageSendTopologyConfigurator<T>> configureTopology)
             where T : class
         {
-            var configurator = _configuration.SendTopology.GetMessageTopology<T>();
+            var configurator = _configuration.Topology.Send.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
@@ -123,7 +123,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
         public void PublishTopology<T>(Action<IServiceBusMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class
         {
-            var configurator = _configuration.PublishTopology.GetMessageTopology<T>();
+            var configurator = _configuration.Topology.Publish.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
@@ -133,7 +133,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
             if (settings == null)
                 throw new ArgumentNullException(nameof(settings));
 
-            var hostTopology = new ServiceBusHostTopology(_configuration.MessageTopology, _configuration.SendTopology, _configuration.PublishTopology);
+            var hostTopology = new ServiceBusHostTopology(_configuration.Topology);
             var host = new ServiceBusHost(settings, hostTopology);
             _hosts.Add(host);
 
@@ -161,7 +161,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
             if (serviceBusHost == null)
                 throw new ArgumentException("Must be a ServiceBusHost", nameof(host));
 
-            var endpointTopologySpecification = _configuration.CreateConfiguration();
+            var endpointTopologySpecification = _configuration.CreateNewConfiguration();
 
             var specification = new ServiceBusReceiveEndpointSpecification(serviceBusHost, queueName, endpointTopologySpecification, _sendTransportProvider);
 
@@ -176,9 +176,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
         public void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
             where T : class
         {
-            var endpointTopologySpecification = _configuration.CreateConfiguration();
+            var endpointTopologySpecification = _configuration.CreateNewConfiguration();
 
-            var settings = new SubscriptionEndpointSettings(_configuration.PublishTopology.GetMessageTopology<T>().TopicDescription, subscriptionName);
+            var settings = new SubscriptionEndpointSettings(_configuration.Topology.Publish.GetMessageTopology<T>().TopicDescription, subscriptionName);
 
             var specification = new ServiceBusSubscriptionEndpointSpecification(host, settings, endpointTopologySpecification, _sendTransportProvider);
 
@@ -193,7 +193,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
         public void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName,
             Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
-            var endpointTopologySpecification = _configuration.CreateConfiguration();
+            var endpointTopologySpecification = _configuration.CreateNewConfiguration();
 
             var specification = new ServiceBusSubscriptionEndpointSpecification(host, subscriptionName, topicName, endpointTopologySpecification, _sendTransportProvider);
 

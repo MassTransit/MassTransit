@@ -18,10 +18,10 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
     using GreenPipes;
 
 
-    public class RabbitMqTopologyLayout :
-        TopologyLayout
+    public class RabbitMqBrokerTopology :
+        BrokerTopology
     {
-        public RabbitMqTopologyLayout(IEnumerable<Exchange> exchanges, IEnumerable<ExchangeToExchangeBinding> exchangeBindings, IEnumerable<Queue> queues,
+        public RabbitMqBrokerTopology(IEnumerable<Exchange> exchanges, IEnumerable<ExchangeToExchangeBinding> exchangeBindings, IEnumerable<Queue> queues,
             IEnumerable<ExchangeToQueueBinding> queueBindings)
         {
             Exchanges = exchanges.ToArray();

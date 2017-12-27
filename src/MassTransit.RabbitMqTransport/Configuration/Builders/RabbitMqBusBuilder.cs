@@ -33,9 +33,9 @@ namespace MassTransit.RabbitMqTransport.Builders
         {
             _hosts = hosts;
 
-            var endpointTopologySpecification = configuration.CreateConfiguration(ConsumePipe);
+            var endpointConfiguration = configuration.CreateNewConfiguration(ConsumePipe);
 
-            _busEndpointSpecification = new RabbitMqReceiveEndpointSpecification(_hosts[0], endpointTopologySpecification, busSettings);
+            _busEndpointSpecification = new RabbitMqReceiveEndpointSpecification(_hosts[0], endpointConfiguration, busSettings);
 
             foreach (var host in hosts.Hosts)
             {

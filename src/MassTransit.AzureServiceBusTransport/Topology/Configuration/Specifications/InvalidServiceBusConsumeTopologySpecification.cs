@@ -34,7 +34,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Specificat
             yield return this.Failure(_key, _message);
         }
 
-        public void Apply(IReceiveEndpointConsumeTopologyBuilder builder)
+        public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
         }
     }

@@ -79,11 +79,11 @@ namespace MassTransit.RabbitMqTransport.Tests
             IRequestClient<SetPrefetchCount, PrefetchCountUpdated> client = new PublishRequestClient<SetPrefetchCount, PrefetchCountUpdated>(Bus,
                 TestTimeout);
 
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 50; i++)
             {
                 await Bus.Publish(new A());
 
-                await Task.Delay(50);
+                await Task.Delay(20);
             }
 
             SetPrefetchCount request = TypeMetadataCache<SetPrefetchCount>.InitializeFromObject(new
@@ -95,11 +95,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             await client.Request(request, TestCancellationToken);
 
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 50; i++)
             {
                 await Bus.Publish(new A());
 
-                await Task.Delay(50);
+                await Task.Delay(20);
             }
 
             Assert.IsTrue(_consumerA.Consumed.Select<A>().Any());

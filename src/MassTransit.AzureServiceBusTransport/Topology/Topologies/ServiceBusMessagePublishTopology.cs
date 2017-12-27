@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 {
     using System;
+    using Builders;
     using Configuration;
     using Configuration.Configurators;
     using MassTransit.Topology;
@@ -124,6 +125,25 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         TopicDescription GetTopicDescription()
         {
             return _topicConfigurator.GetTopicDescription();
+        }
+
+        public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
+        {
+            var topicHandle = builder.CreateTopic(_topicDescription.Value);
+
+            if (builder.Topic == null)
+                builder.Topic = topicHandle;
+
+/*
+            builder.CreateTopicSubscription(builder.Topic, topicHandle, new SubscriptionConfigurator(builder.Topic.Topic.TopicDescription.Path, topicHandle));
+            
+                builder.ExchangeBind(builder.Exchange, exchangeHandle, "", new Dictionary<string, object>());
+            else
+                builder.Exchange = exchangeHandle;
+
+            foreach (IRabbitMqMessagePublishTopology configurator in _implementedMessageTypes)
+                configurator.Apply(builder);
+*/
         }
     }
 }

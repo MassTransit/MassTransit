@@ -14,69 +14,34 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Specifications
 {
     using EndpointSpecifications;
     using MassTransit.Pipeline;
-    using MassTransit.Topology;
-    using MassTransit.Topology.Configuration;
-    using MassTransit.Topology.Topologies;
-    using Topology.Configuration;
-    using Topology.Conventions.PartitionKey;
-    using Topology.Conventions.SessionId;
-    using Topology.Topologies;
 
 
     public class ServiceBusEndpointConfiguration :
-        EndpointConfiguration<IServiceBusEndpointConfiguration,
-            IServiceBusConsumeTopologyConfigurator,
-            IServiceBusSendTopologyConfigurator,
-            IServiceBusPublishTopologyConfigurator>,
+        EndpointConfiguration,
         IServiceBusEndpointConfiguration
     {
-        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology)
-            : this(messageTopology, CreateSend(GlobalTopology.Send), CreatePublish(messageTopology, GlobalTopology.Publish))
+        readonly IServiceBusTopologyConfiguration _topologyConfiguration;
+
+        public ServiceBusEndpointConfiguration(IServiceBusTopologyConfiguration topologyConfiguration, IConsumePipe consumePipe = null)
+            : base(topologyConfiguration, consumePipe)
         {
+            _topologyConfiguration = topologyConfiguration;
         }
 
-        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IServiceBusSendTopologyConfigurator sendTopology,
-            IServiceBusPublishTopologyConfigurator publishTopology)
-            : base(messageTopology, CreateConsume(messageTopology, publishTopology), sendTopology, publishTopology)
+        ServiceBusEndpointConfiguration(IEndpointConfiguration parentConfiguration, IServiceBusTopologyConfiguration topologyConfiguration,
+            IConsumePipe consumePipe = null)
+            : base(parentConfiguration, topologyConfiguration, consumePipe)
         {
+            _topologyConfiguration = topologyConfiguration;
         }
 
-        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IServiceBusSendTopologyConfigurator sendTopology,
-            IServiceBusPublishTopologyConfigurator publishTopology, IServiceBusEndpointConfiguration configuration, IConsumePipe consumePipe = null)
-            : base(messageTopology, CreateConsume(messageTopology, publishTopology), sendTopology, publishTopology, configuration, consumePipe)
+        IServiceBusTopologyConfiguration IServiceBusEndpointConfiguration.Topology => _topologyConfiguration;
+
+        public IServiceBusEndpointConfiguration CreateNewConfiguration(IConsumePipe consumePipe = null)
         {
-        }
+            var topologyConfiguration = new ServiceBusTopologyConfiguration(_topologyConfiguration);
 
-        public override IServiceBusEndpointConfiguration CreateConfiguration(IConsumePipe consumePipe = null)
-        {
-            return new ServiceBusEndpointConfiguration(MessageTopology, SendTopology, PublishTopology, this, consumePipe);
-        }
-
-        static IServiceBusConsumeTopologyConfigurator CreateConsume(IMessageTopology messageTopology, IServiceBusPublishTopologyConfigurator publishTopology)
-        {
-            return new ServiceBusConsumeTopology(messageTopology, publishTopology);
-        }
-
-        static IServiceBusSendTopologyConfigurator CreateSend(ISendTopology delegateSendTopology)
-        {
-            var sendTopology = new ServiceBusSendTopology();
-            sendTopology.AddConvention(new SessionIdSendTopologyConvention());
-            sendTopology.AddConvention(new PartitionKeySendTopologyConvention());
-
-            var observer = new DelegateSendTopologyConfigurationObserver(delegateSendTopology);
-            sendTopology.Connect(observer);
-
-            return sendTopology;
-        }
-
-        static IServiceBusPublishTopologyConfigurator CreatePublish(IMessageTopology messageTopology, IPublishTopologyConfigurator delegatePublishTopology)
-        {
-            var publishTopology = new ServiceBusPublishTopology(messageTopology);
-
-            var observer = new DelegatePublishTopologyConfigurationObserver(delegatePublishTopology);
-            publishTopology.Connect(observer);
-
-            return publishTopology;
+            return new ServiceBusEndpointConfiguration(this, topologyConfiguration, consumePipe);
         }
     }
 }

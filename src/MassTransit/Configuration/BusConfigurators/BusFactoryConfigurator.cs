@@ -23,15 +23,14 @@ namespace MassTransit.BusConfigurators
     using Saga;
     using Saga.SubscriptionConfigurators;
     using Topology.Configuration;
-    using Transports.InMemory.Topology;
 
 
     public abstract class BusFactoryConfigurator<TBuilder>
         where TBuilder : IBusBuilder
     {
+        readonly IEndpointConfiguration _configuration;
         readonly IList<IReceiveEndpointSpecification<TBuilder>> _endpointSpecifications;
         readonly IList<IBusFactorySpecification<TBuilder>> _specifications;
-        readonly IEndpointConfiguration _configuration;
 
         protected BusFactoryConfigurator(IEndpointConfiguration configuration)
         {
@@ -43,18 +42,18 @@ namespace MassTransit.BusConfigurators
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _configuration.ConsumePipeConfigurator.AddPipeSpecification(specification);
+            _configuration.Consume.Configurator.AddPipeSpecification(specification);
         }
 
         public void AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _configuration.ConsumePipeConfigurator.AddPrePipeSpecification(specification);
+            _configuration.Consume.Configurator.AddPrePipeSpecification(specification);
         }
 
         public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
             where T : class
         {
-            _configuration.ConsumePipeConfigurator.AddPipeSpecification(specification);
+            _configuration.Consume.Configurator.AddPipeSpecification(specification);
         }
 
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
@@ -62,7 +61,7 @@ namespace MassTransit.BusConfigurators
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            callback(_configuration.SendPipeConfigurator);
+            callback(_configuration.Send.Configurator);
         }
 
         public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
@@ -70,13 +69,13 @@ namespace MassTransit.BusConfigurators
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            callback(_configuration.PublishPipeConfigurator);
+            callback(_configuration.Publish.Configurator);
         }
 
         public void SendTopology<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology)
             where T : class
         {
-            IMessageSendTopologyConfigurator<T> configurator = _configuration.SendTopology.GetMessageTopology<T>();
+            IMessageSendTopologyConfigurator<T> configurator = _configuration.Topology.Send.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
@@ -84,10 +83,11 @@ namespace MassTransit.BusConfigurators
         public void PublishTopology<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class
         {
-            var configurator = _configuration.PublishTopology.GetMessageTopology<T>();
+            var configurator = _configuration.Topology.Publish.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
+
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
             _specifications.Add(CreateSpecificationProxy(specification));
@@ -105,12 +105,12 @@ namespace MassTransit.BusConfigurators
 
         public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
-            return _configuration.ConsumePipeConfigurator.ConnectConsumerConfigurationObserver(observer);
+            return _configuration.Consume.Configurator.ConnectConsumerConfigurationObserver(observer);
         }
 
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
         {
-            return _configuration.ConsumePipeConfigurator.ConnectSagaConfigurationObserver(observer);
+            return _configuration.Consume.Configurator.ConnectSagaConfigurationObserver(observer);
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace MassTransit.BusConfigurators
         /// </summary>
         public void SeparatePublishFromSendTopology()
         {
-            _configuration.SeparatePublishFromSendTopology();
+            _configuration.Topology.SeparatePublishFromSendTopology();
         }
 
         public virtual IEnumerable<ValidationResult> Validate()
@@ -146,24 +146,24 @@ namespace MassTransit.BusConfigurators
 
         public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator) where TConsumer : class
         {
-            _configuration.ConsumePipeConfigurator.ConsumerConfigured(configurator);
+            _configuration.Consume.Configurator.ConsumerConfigured(configurator);
         }
 
         public void ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator) where TConsumer : class
             where TMessage : class
         {
-            _configuration.ConsumePipeConfigurator.ConsumerMessageConfigured(configurator);
+            _configuration.Consume.Configurator.ConsumerMessageConfigured(configurator);
         }
 
         public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator) where TSaga : class, ISaga
         {
-            _configuration.ConsumePipeConfigurator.SagaConfigured(configurator);
+            _configuration.Consume.Configurator.SagaConfigured(configurator);
         }
 
         public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator) where TSaga : class, ISaga
             where TMessage : class
         {
-            _configuration.ConsumePipeConfigurator.SagaMessageConfigured(configurator);
+            _configuration.Consume.Configurator.SagaMessageConfigured(configurator);
         }
 
 

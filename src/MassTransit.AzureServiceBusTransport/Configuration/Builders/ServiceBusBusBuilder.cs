@@ -33,7 +33,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Builders
             if (hosts == null)
                 throw new ArgumentNullException(nameof(hosts));
 
-            var endpointTopologySpecification = configuration.CreateConfiguration(ConsumePipe);
+            var endpointTopologySpecification = configuration.CreateNewConfiguration(ConsumePipe);
 
             _busEndpointSpecification = new ServiceBusReceiveEndpointSpecification(hosts[0], settings, endpointTopologySpecification, sendTransportProvider);
 

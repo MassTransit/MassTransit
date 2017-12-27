@@ -13,7 +13,6 @@
 namespace MassTransit.RabbitMqTransport.Topology.Configuration.Specifications
 {
     using System.Collections.Generic;
-    using Builders;
     using Configurators;
     using GreenPipes;
 
@@ -50,7 +49,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Specifications
             yield break;
         }
 
-        public void Apply(IRabbitMqPublishTopologyBuilder builder)
+        public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
         {
             var exchangeHandle = builder.ExchangeDeclare(_exchangeName, _exchangeType, _durable, _autoDelete, _exchangeArguments);
 

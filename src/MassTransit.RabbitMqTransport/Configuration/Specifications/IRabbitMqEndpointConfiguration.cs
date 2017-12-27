@@ -13,12 +13,14 @@
 namespace MassTransit.RabbitMqTransport.Specifications
 {
     using EndpointSpecifications;
-    using Topology;
-    using Topology.Configuration;
+    using MassTransit.Pipeline;
 
 
     public interface IRabbitMqEndpointConfiguration :
-        IEndpointConfiguration<IRabbitMqEndpointConfiguration, IRabbitMqConsumeTopologyConfigurator, IRabbitMqSendTopologyConfigurator, IRabbitMqPublishTopologyConfigurator>
+        IEndpointConfiguration
     {
+        new IRabbitMqTopologyConfiguration Topology { get; }
+
+        IRabbitMqEndpointConfiguration CreateNewConfiguration(IConsumePipe consumePipe = null);
     }
 }

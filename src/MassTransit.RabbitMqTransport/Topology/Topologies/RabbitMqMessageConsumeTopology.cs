@@ -48,7 +48,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
 
-        public void Apply(IRabbitMqConsumeTopologyBuilder builder)
+        public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
             {

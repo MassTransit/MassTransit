@@ -47,7 +47,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             _bindMessageExchanges = true;
 
-            _settings = new RabbitMqReceiveSettings(queueName, configuration.ConsumeTopology.ExchangeTypeSelector.DefaultExchangeType, true, false)
+            _settings = new RabbitMqReceiveSettings(queueName, configuration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false)
             {
                 QueueName = queueName
             };
@@ -177,13 +177,13 @@ namespace MassTransit.RabbitMqTransport.Configurators
             if (exchangeName == null)
                 throw new ArgumentNullException(nameof(exchangeName));
 
-            _configuration.ConsumeTopology.Bind(exchangeName);
+            _configuration.Topology.Consume.Bind(exchangeName);
         }
 
         public void Bind<T>()
             where T : class
         {
-            _configuration.ConsumeTopology.GetMessageTopology<T>().Bind();
+            _configuration.Topology.Consume.GetMessageTopology<T>().Bind();
         }
 
         public void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback)
@@ -193,7 +193,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            _configuration.ConsumeTopology.Bind(exchangeName, callback);
+            _configuration.Topology.Consume.Bind(exchangeName, callback);
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -214,7 +214,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
                 throw new ConfigurationException("Must be a RabbitMqBusBuilder");
 
             var receiveEndpointBuilder = new RabbitMqReceiveEndpointBuilder(builder, _host, rabbitMqBusBuilder.Hosts, _bindMessageExchanges, _configuration);
-
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
@@ -239,12 +238,12 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         protected override Uri GetErrorAddress()
         {
-            return _configuration.SendTopology.GetErrorAddress(_settings, _host.Address);
+            return _configuration.Topology.Send.GetErrorAddress(_settings, _host.Address);
         }
 
         protected override Uri GetDeadLetterAddress()
         {
-            return _configuration.SendTopology.GetDeadLetterAddress(_settings, _host.Address);
+            return _configuration.Topology.Send.GetDeadLetterAddress(_settings, _host.Address);
         }
     }
 }

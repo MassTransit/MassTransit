@@ -51,7 +51,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         IMessageExchangeTypeSelector<TMessage> ExchangeTypeSelector { get; }
 
-        public void Apply(IRabbitMqPublishTopologyBuilder builder)
+        public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
         {
             var exchangeHandle = ExchangeDeclare(builder);
 
@@ -103,7 +103,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             _exchangeConfigurator.SetExchangeArgument(key, value);
         }
 
-        ExchangeHandle ExchangeDeclare(IRabbitMqTopologyBuilder builder)
+        ExchangeHandle ExchangeDeclare(IBrokerTopologyBuilder builder)
         {
             return builder.ExchangeDeclare(_exchangeConfigurator.ExchangeName, _exchangeConfigurator.ExchangeType, _exchangeConfigurator.Durable,
                 _exchangeConfigurator.AutoDelete, _exchangeConfigurator.ExchangeArguments);
@@ -131,7 +131,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
                 _direct = direct;
             }
 
-            public void Apply(IRabbitMqPublishTopologyBuilder builder)
+            public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
             {
                 if (_direct)
                 {

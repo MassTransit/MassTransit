@@ -43,7 +43,7 @@ namespace MassTransit.Builders
 
             _inputAddress = new Lazy<Uri>(GetInputAddress);
 
-            _consumePipe = _configuration.CreateConsumePipe();
+            _consumePipe = _configuration.Consume.CreatePipe();
         }
 
         protected BusObservable BusObservable => _busObservable;
@@ -65,7 +65,7 @@ namespace MassTransit.Builders
 
         public ISendPipe CreateSendPipe()
         {
-            return _configuration.CreateSendPipe();
+            return _configuration.Send.CreatePipe();
         }
 
         public IConsumePipe CreateConsumePipe()
@@ -85,7 +85,7 @@ namespace MassTransit.Builders
 
         public IPublishPipe CreatePublishPipe()
         {
-            return _configuration.CreatePublishPipe();
+            return _configuration.Publish.CreatePipe();
         }
 
         protected abstract Uri GetInputAddress();

@@ -14,6 +14,8 @@ namespace MassTransit.Transports.InMemory.Builders
 {
     using System;
     using System.Linq;
+    using Configuration;
+    using EndpointSpecifications;
     using GreenPipes;
     using MassTransit.Builders;
 
@@ -36,7 +38,7 @@ namespace MassTransit.Transports.InMemory.Builders
 
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            _configuration.ConsumeTopology
+            _configuration.Topology.Consume
                 .GetMessageTopology<T>()
                 .Bind();
 
@@ -54,7 +56,7 @@ namespace MassTransit.Transports.InMemory.Builders
             builder.Exchange = queueName;
             builder.QueueBind(builder.Exchange, builder.Queue);
 
-            _configuration.ConsumeTopology.Apply(builder);
+            _configuration.Topology.Consume.Apply(builder);
 
             return new InMemoryReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _sendTransportProvider);
         }

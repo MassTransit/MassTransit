@@ -17,7 +17,6 @@ namespace MassTransit.HttpTransport.Builders
     using Specifications;
     using Transport;
     using Transports;
-    using Transports.InMemory;
 
 
     public class HttpBusBuilder :
@@ -25,15 +24,13 @@ namespace MassTransit.HttpTransport.Builders
     {
         readonly HttpReceiveEndpointSpecification _busEndpointSpecification;
         readonly BusHostCollection<HttpHost> _hosts;
-        readonly IInMemoryEndpointConfiguration _configuration;
 
-        public HttpBusBuilder(BusHostCollection<HttpHost> hosts, IInMemoryEndpointConfiguration configuration)
+        public HttpBusBuilder(BusHostCollection<HttpHost> hosts, IHttpEndpointConfiguration configuration)
             : base(hosts, configuration)
         {
             _hosts = hosts;
-            _configuration = configuration;
 
-            var endpointSpecification = configuration.CreateConfiguration(ConsumePipe);
+            var endpointSpecification = configuration.CreateNewConfiguration(ConsumePipe);
 
             _busEndpointSpecification = new HttpReceiveEndpointSpecification(_hosts[0], _hosts, "", endpointSpecification);
 

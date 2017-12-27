@@ -46,7 +46,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             return GetMessageTopology<T>() as IServiceBusMessageConsumeTopologyConfigurator<T>;
         }
 
-        public void Apply(IReceiveEndpointConsumeTopologyBuilder builder)
+        public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
                 specification.Apply(builder);

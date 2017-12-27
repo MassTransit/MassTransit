@@ -13,7 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 {
     using System.Text;
-    using MassTransit.Topology;
+    using AzureServiceBusTransport.Configuration.Specifications;
     using MassTransit.Topology.Topologies;
     using Util;
 
@@ -22,18 +22,16 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         HostTopology,
         IServiceBusHostTopology
     {
-        readonly IServiceBusPublishTopology _publishTopology;
-        readonly IServiceBusSendTopology _sendTopology;
+        readonly IServiceBusTopologyConfiguration _topologyConfiguration;
 
-        public ServiceBusHostTopology(IMessageTopology messageTopology, IServiceBusSendTopology sendTopology, IServiceBusPublishTopology publishTopology)
-            : base(messageTopology, sendTopology, publishTopology)
+        public ServiceBusHostTopology(IServiceBusTopologyConfiguration topologyConfiguration)
+            : base(topologyConfiguration)
         {
-            _sendTopology = sendTopology;
-            _publishTopology = publishTopology;
+            _topologyConfiguration = topologyConfiguration;
         }
 
-        IServiceBusPublishTopology IServiceBusHostTopology.PublishTopology => _publishTopology;
-        IServiceBusSendTopology IServiceBusHostTopology.SendTopology => _sendTopology;
+        IServiceBusPublishTopology IServiceBusHostTopology.PublishTopology => _topologyConfiguration.Publish;
+        IServiceBusSendTopology IServiceBusHostTopology.SendTopology => _topologyConfiguration.Send;
 
         public override string CreateTemporaryQueueName(string prefix)
         {
@@ -60,12 +58,12 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
         IServiceBusMessagePublishTopology<T> IServiceBusHostTopology.Publish<T>()
         {
-            return _publishTopology.GetMessageTopology<T>();
+            return _topologyConfiguration.Publish.GetMessageTopology<T>();
         }
 
         IServiceBusMessageSendTopology<T> IServiceBusHostTopology.Send<T>()
         {
-            return _sendTopology.GetMessageTopology<T>();
+            return _topologyConfiguration.Send.GetMessageTopology<T>();
         }
     }
 }

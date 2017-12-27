@@ -16,7 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
     using Microsoft.ServiceBus.Messaging;
 
 
-    public interface IServiceBusTopologyBuilder
+    public interface IBrokerTopologyBuilder
     {
         /// <summary>
         /// Creates a topic

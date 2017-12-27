@@ -14,21 +14,21 @@ namespace MassTransit.HttpTransport.Builders
 {
     using System;
     using MassTransit.Builders;
+    using Specifications;
     using Topology;
     using Transport;
     using Transports;
-    using Transports.InMemory;
 
 
     public class HttpReceiveEndpointBuilder :
         ReceiveEndpointBuilder,
         IHttpReceiveEndpointBuilder
     {
+        readonly IHttpEndpointConfiguration _configuration;
         readonly IHttpHost _host;
-        readonly IInMemoryEndpointConfiguration _configuration;
         readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpReceiveEndpointBuilder(IBusBuilder busBuilder, IHttpHost host, BusHostCollection<HttpHost> hosts, IInMemoryEndpointConfiguration configuration)
+        public HttpReceiveEndpointBuilder(IBusBuilder busBuilder, IHttpHost host, BusHostCollection<HttpHost> hosts, IHttpEndpointConfiguration configuration)
             : base(busBuilder, configuration)
         {
             _host = host;

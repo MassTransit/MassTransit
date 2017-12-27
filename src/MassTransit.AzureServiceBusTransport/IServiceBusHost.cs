@@ -33,7 +33,7 @@ namespace MassTransit.AzureServiceBusTransport
         /// <summary>
         /// Returns the topology of the service bus host
         /// </summary>
-        IServiceBusHostTopology Topology { get; }
+        new IServiceBusHostTopology Topology { get; }
 
         Task<MessagingFactory> MessagingFactory { get; }
 

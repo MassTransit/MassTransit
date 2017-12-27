@@ -17,9 +17,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
     public static class TopologyLayoutExtensions
     {
-        static readonly ILog _log = Logger.Get<TopologyLayout>();
+        static readonly ILog _log = Logger.Get<BrokerTopology>();
 
-        public static void LogResult(this TopologyLayout layout)
+        public static void LogResult(this BrokerTopology layout)
         {
             foreach (var exchange in layout.Topics)
             {

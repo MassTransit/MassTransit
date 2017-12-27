@@ -26,6 +26,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         /// Apply the entire topology to the builder
         /// </summary>
         /// <param name="builder"></param>
-        void Apply(IReceiveEndpointConsumeTopologyBuilder builder);
+        void Apply(IReceiveEndpointBrokerTopologyBuilder builder);
     }
 }

@@ -17,7 +17,8 @@ namespace MassTransit
 
 
     public interface IPublishEndpointProvider :
-        IPublishObserverConnector
+        IPublishObserverConnector,
+        ISendObserverConnector
     {
         IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId = default(Guid?), Guid? conversationId = default(Guid?));
 

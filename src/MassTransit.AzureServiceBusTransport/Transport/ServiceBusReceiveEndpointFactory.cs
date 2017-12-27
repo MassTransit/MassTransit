@@ -17,7 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using Configuration.Builders;
     using Configuration.Configurators;
     using Configuration.Specifications;
-    using MassTransit.Configurators;
+    using Configurators;
 
 
     public class ServiceBusReceiveEndpointFactory :
@@ -39,7 +39,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public void CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var endpointTopologySpecification = _configuration.CreateConfiguration();
+            var endpointTopologySpecification = _configuration.CreateNewConfiguration();
 
             var endpointConfigurator = new ServiceBusReceiveEndpointSpecification(_host, queueName, endpointTopologySpecification, _sendTransportProvider);
 

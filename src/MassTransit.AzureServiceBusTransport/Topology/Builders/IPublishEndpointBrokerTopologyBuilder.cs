@@ -10,27 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Topology.Builders
+namespace MassTransit.AzureServiceBusTransport.Topology.Builders
 {
     using Entities;
 
 
     /// <summary>
-    /// A unique builder context should be created for each specification, so that the items added
-    /// by it can be combined together into a group - so that if a subsequent specification yanks 
-    /// something that conflicts, the system can yank the group or warn that it's impacted.
+    /// A builder for creating the topology when publishing a message
     /// </summary>
-    public interface IRabbitMqConsumeTopologyBuilder :
-        IRabbitMqTopologyBuilder
+    public interface IPublishEndpointBrokerTopologyBuilder :
+        IBrokerTopologyBuilder
     {
         /// <summary>
-        /// A handle to the consuming queue
+        /// The topic to which the message is published
         /// </summary>
-        QueueHandle Queue { get; }
+        TopicHandle Topic { get; set; }
 
         /// <summary>
-        /// A handle to the exchange which is bound directly to the consuming queue
+        /// Create an implemented builder which can be passed to implemented types
         /// </summary>
-        ExchangeHandle Exchange { get; }
+        /// <returns></returns>
+        IPublishEndpointBrokerTopologyBuilder CreateImplementedBuilder();
     }
 }

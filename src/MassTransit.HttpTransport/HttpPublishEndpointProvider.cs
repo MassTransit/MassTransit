@@ -59,5 +59,10 @@ namespace MassTransit.HttpTransport
 
             return new SendEndpoint(transport, _serializer, destinationAddress, _host.Address, SendPipe.Empty);
         }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return new EmptyConnectHandle();
+        }
     }
 }

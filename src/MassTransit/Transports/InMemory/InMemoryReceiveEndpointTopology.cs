@@ -13,6 +13,9 @@
 namespace MassTransit.Transports.InMemory
 {
     using System;
+    using System.Runtime.InteropServices;
+    using Configuration;
+    using EndpointSpecifications;
     using MassTransit.Topology;
     using Pipeline;
     using Pipeline.Pipes;
@@ -37,19 +40,16 @@ namespace MassTransit.Transports.InMemory
             _serializer = serializer;
             _sendTransportProvider = sendTransportProvider;
 
-            Send = configuration.SendTopology;
-            Publish = configuration.PublishTopology;
-
-            _sendPipe = configuration.CreateSendPipe();
-            _publishPipe = configuration.CreatePublishPipe();
+            _sendPipe = configuration.Send.CreatePipe();
+            _publishPipe = configuration.Publish.CreatePipe();
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
         }
 
         public Uri InputAddress { get; }
-        public ISendTopology Send { get; }
-        public IPublishTopology Publish { get; }
+        public ISendTopology Send => _configuration.Topology.Send;
+        public IPublishTopology Publish => _configuration.Topology.Publish;
 
         ISendEndpointProvider IReceiveEndpointTopology.SendEndpointProvider => _sendEndpointProvider.Value;
         IPublishEndpointProvider IReceiveEndpointTopology.PublishEndpointProvider => _publishEndpointProvider.Value;
@@ -68,8 +68,7 @@ namespace MassTransit.Transports.InMemory
 
             var sendEndpointCache = new SendEndpointCache(sendEndpointProvider);
 
-            return new InMemoryPublishEndpointProvider(_sendTransportProvider, _publishPipe, _configuration.PublishTopology,
-                _serializer, InputAddress);
+            return new InMemoryPublishEndpointProvider(_sendTransportProvider, _publishPipe, _configuration.Topology.Publish, _serializer, InputAddress);
         }
     }
 }

@@ -12,25 +12,27 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory.Topology.Topologies
 {
-    using MassTransit.Topology;
+    using Configuration;
+    using EndpointSpecifications;
     using MassTransit.Topology.Topologies;
 
 
     public class InMemoryHostTopology :
-        HostTopology
+        HostTopology,
+        IInMemoryHostTopology
     {
-        readonly IInMemoryPublishTopology _publishTopology;
+        readonly IInMemoryTopologyConfiguration _topologyConfiguration;
 
-        public InMemoryHostTopology(IMessageTopology messageTopology, ISendTopology sendTopology, IInMemoryPublishTopology publishTopology)
-            : base(messageTopology, sendTopology, publishTopology)
+        public InMemoryHostTopology(IInMemoryTopologyConfiguration topologyConfiguration)
+            : base(topologyConfiguration)
         {
-            _publishTopology = publishTopology;
+            _topologyConfiguration = topologyConfiguration;
         }
 
         public new IInMemoryMessagePublishTopology<T> Publish<T>()
             where T : class
         {
-            return _publishTopology.GetMessageTopology<T>();
+            return _topologyConfiguration.Publish.GetMessageTopology<T>();
         }
     }
 }
