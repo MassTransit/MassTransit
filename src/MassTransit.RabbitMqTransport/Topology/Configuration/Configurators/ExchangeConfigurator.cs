@@ -2,10 +2,12 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Configurators
 {
     using System;
     using System.Collections.Generic;
+    using Entities;
 
 
     public class ExchangeConfigurator :
-        IExchangeConfigurator
+        IExchangeConfigurator,
+        Exchange
     {
         public ExchangeConfigurator(string exchangeName, string exchangeType, bool durable, bool autoDelete)
         {
@@ -15,6 +17,16 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Configurators
             AutoDelete = autoDelete;
 
             ExchangeArguments = new Dictionary<string, object>();
+        }
+
+        public ExchangeConfigurator(Exchange source)
+        {
+            ExchangeName = source.ExchangeName;
+            ExchangeType = source.ExchangeType;
+            Durable = source.Durable;
+            AutoDelete = source.AutoDelete;
+
+            ExchangeArguments = new Dictionary<string, object>(source.ExchangeArguments);
         }
 
         public string ExchangeName { get; set; }
@@ -48,6 +60,5 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Configurators
             if (ExchangeType != RabbitMQ.Client.ExchangeType.Fanout)
                 yield return "type=" + ExchangeType;
         }
-
     }
 }

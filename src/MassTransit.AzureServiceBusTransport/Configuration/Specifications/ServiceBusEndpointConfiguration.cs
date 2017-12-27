@@ -18,6 +18,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Specifications
     using MassTransit.Topology.Configuration;
     using MassTransit.Topology.Topologies;
     using Topology.Configuration;
+    using Topology.Conventions.PartitionKey;
+    using Topology.Conventions.SessionId;
     using Topology.Topologies;
 
 
@@ -33,17 +35,14 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Specifications
         {
         }
 
-        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology,
-            IServiceBusSendTopologyConfigurator sendTopology,
+        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IServiceBusSendTopologyConfigurator sendTopology,
             IServiceBusPublishTopologyConfigurator publishTopology)
             : base(messageTopology, CreateConsume(messageTopology, publishTopology), sendTopology, publishTopology)
         {
         }
 
-        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology,
-            IServiceBusSendTopologyConfigurator sendTopology,
-            IServiceBusPublishTopologyConfigurator publishTopology,
-            IServiceBusEndpointConfiguration configuration, IConsumePipe consumePipe = null)
+        public ServiceBusEndpointConfiguration(IMessageTopologyConfigurator messageTopology, IServiceBusSendTopologyConfigurator sendTopology,
+            IServiceBusPublishTopologyConfigurator publishTopology, IServiceBusEndpointConfiguration configuration, IConsumePipe consumePipe = null)
             : base(messageTopology, CreateConsume(messageTopology, publishTopology), sendTopology, publishTopology, configuration, consumePipe)
         {
         }
@@ -61,6 +60,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Specifications
         static IServiceBusSendTopologyConfigurator CreateSend(ISendTopology delegateSendTopology)
         {
             var sendTopology = new ServiceBusSendTopology();
+            sendTopology.AddConvention(new SessionIdSendTopologyConvention());
+            sendTopology.AddConvention(new PartitionKeySendTopologyConvention());
 
             var observer = new DelegateSendTopologyConfigurationObserver(delegateSendTopology);
             sendTopology.Connect(observer);

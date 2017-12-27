@@ -42,6 +42,11 @@ namespace MassTransit.Util
             return GetOrAdd(type).IsValidMessageType;
         }
 
+        public static bool IsTemporaryMessageType(Type type)
+        {
+            return GetOrAdd(type).IsTemporaryMessageType;
+        }
+
         public static Type[] GetMessageTypes(Type type)
         {
             return GetOrAdd(type).MessageTypes;
@@ -57,6 +62,7 @@ namespace MassTransit.Util
         interface CachedType
         {
             bool IsValidMessageType { get; }
+            bool IsTemporaryMessageType { get; }
             string ShortName { get; }
             Type[] MessageTypes { get; }
         }
@@ -66,9 +72,8 @@ namespace MassTransit.Util
             CachedType
         {
             public bool IsValidMessageType => TypeMetadataCache<T>.IsValidMessageType;
-
+            public bool IsTemporaryMessageType => TypeMetadataCache<T>.IsTemporaryMessageType;
             public string ShortName => TypeMetadataCache<T>.ShortName;
-
             public Type[] MessageTypes => TypeMetadataCache<T>.MessageTypes;
         }
     }

@@ -106,7 +106,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         public Uri GetDestinationAddress(Type messageType, Action<IExchangeConfigurator> configure = null)
         {
-            var isTemporary = messageType.GetTypeInfo().IsTemporaryMessageType();
+            var isTemporary = TypeMetadataCache.IsTemporaryMessageType(messageType);
 
             var durable = !isTemporary;
             var autoDelete = isTemporary;

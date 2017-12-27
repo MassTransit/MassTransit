@@ -25,7 +25,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration
 
 
     public interface IRabbitMqMessagePublishTopologyConfigurator :
-        IMessagePublishTopologyConfigurator
+        IMessagePublishTopologyConfigurator,
+        IExchangeConfigurator
     {
     }
 }

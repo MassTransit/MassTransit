@@ -52,7 +52,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
 
-        [Test, Explicit]
+        [Test, Explicit, Category("SlowAF")]
         public async Task Should_fault_nicely()
         {
             await Bus.Publish(new ReconnectMessage {Value = "Before"});

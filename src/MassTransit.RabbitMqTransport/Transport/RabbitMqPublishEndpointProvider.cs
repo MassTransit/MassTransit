@@ -58,12 +58,12 @@ namespace MassTransit.RabbitMqTransport.Transport
         public async Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
             where T : class
         {
-            IRabbitMqMessagePublishTopology<T> messageTopology = _host.Topology.Publish<T>();
+            IRabbitMqMessagePublishTopology<T> publishTopology = _host.Topology.Publish<T>();
 
-            if (!messageTopology.TryGetPublishAddress(_host.Address, out var publishAddress))
+            if (!publishTopology.TryGetPublishAddress(_host.Address, out var publishAddress))
                 throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
 
-            return await _index.Get(new TypeKey(typeof(T), publishAddress), typeKey => CreateSendEndpoint<T>(typeKey)).ConfigureAwait(false);
+            return await _index.Get(new TypeKey(typeof(T), publishAddress), typeKey => CreateSendEndpoint<T>(typeKey, publishTopology)).ConfigureAwait(false);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
@@ -71,15 +71,13 @@ namespace MassTransit.RabbitMqTransport.Transport
             return _publishObservable.Connect(observer);
         }
 
-        Task<CachedSendEndpoint<TypeKey>> CreateSendEndpoint<T>(TypeKey typeKey)
+        Task<CachedSendEndpoint<TypeKey>> CreateSendEndpoint<T>(TypeKey typeKey, IRabbitMqMessagePublishTopology<T> publishTopology)
             where T : class
         {
-            IRabbitMqMessagePublishTopology<T> messageTopology = _host.Topology.Publish<T>();
-
-            var sendSettings = messageTopology.GetSendSettings();
+            var sendSettings = publishTopology.GetSendSettings();
 
             var builder = new PublishEndpointTopologyBuilder();
-            messageTopology.Apply(builder);
+            publishTopology.Apply(builder);
 
             var topology = builder.BuildTopologyLayout();
 

@@ -14,8 +14,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 {
     using System;
     using System.Collections.Generic;
-    using Builders;
     using Configuration;
+    using Configuration.Configurators;
     using Entities;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
@@ -27,6 +27,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         IRabbitMqMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
+        readonly ExchangeConfigurator _exchangeConfigurator;
         readonly IList<IRabbitMqMessagePublishTopology> _implementedMessageTypes;
         readonly IMessageTopology<TMessage> _messageTopology;
 
@@ -34,6 +35,16 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         {
             _messageTopology = messageTopology;
             ExchangeTypeSelector = exchangeTypeSelector;
+
+            var exchangeName = messageTopology.EntityName;
+            var exchangeType = exchangeTypeSelector.GetExchangeType(exchangeName);
+
+            var temporary = TypeMetadataCache<TMessage>.IsTemporaryMessageType;
+
+            var durable = !temporary;
+            var autoDelete = temporary;
+
+            _exchangeConfigurator = new ExchangeConfigurator(exchangeName, exchangeType, durable, autoDelete);
 
             _implementedMessageTypes = new List<IRabbitMqMessagePublishTopology>();
         }
@@ -55,50 +66,47 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
         {
-            var exchangeName = _messageTopology.EntityName;
-            var exchangeType = ExchangeTypeSelector.GetExchangeType(exchangeName);
-
-            var sendSettings = GetSendSettings(exchangeName, exchangeType);
-
-            publishAddress = sendSettings.GetSendAddress(baseAddress);
+            publishAddress = GetSendSettings().GetSendAddress(baseAddress);
             return true;
         }
 
         public SendSettings GetSendSettings()
         {
-            var exchangeName = _messageTopology.EntityName;
-            var exchangeType = ExchangeTypeSelector.GetExchangeType(exchangeName);
+            return new RabbitMqSendSettings(_exchangeConfigurator.ExchangeName, _exchangeConfigurator.ExchangeType, _exchangeConfigurator.Durable,
+                _exchangeConfigurator.AutoDelete);
+        }
 
-            return GetSendSettings(exchangeName, exchangeType);
+        public Exchange Exchange => _exchangeConfigurator;
+
+        bool IExchangeConfigurator.Durable
+        {
+            set => _exchangeConfigurator.Durable = value;
+        }
+
+        bool IExchangeConfigurator.AutoDelete
+        {
+            set => _exchangeConfigurator.AutoDelete = value;
+        }
+
+        string IExchangeConfigurator.ExchangeType
+        {
+            set => _exchangeConfigurator.ExchangeType = value;
+        }
+
+        void IExchangeConfigurator.SetExchangeArgument(string key, object value)
+        {
+            _exchangeConfigurator.SetExchangeArgument(key, value);
+        }
+
+        void IExchangeConfigurator.SetExchangeArgument(string key, TimeSpan value)
+        {
+            _exchangeConfigurator.SetExchangeArgument(key, value);
         }
 
         ExchangeHandle ExchangeDeclare(IRabbitMqTopologyBuilder builder)
         {
-            var exchangeName = _messageTopology.EntityName;
-            var exchangeType = ExchangeTypeSelector.GetExchangeType(exchangeName);
-
-            var temporary = TypeMetadataCache<TMessage>.IsTemporaryMessageType;
-
-            var durable = !temporary;
-            var autoDelete = temporary;
-
-            var arguments = new Dictionary<string, object>();
-
-            return builder.ExchangeDeclare(exchangeName, exchangeType, durable, autoDelete, arguments);
-        }
-
-        public SendSettings GetSendSettings(string exchangeName, string exchangeType, Action<IExchangeConfigurator> configure = null)
-        {
-            var isTemporary = TypeMetadataCache<TMessage>.IsTemporaryMessageType;
-
-            var durable = !isTemporary;
-            var autoDelete = isTemporary;
-
-            var settings = new RabbitMqSendSettings(exchangeName, exchangeType, durable, autoDelete);
-
-            configure?.Invoke(settings);
-
-            return settings;
+            return builder.ExchangeDeclare(_exchangeConfigurator.ExchangeName, _exchangeConfigurator.ExchangeType, _exchangeConfigurator.Durable,
+                _exchangeConfigurator.AutoDelete, _exchangeConfigurator.ExchangeArguments);
         }
 
         public void AddImplementedMessageConfigurator<T>(IRabbitMqMessagePublishTopologyConfigurator<T> configurator, bool direct)

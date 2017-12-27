@@ -31,11 +31,14 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         where TMessage : class
     {
         readonly IMessageTopology<TMessage> _messageTopology;
+        readonly IRabbitMqMessagePublishTopology<TMessage> _publishTopology;
         readonly IList<IRabbitMqConsumeTopologySpecification> _specifications;
 
-        public RabbitMqMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector)
+        public RabbitMqMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector,
+            IRabbitMqMessagePublishTopology<TMessage> publishTopology)
         {
             _messageTopology = messageTopology;
+            _publishTopology = publishTopology;
             ExchangeTypeSelector = exchangeTypeSelector;
 
             _specifications = new List<IRabbitMqConsumeTopologySpecification>();
@@ -61,15 +64,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
                 return;
             }
 
-            var exchangeName = _messageTopology.EntityName;
-            var exchangeType = ExchangeTypeSelector.GetExchangeType(exchangeName);
-
-            var temporary = TypeMetadataCache<TMessage>.IsTemporaryMessageType;
-
-            var autoDelete = temporary;
-            var durable = !temporary;
-
-            var binding = new ExchangeBindingConfigurator(exchangeName, exchangeType, durable, autoDelete, "");
+            var binding = new ExchangeBindingConfigurator(_publishTopology.Exchange, "");
 
             configure?.Invoke(binding);
 

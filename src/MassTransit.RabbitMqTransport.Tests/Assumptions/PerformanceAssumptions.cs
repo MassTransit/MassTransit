@@ -5,7 +5,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
     using RabbitMQ.Client.Events;
 
 
-    [TestFixture, Explicit]
+    [TestFixture, Explicit, Category("SlowAF")]
     public class BasicAckIsFasterOnGet :
         GivenAChannel
     {
@@ -17,47 +17,47 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
         public void LoadUpMessages()
         {
             WithChannel(chan =>
-                {
-                    chan.QueueDeclare(theQueue, false, false, false, null);
-                    chan.ExchangeDeclare(theExchange, "fanout",false);
-                    chan.QueueBind(theQueue,theExchange, "");
+            {
+                chan.QueueDeclare(theQueue, false, false, false, null);
+                chan.ExchangeDeclare(theExchange, "fanout", false);
+                chan.QueueBind(theQueue, theExchange, "");
 
-                    for (int i = 0; i < HowMany; i++)
-                    {
-                        chan.BasicPublish(theExchange, "", null, TheMessage);
-                    }
-                });
+                for (int i = 0; i < HowMany; i++)
+                {
+                    chan.BasicPublish(theExchange, "", null, TheMessage);
+                }
+            });
         }
 
         [Test]
         public void NoAcks()
         {
             WithChannel(chan =>
+            {
+                WithStopWatch("NoAcks", () =>
                 {
-                    WithStopWatch("NoAcks", () =>
-                        {
-                            for (int i = 0; i < HowMany; i++)
-                            {
-                                var msg = chan.BasicGet(theQueue, true);
-                            }
-                        });
+                    for (int i = 0; i < HowMany; i++)
+                    {
+                        var msg = chan.BasicGet(theQueue, true);
+                    }
                 });
+            });
         }
 
         [Test]
         public void Acks()
         {
-            WithChannel(chan=>
+            WithChannel(chan =>
+            {
+                WithStopWatch("Acks", () =>
                 {
-                    WithStopWatch("Acks", ()=>
-                        {
-                            for (int i = 0; i < HowMany; i++)
-                            {
-                                var msg = chan.BasicGet(theQueue, false);
-                                chan.BasicAck(msg.DeliveryTag, false);
-                            }
-                        });
+                    for (int i = 0; i < HowMany; i++)
+                    {
+                        var msg = chan.BasicGet(theQueue, false);
+                        chan.BasicAck(msg.DeliveryTag, false);
+                    }
                 });
+            });
         }
 
         [Test]
@@ -76,7 +76,6 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
                 });
             });
         }
-
 
         [Test]
         public void BasicConsumer()
@@ -103,9 +102,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
     }
 
 
-
-
-    [TestFixture, Explicit]
+    [TestFixture, Explicit, Category("SlowAF")]
     public class BasicPublishWithNoTxIsFaster :
         GivenAChannel
     {
@@ -122,7 +119,6 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
                 chan.ExchangeDeclare(theExchange, "fanout", false);
                 chan.QueueBind(theQueue, theExchange, "");
                 chan.QueuePurge(theQueue);
-
             });
         }
 
@@ -130,34 +126,32 @@ namespace MassTransit.RabbitMqTransport.Tests.Assumptions
         public void NoTrx()
         {
             WithChannel(chan =>
+            {
+                WithStopWatch("publish no-trx", () =>
                 {
-                    WithStopWatch("publish no-trx", () =>
-                        {
-                            for (int i = 0; i < HowMany; i++)
-                            {
-                                chan.BasicPublish(theExchange, "", null, TheMessage);
-                            }
-
-                        });
+                    for (int i = 0; i < HowMany; i++)
+                    {
+                        chan.BasicPublish(theExchange, "", null, TheMessage);
+                    }
                 });
+            });
         }
 
         [Test]
         public void WithTrx()
         {
             WithChannel(chan =>
+            {
+                WithStopWatch("publish trx", () =>
                 {
-                    WithStopWatch("publish trx", () =>
-                        {
-                            for (int i = 0; i < HowMany; i++)
-                            {
-                                chan.TxSelect();
-                                chan.BasicPublish(theExchange, "", null, TheMessage);
-                                chan.TxCommit();
-                            }
-
-                        });
+                    for (int i = 0; i < HowMany; i++)
+                    {
+                        chan.TxSelect();
+                        chan.BasicPublish(theExchange, "", null, TheMessage);
+                        chan.TxCommit();
+                    }
                 });
+            });
         }
     }
 }

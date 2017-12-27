@@ -93,7 +93,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _nameFormatter = new RabbitMqMessageNameFormatter();
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
-            _consumeTopology = new RabbitMqConsumeTopology(RabbitMqBusFactory.MessageTopology);
+            _consumeTopology = new RabbitMqConsumeTopology(RabbitMqBusFactory.MessageTopology, new RabbitMqPublishTopology(RabbitMqBusFactory.MessageTopology));
 
             _builder = new ReceiveEndpointConsumeTopologyBuilder();
 

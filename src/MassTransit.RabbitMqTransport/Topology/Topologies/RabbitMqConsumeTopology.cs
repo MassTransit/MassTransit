@@ -32,11 +32,13 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
     {
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly IMessageTopology _messageTopology;
+        readonly IRabbitMqPublishTopology _publishTopology;
         readonly IList<IRabbitMqConsumeTopologySpecification> _specifications;
 
-        public RabbitMqConsumeTopology(IMessageTopology messageTopology)
+        public RabbitMqConsumeTopology(IMessageTopology messageTopology, IRabbitMqPublishTopology publishTopology)
         {
             _messageTopology = messageTopology;
+            _publishTopology = publishTopology;
             ExchangeTypeSelector = new FanoutExchangeTypeSelector();
 
             _specifications = new List<IRabbitMqConsumeTopologySpecification>();
@@ -102,7 +104,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         {
             var exchangeTypeSelector = new MessageExchangeTypeSelector<T>(ExchangeTypeSelector);
 
-            var messageTopology = new RabbitMqMessageConsumeTopology<T>(_messageTopology.GetMessageTopology<T>(), exchangeTypeSelector);
+            var messageTopology = new RabbitMqMessageConsumeTopology<T>(_messageTopology.GetMessageTopology<T>(), exchangeTypeSelector,
+                _publishTopology.GetMessageTopology<T>());
 
             OnMessageTopologyCreated(messageTopology);
 

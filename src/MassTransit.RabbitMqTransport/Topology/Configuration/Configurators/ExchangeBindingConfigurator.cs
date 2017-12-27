@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Configurators
 {
     using System;
     using System.Collections.Generic;
+    using Entities;
 
 
     public class ExchangeBindingConfigurator :
@@ -25,6 +26,14 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Configurators
         {
             RoutingKey = routingKey;
 
+            BindingArguments = new Dictionary<string, object>();
+        }
+
+        public ExchangeBindingConfigurator(Exchange exchange, string routingKey)
+            : base(exchange)
+        {
+            RoutingKey = routingKey;
+            
             BindingArguments = new Dictionary<string, object>();
         }
 
