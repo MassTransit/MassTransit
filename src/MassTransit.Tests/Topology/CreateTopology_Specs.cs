@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Topology
             var harness = new InMemoryTestHarness();
             harness.OnConfigureInMemoryBus += configurator =>
             {
-                configurator.SendTopology<IEvent>(x =>
+                configurator.Send<IEvent>(x =>
                 {
                     x.UseCorrelationId(p => p.TransactionId);
                 });

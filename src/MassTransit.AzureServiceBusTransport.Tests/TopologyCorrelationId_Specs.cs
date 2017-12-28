@@ -79,7 +79,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
             MessageCorrelation.UseCorrelationId<LegacyMessage>(x => x.TransactionId);
 
-            configurator.SendTopology<IEvent>(x =>
+            configurator.Send<IEvent>(x =>
             {
                 x.UseCorrelationId(p => p.TransactionId);
             });
@@ -142,12 +142,12 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
-            configurator.SendTopology<PartitionedMessage>(x =>
+            configurator.Send<PartitionedMessage>(x =>
             {
                 x.UsePartitionKeyFormatter(p => p.Message.CorrelationId.ToString("N"));
             });
 
-            configurator.PublishTopology<PartitionedMessage>(x =>
+            configurator.Publish<PartitionedMessage>(x =>
             {
                 x.EnablePartitioning = true;
                 //x.EnableExpress = true;
@@ -197,12 +197,12 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
-            configurator.SendTopology<PartitionedMessage>(x =>
+            configurator.Send<PartitionedMessage>(x =>
             {
                 x.UsePartitionKeyFormatter(p => p.Message.CorrelationId.ToString("N"));
             });
 
-            configurator.PublishTopology<PartitionedMessage>(x =>
+            configurator.Publish<PartitionedMessage>(x =>
             {
                 x.EnablePartitioning = true;
                 //x.EnableExpress = true;

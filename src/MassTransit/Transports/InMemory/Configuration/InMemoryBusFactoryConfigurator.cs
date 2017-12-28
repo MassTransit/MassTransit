@@ -75,13 +75,15 @@ namespace MassTransit.Transports.InMemory
             return builder.Build();
         }
 
-        public void PublishTopology<T>(Action<IInMemoryMessagePublishTopologyConfigurator<T>> configureTopology)
+        public void Publish<T>(Action<IInMemoryMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class
         {
             var configurator = _configuration.Topology.Publish.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
+
+        public new IInMemoryPublishTopologyConfigurator PublishTopology => _configuration.Topology.Publish;
 
         public int TransportConcurrencyLimit { get; set; }
 

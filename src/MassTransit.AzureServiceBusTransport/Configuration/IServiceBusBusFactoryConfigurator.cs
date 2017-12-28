@@ -22,6 +22,10 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         IBusFactoryConfigurator,
         IServiceBusQueueEndpointConfigurator
     {
+         IServiceBusSendTopologyConfigurator SendTopology { get; }
+
+         IServiceBusPublishTopologyConfigurator PublishTopology { get; }
+
         /// <summary>
         /// In most cases, this is not needed and should not be used. However, if for any reason the default bus
         /// endpoint queue name needs to be changed, this will do it. Do NOT set it to the same name as a receive
@@ -40,7 +44,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configureTopology"></param>
-        void SendTopology<T>(Action<IServiceBusMessageSendTopologyConfigurator<T>> configureTopology)
+        void Send<T>(Action<IServiceBusMessageSendTopologyConfigurator<T>> configureTopology)
             where T : class;
 
         /// <summary>
@@ -48,7 +52,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configureTopology"></param>
-        void PublishTopology<T>(Action<IServiceBusMessagePublishTopologyConfigurator<T>> configureTopology)
+        void Publish<T>(Action<IServiceBusMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class;
 
         /// <summary>

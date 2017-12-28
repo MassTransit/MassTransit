@@ -33,6 +33,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         }
 
         public IExchangeTypeSelector ExchangeTypeSelector { get; }
+        
+        public PublishBrokerTopologyOptions BrokerTopologyOptions { get; set; }
 
         IRabbitMqMessagePublishTopology<T> IRabbitMqPublishTopology.GetMessageTopology<T>()
         {

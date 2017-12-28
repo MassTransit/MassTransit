@@ -72,7 +72,7 @@ namespace MassTransit.BusConfigurators
             callback(_configuration.Publish.Configurator);
         }
 
-        public void SendTopology<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology)
+        public void Send<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology)
             where T : class
         {
             IMessageSendTopologyConfigurator<T> configurator = _configuration.Topology.Send.GetMessageTopology<T>();
@@ -80,13 +80,17 @@ namespace MassTransit.BusConfigurators
             configureTopology?.Invoke(configurator);
         }
 
-        public void PublishTopology<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology)
+        public void Publish<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class
         {
             var configurator = _configuration.Topology.Publish.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
+
+        public ISendTopologyConfigurator SendTopology => _configuration.Topology.Send;
+
+        public IPublishTopologyConfigurator PublishTopology => _configuration.Topology.Publish;
 
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {

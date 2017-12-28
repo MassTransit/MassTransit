@@ -83,7 +83,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         {
             var sendSettings = publishTopology.GetSendSettings();
 
-            var builder = new PublishEndpointBrokerTopologyBuilder();
+            var builder = new PublishEndpointBrokerTopologyBuilder(_host.Topology.PublishTopology.BrokerTopologyOptions);
             publishTopology.Apply(builder);
 
             var topology = builder.BuildTopologyLayout();

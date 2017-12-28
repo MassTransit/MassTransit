@@ -32,12 +32,14 @@ namespace MassTransit
 
         IInMemoryHost Host { get; }
 
+        IInMemoryPublishTopologyConfigurator PublishTopology { get; }
+
         /// <summary>
         /// Configure the send topology of the message type
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configureTopology"></param>
-        void PublishTopology<T>(Action<IInMemoryMessagePublishTopologyConfigurator<T>> configureTopology)
+        void Publish<T>(Action<IInMemoryMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class;
 
         /// <summary>

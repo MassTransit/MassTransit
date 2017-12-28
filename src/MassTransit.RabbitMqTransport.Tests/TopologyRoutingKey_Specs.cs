@@ -44,9 +44,9 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            configurator.SendTopology<IRoutedEvent>(x => x.UseRoutingKeyFormatter(context => context.Message.TransactionId.ToString()));
+            configurator.Send<IRoutedEvent>(x => x.UseRoutingKeyFormatter(context => context.Message.TransactionId.ToString()));
 
-            configurator.SendTopology<IEvent>(x =>
+            configurator.Send<IEvent>(x =>
             {
                 x.UseCorrelationId(p => p.TransactionId);
             });

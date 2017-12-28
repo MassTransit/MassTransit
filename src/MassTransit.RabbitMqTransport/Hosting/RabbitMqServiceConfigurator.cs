@@ -66,19 +66,23 @@ namespace MassTransit.RabbitMqTransport.Hosting
             _configurator.AddPrePipeSpecification(specification);
         }
 
+        public ISendTopologyConfigurator SendTopology => _configurator.SendTopology;
+
+        public IPublishTopologyConfigurator PublishTopology => _configurator.PublishTopology;
+
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
             _configurator.AddBusFactorySpecification(specification);
         }
 
-        public void SendTopology<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology) where T : class
+        public void Send<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology) where T : class
         {
-            ((IBusFactoryConfigurator)_configurator).SendTopology<T>(configureTopology);
+            ((IBusFactoryConfigurator)_configurator).Send(configureTopology);
         }
 
-        public void PublishTopology<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology) where T : class
+        public void Publish<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology) where T : class
         {
-            ((IBusFactoryConfigurator)_configurator).PublishTopology<T>(configureTopology);
+            ((IBusFactoryConfigurator)_configurator).Publish(configureTopology);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)

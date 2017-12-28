@@ -79,7 +79,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             MessageCorrelation.UseCorrelationId<LegacyMessage>(x => x.TransactionId);
 
-            configurator.SendTopology<IEvent>(x =>
+            configurator.Send<IEvent>(x =>
             {
                 x.UseCorrelationId(p => p.TransactionId);
             });

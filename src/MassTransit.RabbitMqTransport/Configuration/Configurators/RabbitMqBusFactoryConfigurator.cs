@@ -149,19 +149,22 @@ namespace MassTransit.RabbitMqTransport.Configurators
             return _configuration.Topology.Consume.CreateTemporaryQueueName(prefix);
         }
 
-        void IRabbitMqBusFactoryConfigurator.SendTopology<T>(Action<IRabbitMqMessageSendTopologyConfigurator<T>> configureTopology)
+        void IRabbitMqBusFactoryConfigurator.Send<T>(Action<IRabbitMqMessageSendTopologyConfigurator<T>> configureTopology)
         {
             IRabbitMqMessageSendTopologyConfigurator<T> configurator = _configuration.Topology.Send.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
 
-        void IRabbitMqBusFactoryConfigurator.PublishTopology<T>(Action<IRabbitMqMessagePublishTopologyConfigurator<T>> configureTopology)
+        void IRabbitMqBusFactoryConfigurator.Publish<T>(Action<IRabbitMqMessagePublishTopologyConfigurator<T>> configureTopology)
         {
             IRabbitMqMessagePublishTopologyConfigurator<T> configurator = _configuration.Topology.Publish.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
+
+        public new IRabbitMqSendTopologyConfigurator SendTopology => _configuration.Topology.Send;
+        public new IRabbitMqPublishTopologyConfigurator PublishTopology => _configuration.Topology.Publish;
 
         public void OverrideDefaultBusEndpointQueueName(string value)
         {

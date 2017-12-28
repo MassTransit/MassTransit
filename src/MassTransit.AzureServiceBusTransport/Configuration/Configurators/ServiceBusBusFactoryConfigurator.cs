@@ -112,7 +112,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
             _settings.QueueDescription.Path = value;
         }
 
-        public void SendTopology<T>(Action<IServiceBusMessageSendTopologyConfigurator<T>> configureTopology)
+        public void Send<T>(Action<IServiceBusMessageSendTopologyConfigurator<T>> configureTopology)
             where T : class
         {
             var configurator = _configuration.Topology.Send.GetMessageTopology<T>();
@@ -120,13 +120,16 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
             configureTopology?.Invoke(configurator);
         }
 
-        public void PublishTopology<T>(Action<IServiceBusMessagePublishTopologyConfigurator<T>> configureTopology)
+        public void Publish<T>(Action<IServiceBusMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class
         {
             var configurator = _configuration.Topology.Publish.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
+
+        public new IServiceBusSendTopologyConfigurator SendTopology => _configuration.Topology.Send;
+        public new IServiceBusPublishTopologyConfigurator PublishTopology => _configuration.Topology.Publish;
 
         public IServiceBusHost Host(ServiceBusHostSettings settings)
         {

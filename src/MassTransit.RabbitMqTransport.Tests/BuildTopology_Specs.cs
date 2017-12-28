@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using MassTransit.Topology;
     using MassTransit.Topology.EntityNameFormatters;
     using NUnit.Framework;
@@ -44,6 +45,34 @@ namespace MassTransit.RabbitMqTransport.Tests
         public interface ThirdInterface :
             SecondInterface
         {
+        }
+    }
+
+
+    [TestFixture]
+    public class Publish_with_complex_hierarchy :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_be_received()
+        {
+            await Bus.Publish<ThirdInterface>(new {});
+
+            var received = await _receivedA;
+        }
+
+        Task<ConsumeContext<FirstInterface>> _receivedA;
+
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.PublishTopology.BrokerTopologyOptions = PublishBrokerTopologyOptions.MaintainHierarchy;
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            base.ConfigureRabbitMqReceiveEndpoint(configurator);
+
+            _receivedA = Handled<FirstInterface>(configurator);
         }
     }
 
@@ -85,7 +114,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
 
             Assert.That(topology.Exchanges.Any(x => x.ExchangeName == singleInterfaceName), Is.True);
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == singleInterfaceName && x.Destination.ExchangeName == _inputQueueName), Is.True);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == singleInterfaceName && x.Destination.ExchangeName == _inputQueueName),
+                Is.True);
         }
 
         [SetUp]
@@ -205,8 +235,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.That(topology.Exchanges.Any(x => x.ExchangeName == secondInterfaceName), Is.True);
             Assert.That(topology.Exchanges.Length, Is.EqualTo(3));
             Assert.That(topology.ExchangeBindings.Length, Is.EqualTo(2));
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == secondInterfaceName && x.Destination.ExchangeName == firstInterfaceName), Is.True);
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == thirdInterfaceName && x.Destination.ExchangeName == secondInterfaceName), Is.True);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == secondInterfaceName && x.Destination.ExchangeName == firstInterfaceName),
+                Is.True);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == thirdInterfaceName && x.Destination.ExchangeName == secondInterfaceName),
+                Is.True);
 
             Assert.That(topology.Exchanges.Any(x => x.ExchangeName == firstInterfaceName), Is.True);
         }
@@ -234,7 +266,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
             _publishTopology = new RabbitMqPublishTopology(RabbitMqBusFactory.MessageTopology);
 
-            _builder = new PublishEndpointBrokerTopologyBuilder(PublishEndpointBrokerTopologyBuilder.Options.MaintainHierarchy);
+            _builder = new PublishEndpointBrokerTopologyBuilder(PublishBrokerTopologyOptions.MaintainHierarchy);
         }
 
         RabbitMqMessageNameFormatter _nameFormatter;

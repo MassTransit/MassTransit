@@ -12,20 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology
 {
-    using MassTransit.Topology;
+    using System;
 
 
-    public interface IRabbitMqPublishTopology :
-        IPublishTopology
+    [Flags]
+    public enum PublishBrokerTopologyOptions
     {
-        new IRabbitMqMessagePublishTopology<T> GetMessageTopology<T>()
-            where T : class;
-
-        IExchangeTypeSelector ExchangeTypeSelector { get; }
-        
-        /// <summary>
-        /// Determines how type hierarchy is configured on the broker
-        /// </summary>
-        PublishBrokerTopologyOptions BrokerTopologyOptions { get; }
+        FlattenHierarchy = 0,
+        MaintainHierarchy = 1
     }
 }

@@ -23,6 +23,10 @@ namespace MassTransit
         ISendPipelineConfigurator,
         IPublishPipelineConfigurator
     {
+        ISendTopologyConfigurator SendTopology { get; }
+
+        IPublishTopologyConfigurator PublishTopology { get; }
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IBusFactorySpecification specification);
 
@@ -31,7 +35,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configureTopology"></param>
-        void SendTopology<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology)
+        void Send<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology)
             where T : class;
 
         /// <summary>
@@ -39,7 +43,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configureTopology"></param>
-        void PublishTopology<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology)
+        void Publish<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class;
 
         /// <summary>

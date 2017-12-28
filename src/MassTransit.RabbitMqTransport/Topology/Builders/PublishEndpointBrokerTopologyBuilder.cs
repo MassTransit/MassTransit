@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology.Builders
 {
-    using System;
     using System.Collections.Generic;
     using Entities;
     using MassTransit.Topology.Entities;
@@ -22,17 +21,9 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
         BrokerTopologyBuilder,
         IPublishEndpointBrokerTopologyBuilder
     {
-        [Flags]
-        public enum Options
-        {
-            FlattenHierarchy = 0,
-            MaintainHierarchy = 1
-        }
+        readonly PublishBrokerTopologyOptions _options;
 
-
-        readonly Options _options;
-
-        public PublishEndpointBrokerTopologyBuilder(Options options = Options.FlattenHierarchy)
+        public PublishEndpointBrokerTopologyBuilder(PublishBrokerTopologyOptions options = PublishBrokerTopologyOptions.FlattenHierarchy)
         {
             _options = options;
             Exchanges = new NamedEntityCollection<ExchangeEntity, ExchangeHandle>(ExchangeEntity.EntityComparer, ExchangeEntity.NameComparer);
@@ -49,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
 
         public IPublishEndpointBrokerTopologyBuilder CreateImplementedBuilder()
         {
-            if (_options.HasFlag(Options.MaintainHierarchy))
+            if (_options.HasFlag(PublishBrokerTopologyOptions.MaintainHierarchy))
             {
                 return new ImplementedBuilder(this, _options);
             }
@@ -67,10 +58,10 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
             IPublishEndpointBrokerTopologyBuilder
         {
             readonly IPublishEndpointBrokerTopologyBuilder _builder;
-            readonly Options _options;
+            readonly PublishBrokerTopologyOptions _options;
             ExchangeHandle _exchange;
 
-            public ImplementedBuilder(IPublishEndpointBrokerTopologyBuilder builder, Options options)
+            public ImplementedBuilder(IPublishEndpointBrokerTopologyBuilder builder, PublishBrokerTopologyOptions options)
             {
                 _builder = builder;
                 _options = options;
@@ -91,7 +82,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
 
             public IPublishEndpointBrokerTopologyBuilder CreateImplementedBuilder()
             {
-                if (_options.HasFlag(Options.MaintainHierarchy))
+                if (_options.HasFlag(PublishBrokerTopologyOptions.MaintainHierarchy))
                 {
                     return new ImplementedBuilder(this, _options);
                 }
