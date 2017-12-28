@@ -51,9 +51,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Conventions.SessionId
 
             public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
             {
-                var rabbitMqSendContext = context.GetPayload<ServiceBusSendContext<T>>();
+                var sendContext = context.GetPayload<ServiceBusSendContext<T>>();
 
-                return _filter.Send(rabbitMqSendContext, next);
+                return _filter.Send(sendContext, next);
             }
 
             public void Probe(ProbeContext context)

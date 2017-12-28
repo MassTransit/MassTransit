@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Transports.InMemory.Configuration
+﻿namespace MassTransit.Transports.InMemory
 {
     using EndpointSpecifications;
     using GreenPipes;

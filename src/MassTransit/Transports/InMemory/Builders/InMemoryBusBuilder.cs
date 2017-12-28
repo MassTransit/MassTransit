@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.InMemory.Builders
 {
     using System;
-    using Configuration;
     using MassTransit.Builders;
 
 

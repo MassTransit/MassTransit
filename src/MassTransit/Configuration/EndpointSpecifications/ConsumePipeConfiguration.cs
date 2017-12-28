@@ -29,10 +29,8 @@ namespace MassTransit.EndpointSpecifications
         }
 
         public ConsumePipeConfiguration(IConsumePipeSpecification parentSpecification, IConsumePipe consumePipe = null)
+            : this(consumePipe)
         {
-            _consumePipe = consumePipe;
-            _specification = new ConsumePipeSpecification();
-            
             _specification.Connect(new ParentConsumePipeSpecificationObserver(parentSpecification));
         }
 

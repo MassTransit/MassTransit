@@ -30,6 +30,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
             await _handled;
         }
+
         Task<ConsumeContext<PingMessage>> _handled;
 
         protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)

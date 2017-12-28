@@ -33,7 +33,6 @@ namespace MassTransit.EndpointSpecifications
         public PublishPipeConfiguration(IPublishPipeSpecification parentSpecification)
         {
             _specification = new PublishPipeSpecification();
-
             _specification.Connect(new ParentPublishPipeSpecificationObserver(parentSpecification));
         }
 

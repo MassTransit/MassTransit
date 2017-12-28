@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using Transports.InMemory;
 
 
     public static class InMemoryConfigurationExtensions

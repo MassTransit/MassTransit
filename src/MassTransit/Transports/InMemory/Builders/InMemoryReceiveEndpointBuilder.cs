@@ -14,7 +14,6 @@ namespace MassTransit.Transports.InMemory.Builders
 {
     using System;
     using System.Linq;
-    using Configuration;
     using EndpointSpecifications;
     using GreenPipes;
     using MassTransit.Builders;

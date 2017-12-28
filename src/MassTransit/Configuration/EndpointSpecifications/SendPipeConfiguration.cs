@@ -27,14 +27,12 @@ namespace MassTransit.EndpointSpecifications
         public SendPipeConfiguration(ISendTopology sendTopology)
         {
             _specification = new SendPipeSpecification();
-
             _specification.Connect(new TopologySendPipeSpecificationObserver(sendTopology));
         }
 
         public SendPipeConfiguration(ISendPipeSpecification parentSpecification)
         {
             _specification = new SendPipeSpecification();
-
             _specification.Connect(new ParentSendPipeSpecificationObserver(parentSpecification));
         }
 

@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Text;
     using System.Text.RegularExpressions;
     using NewIdFormatters;
+    using Transports.InMemory;
     using Util;
 
 

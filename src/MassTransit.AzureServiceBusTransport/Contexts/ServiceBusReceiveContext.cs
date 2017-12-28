@@ -110,5 +110,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 
             return base.GetContentType();
         }
+        
+        
     }
 }

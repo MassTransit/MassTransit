@@ -14,13 +14,11 @@ namespace MassTransit
 {
     using System;
     using System.Threading;
-    using BusConfigurators;
-    using EndpointSpecifications;
     using Topology;
     using Topology.Configuration;
     using Topology.EntityNameFormatters;
     using Topology.Topologies;
-    using Transports.InMemory.Configuration;
+    using Transports.InMemory;
 
 
     public static class InMemoryBus

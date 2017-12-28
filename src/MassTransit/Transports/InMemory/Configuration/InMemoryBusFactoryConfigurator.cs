@@ -10,20 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.BusConfigurators
+namespace MassTransit.Transports.InMemory
 {
     using System;
     using System.Collections.Generic;
     using Builders;
-    using EndpointSpecifications;
+    using BusConfigurators;
     using GreenPipes;
+    using MassTransit.Builders;
+    using Topology.Configurators;
+    using Topology.Topologies;
     using Transports;
-    using Transports.InMemory;
-    using Transports.InMemory.Builders;
-    using Transports.InMemory.Configuration;
-    using Transports.InMemory.Topology;
-    using Transports.InMemory.Topology.Configurators;
-    using Transports.InMemory.Topology.Topologies;
 
 
     public class InMemoryBusFactoryConfigurator :

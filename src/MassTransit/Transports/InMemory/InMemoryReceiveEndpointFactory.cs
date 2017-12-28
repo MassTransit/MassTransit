@@ -14,7 +14,6 @@ namespace MassTransit.Transports.InMemory
 {
     using System;
     using Builders;
-    using Configuration;
     using Configurators;
 
 

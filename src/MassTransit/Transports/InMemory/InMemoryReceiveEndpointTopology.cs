@@ -13,9 +13,6 @@
 namespace MassTransit.Transports.InMemory
 {
     using System;
-    using System.Runtime.InteropServices;
-    using Configuration;
-    using EndpointSpecifications;
     using MassTransit.Topology;
     using Pipeline;
     using Pipeline.Pipes;
@@ -24,13 +21,13 @@ namespace MassTransit.Transports.InMemory
     public class InMemoryReceiveEndpointTopology :
         IInMemoryReceiveEndpointTopology
     {
+        readonly IInMemoryEndpointConfiguration _configuration;
         readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
         readonly IPublishPipe _publishPipe;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ISendPipe _sendPipe;
         readonly ISendTransportProvider _sendTransportProvider;
         readonly IMessageSerializer _serializer;
-        readonly IInMemoryEndpointConfiguration _configuration;
 
         public InMemoryReceiveEndpointTopology(IInMemoryEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer,
             ISendTransportProvider sendTransportProvider)

@@ -17,7 +17,6 @@ namespace MassTransit
     using Builders;
     using Transports.InMemory;
     using Transports.InMemory.Builders;
-    using Transports.InMemory.Topology;
     using Transports.InMemory.Topology.Configurators;
 
 

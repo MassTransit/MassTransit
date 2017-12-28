@@ -58,8 +58,6 @@ namespace MassTransit.Pipeline.Pipes
 
                     if (_observers.Count > 0)
                         await _observers.PostSend(context).ConfigureAwait(false);
-
-                    await _outputPipe.Send(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
