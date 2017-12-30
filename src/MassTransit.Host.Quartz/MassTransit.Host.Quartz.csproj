@@ -8,18 +8,20 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="MassTransit.Host.*.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MassTransitScheduling.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="4.6.2" />
-    <PackageReference Include="Common.Logging" Version="3.3.1" />
-    <PackageReference Include="Common.Logging.Core" Version="3.3.1" />
-    <PackageReference Include="Common.Logging.Log4Net1213" Version="3.3.1" />
     <PackageReference Include="GreenPipes" Version="1.2.0" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="Quartz" Version="2.6.1" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
+    <PackageReference Include="Quartz" Version="3.0.0" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.104.0" />
-    <Reference Include="System.Xml" />
     <ProjectReference Include="..\MassTransit.Host\MassTransit.Host.csproj" />
     <ProjectReference Include="..\MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj" />

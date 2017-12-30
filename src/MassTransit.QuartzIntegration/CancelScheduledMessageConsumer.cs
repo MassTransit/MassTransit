@@ -1,14 +1,14 @@
 // Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.QuartzIntegration
 {
@@ -31,12 +31,12 @@ namespace MassTransit.QuartzIntegration
             _scheduler = scheduler;
         }
 
-        public Task Consume(ConsumeContext<CancelScheduledMessage> context)
+        public async Task Consume(ConsumeContext<CancelScheduledMessage> context)
         {
             var correlationId = context.Message.TokenId.ToString("N");
 
             var jobKey = new JobKey(correlationId);
-            var deletedJob = _scheduler.DeleteJob(jobKey);
+            var deletedJob = await _scheduler.DeleteJob(jobKey).ConfigureAwait(false);
 
             if (_log.IsDebugEnabled)
             {
@@ -45,11 +45,9 @@ namespace MassTransit.QuartzIntegration
                 else
                     _log.DebugFormat("CancelScheduledMessage: no message found {0}", jobKey);
             }
-
-            return TaskUtil.Completed;
         }
 
-        public Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
+        public async Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
         {
             const string prependedValue = "Recurring.Trigger.";
 
@@ -60,7 +58,7 @@ namespace MassTransit.QuartzIntegration
                 scheduleId = string.Concat(prependedValue, scheduleId);
             }
 
-            bool unscheduledJob = _scheduler.UnscheduleJob(new TriggerKey(scheduleId, context.Message.ScheduleGroup));
+            bool unscheduledJob = await _scheduler.UnscheduleJob(new TriggerKey(scheduleId, context.Message.ScheduleGroup)).ConfigureAwait(false);
 
             if (_log.IsDebugEnabled)
             {
@@ -72,8 +70,6 @@ namespace MassTransit.QuartzIntegration
                 else
                     _log.DebugFormat("CancelRecurringScheduledMessage: no message found {0}", context.Message);
             }
-
-            return TaskUtil.Completed;
         }
     }
 }
