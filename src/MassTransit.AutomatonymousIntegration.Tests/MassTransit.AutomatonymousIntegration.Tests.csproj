@@ -24,8 +24,6 @@
   <ItemGroup>
     <PackageReference Include="Automatonymous" Version="3.6.1" />
     <PackageReference Include="Automatonymous.NHibernate" Version="3.6.1" />
-    <PackageReference Include="Common.Logging" Version="3.3.1" />
-    <PackageReference Include="Common.Logging.Core" Version="3.3.1" />
     <PackageReference Include="EntityFramework" Version="6.2.0" />
     <PackageReference Include="GreenPipes" Version="1.2.0" />
     <PackageReference Include="Iesi.Collections" Version="4.0.1.4000" />
@@ -37,7 +35,7 @@
     <PackageReference Include="NHibernate" Version="4.1.1.4000" />
     <PackageReference Include="NUnit" Version="3.9.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
-    <PackageReference Include="Quartz" Version="2.6.1" />
+    <PackageReference Include="Quartz" Version="3.0.0" />
     <PackageReference Include="Shouldly" Version="2.8.3" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

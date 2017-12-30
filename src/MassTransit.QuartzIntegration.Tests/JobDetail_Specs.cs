@@ -1,33 +1,35 @@
 ﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using Quartz;
     using Quartz.Impl;
+    using Util;
 
 
     [TestFixture]
     public class When_scheduling_a_job_using_quartz
     {
         [Test]
-        public void Should_return_the_properties()
+        public async Task Should_return_the_properties()
         {
             var factory = new StdSchedulerFactory();
-            IScheduler scheduler = factory.GetScheduler();
-            scheduler.Start();
+            IScheduler scheduler = await factory.GetScheduler().ConfigureAwait(false);
+            await scheduler.Start().ConfigureAwait(false);
 
             IJobDetail jobDetail = JobBuilder.Create<MyJob>()
                 .UsingJobData("Body", "By Jake")
@@ -38,7 +40,7 @@ namespace MassTransit.QuartzIntegration.Tests
                 .StartAt(DateTime.UtcNow + TimeSpan.FromSeconds(1))
                 .Build();
 
-            scheduler.ScheduleJob(jobDetail, trigger);
+            await scheduler.ScheduleJob(jobDetail, trigger).ConfigureAwait(false);
 
             Assert.IsTrue(MyJob.Signaled.WaitOne(Utils.Timeout));
 
@@ -46,12 +48,12 @@ namespace MassTransit.QuartzIntegration.Tests
         }
 
         [Test]
-        public void Should_return_the_properties_with_custom_factory()
+        public async Task Should_return_the_properties_with_custom_factory()
         {
             var factory = new StdSchedulerFactory();
-            IScheduler scheduler = factory.GetScheduler();
+            IScheduler scheduler = await factory.GetScheduler().ConfigureAwait(false);
             scheduler.JobFactory = new MassTransitJobFactory(null);
-            scheduler.Start();
+            await scheduler.Start().ConfigureAwait(false);;
 
             IJobDetail jobDetail = JobBuilder.Create<MyJob>()
                 .UsingJobData("Body", "By Jake")
@@ -62,7 +64,7 @@ namespace MassTransit.QuartzIntegration.Tests
                 .StartAt(DateTime.UtcNow + TimeSpan.FromSeconds(1))
                 .Build();
 
-            scheduler.ScheduleJob(jobDetail, trigger);
+            await scheduler.ScheduleJob(jobDetail, trigger).ConfigureAwait(false);
 
             Assert.IsTrue(MyJob.Signaled.WaitOne(Utils.Timeout));
 
@@ -83,10 +85,11 @@ namespace MassTransit.QuartzIntegration.Tests
 
             public string Body { get; set; }
 
-            public void Execute(IJobExecutionContext context)
+            public Task Execute(IJobExecutionContext context)
             {
                 SignaledBody = Body;
                 Signaled.Set();
+                return TaskUtil.Completed;
             }
         }
     }
