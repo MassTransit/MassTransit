@@ -1,6 +1,7 @@
 branches:
   only:
     - master
+    - develop
 only_commits:
   files:
     - docs/**/*
