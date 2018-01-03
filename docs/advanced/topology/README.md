@@ -17,4 +17,4 @@ Topology also defines how things are named, including RabbitMQ exchanges and Azu
     * [PartitionKey](servicebus/partitionkey.md)
     * [Topic Subscription](servicebus/topicsub.md)
 
-You can also view a visual representation of the [default broker topologies](../understand/default-topology.md) created.
+You can also view a visual representation of the [default broker topologies](../../understand/default-topology.md) created.

@@ -78,7 +78,7 @@
 * [Audit](advanced/audit/README.md)
 * [Turnout](advanced/turnout/README.md)
 * [Versioning](advanced/versioning.md)
-* [Topology](topology/README.md)
+* [Topology](advanced/topology/README.md)
 * [Transactions](advanced/transactions.md)
 * [Interoperability](advanced/interoperability.md)
 
