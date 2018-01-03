@@ -12,4 +12,5 @@
     * [Rate limiter](middleware/rate-limiter.md)
     * [Latest](middleware/latest.md)
     * [Custom](middleware/custom.md)
+* [Topology](topology/README.md)
 * [Transactions](transactions.md)

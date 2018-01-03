@@ -96,9 +96,5 @@ The exchanges and queues for the send example are shown.
 
 
 
-
-
-
-
-
+> Note that the broker topology can now be configured using the [topology](../topology/README.md) API.
 
