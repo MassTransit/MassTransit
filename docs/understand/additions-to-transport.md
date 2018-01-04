@@ -37,10 +37,10 @@ private information (to meet PCI or HIPAA requirements).
 
 ### Message header and correlation
 Designing a common message envelope can be a nitty-gritty affair until things stabilize. And MassTransit is already
-stable having been used in production since 2008. The format is [well documented](advanced/interop.html) and has been 
-tested with billions of messages. Furthermore, the envelope includes headers for tracking messages, including 
-conversations, correlations, and requests. The address and host information in the envelope make it easy to build 
-any messaging pattern.
+stable having been used in production since 2008. The format is [well documented](../advanced/interoperability.html)
+and has been tested with billions of messages. Furthermore, the envelope includes headers for tracking messages,
+including conversations, correlations, and requests. The address and host information in the envelope make it easy to
+build any messaging pattern.
 
 ### Consumer lifecycle management
 MassTransit handles consumer creation and disposal, and integrates with most major dependency injection containers
