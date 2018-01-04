@@ -34,6 +34,11 @@ namespace MassTransit.Topology.Configuration
     public interface IMessageTopologyConfigurator :
         IMessageTopology
     {
+        /// <summary>
+        /// Replace the default entity name formatter
+        /// </summary>
+        void SetEntityNameFormatter(IEntityNameFormatter entityNameFormatter);
+
         new IMessageTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
     }

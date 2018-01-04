@@ -66,21 +66,29 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             _configurator.AddPrePipeSpecification(specification);
         }
 
-        public ISendTopologyConfigurator SendTopology => ((IBusFactoryConfigurator)_configurator).SendTopology;
-
-        public IPublishTopologyConfigurator PublishTopology => ((IBusFactoryConfigurator)_configurator).PublishTopology;
+        public IMessageTopologyConfigurator MessageTopology => _configurator.MessageTopology;
+        public ISendTopologyConfigurator SendTopology => _configurator.SendTopology;
+        public IPublishTopologyConfigurator PublishTopology => _configurator.PublishTopology;
 
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
             _configurator.AddBusFactorySpecification(specification);
         }
 
-        public void Send<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology) where T : class
+        public void Message<T>(Action<IMessageTopologyConfigurator<T>> configureTopology)
+            where T : class
+        {
+            _configurator.Message(configureTopology);
+        }
+
+        public void Send<T>(Action<IMessageSendTopologyConfigurator<T>> configureTopology)
+            where T : class
         {
             ((IBusFactoryConfigurator)_configurator).Send(configureTopology);
         }
 
-        public void Publish<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology) where T : class
+        public void Publish<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology)
+            where T : class
         {
             ((IBusFactoryConfigurator)_configurator).Publish(configureTopology);
         }
@@ -120,12 +128,15 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             return _configurator.ConnectSagaConfigurationObserver(observer);
         }
 
-        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator) where TSaga : class, ISaga
+        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
+            where TSaga : class, ISaga
         {
             _configurator.SagaConfigured(configurator);
         }
 
-        public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator) where TSaga : class, ISaga where TMessage : class
+        public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
+            where TSaga : class, ISaga
+            where TMessage : class
         {
             _configurator.SagaMessageConfigured(configurator);
         }

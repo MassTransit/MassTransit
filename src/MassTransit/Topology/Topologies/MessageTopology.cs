@@ -29,16 +29,18 @@ namespace MassTransit.Topology.Topologies
 
         public MessageTopology(IEntityNameFormatter entityNameFormatter)
         {
-            if (entityNameFormatter == null)
-                throw new ArgumentNullException(nameof(entityNameFormatter));
-
-            EntityNameFormatter = entityNameFormatter;
+            EntityNameFormatter = entityNameFormatter ?? throw new ArgumentNullException(nameof(entityNameFormatter));
 
             _messageTypes = new ConcurrentDictionary<Type, IMessageTypeTopologyConfigurator>();
             _observers = new MessageTopologyConfigurationObservable();
         }
 
-        public IEntityNameFormatter EntityNameFormatter { get; }
+        public IEntityNameFormatter EntityNameFormatter { get; private set; }
+
+        public void SetEntityNameFormatter(IEntityNameFormatter entityNameFormatter)
+        {
+            EntityNameFormatter = entityNameFormatter ?? throw new ArgumentNullException("The entity name formatter cannot be null");
+        }
 
         IMessageTopologyConfigurator<T> IMessageTopologyConfigurator.GetMessageTopology<T>()
         {
@@ -72,7 +74,7 @@ namespace MassTransit.Topology.Topologies
             var messageTopology = new MessageTopology<T>(new MessageEntityNameFormatter<T>(EntityNameFormatter));
 
             OnMessageTopologyCreated(messageTopology);
-            
+
             return messageTopology;
         }
 
@@ -103,10 +105,7 @@ namespace MassTransit.Topology.Topologies
 
         public void SetEntityNameFormatter(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
         {
-            if (entityNameFormatter == null)
-                throw new ArgumentNullException(nameof(entityNameFormatter));
-
-            EntityNameFormatter = entityNameFormatter;
+            EntityNameFormatter = entityNameFormatter ?? throw new ArgumentNullException(nameof(entityNameFormatter));
         }
 
         public void SetEntityName(string entityName)

@@ -4,7 +4,7 @@ Topology is how MassTransit configures the broker capabilities (exchanges and qu
 
 Topology also defines how things are named, including RabbitMQ exchanges and Azure Service Bus topics -- both of which are used for publishing messages.
 
-
+* [Message](message.md)
 * [Publish](publish.md)
 * [Send](send.md)
 * [Consume](consume.md)

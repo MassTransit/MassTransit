@@ -18,8 +18,14 @@ namespace MassTransit.Topology
     public interface IMessageTopology<in TMessage>
         where TMessage : class
     {
+        /// <summary>
+        /// The entity name formatter for this message type
+        /// </summary>
         IMessageEntityNameFormatter<TMessage> EntityNameFormatter { get; }
 
+        /// <summary>
+        /// The formatted entity name for this message type
+        /// </summary>
         string EntityName { get; }
     }
 
@@ -27,6 +33,16 @@ namespace MassTransit.Topology
     public interface IMessageTopology :
         IConnectMessageTopologyConfigurationObserver
     {
+        /// <summary>
+        /// The entity name formatter used to format message names
+        /// </summary>
+        IEntityNameFormatter EntityNameFormatter { get; }
+
+        /// <summary>
+        /// Returns the message topology for the specified message type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         IMessageTopology<T> GetMessageTopology<T>()
             where T : class;
     }

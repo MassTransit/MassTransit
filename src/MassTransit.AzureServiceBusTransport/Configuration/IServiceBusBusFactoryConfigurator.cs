@@ -22,9 +22,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         IBusFactoryConfigurator,
         IServiceBusQueueEndpointConfigurator
     {
-         IServiceBusSendTopologyConfigurator SendTopology { get; }
+        new IServiceBusSendTopologyConfigurator SendTopology { get; }
 
-         IServiceBusPublishTopologyConfigurator PublishTopology { get; }
+        new IServiceBusPublishTopologyConfigurator PublishTopology { get; }
 
         /// <summary>
         /// In most cases, this is not needed and should not be used. However, if for any reason the default bus

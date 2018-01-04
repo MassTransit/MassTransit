@@ -32,7 +32,7 @@ namespace MassTransit
 
         IInMemoryHost Host { get; }
 
-        IInMemoryPublishTopologyConfigurator PublishTopology { get; }
+        new IInMemoryPublishTopologyConfigurator PublishTopology { get; }
 
         /// <summary>
         /// Configure the send topology of the message type

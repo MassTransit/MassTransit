@@ -79,6 +79,7 @@
 * [Turnout](advanced/turnout/README.md)
 * [Versioning](advanced/versioning.md)
 * [Topology](advanced/topology/README.md)
+    * [Message](advanced/topology/message.md)
     * [Publish](advanced/topology/publish.md)
     * [Send](advanced/topology/send.md)
     * [Consume](advanced/topology/consume.md)

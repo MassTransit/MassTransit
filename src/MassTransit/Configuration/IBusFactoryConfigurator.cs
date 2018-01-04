@@ -23,12 +23,22 @@ namespace MassTransit
         ISendPipelineConfigurator,
         IPublishPipelineConfigurator
     {
+        IMessageTopologyConfigurator MessageTopology { get; }
+
         ISendTopologyConfigurator SendTopology { get; }
 
         IPublishTopologyConfigurator PublishTopology { get; }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IBusFactorySpecification specification);
+
+        /// <summary>
+        /// Configure the message topology for the message type (global across all bus instances of the same transport type)
+        /// </summary>
+        /// <param name="configureTopology"></param>
+        /// <typeparam name="T"></typeparam>
+        void Message<T>(Action<IMessageTopologyConfigurator<T>> configureTopology)
+            where T : class;
 
         /// <summary>
         /// Configure the send topology of the message type

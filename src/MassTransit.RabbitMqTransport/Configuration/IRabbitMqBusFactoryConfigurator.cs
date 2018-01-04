@@ -22,9 +22,9 @@ namespace MassTransit.RabbitMqTransport
         IBusFactoryConfigurator,
         IQueueEndpointConfigurator
     {
-         IRabbitMqSendTopologyConfigurator SendTopology { get; }
+        new IRabbitMqSendTopologyConfigurator SendTopology { get; }
 
-         IRabbitMqPublishTopologyConfigurator PublishTopology { get; }
+        new IRabbitMqPublishTopologyConfigurator PublishTopology { get; }
 
         /// <summary>
         /// Configure the send topology of the message type
