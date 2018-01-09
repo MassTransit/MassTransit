@@ -48,9 +48,9 @@ namespace MassTransit.RabbitMqTransport.Integration
             _source.TrySetException(new PublishNackException(DestinationAddress, "The message was nacked by RabbitMQ"));
         }
 
-        public void PublishNotConfirmed()
+        public void PublishNotConfirmed(string reason)
         {
-            _source.TrySetException(new MessageNotConfirmedException(DestinationAddress));
+            _source.TrySetException(new MessageNotConfirmedException(DestinationAddress, reason));
         }
 
         public void PublishReturned(ushort code, string text)

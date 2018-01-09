@@ -17,7 +17,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
-    using Topology;
     using Topology.Builders;
     using Topology.Entities;
 
@@ -42,7 +41,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
-            await context.OneTimeSetup<ConfigureTopologyContext>(async payload =>
+            await context.OneTimeSetup<ConfigureTopologyContext<TSettings>>(async payload =>
             {
                 await ConfigureTopology(context).ConfigureAwait(false);
 
@@ -108,11 +107,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
 
             return context.QueueBind(binding.Destination.QueueName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments);
-        }
-
-
-        public interface ConfigureTopologyContext
-        {
         }
     }
 }

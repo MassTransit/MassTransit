@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,9 @@
 namespace MassTransit.RabbitMqTransport.Builders
 {
     using System;
+    using EndpointSpecifications;
     using GreenPipes;
     using MassTransit.Builders;
-    using Specifications;
     using Topology;
     using Topology.Builders;
     using Transport;
@@ -27,13 +27,12 @@ namespace MassTransit.RabbitMqTransport.Builders
         IRabbitMqReceiveEndpointBuilder
     {
         readonly bool _bindMessageExchanges;
-        readonly IRabbitMqHost _host;
-        readonly BusHostCollection<RabbitMqHost> _hosts;
         readonly IRabbitMqEndpointConfiguration _configuration;
+        readonly RabbitMqHost _host;
+        readonly BusHostCollection<RabbitMqHost> _hosts;
 
-        public RabbitMqReceiveEndpointBuilder(IBusBuilder busBuilder, IRabbitMqHost host, BusHostCollection<RabbitMqHost> hosts, bool bindMessageExchanges,
-            IRabbitMqEndpointConfiguration configuration)
-            : base(busBuilder, configuration)
+        public RabbitMqReceiveEndpointBuilder(RabbitMqHost host, BusHostCollection<RabbitMqHost> hosts, bool bindMessageExchanges, IRabbitMqEndpointConfiguration configuration)
+            : base(configuration)
         {
             _bindMessageExchanges = bindMessageExchanges;
             _configuration = configuration;
@@ -44,20 +43,18 @@ namespace MassTransit.RabbitMqTransport.Builders
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
             if (_bindMessageExchanges)
-            {
                 _configuration.Topology.Consume
                     .GetMessageTopology<T>()
                     .Bind();
-            }
 
             return base.ConnectConsumePipe(pipe);
         }
 
         public IRabbitMqReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress, ReceiveSettings settings)
         {
-            var topologyLayout = BuildTopology(settings);
+            var brokerTopology = BuildTopology(settings);
 
-            return new RabbitMqReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _host, _hosts, topologyLayout);
+            return new RabbitMqReceiveEndpointTopology(_configuration, inputAddress, _host, _hosts, brokerTopology);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)

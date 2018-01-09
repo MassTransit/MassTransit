@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,83 +14,43 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
+    using GreenPipes.Agents;
     using Logging;
     using Util.Caching;
-
-
-    public delegate Task<ISendEndpoint> SendEndpointFactory(Uri address);
-
-
-    public interface ISendEndpointCache
-    {
-        /// <summary>
-        /// Return a SendEndpoint from the cache, using the factory to create it if it doesn't exist in the cache.
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="factory"></param>
-        /// <returns></returns>
-        Task<ISendEndpoint> GetSendEndpoint(Uri address, SendEndpointFactory factory);
-    }
 
 
     /// <summary>
     /// Caches SendEndpoint instances by address (ignoring the query string entirely, case insensitive)
     /// </summary>
-    public class SendEndpointCache :
-        ISendEndpointProvider,
-        ISendEndpointCache
+    public class SendEndpointCache<TKey> :
+        Agent,
+        ISendEndpointCache<TKey>
     {
-        static readonly ILog _log = Logger.Get<SendEndpointCache>();
+        static readonly ILog _log = Logger.Get<SendEndpointCache<TKey>>();
 
-        readonly IIndex<Uri, CachedSendEndpoint<Uri>> _index;
-        readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IIndex<TKey, CachedSendEndpoint<TKey>> _index;
 
-        public SendEndpointCache(ISendEndpointProvider sendEndpointProvider)
+        public SendEndpointCache()
         {
-            _sendEndpointProvider = sendEndpointProvider;
-
-            var cache = new GreenCache<CachedSendEndpoint<Uri>>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
-            _index = cache.AddIndex("address", x => x.Key);
+            var cache = new GreenCache<CachedSendEndpoint<TKey>>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
+            _index = cache.AddIndex("key", x => x.Key);
         }
 
-        public async Task<ISendEndpoint> GetSendEndpoint(Uri address, SendEndpointFactory factory)
+        public async Task<ISendEndpoint> GetSendEndpoint(TKey key, SendEndpointFactory<TKey> factory)
         {
-            CachedSendEndpoint<Uri> sendEndpoint = await _index.Get(address, x => GetSendEndpointFromFactory(x, factory)).ConfigureAwait(false);
+            CachedSendEndpoint<TKey> sendEndpoint = await _index.Get(key, x => GetSendEndpointFromFactory(x, factory)).ConfigureAwait(false);
 
             return sendEndpoint;
         }
 
-        public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
-        {
-            CachedSendEndpoint<Uri> sendEndpoint = await _index.Get(address, GetSendEndpointFromProvider).ConfigureAwait(false);
-
-            return sendEndpoint;
-        }
-
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
-        {
-            return _sendEndpointProvider.ConnectSendObserver(observer);
-        }
-
-        async Task<CachedSendEndpoint<Uri>> GetSendEndpointFromProvider(Uri address)
-        {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("GetSendEndpoint: {0}", address);
-
-            var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
-
-            return new CachedSendEndpoint<Uri>(address, sendEndpoint);
-        }
-
-        async Task<CachedSendEndpoint<Uri>> GetSendEndpointFromFactory(Uri address, SendEndpointFactory factory)
+        async Task<CachedSendEndpoint<TKey>> GetSendEndpointFromFactory(TKey address, SendEndpointFactory<TKey> factory)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("GetSendEndpoint (factory): {0}", address);
 
             var sendEndpoint = await factory(address).ConfigureAwait(false);
 
-            return new CachedSendEndpoint<Uri>(address, sendEndpoint);
+            return new CachedSendEndpoint<TKey>(address, sendEndpoint);
         }
     }
 }

@@ -26,8 +26,8 @@ namespace MassTransit.RabbitMqTransport
         {
         }
 
-        public MessageNotConfirmedException(Uri uri, string message = "The message was not confirmed by RabbitMQ")
-            : base(uri, message)
+        public MessageNotConfirmedException(Uri uri, string reason)
+            : base(uri, $"The message was not confirmed: {reason}")
         {
         }
 

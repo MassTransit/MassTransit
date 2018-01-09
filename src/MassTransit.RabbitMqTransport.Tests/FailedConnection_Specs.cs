@@ -162,16 +162,18 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
 
-            BusHandle handle = await busControl.StartAsync();
+            BusHandle handle = await busControl.StartAsync(TestCancellationToken);
             try
             {
                 Console.WriteLine("Waiting for connection...");
 
                 await handle.Ready;
+
+                await Task.Delay(5000);
             }
             finally
             {
-                await handle.StopAsync();
+                await handle.StopAsync(TestCancellationToken);
             }
         }
 

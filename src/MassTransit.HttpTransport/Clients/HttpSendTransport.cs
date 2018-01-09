@@ -148,11 +148,6 @@ namespace MassTransit.HttpTransport.Clients
             return TaskUtil.Completed;
         }
 
-        public Task Close()
-        {
-            return TaskUtil.Completed;
-        }
-
         static string GetAssemblyFileVersion(Assembly assembly)
         {
             var attribute = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();

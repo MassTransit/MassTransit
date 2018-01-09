@@ -48,7 +48,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
             return this;
         }
 
-        public BrokerTopology BuildTopologyLayout()
+        public BrokerTopology BuildBrokerTopology()
         {
             return new RabbitMqBrokerTopology(Exchanges, ExchangeBindings, Queues, QueueBindings);
         }

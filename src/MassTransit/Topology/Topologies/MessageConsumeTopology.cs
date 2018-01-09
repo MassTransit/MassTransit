@@ -14,7 +14,8 @@ namespace MassTransit.Topology.Topologies
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
+    using System.Linq;
+    using GreenPipes;
 
 
     public class MessageConsumeTopology<TMessage> :
@@ -22,14 +23,14 @@ namespace MassTransit.Topology.Topologies
         where TMessage : class
     {
         readonly IList<IMessageConsumeTopologyConvention<TMessage>> _conventions;
-        readonly IList<IMessageConsumeTopology<TMessage>> _delegateConfigurations;
+        readonly IList<IMessageConsumeTopology<TMessage>> _delegateTopologies;
         readonly IList<IMessageConsumeTopology<TMessage>> _topologies;
 
         public MessageConsumeTopology()
         {
             _conventions = new List<IMessageConsumeTopologyConvention<TMessage>>();
             _topologies = new List<IMessageConsumeTopology<TMessage>>();
-            _delegateConfigurations = new List<IMessageConsumeTopology<TMessage>>();
+            _delegateTopologies = new List<IMessageConsumeTopology<TMessage>>();
         }
 
         public void Add(IMessageConsumeTopology<TMessage> consumeTopology)
@@ -39,20 +40,19 @@ namespace MassTransit.Topology.Topologies
 
         public void AddDelegate(IMessageConsumeTopology<TMessage> configuration)
         {
-            _delegateConfigurations.Add(configuration);
+            _delegateTopologies.Add(configuration);
         }
 
         public void Apply(ITopologyPipeBuilder<ConsumeContext<TMessage>> builder)
         {
             ITopologyPipeBuilder<ConsumeContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
-            foreach (IMessageConsumeTopology<TMessage> topology in _delegateConfigurations)
+            foreach (IMessageConsumeTopology<TMessage> topology in _delegateTopologies)
                 topology.Apply(delegatedBuilder);
 
             foreach (IMessageConsumeTopologyConvention<TMessage> convention in _conventions)
             {
-                IMessageConsumeTopology<TMessage> topology;
-                if (convention.TryGetMessageConsumeTopology(out topology))
+                if (convention.TryGetMessageConsumeTopology(out IMessageConsumeTopology<TMessage> topology))
                     topology.Apply(builder);
             }
 
@@ -95,6 +95,11 @@ namespace MassTransit.Topology.Topologies
             var addedConvention = add();
             if (addedConvention != null)
                 _conventions.Add(addedConvention);
+        }
+
+        public virtual IEnumerable<ValidationResult> Validate()
+        {
+            return Enumerable.Empty<ValidationResult>();
         }
     }
 }

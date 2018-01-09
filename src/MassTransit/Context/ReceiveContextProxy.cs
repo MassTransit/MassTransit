@@ -84,7 +84,6 @@ namespace MassTransit.Context
 
         ISendEndpointProvider ReceiveContext.SendEndpointProvider => _context.SendEndpointProvider;
         IPublishEndpointProvider ReceiveContext.PublishEndpointProvider => _context.PublishEndpointProvider;
-        ISendTransportProvider ReceiveContext.SendTransportProvider => _context.SendTransportProvider;
-        IReceiveEndpointTopology ReceiveContext.Topology => _context.Topology;
+        IReceiveTopology ReceiveContext.Topology => _context.Topology;
     }
 }

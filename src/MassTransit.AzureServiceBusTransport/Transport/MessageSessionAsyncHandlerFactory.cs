@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,33 +13,29 @@
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
-    using MassTransit.Topology;
     using Microsoft.ServiceBus.Messaging;
     using Transports.Metrics;
-    using Util;
 
 
     public class MessageSessionAsyncHandlerFactory :
         IMessageSessionAsyncHandlerFactory
     {
-        readonly NamespaceContext _context;
-        readonly ISessionReceiver _receiver;
-        readonly ITaskSupervisor _supervisor;
+        readonly ClientContext _context;
+        readonly IBrokeredMessageReceiver _messageReceiver;
+        readonly IReceiver _receiver;
         readonly IDeliveryTracker _tracker;
-        readonly IReceiveEndpointTopology _topology;
 
-        public MessageSessionAsyncHandlerFactory(NamespaceContext context, ITaskSupervisor supervisor, ISessionReceiver receiver, IDeliveryTracker tracker, IReceiveEndpointTopology topology)
+        public MessageSessionAsyncHandlerFactory(ClientContext context, IReceiver receiver, IDeliveryTracker tracker, IBrokeredMessageReceiver messageReceiver)
         {
             _context = context;
-            _supervisor = supervisor;
             _receiver = receiver;
             _tracker = tracker;
-            _topology = topology;
+            _messageReceiver = messageReceiver;
         }
 
         public IMessageSessionAsyncHandler CreateInstance(MessageSession session, BrokeredMessage message)
         {
-            return new MessageSessionAsyncHandler(_context, _supervisor, _receiver, session, _tracker, _topology);
+            return new MessageSessionAsyncHandler(_context, _receiver, session, _tracker, _messageReceiver);
         }
 
         public void DisposeInstance(IMessageSessionAsyncHandler handler)

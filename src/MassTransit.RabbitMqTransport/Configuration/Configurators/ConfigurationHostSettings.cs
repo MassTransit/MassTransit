@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,8 +17,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
     using RabbitMQ.Client;
-    using Topology;
-    using Transports;
     using Util;
 
 
@@ -27,8 +25,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
     {
         public ConfigurationHostSettings()
         {
-            MessageNameFormatter = new RabbitMqMessageNameFormatter();
-
             var defaultOptions = new SslOption();
             SslProtocol = defaultOptions.Version;
             AcceptablePolicyErrors = defaultOptions.AcceptablePolicyErrors | SslPolicyErrors.RemoteCertificateChainErrors;
@@ -36,11 +32,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
             PublisherConfirmation = true;
 
             ClientProvidedName = HostMetadataCache.Host.ProcessName;
-
-//            _topology = new Lazy<IRabbitMqHostTopology>(() => new RabbitMqTopology(new FanoutExchangeTypeSelector(), MessageNameFormatter, HostAddress, TODO, TODO, TODO));
         }
-
-        readonly Lazy<IRabbitMqHostTopology> _topology;
 
         public string Host { get; set; }
         public int Port { get; set; }
@@ -58,11 +50,9 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public bool UseClientCertificateAsAuthenticationIdentity { get; set; }
         public LocalCertificateSelectionCallback CertificateSelectionCallback { get; set; }
         public RemoteCertificateValidationCallback CertificateValidationCallback { get; set; }
-        public IMessageNameFormatter MessageNameFormatter { get; set; }
         public string[] ClusterMembers { get; set; }
         public IRabbitMqEndpointResolver HostNameSelector { get; set; }
         public string ClientProvidedName { get; set; }
-  //      public IRabbitMqHostTopology Topology => _topology.Value;
 
         public Uri HostAddress
         {

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,10 +15,10 @@ namespace MassTransit
     using System;
     using System.Threading;
     using Topology;
-    using Topology.Configuration;
     using Topology.EntityNameFormatters;
     using Topology.Topologies;
-    using Transports.InMemory;
+    using Transports.InMemory.Configurators;
+    using Transports.InMemory.EndpointSpecifications;
 
 
     public static class InMemoryBus

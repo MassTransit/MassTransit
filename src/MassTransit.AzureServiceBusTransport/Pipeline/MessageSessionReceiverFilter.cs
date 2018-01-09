@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,76 +12,25 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
-    using System.Threading.Tasks;
-    using Events;
-    using GreenPipes;
-    using Logging;
-    using MassTransit.Topology;
     using Transport;
-    using Util;
+    using Transports;
 
 
     /// <summary>
     /// Creates a message session receiver
     /// </summary>
     public class MessageSessionReceiverFilter :
-        IFilter<NamespaceContext>
+        MessageReceiverFilter
     {
-        static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
-        readonly IPipe<ReceiveContext> _receivePipe;
-        readonly IReceiveEndpointTopology _topology;
-
-        public MessageSessionReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveEndpointTopology topology)
-        {
-            _receivePipe = receivePipe;
-            _topology = topology;
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
+        public MessageSessionReceiverFilter(IBrokeredMessageReceiver messageReceiver, IReceiveTransportObserver transportObserver, IDeadLetterTransport deadLetterTransport,
+            IErrorTransport errorTransport)
+            : base(messageReceiver, transportObserver, deadLetterTransport, errorTransport)
         {
         }
 
-        async Task IFilter<NamespaceContext>.Send(NamespaceContext context, IPipe<NamespaceContext> next)
+        protected override IReceiver CreateMessageReceiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
         {
-            var clientContext = context.GetPayload<ClientContext>();
-
-            var clientSettings = context.GetPayload<ClientSettings>();
-
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating message receiver for {0}", clientContext.InputAddress);
-
-            using (var scope = context.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {clientContext.InputAddress}"))
-            {
-                var receiver = new SessionReceiver(clientContext, _receivePipe, clientSettings, scope, _topology);
-
-                await receiver.Start(context).ConfigureAwait(false);
-
-                await scope.Ready.ConfigureAwait(false);
-
-                await context.Ready(new ReceiveTransportReadyEvent(clientContext.InputAddress)).ConfigureAwait(false);
-
-                scope.SetReady();
-
-                try
-                {
-                    await scope.Completed.ConfigureAwait(false);
-                }
-                finally
-                {
-                    var metrics = receiver.GetDeliveryMetrics();
-
-                    await context.Completed(new ReceiveTransportCompletedEvent(clientContext.InputAddress, metrics)).ConfigureAwait(false);
-
-                    if (_log.IsDebugEnabled)
-                    {
-                        _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", clientContext.InputAddress,
-                            metrics.DeliveryCount,
-                            metrics.ConcurrentDeliveryCount);
-                    }
-                }
-            }
-
-            await next.Send(context).ConfigureAwait(false);
+            return new SessionReceiver(context, messageReceiver, DeadLetterTransport, ErrorTransport);
         }
     }
 }

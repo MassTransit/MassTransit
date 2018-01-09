@@ -10,9 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Topology.Configuration
+namespace MassTransit.Topology
 {
     using System;
+    using GreenPipes;
 
 
     /// <summary>
@@ -62,7 +63,8 @@ namespace MassTransit.Topology.Configuration
     }
 
 
-    public interface IMessageConsumeTopologyConfigurator
+    public interface IMessageConsumeTopologyConfigurator :
+        ISpecification
     {
     }
 }

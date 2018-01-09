@@ -20,7 +20,7 @@ namespace MassTransit
     using Internals.Extensions;
     using PipeConfigurators;
     using Saga;
-    using Saga.SubscriptionConfigurators;
+    using SagaConfigurators;
     using Scoping;
     using SimpleInjector;
     using SimpleInjectorIntegration;

@@ -14,7 +14,8 @@ namespace MassTransit.Topology.Topologies
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
+    using System.Linq;
+    using GreenPipes;
 
 
     public class MessagePublishTopology<TMessage> :
@@ -22,7 +23,7 @@ namespace MassTransit.Topology.Topologies
         where TMessage : class
     {
         readonly IList<IMessagePublishTopologyConvention<TMessage>> _conventions;
-        readonly IList<IMessagePublishTopology<TMessage>> _delegateConfigurations;
+        readonly IList<IMessagePublishTopology<TMessage>> _delegateTopologies;
         readonly IList<IImplementedMessagePublishTopologyConfigurator<TMessage>> _implementedMessageTypes;
         readonly IList<IMessagePublishTopology<TMessage>> _topologies;
 
@@ -30,7 +31,7 @@ namespace MassTransit.Topology.Topologies
         {
             _conventions = new List<IMessagePublishTopologyConvention<TMessage>>();
             _topologies = new List<IMessagePublishTopology<TMessage>>();
-            _delegateConfigurations = new List<IMessagePublishTopology<TMessage>>();
+            _delegateTopologies = new List<IMessagePublishTopology<TMessage>>();
             _implementedMessageTypes = new List<IImplementedMessagePublishTopologyConfigurator<TMessage>>();
         }
 
@@ -41,14 +42,14 @@ namespace MassTransit.Topology.Topologies
 
         public void AddDelegate(IMessagePublishTopology<TMessage> configuration)
         {
-            _delegateConfigurations.Add(configuration);
+            _delegateTopologies.Add(configuration);
         }
 
         public void Apply(ITopologyPipeBuilder<PublishContext<TMessage>> builder)
         {
             ITopologyPipeBuilder<PublishContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
-            foreach (IMessagePublishTopology<TMessage> topology in _delegateConfigurations)
+            foreach (IMessagePublishTopology<TMessage> topology in _delegateTopologies)
                 topology.Apply(delegatedBuilder);
 
             foreach (IMessagePublishTopologyConvention<TMessage> convention in _conventions)
@@ -88,6 +89,11 @@ namespace MassTransit.Topology.Topologies
             var addedConvention = add();
             if (addedConvention != null)
                 _conventions.Add(addedConvention);
+        }
+
+        public virtual IEnumerable<ValidationResult> Validate()
+        {
+            return Enumerable.Empty<ValidationResult>();
         }
 
         public void AddImplementedMessageConfigurator<T>(IMessagePublishTopologyConfigurator<T> configurator)

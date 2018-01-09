@@ -15,6 +15,7 @@ namespace MassTransit.Logging
     using System.Collections.Generic;
     using System.Diagnostics;
 
+
     public class LogLevel
     {
         public static readonly LogLevel All = new LogLevel("All", 6, SourceLevels.All, TraceEventType.Verbose);
@@ -81,6 +82,22 @@ namespace MassTransit.Logging
         public static bool operator <=(LogLevel left, LogLevel right)
         {
             return right != null && (left != null && left._index <= right._index);
+        }
+
+        public static implicit operator TraceLevel(LogLevel level)
+        {
+            switch (level.SourceLevel)
+            {
+                case SourceLevels.Critical:
+                case SourceLevels.Error:
+                    return TraceLevel.Error;
+                case SourceLevels.Warning:
+                    return TraceLevel.Warning;
+                case SourceLevels.Information:
+                    return TraceLevel.Info;
+                default:
+                    return TraceLevel.Verbose;
+            }
         }
 
         public static LogLevel FromSourceLevels(SourceLevels level)

@@ -22,6 +22,16 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
         /// The entity path
         /// </summary>
         string Path { get; }
+        
+        /// <summary>
+        /// The base path for the message entity
+        /// </summary>
+        string BasePath { get; set; }
+        
+        /// <summary>
+        /// The full path of the message entity
+        /// </summary>
+        string FullPath { get; }
 
         /// <summary>
         /// How long of a window to use to detect duplicate messages

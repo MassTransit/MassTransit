@@ -16,7 +16,7 @@ namespace MassTransit
     using RabbitMqTransport.Topology;
     using RabbitMqTransport.Topology.Conventions;
     using RabbitMqTransport.Topology.Conventions.RoutingKey;
-    using Topology.Configuration;
+    using Topology;
 
 
     public static class RoutingKeyConventionExtensions

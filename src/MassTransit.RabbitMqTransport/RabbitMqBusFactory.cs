@@ -15,8 +15,8 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Threading;
     using Configurators;
+    using EndpointSpecifications;
     using MassTransit.Topology;
-    using MassTransit.Topology.Configuration;
     using MassTransit.Topology.EntityNameFormatters;
     using MassTransit.Topology.Topologies;
     using Specifications;

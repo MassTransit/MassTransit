@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport.Testing
 {
     using System;
-    using Configuration;
     using Logging;
     using MassTransit.Testing;
     using Microsoft.ServiceBus;

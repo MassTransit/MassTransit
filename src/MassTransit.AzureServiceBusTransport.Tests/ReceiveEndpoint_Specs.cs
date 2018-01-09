@@ -22,6 +22,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     public class Creating_a_receive_endpoint_from_an_existing_bus :
         AzureServiceBusTestFixture
     {
+        public Creating_a_receive_endpoint_from_an_existing_bus()
+        {
+            TestTimeout = TimeSpan.FromMinutes(1);
+        }
+
         [Test]
         public async Task Should_be_allowed()
         {
@@ -35,7 +40,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             });
 
             await handle.Ready;
-            
+
             try
             {
                 await Bus.Publish(new PingMessage());
@@ -57,8 +62,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 Handled<PingMessage>(x);
             });
+
             await handle.Ready;
-            
+
             try
             {
                 Assert.That(async () =>
@@ -91,8 +97,9 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 pingHandled = Handled<PingMessage>(x);
             });
+
             await handle.Ready;
-            
+
             try
             {
                 await Bus.Publish(new PingMessage());
@@ -100,7 +107,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 ConsumeContext<PingMessage> pinged = await pingHandled;
 
                 Assert.That(pinged.ReceiveContext.InputAddress,
-                    Is.EqualTo(new Uri(Host.Address, string.Join("/", Host.Topology.Message<PingMessage>().EntityName, "second_subscription"))));
+                    Is.EqualTo(new Uri(string.Join("/", Host.Address.GetLeftPart(UriPartial.Authority), Host.Topology.Message<PingMessage>().EntityName, "Subscriptions",
+                        "second_subscription"))));
             }
             finally
             {
@@ -115,6 +123,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 Handled<PingMessage>(x);
             });
+
             await handle.Ready;
 
             try
@@ -124,8 +133,8 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     var unused = Host.ConnectSubscriptionEndpoint<PingMessage>("second_subscription", x =>
                     {
                     });
+
                     await unused.Ready;
-                    
                 }, Throws.TypeOf<ConfigurationException>());
             }
             finally

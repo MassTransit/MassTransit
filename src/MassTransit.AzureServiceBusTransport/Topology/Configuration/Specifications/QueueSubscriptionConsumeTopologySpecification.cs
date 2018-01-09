@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Specifications
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
     using Builders;
@@ -49,7 +50,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Specificat
             var subscriptionDescription = _subscriptionDescription;
 
             subscriptionDescription.ForwardTo = builder.Queue.Queue.QueueDescription.Path;
-            subscriptionDescription.Name = GetSubscriptionName(subscriptionDescription.Name, builder.Queue.Queue.QueueDescription.Path);
+            subscriptionDescription.Name = GetSubscriptionName(subscriptionDescription.Name, builder.Queue.Queue.QueueDescription.Path.Split('/').Last());
 
             var queueSubscription = builder.CreateQueueSubscription(topic, builder.Queue, subscriptionDescription);
         }

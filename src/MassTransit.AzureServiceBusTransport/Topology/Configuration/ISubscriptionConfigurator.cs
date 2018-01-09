@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
 {
     using System;
+    using Microsoft.ServiceBus.Messaging;
 
 
     public interface ISubscriptionConfigurator :
@@ -37,6 +38,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
         /// Move messages to the dead letter queue on filter evaluation exception
         /// </summary>
         bool? EnableDeadLetteringOnFilterEvaluationExceptions { set; }
+
+        SubscriptionDescription GetSubscriptionDescription();
     }
 
 

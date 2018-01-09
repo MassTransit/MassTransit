@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,8 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurators
 {
     using System;
+    using System.Collections.Generic;
+    using GreenPipes;
     using Microsoft.ServiceBus.Messaging;
 
 
@@ -42,9 +44,15 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
 
         public bool? RequiresSession { get; set; }
 
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (AutoDeleteOnIdle.HasValue && AutoDeleteOnIdle != TimeSpan.Zero && AutoDeleteOnIdle < TimeSpan.FromMinutes(5))
+                yield return this.Failure("AutoDeleteOnIdle", "must be zero, or >= 5:00");
+        }
+
         public QueueDescription GetQueueDescription()
         {
-            var description = new QueueDescription(Path);
+            var description = new QueueDescription(FullPath);
 
             if (AutoDeleteOnIdle.HasValue)
                 description.AutoDeleteOnIdle = AutoDeleteOnIdle.Value;

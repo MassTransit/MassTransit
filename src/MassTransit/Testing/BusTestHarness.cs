@@ -122,12 +122,13 @@ namespace MassTransit.Testing
 
             InputQueueSendEndpoint = await GetSendEndpoint(InputQueueAddress).ConfigureAwait(false);
 
-            _busSendObserver = BusSendEndpoint.ConnectSendObserver(_sent);
             _inputQueueSendObserver = InputQueueSendEndpoint.ConnectSendObserver(_sent);
 
             _busConsumeObserver = _bus.ConnectConsumeObserver(_consumed);
 
             _busPublishObserver = _bus.ConnectPublishObserver(_published);
+
+            _busSendObserver = _bus.ConnectSendObserver(_sent);
         }
 
         public virtual async Task Stop()

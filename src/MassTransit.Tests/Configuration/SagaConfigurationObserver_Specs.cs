@@ -17,7 +17,6 @@ namespace MassTransit.Tests.Configuration
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Saga;
-    using MassTransit.Saga.SubscriptionConfigurators;
     using NUnit.Framework;
     using TestFramework.Messages;
     using Util;

@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,10 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
-    using Util;
+    using Logging;
 
 
     /// <summary>
@@ -24,36 +25,41 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     public class ReceiveModelFilter :
         IFilter<ConnectionContext>
     {
+        static readonly ILog _log = Logger.Get<ReceiveModelFilter>();
         readonly IRabbitMqHost _host;
         readonly IPipe<ModelContext> _pipe;
-        readonly ITaskSupervisor _supervisor;
 
-        public ReceiveModelFilter(IPipe<ModelContext> pipe, ITaskSupervisor supervisor, IRabbitMqHost host)
+        public ReceiveModelFilter(IPipe<ModelContext> pipe, IRabbitMqHost host)
         {
             _pipe = pipe;
-            _supervisor = supervisor;
             _host = host;
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
+            var scope = context.CreateFilterScope("receiveModel");
+
+            _pipe.Probe(scope);
         }
 
         async Task IFilter<ConnectionContext>.Send(ConnectionContext context, IPipe<ConnectionContext> next)
         {
-            using (var scope = _supervisor.CreateScope($"{TypeMetadataCache<ReceiveModelFilter>.ShortName}"))
+            var model = await context.CreateModel().ConfigureAwait(false);
+
+            var modelContext = new RabbitMqModelContext(context, model, _host, context.CancellationToken);
+            try
             {
-                var model = await context.CreateModel().ConfigureAwait(false);
+                await _pipe.Send(modelContext).ConfigureAwait(false);
 
-                using (var modelContext = new RabbitMqModelContext(context, model, scope, _host))
-                {
-                    await _pipe.Send(modelContext).ConfigureAwait(false);
-                }
-
-                await scope.Completed.ConfigureAwait(false);
-
-                await next.Send(context).ConfigureAwait(false);
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Consumer model pipe completed.");
             }
+            finally
+            {
+                await modelContext.DisposeAsync(CancellationToken.None).ConfigureAwait(false);
+            }
+
+            await next.Send(context).ConfigureAwait(false);
         }
     }
 }

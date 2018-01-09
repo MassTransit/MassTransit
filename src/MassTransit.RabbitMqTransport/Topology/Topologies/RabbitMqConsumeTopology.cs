@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,15 +14,15 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
     using Builders;
-    using Configuration;
-    using Configuration.Configurators;
-    using Configuration.Specifications;
+    using Configurators;
+    using GreenPipes;
     using MassTransit.Topology;
-    using MassTransit.Topology.Configuration;
     using MassTransit.Topology.Topologies;
     using NewIdFormatters;
+    using Specifications;
     using Util;
 
 
@@ -51,6 +51,14 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             return base.GetMessageTopology<T>() as IRabbitMqMessageConsumeTopologyConfigurator<T>;
         }
 
+        public void AddSpecification(IRabbitMqConsumeTopologySpecification specification)
+        {
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
+
+            _specifications.Add(specification);
+        }
+
         IRabbitMqMessageConsumeTopologyConfigurator<T> IRabbitMqConsumeTopologyConfigurator.GetMessageTopology<T>()
         {
             return base.GetMessageTopology<T>() as IRabbitMqMessageConsumeTopologyConfigurator<T>;
@@ -68,11 +76,11 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         {
             var exchangeType = ExchangeTypeSelector.DefaultExchangeType;
 
-            var binding = new ExchangeBindingConfigurator(exchangeName, exchangeType, true, false, "");
+            var specification = new ExchangeBindingConsumeTopologySpecification(exchangeName, exchangeType);
 
-            configure?.Invoke(binding);
+            configure?.Invoke(specification);
 
-            var specification = new ExchangeBindingConsumeTopologySpecification(binding);
+            _specifications.Add(specification);
 
             _specifications.Add(specification);
         }
@@ -98,6 +106,11 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             sb.Append(NewId.Next().ToString(_formatter));
 
             return sb.ToString();
+        }
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            return base.Validate().Concat(_specifications.SelectMany(x => x.Validate()));
         }
 
         protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)

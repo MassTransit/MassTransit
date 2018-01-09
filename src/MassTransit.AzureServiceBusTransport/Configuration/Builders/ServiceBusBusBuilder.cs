@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Configuration.Builders
+namespace MassTransit.AzureServiceBusTransport.Builders
 {
     using System;
     using Configurators;
@@ -26,8 +26,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Builders
     {
         readonly ServiceBusReceiveEndpointSpecification _busEndpointSpecification;
 
-        public ServiceBusBusBuilder(BusHostCollection<ServiceBusHost> hosts, ReceiveEndpointSettings settings,
-            IServiceBusEndpointConfiguration configuration, ISendTransportProvider sendTransportProvider)
+        public ServiceBusBusBuilder(BusHostCollection<ServiceBusHost> hosts, ReceiveEndpointSettings settings, IServiceBusEndpointConfiguration configuration)
             : base(hosts, configuration)
         {
             if (hosts == null)
@@ -35,12 +34,12 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Builders
 
             var endpointTopologySpecification = configuration.CreateNewConfiguration(ConsumePipe);
 
-            _busEndpointSpecification = new ServiceBusReceiveEndpointSpecification(hosts[0], settings, endpointTopologySpecification, sendTransportProvider);
+            _busEndpointSpecification = new ServiceBusReceiveEndpointSpecification(hosts, hosts[0], settings, endpointTopologySpecification);
 
             foreach (var host in hosts.Hosts)
             {
-                host.ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(this, host, configuration, sendTransportProvider);
-                host.SubscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(this, host, configuration, sendTransportProvider);
+                host.ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(this, hosts, host, configuration);
+                host.SubscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(this, hosts, host, configuration);
             }
         }
 

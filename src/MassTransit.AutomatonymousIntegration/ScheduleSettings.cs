@@ -30,6 +30,6 @@ namespace Automatonymous
         /// <summary>
         /// Configure the received correlation
         /// </summary>
-        Action<EventCorrelationConfigurator<TInstance, TMessage>> Received { get; }
+        Action<IEventCorrelationConfigurator<TInstance, TMessage>> Received { get; }
     }
 }

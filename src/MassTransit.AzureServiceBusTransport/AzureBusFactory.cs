@@ -14,13 +14,11 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Threading;
-    using Configuration;
-    using Configuration.Configurators;
-    using Configuration.Specifications;
+    using Configurators;
     using MassTransit.Topology;
-    using MassTransit.Topology.Configuration;
     using MassTransit.Topology.EntityNameFormatters;
     using MassTransit.Topology.Topologies;
+    using Specifications;
 
 
     public static class AzureBusFactory
@@ -45,8 +43,7 @@ namespace MassTransit.AzureServiceBusTransport
         static class Cached
         {
             internal static readonly Lazy<IMessageTopologyConfigurator> MessageTopologyValue =
-                new Lazy<IMessageTopologyConfigurator>(() => new MessageTopology(_entityNameFormatter),
-                    LazyThreadSafetyMode.PublicationOnly);
+                new Lazy<IMessageTopologyConfigurator>(() => new MessageTopology(_entityNameFormatter), LazyThreadSafetyMode.PublicationOnly);
 
             static readonly IEntityNameFormatter _entityNameFormatter;
 

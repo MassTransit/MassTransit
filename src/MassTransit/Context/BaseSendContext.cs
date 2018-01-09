@@ -85,7 +85,7 @@ namespace MassTransit.Context
 
         public IMessageSerializer Serializer
         {
-            get { return _serializer; }
+            get => _serializer;
             set
             {
                 _serializer = value;

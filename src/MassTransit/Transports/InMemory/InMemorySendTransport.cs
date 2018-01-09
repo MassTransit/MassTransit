@@ -13,9 +13,9 @@
 namespace MassTransit.Transports.InMemory
 {
     using System;
-    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contexts;
     using Fabric;
     using GreenPipes;
     using Pipeline.Observables;
@@ -71,53 +71,9 @@ namespace MassTransit.Transports.InMemory
             }
         }
 
-        async Task ISendTransport.Move(ReceiveContext context, IPipe<SendContext> pipe)
-        {
-            var messageId = GetMessageId(context);
-
-            byte[] body;
-            using (var bodyStream = context.GetBody())
-            {
-                body = await GetMessageBody(bodyStream).ConfigureAwait(false);
-            }
-
-            var messageType = "Unknown";
-            InMemoryTransportMessage receivedMessage;
-            if (context.TryGetPayload(out receivedMessage))
-                messageType = receivedMessage.MessageType;
-
-            var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
-
-            await _exchange.Send(transportMessage).ConfigureAwait(false);
-        }
-
-        Task ISendTransport.Close()
-        {
-            // an in-memory send transport does not get disposed
-            return TaskUtil.Completed;
-        }
-
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _sendObservable.Connect(observer);
-        }
-
-        async Task<byte[]> GetMessageBody(Stream body)
-        {
-            using (var ms = new MemoryStream())
-            {
-                await body.CopyToAsync(ms).ConfigureAwait(false);
-
-                return ms.ToArray();
-            }
-        }
-
-        static Guid GetMessageId(ReceiveContext context)
-        {
-            object messageIdValue;
-            return context.TransportHeaders.TryGetHeader("MessageId", out messageIdValue)
-                ? new Guid(messageIdValue.ToString())
-                : NewId.NextGuid();
         }
     }
 }

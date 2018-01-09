@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,10 +14,12 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Builders;
     using Configuration;
     using Configuration.Configurators;
     using Configuration.Specifications;
+    using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Newtonsoft.Json.Linq;
@@ -67,6 +69,11 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription());
 
             _specifications.Add(specification);
+        }
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            return base.Validate().Concat(_specifications.SelectMany(x => x.Validate()));
         }
     }
 }

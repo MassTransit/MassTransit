@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,18 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
+namespace MassTransit.AzureServiceBusTransport.Configurators
 {
     using System;
     using System.Collections.Generic;
     using Builders;
+    using Contexts;
     using GreenPipes;
+    using GreenPipes.Agents;
     using MassTransit.Builders;
     using Pipeline;
     using Settings;
     using Specifications;
+    using Topology;
     using Topology.Configuration.Configurators;
     using Transport;
+    using Transports;
 
 
     public class ServiceBusReceiveEndpointSpecification :
@@ -29,24 +33,28 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
         IServiceBusReceiveEndpointConfigurator
     {
         readonly IServiceBusEndpointConfiguration _configuration;
-        readonly ISendTransportProvider _sendTransportProvider;
+        readonly BusHostCollection<ServiceBusHost> _hosts;
+        readonly IServiceBusSendTopology _sendTopology;
         readonly ReceiveEndpointSettings _settings;
         bool _subscribeMessageTopics;
 
-        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, string queueName, IServiceBusEndpointConfiguration configuration,
-            ISendTransportProvider sendTransportProvider)
-            : this(host, new ReceiveEndpointSettings(new QueueConfigurator(queueName)), configuration, sendTransportProvider)
+        public ServiceBusReceiveEndpointSpecification(BusHostCollection<ServiceBusHost> hosts, ServiceBusHost host, string queueName,
+            IServiceBusEndpointConfiguration configuration)
+            : this(hosts, host, new ReceiveEndpointSettings(queueName, new QueueConfigurator(queueName)), configuration)
         {
         }
 
-        public ServiceBusReceiveEndpointSpecification(IServiceBusHost host, ReceiveEndpointSettings settings, IServiceBusEndpointConfiguration configuration,
-            ISendTransportProvider sendTransportProvider)
+        public ServiceBusReceiveEndpointSpecification(BusHostCollection<ServiceBusHost> hosts, ServiceBusHost host, ReceiveEndpointSettings settings,
+            IServiceBusEndpointConfiguration configuration)
             : base(host, settings, settings.QueueConfigurator, configuration)
         {
+            _hosts = hosts;
             _settings = settings;
             _configuration = configuration;
-            _sendTransportProvider = sendTransportProvider;
             _subscribeMessageTopics = true;
+
+            _settings.QueueConfigurator.BasePath = host.Address.AbsolutePath;
+            _sendTopology = configuration.Topology.Send;
         }
 
         public bool SubscribeMessageTopics
@@ -58,7 +66,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
         {
             set
             {
-                _settings.QueueDescription.EnableExpress = value;
+                _settings.QueueConfigurator.EnableExpress = value;
 
                 Changed(nameof(EnableExpress));
             }
@@ -124,25 +132,50 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Configurators
 
             if (_settings.PrefetchCount < 0)
                 yield return this.Failure("PrefetchCount", "must be >= 0");
+
             if (_settings.MaxConcurrentCalls <= 0)
                 yield return this.Failure("MaxConcurrentCalls", "must be > 0");
-            if (_settings.QueueDescription.AutoDeleteOnIdle != TimeSpan.Zero && _settings.QueueDescription.AutoDeleteOnIdle < TimeSpan.FromMinutes(5))
-                yield return this.Failure("AutoDeleteOnIdle", "must be zero, or >= 5:00");
+
+            foreach (var result in _settings.QueueConfigurator.Validate())
+                yield return result;
         }
 
         public override void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new ServiceBusReceiveEndpointBuilder(builder, Host, _subscribeMessageTopics, _configuration, _sendTransportProvider);
+            var receiveEndpointBuilder = new ServiceBusReceiveEndpointBuilder(_hosts, Host, _subscribeMessageTopics, _configuration);
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 
             var receiveEndpointTopology = receiveEndpointBuilder.CreateReceiveEndpointTopology(InputAddress, _settings);
 
-            ApplyReceiveEndpoint(receivePipe, receiveEndpointTopology, x =>
-            {
-                x.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointTopology.BrokerTopology, _settings.RemoveSubscriptions));
-                x.UseFilter(new PrepareQueueClientFilter(_settings));
-            });
+            NamespacePipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointTopology.BrokerTopology, _settings.RemoveSubscriptions));
+
+            ApplyReceiveEndpoint(receivePipe, receiveEndpointTopology);
+        }
+
+        protected override IErrorTransport CreateErrorTransport(ServiceBusHost host)
+        {
+            var settings = _sendTopology.GetErrorSettings(_settings.QueueConfigurator);
+
+            return new BrokeredMessageErrorTransport(CreateSendEndpointContextCache(host, settings));
+        }
+
+        protected override IDeadLetterTransport CreateDeadLetterTransport(ServiceBusHost host)
+        {
+            var settings = _sendTopology.GetDeadLetterSettings(_settings.QueueConfigurator);
+
+            return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextCache(host, settings));
+        }
+
+        protected override IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings, IPipe<NamespaceContext> namespacePipe)
+        {
+            return new QueueSendEndpointContextFactory(host.MessagingFactoryCache, host.NamespaceCache, Pipe.Empty<MessagingFactoryContext>(), namespacePipe, settings);
+        }
+
+        protected override IClientCache CreateClientCache(Uri inputAddress, IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache)
+        {
+            return new ClientCache(inputAddress,
+                new QueueClientContextFactory(messagingFactoryCache, namespaceCache, MessagingFactoryPipeConfigurator.Build(), NamespacePipeConfigurator.Build(), _settings));
         }
     }
 }

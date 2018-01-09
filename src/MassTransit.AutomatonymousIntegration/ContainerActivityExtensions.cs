@@ -13,6 +13,7 @@
 namespace Automatonymous
 {
     using System;
+    using Activities;
     using Binders;
 
 

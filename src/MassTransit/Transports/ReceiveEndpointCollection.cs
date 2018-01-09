@@ -18,11 +18,13 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Agents;
     using Pipeline.Observables;
     using Util;
 
 
     public class ReceiveEndpointCollection :
+        Agent,
         IReceiveEndpointCollection
     {
         readonly ConsumeObservable _consumeObservers;
@@ -49,6 +51,7 @@ namespace MassTransit.Transports
         {
             if (endpoint == null)
                 throw new ArgumentNullException(nameof(endpoint));
+
             if (string.IsNullOrWhiteSpace(endpointName))
                 throw new ArgumentException($"The {nameof(endpointName)} must not be null or empty", nameof(endpointName));
 
@@ -81,7 +84,7 @@ namespace MassTransit.Transports
             lock (_mutateLock)
             {
                 if (!_endpoints.TryGetValue(endpointName, out endpoint))
-                    throw new ConfigurationException($"A receive endpoint with the same key was already added: {endpointName}");
+                    throw new ConfigurationException($"A receive endpoint with the key was not found: {endpointName}");
 
                 if (_handles.ContainsKey(endpointName))
                     throw new ArgumentException($"The specified endpoint has already been started: {endpointName}", nameof(endpointName));
@@ -98,6 +101,7 @@ namespace MassTransit.Transports
                 endpointScope.Add("name", receiveEndpoint.Key);
                 if (_handles.ContainsKey(receiveEndpoint.Key))
                     endpointScope.Add("started", true);
+
                 receiveEndpoint.Value.Probe(endpointScope);
             }
         }
@@ -112,7 +116,8 @@ namespace MassTransit.Transports
             return _receiveEndpointObservers.Connect(observer);
         }
 
-        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer) where T : class
+        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+            where T : class
         {
             return new MultipleConnectHandle(_endpoints.Values.Select(x => x.ConnectConsumeMessageObserver(observer)));
         }
@@ -130,6 +135,17 @@ namespace MassTransit.Transports
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _sendObservers.Connect(observer);
+        }
+
+        protected override async Task StopAgent(StopContext context)
+        {
+            HostReceiveEndpointHandle[] handles;
+            lock (_mutateLock)
+                handles = _handles.Values.ToArray();
+
+            await Task.WhenAll(handles.Select(x => x.StopAsync(context.CancellationToken))).ConfigureAwait(false);
+
+            await base.StopAgent(context);
         }
 
         HostReceiveEndpointHandle StartEndpoint(string endpointName, IReceiveEndpointControl endpoint)

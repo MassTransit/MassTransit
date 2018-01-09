@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,36 +13,36 @@
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
-    using Configuration;
-    using Configuration.Builders;
-    using Configuration.Configurators;
-    using Configuration.Specifications;
+    using Builders;
+    using Configurators;
     using MassTransit.Configurators;
     using Settings;
+    using Specifications;
+    using Transports;
 
 
     public class ServiceBusSubscriptionEndpointFactory :
         IServiceBusSubscriptionEndpointFactory
     {
         readonly ServiceBusBusBuilder _builder;
+        readonly BusHostCollection<ServiceBusHost> _hosts;
         readonly IServiceBusEndpointConfiguration _configuration;
         readonly ServiceBusHost _host;
-        readonly ISendTransportProvider _sendTransportProvider;
 
-        public ServiceBusSubscriptionEndpointFactory(ServiceBusBusBuilder builder, ServiceBusHost host, IServiceBusEndpointConfiguration configuration,
-            ISendTransportProvider sendTransportProvider)
+        public ServiceBusSubscriptionEndpointFactory(ServiceBusBusBuilder builder, BusHostCollection<ServiceBusHost> hosts, ServiceBusHost host,
+            IServiceBusEndpointConfiguration configuration)
         {
             _builder = builder;
+            _hosts = hosts;
             _host = host;
             _configuration = configuration;
-            _sendTransportProvider = sendTransportProvider;
         }
 
         public void CreateSubscriptionEndpoint(SubscriptionEndpointSettings settings, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
             var endpointConfiguration = _configuration.CreateNewConfiguration();
 
-            var endpointConfigurator = new ServiceBusSubscriptionEndpointSpecification(_host, settings, endpointConfiguration, _sendTransportProvider);
+            var endpointConfigurator = new ServiceBusSubscriptionEndpointSpecification(_hosts, _host, settings, endpointConfiguration);
 
             configure?.Invoke(endpointConfigurator);
 

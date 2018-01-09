@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using Topology.Builders;
 
 
     /// <summary>

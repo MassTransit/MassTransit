@@ -19,7 +19,12 @@ namespace MassTransit.Transports
 
     public static class ReceiveEndpointLoggingExtensions
     {
-        static readonly ILog _messages = Logger.Get("MassTransit.Messages");
+        static ILog _messages = Logger.Get("MassTransit.Messages");
+
+        public static void SetLog(ILog log)
+        {
+            _messages = log;
+        }
 
         /// <summary>
         /// Log that a message was skipped, and moved to the dead letter queue
@@ -35,12 +40,12 @@ namespace MassTransit.Transports
         /// Log that a message was moved from one endpoint to the destination endpoint address
         /// </summary>
         /// <param name="context"></param>
-        /// <param name="destinationAddress"></param>
+        /// <param name="destination"></param>
         /// <param name="reason"> </param>
-        public static void LogMoved(this ReceiveContext context, Uri destinationAddress, string reason)
+        public static void LogMoved(this ReceiveContext context, string destination, string reason)
         {
             if (_messages.IsInfoEnabled)
-                _messages.Info($"MOVE {context.InputAddress} {GetMessageId(context)} {destinationAddress} {reason}");
+                _messages.Info($"MOVE {context.InputAddress} {GetMessageId(context)} {destination} {reason}");
         }
 
         static string GetMessageId(ReceiveContext context)

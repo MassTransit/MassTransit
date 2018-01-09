@@ -20,6 +20,8 @@ namespace MassTransit.Tests.Serialization
     using MassTransit.Serialization;
     using MassTransit.Transports;
     using MassTransit.Transports.InMemory;
+    using MassTransit.Transports.InMemory.Contexts;
+    using MassTransit.Transports.InMemory.Fabric;
     using Messages;
     using NUnit.Framework;
     using Util;

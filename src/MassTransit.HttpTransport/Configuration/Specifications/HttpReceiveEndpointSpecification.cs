@@ -60,7 +60,7 @@ namespace MassTransit.HttpTransport.Specifications
 
         public void Apply(IBusBuilder builder)
         {
-            var receiveEndpointBuilder = new HttpReceiveEndpointBuilder(builder, _host, _hosts, _configuration);
+            var receiveEndpointBuilder = new HttpReceiveEndpointBuilder(_host, _hosts, _configuration);
 
             var receiveEndpointTopology = receiveEndpointBuilder.CreateReceiveEndpointTopology(InputAddress);
 
@@ -71,7 +71,7 @@ namespace MassTransit.HttpTransport.Specifications
 
             var receiveSettings = new Settings(_pathMatch);
 
-            var transport = new HttpReceiveTransport(_host, receiveSettings, receiveEndpointTopology);
+            var transport = new HttpReceiveTransport(_host, receiveSettings, receivePipe, receiveEndpointTopology);
 
             var httpHost = _host as HttpHost;
             if (httpHost == null)
@@ -83,22 +83,6 @@ namespace MassTransit.HttpTransport.Specifications
         protected override Uri GetInputAddress()
         {
             return _host.Settings.GetInputAddress();
-        }
-
-        protected override Uri GetErrorAddress()
-        {
-            var errorQueueName = "bus_error";
-            var sendSettings = new HttpSendSettingsImpl(HttpMethod.Get, errorQueueName);
-
-            return _host.Settings.GetSendAddress(sendSettings);
-        }
-
-        protected override Uri GetDeadLetterAddress()
-        {
-            var deadLetterQueueName = "bus_skipped";
-            var sendSettings = new HttpSendSettingsImpl(HttpMethod.Delete, deadLetterQueueName);
-
-            return _host.Settings.GetSendAddress(sendSettings);
         }
 
 

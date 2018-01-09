@@ -51,12 +51,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
             return this;
         }
 
-        public BrokerTopology BuildBrokerTopology()
-        {
-            return new ServiceBusBrokerTopology(Topics, Subscriptions, Queues, QueueSubscriptions, TopicSubscriptions);
-        }
-
-
         class ImplementedBuilder :
             IPublishEndpointBrokerTopologyBuilder
         {

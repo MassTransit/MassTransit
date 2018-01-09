@@ -28,8 +28,8 @@ namespace MassTransit.HttpTransport.Builders
         readonly IHttpHost _host;
         readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpReceiveEndpointBuilder(IBusBuilder busBuilder, IHttpHost host, BusHostCollection<HttpHost> hosts, IHttpEndpointConfiguration configuration)
-            : base(busBuilder, configuration)
+        public HttpReceiveEndpointBuilder(IHttpHost host, BusHostCollection<HttpHost> hosts, IHttpEndpointConfiguration configuration)
+            : base(configuration)
         {
             _host = host;
             _configuration = configuration;
@@ -38,7 +38,7 @@ namespace MassTransit.HttpTransport.Builders
 
         public IHttpReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress)
         {
-            return new HttpReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _host, _hosts);
+            return new HttpReceiveEndpointTopology(_configuration, inputAddress, _host, _hosts);
         }
     }
 }

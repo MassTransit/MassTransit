@@ -19,14 +19,14 @@ namespace MassTransit.AzureServiceBusTransport.Topology
     {
         static readonly ILog _log = Logger.Get<BrokerTopology>();
 
-        public static void LogResult(this BrokerTopology layout)
+        public static void LogResult(this BrokerTopology topology)
         {
-            foreach (var exchange in layout.Topics)
+            foreach (var exchange in topology.Topics)
             {
 //                _log.InfoFormat("ExchangeName: {0}, type: {1}, durable: {2}, auto-delete: {3}", exchange.Name, exchange.Type, exchange.Durable, exchange.AutoDelete);
             }
 
-            foreach (var binding in layout.Subscriptions)
+            foreach (var binding in topology.Subscriptions)
             {
   //              _log.InfoFormat("ExchangeName Binding: source {0}, subscriptionName: {1}, routingKey: {2}", binding.Source.Name, binding.SubscriptionName,
     //                binding.RoutingKey);

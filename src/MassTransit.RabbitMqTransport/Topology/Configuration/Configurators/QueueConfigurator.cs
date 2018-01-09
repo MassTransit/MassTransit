@@ -1,15 +1,37 @@
-namespace MassTransit.RabbitMqTransport.Topology.Configuration.Configurators
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.RabbitMqTransport.Topology.Configurators
 {
     using System;
     using System.Collections.Generic;
+    using Entities;
 
 
     public class QueueConfigurator :
         ExchangeConfigurator,
-        IQueueConfigurator
+        IQueueConfigurator,
+        Queue
     {
         public QueueConfigurator(string name, string type, bool durable, bool autoDelete)
             : base(name, type, durable, autoDelete)
+        {
+            QueueArguments = new Dictionary<string, object>();
+
+            QueueName = name;
+        }
+
+        public QueueConfigurator(QueueConfigurator source, string name)
+            : base(name, source.ExchangeType, source.Durable, source.AutoDelete)
         {
             QueueArguments = new Dictionary<string, object>();
 
@@ -29,14 +51,14 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Configurators
 
         public void SetQueueArgument(string key, TimeSpan value)
         {
-            int milliseconds = (int)value.TotalMilliseconds;
+            var milliseconds = (int)value.TotalMilliseconds;
 
             SetQueueArgument(key, milliseconds);
         }
 
         public bool Lazy
         {
-            set { SetQueueArgument("x-queue-mode", value ? "lazy" : "default"); }
+            set => SetQueueArgument("x-queue-mode", value ? "lazy" : "default");
         }
 
         public void EnablePriority(byte maxPriority)
@@ -46,14 +68,13 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Configurators
 
         public string QueueName { get; set; }
         public bool Exclusive { get; set; }
+
         public IDictionary<string, object> QueueArguments { get; }
 
         protected override IEnumerable<string> GetQueryStringOptions()
         {
             foreach (var option in base.GetQueryStringOptions())
-            {
                 yield return option;
-            }
 
             if (Exclusive)
                 yield return "exclusive=true";

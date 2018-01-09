@@ -14,7 +14,6 @@ namespace MassTransit.Topology.Topologies
 {
     using System;
     using System.Threading;
-    using Configuration;
     using Conventions;
     using GreenPipes;
     using Observers;

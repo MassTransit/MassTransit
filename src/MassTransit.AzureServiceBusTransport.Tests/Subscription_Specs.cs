@@ -15,7 +15,6 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     namespace SubscriptionTests
     {
         using System.Threading.Tasks;
-        using Configuration;
         using NUnit.Framework;
 
 

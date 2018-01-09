@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -35,15 +35,13 @@ namespace MassTransit.Context
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            var msg = message as T;
-            if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
+            if (message is T msg)
+                return endpoint.Send(msg, cancellationToken);
 
-            return endpoint.Send(msg, cancellationToken);
+            throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
         }
 
-        Task ISendEndpointConverter.Send(ISendEndpoint endpoint, object message, IPipe<SendContext> pipe,
-            CancellationToken cancellationToken)
+        Task ISendEndpointConverter.Send(ISendEndpoint endpoint, object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (endpoint == null)
                 throw new ArgumentNullException(nameof(endpoint));
@@ -52,11 +50,10 @@ namespace MassTransit.Context
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var msg = message as T;
-            if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
+            if (message is T msg)
+                return endpoint.Send(msg, pipe, cancellationToken);
 
-            return endpoint.Send(msg, pipe, cancellationToken);
+            throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
         }
     }
 }

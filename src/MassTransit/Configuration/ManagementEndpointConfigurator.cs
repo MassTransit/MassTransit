@@ -17,7 +17,6 @@ namespace MassTransit
     using ConsumeConfigurators;
     using GreenPipes;
     using Saga;
-    using Saga.SubscriptionConfigurators;
 
 
     /// <summary>

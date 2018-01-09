@@ -54,5 +54,10 @@ namespace MassTransit.Util
         IEnumerable<PropertyInfo> Properties { get; }
 
         T InitializeFromObject(object values);
+
+        /// <summary>
+        /// The implementation type for the type, if it's an interface
+        /// </summary>
+        Type ImplementationType { get; }
     }
 }

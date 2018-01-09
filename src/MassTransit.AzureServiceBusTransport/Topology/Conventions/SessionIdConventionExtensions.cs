@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
     using AzureServiceBusTransport.Topology.Conventions;
     using AzureServiceBusTransport.Topology.Conventions.SessionId;
-    using Topology.Configuration;
+    using Topology;
 
 
     public static class SessionIdConventionExtensions

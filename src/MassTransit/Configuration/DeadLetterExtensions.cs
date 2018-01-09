@@ -24,7 +24,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="rescuePipe"></param>
-        public static void UseDeadLetterQueue(this IPipeConfigurator<ReceiveContext> configurator, IPipe<ReceiveContext> rescuePipe)
+        public static void UseDeadLetter(this IPipeConfigurator<ReceiveContext> configurator, IPipe<ReceiveContext> rescuePipe)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));

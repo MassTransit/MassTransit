@@ -18,9 +18,9 @@ namespace MassTransit.RabbitMqTransport.Hosting
     using GreenPipes;
     using MassTransit.Builders;
     using MassTransit.Hosting;
-    using MassTransit.Topology.Configuration;
+    using MassTransit.Topology;
     using Saga;
-    using Saga.SubscriptionConfigurators;
+    using SagaConfigurators;
 
 
     /// <summary>

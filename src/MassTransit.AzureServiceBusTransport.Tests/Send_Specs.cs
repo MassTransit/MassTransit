@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport.Tests
 {
     using System.Threading.Tasks;
-    using Configuration;
     using NUnit.Framework;
     using TestFramework.Messages;
 
@@ -108,6 +107,21 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             PongMessage message = await _response;
 
             Assert.AreEqual(message.CorrelationId, _ping.Result.Message.CorrelationId);
+        }
+
+        [Test]
+        public async Task Should_be_quick_on_the_subsequent_calls()
+        {
+            await _requestClient.Request(new PingMessage());
+            await _requestClient.Request(new PingMessage());
+            await _requestClient.Request(new PingMessage());
+            await _requestClient.Request(new PingMessage());
+            await _requestClient.Request(new PingMessage());
+            await _requestClient.Request(new PingMessage());
+            await _requestClient.Request(new PingMessage());
+            await _requestClient.Request(new PingMessage());
+            await _requestClient.Request(new PingMessage());
+            await _requestClient.Request(new PingMessage());
         }
     }
 }

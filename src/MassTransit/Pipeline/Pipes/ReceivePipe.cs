@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Pipes
 {
+    using System;
     using System.Threading.Tasks;
     using GreenPipes;
 
@@ -20,7 +21,6 @@ namespace MassTransit.Pipeline.Pipes
         IReceivePipe
     {
         readonly IConsumePipe _consumePipe;
-
         readonly IPipe<ReceiveContext> _receivePipe;
 
         public ReceivePipe(IPipe<ReceiveContext> receivePipe, IConsumePipe consumePipe)
@@ -28,8 +28,6 @@ namespace MassTransit.Pipeline.Pipes
             _receivePipe = receivePipe;
             _consumePipe = consumePipe;
         }
-
-        public IConsumePipe ConsumePipe => _consumePipe;
 
         Task IPipe<ReceiveContext>.Send(ReceiveContext context)
         {
@@ -49,6 +47,16 @@ namespace MassTransit.Pipeline.Pipes
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
             return _consumePipe.ConnectConsumeObserver(observer);
+        }
+
+        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+        {
+            return _consumePipe.ConnectConsumePipe(pipe);
+        }
+
+        ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+        {
+            return _consumePipe.ConnectRequestPipe(requestId, pipe);
         }
     }
 }

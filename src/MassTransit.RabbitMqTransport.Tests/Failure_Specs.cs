@@ -40,12 +40,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             await harness1.Start();
             try
             {
-                await harness2.Start();
+                Assert.That(async () => await harness2.Start(), Throws.TypeOf<RabbitMqConnectionException>());
 
                 await harness2.Stop();
-            }
-            catch (RabbitMqConnectionException exception)
-            {
             }
             finally
             {

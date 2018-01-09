@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,43 +13,44 @@
 namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Events;
     using GreenPipes;
+    using GreenPipes.Agents;
     using Integration;
-    using Logging;
     using MassTransit.Pipeline;
     using MassTransit.Topology;
-    using Policies;
     using Topology;
     using Transports;
-    using Util;
 
 
     public class RabbitMqHost :
+        Supervisor,
         IRabbitMqHost,
         IBusHostControl
     {
-        static readonly ILog _log = Logger.Get<RabbitMqHost>();
-        readonly RabbitMqConnectionCache _connectionCache;
-        readonly IRetryPolicy _connectionRetryPolicy;
         readonly RabbitMqHostSettings _settings;
-        readonly TaskSupervisor _supervisor;
         readonly IRabbitMqHostTopology _topology;
+        HostHandle _handle;
 
         public RabbitMqHost(RabbitMqHostSettings settings, IRabbitMqHostTopology topology)
         {
             _settings = settings;
             _topology = topology;
 
-            var exceptionFilter = Retry.Selected<RabbitMqConnectionException>();
             ReceiveEndpoints = new ReceiveEndpointCollection();
 
-            _connectionRetryPolicy = exceptionFilter.Exponential(1000, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(1));
+            ConnectionRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Handle<RabbitMqConnectionException>();
 
-            _supervisor = new TaskSupervisor($"{TypeMetadataCache<RabbitMqHost>.ShortName} - {_settings.ToDebugString()}");
+                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+            });
 
-            _connectionCache = new RabbitMqConnectionCache(settings, _topology, _supervisor);
+            ConnectionCache = new RabbitMqConnectionCache(settings, _topology);
         }
 
         public IRabbitMqReceiveEndpointFactory ReceiveEndpointFactory { get; set; }
@@ -58,33 +59,21 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         public async Task<HostHandle> Start()
         {
-            IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async context =>
-            {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connection established to {0}", _settings.ToDebugString());
-
-                try
-                {
-                    await _supervisor.StopRequested.ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                }
-            });
-
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting connection to {0}", _settings.ToDebugString());
-
-            var connectionTask = _connectionRetryPolicy.RetryUntilCancelled(() => _connectionCache.Send(connectionPipe, _supervisor.StoppingToken),
-                _supervisor.StoppingToken);
+            if (_handle != null)
+                throw new MassTransitException($"The host was already started: {_settings.ToDebugString()}");
 
             HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints();
 
-            return new Handle(connectionTask, handles, _supervisor, this);
+            _handle = new Handle(handles, this, ConnectionCache);
+
+            return _handle;
         }
 
         public bool Matches(Uri address)
         {
+            if (!address.Scheme.Equals("rabbitmq", StringComparison.OrdinalIgnoreCase))
+                return false;
+
             var settings = address.GetHostSettings();
 
             return RabbitMqHostEqualityComparer.Default.Equals(_settings, settings);
@@ -111,19 +100,18 @@ namespace MassTransit.RabbitMqTransport.Transport
                     _settings.SslServerName
                 });
 
-            _connectionCache.Probe(scope);
+            ConnectionCache.Probe(scope);
 
             ReceiveEndpoints.Probe(scope);
         }
 
-        public IConnectionCache ConnectionCache => _connectionCache;
+        public Uri Address => _settings.HostAddress;
+        IHostTopology IHost.Topology => _topology;
+
+        public IConnectionCache ConnectionCache { get; }
+        public IRetryPolicy ConnectionRetryPolicy { get; }
         public RabbitMqHostSettings Settings => _settings;
-
         public IRabbitMqHostTopology Topology => _topology;
-        IHostTopology IHost.Topology => Topology;
-
-        public IRetryPolicy ConnectionRetryPolicy => _connectionRetryPolicy;
-        public ITaskSupervisor Supervisor => _supervisor;
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
         {
@@ -139,8 +127,6 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             return ReceiveEndpoints.Start(queueName);
         }
-
-        public Uri Address => _settings.HostAddress;
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
@@ -174,31 +160,45 @@ namespace MassTransit.RabbitMqTransport.Transport
 
 
         class Handle :
-            BaseHostHandle
+            HostHandle
         {
-            readonly Task _connectionTask;
-            readonly TaskSupervisor _supervisor;
+            readonly IAgent _connectionCache;
+            readonly HostReceiveEndpointHandle[] _handles;
+            readonly RabbitMqHost _host;
 
-            public Handle(Task connectionTask, HostReceiveEndpointHandle[] handles, TaskSupervisor supervisor, IHost host)
-                : base(host, handles)
+            public Handle(HostReceiveEndpointHandle[] handles, RabbitMqHost host, IAgent connectionCache)
             {
-                _connectionTask = connectionTask;
-                _supervisor = supervisor;
+                _host = host;
+                _handles = handles;
+                _connectionCache = connectionCache;
             }
 
-            public override async Task Stop(CancellationToken cancellationToken)
+            Task<HostReady> HostHandle.Ready
             {
-                await base.Stop(cancellationToken).ConfigureAwait(false);
+                get { return ReadyOrNot(_handles.Select(x => x.Ready)); }
+            }
 
-                await _supervisor.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
+            async Task HostHandle.Stop(CancellationToken cancellationToken)
+            {
+                await Task.WhenAll(_handles.Select(x => x.StopAsync(cancellationToken))).ConfigureAwait(false);
 
-                try
-                {
-                    await _connectionTask.ConfigureAwait(false);
-                }
-                catch (TaskCanceledException)
-                {
-                }
+                await _host.Stop("Host Stopped", cancellationToken).ConfigureAwait(false);
+
+                await _connectionCache.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
+            }
+
+            async Task<HostReady> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> endpoints)
+            {
+                Task<ReceiveEndpointReady>[] readyTasks = endpoints as Task<ReceiveEndpointReady>[] ?? endpoints.ToArray();
+
+                foreach (Task<ReceiveEndpointReady> ready in readyTasks)
+                    await ready.ConfigureAwait(false);
+
+                await _connectionCache.Ready.ConfigureAwait(false);
+
+                ReceiveEndpointReady[] endpointsReady = await Task.WhenAll(readyTasks).ConfigureAwait(false);
+
+                return new HostReadyEvent(_host.Address, endpointsReady);
             }
         }
     }

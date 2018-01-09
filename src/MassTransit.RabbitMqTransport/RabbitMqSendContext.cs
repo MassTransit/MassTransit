@@ -50,6 +50,5 @@ namespace MassTransit.RabbitMqTransport
         RabbitMqSendContext
         where T : class
     {
-        byte[] Body { get; }
     }
 }

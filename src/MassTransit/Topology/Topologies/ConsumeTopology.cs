@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.Topology.Topologies
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using Configuration;
     using GreenPipes;
     using Observers;
     using Util;
@@ -28,12 +27,12 @@ namespace MassTransit.Topology.Topologies
     {
         readonly IList<IMessageConsumeTopologyConvention> _conventions;
         readonly object _lock = new object();
-        readonly ConcurrentDictionary<Type, IMessageConsumeTopologyConfigurator> _messageConfigurators;
+        readonly ConcurrentDictionary<Type, IMessageConsumeTopologyConfigurator> _messageTypes;
         readonly ConsumeTopologyConfigurationObservable _observers;
 
         protected ConsumeTopology()
         {
-            _messageConfigurators = new ConcurrentDictionary<Type, IMessageConsumeTopologyConfigurator>();
+            _messageTypes = new ConcurrentDictionary<Type, IMessageConsumeTopologyConfigurator>();
 
             _observers = new ConsumeTopologyConfigurationObservable();
 
@@ -69,6 +68,11 @@ namespace MassTransit.Topology.Topologies
             }
         }
 
+        public virtual IEnumerable<ValidationResult> Validate()
+        {
+            return _messageTypes.Values.SelectMany(x => x.Validate());
+        }
+
         void IConsumeTopologyConfigurator.AddMessageConsumeTopology<T>(IMessageConsumeTopology<T> topology)
         {
             IMessageConsumeTopologyConfigurator<T> messageConfiguration = GetMessageTopology<T>();
@@ -76,13 +80,13 @@ namespace MassTransit.Topology.Topologies
             messageConfiguration.Add(topology);
         }
 
-        public IMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
+        protected IMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class
         {
             if (TypeMetadataCache<T>.IsValidMessageType == false)
                 throw new ArgumentException(TypeMetadataCache<T>.InvalidMessageTypeReason, nameof(T));
 
-            var specification = _messageConfigurators.GetOrAdd(typeof(T), CreateMessageTopology<T>);
+            var specification = _messageTypes.GetOrAdd(typeof(T), CreateMessageTopology<T>);
 
             return specification as IMessageConsumeTopologyConfigurator<T>;
         }
@@ -92,7 +96,7 @@ namespace MassTransit.Topology.Topologies
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
             {
-                configurators = _messageConfigurators.Values.ToArray();
+                configurators = _messageTypes.Values.ToArray();
             }
 
             if (configurators.Length == 0)
@@ -110,7 +114,7 @@ namespace MassTransit.Topology.Topologies
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
             {
-                configurators = _messageConfigurators.Values.ToArray();
+                configurators = _messageTypes.Values.ToArray();
             }
 
             if (configurators.Length == 0)
@@ -128,7 +132,7 @@ namespace MassTransit.Topology.Topologies
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
             {
-                configurators = _messageConfigurators.Values.ToArray();
+                configurators = _messageTypes.Values.ToArray();
             }
 
             switch (configurators.Length)

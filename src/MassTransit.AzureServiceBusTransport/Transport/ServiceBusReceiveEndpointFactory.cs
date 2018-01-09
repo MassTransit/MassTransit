@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,11 +13,11 @@
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
-    using Configuration;
-    using Configuration.Builders;
-    using Configuration.Configurators;
-    using Configuration.Specifications;
+    using Builders;
     using Configurators;
+    using MassTransit.Configurators;
+    using Specifications;
+    using Transports;
 
 
     public class ServiceBusReceiveEndpointFactory :
@@ -26,28 +26,28 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly ServiceBusBusBuilder _builder;
         readonly IServiceBusEndpointConfiguration _configuration;
         readonly ServiceBusHost _host;
-        readonly ISendTransportProvider _sendTransportProvider;
+        readonly BusHostCollection<ServiceBusHost> _hosts;
 
-        public ServiceBusReceiveEndpointFactory(ServiceBusBusBuilder builder, ServiceBusHost host, IServiceBusEndpointConfiguration configuration,
-            ISendTransportProvider sendTransportProvider)
+        public ServiceBusReceiveEndpointFactory(ServiceBusBusBuilder builder, BusHostCollection<ServiceBusHost> hosts, ServiceBusHost host,
+            IServiceBusEndpointConfiguration configuration)
         {
             _builder = builder;
             _host = host;
             _configuration = configuration;
-            _sendTransportProvider = sendTransportProvider;
+            _hosts = hosts;
         }
 
         public void CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
             var endpointTopologySpecification = _configuration.CreateNewConfiguration();
 
-            var endpointConfigurator = new ServiceBusReceiveEndpointSpecification(_host, queueName, endpointTopologySpecification, _sendTransportProvider);
+            var specification = new ServiceBusReceiveEndpointSpecification(_hosts, _host, queueName, endpointTopologySpecification);
 
-            configure?.Invoke(endpointConfigurator);
+            configure?.Invoke(specification);
 
-            BusConfigurationResult.CompileResults(endpointConfigurator.Validate());
+            BusConfigurationResult.CompileResults(specification.Validate());
 
-            endpointConfigurator.Apply(_builder);
+            specification.Apply(_builder);
         }
     }
 }

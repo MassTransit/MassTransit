@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using AzureServiceBusTransport;
-    using AzureServiceBusTransport.Configuration;
     using Turnout.Configuration;
 
 
@@ -41,7 +40,7 @@ namespace MassTransit
                 expiredEndpointConfigurator.SubscribeMessageTopics = false;
 
                 // configure the turnout management endpoint
-                var temporaryQueueName = host.GetTemporaryQueueName("turnout-");
+                var temporaryQueueName = host.Topology.CreateTemporaryQueueName("turnout-");
                 busFactoryConfigurator.ReceiveEndpoint(host, temporaryQueueName, turnoutEndpointConfigurator =>
                 {
                     turnoutEndpointConfigurator.PrefetchCount = 100;

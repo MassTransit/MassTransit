@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Pipes
 {
     using System;
     using Context;
+    using Context.Converters;
     using GreenPipes;
     using GreenPipes.Pipes;
 

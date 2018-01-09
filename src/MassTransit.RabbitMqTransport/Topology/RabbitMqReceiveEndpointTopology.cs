@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,82 +14,71 @@ namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using Builders;
-    using MassTransit.Pipeline;
+    using EndpointSpecifications;
     using MassTransit.Topology;
-    using RabbitMqTransport.Specifications;
     using Transport;
     using Transports;
 
 
     public class RabbitMqReceiveEndpointTopology :
+        ReceiveEndpointTopology,
         IRabbitMqReceiveEndpointTopology
     {
-        readonly IRabbitMqHost _host;
-        readonly IRabbitMqPublishTopology _publish;
-        readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
-        readonly IRabbitMqConsumeTopology _consume;
-        readonly IRabbitMqSendTopology _send;
-        readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
-        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
-        readonly IRabbitMqEndpointConfiguration _configuration;
-        readonly IMessageSerializer _serializer;
-        readonly BrokerTopology _brokerTopology;
+        readonly RabbitMqHost _host;
         readonly BusHostCollection<RabbitMqHost> _hosts;
+        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
+        readonly Lazy<IPublishTransportProvider> _publishTransportProvider;
+        readonly IRabbitMqPublishTopology _publishTopology;
 
-        public RabbitMqReceiveEndpointTopology(IRabbitMqEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer,
-            IRabbitMqHost host, BusHostCollection<RabbitMqHost> hosts, BrokerTopology brokerTopology)
+        public RabbitMqReceiveEndpointTopology(IRabbitMqEndpointConfiguration configuration, Uri inputAddress, RabbitMqHost host, BusHostCollection<RabbitMqHost> hosts,
+            BrokerTopology brokerTopology)
+            : base(configuration, inputAddress, host.Address)
         {
-            InputAddress = inputAddress;
-            _configuration = configuration;
-            _serializer = serializer;
             _host = host;
-            _brokerTopology = brokerTopology;
+            BrokerTopology = brokerTopology;
 
             _hosts = hosts;
-
-            _consume = configuration.Topology.Consume;
-
-            _send = configuration.Topology.Send;
-            _publish = configuration.Topology.Publish;
+            _publishTopology = configuration.Topology.Publish;
 
             _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
-            _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
-            _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
+            _publishTransportProvider = new Lazy<IPublishTransportProvider>(CreatePublishTransportProvider);
         }
 
-        public Uri InputAddress { get; }
-        public BrokerTopology BrokerTopology => _brokerTopology;
+        public BrokerTopology BrokerTopology { get; }
 
-        public IRabbitMqConsumeTopology ConsumeTopology => _consume;
-        public IRabbitMqSendTopology SendTopology => _send;
-        public IRabbitMqPublishTopology PublishTopology => _publish;
-
-        ISendTopology IReceiveEndpointTopology.Send => _send;
-        IPublishTopology IReceiveEndpointTopology.Publish => _publish;
-
-        ISendEndpointProvider IReceiveEndpointTopology.SendEndpointProvider => _sendEndpointProvider.Value;
-        IPublishEndpointProvider IReceiveEndpointTopology.PublishEndpointProvider => _publishEndpointProvider.Value;
-        ISendTransportProvider IReceiveEndpointTopology.SendTransportProvider => _sendTransportProvider.Value;
-
-        ISendEndpointProvider CreateSendEndpointProvider()
+        public ISendEndpointProvider CreateSendEndpointProvider(ReceiveContext receiveContext)
         {
-            var sendPipe = _configuration.Send.CreatePipe();
+            var transportProvider = new ReceiveContextSendTransportProvider(_hosts, receiveContext);
 
-            var provider = new RabbitMqSendEndpointProvider(_serializer, InputAddress, _sendTransportProvider.Value, sendPipe);
-
-            return new SendEndpointCache(provider);
+            return new SendEndpointProvider(transportProvider, SendObservers, Serializer, InputAddress, SendPipe);
         }
 
-        IPublishEndpointProvider CreatePublishEndpointProvider()
+        public IPublishEndpointProvider CreatePublishEndpointProvider(ReceiveContext receiveContext)
         {
-            IPublishPipe publishPipe = _configuration.Publish.CreatePipe();
+            var transportProivder = new ReceiveContextPublishTransportProvider(receiveContext, _host, _publishTopology);
 
-            return new RabbitMqPublishEndpointProvider(_host, _serializer, InputAddress, publishPipe);
+            return new PublishEndpointProvider(transportProivder, _host.Address, PublishObservers, SendObservers, Serializer, InputAddress, PublishPipe, _publishTopology);
         }
 
         ISendTransportProvider CreateSendTransportProvider()
         {
-            return new RabbitMqSendTransportProvider(_hosts);
+            return new SendTransportProvider(_hosts);
+        }
+
+        IPublishTransportProvider CreatePublishTransportProvider()
+        {
+            return new PublishTransportProvider(_host, _publishTopology);
+        }
+
+        protected override ISendEndpointProvider CreateSendEndpointProvider()
+        {
+            return new SendEndpointProvider(_sendTransportProvider.Value, SendObservers, Serializer, InputAddress, SendPipe);
+        }
+
+        protected override IPublishEndpointProvider CreatePublishEndpointProvider()
+        {
+            return new PublishEndpointProvider(_publishTransportProvider.Value, _host.Address, PublishObservers, SendObservers, Serializer, InputAddress, PublishPipe,
+                _publishTopology);
         }
     }
 }

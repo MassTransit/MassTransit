@@ -153,7 +153,7 @@ namespace MassTransit
 
                 busHandle = new Handle(hosts, this, _busObservable);
 
-                await busHandle.Ready.WithCancellation(cancellationToken).ConfigureAwait(false);
+                await busHandle.Ready.UntilCompletedOrCanceled(cancellationToken).ConfigureAwait(false);
 
                 await _busObservable.PostStart(this, busHandle.Ready).ConfigureAwait(false);
 

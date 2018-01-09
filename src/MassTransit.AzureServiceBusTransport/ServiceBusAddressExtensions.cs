@@ -14,7 +14,6 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Text;
-    using Configuration;
     using Internals.Extensions;
     using Microsoft.ServiceBus.Messaging;
     using NewIdFormatters;
@@ -98,7 +97,7 @@ namespace MassTransit.AzureServiceBusTransport
         public static IManagementEndpointConfigurator ManagementEndpoint(this IServiceBusBusFactoryConfigurator configurator,
             IServiceBusHost host, Action<IReceiveEndpointConfigurator> configure = null)
         {
-            var queueName = host.GetTemporaryQueueName("manage-");
+            var queueName = host.Topology.CreateTemporaryQueueName("manage-");
 
             IServiceBusReceiveEndpointConfigurator specification = null;
             configurator.ReceiveEndpoint(host, queueName, x =>

@@ -17,7 +17,7 @@ namespace Automatonymous.CorrelationConfigurators
 
 
     public class CorrelatedByEventCorrelationBuilder<TInstance, TData> :
-        EventCorrelationBuilder<TInstance>
+        IEventCorrelationBuilder
         where TData : class, CorrelatedBy<Guid>
         where TInstance : class, SagaStateMachineInstance
     {

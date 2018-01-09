@@ -68,6 +68,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await bus.Publish(new PingMessage());
 
                 await consumerStarted.Task;
+                
+                await Console.Out.WriteLineAsync("Consumer Start Acknowledged");
             }
             finally
             {

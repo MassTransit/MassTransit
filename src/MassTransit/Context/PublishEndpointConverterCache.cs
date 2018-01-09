@@ -13,11 +13,9 @@ namespace MassTransit.Context
     /// </summary>
     public class PublishEndpointConverterCache
     {
-        readonly ConcurrentDictionary<Type, Lazy<IPublishEndpointConverter>> _types =
-            new ConcurrentDictionary<Type, Lazy<IPublishEndpointConverter>>();
+        readonly ConcurrentDictionary<Type, Lazy<IPublishEndpointConverter>> _types = new ConcurrentDictionary<Type, Lazy<IPublishEndpointConverter>>();
 
-        public static Task Publish(IPublishEndpoint endpoint, object message, Type messageType,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static Task Publish(IPublishEndpoint endpoint, object message, Type messageType, CancellationToken cancellationToken = default(CancellationToken))
         {
             return Cached.Converters.Value[messageType].Publish(endpoint, message, cancellationToken);
         }

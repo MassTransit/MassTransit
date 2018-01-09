@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
     using GreenPipes;
+    using GreenPipes.Agents;
     using Pipeline;
 
 
@@ -23,6 +24,7 @@ namespace MassTransit.Transports
         IConsumeObserverConnector,
         IPublishObserverConnector,
         ISendObserverConnector,
+        IAgent,
         IProbeSite
     {
         /// <summary>

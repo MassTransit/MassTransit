@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,19 +14,18 @@ namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
     using Builders;
-    using Configurators;
+    using EndpointSpecifications;
     using MassTransit.Configurators;
-    using Specifications;
 
 
     public class RabbitMqReceiveEndpointFactory :
         IRabbitMqReceiveEndpointFactory
     {
         readonly RabbitMqBusBuilder _builder;
-        readonly IRabbitMqHost _host;
         readonly IRabbitMqEndpointConfiguration _configuration;
+        readonly RabbitMqHost _host;
 
-        public RabbitMqReceiveEndpointFactory(RabbitMqBusBuilder builder, IRabbitMqHost host, IRabbitMqEndpointConfiguration configuration)
+        public RabbitMqReceiveEndpointFactory(RabbitMqBusBuilder builder, RabbitMqHost host, IRabbitMqEndpointConfiguration configuration)
         {
             _builder = builder;
             _host = host;

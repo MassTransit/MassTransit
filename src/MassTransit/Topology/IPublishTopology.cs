@@ -13,7 +13,6 @@
 namespace MassTransit.Topology
 {
     using System;
-    using Configuration;
 
 
     public interface IPublishTopology :

@@ -45,5 +45,10 @@ namespace MassTransit.RabbitMqTransport
         ///     The basic properties of the message
         /// </summary>
         IBasicProperties Properties { get; }
+        
+        /// <summary>
+        /// The message body, since it's a byte array on RabbitMQ
+        /// </summary>
+        byte[] Body { get; }
     }
 }

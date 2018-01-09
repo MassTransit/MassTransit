@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,14 +13,10 @@
 namespace MassTransit.RabbitMqTransport.Topology.Topologies
 {
     using System;
-    using System.Collections.Generic;
     using System.Net;
-    using Builders;
-    using Configuration;
-    using Configuration.Configurators;
     using MassTransit.Topology;
-    using MassTransit.Topology.Configuration;
     using MassTransit.Topology.Topologies;
+    using Settings;
     using Util;
 
 
@@ -42,16 +38,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             IMessageSendTopologyConfigurator<T> configurator = base.GetMessageTopology<T>();
 
             return configurator as IRabbitMqMessageSendTopologyConfigurator<T>;
-        }
-
-        public Uri GetErrorAddress(QueueConfigurator configurator, Uri hostAddress)
-        {
-            return GetQueueAddress(configurator, hostAddress, "_error");
-        }
-
-        public Uri GetDeadLetterAddress(QueueConfigurator configurator, Uri hostAddress)
-        {
-            return GetQueueAddress(configurator, hostAddress, "_skipped");
         }
 
         public SendSettings GetSendSettings(Uri address)
@@ -93,27 +79,14 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             return settings;
         }
 
-        public BrokerTopology GetBrokerTopology(Uri address)
+        public ErrorSettings GetErrorSettings(EntitySettings settings)
         {
-            var settings = GetSendSettings(address);
+            return new RabbitMqErrorSettings(settings, settings.ExchangeName + "_error");
+        }
 
-            var builder = new PublishEndpointBrokerTopologyBuilder();
-
-            builder.Exchange = builder.ExchangeDeclare(settings.ExchangeName, settings.ExchangeType, settings.Durable, settings.AutoDelete,
-                settings.ExchangeArguments);
-
-            if (settings.BindToQueue)
-            {
-                var queue = builder.QueueDeclare(settings.QueueName, settings.Durable, settings.AutoDelete, false, settings.QueueArguments);
-                builder.QueueBind(builder.Exchange, queue, "", new Dictionary<string, object>());
-            }
-
-            foreach (var specification in settings.PublishTopologySpecifications)
-            {
-                specification.Apply(builder);
-            }
-
-            return builder.BuildTopologyLayout();
+        public DeadLetterSettings GetDeadLetterSettings(EntitySettings settings)
+        {
+            return new RabbitMqDeadLetterSettings(settings, settings.ExchangeName + "_skipped");
         }
 
         protected override IMessageSendTopologyConfigurator CreateMessageTopology<T>(Type type)
@@ -123,16 +96,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             OnMessageTopologyCreated(messageTopology);
 
             return messageTopology;
-        }
-
-        Uri GetQueueAddress(QueueConfigurator configurator, Uri hostAddress, string suffix)
-        {
-            var queueName = configurator.QueueName + suffix;
-            var sendSettings = new RabbitMqSendSettings(queueName, ExchangeTypeSelector.DefaultExchangeType, configurator.Durable, configurator.AutoDelete);
-
-            sendSettings.BindToQueue(queueName);
-
-            return sendSettings.GetSendAddress(hostAddress);
         }
     }
 }

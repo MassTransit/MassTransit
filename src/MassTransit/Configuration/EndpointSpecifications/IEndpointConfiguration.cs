@@ -23,5 +23,7 @@ namespace MassTransit.EndpointSpecifications
         IPublishPipeConfiguration Publish { get; }
 
         ITopologyConfiguration Topology { get; }
+
+        ISerializationConfiguration Serialization { get; }
     }
 }

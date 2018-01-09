@@ -17,6 +17,7 @@ namespace MassTransit.Saga
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
     using Logging;
     using Util;

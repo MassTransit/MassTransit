@@ -15,7 +15,7 @@ namespace MassTransit
     using System;
     using GreenPipes;
     using Saga;
-    using Saga.Configuration;
+    using SagaSpecifications;
 
 
     public static class SagaPipeConfiguratorExtensions

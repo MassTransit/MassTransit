@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -37,18 +37,14 @@ namespace MassTransit.Policies
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    var canceledException = exception as OperationCanceledException;
-                    if (canceledException != null && canceledException.CancellationToken == cancellationToken)
+                    if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == cancellationToken)
                         throw;
 
                     cancellationToken.ThrowIfCancellationRequested();
                 }
 
-                RetryContext<InlinePipeContext> retryContext;
-                if (!policyContext.CanRetry(exception, out retryContext))
-                {
+                if (!policyContext.CanRetry(exception, out RetryContext<InlinePipeContext> retryContext))
                     throw;
-                }
 
                 await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
             }
@@ -68,18 +64,14 @@ namespace MassTransit.Policies
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    var canceledException = exception as OperationCanceledException;
-                    if (canceledException != null && canceledException.CancellationToken == cancellationToken)
+                    if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == cancellationToken)
                         throw;
 
                     cancellationToken.ThrowIfCancellationRequested();
                 }
 
-                RetryContext<InlinePipeContext> retryContext;
-                if (!policyContext.CanRetry(exception, out retryContext))
-                {
+                if (!policyContext.CanRetry(exception, out RetryContext<InlinePipeContext> retryContext))
                     throw;
-                }
 
                 return await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
             }
@@ -105,18 +97,14 @@ namespace MassTransit.Policies
                 {
                     if (context.CancellationToken.IsCancellationRequested)
                     {
-                        var canceledException = exception as OperationCanceledException;
-                        if (canceledException != null && canceledException.CancellationToken == context.CancellationToken)
+                        if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == context.CancellationToken)
                             throw;
 
                         context.CancellationToken.ThrowIfCancellationRequested();
                     }
 
-                    RetryContext<T> nextRetryContext;
-                    if (!retryContext.CanRetry(exception, out nextRetryContext))
-                    {
+                    if (!retryContext.CanRetry(exception, out RetryContext<T> nextRetryContext))
                         throw;
-                    }
 
                     retryContext = nextRetryContext;
                 }
@@ -143,18 +131,14 @@ namespace MassTransit.Policies
                 {
                     if (context.CancellationToken.IsCancellationRequested)
                     {
-                        var canceledException = exception as OperationCanceledException;
-                        if (canceledException != null && canceledException.CancellationToken == context.CancellationToken)
+                        if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == context.CancellationToken)
                             throw;
 
                         context.CancellationToken.ThrowIfCancellationRequested();
                     }
 
-                    RetryContext<T> nextRetryContext;
-                    if (!retryContext.CanRetry(exception, out nextRetryContext))
-                    {
+                    if (!retryContext.CanRetry(exception, out RetryContext<T> nextRetryContext))
                         throw;
-                    }
 
                     retryContext = nextRetryContext;
                 }
@@ -176,9 +160,6 @@ namespace MassTransit.Policies
                 {
                     await Retry(retryPolicy, retryMethod, cancellationToken).ConfigureAwait(false);
                 }
-                catch (TaskCanceledException)
-                {
-                }
                 catch (OperationCanceledException)
                 {
                 }
@@ -187,6 +168,7 @@ namespace MassTransit.Policies
                     if (_log.IsWarnEnabled)
                         _log.Warn($"Repeating until cancelled: {cancellationToken.IsCancellationRequested}", ex);
                 }
+                
             }
         }
 

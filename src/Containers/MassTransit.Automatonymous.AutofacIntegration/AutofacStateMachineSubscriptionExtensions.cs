@@ -16,14 +16,13 @@ namespace MassTransit
     using Autofac;
     using AutofacIntegration;
     using Automatonymous;
+    using Automatonymous.SagaConfigurators;
     using Automatonymous.Scoping;
-    using Automatonymous.SubscriptionConfigurators;
-    using Automatonymous.SubscriptionConnectors;
+    using Automatonymous.StateMachineConnectors;
     using AutomatonymousAutofacIntegration;
     using GreenPipes;
     using Pipeline;
     using Saga;
-    using Saga.SubscriptionConfigurators;
     using Scoping;
 
 

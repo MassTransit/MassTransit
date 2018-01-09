@@ -17,9 +17,10 @@ namespace MassTransit.Pipeline
 
     public interface IReceivePipe :
         IPipe<ReceiveContext>,
+        IConsumePipeConnector,
+        IRequestPipeConnector,
         IConsumeMessageObserverConnector,
         IConsumeObserverConnector
     {
-        IConsumePipe ConsumePipe { get; }
     }
 }

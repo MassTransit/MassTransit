@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,71 +15,75 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading.Tasks;
     using Events;
     using GreenPipes;
+    using GreenPipes.Agents;
     using Logging;
-    using MassTransit.Topology;
     using Transport;
-    using Util;
+    using Transports;
 
 
     /// <summary>
     /// Creates a message receiver and receives messages from the input queue of the endpoint
     /// </summary>
     public class MessageReceiverFilter :
-        IFilter<NamespaceContext>
+        Supervisor,
+        IFilter<ClientContext>
     {
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
-        readonly IPipe<ReceiveContext> _receivePipe;
-        readonly IReceiveEndpointTopology _topology;
+        readonly IBrokeredMessageReceiver _messageReceiver;
+        readonly IReceiveTransportObserver _transportObserver;
+        protected readonly IDeadLetterTransport DeadLetterTransport;
+        protected readonly IErrorTransport ErrorTransport;
 
-        public MessageReceiverFilter(IPipe<ReceiveContext> receivePipe, IReceiveEndpointTopology topology)
+        public MessageReceiverFilter(IBrokeredMessageReceiver messageReceiver, IReceiveTransportObserver transportObserver, IDeadLetterTransport deadLetterTransport,
+            IErrorTransport errorTransport)
         {
-            _receivePipe = receivePipe;
-            _topology = topology;
+            _messageReceiver = messageReceiver;
+            _transportObserver = transportObserver;
+            DeadLetterTransport = deadLetterTransport;
+            ErrorTransport = errorTransport;
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
+            var scope = context.CreateFilterScope("messageReceiver");
+            _messageReceiver.Probe(scope);
         }
 
-        async Task IFilter<NamespaceContext>.Send(NamespaceContext context, IPipe<NamespaceContext> next)
+        async Task IFilter<ClientContext>.Send(ClientContext context, IPipe<ClientContext> next)
         {
-            var clientContext = context.GetPayload<ClientContext>();
-
-            var clientSettings = context.GetPayload<ClientSettings>();
-
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating message receiver for {0}", clientContext.InputAddress);
+                _log.DebugFormat("Creating message receiver for {0}", context.InputAddress);
 
-            using (var scope = context.CreateScope($"{TypeMetadataCache<MessageReceiverFilter>.ShortName} - {clientContext.InputAddress}"))
+            var receiver = CreateMessageReceiver(context, _messageReceiver);
+
+            await receiver.Start().ConfigureAwait(false);
+
+            await receiver.Ready.ConfigureAwait(false);
+
+            Add(receiver);
+
+            await _transportObserver.Ready(new ReceiveTransportReadyEvent(context.InputAddress)).ConfigureAwait(false);
+
+            try
             {
-                var receiver = new Receiver(context, clientContext, _receivePipe, clientSettings, scope, _topology);
+                await receiver.Completed.ConfigureAwait(false);
+            }
+            finally
+            {
+                var metrics = receiver.GetDeliveryMetrics();
 
-                await scope.Ready.ConfigureAwait(false);
+                await _transportObserver.Completed(new ReceiveTransportCompletedEvent(context.InputAddress, metrics)).ConfigureAwait(false);
 
-                await context.Ready(new ReceiveTransportReadyEvent(clientContext.InputAddress)).ConfigureAwait(false);
-
-                scope.SetReady();
-
-                try
-                {
-                    await scope.Completed.ConfigureAwait(false);
-                }
-                finally
-                {
-                    var metrics = receiver.GetDeliveryMetrics();
-
-                    await context.Completed(new ReceiveTransportCompletedEvent(clientContext.InputAddress, metrics)).ConfigureAwait(false);
-
-                    if (_log.IsDebugEnabled)
-                    {
-                        _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", clientContext.InputAddress,
-                            metrics.DeliveryCount,
-                            metrics.ConcurrentDeliveryCount);
-                    }
-                }
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", context.InputAddress, metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
             }
 
             await next.Send(context).ConfigureAwait(false);
+        }
+
+        protected virtual IReceiver CreateMessageReceiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
+        {
+            return new Receiver(context, messageReceiver, DeadLetterTransport, ErrorTransport);
         }
     }
 }

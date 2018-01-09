@@ -17,7 +17,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using NUnit.Framework;
 
 
-    [TestFixture, Explicit]
+    [TestFixture, Category("SlowAF")]
     public class PublishFaultObserver_Specs :
         RabbitMqTestFixture
     {

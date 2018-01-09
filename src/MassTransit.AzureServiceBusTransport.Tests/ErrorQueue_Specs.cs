@@ -3,7 +3,6 @@
     using System;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
-    using Configuration;
     using GreenPipes;
     using NUnit.Framework;
     using Shouldly;
@@ -104,6 +103,8 @@
         {
             configurator.ReceiveEndpoint(host, "input_queue_error", x =>
             {
+                x.SubscribeMessageTopics = false;
+                
                 _errorHandler = Handled<PingMessage>(x);
             });
         }

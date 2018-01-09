@@ -34,7 +34,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
 
         public TopicDescription GetTopicDescription()
         {
-            var topicDescription = new TopicDescription(Path);
+            var topicDescription = new TopicDescription(FullPath);
 
             if (AutoDeleteOnIdle.HasValue)
                 topicDescription.AutoDeleteOnIdle = AutoDeleteOnIdle.Value;

@@ -14,7 +14,6 @@ namespace MassTransit.Observables
 {
     using GreenPipes.Util;
     using Saga;
-    using Saga.SubscriptionConfigurators;
 
 
     public class SagaConfigurationObservable :

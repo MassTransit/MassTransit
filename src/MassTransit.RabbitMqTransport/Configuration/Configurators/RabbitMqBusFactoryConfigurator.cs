@@ -16,11 +16,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
     using System.Collections.Generic;
     using Builders;
     using BusConfigurators;
+    using EndpointSpecifications;
     using GreenPipes;
     using MassTransit.Builders;
-    using Specifications;
     using Topology;
-    using Topology.Configuration;
+    using Topology.Settings;
     using Topology.Topologies;
     using Transport;
     using Transports;
@@ -182,12 +182,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void ReceiveEndpoint(IRabbitMqHost host, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            if (host == null)
-                throw new EndpointNotFoundException("The host address specified was not configured.");
+            var rabbitMqHost = host as RabbitMqHost ?? throw new ArgumentException("The host must be a RabbitMqHost", nameof(host));
 
             var endpointTopologySpecification = _configuration.CreateNewConfiguration();
 
-            var specification = new RabbitMqReceiveEndpointSpecification(host, endpointTopologySpecification, queueName);
+            var specification = new RabbitMqReceiveEndpointSpecification(rabbitMqHost, endpointTopologySpecification, queueName);
 
             specification.ConnectConsumerConfigurationObserver(this);
             specification.ConnectSagaConfigurationObserver(this);

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,66 +13,56 @@
 namespace MassTransit.AzureServiceBusTransport.Topology
 {
     using System;
-    using AzureServiceBusTransport.Configuration.Specifications;
-    using MassTransit.Pipeline;
     using MassTransit.Topology;
+    using Specifications;
     using Transport;
     using Transports;
 
 
     public class ServiceBusReceiveEndpointTopology :
+        ReceiveEndpointTopology,
         IServiceBusReceiveEndpointTopology
     {
         readonly IServiceBusHost _host;
+        readonly BusHostCollection<ServiceBusHost> _hosts;
         readonly IServiceBusPublishTopology _publish;
-        readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
-        readonly IPublishPipe _publishPipe;
-        readonly IServiceBusSendTopology _send;
-        readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
-        readonly ISendPipe _sendPipe;
-        readonly ISendTransportProvider _sendTransportProvider;
-        readonly IMessageSerializer _serializer;
+        readonly Lazy<IPublishTransportProvider> _publishTransportProvider;
+        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
 
-        public ServiceBusReceiveEndpointTopology(IServiceBusEndpointConfiguration configuration, Uri inputAddress, IMessageSerializer serializer,
-            IServiceBusHost host, ISendTransportProvider sendTransportProvider, BrokerTopology brokerTopology)
+        public ServiceBusReceiveEndpointTopology(IServiceBusEndpointConfiguration configuration, Uri inputAddress, IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts,
+            BrokerTopology brokerTopology)
+            : base(configuration, inputAddress, host.Address)
         {
-            InputAddress = inputAddress;
-            _serializer = serializer;
             _host = host;
+            _hosts = hosts;
             BrokerTopology = brokerTopology;
-            _sendTransportProvider = sendTransportProvider;
 
-            _send = configuration.Topology.Send;
             _publish = configuration.Topology.Publish;
 
-            _sendPipe = configuration.Send.CreatePipe();
-            _publishPipe = configuration.Publish.CreatePipe();
-
-            _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
-            _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
+            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
+            _publishTransportProvider = new Lazy<IPublishTransportProvider>(CreatePublishTransportProvider);
         }
 
         public BrokerTopology BrokerTopology { get; }
-        public Uri InputAddress { get; }
-        public ISendTopology Send => _send;
-        public IPublishTopology Publish => _publish;
 
-        ISendEndpointProvider IReceiveEndpointTopology.SendEndpointProvider => _sendEndpointProvider.Value;
-        IPublishEndpointProvider IReceiveEndpointTopology.PublishEndpointProvider => _publishEndpointProvider.Value;
-        ISendTransportProvider IReceiveEndpointTopology.SendTransportProvider => _sendTransportProvider;
-
-        ISendEndpointProvider CreateSendEndpointProvider()
+        ISendTransportProvider CreateSendTransportProvider()
         {
-            var provider = new ServiceBusSendEndpointProvider(_serializer, InputAddress, _sendTransportProvider, _sendPipe);
-
-            return new SendEndpointCache(provider);
+            return new SendEndpointSendTransportProvider(_hosts);
         }
 
-        IPublishEndpointProvider CreatePublishEndpointProvider()
+        IPublishTransportProvider CreatePublishTransportProvider()
         {
-            var provider = new PublishSendEndpointProvider(_serializer, InputAddress, _host);
+            return new PublishTransportProvider(_hosts, _host);
+        }
 
-            return new ServiceBusPublishEndpointProvider(_host, provider, _publishPipe, _publish, _serializer, InputAddress);
+        protected override ISendEndpointProvider CreateSendEndpointProvider()
+        {
+            return new SendEndpointProvider(_sendTransportProvider.Value, SendObservers, Serializer, InputAddress, SendPipe);
+        }
+
+        protected override IPublishEndpointProvider CreatePublishEndpointProvider()
+        {
+            return new PublishEndpointProvider(_publishTransportProvider.Value, _host.Address, PublishObservers, SendObservers, Serializer, InputAddress, PublishPipe, _publish);
         }
     }
 }

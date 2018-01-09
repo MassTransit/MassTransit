@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.HttpTransport.Topology
 {
     using System;
     using Clients;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using MassTransit.Topology;
     using Microsoft.Owin;
@@ -41,12 +42,21 @@ namespace MassTransit.HttpTransport.Topology
 
         Uri IReceiveEndpointTopology.InputAddress => _topology.InputAddress;
 
-        ISendTopology IReceiveEndpointTopology.Send => _topology.Send;
-        IPublishTopology IReceiveEndpointTopology.Publish => _topology.Publish;
+        ISendTopology IReceiveTopology.Send => _topology.Send;
+        IPublishTopology IReceiveTopology.Publish => _topology.Publish;
 
-        ISendEndpointProvider IReceiveEndpointTopology.SendEndpointProvider => _sendEndpointProvider.Value;
-        IPublishEndpointProvider IReceiveEndpointTopology.PublishEndpointProvider => _topology.PublishEndpointProvider;
-        ISendTransportProvider IReceiveEndpointTopology.SendTransportProvider => _topology.SendTransportProvider;
+        ISendEndpointProvider IReceiveTopology.SendEndpointProvider => _sendEndpointProvider.Value;
+        IPublishEndpointProvider IReceiveTopology.PublishEndpointProvider => _topology.PublishEndpointProvider;
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _topology.ConnectSendObserver(observer);
+        }
+
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _topology.ConnectPublishObserver(observer);
+        }
 
         ISendEndpointProvider CreateSendEndpointProvider()
         {

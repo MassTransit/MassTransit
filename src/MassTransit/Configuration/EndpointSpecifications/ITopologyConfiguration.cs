@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.EndpointSpecifications
 {
-    using Topology.Configuration;
+    using Topology;
 
 
     public interface ITopologyConfiguration

@@ -18,6 +18,7 @@ namespace MassTransit.Util
     using System.Linq;
     using System.Reflection;
     using System.Threading;
+    using GreenPipes.Internals.Extensions;
     using Internals.Extensions;
     using Newtonsoft.Json.Linq;
     using Saga;
@@ -83,6 +84,7 @@ namespace MassTransit.Util
         ITypeMetadataCache<T>
     {
         readonly Lazy<bool> _hasSagaInterfaces;
+        readonly Lazy<Type> _implementationType;
         readonly Lazy<bool> _isTemporaryMessageType;
         readonly Lazy<bool> _isValidMessageType;
         readonly Lazy<string[]> _messageTypeNames;
@@ -93,21 +95,23 @@ namespace MassTransit.Util
 
         TypeMetadataCache()
         {
-            _shortName = typeof(T).GetTypeName();
+            _shortName = Internals.Extensions.TypeExtensions.GetTypeName(typeof(T));
 
             _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
 
-            _properties = new Lazy<List<PropertyInfo>>(() => typeof(T).GetAllProperties().ToList());
+            _properties = new Lazy<List<PropertyInfo>>(() => Internals.Extensions.TypeExtensions.GetAllProperties(typeof(T)).ToList());
 
             _isValidMessageType = new Lazy<bool>(CheckIfValidMessageType);
             _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T).GetTypeInfo()));
             _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
+            _implementationType = new Lazy<Type>(() => TypeCache.GetImplementationType(typeof(T)));
         }
 
         public static string ShortName => Cached.Metadata.Value.ShortName;
         public static bool HasSagaInterfaces => Cached.Metadata.Value.HasSagaInterfaces;
         public static IEnumerable<PropertyInfo> Properties => Cached.Metadata.Value.Properties;
+        public static Type ImplementationType => Cached.Metadata.Value.ImplementationType;
         public static bool IsValidMessageType => Cached.Metadata.Value.IsValidMessageType;
         public static string InvalidMessageTypeReason => Cached.Metadata.Value.InvalidMessageTypeReason;
         public static bool IsTemporaryMessageType => Cached.Metadata.Value.IsTemporaryMessageType;
@@ -119,6 +123,8 @@ namespace MassTransit.Util
         bool ITypeMetadataCache<T>.IsValidMessageType => _isValidMessageType.Value;
         string ITypeMetadataCache<T>.InvalidMessageTypeReason => _invalidMessageTypeReason;
         Type[] ITypeMetadataCache<T>.MessageTypes => _messageTypes.Value;
+        Type ITypeMetadataCache<T>.ImplementationType => _implementationType.Value;
+
 
         T ITypeMetadataCache<T>.InitializeFromObject(object values)
         {
@@ -179,22 +185,22 @@ namespace MassTransit.Util
                 var typeDefinition = typeInfo.GetGenericTypeDefinition();
                 if (typeDefinition == typeof(CorrelatedBy<>))
                 {
-                    _invalidMessageTypeReason = $"CorrelatedBy<{typeof(T).GetClosingArguments(typeof(CorrelatedBy<>)).First().Name} is not a valid message type";
+                    _invalidMessageTypeReason = $"CorrelatedBy<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(CorrelatedBy<>)).First().Name} is not a valid message type";
                     return false;
                 }
                 if (typeDefinition == typeof(Orchestrates<>))
                 {
-                    _invalidMessageTypeReason = $"Orchestrates<{typeof(T).GetClosingArguments(typeof(Orchestrates<>)).First().Name} is not a valid message type";
+                    _invalidMessageTypeReason = $"Orchestrates<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(Orchestrates<>)).First().Name} is not a valid message type";
                     return false;
                 }
                 if (typeDefinition == typeof(InitiatedBy<>))
                 {
-                    _invalidMessageTypeReason = $"InitiatedBy<{typeof(T).GetClosingArguments(typeof(InitiatedBy<>)).First().Name} is not a valid message type";
+                    _invalidMessageTypeReason = $"InitiatedBy<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(InitiatedBy<>)).First().Name} is not a valid message type";
                     return false;
                 }
                 if (typeDefinition == typeof(Observes<,>))
                 {
-                    var closingArguments = typeof(T).GetClosingArguments(typeof(Observes<,>)).ToArray();
+                    var closingArguments = Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(Observes<,>)).ToArray();
                     _invalidMessageTypeReason = $"Observes<{closingArguments[0].Name},{closingArguments[1].Name} is not a valid message type";
                     return false;
                 }
@@ -260,9 +266,9 @@ namespace MassTransit.Util
             if (interfaces.Contains(typeof(ISaga)))
                 return true;
 
-            return interfaces.Any(t => t.HasInterface(typeof(InitiatedBy<>))
-                || t.HasInterface(typeof(Orchestrates<>))
-                || t.HasInterface(typeof(Observes<,>)));
+            return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(InitiatedBy<>))
+                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Orchestrates<>))
+                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Observes<,>)));
         }
 
 

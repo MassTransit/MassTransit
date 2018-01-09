@@ -25,8 +25,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
 
         public RabbitMqHostBusFactory(ISettingsProvider settingsProvider)
         {
-            RabbitMqSettings settings;
-            if (!settingsProvider.TryGetSettings("RabbitMQ", out settings))
+            if (!settingsProvider.TryGetSettings("RabbitMQ", out RabbitMqSettings settings))
                 throw new ConfigurationException("The RabbitMQ settings were not available");
 
             _hostSettings = new ConfigurationHostSettings

@@ -15,7 +15,6 @@ namespace MassTransit.AzureServiceBusTransport.Tests.TurningItOut
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
-    using Configuration;
     using MassTransit.Saga;
     using NUnit.Framework;
     using Saga;

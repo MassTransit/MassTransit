@@ -25,19 +25,10 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly IRetryPolicy _retryPolicy;
         readonly TopicClient _topicClient;
 
-        public TopicSendClient(TopicClient topicClient)
+        public TopicSendClient(TopicClient topicClient, IRetryPolicy retryPolicy)
         {
             _topicClient = topicClient;
-
-            _retryPolicy = Retry.CreatePolicy(x =>
-            {
-                x.Handle<ServerBusyException>();
-                x.Handle<MessagingException>(exception => exception.IsTransient || exception.IsWrappedExceptionTransient());
-                x.Handle<MessagingCommunicationException>(exception => exception.IsTransient || exception.IsWrappedExceptionTransient());
-                x.Handle<TimeoutException>();
-
-                x.Interval(5, TimeSpan.FromSeconds(10));
-            });
+            _retryPolicy = retryPolicy;
         }
 
         public string Path => _topicClient.Path;

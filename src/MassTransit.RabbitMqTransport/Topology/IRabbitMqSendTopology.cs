@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,6 @@
 namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
-    using Builders;
-    using Configuration;
-    using Configuration.Configurators;
     using MassTransit.Topology;
 
 
@@ -28,26 +25,17 @@ namespace MassTransit.RabbitMqTransport.Topology
         SendSettings GetSendSettings(Uri address);
 
         /// <summary>
-        /// Returns the topology for the specified address
+        /// Return the error settings for the queue
         /// </summary>
-        /// <param name="address">A valid RabbitMQ endpoint address</param>
+        /// <param name="settings"></param>
         /// <returns></returns>
-        BrokerTopology GetBrokerTopology(Uri address);
+        ErrorSettings GetErrorSettings(EntitySettings settings);
 
         /// <summary>
-        /// Returns the error address for the specified queue
+        /// Return the dead letter settings for the queue
         /// </summary>
-        /// <param name="configurator">The configurator for the receive endpoint</param>
-        /// <param name="hostAddress">The host address</param>
+        /// <param name="settings"></param>
         /// <returns></returns>
-        Uri GetErrorAddress(QueueConfigurator configurator, Uri hostAddress);
-
-        /// <summary>
-        /// Returns the dead letter address for the specified queue
-        /// </summary>
-        /// <param name="configurator">The configurator for the receive endpoint</param>
-        /// <param name="hostAddress">The host address</param>
-        /// <returns></returns>
-        Uri GetDeadLetterAddress(QueueConfigurator configurator, Uri hostAddress);
+        DeadLetterSettings GetDeadLetterSettings(EntitySettings settings);
     }
 }

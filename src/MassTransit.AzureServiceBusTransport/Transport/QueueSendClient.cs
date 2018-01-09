@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,19 +25,10 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly QueueClient _queueClient;
         readonly IRetryPolicy _retryPolicy;
 
-        public QueueSendClient(QueueClient queueClient)
+        public QueueSendClient(QueueClient queueClient, IRetryPolicy retryPolicy)
         {
             _queueClient = queueClient;
-
-            _retryPolicy = Retry.CreatePolicy(x =>
-            {
-                x.Handle<ServerBusyException>();
-                x.Handle<MessagingException>(exception => exception.IsTransient || exception.IsWrappedExceptionTransient());
-                x.Handle<MessagingCommunicationException>(exception => exception.IsTransient || exception.IsWrappedExceptionTransient());
-                x.Handle<TimeoutException>();
-
-                x.Interval(5, TimeSpan.FromSeconds(10));
-            });
+            _retryPolicy = retryPolicy;
         }
 
         public string Path => _queueClient.Path;

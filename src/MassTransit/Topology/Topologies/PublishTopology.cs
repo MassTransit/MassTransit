@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,7 +16,6 @@ namespace MassTransit.Topology.Topologies
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using Configuration;
     using GreenPipes;
     using Metadata;
     using Observers;
@@ -86,6 +85,11 @@ namespace MassTransit.Topology.Topologies
             messageConfiguration.Add(topology);
         }
 
+        public virtual IEnumerable<ValidationResult> Validate()
+        {
+            return _messageTypes.Values.SelectMany(x => x.Validate());
+        }
+
         protected virtual IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
             where T : class
         {
@@ -106,9 +110,9 @@ namespace MassTransit.Topology.Topologies
             if (TypeMetadataCache<T>.IsValidMessageType == false)
                 throw new ArgumentException(TypeMetadataCache<T>.InvalidMessageTypeReason, nameof(T));
 
-            var specification = _messageTypes.GetOrAdd(typeof(T), CreateMessageTopology<T>);
+            var topology = _messageTypes.GetOrAdd(typeof(T), CreateMessageTopology<T>);
 
-            return specification as IMessagePublishTopologyConfigurator<T>;
+            return topology as IMessagePublishTopologyConfigurator<T>;
         }
 
         protected void OnMessageTopologyCreated<T>(IMessagePublishTopologyConfigurator<T> messageTopology)
@@ -138,7 +142,8 @@ namespace MassTransit.Topology.Topologies
 
         IMessageTypeFactory GetOrAddByMessageType(Type type)
         {
-            return _messageTypeFactoryCache.GetOrAdd(type, _ => (IMessageTypeFactory)Activator.CreateInstance(typeof(MessageTypeFactory<>).MakeGenericType(type), this));
+            return _messageTypeFactoryCache.GetOrAdd(type,
+                _ => (IMessageTypeFactory)Activator.CreateInstance(typeof(MessageTypeFactory<>).MakeGenericType(type), this));
         }
 
 

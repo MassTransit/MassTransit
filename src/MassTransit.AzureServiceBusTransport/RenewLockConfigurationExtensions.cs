@@ -13,7 +13,7 @@
 namespace MassTransit
 {
     using System;
-    using AzureServiceBusTransport.Configuration.Specifications;
+    using AzureServiceBusTransport.Specifications;
     using GreenPipes;
 
 

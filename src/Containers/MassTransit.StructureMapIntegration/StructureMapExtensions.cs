@@ -20,7 +20,6 @@ namespace MassTransit
     using Internals.Extensions;
     using PipeConfigurators;
     using Saga;
-    using Saga.SubscriptionConfigurators;
     using Scoping;
     using StructureMap;
     using StructureMapIntegration;

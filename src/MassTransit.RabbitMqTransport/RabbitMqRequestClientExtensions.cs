@@ -85,7 +85,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response"));
+            var endpoint = host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryQueueName("response"));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 

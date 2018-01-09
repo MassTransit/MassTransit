@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,8 +13,10 @@
 namespace MassTransit.Transports.InMemory.Topology.Topologies
 {
     using System.Collections.Generic;
-    using Builders;
+    using System.Linq;
     using Configurators;
+    using GreenPipes;
+    using InMemory.Builders;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Newtonsoft.Json.Linq;
@@ -56,6 +58,11 @@ namespace MassTransit.Transports.InMemory.Topology.Topologies
             var specification = new ExchangeBindingConsumeTopologySpecification(_messageTopology.EntityName);
 
             _specifications.Add(specification);
+        }
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            return base.Validate().Concat(_specifications.SelectMany(x => x.Validate()));
         }
     }
 }

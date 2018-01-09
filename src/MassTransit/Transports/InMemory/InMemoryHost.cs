@@ -22,6 +22,7 @@ namespace MassTransit.Transports.InMemory
     using Logging;
     using MassTransit.Topology;
     using Pipeline;
+    using Topology.Builders;
     using Util.Caching;
 
 
@@ -84,7 +85,7 @@ namespace MassTransit.Transports.InMemory
             _receiveEndpoints.Probe(scope);
         }
 
-        public IReceiveTransport GetReceiveTransport(string queueName, IReceiveEndpointTopology topology)
+        public IReceiveTransport GetReceiveTransport(string queueName, IReceivePipe receivePipe, IReceiveEndpointTopology topology)
         {
             if (_sendEndpointProvider == null)
                 _sendEndpointProvider = topology.SendEndpointProvider;
@@ -98,7 +99,10 @@ namespace MassTransit.Transports.InMemory
 
             var queue = _messageFabric.GetQueue(queueName);
 
-            return new InMemoryReceiveTransport(new Uri(_baseUri, queueName), queue, topology);
+            var skippedExchange = _messageFabric.GetExchange($"{queueName}_skipped");
+            var errorExchange = _messageFabric.GetExchange($"{queueName}_error");
+
+            return new InMemoryReceiveTransport(new Uri(_baseUri, queueName), queue, receivePipe, errorExchange, skippedExchange, topology);
         }
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure = null)
@@ -163,6 +167,15 @@ namespace MassTransit.Transports.InMemory
 
                 return inMemorySendTransport;
             });
+        }
+
+        public IInMemoryExchange GetExchange(Uri address)
+        {
+            var queueName = address.AbsolutePath.Split('/').Last();
+
+            var exchange = _messageFabric.GetExchange(queueName);
+
+            return exchange;
         }
 
 

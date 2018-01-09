@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using NUnit.Framework;
     using Topology;
     using Topology.Builders;
-    using Topology.Configuration;
     using Topology.Topologies;
     using TopologyTestTypes;
 
@@ -151,7 +150,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _publishTopology.GetMessageTopology<SecondInterface>()
                 .Apply(_builder);
 
-            var topology = _builder.BuildTopologyLayout();
+            var topology = _builder.BuildBrokerTopology();
 
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(FirstInterface)).ToString();
             var interfaceName = _nameFormatter.GetMessageName(typeof(SecondInterface)).ToString();
@@ -170,7 +169,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _publishTopology.GetMessageTopology<SingleInterface>()
                 .Apply(_builder);
 
-            var topology = _builder.BuildTopologyLayout();
+            var topology = _builder.BuildBrokerTopology();
 
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
 
@@ -205,7 +204,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _publishTopology.GetMessageTopology<SecondInterface>()
                 .Apply(_builder);
 
-            var topology = _builder.BuildTopologyLayout();
+            var topology = _builder.BuildBrokerTopology();
             topology.LogResult();
 
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(FirstInterface)).ToString();
@@ -225,7 +224,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _publishTopology.GetMessageTopology<ThirdInterface>()
                 .Apply(_builder);
 
-            var topology = _builder.BuildTopologyLayout();
+            var topology = _builder.BuildBrokerTopology();
             topology.LogResult();
 
             var firstInterfaceName = _nameFormatter.GetMessageName(typeof(FirstInterface)).ToString();
@@ -249,7 +248,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _publishTopology.GetMessageTopology<SingleInterface>()
                 .Apply(_builder);
 
-            var topology = _builder.BuildTopologyLayout();
+            var topology = _builder.BuildBrokerTopology();
             topology.LogResult();
 
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();

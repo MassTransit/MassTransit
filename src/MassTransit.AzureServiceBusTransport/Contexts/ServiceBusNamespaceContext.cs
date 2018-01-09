@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,10 +13,12 @@
 namespace MassTransit.AzureServiceBusTransport.Contexts
 {
     using System;
+    using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
-    using Configuration;
     using GreenPipes;
     using GreenPipes.Payloads;
+    using Logging;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
     using Util;
@@ -24,105 +26,240 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 
     public class ServiceBusNamespaceContext :
         BasePipeContext,
-        NamespaceContext
+        NamespaceContext,
+        IAsyncDisposable
     {
-        readonly IServiceBusHost _host;
-        readonly IReceiveTransportObserver _receiveTransportObserver;
-        readonly IReceiveObserver _receiveObserver;
-        readonly ITaskSupervisor _supervisor;
+        static readonly ILog _log = Logger.Get<ServiceBusNamespaceContext>();
 
-        public ServiceBusNamespaceContext(IServiceBusHost host, IReceiveObserver receiveObserver, IReceiveTransportObserver receiveTransportObserver,
-            TaskSupervisor supervisor)
-            : base(new PayloadCache(), supervisor.StoppingToken)
+        readonly NamespaceManager _namespaceManager;
+
+        public ServiceBusNamespaceContext(NamespaceManager namespaceManager, CancellationToken cancellationToken)
+            : base(new PayloadCache(), cancellationToken)
         {
-            _host = host;
-            _receiveObserver = receiveObserver;
-            _receiveTransportObserver = receiveTransportObserver;
-            _supervisor = supervisor;
+            _namespaceManager = namespaceManager;
         }
 
-        public Task<MessagingFactory> MessagingFactory => _host.MessagingFactory;
-
-        public Task<MessagingFactory> SessionMessagingFactory => _host.SessionMessagingFactory;
-
-        public NamespaceManager NamespaceManager => _host.NamespaceManager;
-
-        public Uri ServiceAddress => _host.Settings.ServiceUri;
-
-        public Task<QueueDescription> CreateQueue(QueueDescription queueDescription)
+        public Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            return _host.CreateQueue(queueDescription);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Closed namespace manager: {0}", _namespaceManager.Address);
+
+            return TaskUtil.Completed;
         }
 
-        public Task<TopicDescription> CreateTopic(TopicDescription topicDescription)
+        public Uri ServiceAddress => _namespaceManager.Address;
+
+        public async Task<QueueDescription> CreateQueue(QueueDescription queueDescription)
         {
-            return _host.CreateTopic(topicDescription);
+            var create = true;
+            try
+            {
+                queueDescription = await _namespaceManager.GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
+
+                create = false;
+            }
+            catch (MessagingEntityNotFoundException)
+            {
+            }
+
+            if (create)
+            {
+                var created = false;
+                try
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating queue {0}", queueDescription.Path);
+
+                    queueDescription = await _namespaceManager.CreateQueueAsync(queueDescription).ConfigureAwait(false);
+
+                    created = true;
+                }
+                catch (MessagingEntityAlreadyExistsException)
+                {
+                }
+                catch (MessagingException mex)
+                {
+                    if (mex.Message.Contains("(409)"))
+                    {
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                if (!created)
+                    queueDescription = await _namespaceManager.GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
+            }
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Queue: {0} ({1})", queueDescription.Path,
+                    string.Join(", ", new[]
+                    {
+                        queueDescription.EnableExpress ? "express" : "",
+                        queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
+                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : "",
+                        queueDescription.RequiresSession ? "session" : ""
+                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
+
+            return queueDescription;
         }
 
-        public Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription subscriptionDescription)
+        public async Task<TopicDescription> CreateTopic(TopicDescription topicDescription)
         {
-            return _host.CreateTopicSubscription(subscriptionDescription);
+            var create = true;
+            try
+            {
+                topicDescription = await _namespaceManager.GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
+
+                create = false;
+            }
+            catch (MessagingEntityNotFoundException)
+            {
+            }
+
+            if (create)
+            {
+                var created = false;
+                try
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating topic {0}", topicDescription.Path);
+
+                    topicDescription = await _namespaceManager.CreateTopicAsync(topicDescription).ConfigureAwait(false);
+
+                    created = true;
+                }
+                catch (MessagingEntityAlreadyExistsException)
+                {
+                }
+                catch (MessagingException mex)
+                {
+                    if (mex.Message.Contains("(409)"))
+                    {
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                if (!created)
+                    topicDescription = await _namespaceManager.GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
+            }
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Topic: {0} ({1})", topicDescription.Path,
+                    string.Join(", ", new[]
+                    {
+                        topicDescription.EnableExpress ? "express" : "",
+                        topicDescription.RequiresDuplicateDetection ? "dupe detect" : ""
+                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
+
+            return topicDescription;
         }
 
-        public Task<SubscriptionDescription> CreateTopicSubscription(string subscriptionName, string topicPath, string queuePath,
-            QueueDescription queueDescription)
+        public async Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription description)
         {
-            return _host.CreateTopicSubscription(Defaults.CreateSubscriptionDescription(topicPath, subscriptionName, queueDescription, queuePath));
+            var create = true;
+            SubscriptionDescription subscriptionDescription = null;
+            try
+            {
+                subscriptionDescription = await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                if (string.IsNullOrWhiteSpace(description.ForwardTo))
+                {
+                    if (!string.IsNullOrWhiteSpace(subscriptionDescription.ForwardTo))
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name,
+                                subscriptionDescription.TopicPath,
+                                subscriptionDescription.ForwardTo);
+
+                        await _namespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    var forwardTo = subscriptionDescription.ForwardTo;
+                    var address = _namespaceManager.Address.ToString();
+                    if (forwardTo.StartsWith(address))
+                        forwardTo = forwardTo.Substring(address.Length).Trim('/');
+
+                    if (description.ForwardTo.Equals(forwardTo))
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Updating subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                                subscriptionDescription.ForwardTo);
+
+                        await _namespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
+
+                        create = false;
+                    }
+                    else
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name,
+                                subscriptionDescription.TopicPath,
+                                subscriptionDescription.ForwardTo);
+
+                        await _namespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (MessagingEntityNotFoundException)
+            {
+            }
+
+            if (create)
+            {
+                var created = false;
+                try
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Creating subscription {0} -> {1}", description.TopicPath, description.ForwardTo);
+
+
+                    subscriptionDescription = await _namespaceManager.CreateSubscriptionAsync(description).ConfigureAwait(false);
+
+                    created = true;
+                }
+                catch (MessagingEntityAlreadyExistsException)
+                {
+                }
+                catch (MessagingException mex)
+                {
+                    if (mex.Message.Contains("(409)"))
+                    {
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                if (!created)
+                    subscriptionDescription = await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+            }
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
+                    subscriptionDescription.ForwardTo);
+
+            return subscriptionDescription;
         }
 
-        public Task DeleteTopicSubscription(SubscriptionDescription description)
+        public async Task DeleteTopicSubscription(SubscriptionDescription description)
         {
-            return _host.DeleteTopicSubscription(description);
-        }
+            try
+            {
+                await _namespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+            }
+            catch (MessagingEntityNotFoundException)
+            {
+            }
 
-        ITaskScope NamespaceContext.CreateScope(string tag)
-        {
-            return _supervisor.CreateScope(tag);
-        }
-
-        public string GetQueuePath(QueueDescription queueDescription)
-        {
-            return _host.GetQueuePath(queueDescription);
-        }
-
-        Task IReceiveObserver.PreReceive(ReceiveContext context)
-        {
-            return _receiveObserver.PreReceive(context);
-        }
-
-        Task IReceiveObserver.PostReceive(ReceiveContext context)
-        {
-            return _receiveObserver.PostReceive(context);
-        }
-
-        Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
-        {
-            return _receiveObserver.PostConsume(context, duration, consumerType);
-        }
-
-        Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
-        {
-            return _receiveObserver.ConsumeFault(context, duration, consumerType, exception);
-        }
-
-        Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
-        {
-            return _receiveObserver.ReceiveFault(context, exception);
-        }
-
-        Task IReceiveTransportObserver.Ready(ReceiveTransportReady ready)
-        {
-            return _receiveTransportObserver.Ready(ready);
-        }
-
-        Task IReceiveTransportObserver.Completed(ReceiveTransportCompleted completed)
-        {
-            return _receiveTransportObserver.Completed(completed);
-        }
-
-        Task IReceiveTransportObserver.Faulted(ReceiveTransportFaulted faulted)
-        {
-            return _receiveTransportObserver.Faulted(faulted);
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Subscription Deleted: {0} ({1} -> {2})", description.Name, description.TopicPath, description.ForwardTo);
         }
     }
 }

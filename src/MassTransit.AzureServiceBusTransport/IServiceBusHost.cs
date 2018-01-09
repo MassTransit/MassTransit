@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,13 +13,9 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using System.Threading.Tasks;
-    using Configuration;
     using GreenPipes;
-    using Microsoft.ServiceBus;
-    using Microsoft.ServiceBus.Messaging;
+    using Pipeline;
     using Topology;
-    using Util;
 
 
     /// <summary>
@@ -29,41 +25,32 @@ namespace MassTransit.AzureServiceBusTransport
         IHost
     {
         ServiceBusHostSettings Settings { get; }
-        
+
         /// <summary>
         /// Returns the topology of the service bus host
         /// </summary>
         new IServiceBusHostTopology Topology { get; }
 
-        Task<MessagingFactory> MessagingFactory { get; }
+        /// <summary>
+        /// The default messaging factory cache, could be AMQP or NET-TCP, depending upon configuration
+        /// </summary>
+        IMessagingFactoryCache MessagingFactoryCache { get; }
 
         /// <summary>
-        /// Session-based messages with state require the use of a net-tcp style client
+        /// The messaging factory cache for NET-TCP (may be the same as above, depending upon configuration)
         /// </summary>
-        Task<MessagingFactory> SessionMessagingFactory { get; }
-
-        NamespaceManager NamespaceManager { get; }
-
-        NamespaceManager RootNamespaceManager { get; }
+        IMessagingFactoryCache NetMessagingFactoryCache { get; }
 
         /// <summary>
-        /// The supervisor for the host, which indicates when it's being stopped
+        /// The namespace cache for operating on the service bus namespace (management)
         /// </summary>
-        ITaskSupervisor Supervisor { get; }
+        INamespaceCache NamespaceCache { get; }
 
         /// <summary>
         /// The retry policy shared by transports communicating with the host. Should be
         /// used for all operations against Azure.
         /// </summary>
         IRetryPolicy RetryPolicy { get; }
-
-        string GetQueuePath(QueueDescription queueDescription);
-
-        Task<TopicDescription> CreateTopic(TopicDescription topicDescription);
-
-        Task<QueueDescription> CreateQueue(QueueDescription queueDescription);
-
-        Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription description);
 
         /// <summary>
         /// Create a temporary receive endpoint on the host, with a separate handle for stopping/removing the endpoint
@@ -100,12 +87,5 @@ namespace MassTransit.AzureServiceBusTransport
         /// <returns></returns>
         HostReceiveEndpointHandle ConnectSubscriptionEndpoint(string subscriptionName, string topicName,
             Action<IServiceBusSubscriptionEndpointConfigurator> configure = null);
-
-        /// <summary>
-        /// Delete a topic subscription from the host
-        /// </summary>
-        /// <param name="description"></param>
-        /// <returns></returns>
-        Task DeleteTopicSubscription(SubscriptionDescription description);
     }
 }

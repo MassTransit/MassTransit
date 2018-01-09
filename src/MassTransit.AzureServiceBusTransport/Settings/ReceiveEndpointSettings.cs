@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,6 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
     using Microsoft.ServiceBus.Messaging;
     using Topology.Configuration;
     using Topology.Configuration.Configurators;
@@ -27,20 +26,27 @@ namespace MassTransit.AzureServiceBusTransport.Settings
     {
         readonly QueueConfigurator _queueConfigurator;
 
-        public ReceiveEndpointSettings(QueueConfigurator queueConfigurator)
+        public ReceiveEndpointSettings(string queueName, QueueConfigurator queueConfigurator)
         {
             _queueConfigurator = queueConfigurator;
+
+            Name = queueName;
         }
+
+        public IQueueConfigurator QueueConfigurator => _queueConfigurator;
 
         public bool RemoveSubscriptions { get; set; }
 
         public override TimeSpan LockDuration => _queueConfigurator.LockDuration ?? Defaults.LockDuration;
 
-        public override string Path => _queueConfigurator.Path;
+        public override string Path => _queueConfigurator.FullPath;
 
         public override bool RequiresSession => _queueConfigurator.RequiresSession ?? false;
 
-        public QueueDescription QueueDescription => _queueConfigurator.GetQueueDescription();
+        public QueueDescription GetQueueDescription()
+        {
+            return _queueConfigurator.GetQueueDescription();
+        }
 
         public override void SelectBasicTier()
         {
@@ -58,7 +64,5 @@ namespace MassTransit.AzureServiceBusTransport.Settings
                 && _queueConfigurator.AutoDeleteOnIdle.Value != Defaults.AutoDeleteOnIdle)
                 yield return $"autodelete={_queueConfigurator.AutoDeleteOnIdle.Value.TotalSeconds}";
         }
-
-        public IQueueConfigurator QueueConfigurator => _queueConfigurator;
     }
 }

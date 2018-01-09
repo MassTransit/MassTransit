@@ -13,9 +13,9 @@
 namespace MassTransit.Saga.Connectors
 {
     using System;
-    using Configuration;
     using GreenPipes;
     using MassTransit.Pipeline;
+    using SagaSpecifications;
 
 
     public abstract class SagaMessageConnector<TSaga, TMessage> :

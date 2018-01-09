@@ -14,12 +14,13 @@ namespace MassTransit.Transports.InMemory
 {
     using System;
     using MassTransit.Topology;
+    using Pipeline;
 
 
     public interface IInMemoryHost :
         IHost
     {
-        IReceiveTransport GetReceiveTransport(string queueName, IReceiveEndpointTopology topology);
+        IReceiveTransport GetReceiveTransport(string queueName, IReceivePipe receivePipe, IReceiveEndpointTopology topology);
 
         /// <summary>
         /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint

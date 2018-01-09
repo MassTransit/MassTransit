@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurators
 {
     using System;
-    using AzureServiceBusTransport.Configuration;
 
 
     public abstract class EntityConfigurator :

@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology
 {
-    using Configuration;
-
-
     public interface ISendTopology :
         IConnectSendTopologyConfigurationObserver
     {

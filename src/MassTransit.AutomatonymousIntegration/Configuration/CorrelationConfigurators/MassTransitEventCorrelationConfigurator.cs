@@ -17,12 +17,14 @@ namespace Automatonymous.CorrelationConfigurators
     using GreenPipes;
     using MassTransit;
     using MassTransit.Saga;
+    using MassTransit.Saga.Factories;
     using MassTransit.Saga.Pipeline.Filters;
+    using Saga.QueryFactories;
 
 
     public class MassTransitEventCorrelationConfigurator<TInstance, TData> :
-        EventCorrelationConfigurator<TInstance, TData>,
-        EventCorrelationBuilder<TInstance>
+        IEventCorrelationConfigurator<TInstance, TData>,
+        IEventCorrelationBuilder
         where TInstance : class, SagaStateMachineInstance
         where TData : class
     {
@@ -61,7 +63,7 @@ namespace Automatonymous.CorrelationConfigurators
             set { _insertOnInitial = value; }
         }
 
-        public EventCorrelationConfigurator<TInstance, TData> CorrelateById(Func<ConsumeContext<TData>, Guid> selector)
+        public IEventCorrelationConfigurator<TInstance, TData> CorrelateById(Func<ConsumeContext<TData>, Guid> selector)
         {
             _messageFilter = new CorrelationIdMessageFilter<TData>(selector);
 
@@ -70,7 +72,7 @@ namespace Automatonymous.CorrelationConfigurators
             return this;
         }
 
-        public EventCorrelationConfigurator<TInstance, TData> CorrelateById<T>(Expression<Func<TInstance, T>> propertyExpression,
+        public IEventCorrelationConfigurator<TInstance, TData> CorrelateById<T>(Expression<Func<TInstance, T>> propertyExpression,
             Func<ConsumeContext<TData>, T> selector) where T : struct
         {
             if (propertyExpression == null)
@@ -88,7 +90,7 @@ namespace Automatonymous.CorrelationConfigurators
             return this;
         }
 
-        public EventCorrelationConfigurator<TInstance, TData> CorrelateBy<T>(Expression<Func<TInstance, T?>> propertyExpression,
+        public IEventCorrelationConfigurator<TInstance, TData> CorrelateBy<T>(Expression<Func<TInstance, T?>> propertyExpression,
             Func<ConsumeContext<TData>, T?> selector)
             where T : struct
         {
@@ -107,7 +109,7 @@ namespace Automatonymous.CorrelationConfigurators
             return this;
         }
 
-        public EventCorrelationConfigurator<TInstance, TData> CorrelateBy<T>(Expression<Func<TInstance, T>> propertyExpression,
+        public IEventCorrelationConfigurator<TInstance, TData> CorrelateBy<T>(Expression<Func<TInstance, T>> propertyExpression,
             Func<ConsumeContext<TData>, T> selector)
             where T : class
         {
@@ -126,7 +128,7 @@ namespace Automatonymous.CorrelationConfigurators
             return this;
         }
 
-        public EventCorrelationConfigurator<TInstance, TData> SelectId(Func<ConsumeContext<TData>, Guid> selector)
+        public IEventCorrelationConfigurator<TInstance, TData> SelectId(Func<ConsumeContext<TData>, Guid> selector)
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
@@ -136,7 +138,7 @@ namespace Automatonymous.CorrelationConfigurators
             return this;
         }
 
-        public EventCorrelationConfigurator<TInstance, TData> CorrelateBy(Expression<Func<TInstance, ConsumeContext<TData>, bool>> correlationExpression)
+        public IEventCorrelationConfigurator<TInstance, TData> CorrelateBy(Expression<Func<TInstance, ConsumeContext<TData>, bool>> correlationExpression)
         {
             if (correlationExpression == null)
                 throw new ArgumentNullException(nameof(correlationExpression));
@@ -151,15 +153,15 @@ namespace Automatonymous.CorrelationConfigurators
             return this;
         }
 
-        public EventCorrelationConfigurator<TInstance, TData> SetSagaFactory(SagaFactoryMethod<TInstance, TData> factoryMethod)
+        public IEventCorrelationConfigurator<TInstance, TData> SetSagaFactory(SagaFactoryMethod<TInstance, TData> factoryMethod)
         {
             _sagaFactory = new FactoryMethodSagaFactory<TInstance, TData>(factoryMethod);
 
             return this;
         }
 
-        public EventCorrelationConfigurator<TInstance, TData> OnMissingInstance(
-            Func<MissingInstanceConfigurator<TData>, IPipe<ConsumeContext<TData>>> getMissingPipe)
+        public IEventCorrelationConfigurator<TInstance, TData> OnMissingInstance(
+            Func<IMissingInstanceConfigurator<TData>, IPipe<ConsumeContext<TData>>> getMissingPipe)
         {
             if (getMissingPipe == null)
                 throw new ArgumentNullException(nameof(getMissingPipe));

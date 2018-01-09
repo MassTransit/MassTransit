@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,7 +25,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
-    using Specifications;
     using Topology;
     using Util;
 
@@ -33,32 +32,23 @@ namespace MassTransit.RabbitMqTransport.Contexts
     public class RabbitMqModelContext :
         BasePipeContext,
         ModelContext,
-        IDisposable
+        IAsyncDisposable
     {
         static readonly ILog _log = Logger.Get<RabbitMqModelContext>();
 
         readonly ConnectionContext _connectionContext;
-        readonly IModel _model;
-        readonly ITaskParticipant _participant;
-        readonly ConcurrentDictionary<ulong, PendingPublish> _published;
         readonly IRabbitMqHost _host;
+        readonly IModel _model;
+        readonly ConcurrentDictionary<ulong, PendingPublish> _published;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         ulong _publishTagMax;
 
-        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, ITaskScope taskScope, IRabbitMqHost host)
-            : this(connectionContext, model, host,
-                taskScope.CreateParticipant($"{TypeMetadataCache<RabbitMqModelContext>.ShortName} - {connectionContext.HostSettings.ToDebugString()}"))
-        {
-        }
-
-        RabbitMqModelContext(ConnectionContext connectionContext, IModel model, IRabbitMqHost host, ITaskParticipant participant)
-            : base(new PayloadCacheScope(connectionContext))
+        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, IRabbitMqHost host, CancellationToken cancellationToken)
+            : base(new PayloadCacheScope(connectionContext), cancellationToken)
         {
             _connectionContext = connectionContext;
             _model = model;
             _host = host;
-
-            _participant = participant;
 
             _published = new ConcurrentDictionary<ulong, PendingPublish>();
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
@@ -69,16 +59,33 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _model.BasicReturn += OnBasicReturn;
 
             if (host.Settings.PublisherConfirmation)
-            {
                 _model.ConfirmSelect();
-            }
-
-            _participant.SetReady();
         }
 
-        public void Dispose()
+        public Task DisposeAsync(CancellationToken cancellationToken)
         {
-            Close("ModelContext Disposed");
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Closing model: {0} / {1}", _model.ChannelNumber, _connectionContext.Description);
+
+            try
+            {
+                if (_host.Settings.PublisherConfirmation && _model.IsOpen && _published.Count > 0)
+                {
+                    _model.WaitForConfirms(TimeSpan.FromSeconds(30), out var timedOut);
+                    if (timedOut)
+                        _log.WarnFormat("Timeout waiting for pending confirms: {0}", _connectionContext.Description);
+                    else
+                        _log.DebugFormat("Pending confirms complete: {0}", _connectionContext.Description);
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Fault waiting for confirms", ex);
+            }
+
+            _model.Cleanup(200, "ModelContext Disposed");
+
+            return TaskUtil.Completed;
         }
 
         IModel ModelContext.Model => _model;
@@ -87,15 +94,13 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         IRabbitMqPublishTopology ModelContext.PublishTopology => _host.Topology.PublishTopology;
 
-        CancellationToken PipeContext.CancellationToken => _participant.StoppedToken;
-
         async Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body,
             bool awaitAck)
         {
             if (_host.Settings.PublisherConfirmation)
             {
                 var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, basicProperties, body),
-                    _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
+                    CancellationToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
 
                 if (awaitAck)
                 {
@@ -107,55 +112,55 @@ namespace MassTransit.RabbitMqTransport.Contexts
             else
             {
                 await Task.Factory.StartNew(() => Publish(exchange, routingKey, mandatory, basicProperties, body),
-                    _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
+                    CancellationToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
             }
         }
 
         Task ModelContext.ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
         {
             return Task.Factory.StartNew(() => _model.ExchangeBind(destination, source, routingKey, arguments),
-                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
+                CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task ModelContext.ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
         {
             return Task.Factory.StartNew(() => _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments),
-                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
+                CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         public Task ExchangeDeclarePassive(string exchange)
         {
             return Task.Factory.StartNew(() => _model.ExchangeDeclarePassive(exchange),
-                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
+                CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task ModelContext.QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
         {
             return Task.Factory.StartNew(() => _model.QueueBind(queue, exchange, routingKey, arguments),
-                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
+                CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task<QueueDeclareOk> ModelContext.QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
         {
             return Task.Factory.StartNew(() => _model.QueueDeclare(queue, durable, exclusive, autoDelete, arguments),
-                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
+                CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task<QueueDeclareOk> ModelContext.QueueDeclarePassive(string queue)
         {
-            return Task.Factory.StartNew(() => _model.QueueDeclarePassive(queue),_participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
+            return Task.Factory.StartNew(() => _model.QueueDeclarePassive(queue), CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task<uint> ModelContext.QueuePurge(string queue)
         {
             return Task.Factory.StartNew(() => _model.QueuePurge(queue),
-                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
+                CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task ModelContext.BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
         {
             return Task.Factory.StartNew(() => _model.BasicQos(prefetchSize, prefetchCount, global),
-                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
+                CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         void ModelContext.BasicAck(ulong deliveryTag, bool multiple)
@@ -171,42 +176,13 @@ namespace MassTransit.RabbitMqTransport.Contexts
         Task<string> ModelContext.BasicConsume(string queue, bool noAck, IBasicConsumer consumer)
         {
             return Task.Factory.StartNew(() => _model.BasicConsume(queue, noAck, consumer),
-                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
+                CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         public Task BasicCancel(string consumerTag)
         {
             return Task.Factory.StartNew(() => _model.BasicCancel(consumerTag),
-                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
-        }
-
-        void Close(string reason)
-        {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Closing model: {0} / {1}", _model.ChannelNumber, _connectionContext.HostSettings.ToDebugString());
-
-            try
-            {
-                if (_host.Settings.PublisherConfirmation && _model.IsOpen && _published.Count > 0)
-                {
-                    bool timedOut;
-                    _model.WaitForConfirms(TimeSpan.FromSeconds(30), out timedOut);
-                    if (timedOut)
-                        _log.WarnFormat("Timeout waiting for pending confirms: {0}", _connectionContext.HostSettings.ToDebugString());
-                    else
-                    {
-                        _log.DebugFormat("Pending confirms complete: {0}", _connectionContext.HostSettings.ToDebugString());
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _log.Error("Fault waiting for confirms", ex);
-            }
-
-            _model.Cleanup(200, reason);
-
-            _participant.SetComplete();
+                CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         void OnBasicReturn(object model, BasicReturnEventArgs args)
@@ -240,7 +216,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
             {
                 _published.AddOrUpdate(publishTag, key => pendingPublish, (key, existing) =>
                 {
-                    existing.PublishNotConfirmed();
+                    existing.PublishNotConfirmed($"Duplicate key: {key}");
+
                     return pendingPublish;
                 });
 
@@ -274,20 +251,17 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _model.BasicNacks -= OnBasicNacks;
             _model.BasicReturn -= OnBasicReturn;
 
-            FaultPendingPublishes();
-
-            _participant.SetComplete();
+            FaultPendingPublishes(reason.ReplyText);
         }
 
-        void FaultPendingPublishes()
+        void FaultPendingPublishes(string reason)
         {
             try
             {
                 foreach (var key in _published.Keys)
                 {
-                    PendingPublish pending;
-                    if (_published.TryRemove(key, out pending))
-                        pending.PublishNotConfirmed();
+                    if (_published.TryRemove(key, out var pending))
+                        pending.PublishNotConfirmed(reason);
                 }
             }
             catch (Exception)

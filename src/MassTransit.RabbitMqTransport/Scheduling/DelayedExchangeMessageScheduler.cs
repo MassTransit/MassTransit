@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Scheduling
     using GreenPipes;
     using MassTransit.Scheduling;
     using Topology;
+    using Topology.Settings;
     using Util;
 
 

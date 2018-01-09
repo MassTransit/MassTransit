@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
 {
-    using MassTransit.Topology.Configuration;
+    using MassTransit.Topology;
 
 
     public interface IServiceBusConsumeTopologyConfigurator :
@@ -21,5 +21,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
     {
         new IServiceBusMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
+
+        void AddSpecification(IServiceBusConsumeTopologySpecification specification);
     }
 }

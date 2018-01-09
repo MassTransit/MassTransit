@@ -13,7 +13,6 @@
 namespace MassTransit.Topology.Observers
 {
     using System;
-    using Configuration;
     using Context;
     using GreenPipes;
     using GreenPipes.Filters;

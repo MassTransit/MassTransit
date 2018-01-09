@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -34,15 +34,13 @@ namespace MassTransit.Context
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            var msg = message as T;
-            if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
+            if (message is T msg)
+                return endpoint.Publish(msg, cancellationToken);
 
-            return endpoint.Publish(msg, cancellationToken);
+            throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
         }
 
-        Task IPublishEndpointConverter.Publish(IPublishEndpoint endpoint, object message, IPipe<PublishContext> pipe,
-            CancellationToken cancellationToken)
+        Task IPublishEndpointConverter.Publish(IPublishEndpoint endpoint, object message, IPipe<PublishContext> pipe, CancellationToken cancellationToken)
         {
             if (endpoint == null)
                 throw new ArgumentNullException(nameof(endpoint));
@@ -51,11 +49,10 @@ namespace MassTransit.Context
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var msg = message as T;
-            if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
+            if (message is T msg)
+                return endpoint.Publish(msg, pipe, cancellationToken);
 
-            return endpoint.Publish(msg, pipe, cancellationToken);
+            throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
         }
     }
 }

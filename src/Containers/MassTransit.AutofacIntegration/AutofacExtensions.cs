@@ -28,7 +28,6 @@ namespace MassTransit
     using PipeConfigurators;
     using Pipeline.Filters;
     using Saga;
-    using Saga.SubscriptionConfigurators;
     using Scoping;
 
 

@@ -16,6 +16,7 @@ namespace MassTransit
     using EndpointSpecifications;
     using Newtonsoft.Json;
     using Serialization;
+    using SerializerSpecifications;
 
 
     public static class SerializerConfigurationExtensions

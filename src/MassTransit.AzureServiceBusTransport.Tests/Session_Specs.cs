@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Tests
 {
+    using System;
     using System.Threading.Tasks;
-    using Configuration;
     using NUnit.Framework;
     using TestFramework.Messages;
 
@@ -39,6 +39,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         public Sending_a_message_to_a_session()
             : base("input_queue_session")
         {
+            TestTimeout = TimeSpan.FromMinutes(5);
         }
 
         Task<ConsumeContext<PingMessage>> _handler;

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology
 {
+    using Builders;
     using Entities;
     using MassTransit.Topology;
 
@@ -28,6 +29,8 @@ namespace MassTransit.RabbitMqTransport.Topology
         SendSettings GetSendSettings();
         
         Exchange Exchange { get; }
+        
+        BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options);
     }
 
 

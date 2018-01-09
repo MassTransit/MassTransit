@@ -15,7 +15,7 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.ComponentModel;
     using MassTransit.Builders;
-    using Topology.Configuration;
+    using Topology;
 
 
     public interface IRabbitMqBusFactoryConfigurator :

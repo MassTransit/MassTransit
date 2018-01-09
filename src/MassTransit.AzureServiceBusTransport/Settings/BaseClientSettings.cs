@@ -41,11 +41,12 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 
         public abstract string Path { get; }
 
+        public string Name { get; set; }
+
         public Uri GetInputAddress(Uri serviceUri, string path)
         {
-            var builder = new UriBuilder(serviceUri);
+            var builder = new UriBuilder(serviceUri) {Path = path};
 
-            builder.Path += path;
             builder.Query += string.Join("&", GetQueryStringOptions());
 
             return builder.Uri;

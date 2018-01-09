@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,13 +13,14 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurators
 {
     using System;
-    using AzureServiceBusTransport.Configuration;
 
 
     public abstract class MessageEntityConfigurator :
         EntityConfigurator,
         IMessageEntityConfigurator
     {
+        string _basePath;
+
         protected MessageEntityConfigurator(string path)
         {
             Path = path;
@@ -30,6 +31,14 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
         }
 
         public string Path { get; set; }
+
+        public string BasePath
+        {
+            get => _basePath;
+            set => _basePath = value?.Trim('/');
+        }
+
+        public string FullPath => string.IsNullOrEmpty(BasePath) ? Path : $"{BasePath}/{Path.Trim('/')}";
 
         public TimeSpan? DuplicateDetectionHistoryTimeWindow { get; set; }
 

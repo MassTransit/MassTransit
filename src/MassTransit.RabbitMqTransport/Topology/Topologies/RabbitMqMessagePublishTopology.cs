@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,11 +14,12 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
-    using Configuration.Configurators;
+    using Builders;
+    using Configurators;
     using Entities;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
+    using Settings;
     using Util;
 
 
@@ -27,7 +28,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         IRabbitMqMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly ExchangeConfigurator _exchangeConfigurator;
+        readonly ExchangeConfigurator _exchange;
         readonly IList<IRabbitMqMessagePublishTopology> _implementedMessageTypes;
         readonly IMessageTopology<TMessage> _messageTopology;
 
@@ -44,7 +45,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             var durable = !temporary;
             var autoDelete = temporary;
 
-            _exchangeConfigurator = new ExchangeConfigurator(exchangeName, exchangeType, durable, autoDelete);
+            _exchange = new ExchangeConfigurator(exchangeName, exchangeType, durable, autoDelete);
 
             _implementedMessageTypes = new List<IRabbitMqMessagePublishTopology>();
         }
@@ -72,41 +73,49 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         public SendSettings GetSendSettings()
         {
-            return new RabbitMqSendSettings(_exchangeConfigurator.ExchangeName, _exchangeConfigurator.ExchangeType, _exchangeConfigurator.Durable,
-                _exchangeConfigurator.AutoDelete);
+            return new RabbitMqSendSettings(_exchange.ExchangeName, _exchange.ExchangeType, _exchange.Durable, _exchange.AutoDelete);
         }
 
-        public Exchange Exchange => _exchangeConfigurator;
+        public BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options)
+        {
+            var builder = new PublishEndpointBrokerTopologyBuilder(options);
+
+            Apply(builder);
+
+            return builder.BuildBrokerTopology();
+        }
+
+        public Exchange Exchange => _exchange;
 
         bool IExchangeConfigurator.Durable
         {
-            set => _exchangeConfigurator.Durable = value;
+            set => _exchange.Durable = value;
         }
 
         bool IExchangeConfigurator.AutoDelete
         {
-            set => _exchangeConfigurator.AutoDelete = value;
+            set => _exchange.AutoDelete = value;
         }
 
         string IExchangeConfigurator.ExchangeType
         {
-            set => _exchangeConfigurator.ExchangeType = value;
+            set => _exchange.ExchangeType = value;
         }
 
         void IExchangeConfigurator.SetExchangeArgument(string key, object value)
         {
-            _exchangeConfigurator.SetExchangeArgument(key, value);
+            _exchange.SetExchangeArgument(key, value);
         }
 
         void IExchangeConfigurator.SetExchangeArgument(string key, TimeSpan value)
         {
-            _exchangeConfigurator.SetExchangeArgument(key, value);
+            _exchange.SetExchangeArgument(key, value);
         }
 
         ExchangeHandle ExchangeDeclare(IBrokerTopologyBuilder builder)
         {
-            return builder.ExchangeDeclare(_exchangeConfigurator.ExchangeName, _exchangeConfigurator.ExchangeType, _exchangeConfigurator.Durable,
-                _exchangeConfigurator.AutoDelete, _exchangeConfigurator.ExchangeArguments);
+            return builder.ExchangeDeclare(_exchange.ExchangeName, _exchange.ExchangeType, _exchange.Durable,
+                _exchange.AutoDelete, _exchange.ExchangeArguments);
         }
 
         public void AddImplementedMessageConfigurator<T>(IRabbitMqMessagePublishTopologyConfigurator<T> configurator, bool direct)

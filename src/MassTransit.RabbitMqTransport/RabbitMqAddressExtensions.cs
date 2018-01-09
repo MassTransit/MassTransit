@@ -18,12 +18,12 @@ namespace MassTransit.RabbitMqTransport
     using System.Globalization;
     using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
-    using System.Text;
     using System.Text.RegularExpressions;
     using Configurators;
     using NewIdFormatters;
     using RabbitMQ.Client;
     using Topology;
+    using Topology.Settings;
     using Transport;
     using Util;
 
@@ -32,33 +32,6 @@ namespace MassTransit.RabbitMqTransport
     {
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
-
-        public static string GetTemporaryQueueName(this IRabbitMqHost ignored, string prefix)
-        {
-            var sb = new StringBuilder(prefix);
-
-            var host = HostMetadataCache.Host;
-
-            foreach (char c in host.MachineName)
-            {
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else if (c == '.' || c == '_' || c == '-' || c == ':')
-                    sb.Append(c);
-            }
-            sb.Append('-');
-            foreach (char c in host.ProcessName)
-            {
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else if (c == '.' || c == '_' || c == '-' || c == ':')
-                    sb.Append(c);
-            }
-            sb.Append('-');
-            sb.Append(NewId.Next().ToString(_formatter));
-
-            return sb.ToString();
-        }
 
         public static ReceiveSettings GetReceiveSettings(this Uri address)
         {

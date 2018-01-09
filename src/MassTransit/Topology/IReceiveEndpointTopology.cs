@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,32 +18,12 @@ namespace MassTransit.Topology
     /// <summary>
     /// A receive endpoint has a topology that is used within the context of a received message
     /// </summary>
-    public interface IReceiveEndpointTopology
+    public interface IReceiveEndpointTopology :
+        IReceiveTopology
     {
         /// <summary>
         /// The input address of the receive endpoint
         /// </summary>
         Uri InputAddress { get; }
-
-        ISendTopology Send { get; }
-
-        IPublishTopology Publish { get; }
-
-        /// <summary>
-        /// Creates a send endpoint provider
-        /// </summary>
-        /// <value></value>
-        ISendEndpointProvider SendEndpointProvider { get; }
-
-        /// <summary>
-        /// Creates a publish endpoint provider
-        /// </summary>
-        /// <value></value>
-        IPublishEndpointProvider PublishEndpointProvider { get; }
-
-        /// <summary>
-        /// Returns the send transport provider
-        /// </summary>
-        ISendTransportProvider SendTransportProvider { get; }
     }
 }

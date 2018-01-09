@@ -14,6 +14,7 @@ namespace MassTransit.Tests
 {
     using System;
     using Context;
+    using Context.Converters;
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Filters;

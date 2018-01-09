@@ -14,7 +14,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
 {
     using System;
     using Builders;
-    using MassTransit.Topology.Configuration;
+    using MassTransit.Topology;
 
 
     public interface IServiceBusMessageConsumeTopologyConfigurator<TMessage> :

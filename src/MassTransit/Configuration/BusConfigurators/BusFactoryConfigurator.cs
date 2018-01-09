@@ -21,8 +21,7 @@ namespace MassTransit.BusConfigurators
     using EndpointSpecifications;
     using GreenPipes;
     using Saga;
-    using Saga.SubscriptionConfigurators;
-    using Topology.Configuration;
+    using Topology;
 
 
     public abstract class BusFactoryConfigurator<TBuilder>

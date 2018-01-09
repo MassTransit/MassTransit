@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Topology.Configuration.Configurators
+namespace MassTransit.RabbitMqTransport.Topology.Configurators
 {
     using System;
     using System.Collections.Generic;
@@ -21,19 +21,19 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Configurators
         ExchangeConfigurator,
         IExchangeBindingConfigurator
     {
-        public ExchangeBindingConfigurator(string exchangeName, string exchangeType, bool durable, bool autoDelete, string routingKey)
+        public ExchangeBindingConfigurator(string exchangeName, string exchangeType, bool durable = true, bool autoDelete = false, string routingKey = null)
             : base(exchangeName, exchangeType, durable, autoDelete)
         {
-            RoutingKey = routingKey;
+            RoutingKey = routingKey ?? "";
 
             BindingArguments = new Dictionary<string, object>();
         }
 
-        public ExchangeBindingConfigurator(Exchange exchange, string routingKey)
+        public ExchangeBindingConfigurator(Exchange exchange, string routingKey = null)
             : base(exchange)
         {
-            RoutingKey = routingKey;
-            
+            RoutingKey = routingKey ?? "";
+
             BindingArguments = new Dictionary<string, object>();
         }
 

@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -33,19 +33,5 @@ namespace MassTransit.Transports
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
             where T : class;
-
-        /// <summary>
-        /// Move a message from a receive transport to the transport
-        /// </summary>
-        /// <param name="context">The original receive context</param>
-        /// <param name="pipe"></param>
-        /// <returns>A task completed once the message has been sent</returns>
-        Task Move(ReceiveContext context, IPipe<SendContext> pipe);
-
-        /// <summary>
-        /// Close the transport, releasing any resources it may own
-        /// </summary>
-        /// <returns></returns>
-        Task Close();
     }
 }

@@ -14,8 +14,8 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
     using Microsoft.ServiceBus.Messaging;
+    using Topology;
     using Topology.Configuration;
     using Topology.Configuration.Configurators;
     using Transport;
@@ -38,7 +38,7 @@ namespace MassTransit.AzureServiceBusTransport.Settings
             _topicDescription = topicDescription;
             _subscriptionConfigurator = new SubscriptionConfigurator(topicDescription.Path, subscriptionName);
 
-            Path = string.Join("/", _subscriptionConfigurator.TopicPath, _subscriptionConfigurator.SubscriptionName);
+            Name = Path = EntityNameFormatter.FormatSubscriptionPath(_subscriptionConfigurator.TopicPath, _subscriptionConfigurator.SubscriptionName);
 
             MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
             PrefetchCount = Math.Max(MaxConcurrentCalls, 32);

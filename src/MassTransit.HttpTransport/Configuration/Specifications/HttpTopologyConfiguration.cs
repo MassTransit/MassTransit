@@ -14,7 +14,7 @@ namespace MassTransit.HttpTransport.Specifications
 {
     using EndpointSpecifications;
     using GreenPipes;
-    using MassTransit.Topology.Configuration;
+    using MassTransit.Topology;
     using MassTransit.Topology.Observers;
     using MassTransit.Topology.Topologies;
     using Transports.InMemory.Topology.Configurators;

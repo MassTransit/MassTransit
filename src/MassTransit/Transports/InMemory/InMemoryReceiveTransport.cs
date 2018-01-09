@@ -15,10 +15,10 @@ namespace MassTransit.Transports.InMemory
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contexts;
     using Events;
     using Fabric;
     using GreenPipes;
-    using Logging;
     using MassTransit.Topology;
     using Metrics;
     using Pipeline.Observables;
@@ -33,7 +33,6 @@ namespace MassTransit.Transports.InMemory
         IReceiveTransport,
         IInMemoryQueueConsumer
     {
-        static readonly ILog _log = Logger.Get<InMemoryReceiveTransport>();
         readonly Uri _inputAddress;
         readonly ITaskParticipant _participant;
         readonly IInMemoryQueue _queue;
@@ -42,13 +41,20 @@ namespace MassTransit.Transports.InMemory
         readonly IReceiveEndpointTopology _topology;
         readonly IDeliveryTracker _tracker;
         readonly ReceiveTransportObservable _transportObservable;
-        IPipe<ReceiveContext> _receivePipe;
+        readonly IPipe<ReceiveContext> _receivePipe;
+        readonly IErrorTransport _errorTransport;
+        readonly IDeadLetterTransport _deadLetterTransport;
 
-        public InMemoryReceiveTransport(Uri inputAddress, IInMemoryQueue queue, IReceiveEndpointTopology topology)
+        public InMemoryReceiveTransport(Uri inputAddress, IInMemoryQueue queue, IPipe<ReceiveContext> receivePipe, IInMemoryExchange errorExchange,
+            IInMemoryExchange deadLetterExchange, IReceiveEndpointTopology topology)
         {
             _inputAddress = inputAddress;
             _queue = queue;
             _topology = topology;
+            _receivePipe = receivePipe;
+
+            _errorTransport = new InMemoryMessageErrorTransport(errorExchange);
+            _deadLetterTransport = new InMemoryMessageDeadLetterTransport(deadLetterExchange);
 
             _receiveObservable = new ReceiveObservable();
             _transportObservable = new ReceiveTransportObservable();
@@ -70,6 +76,8 @@ namespace MassTransit.Transports.InMemory
                 throw new ArgumentException("ReceivePipe not configured");
 
             var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservable, _topology);
+            context.GetOrAddPayload(() => _errorTransport);
+            context.GetOrAddPayload(() => _deadLetterTransport);
 
             using (_tracker.BeginDelivery())
             {
@@ -105,12 +113,10 @@ namespace MassTransit.Transports.InMemory
             });
         }
 
-        ReceiveTransportHandle IReceiveTransport.Start(IPipe<ReceiveContext> receivePipe)
+        ReceiveTransportHandle IReceiveTransport.Start()
         {
             try
             {
-                _receivePipe = receivePipe;
-
                 _queue.ConnectConsumer(this);
 
                 TaskUtil.Await(() => _transportObservable.Ready(new ReceiveTransportReadyEvent(_inputAddress)));
@@ -138,11 +144,12 @@ namespace MassTransit.Transports.InMemory
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _topology.PublishEndpointProvider.ConnectPublishObserver(observer);
+            return _topology.ConnectPublishObserver(observer);
         }
+
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _topology.SendEndpointProvider.ConnectSendObserver(observer);
+            return _topology.ConnectSendObserver(observer);
         }
 
         void HandleDeliveryComplete()

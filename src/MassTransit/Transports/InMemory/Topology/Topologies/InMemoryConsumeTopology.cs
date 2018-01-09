@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,10 +14,11 @@ namespace MassTransit.Transports.InMemory.Topology.Topologies
 {
     using System;
     using System.Collections.Generic;
-    using Builders;
+    using System.Linq;
     using Configurators;
+    using GreenPipes;
+    using InMemory.Builders;
     using MassTransit.Topology;
-    using MassTransit.Topology.Configuration;
     using MassTransit.Topology.Topologies;
 
 
@@ -41,6 +42,14 @@ namespace MassTransit.Transports.InMemory.Topology.Topologies
             return configurator as IInMemoryMessageConsumeTopology<T>;
         }
 
+        public void AddSpecification(IInMemoryConsumeTopologySpecification specification)
+        {
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
+
+            _specifications.Add(specification);
+        }
+
         IInMemoryMessageConsumeTopologyConfigurator<T> IInMemoryConsumeTopologyConfigurator.GetMessageTopology<T>()
         {
             return GetMessageTopology<T>() as IInMemoryMessageConsumeTopologyConfigurator<T>;
@@ -52,6 +61,11 @@ namespace MassTransit.Transports.InMemory.Topology.Topologies
                 specification.Apply(builder);
 
             ForEach<IInMemoryMessageConsumeTopologyConfigurator>(x => x.Apply(builder));
+        }
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            return base.Validate().Concat(_specifications.SelectMany(x => x.Validate()));
         }
 
         protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)

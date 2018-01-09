@@ -50,8 +50,8 @@ namespace MassTransit.Transports
         public Task DisposeAsync(CancellationToken cancellationToken)
         {
             _observerHandle?.Disconnect();
-
-            return _transport.Close();
+            
+            return TaskUtil.Completed;
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

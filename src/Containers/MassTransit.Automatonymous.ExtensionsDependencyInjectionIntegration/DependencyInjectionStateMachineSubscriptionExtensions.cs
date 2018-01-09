@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,14 +14,12 @@ namespace MassTransit
 {
     using System;
     using Automatonymous;
+    using Automatonymous.SagaConfigurators;
     using Automatonymous.Scoping;
-    using Automatonymous.SubscriptionConfigurators;
-    using Automatonymous.SubscriptionConnectors;
+    using Automatonymous.StateMachineConnectors;
     using AutomatonymousExtensionsDependencyInjectionIntegration;
     using GreenPipes;
     using Pipeline;
-    using Saga;
-    using Saga.SubscriptionConfigurators;
     using Scoping;
 
 
@@ -59,7 +57,8 @@ namespace MassTransit
         /// <param name="scope">The StructureMap Container to resolve the repository</param>
         /// <param name="configure">Optionally configure the saga</param>
         /// <returns></returns>
-        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, IServiceProvider scope, Action<ISagaConfigurator<TInstance>> configure = null)
+        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, IServiceProvider scope,
+            Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
             ISagaStateMachineFactory stateMachineFactory = new DependencyInjectionSagaStateMachineFactory(scope);
@@ -77,7 +76,8 @@ namespace MassTransit
             configurator.AddEndpointSpecification(stateMachineConfigurator);
         }
 
-        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector bus, SagaStateMachine<TInstance> stateMachine, IServiceProvider scope)
+        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector bus, SagaStateMachine<TInstance> stateMachine,
+            IServiceProvider scope)
             where TInstance : class, SagaStateMachineInstance
         {
             var connector = new StateMachineConnector<TInstance>(stateMachine);

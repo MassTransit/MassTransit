@@ -21,7 +21,7 @@ namespace MassTransit
     using Ninject;
     using NinjectIntegration;
     using Saga;
-    using Saga.SubscriptionConfigurators;
+    using SagaConfigurators;
     using Util;
     using Util.Scanning;
 

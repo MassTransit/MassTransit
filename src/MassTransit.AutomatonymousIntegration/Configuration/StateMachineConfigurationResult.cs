@@ -21,7 +21,7 @@ namespace Automatonymous
     using MassTransit.Configurators;
 
 
-    [Serializable, DebuggerDisplay("{DebuggerString()}")]
+    [Serializable, DebuggerDisplay("{" + nameof(DebuggerString) + "()}")]
     public class StateMachineConfigurationResult :
         ConfigurationResult
     {

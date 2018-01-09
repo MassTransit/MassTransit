@@ -19,6 +19,7 @@ namespace MassTransit.ConsumePipeSpecifications
     using Configuration;
     using ConsumeConfigurators;
     using Context;
+    using Context.Converters;
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Filters;
@@ -27,7 +28,6 @@ namespace MassTransit.ConsumePipeSpecifications
     using Pipeline;
     using Pipeline.Pipes;
     using Saga;
-    using Saga.SubscriptionConfigurators;
 
 
     public class ConsumePipeSpecification :

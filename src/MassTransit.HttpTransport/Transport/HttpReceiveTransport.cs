@@ -29,12 +29,14 @@ namespace MassTransit.HttpTransport.Transport
         readonly ReceiveSettings _receiveSettings;
         readonly ReceiveTransportObservable _receiveTransportObservable;
         readonly IHttpReceiveEndpointTopology _topology;
+        readonly IPipe<ReceiveContext> _receivePipe;
 
-        public HttpReceiveTransport(IHttpHost host, ReceiveSettings receiveSettings, IHttpReceiveEndpointTopology topology)
+        public HttpReceiveTransport(IHttpHost host, ReceiveSettings receiveSettings, IPipe<ReceiveContext> receivePipe, IHttpReceiveEndpointTopology topology)
         {
             _host = host;
             _receiveSettings = receiveSettings;
             _topology = topology;
+            _receivePipe = receivePipe;
 
             _receiveObservable = new ReceiveObservable();
             _receiveTransportObservable = new ReceiveTransportObservable();
@@ -57,13 +59,13 @@ namespace MassTransit.HttpTransport.Transport
             scope.Set(_host.Settings);
         }
 
-        public ReceiveTransportHandle Start(IPipe<ReceiveContext> receivePipe)
+        public ReceiveTransportHandle Start()
         {
             var supervisor = new TaskSupervisor($"{TypeMetadataCache<HttpReceiveTransport>.ShortName} - {_host.Settings.GetInputAddress()}");
 
             IPipe<OwinHostContext> hostPipe = Pipe.New<OwinHostContext>(cxt =>
             {
-                cxt.HttpConsumer(receivePipe, _host.Settings, _receiveSettings, _receiveObservable, _receiveTransportObservable, supervisor, _topology);
+                cxt.HttpConsumer(_receivePipe, _host.Settings, _receiveSettings, _receiveObservable, _receiveTransportObservable, supervisor, _topology);
             });
 
             var hostTask = _host.OwinHostCache.Send(hostPipe, supervisor.StoppingToken);
@@ -73,12 +75,12 @@ namespace MassTransit.HttpTransport.Transport
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _topology.PublishEndpointProvider.ConnectPublishObserver(observer);
+            return _topology.ConnectPublishObserver(observer);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _topology.SendEndpointProvider.ConnectSendObserver(observer);
+            return _topology.ConnectSendObserver(observer);
         }
 
 

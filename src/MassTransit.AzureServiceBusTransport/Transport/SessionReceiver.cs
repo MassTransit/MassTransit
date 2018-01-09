@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,132 +12,31 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
-    using System;
-    using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using Internals.Extensions;
-    using Logging;
-    using MassTransit.Topology;
     using Microsoft.ServiceBus.Messaging;
-    using Transports.Metrics;
-    using Util;
+    using Transports;
 
 
     public class SessionReceiver :
-        ISessionReceiver
+        Receiver
     {
-        static readonly ILog _log = Logger.Get<SessionReceiver>();
-        readonly ClientContext _clientContext;
-        readonly ClientSettings _clientSettings;
-        readonly ITaskParticipant _participant;
-        readonly IPipe<ReceiveContext> _receivePipe;
-        readonly ITaskSupervisor _supervisor;
-        readonly IDeliveryTracker _tracker;
-        bool _shuttingDown;
-        readonly IReceiveEndpointTopology _topology;
+        readonly ClientContext _context;
+        readonly IBrokeredMessageReceiver _messageReceiver;
 
-        public SessionReceiver(ClientContext clientContext, IPipe<ReceiveContext> receivePipe, ClientSettings clientSettings, ITaskSupervisor supervisor, IReceiveEndpointTopology topology)
+        public SessionReceiver(ClientContext context, IBrokeredMessageReceiver messageReceiver, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+            : base(context, messageReceiver, deadLetterTransport, errorTransport)
         {
-            _clientContext = clientContext;
-            _receivePipe = receivePipe;
-            _clientSettings = clientSettings;
-            _supervisor = supervisor;
-            _topology = topology;
-
-            _tracker = new DeliveryTracker(HandleDeliveryComplete);
-
-            _participant = supervisor.CreateParticipant($"{TypeMetadataCache<Receiver>.ShortName} - {clientContext.InputAddress}", Stop);
+            _context = context;
+            _messageReceiver = messageReceiver;
         }
 
-        bool ISessionReceiver.IsShuttingDown => _shuttingDown;
-
-        string ISessionReceiver.QueuePath => _clientSettings.Path;
-
-        Uri ISessionReceiver.InputAddress => _clientContext.InputAddress;
-
-        IPipe<ReceiveContext> ISessionReceiver.ReceivePipe => _receivePipe;
-
-        public DeliveryMetrics GetDeliveryMetrics()
+        public override async Task Start()
         {
-            return _tracker.GetDeliveryMetrics();
-        }
+            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(_context, this, DeliveryTracker, _messageReceiver);
 
-        void HandleDeliveryComplete()
-        {
-            if (_shuttingDown)
-            {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Receiver shutdown completed: {0}", _clientContext.InputAddress);
+            await _context.RegisterSessionHandlerFactoryAsync(handlerFactory, ExceptionHandler).ConfigureAwait(false);
 
-                _participant.SetComplete();
-            }
-        }
-
-        async Task Stop()
-        {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Shutting down receiver: {0}", _clientContext.InputAddress);
-
-            _shuttingDown = true;
-
-            if (_tracker.ActiveDeliveryCount > 0)
-            {
-                try
-                {
-                    using (var cancellation = new CancellationTokenSource(_clientSettings.LockDuration))
-                    {
-                        await _participant.ParticipantCompleted.WithCancellation(cancellation.Token).ConfigureAwait(false);
-                    }
-                }
-                catch (TaskCanceledException)
-                {
-                    if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Timeout waiting for receiver to exit: {0}", _clientContext.InputAddress);
-                }
-            }
-
-            if (_tracker.ActiveDeliveryCount == 0)
-            {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Receiver shutdown completed: {0}", _clientContext.InputAddress);
-
-                _participant.SetComplete();
-            }
-        }
-
-        public async Task Start(NamespaceContext context)
-        {
-            var options = new SessionHandlerOptions
-            {
-                AutoComplete = false,
-                AutoRenewTimeout = _clientSettings.AutoRenewTimeout,
-                MaxConcurrentSessions = _clientSettings.MaxConcurrentCalls,
-                MessageWaitTimeout = _clientSettings.MessageWaitTimeout
-            };
-
-            options.ExceptionReceived += (sender, x) =>
-            {
-                if (!(x.Exception is OperationCanceledException))
-                {
-                    if (_log.IsErrorEnabled)
-                        _log.Error($"Exception received on session receiver: {_clientContext.InputAddress} during {x.Action}", x.Exception);
-                }
-
-                if (_tracker.ActiveDeliveryCount == 0)
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Session receiver shutdown completed: {0}", _clientContext.InputAddress);
-
-                    _participant.SetComplete();
-                }
-            };
-
-            IMessageSessionAsyncHandlerFactory handlerFactory = new MessageSessionAsyncHandlerFactory(context, _supervisor, this, _tracker, _topology);
-
-            await _clientContext.RegisterSessionHandlerFactoryAsync(handlerFactory, options).ConfigureAwait(false);
-
-            _participant.SetReady();
+            SetReady();
         }
     }
 }

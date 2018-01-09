@@ -93,6 +93,11 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
             return TopicSubscriptions.GetOrAdd(subscriptionEntity);
         }
 
+        public BrokerTopology BuildBrokerTopology()
+        {
+            return new ServiceBusBrokerTopology(Topics, Subscriptions, Queues, QueueSubscriptions, TopicSubscriptions);
+        }
+
         long GetNextId()
         {
             return Interlocked.Increment(ref _nextId);

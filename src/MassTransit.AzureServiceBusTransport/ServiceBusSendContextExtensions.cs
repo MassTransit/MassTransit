@@ -24,8 +24,7 @@ namespace MassTransit.AzureServiceBusTransport
         /// <param name="scheduledTime">The scheduled time for the message</param>
         public static void SetScheduledEnqueueTime(this SendContext context, DateTime scheduledTime)
         {
-            ServiceBusSendContext sendContext;
-            if (context.TryGetPayload(out sendContext))
+            if (context.TryGetPayload(out ServiceBusSendContext sendContext))
             {
                 if (scheduledTime.Kind == DateTimeKind.Local)
                     scheduledTime = scheduledTime.ToUniversalTime();
@@ -41,8 +40,7 @@ namespace MassTransit.AzureServiceBusTransport
         /// <param name="delay">The time to wait before the message shuould be enqueued</param>
         public static void SetScheduledEnqueueTime(this SendContext context, TimeSpan delay)
         {
-            ServiceBusSendContext sendContext;
-            if (context.TryGetPayload(out sendContext))
+            if (context.TryGetPayload(out ServiceBusSendContext sendContext))
             {
                 sendContext.ScheduledEnqueueTimeUtc = DateTime.UtcNow + delay;
             }
@@ -50,8 +48,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public static void SetSessionId(this SendContext context, string sessionId)
         {
-            ServiceBusSendContext sendContext;
-            if (context.TryGetPayload(out sendContext))
+            if (context.TryGetPayload(out ServiceBusSendContext sendContext))
             {
                 sendContext.SessionId = sessionId;
             }
@@ -59,16 +56,14 @@ namespace MassTransit.AzureServiceBusTransport
 
         public static void SetReplyToSessionId(this SendContext context, string sessionId)
         {
-            ServiceBusSendContext sendContext;
-            if (context.TryGetPayload(out sendContext))
+            if (context.TryGetPayload(out ServiceBusSendContext sendContext))
             {
                 sendContext.ReplyToSessionId = sessionId;
             }
         }
         public static void SetPartitionKey(this SendContext context, string partitionKey)
         {
-            ServiceBusSendContext sendContext;
-            if (context.TryGetPayload(out sendContext))
+            if (context.TryGetPayload(out ServiceBusSendContext sendContext))
             {
                 sendContext.PartitionKey = partitionKey;
             }

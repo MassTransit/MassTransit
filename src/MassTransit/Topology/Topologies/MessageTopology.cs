@@ -14,7 +14,6 @@ namespace MassTransit.Topology.Topologies
 {
     using System;
     using System.Collections.Concurrent;
-    using Configuration;
     using EntityNameFormatters;
     using GreenPipes;
     using Observers;

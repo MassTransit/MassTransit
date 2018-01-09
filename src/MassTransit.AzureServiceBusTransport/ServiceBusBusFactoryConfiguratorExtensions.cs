@@ -14,8 +14,7 @@ namespace MassTransit
 {
     using System;
     using AzureServiceBusTransport;
-    using AzureServiceBusTransport.Configuration;
-    using AzureServiceBusTransport.Configuration.Configurators;
+    using AzureServiceBusTransport.Configurators;
     using Microsoft.ServiceBus;
 
 
@@ -93,7 +92,7 @@ namespace MassTransit
         public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host,
             Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var queueName = host.GetTemporaryQueueName("endpoint");
+            var queueName = host.Topology.CreateTemporaryQueueName("endpoint");
 
             configurator.ReceiveEndpoint(host, queueName, x =>
             {

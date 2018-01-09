@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -18,25 +18,18 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using GreenPipes;
     using RabbitMQ.Client;
     using Topology;
-    using Util;
 
 
     public class SharedConnectionContext :
-        ConnectionContext,
-        IDisposable
+        ConnectionContext
     {
         readonly CancellationToken _cancellationToken;
         readonly ConnectionContext _context;
-        readonly ITaskParticipant _participant;
 
-        public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken, ITaskScope scope)
+        public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken)
         {
             _context = context;
             _cancellationToken = cancellationToken;
-
-            _participant = scope.CreateParticipant($"{TypeMetadataCache<SharedConnectionContext>.ShortName} - {context.Description}");
-
-            _participant.SetReady();
         }
 
         CancellationToken PipeContext.CancellationToken => _cancellationToken;
@@ -65,11 +58,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
         Task<IModel> ConnectionContext.CreateModel()
         {
             return _context.CreateModel();
-        }
-
-        void IDisposable.Dispose()
-        {
-            _participant.SetComplete();
         }
     }
 }

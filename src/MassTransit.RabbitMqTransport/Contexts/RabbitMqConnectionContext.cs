@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Payloads;
@@ -24,26 +25,21 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
     public class RabbitMqConnectionContext :
         BasePipeContext,
-        ConnectionContext
+        ConnectionContext,
+        IAsyncDisposable
     {
         static readonly ILog _log = Logger.Get<RabbitMqConnectionContext>();
 
         readonly IConnection _connection;
-        readonly ITaskParticipant _participant;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
-        public RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, IRabbitMqHostTopology topology, string description, ITaskSupervisor supervisor)
-            : this(connection, hostSettings, description, supervisor.CreateParticipant($"{TypeMetadataCache<RabbitMqConnectionContext>.ShortName} - {description}"))
-        {
-            Topology = topology;
-        }
-
-        RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, string description, ITaskParticipant participant)
-            : base(new PayloadCache(), participant.StoppedToken)
+        public RabbitMqConnectionContext(IConnection connection, RabbitMqHostSettings hostSettings, IRabbitMqHostTopology topology, string description,
+            CancellationToken cancellationToken)
+            : base(new PayloadCache(), cancellationToken)
         {
             _connection = connection;
             HostSettings = hostSettings;
-            _participant = participant;
+            Topology = topology;
 
             Description = description;
 
@@ -59,13 +55,12 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public Task<IModel> CreateModel()
         {
-            return Task.Factory.StartNew(() => _connection.CreateModel(),
-                _participant.StoppedToken, TaskCreationOptions.None, _taskScheduler);
+            return Task.Factory.StartNew(() => _connection.CreateModel(), CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
-        public IConnection Connection => _connection;
+        IConnection ConnectionContext.Connection => _connection;
 
-        public void Dispose()
+        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
         {
             _connection.ConnectionShutdown -= OnConnectionShutdown;
 
@@ -77,14 +72,12 @@ namespace MassTransit.RabbitMqTransport.Contexts
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Disconnected: {0}", Description);
 
-            _participant.SetComplete();
+            return TaskUtil.Completed;
         }
 
         void OnConnectionShutdown(object connection, ShutdownEventArgs reason)
         {
             _connection.Cleanup(reason.ReplyCode, reason.ReplyText);
-
-            _participant.SetComplete();
         }
     }
 }

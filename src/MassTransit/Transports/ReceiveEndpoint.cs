@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -41,12 +41,12 @@ namespace MassTransit.Transports
 
             _observers = new ReceiveEndpointObservable();
 
-            _handle = receiveTransport.ConnectReceiveTransportObserver(new Observer(this));
+            _handle = receiveTransport.ConnectReceiveTransportObserver(new Observer(this, _observers));
         }
 
         ReceiveEndpointHandle IReceiveEndpointControl.Start()
         {
-            var transportHandle = _receiveTransport.Start(_receivePipe);
+            var transportHandle = _receiveTransport.Start();
 
             return new Handle(transportHandle);
         }
@@ -80,12 +80,12 @@ namespace MassTransit.Transports
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            return _receivePipe.ConsumePipe.ConnectConsumePipe(pipe);
+            return _receivePipe.ConnectConsumePipe(pipe);
         }
 
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
-            return _receivePipe.ConsumePipe.ConnectRequestPipe(requestId, pipe);
+            return _receivePipe.ConnectRequestPipe(requestId, pipe);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
@@ -99,30 +99,32 @@ namespace MassTransit.Transports
         }
 
 
-        public class Observer :
+        class Observer :
             IReceiveTransportObserver
         {
             readonly ReceiveEndpoint _endpoint;
+            readonly IReceiveEndpointObserver _observer;
 
-            public Observer(ReceiveEndpoint endpoint)
+            public Observer(ReceiveEndpoint endpoint, IReceiveEndpointObserver observer)
             {
                 _endpoint = endpoint;
+                _observer = observer;
             }
 
             public Task Ready(ReceiveTransportReady ready)
             {
-                return _endpoint._observers.Ready(new ReceiveEndpointReadyEvent(ready.InputAddress, _endpoint));
+                return _observer.Ready(new ReceiveEndpointReadyEvent(ready.InputAddress, _endpoint));
             }
 
             public Task Completed(ReceiveTransportCompleted completed)
             {
-                return _endpoint._observers.Completed(new ReceiveEndpointCompletedEvent(completed.InputAddress,
-                    completed.DeliveryCount, completed.ConcurrentDeliveryCount, _endpoint));
+                return _observer.Completed(new ReceiveEndpointCompletedEvent(completed.InputAddress, completed.DeliveryCount, completed.ConcurrentDeliveryCount,
+                    _endpoint));
             }
 
             public Task Faulted(ReceiveTransportFaulted faulted)
             {
-                return _endpoint._observers.Faulted(new ReceiveEndpointFaultedEvent(faulted.InputAddress, faulted.Exception, _endpoint));
+                return _observer.Faulted(new ReceiveEndpointFaultedEvent(faulted.InputAddress, faulted.Exception, _endpoint));
             }
         }
 

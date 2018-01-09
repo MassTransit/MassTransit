@@ -25,13 +25,11 @@ namespace MassTransit.Context
     /// </summary>
     public class SendEndpointConverterCache
     {
-        readonly ConcurrentDictionary<Type, Lazy<ISendEndpointConverter>> _types =
-            new ConcurrentDictionary<Type, Lazy<ISendEndpointConverter>>();
+        readonly ConcurrentDictionary<Type, Lazy<ISendEndpointConverter>> _types = new ConcurrentDictionary<Type, Lazy<ISendEndpointConverter>>();
 
         ISendEndpointConverter this[Type type] => _types.GetOrAdd(type, CreateTypeConverter).Value;
 
-        public static Task Send(ISendEndpoint endpoint, object message, Type messageType,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static Task Send(ISendEndpoint endpoint, object message, Type messageType, CancellationToken cancellationToken = default(CancellationToken))
         {
             return Cached.Converters.Value[messageType].Send(endpoint, message, cancellationToken);
         }

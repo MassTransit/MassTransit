@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,31 +13,61 @@
 namespace MassTransit.AzureServiceBusTransport.Contexts
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
+    using Logging;
     using Microsoft.ServiceBus.Messaging;
+    using Transport;
 
 
     public class SubscriptionClientContext :
-        ClientContext
+        BasePipeContext,
+        ClientContext,
+        IAsyncDisposable
     {
+        static readonly ILog _log = Logger.Get<QueueClientContext>();
         readonly SubscriptionClient _client;
+        readonly ClientSettings _settings;
 
-        public SubscriptionClientContext(SubscriptionClient client, Uri inputAddress)
+        public SubscriptionClientContext(SubscriptionClient client, Uri inputAddress, ClientSettings settings)
         {
             _client = client;
+            _settings = settings;
             InputAddress = inputAddress;
         }
 
-        public Task RegisterSessionHandlerFactoryAsync(IMessageSessionAsyncHandlerFactory factory, SessionHandlerOptions options)
-        {
-            return _client.RegisterSessionHandlerFactoryAsync(factory, options);
-        }
-
-        public void OnMessageAsync(Func<BrokeredMessage, Task> callback, OnMessageOptions options)
-        {
-            _client.OnMessageAsync(callback, options);
-        }
-
+        public string EntityPath => _client.TopicPath;
         public Uri InputAddress { get; }
+
+        public Task RegisterSessionHandlerFactoryAsync(IMessageSessionAsyncHandlerFactory factory, EventHandler<ExceptionReceivedEventArgs> exceptionHandler)
+        {
+            return _client.RegisterSessionHandlerFactoryAsync(factory, _settings.GetSessionHandlerOptions(exceptionHandler));
+        }
+
+        public void OnMessageAsync(Func<BrokeredMessage, Task> callback, EventHandler<ExceptionReceivedEventArgs> exceptionHandler)
+        {
+            _client.OnMessageAsync(callback, _settings.GetOnMessageOptions(exceptionHandler));
+        }
+
+        async Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Closing client: {0}", InputAddress);
+
+            try
+            {
+                if (_client != null && !_client.IsClosed)
+                    await _client.CloseAsync().ConfigureAwait(false);
+
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Closed client: {0}", InputAddress);
+            }
+            catch (Exception exception)
+            {
+                if (_log.IsWarnEnabled)
+                    _log.Warn($"Exception closing the client: {InputAddress}", exception);
+            }
+        }
     }
 }

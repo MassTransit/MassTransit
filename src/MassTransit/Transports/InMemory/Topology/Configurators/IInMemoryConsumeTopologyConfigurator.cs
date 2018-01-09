@@ -12,7 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory.Topology.Configurators
 {
-    using MassTransit.Topology.Configuration;
+    using MassTransit.Topology;
 
 
     public interface IInMemoryConsumeTopologyConfigurator :
@@ -21,5 +21,7 @@ namespace MassTransit.Transports.InMemory.Topology.Configurators
     {
         new IInMemoryMessageConsumeTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
+
+        void AddSpecification(IInMemoryConsumeTopologySpecification specification);
     }
 }

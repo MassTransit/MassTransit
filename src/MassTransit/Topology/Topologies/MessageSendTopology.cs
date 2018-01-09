@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,7 +14,8 @@ namespace MassTransit.Topology.Topologies
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
+    using System.Linq;
+    using GreenPipes;
 
 
     public class MessageSendTopology<TMessage> :
@@ -22,14 +23,14 @@ namespace MassTransit.Topology.Topologies
         where TMessage : class
     {
         readonly IList<IMessageSendTopologyConvention<TMessage>> _conventions;
-        readonly IList<IMessageSendTopology<TMessage>> _delegateConfigurations;
+        readonly IList<IMessageSendTopology<TMessage>> _delegateTopologies;
         readonly IList<IMessageSendTopology<TMessage>> _topologies;
 
         public MessageSendTopology()
         {
             _conventions = new List<IMessageSendTopologyConvention<TMessage>>();
             _topologies = new List<IMessageSendTopology<TMessage>>();
-            _delegateConfigurations = new List<IMessageSendTopology<TMessage>>();
+            _delegateTopologies = new List<IMessageSendTopology<TMessage>>();
         }
 
         public void Add(IMessageSendTopology<TMessage> sendTopology)
@@ -39,14 +40,14 @@ namespace MassTransit.Topology.Topologies
 
         public void AddDelegate(IMessageSendTopology<TMessage> configuration)
         {
-            _delegateConfigurations.Add(configuration);
+            _delegateTopologies.Add(configuration);
         }
 
         public void Apply(ITopologyPipeBuilder<SendContext<TMessage>> builder)
         {
             ITopologyPipeBuilder<SendContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
-            foreach (IMessageSendTopology<TMessage> topology in _delegateConfigurations)
+            foreach (IMessageSendTopology<TMessage> topology in _delegateTopologies)
             {
                 topology.Apply(delegatedBuilder);
             }
@@ -101,6 +102,11 @@ namespace MassTransit.Topology.Topologies
             var addedConvention = add();
             if (addedConvention != null)
                 _conventions.Add(addedConvention);
+        }
+
+        public virtual IEnumerable<ValidationResult> Validate()
+        {
+            return Enumerable.Empty<ValidationResult>();
         }
     }
 }

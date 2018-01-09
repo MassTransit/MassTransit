@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,8 +25,7 @@ namespace MassTransit
         /// <returns>The retry attempt number, 0 = first time, >= 1 = retry</returns>
         public static int GetRetryAttempt(this ConsumeContext context)
         {
-            ConsumeRetryContext retryContext;
-            return context.TryGetPayload(out retryContext) ? retryContext.RetryAttempt : 0;
+            return context.TryGetPayload(out ConsumeRetryContext retryContext) ? retryContext.RetryAttempt : 0;
         }
     }
 }

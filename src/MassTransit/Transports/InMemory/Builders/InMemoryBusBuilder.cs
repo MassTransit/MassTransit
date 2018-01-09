@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.Transports.InMemory.Builders
 {
     using System;
+    using EndpointSpecifications;
     using MassTransit.Builders;
 
 
@@ -21,7 +22,6 @@ namespace MassTransit.Transports.InMemory.Builders
         IInMemoryBusBuilder
     {
         readonly InMemoryReceiveEndpointSpecification _busEndpointSpecification;
-        readonly IInMemoryEndpointConfiguration _configuration;
         readonly Uri _inputAddress;
 
         public InMemoryBusBuilder(InMemoryHost inMemoryHost, ISendTransportProvider sendTransportProvider, BusHostCollection<IBusHostControl> hosts,
@@ -30,16 +30,16 @@ namespace MassTransit.Transports.InMemory.Builders
         {
             if (inMemoryHost == null)
                 throw new ArgumentNullException(nameof(inMemoryHost));
+
             if (sendTransportProvider == null)
                 throw new ArgumentNullException(nameof(sendTransportProvider));
 
-            var busQueueName = GenerateBusQueueName();
+            var busQueueName = inMemoryHost.Topology.CreateTemporaryQueueName("bus");
             _inputAddress = new Uri(inMemoryHost.Address, $"{busQueueName}");
 
             InMemoryHost = inMemoryHost;
-            _configuration = configuration;
 
-            var busEndpointSpecification = _configuration.CreateNewConfiguration(ConsumePipe);
+            var busEndpointSpecification = configuration.CreateNewConfiguration(ConsumePipe);
 
             _busEndpointSpecification = new InMemoryReceiveEndpointSpecification(inMemoryHost.Address, busQueueName, sendTransportProvider,
                 busEndpointSpecification);
@@ -61,11 +61,6 @@ namespace MassTransit.Transports.InMemory.Builders
         protected override void PreBuild()
         {
             _busEndpointSpecification.Apply(this);
-        }
-
-        static string GenerateBusQueueName()
-        {
-            return NewId.Next().ToString("NS");
         }
     }
 }

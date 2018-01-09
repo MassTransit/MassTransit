@@ -37,7 +37,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response"));
+            var endpoint = host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryQueueName("response"), x => x.AutoDeleteOnIdle = TimeSpan.FromMinutes(5));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
@@ -61,7 +61,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response"));
+            var endpoint = host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryQueueName("response"), x => x.AutoDeleteOnIdle = TimeSpan.FromMinutes(5));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
@@ -84,7 +84,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = host.ConnectReceiveEndpoint(host.GetTemporaryQueueName("response"));
+            var endpoint = host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryQueueName("response"), x => x.AutoDeleteOnIdle = TimeSpan.FromMinutes(5));
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 

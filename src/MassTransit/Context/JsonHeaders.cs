@@ -30,13 +30,8 @@ namespace MassTransit.Context
 
         public JsonHeaders(IObjectTypeDeserializer deserializer, IHeaderProvider provider)
         {
-            if (deserializer == null)
-                throw new ArgumentNullException(nameof(deserializer));
-            if (provider == null)
-                throw new ArgumentNullException(nameof(provider));
-
-            _deserializer = deserializer;
-            _provider = provider;
+            _deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
+            _provider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()

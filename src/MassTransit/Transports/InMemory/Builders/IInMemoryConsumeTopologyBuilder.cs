@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory.Builders
 {
+    using Topology.Builders;
+
+
     /// <summary>
     /// A unique builder context should be created for each specification, so that the items added
     /// by it can be combined together into a group - so that if a subsequent specification yanks 

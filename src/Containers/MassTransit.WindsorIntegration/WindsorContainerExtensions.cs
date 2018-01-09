@@ -23,7 +23,7 @@ namespace MassTransit
     using Internals.Extensions;
     using PipeConfigurators;
     using Saga;
-    using Saga.SubscriptionConfigurators;
+    using SagaConfigurators;
     using WindsorIntegration;
 
 

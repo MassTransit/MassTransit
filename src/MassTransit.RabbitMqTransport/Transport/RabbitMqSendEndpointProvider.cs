@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,42 +15,77 @@ namespace MassTransit.RabbitMqTransport.Transport
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Agents;
+    using Integration;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
+    using Pipeline;
+    using Topology;
     using Transports;
 
 
     public class RabbitMqSendEndpointProvider :
         ISendEndpointProvider
     {
-        readonly Uri _sourceAddress;
-        readonly SendObservable _sendObservable;
-        readonly IMessageSerializer _serializer;
-        readonly ISendTransportProvider _transportProvider;
+        readonly ISendEndpointCache<Uri> _cache;
+        readonly BusHostCollection<RabbitMqHost> _hosts;
+        readonly SendObservable _observers;
         readonly ISendPipe _sendPipe;
+        readonly IMessageSerializer _serializer;
+        readonly Uri _sourceAddress;
 
-        public RabbitMqSendEndpointProvider(IMessageSerializer serializer, Uri sourceAddress, ISendTransportProvider transportProvider, ISendPipe sendPipe)
+        public RabbitMqSendEndpointProvider(BusHostCollection<RabbitMqHost> hosts, SendObservable observers, IMessageSerializer serializer, Uri sourceAddress, ISendPipe sendPipe)
         {
+            _hosts = hosts;
             _serializer = serializer;
             _sourceAddress = sourceAddress;
-            _transportProvider = transportProvider;
             _sendPipe = sendPipe;
 
-            _sendObservable = new SendObservable();
+            _cache = new SendEndpointCache<Uri>();
+            _observers = observers;
         }
 
-        public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            ISendTransport sendTransport = await _transportProvider.GetSendTransport(address).ConfigureAwait(false);
-
-            var handle = sendTransport.ConnectSendObserver(_sendObservable);
-
-            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, _sendPipe, handle);
+            return _cache.GetSendEndpoint(address, CreateSendEndpoint);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _sendObservable.Connect(observer);
+            return _observers.Connect(observer);
+        }
+
+        Task<ISendEndpoint> CreateSendEndpoint(Uri address)
+        {
+            var sendTransport = GetSendTransport(address);
+
+            var handle = sendTransport.ConnectSendObserver(_observers);
+
+            return Task.FromResult<ISendEndpoint>(new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, _sendPipe, handle));
+        }
+
+        ISendTransport GetSendTransport(Uri address)
+        {
+            var host = _hosts.GetHost(address);
+
+            var settings = host.Topology.SendTopology.GetSendSettings(address);
+
+            var brokerTopology = settings.GetBrokerTopology();
+
+            IAgent<ModelContext> modelSource = GetModelSource(host);
+
+            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology);
+
+            var transport = new RabbitMqSendTransport(modelSource, configureTopologyFilter, settings.ExchangeName);
+
+            host.Add(transport);
+
+            return transport;
+        }
+
+        protected virtual IAgent<ModelContext> GetModelSource(RabbitMqHost host)
+        {
+            return new RabbitMqModelCache(host, host.ConnectionCache);
         }
     }
 }

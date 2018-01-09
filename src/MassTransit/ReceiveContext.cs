@@ -116,13 +116,8 @@ namespace MassTransit
         IPublishEndpointProvider PublishEndpointProvider { get; }
 
         /// <summary>
-        /// The transport provider for this endpoint
-        /// </summary>
-        ISendTransportProvider SendTransportProvider { get; }
-
-        /// <summary>
         /// The topology of the receive endpoint
         /// </summary>
-        IReceiveEndpointTopology Topology { get; }
+        IReceiveTopology Topology { get; }
     }
 }

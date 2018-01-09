@@ -10,11 +10,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Topology.Configuration.Specifications
+namespace MassTransit.RabbitMqTransport.Topology.Specifications
 {
     using System.Collections.Generic;
     using Builders;
     using Configurators;
+    using Entities;
     using GreenPipes;
 
 
@@ -22,25 +23,17 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Specifications
     /// Used to bind an exchange to the consuming queue's exchange
     /// </summary>
     public class ExchangeBindingConsumeTopologySpecification :
+        ExchangeBindingConfigurator,
         IRabbitMqConsumeTopologySpecification
     {
-        readonly string _exchangeName;
-        readonly string _exchangeType;
-        readonly bool _durable;
-        readonly bool _autoDelete;
-        readonly IDictionary<string, object> _exchangeArguments;
-        readonly string _routingKey;
-        readonly IDictionary<string, object> _bindingArguments;
-
-        public ExchangeBindingConsumeTopologySpecification(ExchangeBindingConfigurator configurator)
+        public ExchangeBindingConsumeTopologySpecification(string exchangeName, string exchangeType, bool durable = true, bool autoDelete = false)
+            : base(exchangeName, exchangeType, durable, autoDelete)
         {
-            _exchangeName = configurator.ExchangeName;
-            _exchangeType = configurator.ExchangeType;
-            _durable = configurator.Durable;
-            _autoDelete = configurator.AutoDelete;
-            _exchangeArguments = configurator.ExchangeArguments;
-            _routingKey = configurator.RoutingKey;
-            _bindingArguments = configurator.BindingArguments;
+        }
+
+        public ExchangeBindingConsumeTopologySpecification(Exchange exchange)
+            : base(exchange)
+        {
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -50,9 +43,9 @@ namespace MassTransit.RabbitMqTransport.Topology.Configuration.Specifications
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
-            var exchangeHandle = builder.ExchangeDeclare(_exchangeName, _exchangeType, _durable, _autoDelete, _exchangeArguments);
+            var exchangeHandle = builder.ExchangeDeclare(ExchangeName, ExchangeType, Durable, AutoDelete, ExchangeArguments);
 
-            var bindingHandle = builder.ExchangeBind(exchangeHandle, builder.Exchange, _routingKey, _bindingArguments);
+            var bindingHandle = builder.ExchangeBind(exchangeHandle, builder.Exchange, RoutingKey, BindingArguments);
         }
     }
 }

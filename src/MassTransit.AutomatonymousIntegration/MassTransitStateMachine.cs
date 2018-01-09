@@ -23,6 +23,7 @@ namespace Automatonymous
     using MassTransit.Logging;
     using MassTransit.Scheduling;
     using Requests;
+    using SagaConfigurators;
     using Schedules;
 
 
@@ -104,7 +105,7 @@ namespace Automatonymous
         /// <typeparam name="T">The event data type</typeparam>
         /// <param name="propertyExpression">The event property</param>
         /// <param name="configureEventCorrelation">Configuration callback for the event</param>
-        protected void Event<T>(Expression<Func<Event<T>>> propertyExpression, Action<EventCorrelationConfigurator<TInstance, T>> configureEventCorrelation)
+        protected void Event<T>(Expression<Func<Event<T>>> propertyExpression, Action<IEventCorrelationConfigurator<TInstance, T>> configureEventCorrelation)
             where T : class
         {
             base.Event(propertyExpression);
@@ -133,7 +134,7 @@ namespace Automatonymous
         /// <param name="eventPropertyExpression">The event property expression</param>
         /// <param name="configureEventCorrelation">Configuration callback for the event</param>
         protected void Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression, Expression<Func<TProperty, Event<T>>> eventPropertyExpression,
-            Action<EventCorrelationConfigurator<TInstance, T>> configureEventCorrelation)
+            Action<IEventCorrelationConfigurator<TInstance, T>> configureEventCorrelation)
             where TProperty : class
             where T : class
         {
@@ -173,13 +174,13 @@ namespace Automatonymous
                 var @event = (Event<T>)propertyInfo.GetValue(this);
 
                 var builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(T));
-                var builder = (EventCorrelationBuilder<TInstance>)Activator.CreateInstance(builderType, this, @event);
+                var builder = (IEventCorrelationBuilder)Activator.CreateInstance(builderType, this, @event);
 
                 _eventCorrelations[@event] = builder.Build();
             }
         }
 
-        void DefaultCorrelatedByConfigurator<T>(EventCorrelationConfigurator<TInstance, T> configurator)
+        void DefaultCorrelatedByConfigurator<T>(IEventCorrelationConfigurator<TInstance, T> configurator)
             where T : class, CorrelatedBy<Guid>
         {
             configurator.CorrelateById(context => context.Message.CorrelationId);
@@ -197,7 +198,7 @@ namespace Automatonymous
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
-            Action<RequestConfigurator<TInstance, TRequest, TResponse>> configureRequest)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse>> configureRequest)
             where TRequest : class
             where TResponse : class
         {
@@ -259,7 +260,7 @@ namespace Automatonymous
         /// <param name="configureSchedule">The callback to configure the schedule</param>
         protected void Schedule<TMessage>(Expression<Func<Schedule<TInstance, TMessage>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> tokenIdExpression,
-            Action<ScheduleConfigurator<TInstance, TMessage>> configureSchedule)
+            Action<IScheduleConfigurator<TInstance, TMessage>> configureSchedule)
             where TMessage : class
         {
             var configurator = new StateMachineScheduleConfigurator<TInstance, TMessage>();
@@ -423,7 +424,7 @@ namespace Automatonymous
                 if (@event != null)
                 {
                     var builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(TData));
-                    var builder = (EventCorrelationBuilder<TInstance>)Activator.CreateInstance(builderType, machine, @event);
+                    var builder = (IEventCorrelationBuilder)Activator.CreateInstance(builderType, machine, @event);
 
                     machine._eventCorrelations[@event] = builder.Build();
                 }

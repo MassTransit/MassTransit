@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,6 +19,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Microsoft.ServiceBus.Messaging;
+    using Settings;
+    using Transport;
     using Util;
 
 
@@ -55,7 +57,33 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
         public TopicDescription TopicDescription => _topicDescription.Value;
 
+        public BrokerTopology GetBrokerTopology()
+        {
+            var builder = new PublishEndpointBrokerTopologyBuilder();
+
+            builder.Topic = builder.CreateTopic(_topicDescription.Value);
+
+            return builder.BuildBrokerTopology();
+        }
+
+        public SendSettings GetSendSettings()
+        {
+            var description = GetTopicDescription();
+
+            var sendSettings = new TopicSendSettings(description);
+
+            return sendSettings;
+        }
+
         string IMessageEntityConfigurator.Path => _topicConfigurator.Path;
+
+        string IMessageEntityConfigurator.BasePath
+        {
+            get => _topicConfigurator.BasePath;
+            set => _topicConfigurator.BasePath = value;
+        }
+
+        string IMessageEntityConfigurator.FullPath => _topicConfigurator.FullPath;
 
         TimeSpan? IMessageEntityConfigurator.DuplicateDetectionHistoryTimeWindow
         {
@@ -122,11 +150,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             set => _topicConfigurator.EnableFilteringMessagesBeforePublishing = value;
         }
 
-        TopicDescription GetTopicDescription()
-        {
-            return _topicConfigurator.GetTopicDescription();
-        }
-
         public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
         {
             var topicHandle = builder.CreateTopic(_topicDescription.Value);
@@ -134,7 +157,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             if (builder.Topic == null)
                 builder.Topic = topicHandle;
 
-/*
+            // TODO add publisher exchange bindings for message inherited types, similar to RMQ
+            /*
+
             builder.CreateTopicSubscription(builder.Topic, topicHandle, new SubscriptionConfigurator(builder.Topic.Topic.TopicDescription.Path, topicHandle));
             
                 builder.ExchangeBind(builder.Exchange, exchangeHandle, "", new Dictionary<string, object>());
@@ -144,6 +169,11 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             foreach (IRabbitMqMessagePublishTopology configurator in _implementedMessageTypes)
                 configurator.Apply(builder);
 */
+        }
+
+        TopicDescription GetTopicDescription()
+        {
+            return _topicConfigurator.GetTopicDescription();
         }
     }
 }

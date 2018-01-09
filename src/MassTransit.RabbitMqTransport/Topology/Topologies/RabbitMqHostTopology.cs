@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,10 @@
 namespace MassTransit.RabbitMqTransport.Topology.Topologies
 {
     using System;
-    using System.Net;
     using System.Text;
+    using EndpointSpecifications;
     using MassTransit.Topology.Topologies;
+    using Settings;
     using Specifications;
     using Transports;
     using Util;
@@ -55,41 +56,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         public SendSettings GetSendSettings(Uri address)
         {
-            var name = address.AbsolutePath.Substring(1);
-            string[] pathSegments = name.Split('/');
-            if (pathSegments.Length == 2)
-                name = pathSegments[1];
-
-            if (name == "*")
-                throw new ArgumentException("Cannot send to a dynamic address");
-
-            RabbitMqEntityNameValidator.Validator.ThrowIfInvalidEntityName(name);
-
-            var isTemporary = address.Query.GetValueFromQueryString("temporary", false);
-
-            var durable = address.Query.GetValueFromQueryString("durable", !isTemporary);
-            var autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
-
-            var exchangeType = address.Query.GetValueFromQueryString("type") ?? _exchangeTypeSelector.DefaultExchangeType;
-
-            var settings = new RabbitMqSendSettings(name, exchangeType, durable, autoDelete);
-
-            var bindToQueue = address.Query.GetValueFromQueryString("bind", false);
-            if (bindToQueue)
-            {
-                var queueName = WebUtility.UrlDecode(address.Query.GetValueFromQueryString("queue"));
-                settings.BindToQueue(queueName);
-            }
-
-            var delayedType = address.Query.GetValueFromQueryString("delayedType");
-            if (!string.IsNullOrWhiteSpace(delayedType))
-                settings.SetExchangeArgument("x-delayed-type", delayedType);
-
-            var bindExchange = address.Query.GetValueFromQueryString("bindexchange");
-            if (!string.IsNullOrWhiteSpace(bindExchange))
-                settings.BindToExchange(bindExchange);
-
-            return settings;
+            return _topologyConfiguration.Send.GetSendSettings(address);
         }
 
         public Uri GetDestinationAddress(string exchangeName, Action<IExchangeConfigurator> configure = null)

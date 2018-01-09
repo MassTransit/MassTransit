@@ -12,9 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
 {
+    using GreenPipes;
+    using Microsoft.ServiceBus.Messaging;
+
+
     public interface IQueueConfigurator :
         IMessageEntityConfigurator,
-        IEndpointEntityConfigurator
+        IEndpointEntityConfigurator,
+        ISpecification
     {
         /// <summary>
         /// Move messages to the dead letter queue on filter evaluation exception
@@ -25,5 +30,11 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
         /// Sets the path where messages are forwarded to
         /// </summary>
         string ForwardTo { set; }
+
+        /// <summary>
+        /// Create the queueDescription for the configuration
+        /// </summary>
+        /// <returns></returns>
+        QueueDescription GetQueueDescription();
     }
 }

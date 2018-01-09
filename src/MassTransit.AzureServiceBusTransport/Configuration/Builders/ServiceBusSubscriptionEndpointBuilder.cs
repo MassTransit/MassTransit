@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Configuration.Builders
+namespace MassTransit.AzureServiceBusTransport.Builders
 {
     using System;
     using MassTransit.Builders;
@@ -18,6 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Builders
     using Topology;
     using Topology.Builders;
     using Transport;
+    using Transports;
 
 
     public class ServiceBusSubscriptionEndpointBuilder :
@@ -26,22 +27,21 @@ namespace MassTransit.AzureServiceBusTransport.Configuration.Builders
     {
         readonly IServiceBusEndpointConfiguration _configuration;
         readonly IServiceBusHost _host;
-        readonly ISendTransportProvider _sendTransportProvider;
+        readonly BusHostCollection<ServiceBusHost> _hosts;
 
-        public ServiceBusSubscriptionEndpointBuilder(IBusBuilder busBuilder, IServiceBusHost host, IServiceBusEndpointConfiguration configuration,
-            ISendTransportProvider sendTransportProvider)
-            : base(busBuilder, configuration)
+        public ServiceBusSubscriptionEndpointBuilder(BusHostCollection<ServiceBusHost> hosts, IServiceBusHost host, IServiceBusEndpointConfiguration configuration)
+            : base(configuration)
         {
             _configuration = configuration;
+            _hosts = hosts;
             _host = host;
-            _sendTransportProvider = sendTransportProvider;
         }
 
         public IServiceBusReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress, SubscriptionSettings settings)
         {
             var topologyLayout = BuildTopology(settings);
 
-            return new ServiceBusReceiveEndpointTopology(_configuration, inputAddress, MessageSerializer, _host, _sendTransportProvider, topologyLayout);
+            return new ServiceBusReceiveEndpointTopology(_configuration, inputAddress, _host, _hosts, topologyLayout);
         }
 
         BrokerTopology BuildTopology(SubscriptionSettings settings)

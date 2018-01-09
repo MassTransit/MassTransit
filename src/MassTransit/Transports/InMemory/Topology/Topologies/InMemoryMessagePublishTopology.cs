@@ -14,6 +14,7 @@ namespace MassTransit.Transports.InMemory.Topology.Topologies
 {
     using System;
     using System.Collections.Generic;
+    using Builders;
     using Configurators;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;

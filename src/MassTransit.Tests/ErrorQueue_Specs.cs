@@ -61,7 +61,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.CorrelationId.ShouldBe(_correlationId);
+            Assert.That(context.CorrelationId, Is.EqualTo(_correlationId));
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.DestinationAddress.ShouldBe(InputQueueAddress);
+            Assert.That(context.DestinationAddress, Is.EqualTo(InputQueueAddress));
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.FaultAddress.ShouldBe(BusAddress);
+            Assert.That(context.FaultAddress, Is.EqualTo(BusAddress));
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.ResponseAddress.ShouldBe(BusAddress);
+            Assert.That(context.ResponseAddress, Is.EqualTo(BusAddress));
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.SourceAddress.ShouldBe(BusAddress);
+            Assert.That(context.SourceAddress, Is.EqualTo(BusAddress));
         }
 
         [Test]

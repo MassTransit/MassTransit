@@ -15,9 +15,10 @@ namespace MassTransit.Saga.Connectors
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configuration;
     using GreenPipes;
     using MassTransit.Pipeline;
+    using Metadata;
+    using SagaSpecifications;
     using Util;
 
 

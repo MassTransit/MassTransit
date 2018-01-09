@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,7 +21,6 @@ namespace MassTransit.AzureServiceBusTransport.Saga
     using Logging;
     using MassTransit.Saga;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Bson;
     using Serialization;
     using Util;
 
@@ -50,16 +49,12 @@ namespace MassTransit.AzureServiceBusTransport.Saga
         {
             MessageSessionContext sessionContext;
             if (!context.TryGetPayload(out sessionContext))
-            {
                 throw new SagaException($"The session-based saga repository requires an active message session: {TypeMetadataCache<TSaga>.ShortName}",
                     typeof(TSaga), typeof(T));
-            }
 
             Guid sessionId;
             if (Guid.TryParse(sessionContext.SessionId, out sessionId))
-            {
                 context = new CorrelationIdConsumeContextProxy<T>(context, sessionId);
-            }
 
             var saga = await ReadSagaState(sessionContext).ConfigureAwait(false);
             if (saga == null)
@@ -73,9 +68,7 @@ namespace MassTransit.AzureServiceBusTransport.Saga
                 SagaConsumeContext<TSaga, T> sagaConsumeContext = new MessageSessionSagaConsumeContext<TSaga, T>(context, sessionContext, saga);
 
                 if (_log.IsDebugEnabled)
-                {
                     _log.DebugFormat("SAGA:{0}:{1} Existing {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId, TypeMetadataCache<T>.ShortName);
-                }
 
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
@@ -84,10 +77,8 @@ namespace MassTransit.AzureServiceBusTransport.Saga
                     await WriteSagaState(sessionContext, saga).ConfigureAwait(false);
 
                     if (_log.IsDebugEnabled)
-                    {
                         _log.DebugFormat("SAGA:{0}:{1} Updated {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
                             TypeMetadataCache<T>.ShortName);
-                    }
                 }
             }
         }
@@ -175,10 +166,8 @@ namespace MassTransit.AzureServiceBusTransport.Saga
                 var proxy = new MessageSessionSagaConsumeContext<TSaga, TMessage>(context, sessionContext, context.Saga);
 
                 if (_log.IsDebugEnabled)
-                {
                     _log.DebugFormat("SAGA:{0}:{1} Created {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
                         TypeMetadataCache<TMessage>.ShortName);
-                }
 
                 try
                 {
@@ -188,19 +177,15 @@ namespace MassTransit.AzureServiceBusTransport.Saga
                     {
                         await _writeSagaState(sessionContext, proxy.Saga).ConfigureAwait(false);
                         if (_log.IsDebugEnabled)
-                        {
                             _log.DebugFormat("SAGA:{0}:{1} Saved {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
                                 TypeMetadataCache<TMessage>.ShortName);
-                        }
                     }
                 }
                 catch (Exception)
                 {
                     if (_log.IsDebugEnabled)
-                    {
                         _log.DebugFormat("SAGA:{0}:{1} Unsaved(Fault) {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
                             TypeMetadataCache<TMessage>.ShortName);
-                    }
 
                     throw;
                 }

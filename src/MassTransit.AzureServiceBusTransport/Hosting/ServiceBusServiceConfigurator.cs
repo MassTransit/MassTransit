@@ -13,15 +13,14 @@
 namespace MassTransit.AzureServiceBusTransport.Hosting
 {
     using System;
-    using Configuration;
     using ConsumeConfigurators;
     using GreenPipes;
     using Builders;
+    using MassTransit.Builders;
     using MassTransit.Configuration;
     using MassTransit.Hosting;
     using MassTransit.Saga;
-    using MassTransit.Saga.SubscriptionConfigurators;
-    using MassTransit.Topology.Configuration;
+    using MassTransit.Topology;
 
 
     /// <summary>
