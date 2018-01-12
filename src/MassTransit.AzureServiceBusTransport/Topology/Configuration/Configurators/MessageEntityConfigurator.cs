@@ -29,7 +29,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
             EnableBatchedOperations = true;
         }
 
-        public string Path { get; }
+        public string Path { get; set; }
 
         public TimeSpan? DuplicateDetectionHistoryTimeWindow { get; set; }
 
