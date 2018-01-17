@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading.Tasks;
     using Events;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using Transports;
     using Util;
 
@@ -52,6 +53,7 @@ namespace MassTransit.Pipeline.Filters
             {
                 sendContext.Headers.Set(MessageHeaders.Reason, "fault");
 
+                sendContext.Headers.Set(MessageHeaders.FaultExceptionType, TypeCache.GetShortName(exception.GetType()));
                 sendContext.Headers.Set(MessageHeaders.FaultMessage, exceptionMessage);
                 sendContext.Headers.Set(MessageHeaders.FaultTimestamp, context.ExceptionTimestamp.ToString("O"));
                 sendContext.Headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
