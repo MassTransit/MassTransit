@@ -20,6 +20,11 @@ namespace MassTransit
         public const string Reason = "MT-Reason";
 
         /// <summary>
+        /// The type of exception from a Fault
+        /// </summary>
+        public const string FaultExceptionType = "MT-Fault-ExceptionType";
+
+        /// <summary>
         /// The exception message from a Fault
         /// </summary>
         public const string FaultMessage = "MT-Fault-Message";
