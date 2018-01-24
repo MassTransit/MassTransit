@@ -21,7 +21,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="4.1.1" />
-    <PackageReference Include="GreenPipes" Version="1.2.0" />
+    <PackageReference Include="GreenPipes" Version="1.2.1" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.Azure.DocumentDB" Version="1.17.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />

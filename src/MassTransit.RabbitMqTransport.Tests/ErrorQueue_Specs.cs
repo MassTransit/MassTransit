@@ -297,4 +297,51 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
     }
+    [TestFixture]
+    public class An_aggregate_exception :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_have_the_actual_exception()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get("MT-Fault-Message", (string)null), Is.EqualTo("Request is so bad, I'm dying here!"));
+        }
+
+        [Test]
+        public async Task Should_move_the_message_to_the_error_queue()
+        {
+            await _errorHandler;
+        }
+
+        Task<ConsumeContext<PingMessage>> _errorHandler;
+        Task<PongMessage> _responseTask;
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            var client = Bus.CreateRequestClient<PingMessage, PongMessage>(InputQueueAddress, TestTimeout);
+
+            _responseTask = client.Request(new PingMessage());
+        }
+
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        {
+            configurator.ReceiveEndpoint(host, "input_queue_error", x =>
+            {
+                x.PurgeOnStartup = true;
+
+                _errorHandler = Handled<PingMessage>(x);
+            });
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            Handler<PingMessage>(configurator, async context =>
+            {
+                throw new AggregateException("Request is so bad, I'm dying here!");
+            });
+        }
+    }
 }
