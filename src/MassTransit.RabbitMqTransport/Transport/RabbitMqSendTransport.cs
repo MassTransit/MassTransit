@@ -26,7 +26,6 @@ namespace MassTransit.RabbitMqTransport.Transport
     using Logging;
     using MassTransit.Pipeline.Observables;
     using Transports;
-    using Util;
 
 
     public class RabbitMqSendTransport :

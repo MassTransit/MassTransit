@@ -20,12 +20,9 @@ namespace MassTransit.Transports.InMemory
         InMemoryMessageMoveTransport,
         IErrorTransport
     {
-        readonly IInMemoryExchange _exchange;
-
         public InMemoryMessageErrorTransport(IInMemoryExchange exchange)
             : base(exchange)
         {
-            _exchange = exchange;
         }
 
         public Task Send(ExceptionReceiveContext context)

@@ -125,7 +125,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     {
                         await Task.Delay(TimeSpan.FromSeconds(context.Command.Size), context.CancellationToken).ConfigureAwait(false);
                     }
-                    catch (TaskCanceledException ex)
+                    catch (TaskCanceledException)
                     {
                         Console.WriteLine("Task was canceled!");
                         throw;
@@ -202,7 +202,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     {
                         await Task.Delay(TimeSpan.FromSeconds(context.Command.Size), context.CancellationToken).ConfigureAwait(false);
                     }
-                    catch (TaskCanceledException ex)
+                    catch (TaskCanceledException)
                     {
                         Console.WriteLine("Task was canceled!");
                         throw;

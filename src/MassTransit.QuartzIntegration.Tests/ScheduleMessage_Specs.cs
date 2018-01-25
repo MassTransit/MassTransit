@@ -28,7 +28,7 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {
-                await context.ScheduleMessage(DateTime.Now + TimeSpan.FromSeconds(10), new SecondMessage());
+                await context.ScheduleSend(TimeSpan.FromSeconds(10), new SecondMessage());
             });
 
             _second = Handled<SecondMessage>(configurator);

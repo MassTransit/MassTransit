@@ -70,7 +70,7 @@ namespace MassTransit.Tests
         {
         }
 
-        Task<ConsumeContext<PingMessage2>> _handled;
+
         Task<ConsumeContext<ReceiveFault>> _faulted;
 
         [Test]

@@ -16,7 +16,7 @@ namespace GreenPipes.Agents
 
 
     /// <summary>
-    /// A handle to a PipeContext instance (of type <typeparam name="TContext">T</typeparam>), which can be disposed
+    /// A handle to a PipeContext instance (of type <typeparamref name="TContext"/>), which can be disposed
     /// once it is no longer needed (or can no longer be used).
     /// </summary>
     /// <typeparam name="TContext"></typeparam>

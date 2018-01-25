@@ -19,6 +19,7 @@ namespace MassTransit.Transports.InMemory
     using Events;
     using Fabric;
     using GreenPipes;
+    using GreenPipes.Agents;
     using MassTransit.Topology;
     using Metrics;
     using Pipeline.Observables;
@@ -30,14 +31,13 @@ namespace MassTransit.Transports.InMemory
     /// based on TPL usage.
     /// </summary>
     public class InMemoryReceiveTransport :
+        Agent,
         IReceiveTransport,
         IInMemoryQueueConsumer
     {
         readonly Uri _inputAddress;
-        readonly ITaskParticipant _participant;
         readonly IInMemoryQueue _queue;
         readonly ReceiveObservable _receiveObservable;
-        readonly TaskSupervisor _supervisor;
         readonly IReceiveEndpointTopology _topology;
         readonly IDeliveryTracker _tracker;
         readonly ReceiveTransportObservable _transportObservable;
@@ -60,18 +60,14 @@ namespace MassTransit.Transports.InMemory
             _transportObservable = new ReceiveTransportObservable();
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
-
-            _supervisor = new TaskSupervisor($"{TypeMetadataCache<InMemoryReceiveTransport>.ShortName} - {_inputAddress}");
-            _participant = _supervisor.CreateParticipant($"{TypeMetadataCache<InMemoryReceiveTransport>.ShortName} - {_inputAddress}");
         }
 
         public async Task Consume(InMemoryTransportMessage message, CancellationToken cancellationToken)
         {
-            await _supervisor.Ready.ConfigureAwait(false);
-
-            if (_supervisor.StoppedToken.IsCancellationRequested)
+            await Ready.ConfigureAwait(false);
+            if (IsStopped)
                 return;
-
+            
             if (_receivePipe == null)
                 throw new ArgumentException("ReceivePipe not configured");
 
@@ -121,13 +117,13 @@ namespace MassTransit.Transports.InMemory
 
                 TaskUtil.Await(() => _transportObservable.Ready(new ReceiveTransportReadyEvent(_inputAddress)));
 
-                _participant.SetReady();
+                SetReady();
 
-                return new Handle(_supervisor, _participant, this);
+                return new Handle(this);
             }
             catch (Exception exception)
             {
-                _participant.SetNotReady(exception);
+                SetNotReady(exception);
                 throw;
             }
         }
@@ -160,25 +156,17 @@ namespace MassTransit.Transports.InMemory
         class Handle :
             ReceiveTransportHandle
         {
-            readonly ITaskParticipant _participant;
-            readonly TaskSupervisor _supervisor;
             readonly InMemoryReceiveTransport _transport;
 
-            public Handle(TaskSupervisor supervisor, ITaskParticipant participant, InMemoryReceiveTransport transport)
+            public Handle(InMemoryReceiveTransport transport)
             {
-                _supervisor = supervisor;
-                _participant = participant;
                 _transport = transport;
             }
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
-                _participant.SetComplete();
-
-                await _supervisor.Stop("Stopped", cancellationToken).ConfigureAwait(false);
-
-                await _supervisor.Completed.ConfigureAwait(false);
-
+                await _transport.Stop("Stop", cancellationToken).ConfigureAwait(false);
+                
                 await _transport._transportObservable.Completed(new ReceiveTransportCompletedEvent(_transport._inputAddress,
                     _transport._tracker.GetDeliveryMetrics())).ConfigureAwait(false);
             }

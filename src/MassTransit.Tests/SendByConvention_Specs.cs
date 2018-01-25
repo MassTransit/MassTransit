@@ -132,12 +132,7 @@ namespace MassTransit.Tests
             await _handled;
         }
 
-        public Conventional_polymorphic_overridden()
-        {
-            InMemoryTestHarness.OnConfigureInMemoryBus += ConfigureInMemoryBus;
-        }
-
-        void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("second_queue", x =>
             {

@@ -40,7 +40,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {
-                await context.ScheduleMessage(DateTime.Now, new SecondMessage());
+                await context.ScheduleSend(DateTime.Now, new SecondMessage());
             });
 
             _second = Handled<SecondMessage>(configurator);

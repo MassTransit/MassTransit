@@ -135,7 +135,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
                     transaction.Commit();
                 }
-                catch (DbUpdateConcurrencyException ex)
+                catch (DbUpdateConcurrencyException)
                 {
                     try
                     {
@@ -253,7 +253,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
                         transaction.Commit();
                     }
-                    catch (DbUpdateConcurrencyException ex)
+                    catch (DbUpdateConcurrencyException)
                     {
                         try
                         {

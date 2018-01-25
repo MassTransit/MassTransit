@@ -274,7 +274,6 @@ namespace MassTransit.Tests
         Task<ConsumeContext<PongMessage>> _responseHandler;
         Task<Request<PingMessage>> _request;
         Task<PongMessage> _response;
-        Task<PingNotSupported> _notSupported;
 
         [OneTimeSetUp]
         public async Task Setup()

@@ -32,7 +32,6 @@ namespace MassTransit.Tests.Courier
             var response = await _requestClient.Request(new Request());
         }
 
-        RoutingSlip _routingSlip;
         RequestProxy _requestProxy;
         ResponseProxy _responseProxy;
         Uri _requestAddress;
@@ -122,7 +121,6 @@ namespace MassTransit.Tests.Courier
             Assert.That(async () => await _requestClient.Request(new Request()), Throws.TypeOf<RequestFaultException>());
         }
 
-        RoutingSlip _routingSlip;
         RequestProxy _requestProxy;
         ResponseProxy _responseProxy;
         Uri _requestAddress;

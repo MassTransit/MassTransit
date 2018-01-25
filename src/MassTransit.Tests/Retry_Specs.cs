@@ -136,8 +136,6 @@ namespace MassTransit.Tests
             Console.WriteLine(result.ToJsonString());
         }
 
-        int _attempts;
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Consumer(() => new Consumer(), x =>

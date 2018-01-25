@@ -29,7 +29,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             StateMachineTestFixture
         {
             SagaDbContextFactory _sagaDbContextFactory;
-            readonly Lazy<ISagaRepository<SimpleState>> _repository;
 
             [Test]
             public async Task Test_Discarded_Missing_Saga_Instance_Is_Not_Persisted()

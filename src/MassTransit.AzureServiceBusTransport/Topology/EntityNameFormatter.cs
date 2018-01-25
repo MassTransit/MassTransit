@@ -36,6 +36,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         /// Formats the subqueue path for either a queue, or a subscription.
         /// </summary>
         /// <param name="entityPath">The name of the queue, or path of the subscription.</param>
+        /// <param name="subQueueName">The name of the subQueue</param>
         /// <returns>The path as a string of the subqueue entity.</returns>
         public static string FormatSubQueuePath(string entityPath, string subQueueName)
         {
@@ -46,6 +47,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         /// Formats the subscription path, based on the topic path and subscription name.
         /// </summary>
         /// <param name="topicPath">The name of the topic, including slashes.</param>
+        /// <param name="subscriptionName">The subscription name</param>
         public static string FormatSubscriptionPath(string topicPath, string subscriptionName)
         {
             return string.Concat(topicPath, PathDelimiter, Subscriptions, PathDelimiter, subscriptionName);

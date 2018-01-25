@@ -20,10 +20,5 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
         ISubscriptionEndpointBrokerTopologyBuilder
     {
         public TopicHandle Topic { get; set; }
-
-        public BrokerTopology BuildBrokerTopology()
-        {
-            return new ServiceBusBrokerTopology(Topics, Subscriptions, Queues, QueueSubscriptions, TopicSubscriptions);
-        }
     }
 }

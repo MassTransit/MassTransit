@@ -48,7 +48,7 @@ namespace MassTransit.QuartzIntegration.Tests
             var countBeforeCancel = _count;
             Assert.AreEqual(8, _count, "Expected to see 8 interval messages");
 
-            await Bus.CancelScheduledRecurringMessage(scheduledRecurringMessage);
+            await Bus.CancelScheduledRecurringSend(scheduledRecurringMessage);
 
             await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new DoneAgain { Name = "Joe" });
 

@@ -192,7 +192,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         class TestState :
             SagaStateMachineInstance
         {
-            Guid? _doSomethingRequestId;
             public State CurrentState { get; set; }
 
             public string MemberNumber { get; set; }
