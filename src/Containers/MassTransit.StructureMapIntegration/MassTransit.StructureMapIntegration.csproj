@@ -13,7 +13,7 @@
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="1.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="StructureMap" Version="4.5.3" />
+    <PackageReference Include="StructureMap" Version="4.6.1" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>
