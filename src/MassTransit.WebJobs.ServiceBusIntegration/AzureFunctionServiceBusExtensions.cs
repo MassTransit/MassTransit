@@ -23,17 +23,36 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     public static class AzureFunctionServiceBusExtensions
     {
         public static IBrokeredMessageReceiver CreateBrokeredMessageReceiver(this IBusFactorySelector selector, IBinder binder,
-            Action<IWebJobBrokeredMessageReceiverConfigurator> configure)
+            Action<IWebJobReceiverConfigurator> configure)
         {
             if (binder == null)
                 throw new ArgumentNullException(nameof(binder));
+
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
             var endpointConfiguration = new ServiceBusEndpointConfiguration(new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology));
 
             var configurator = new WebJobBrokeredMessageReceiverSpecification(binder, endpointConfiguration);
-            
+
+            configure(configurator);
+
+            return configurator.Build();
+        }
+
+        public static IEventDataReceiver CreateEventDataReceiver(this IBusFactorySelector selector, IBinder binder,
+            Action<IWebJobReceiverConfigurator> configure)
+        {
+            if (binder == null)
+                throw new ArgumentNullException(nameof(binder));
+
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+
+            var endpointConfiguration = new ServiceBusEndpointConfiguration(new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology));
+
+            var configurator = new WebJobEventDataReceiverSpecification(binder, endpointConfiguration);
+
             configure(configurator);
 
             return configurator.Build();

@@ -14,19 +14,17 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 {
     using System;
     using System.Threading;
-    using AzureServiceBusTransport.Builders;
     using AzureServiceBusTransport.Configurators;
     using AzureServiceBusTransport.Specifications;
     using AzureServiceBusTransport.Transport;
     using Configurators;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Host;
-    using Pipeline;
     using Topology;
     using Transports;
 
 
-    public class WebJobBrokeredMessageReceiverSpecification :
+    public class WebJobEventDataReceiverSpecification :
         MessageReceiverSpecification,
         IWebJobReceiverConfigurator,
         IWebJobHandlerFactory
@@ -35,7 +33,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
         readonly IServiceBusEndpointConfiguration _endpointConfiguration;
         CancellationToken _cancellationToken;
 
-        public WebJobBrokeredMessageReceiverSpecification(IBinder binder, IServiceBusEndpointConfiguration endpointConfiguration,
+        public WebJobEventDataReceiverSpecification(IBinder binder, IServiceBusEndpointConfiguration endpointConfiguration,
             CancellationToken cancellationToken = default(CancellationToken))
             : base(endpointConfiguration)
         {
@@ -58,16 +56,16 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 
         protected virtual IReceiveEndpointTopology CreateReceiveTopology()
         {
-            return new WebJobMessageReceiverEndpointTopology(_endpointConfiguration, InputAddress, Log, _binder, _cancellationToken);
+            return new WebJobEventDataReceiverEndpointTopology(_endpointConfiguration, InputAddress, Log, _binder, _cancellationToken);
         }
 
-        public IBrokeredMessageReceiver Build()
+        public IEventDataReceiver Build()
         {
             var result = BusConfigurationResult.CompileResults(Validate());
 
             try
             {
-                return new BrokeredMessageReceiver(InputAddress, CreateReceivePipe(), _log, CreateReceiveTopology());
+                return new EventDataReceiver(InputAddress, CreateReceivePipe(), _log, CreateReceiveTopology());
             }
             catch (Exception ex)
             {

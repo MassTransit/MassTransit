@@ -16,7 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Logging;
 
 
-    public interface IBrokeredMessageReceiverConfigurator :
+    public interface IEventDataReceiverConfigurator :
         IReceiveEndpointConfigurator
     {
         /// <summary>

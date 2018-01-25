@@ -23,37 +23,35 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     using Transports;
 
 
-    public class BinderSendTransportProvider :
+    public class EventHubAttributeSendTransportProvider :
         ISendTransportProvider
     {
         readonly IBinder _binder;
-        readonly ILog _log;
         readonly CancellationToken _cancellationToken;
+        readonly ILog _log;
 
-        public BinderSendTransportProvider(IBinder binder, ILog log, CancellationToken cancellationToken)
+        public EventHubAttributeSendTransportProvider(IBinder binder, ILog log, CancellationToken cancellationToken)
         {
             _binder = binder;
             _log = log;
             _cancellationToken = cancellationToken;
         }
 
-        public async Task<ISendTransport> GetSendTransport(Uri address)
+        async Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
         {
-            var queueOrTopicName = address.AbsolutePath.Trim('/');
+            var eventHubName = address.AbsolutePath.Trim('/');
 
-            var serviceBusQueue = new ServiceBusAttribute(queueOrTopicName, AccessRights.Manage);
-            serviceBusQueue.EntityType = EntityType.Queue;
+            var attribute = new EventHubAttribute(eventHubName);
 
-            IAsyncCollector<BrokeredMessage> collector = await _binder.BindAsync<IAsyncCollector<BrokeredMessage>>(serviceBusQueue, _cancellationToken).ConfigureAwait(false);
+            IAsyncCollector<EventData> collector = await _binder.BindAsync<IAsyncCollector<EventData>>(attribute, _cancellationToken).ConfigureAwait(false);
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating Send Transport: {0}", queueOrTopicName);
+            var client = new CollectorEventDataSendEndpointContext(eventHubName, _log, collector, _cancellationToken);
 
-            var client = new CollectorSendEndpointContext(queueOrTopicName, _log, collector, _cancellationToken);
+            var source = new CollectorEventDataSendEndpointContextSource(client);
 
-            var source = new CollectorSendEndpointContextSource(client);
+            var transport = new EventHubSendTransport(source, address);
 
-            return new ServiceBusSendTransport(source, address);
+            return transport;
         }
     }
 }

@@ -125,8 +125,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EntityFramework
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Automatonymous.ExtensionsDependencyInjectionIntegration", "Containers\MassTransit.Automatonymous.ExtensionsDependencyInjectionIntegration\MassTransit.Automatonymous.ExtensionsDependencyInjectionIntegration.csproj", "{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.WebJobsIntegration", "MassTransit.WebJobsIntegration\MassTransit.WebJobsIntegration.csproj", "{EE1CD7C0-20E7-4F9D-A413-632C041493D3}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.WebJobs.ServiceBusIntegration", "MassTransit.WebJobs.ServiceBusIntegration\MassTransit.WebJobs.ServiceBusIntegration.csproj", "{428E3A5A-3971-4DD9-9ADE-1F9BF124382A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.AzureFunctions.ServiceBus", "Samples\Sample.AzureFunctions.ServiceBus\Sample.AzureFunctions.ServiceBus.csproj", "{D4D62013-2127-43A9-9C40-273DEBD509BD}"
@@ -630,18 +628,6 @@ Global
 		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
 		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
 		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.Debug|x86.Build.0 = Debug|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.Release|x86.ActiveCfg = Release|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.Release|x86.Build.0 = Release|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 		{428E3A5A-3971-4DD9-9ADE-1F9BF124382A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{428E3A5A-3971-4DD9-9ADE-1F9BF124382A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{428E3A5A-3971-4DD9-9ADE-1F9BF124382A}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -713,7 +699,6 @@ Global
 		{D2F68284-BBF9-45EF-BC4B-BAD4169100AA} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{5991CFE3-F59B-4563-982B-371E1B03EC53} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{803C1D88-244B-4BA2-91AE-5E0CF20A92E5} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
-		{EE1CD7C0-20E7-4F9D-A413-632C041493D3} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{428E3A5A-3971-4DD9-9ADE-1F9BF124382A} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{D4D62013-2127-43A9-9C40-273DEBD509BD} = {C0CD5A16-BD57-429A-8E9A-0DED4DD507F3}
 	EndGlobalSection

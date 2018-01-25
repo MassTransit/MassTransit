@@ -21,13 +21,15 @@ namespace Sample.AzureFunctions.ServiceBus
     using MassTransit.WebJobs.ServiceBusIntegration;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Host;
+    using Microsoft.Azure.WebJobs.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
 
 
     public static class Functions
     {
         [FunctionName("SubmitOrder")]
-        public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue", AccessRights.Manage)] BrokeredMessage message, IBinder binder,
+        public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue", AccessRights.Manage)]
+            BrokeredMessage message, IBinder binder,
             TraceWriter traceWriter, CancellationToken cancellationToken)
         {
             traceWriter.Info("Creating brokered message receiver");
@@ -44,6 +46,25 @@ namespace Sample.AzureFunctions.ServiceBus
 
             return handler.Handle(message);
         }
+
+        [FunctionName("AuditOrder")]
+        public static Task AuditOrderAsync([EventHubTrigger("input-hub")] EventData message, IBinder binder,
+            TraceWriter traceWriter, CancellationToken cancellationToken)
+        {
+            traceWriter.Info("Creating EventHub receiver");
+
+            var handler = Bus.Factory.CreateEventDataReceiver(binder, cfg =>
+            {
+                cfg.CancellationToken = cancellationToken;
+                cfg.SetLog(traceWriter);
+                cfg.InputAddress = new Uri("sb://masstransit-eventhub.servicebus.windows.net/input-hub");
+
+                cfg.UseRetry(x => x.Intervals(10, 100, 500, 1000));
+                cfg.Consumer<AuditOrderConsumer>(() => new AuditOrderConsumer(cfg.Log));
+            });
+
+            return handler.Handle(message);
+        }
     }
 
 
@@ -56,6 +77,7 @@ namespace Sample.AzureFunctions.ServiceBus
         {
             _log = log;
         }
+
         public Task Consume(ConsumeContext<SubmitOrder> context)
         {
             if (_log.IsDebugEnabled)
@@ -67,7 +89,25 @@ namespace Sample.AzureFunctions.ServiceBus
                 Timestamp = DateTime.UtcNow,
             });
 
-            return context.RespondAsync<OrderAccepted>(new { context.Message.OrderNumber });
+            return context.RespondAsync<OrderAccepted>(new {context.Message.OrderNumber});
+        }
+    }
+
+
+    public class AuditOrderConsumer :
+        IConsumer<OrderReceived>
+    {
+        readonly ILog _log;
+
+        public AuditOrderConsumer(ILog log)
+        {
+            _log = log;
+        }
+
+        public async Task Consume(ConsumeContext<OrderReceived> context)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Received Order: {0}", context.Message.OrderNumber);
         }
     }
 
@@ -87,7 +127,7 @@ namespace Sample.AzureFunctions.ServiceBus
     public interface OrderReceived
     {
         DateTime Timestamp { get; }
-        
+
         string OrderNumber { get; }
     }
 }

@@ -10,29 +10,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
+namespace MassTransit.AzureServiceBusTransport.Transport
 {
-    using System.Threading;
-    using AzureServiceBusTransport.Configurators;
-    using GreenPipes;
-    using Microsoft.Azure.WebJobs.Host;
+    using System;
+    using System.Threading.Tasks;
+    using MassTransit.Pipeline;
+    using Microsoft.ServiceBus.Messaging;
+    using Transports;
 
 
-    public interface IWebJobBrokeredMessageReceiverConfigurator :
-        IBrokeredMessageReceiverConfigurator
+    public interface IEventDataReceiver :
+        IMessageReceiver,
+        IConsumeMessageObserverConnector,
+        IConsumeObserverConnector
     {
-        CancellationToken CancellationToken { set; }
-
         /// <summary>
-        /// Set the log for the receiver
+        /// Handles the <paramref name="message"/>
         /// </summary>
-        /// <param name="traceWriter"></param>
-        void SetLog(TraceWriter traceWriter);
-    }
-
-
-    public interface IWebJobHandlerFactory :
-        ISpecification
-    {
+        /// <param name="message"></param>
+        /// <param name="contextCallback">Callback to adjust the context</param>
+        /// <returns></returns>
+        Task Handle(EventData message, Action<ReceiveContext> contextCallback = null);
     }
 }

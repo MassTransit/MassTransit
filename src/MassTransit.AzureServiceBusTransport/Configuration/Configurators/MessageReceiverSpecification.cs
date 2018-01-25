@@ -18,23 +18,21 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using EndpointSpecifications;
     using GreenPipes;
     using Logging;
-    using MassTransit.Configurators;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Pipes;
-    using MassTransit.Topology;
     using Specifications;
     using Transport;
 
 
-    public abstract class BrokeredMessageReceiverSpecification :
+    public abstract class MessageReceiverSpecification :
         ReceiveSpecification,
-        IBrokeredMessageReceiverConfigurator,
+        IReceiverConfigurator,
         ISpecification
     {
-        ILog _log = Logger.Get<BrokeredMessageReceiver>();
+        protected ILog _log = Logger.Get<BrokeredMessageReceiver>();
 
-        protected BrokeredMessageReceiverSpecification(IServiceBusEndpointConfiguration configuration)
+        protected MessageReceiverSpecification(IServiceBusEndpointConfiguration configuration)
             : base(configuration)
         {
             InputAddress = new Uri("sb://localhost/");
@@ -54,28 +52,10 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
                 yield return result;
         }
 
-        public IBrokeredMessageReceiver Build()
+        protected IReceivePipe CreateReceivePipe()
         {
-            var result = BusConfigurationResult.CompileResults(Validate());
+            var builder = new MessageReceiverBuilder(Configuration);
 
-            try
-            {
-                var builder = new BrokeredMessageReceiverBuilder(Configuration);
-
-                var receivePipe = CreateReceivePipe(builder);
-
-                var topology = CreateReceiveTopology();
-
-                return new BrokeredMessageReceiver(InputAddress, receivePipe, _log, topology);
-            }
-            catch (Exception ex)
-            {
-                throw new ConfigurationException(result, "An exception occurred during handler creation", ex);
-            }
-        }
-
-        IReceivePipe CreateReceivePipe(BrokeredMessageReceiverBuilder builder)
-        {
             foreach (var specification in Specifications)
                 specification.Configure(builder);
 
@@ -85,7 +65,5 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
             return new ReceivePipe(receivePipe, builder.ConsumePipe);
         }
-
-        protected abstract IReceiveEndpointTopology CreateReceiveTopology();
     }
 }

@@ -23,14 +23,14 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     using Transports;
 
 
-    public class BinderPublishTransportProvider :
+    public class ServiceBusAttributePublishTransportProvider :
         IPublishTransportProvider
     {
         readonly IBinder _binder;
         readonly ILog _log;
         readonly CancellationToken _cancellationToken;
 
-        public BinderPublishTransportProvider(IBinder binder, ILog log, CancellationToken cancellationToken)
+        public ServiceBusAttributePublishTransportProvider(IBinder binder, ILog log, CancellationToken cancellationToken)
         {
             _binder = binder;
             _log = log;
