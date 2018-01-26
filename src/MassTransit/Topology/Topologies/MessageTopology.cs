@@ -95,7 +95,7 @@ namespace MassTransit.Topology.Topologies
         {
             EntityNameFormatter = entityNameFormatter;
 
-            _entityName = new Lazy<string>(EntityNameFormatter.FormatEntityName);
+            _entityName = new Lazy<string>(() => EntityNameFormatter.FormatEntityName());
         }
 
         public IMessageEntityNameFormatter<TMessage> EntityNameFormatter { get; private set; }
@@ -104,12 +104,16 @@ namespace MassTransit.Topology.Topologies
 
         public void SetEntityNameFormatter(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
         {
+            if (_entityName.IsValueCreated)
+                throw new ConfigurationException(
+                    $"The message type {TypeMetadataCache<TMessage>.ShortName} entity name was already evaluated: {_entityName.Value}");
+
             EntityNameFormatter = entityNameFormatter ?? throw new ArgumentNullException(nameof(entityNameFormatter));
         }
 
         public void SetEntityName(string entityName)
         {
-            EntityNameFormatter = new StaticEntityNameFormatter<TMessage>(entityName);
+            SetEntityNameFormatter(new StaticEntityNameFormatter<TMessage>(entityName));
         }
     }
 }

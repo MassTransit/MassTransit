@@ -15,7 +15,6 @@ namespace MassTransit.Transports
     using System;
     using System.Threading.Tasks;
     using GreenPipes.Agents;
-    using Logging;
     using Util.Caching;
 
 
@@ -26,8 +25,6 @@ namespace MassTransit.Transports
         Agent,
         ISendEndpointCache<TKey>
     {
-        static readonly ILog _log = Logger.Get<SendEndpointCache<TKey>>();
-
         readonly IIndex<TKey, CachedSendEndpoint<TKey>> _index;
 
         public SendEndpointCache()
@@ -45,9 +42,6 @@ namespace MassTransit.Transports
 
         async Task<CachedSendEndpoint<TKey>> GetSendEndpointFromFactory(TKey address, SendEndpointFactory<TKey> factory)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("GetSendEndpoint (factory): {0}", address);
-
             var sendEndpoint = await factory(address).ConfigureAwait(false);
 
             return new CachedSendEndpoint<TKey>(address, sendEndpoint);
