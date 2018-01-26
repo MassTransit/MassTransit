@@ -22,7 +22,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         DeadLetterSettings
     {
         public RabbitMqDeadLetterSettings(EntitySettings source, string name)
-            : base(source.ExchangeName, source.ExchangeType, source.Durable, source.AutoDelete)
+            : base(name, source.ExchangeType, source.Durable, source.AutoDelete)
         {
             QueueName = name;
 
