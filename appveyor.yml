@@ -18,10 +18,10 @@ nuget:
   disable_publish_on_pr: true
 install:
   # Install DocumentDB Emulator
-  - ps: Start-FileDownload 'https://aka.ms/documentdb-emulator' -FileName 'C:\DocumentDB.Emulator.msi'
-  - msiexec.exe /i C:\DocumentDB.Emulator.msi /quiet /qn /log install.log
+  - ps: Start-FileDownload 'https://aka.ms/cosmosdb-emulator' -FileName 'C:\CosmosDB.Emulator.msi'
+  - msiexec.exe /i C:\CosmosDB.Emulator.msi /quiet /qn /log install.log
   - ps: >-
-      & "${env:ProgramFiles}\DocumentDB Emulator\DocumentDB.Emulator.exe"
+      & "${env:ProgramFiles}\Azure Cosmos DB Emulator\CosmosDB.Emulator.exe" /NoExplorer /NoUI
 build_script:
 - cmd: >-
     @echo off
