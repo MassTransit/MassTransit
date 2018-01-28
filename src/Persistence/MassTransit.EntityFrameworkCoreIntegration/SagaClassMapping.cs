@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Reflection;
     using GreenPipes.Internals.Extensions;
     using GreenPipes.Internals.Reflection;
 
@@ -33,5 +36,20 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             modelBuilder.Entity<T>().Property(t => t.CorrelationId)
                 .ValueGeneratedNever();
         } 
+
+        public static void ConfigureDefaultSagaMaps(this ModelBuilder modelBuilder, IEnumerable<Type> sagas)
+        {
+            MethodInfo method = typeof(SagaClassMapping).GetMethod("ConfigureDefaultSagaMap");
+            var isagaType = typeof(ISaga);
+
+            foreach (var saga in sagas)
+            {
+                if (!isagaType.IsAssignableFrom(saga))
+                    throw new ArgumentOutOfRangeException(nameof(sagas), $"Type \'{saga}\' does not implement {isagaType}\'");
+
+                MethodInfo genericMethod = method.MakeGenericMethod(saga);
+                genericMethod.Invoke(null, new object[] { modelBuilder });
+            }
+        }
     }
 }
