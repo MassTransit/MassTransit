@@ -44,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public bool PublisherConfirmation
         {
-            set { _settings.PublisherConfirmation = value; }
+            set => _settings.PublisherConfirmation = value;
         }
 
         public void UseSsl(Action<IRabbitMqSslConfigurator> configureSsl)

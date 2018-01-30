@@ -150,7 +150,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
             NamespacePipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointTopology.BrokerTopology, _settings.RemoveSubscriptions));
 
-            ApplyReceiveEndpoint(receivePipe, receiveEndpointTopology);
+            ApplyReceiveEndpoint(builder, receivePipe, receiveEndpointTopology);
         }
 
         protected override IErrorTransport CreateErrorTransport(ServiceBusHost host)

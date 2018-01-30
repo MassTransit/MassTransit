@@ -67,5 +67,23 @@ namespace MassTransit
                 await bus.StopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
             }
         }
+
+        /// <summary>
+        /// This can be used to start and stop the bus when configured in a deploy topology only scenario. No messages should be consumed by it.
+        /// 
+        /// </summary>
+        /// <param name="bus"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static async Task DeployAsync(IBusControl bus, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (bus == null)
+                throw new ArgumentNullException(nameof(bus));
+
+            await bus.StartAsync(cancellationToken).ConfigureAwait(false);
+
+            await bus.StopAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 }

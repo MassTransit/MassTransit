@@ -68,7 +68,7 @@ namespace MassTransit.Transports.InMemory.Configurators
 
         public IBusControl CreateBus()
         {
-            var builder = new InMemoryBusBuilder(InMemoryHost, SendTransportProvider, _hosts, _configuration);
+            var builder = new InMemoryBusBuilder(InMemoryHost, SendTransportProvider, _hosts, _configuration, DeployTopologyOnly);
 
             ApplySpecifications(builder);
 

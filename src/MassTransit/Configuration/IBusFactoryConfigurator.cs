@@ -29,6 +29,11 @@ namespace MassTransit
 
         IPublishTopologyConfigurator PublishTopology { get; }
 
+        /// <summary>
+        /// Set to true if the topology should be deployed only
+        /// </summary>
+        bool DeployTopologyOnly { set; }
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IBusFactorySpecification specification);
 

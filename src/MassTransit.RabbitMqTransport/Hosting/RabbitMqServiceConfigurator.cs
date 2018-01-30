@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Hosting
     using MassTransit.Hosting;
     using MassTransit.Topology;
     using Saga;
-    using SagaConfigurators;
 
 
     /// <summary>
@@ -71,6 +70,11 @@ namespace MassTransit.RabbitMqTransport.Hosting
         public ISendTopologyConfigurator SendTopology => _configurator.SendTopology;
 
         public IPublishTopologyConfigurator PublishTopology => _configurator.PublishTopology;
+
+        public bool DeployTopologyOnly
+        {
+            set => _configurator.DeployTopologyOnly = value;
+        }
 
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {

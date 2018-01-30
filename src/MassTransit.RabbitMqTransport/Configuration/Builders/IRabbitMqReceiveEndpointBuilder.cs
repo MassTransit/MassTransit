@@ -12,8 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Builders
 {
+    using System;
+    using Topology;
+
+
     public interface IRabbitMqReceiveEndpointBuilder :
         IReceiveEndpointBuilder
     {
+        IRabbitMqReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress, ReceiveSettings settings);
     }
 }

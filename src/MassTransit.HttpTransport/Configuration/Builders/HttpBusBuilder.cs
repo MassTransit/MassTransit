@@ -25,8 +25,8 @@ namespace MassTransit.HttpTransport.Builders
         readonly HttpReceiveEndpointSpecification _busEndpointSpecification;
         readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpBusBuilder(BusHostCollection<HttpHost> hosts, IHttpEndpointConfiguration configuration)
-            : base(hosts, configuration)
+        public HttpBusBuilder(BusHostCollection<HttpHost> hosts, IHttpEndpointConfiguration configuration, bool deployTopologyOnly)
+            : base(hosts, configuration, deployTopologyOnly)
         {
             _hosts = hosts;
 

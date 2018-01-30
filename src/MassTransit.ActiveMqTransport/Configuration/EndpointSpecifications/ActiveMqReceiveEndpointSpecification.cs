@@ -16,10 +16,12 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
     using System.Collections.Generic;
     using Builders;
     using GreenPipes;
+    using GreenPipes.Agents;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using MassTransit.Builders;
     using MassTransit.EndpointSpecifications;
+    using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Observables;
     using MassTransit.Pipeline.Pipes;
     using Pipeline;
@@ -177,15 +179,29 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
 
             _modelContextConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointTopology.BrokerTopology));
 
-            var deadLetterTransport = CreateDeadLetterTransport();
-
-            var errorTransport = CreateErrorTransport();
-
             var receiveObserver = new ReceiveObservable();
             var transportObserver = new ReceiveTransportObservable();
 
-            var consumerFilter = new ActiveMqConsumerFilter(receivePipe, receiveObserver, transportObserver, receiveEndpointTopology, deadLetterTransport, errorTransport);
-            _modelContextConfigurator.UseFilter(consumerFilter);
+            IAgent consumerAgent;
+            if (builder.DeployTopologyOnly)
+            {
+                var transportReadyFilter = new TransportReadyFilter<SessionContext>(transportObserver, InputAddress);
+                _modelContextConfigurator.UseFilter(transportReadyFilter);
+
+                consumerAgent = transportReadyFilter;
+            }
+            else
+            {
+                var deadLetterTransport = CreateDeadLetterTransport();
+
+                var errorTransport = CreateErrorTransport();
+
+                var consumerFilter = new ActiveMqConsumerFilter(receivePipe, receiveObserver, transportObserver, receiveEndpointTopology, deadLetterTransport, errorTransport);
+                _modelContextConfigurator.UseFilter(consumerFilter);
+
+                consumerAgent = consumerFilter;
+            }
+
 
             IFilter<ConnectionContext> modelFilter = new ReceiveSessionFilter(_modelContextConfigurator.Build(), _host);
 
@@ -194,7 +210,7 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
             var transport = new ActiveMqReceiveTransport(_host, _settings, _connectionContextConfigurator.Build(), receiveEndpointTopology, receiveObserver,
                 transportObserver);
 
-            transport.Add(consumerFilter);
+            transport.Add(consumerAgent);
 
             _host.ReceiveEndpoints.Add(_settings.EntityName ?? NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
         }

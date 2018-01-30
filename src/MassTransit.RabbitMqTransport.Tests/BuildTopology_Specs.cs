@@ -74,6 +74,31 @@ namespace MassTransit.RabbitMqTransport.Tests
             _receivedA = Handled<FirstInterface>(configurator);
         }
     }
+    
+    [TestFixture]
+    public class Configuring_a_topology :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_not_consume_the_messages()
+        {
+            await Bus.Publish<ThirdInterface>(new {});
+        }
+
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.DeployTopologyOnly = true;
+            
+            configurator.PublishTopology.BrokerTopologyOptions = PublishBrokerTopologyOptions.MaintainHierarchy;
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            base.ConfigureRabbitMqReceiveEndpoint(configurator);
+
+            Handled<FirstInterface>(configurator);
+        }
+    }
 
 
     [TestFixture]

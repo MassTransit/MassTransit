@@ -23,6 +23,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
     class ConfigurationHostSettings :
         RabbitMqHostSettings
     {
+        readonly Lazy<Uri> _hostAddress;
+
         public ConfigurationHostSettings()
         {
             var defaultOptions = new SslOption();
@@ -32,6 +34,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
             PublisherConfirmation = true;
 
             ClientProvidedName = HostMetadataCache.Host.ProcessName;
+            
+            _hostAddress = new Lazy<Uri>(FormatHostAddress);
         }
 
         public string Host { get; set; }
@@ -53,25 +57,23 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public string[] ClusterMembers { get; set; }
         public IRabbitMqEndpointResolver HostNameSelector { get; set; }
         public string ClientProvidedName { get; set; }
+        public bool PublisherConfirmation { get; set; }
+        public Uri HostAddress => _hostAddress.Value;
 
-        public Uri HostAddress
+        Uri FormatHostAddress()
         {
-            get
+            var builder = new UriBuilder
             {
-                var builder = new UriBuilder
-                {
-                    Scheme = "rabbitmq",
-                    Host = Host,
-                    Port = Port == 5672 ? 0 : Port,
-                    Path = string.IsNullOrWhiteSpace(VirtualHost) || VirtualHost == "/"
-                        ? "/"
-                        : $"/{VirtualHost.Trim('/')}"
-                };
+                Scheme = "rabbitmq",
+                Host = Host,
+                Port = Port == 5672 ? 0 : Port,
+                Path = string.IsNullOrWhiteSpace(VirtualHost) || VirtualHost == "/"
+                    ? "/"
+                    : $"/{VirtualHost.Trim('/')}"
+            };
 
-                return builder.Uri;
-            }
+            return builder.Uri;
         }
 
-        public bool PublisherConfirmation { get; set; }
     }
 }

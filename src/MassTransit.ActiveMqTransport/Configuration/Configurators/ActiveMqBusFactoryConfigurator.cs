@@ -48,7 +48,7 @@ namespace MassTransit.ActiveMqTransport.Configurators
 
         public IBusControl CreateBus()
         {
-            var builder = new ActiveMqBusBuilder(_hosts, _settings, _configuration);
+            var builder = new ActiveMqBusBuilder(_hosts, _settings, _configuration, DeployTopologyOnly);
 
             ApplySpecifications(builder);
 

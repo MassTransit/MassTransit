@@ -26,8 +26,8 @@ namespace MassTransit.ActiveMqTransport.Builders
         readonly ActiveMqReceiveEndpointSpecification _busEndpointSpecification;
         readonly BusHostCollection<ActiveMqHost> _hosts;
 
-        public ActiveMqBusBuilder(BusHostCollection<ActiveMqHost> hosts, QueueReceiveSettings busSettings, IActiveMqEndpointConfiguration configuration)
-            : base(hosts, configuration)
+        public ActiveMqBusBuilder(BusHostCollection<ActiveMqHost> hosts, QueueReceiveSettings busSettings, IActiveMqEndpointConfiguration configuration, bool deployTopologyOnly)
+            : base(hosts, configuration, deployTopologyOnly)
         {
             _hosts = hosts;
 

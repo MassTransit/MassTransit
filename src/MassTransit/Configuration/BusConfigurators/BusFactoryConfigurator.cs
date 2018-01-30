@@ -98,6 +98,7 @@ namespace MassTransit.BusConfigurators
         public IMessageTopologyConfigurator MessageTopology => _configuration.Topology.Message;
         public ISendTopologyConfigurator SendTopology => _configuration.Topology.Send;
         public IPublishTopologyConfigurator PublishTopology => _configuration.Topology.Publish;
+        public bool DeployTopologyOnly { get; set; }
 
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {

@@ -26,8 +26,8 @@ namespace MassTransit.AzureServiceBusTransport.Builders
     {
         readonly ServiceBusReceiveEndpointSpecification _busEndpointSpecification;
 
-        public ServiceBusBusBuilder(BusHostCollection<ServiceBusHost> hosts, ReceiveEndpointSettings settings, IServiceBusEndpointConfiguration configuration)
-            : base(hosts, configuration)
+        public ServiceBusBusBuilder(BusHostCollection<ServiceBusHost> hosts, ReceiveEndpointSettings settings, IServiceBusEndpointConfiguration configuration, bool deployTopologyOnly)
+            : base(hosts, configuration, deployTopologyOnly)
         {
             if (hosts == null)
                 throw new ArgumentNullException(nameof(hosts));

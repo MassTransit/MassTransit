@@ -26,8 +26,8 @@ namespace MassTransit.RabbitMqTransport.Builders
         readonly RabbitMqReceiveEndpointSpecification _busEndpointSpecification;
         readonly BusHostCollection<RabbitMqHost> _hosts;
 
-        public RabbitMqBusBuilder(BusHostCollection<RabbitMqHost> hosts, RabbitMqReceiveSettings busSettings, IRabbitMqEndpointConfiguration configuration)
-            : base(hosts, configuration)
+        public RabbitMqBusBuilder(BusHostCollection<RabbitMqHost> hosts, RabbitMqReceiveSettings busSettings, IRabbitMqEndpointConfiguration configuration, bool deployTopologyOnly)
+            : base(hosts, configuration, deployTopologyOnly)
         {
             _hosts = hosts;
 

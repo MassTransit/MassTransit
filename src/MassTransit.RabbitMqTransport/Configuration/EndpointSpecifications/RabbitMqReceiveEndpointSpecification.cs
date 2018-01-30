@@ -16,11 +16,13 @@ namespace MassTransit.RabbitMqTransport.EndpointSpecifications
     using System.Collections.Generic;
     using Builders;
     using GreenPipes;
+    using GreenPipes.Agents;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using Management;
     using MassTransit.Builders;
     using MassTransit.EndpointSpecifications;
+    using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Observables;
     using MassTransit.Pipeline.Pipes;
     using Pipeline;
@@ -237,20 +239,33 @@ namespace MassTransit.RabbitMqTransport.EndpointSpecifications
 
             _modelContextConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointTopology.BrokerTopology));
 
-            if (_settings.PurgeOnStartup)
-                _modelContextConfigurator.UseFilter(new PurgeOnStartupFilter(_settings.QueueName));
-
-            _modelContextConfigurator.UseFilter(new PrefetchCountFilter(_managementPipe, _settings.PrefetchCount));
-
-            var deadLetterTransport = CreateDeadLetterTransport();
-
-            var errorTransport = CreateErrorTransport();
-
             var receiveObserver = new ReceiveObservable();
             var transportObserver = new ReceiveTransportObservable();
 
-            var consumerFilter = new RabbitMqConsumerFilter(receivePipe, receiveObserver, transportObserver, receiveEndpointTopology, deadLetterTransport, errorTransport);
-            _modelContextConfigurator.UseFilter(consumerFilter);
+            IAgent consumerAgent;
+            if (builder.DeployTopologyOnly)
+            {
+                var transportReadyFilter = new TransportReadyFilter<ModelContext>(transportObserver, InputAddress);
+                _modelContextConfigurator.UseFilter(transportReadyFilter);
+
+                consumerAgent = transportReadyFilter;
+            }
+            else
+            {
+                if (_settings.PurgeOnStartup)
+                    _modelContextConfigurator.UseFilter(new PurgeOnStartupFilter(_settings.QueueName));
+
+                _modelContextConfigurator.UseFilter(new PrefetchCountFilter(_managementPipe, _settings.PrefetchCount));
+
+                var deadLetterTransport = CreateDeadLetterTransport();
+
+                var errorTransport = CreateErrorTransport();
+
+                var consumerFilter = new RabbitMqConsumerFilter(receivePipe, receiveObserver, transportObserver, receiveEndpointTopology, deadLetterTransport, errorTransport);
+                _modelContextConfigurator.UseFilter(consumerFilter);
+
+                consumerAgent = consumerFilter;
+            }
 
             IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(_modelContextConfigurator.Build(), _host);
 
@@ -259,7 +274,7 @@ namespace MassTransit.RabbitMqTransport.EndpointSpecifications
             var transport = new RabbitMqReceiveTransport(_host, _settings, _connectionContextConfigurator.Build(), receiveEndpointTopology, receiveObserver,
                 transportObserver);
 
-            transport.Add(consumerFilter);
+            transport.Add(consumerAgent);
 
             _host.ReceiveEndpoints.Add(_settings.QueueName ?? NewId.Next().ToString(), new ReceiveEndpoint(transport, receivePipe));
         }

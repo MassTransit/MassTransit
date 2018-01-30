@@ -41,7 +41,7 @@ namespace MassTransit.HttpTransport.Specifications
 
         public IBusControl CreateBus()
         {
-            var builder = new HttpBusBuilder(_hosts, _configuration);
+            var builder = new HttpBusBuilder(_hosts, _configuration, DeployTopologyOnly);
 
             ApplySpecifications(builder);
 

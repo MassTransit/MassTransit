@@ -23,6 +23,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Logging;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Observables;
     using Pipeline;
     using Settings;
@@ -143,32 +144,45 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             _settings.SelectBasicTier();
         }
 
-        protected void ApplyReceiveEndpoint(IReceivePipe receivePipe, IServiceBusReceiveEndpointTopology receiveEndpointTopology)
+        protected void ApplyReceiveEndpoint(IBusBuilder builder, IReceivePipe receivePipe, IServiceBusReceiveEndpointTopology receiveEndpointTopology)
         {
-            _sendEndpointProvider = receiveEndpointTopology.SendEndpointProvider;
-            _publishEndpointProvider = receiveEndpointTopology.PublishEndpointProvider;
-
-            var messageReceiver = new BrokeredMessageReceiver(InputAddress, receivePipe, Logger.Get<Receiver>(), receiveEndpointTopology);
-
             var transportObserver = new ReceiveTransportObservable();
 
-            var clientCache = CreateClientCache(InputAddress, _host.MessagingFactoryCache, _host.NamespaceCache);
+            IAgent consumerAgent;
+            if (builder.DeployTopologyOnly)
+            {
+                var transportReadyFilter = new TransportReadyFilter<ClientContext>(transportObserver, InputAddress);
+                ClientPipeConfigurator.UseFilter(transportReadyFilter);
 
-            var errorTransport = CreateErrorTransport(_host);
-            var deadLetterTransport = CreateDeadLetterTransport(_host);
+                consumerAgent = transportReadyFilter;
+            }
+            else
+            {
+                _sendEndpointProvider = receiveEndpointTopology.SendEndpointProvider;
+                _publishEndpointProvider = receiveEndpointTopology.PublishEndpointProvider;
 
-            var receiverFilter = _settings.RequiresSession
-                ? new MessageSessionReceiverFilter(messageReceiver, transportObserver, deadLetterTransport, errorTransport)
-                : new MessageReceiverFilter(messageReceiver, transportObserver, deadLetterTransport, errorTransport);
+                var messageReceiver = new BrokeredMessageReceiver(InputAddress, receivePipe, Logger.Get<Receiver>(), receiveEndpointTopology);
 
-            ClientPipeConfigurator.UseFilter(receiverFilter);
 
+                var errorTransport = CreateErrorTransport(_host);
+                var deadLetterTransport = CreateDeadLetterTransport(_host);
+
+                var receiverFilter = _settings.RequiresSession
+                    ? new MessageSessionReceiverFilter(messageReceiver, transportObserver, deadLetterTransport, errorTransport)
+                    : new MessageReceiverFilter(messageReceiver, transportObserver, deadLetterTransport, errorTransport);
+
+                ClientPipeConfigurator.UseFilter(receiverFilter);
+
+                consumerAgent = receiverFilter;
+            }
 
             IPipe<ClientContext> clientPipe = ClientPipeConfigurator.Build();
 
+            var clientCache = CreateClientCache(InputAddress, _host.MessagingFactoryCache, _host.NamespaceCache);
+
             var transport = new ReceiveTransport(_host, _settings, _publishEndpointProvider, _sendEndpointProvider, clientCache, clientPipe, transportObserver);
 
-            transport.Add(receiverFilter);
+            transport.Add(consumerAgent);
 
             _host.ReceiveEndpoints.Add(_settings.Name, new ReceiveEndpoint(transport, receivePipe));
         }

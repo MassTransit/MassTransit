@@ -30,10 +30,11 @@ namespace MassTransit.Builders
         readonly IBusHostCollection _hosts;
         readonly Lazy<Uri> _inputAddress;
 
-        protected BusBuilder(IBusHostCollection hosts, IEndpointConfiguration configuration)
+        protected BusBuilder(IBusHostCollection hosts, IEndpointConfiguration configuration, bool deployTopologyOnly)
         {
             _hosts = hosts;
             _configuration = configuration;
+            DeployTopologyOnly = deployTopologyOnly;
 
             _busObservable = new BusObservable();
 
@@ -63,6 +64,8 @@ namespace MassTransit.Builders
         {
             return _busObservable.Connect(observer);
         }
+
+        public bool DeployTopologyOnly { get; }
 
         protected abstract Uri GetInputAddress();
 

@@ -25,8 +25,8 @@ namespace MassTransit.Transports.InMemory.Builders
         readonly Uri _inputAddress;
 
         public InMemoryBusBuilder(InMemoryHost inMemoryHost, ISendTransportProvider sendTransportProvider, BusHostCollection<IBusHostControl> hosts,
-            IInMemoryEndpointConfiguration configuration)
-            : base(hosts, configuration)
+            IInMemoryEndpointConfiguration configuration, bool deployTopologyOnly)
+            : base(hosts, configuration, deployTopologyOnly)
         {
             if (inMemoryHost == null)
                 throw new ArgumentNullException(nameof(inMemoryHost));

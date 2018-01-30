@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqBusBuilder(_hosts, _settings, _configuration);
+            var builder = new RabbitMqBusBuilder(_hosts, _settings, _configuration, DeployTopologyOnly);
 
             ApplySpecifications(builder);
 

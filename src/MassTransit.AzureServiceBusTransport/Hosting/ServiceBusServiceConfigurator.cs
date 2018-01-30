@@ -69,6 +69,11 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         public ISendTopologyConfigurator SendTopology => _configurator.SendTopology;
         public IPublishTopologyConfigurator PublishTopology => _configurator.PublishTopology;
 
+        public bool DeployTopologyOnly
+        {
+            set => _configurator.DeployTopologyOnly = value;
+        }
+
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
             _configurator.AddBusFactorySpecification(specification);

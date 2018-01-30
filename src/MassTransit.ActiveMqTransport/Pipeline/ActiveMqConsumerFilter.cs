@@ -59,7 +59,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostSettings.HostAddress);
 
-
             var queue = context.GetPayload<IQueue>();
 
             var messageConsumer = await context.CreateMessageConsumer(queue, "*", false).ConfigureAwait(false);

@@ -40,5 +40,11 @@ namespace MassTransit.Builders
         /// <param name="observer"></param>
         /// <returns></returns>
         ConnectHandle ConnectBusObserver(IBusObserver observer);
+        
+        /// <summary>
+        /// If true, the receive endpoints should only be configured to deploy the broker topology, and not actually
+        /// receive/consume messages
+        /// </summary>
+        bool DeployTopologyOnly { get; }
     }
 }
