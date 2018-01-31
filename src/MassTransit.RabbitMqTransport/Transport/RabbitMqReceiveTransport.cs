@@ -100,6 +100,9 @@ namespace MassTransit.RabbitMqTransport.Transport
             {
                 await _host.ConnectionRetryPolicy.Retry(async () =>
                 {
+                    if (IsStopping)
+                        return;
+
                     try
                     {
                         await _host.ConnectionCache.Send(_connectionPipe, Stopped).ConfigureAwait(false);

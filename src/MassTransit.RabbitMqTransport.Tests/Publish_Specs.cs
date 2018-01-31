@@ -141,6 +141,84 @@ namespace MassTransit.RabbitMqTransport.Tests
                 _receivedA = Handled<A>(configurator);
             }
         }
+        
+        [TestFixture, Category("SlowAF"), Explicit]
+        public class WhenAMessageIsPublishedToTheEndpointSuccessfully :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async Task Should_not_increase_channel_count()
+            {
+                var message = new A {Id = Guid.NewGuid()};
+                await Bus.Publish(message);
+
+                ConsumeContext<A> received = await _receivedA;
+
+                Assert.AreEqual(message.Id, received.Message.Id);
+            }
+
+            [Test]
+            public async Task Should_take_time_to_watch_channel_use()
+            {
+                ConsumeContext<A> received = await _receivedA;
+
+                await Task.Delay(15000);
+            }
+
+            Task<ConsumeContext<A>> _receivedA;
+
+            protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                base.ConfigureRabbitMqReceiveEndpoint(configurator);
+
+                _receivedA = Handled<A>(configurator);
+            }
+        }
+        
+        [TestFixture, Category("SlowAF"), Explicit]
+        public class WhenAMessageIsPublishedToTheEndpointFaulting :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async Task Should_not_increase_channel_count()
+            {
+                var message = new A {Id = Guid.NewGuid()};
+                await Bus.Publish(message);
+
+                var received = await _faultA;
+
+                Assert.AreEqual(message.Id, received.Message.Message.Id);
+            }
+
+            [Test]
+            public async Task Should_take_time_to_watch_channel_use()
+            {
+                var received = await _faultA;
+
+                await Task.Delay(15000);
+            }
+
+            Task<ConsumeContext<A>> _receivedA;
+            Task<ConsumeContext<Fault<A>>> _faultA;
+
+            protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+            {
+                configurator.ReceiveEndpoint(host, "handle-fault", x =>
+                {
+                    _faultA = Handled<Fault<A>>(x);
+                });
+            }
+
+            protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                base.ConfigureRabbitMqReceiveEndpoint(configurator);
+
+                _receivedA = Handler<A>(configurator, context =>
+                {
+                    throw new IntentionalTestException();
+                });
+            }
+        }
 
 
         [TestFixture]
@@ -320,7 +398,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
 
-        class A
+        public class A
         {
             public Guid Id { get; set; }
         }

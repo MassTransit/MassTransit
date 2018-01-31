@@ -180,12 +180,12 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             async Task HostHandle.Stop(CancellationToken cancellationToken)
             {
-                await Task.WhenAll(_handles.Select(x => x.StopAsync(cancellationToken))).ConfigureAwait(false);
-
-                await _host.Stop("Host Stopped", cancellationToken).ConfigureAwait(false);
-
-                await _connectionCache.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
-            }
+                    await Task.WhenAll(_handles.Select(x => x.StopAsync(cancellationToken))).ConfigureAwait(false);
+                    
+                    await _host.Stop("Host Stopped", cancellationToken).ConfigureAwait(false);
+                    
+                    await _connectionCache.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
+                }
 
             async Task<HostReady> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> endpoints)
             {

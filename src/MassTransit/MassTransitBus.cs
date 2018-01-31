@@ -292,6 +292,9 @@ namespace MassTransit
                 {
                     await _busObserver.StopFaulted(_bus, exception).ConfigureAwait(false);
 
+                    if (_log.IsWarnEnabled)
+                        _log.WarnFormat("Exception occurred while stopping hosts", exception);
+
                     throw;
                 }
 

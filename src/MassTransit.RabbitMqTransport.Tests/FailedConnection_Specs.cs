@@ -25,7 +25,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         AsyncTestFixture
     {
         [Test]
-        public void Should_fault_nicely()
+        public async Task Should_fault_nicely()
         {
             IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
@@ -53,7 +53,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public void Should_fault_when_credentials_are_bad()
+        public async Task Should_fault_when_credentials_are_bad()
         {
             IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
@@ -79,6 +79,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 }
             }, Throws.TypeOf<RabbitMqConnectionException>());
         }
+        
 
         [Test]
         [Explicit]
