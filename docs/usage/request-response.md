@@ -1,4 +1,4 @@
-`# Crafting a request/response conversation
+# Crafting a request/response conversation
 
 Request/response is a common pattern in application development, where a component sends a request to a service and
 continues once the response is received. In a distributed system, this can increase the latency of an application
