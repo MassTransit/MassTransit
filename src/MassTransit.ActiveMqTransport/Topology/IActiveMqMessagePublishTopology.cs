@@ -30,7 +30,7 @@ namespace MassTransit.ActiveMqTransport.Topology
         /// <returns></returns>
         SendSettings GetSendSettings();
 
-        BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options);
+        BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options = PublishBrokerTopologyOptions.MaintainHierarchy);
     }
 
 

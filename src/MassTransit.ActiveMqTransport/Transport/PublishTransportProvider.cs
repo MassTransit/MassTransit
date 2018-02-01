@@ -40,19 +40,19 @@ namespace MassTransit.ActiveMqTransport.Transport
 
             var sendSettings = publishTopology.GetSendSettings();
 
-            var brokerTopology = publishTopology.GetBrokerTopology(PublishBrokerTopologyOptions.MaintainHierarchy);
+            IAgent<SessionContext> sessionAgent = GetSessionAgent();
 
-            IAgent<SessionContext> modelSource = GetModelSource();
+            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(sendSettings, publishTopology.GetBrokerTopology());
 
-            var sendTransport = new ActiveMqSendTransport(modelSource, new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology), sendSettings.EntityName,
-                DestinationType.Topic);
+            var sendTransport = new ActiveMqSendTransport(sessionAgent, configureTopologyFilter, sendSettings.EntityName, DestinationType.Topic);
+            sendTransport.Add(sessionAgent);
 
             _host.Add(sendTransport);
 
             return Task.FromResult<ISendTransport>(sendTransport);
         }
 
-        protected virtual IAgent<SessionContext> GetModelSource()
+        protected virtual IAgent<SessionContext> GetSessionAgent()
         {
             return new ActiveMqSessionCache(_host, _host.ConnectionCache);
         }

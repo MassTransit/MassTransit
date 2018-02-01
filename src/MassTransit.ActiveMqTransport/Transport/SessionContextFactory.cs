@@ -38,34 +38,30 @@ namespace MassTransit.ActiveMqTransport.Transport
         {
             IAsyncPipeContextAgent<SessionContext> asyncContext = supervisor.AddAsyncContext<SessionContext>();
 
-            Task<SessionContext> context = CreateModel(asyncContext, supervisor.Stopped);
+            Task<SessionContext> context = CreateSession(asyncContext, supervisor.Stopped);
 
-            IPipeContextAgent<SessionContext> contextHandle = supervisor.AddContext(context);
-
-            return contextHandle;
+            return supervisor.AddContext(context);
         }
 
         ActivePipeContextHandle<SessionContext> IPipeContextFactory<SessionContext>.CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<SessionContext> context, CancellationToken cancellationToken)
         {
-            return supervisor.AddActiveContext(context, CreateSharedModel(context.Context, cancellationToken));
+            return supervisor.AddActiveContext(context, CreateSharedSession(context.Context, cancellationToken));
         }
 
-        async Task<SessionContext> CreateSharedModel(Task<SessionContext> context, CancellationToken cancellationToken)
+        async Task<SessionContext> CreateSharedSession(Task<SessionContext> context, CancellationToken cancellationToken)
         {
-            var modelContext = await context.ConfigureAwait(false);
+            var sessionContext = await context.ConfigureAwait(false);
 
-            var sharedModel = new SharedSessionContext(modelContext, cancellationToken);
-
-            return sharedModel;
+            return new SharedSessionContext(sessionContext, cancellationToken);
         }
 
-        async Task<SessionContext> CreateModel(IAsyncPipeContextAgent<SessionContext> asyncContext, CancellationToken cancellationToken)
+        async Task<SessionContext> CreateSession(IAsyncPipeContextAgent<SessionContext> asyncContext, CancellationToken cancellationToken)
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Creating model: {0}", connectionContext.Description);
+                    _log.DebugFormat("Creating session: {0}", connectionContext.Description);
 
                 try
                 {

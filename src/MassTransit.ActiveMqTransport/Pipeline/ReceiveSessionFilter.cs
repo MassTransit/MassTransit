@@ -16,7 +16,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
-    using Logging;
 
 
     /// <summary>
@@ -25,7 +24,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     public class ReceiveSessionFilter :
         IFilter<ConnectionContext>
     {
-        static readonly ILog _log = Logger.Get<ReceiveSessionFilter>();
         readonly IActiveMqHost _host;
         readonly IPipe<SessionContext> _pipe;
 
