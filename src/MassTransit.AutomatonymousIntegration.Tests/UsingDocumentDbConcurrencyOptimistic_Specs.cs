@@ -29,7 +29,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using Testing;
 
 
-    [TestFixture]
+    [TestFixture, Explicit]
     public class When_using_DocumentDbConcurrencyOptimistic :
         InMemoryTestFixture
     {
