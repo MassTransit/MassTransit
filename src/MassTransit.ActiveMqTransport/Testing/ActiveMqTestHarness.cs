@@ -26,12 +26,12 @@ namespace MassTransit.ActiveMqTransport.Testing
 
         public ActiveMqTestHarness(string inputQueueName = null)
         {
-            Username = "guest";
-            Password = "guest";
+            Username = "admin";
+            Password = "admin";
 
             InputQueueName = inputQueueName ?? "input_queue";
 
-            HostAddress = new Uri("activemq://localhost/test/");
+            HostAddress = new Uri("activemq://localhost/");
         }
 
         public Uri HostAddress

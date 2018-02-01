@@ -37,10 +37,10 @@ namespace MassTransit.ActiveMqTransport.Transport
         readonly ReceiveObservable _receiveObservable;
         readonly ReceiveTransportObservable _receiveTransportObservable;
         readonly ReceiveSettings _settings;
-        readonly IRabbitMqReceiveEndpointTopology _topology;
+        readonly IActiveMqReceiveEndpointTopology _topology;
 
         public ActiveMqReceiveTransport(IActiveMqHost host, ReceiveSettings settings, IPipe<ConnectionContext> connectionPipe,
-            IRabbitMqReceiveEndpointTopology topology, ReceiveObservable receiveObservable, ReceiveTransportObservable receiveTransportObservable)
+            IActiveMqReceiveEndpointTopology topology, ReceiveObservable receiveObservable, ReceiveTransportObservable receiveTransportObservable)
         {
             _host = host;
             _settings = settings;

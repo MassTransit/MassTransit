@@ -71,8 +71,8 @@ namespace MassTransit.Topology
         ISendTopology IReceiveTopology.Send => _send;
         IPublishTopology IReceiveTopology.Publish => _publish;
 
-        ISendEndpointProvider IReceiveTopology.SendEndpointProvider => _sendEndpointProvider.Value;
-        IPublishEndpointProvider IReceiveTopology.PublishEndpointProvider => _publishEndpointProvider.Value;
+        public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
+        public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
 
         protected abstract ISendEndpointProvider CreateSendEndpointProvider();
         protected abstract IPublishEndpointProvider CreatePublishEndpointProvider();

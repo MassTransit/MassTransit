@@ -16,7 +16,7 @@ namespace MassTransit.ActiveMqTransport.Topology
     using MassTransit.Topology;
 
 
-    public class RabbitMqEntityNameValidator :
+    public class ActiveMqEntityNameValidator :
         IEntityNameValidator
     {
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$", RegexOptions.Compiled);
@@ -43,7 +43,7 @@ namespace MassTransit.ActiveMqTransport.Topology
 
         static class Cached
         {
-            internal static readonly IEntityNameValidator EntityNameValidator = new RabbitMqEntityNameValidator();
+            internal static readonly IEntityNameValidator EntityNameValidator = new ActiveMqEntityNameValidator();
         }
     }
 }

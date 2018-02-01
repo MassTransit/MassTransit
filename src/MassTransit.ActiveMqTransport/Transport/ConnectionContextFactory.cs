@@ -83,7 +83,7 @@ namespace MassTransit.ActiveMqTransport.Transport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connected: {0} (client-id: {1}, version: {2})", _description, connection.ClientId, connection.MetaData.NMSVersion);
 
-                var connectionContext = new RabbitMqConnectionContext(connection, _settings, _topology, _description, supervisor.Stopped);
+                var connectionContext = new ActiveMqConnectionContext(connection, _settings, _topology, _description, supervisor.Stopped);
                 connectionContext.GetOrAddPayload(() => _settings);
 
                 return connectionContext;

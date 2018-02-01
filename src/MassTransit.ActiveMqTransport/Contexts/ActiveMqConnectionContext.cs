@@ -23,17 +23,17 @@ namespace MassTransit.ActiveMqTransport.Contexts
     using Util;
 
 
-    public class RabbitMqConnectionContext :
+    public class ActiveMqConnectionContext :
         BasePipeContext,
         ConnectionContext,
         IAsyncDisposable
     {
-        static readonly ILog _log = Logger.Get<RabbitMqConnectionContext>();
+        static readonly ILog _log = Logger.Get<ActiveMqConnectionContext>();
 
         readonly IConnection _connection;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
-        public RabbitMqConnectionContext(IConnection connection, ActiveMqHostSettings hostSettings, IActiveMqHostTopology topology, string description,
+        public ActiveMqConnectionContext(IConnection connection, ActiveMqHostSettings hostSettings, IActiveMqHostTopology topology, string description,
             CancellationToken cancellationToken)
             : base(new PayloadCache(), cancellationToken)
         {

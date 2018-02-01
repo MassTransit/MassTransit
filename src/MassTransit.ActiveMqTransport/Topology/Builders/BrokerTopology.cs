@@ -21,7 +21,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
     {
         Topic[] Topics { get; }
         Queue[] Queues { get; }
-        ExchangeToExchangeBinding[] ExchangeBindings { get; }
-        ExchangeToQueueBinding[] QueueBindings { get; }
+        Consumer[] Consumers { get; }
     }
 }

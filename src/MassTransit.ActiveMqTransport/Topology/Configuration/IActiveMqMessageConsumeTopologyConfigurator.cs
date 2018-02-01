@@ -17,9 +17,9 @@ namespace MassTransit.ActiveMqTransport.Topology
     using MassTransit.Topology;
 
 
-    public interface IRabbitMqMessageConsumeTopologyConfigurator<TMessage> :
+    public interface IActiveMqMessageConsumeTopologyConfigurator<TMessage> :
         IMessageConsumeTopologyConfigurator<TMessage>,
-        IRabbitMqMessageConsumeTopology<TMessage>
+        IActiveMqMessageConsumeTopology<TMessage>
         where TMessage : class
     {
         /// <summary>
@@ -30,7 +30,7 @@ namespace MassTransit.ActiveMqTransport.Topology
     }
 
 
-    public interface IRabbitMqMessageConsumeTopologyConfigurator :
+    public interface IActiveMqMessageConsumeTopologyConfigurator :
         IMessageConsumeTopologyConfigurator
     {
         /// <summary>

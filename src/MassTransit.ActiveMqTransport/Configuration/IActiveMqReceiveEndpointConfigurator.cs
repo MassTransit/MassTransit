@@ -28,15 +28,16 @@ namespace MassTransit.ActiveMqTransport
         IActiveMqHost Host { get; }
 
         /// <summary>
-        /// If true, binds the message type exchanges to the queue exchange
+        /// If true, creates message consumers for the message types in consumers, handlers, etc.
+        /// With ActiveMQ, these are virtual consumers tied to the virtual topics
         /// </summary>
-        bool BindMessageExchanges { set; }
+        bool BindMessageTopics { set; }
 
         /// <summary>
         /// Bind an existing exchange to the receive endpoint queue by name
         /// </summary>
-        /// <param name="exchangeName">The exchange name</param>
-        void Bind(string exchangeName);
+        /// <param name="topicName">The exchange name</param>
+        void Bind(string topicName);
 
         /// <summary>
         /// Bind an existing exchange for the message type to the receive endpoint by name
@@ -48,8 +49,8 @@ namespace MassTransit.ActiveMqTransport
         /// <summary>
         /// Bind an exchange to the receive endpoint exchange
         /// </summary>
-        /// <param name="exchangeName">The exchange name</param>
+        /// <param name="topicName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Bind(string exchangeName, Action<ITopicBindingConfigurator> callback);
+        void Bind(string topicName, Action<ITopicBindingConfigurator> callback);
     }
 }

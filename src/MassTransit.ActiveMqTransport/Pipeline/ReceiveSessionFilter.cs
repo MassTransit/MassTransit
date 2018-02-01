@@ -37,7 +37,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            var scope = context.CreateFilterScope("receiveModel");
+            var scope = context.CreateFilterScope("receiveSession");
 
             _pipe.Probe(scope);
         }
@@ -50,9 +50,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             try
             {
                 await _pipe.Send(sessionContext).ConfigureAwait(false);
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer model pipe completed.");
             }
             finally
             {

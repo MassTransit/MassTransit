@@ -34,7 +34,7 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
         {
             _messageTopology = messageTopology;
 
-            _sendTopology = new ActiveMqSendTopology(RabbitMqEntityNameValidator.Validator);
+            _sendTopology = new ActiveMqSendTopology(ActiveMqEntityNameValidator.Validator);
             _sendTopology.Connect(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
 
             _publishTopology = new ActiveMqPublishTopology(messageTopology);

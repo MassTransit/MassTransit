@@ -16,11 +16,11 @@ namespace MassTransit.ActiveMqTransport.Topology.Settings
     using Configurators;
 
 
-    public class RabbitMqDeadLetterSettings :
+    public class ActiveMqErrorSettings :
         QueueBindingConfigurator,
-        DeadLetterSettings
+        ErrorSettings
     {
-        public RabbitMqDeadLetterSettings(EntitySettings source, string queueName)
+        public ActiveMqErrorSettings(EntitySettings source, string queueName)
             : base(queueName, source.Durable, source.AutoDelete)
         {
         }

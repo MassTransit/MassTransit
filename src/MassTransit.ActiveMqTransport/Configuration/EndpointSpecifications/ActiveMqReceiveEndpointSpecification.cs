@@ -23,7 +23,6 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
     using MassTransit.EndpointSpecifications;
     using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Observables;
-    using MassTransit.Pipeline.Pipes;
     using Pipeline;
     using Topology;
     using Topology.Settings;
@@ -39,10 +38,9 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
         readonly IActiveMqEndpointConfiguration _configuration;
         readonly IBuildPipeConfigurator<ConnectionContext> _connectionContextConfigurator;
         readonly ActiveMqHost _host;
-        readonly IManagementPipe _managementPipe;
         readonly IBuildPipeConfigurator<SessionContext> _modelContextConfigurator;
         readonly QueueReceiveSettings _settings;
-        bool _bindMessageExchanges;
+        bool _bindMessageTopics;
         IPublishEndpointProvider _publishEndpointProvider;
         ISendEndpointProvider _sendEndpointProvider;
 
@@ -53,9 +51,7 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
             _configuration = configuration;
             _settings = new QueueReceiveSettings(queueName, true, false);
 
-            _bindMessageExchanges = true;
-
-            _managementPipe = new ManagementPipe();
+            _bindMessageTopics = true;
 
             _connectionContextConfigurator = new PipeConfigurator<ConnectionContext>();
             _modelContextConfigurator = new PipeConfigurator<SessionContext>();
@@ -68,8 +64,6 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
             _host = host;
             _configuration = configuration;
             _settings = settings;
-
-            _managementPipe = new ManagementPipe();
 
             _connectionContextConfigurator = new PipeConfigurator<ConnectionContext>();
             _modelContextConfigurator = new PipeConfigurator<SessionContext>();
@@ -120,17 +114,17 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
             set => _settings.Lazy = value;
         }
 
-        public bool BindMessageExchanges
+        public bool BindMessageTopics
         {
-            set => _bindMessageExchanges = value;
+            set => _bindMessageTopics = value;
         }
 
-        public void Bind(string exchangeName)
+        public void Bind(string topicName)
         {
-            if (exchangeName == null)
-                throw new ArgumentNullException(nameof(exchangeName));
+            if (topicName == null)
+                throw new ArgumentNullException(nameof(topicName));
 
-            _configuration.Topology.Consume.Bind(exchangeName);
+            _configuration.Topology.Consume.Bind(topicName);
         }
 
         public void Bind<T>()
@@ -139,15 +133,15 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
             _configuration.Topology.Consume.GetMessageTopology<T>().Bind();
         }
 
-        public void Bind(string exchangeName, Action<ITopicBindingConfigurator> callback)
+        public void Bind(string topicName, Action<ITopicBindingConfigurator> callback)
         {
-            if (exchangeName == null)
-                throw new ArgumentNullException(nameof(exchangeName));
+            if (topicName == null)
+                throw new ArgumentNullException(nameof(topicName));
 
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            _configuration.Topology.Consume.Bind(exchangeName, callback);
+            _configuration.Topology.Consume.Bind(topicName, callback);
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -155,7 +149,7 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
             foreach (var result in base.Validate())
                 yield return result.WithParentKey($"{_settings.EntityName}");
 
-            if (!RabbitMqEntityNameValidator.Validator.IsValidEntityName(_settings.EntityName))
+            if (!ActiveMqEntityNameValidator.Validator.IsValidEntityName(_settings.EntityName))
                 yield return this.Failure($"{_settings.EntityName}", "Is not a valid queue name");
 
             if (_settings.PurgeOnStartup)
@@ -168,7 +162,7 @@ namespace MassTransit.ActiveMqTransport.EndpointSpecifications
             if (rabbitMqBusBuilder == null)
                 throw new ConfigurationException("Must be a RabbitMqBusBuilder");
 
-            var receiveEndpointBuilder = new ActiveMqReceiveEndpointBuilder(_host, rabbitMqBusBuilder.Hosts, _bindMessageExchanges, _configuration);
+            var receiveEndpointBuilder = new ActiveMqReceiveEndpointBuilder(_host, rabbitMqBusBuilder.Hosts, _bindMessageTopics, _configuration);
 
             var receivePipe = CreateReceivePipe(receiveEndpointBuilder);
 

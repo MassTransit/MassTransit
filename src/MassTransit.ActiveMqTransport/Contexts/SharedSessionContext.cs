@@ -68,10 +68,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
         public ISession Session => _context.Session;
 
         ConnectionContext SessionContext.ConnectionContext => _context.ConnectionContext;
-        public IActiveMqPublishTopology PublishTopology
-        {
-            get { return _context.PublishTopology; }
-        }
+
+        IActiveMqPublishTopology SessionContext.PublishTopology => _context.PublishTopology;
 
         Task<ITopic> SessionContext.GetTopic(string topicName)
         {
@@ -83,12 +81,17 @@ namespace MassTransit.ActiveMqTransport.Contexts
             return _context.GetQueue(queueName);
         }
 
-        public Task<IMessageProducer> CreateMessageProducer(IDestination destination)
+        Task<IDestination> SessionContext.GetDestination(string destination, DestinationType destinationType)
+        {
+            return _context.GetDestination(destination, destinationType);
+        }
+
+        Task<IMessageProducer> SessionContext.CreateMessageProducer(IDestination destination)
         {
             return _context.CreateMessageProducer(destination);
         }
 
-        public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal)
+        Task<IMessageConsumer> SessionContext.CreateMessageConsumer(IDestination destination, string selector, bool noLocal)
         {
             return _context.CreateMessageConsumer(destination, selector, noLocal);
         }

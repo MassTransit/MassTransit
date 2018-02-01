@@ -15,7 +15,8 @@ namespace MassTransit.Util.Caching
     using System.Collections.Generic;
 
 
-    public interface ICache<TValue>
+    public interface ICache<TValue> :
+        IConnectCacheValueObserver<TValue>
         where TValue : class
     {
         /// <summary>

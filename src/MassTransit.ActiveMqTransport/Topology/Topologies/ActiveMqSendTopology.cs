@@ -59,12 +59,12 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
 
         public ErrorSettings GetErrorSettings(EntitySettings settings)
         {
-            return new RabbitMqErrorSettings(settings, settings.EntityName + "_error");
+            return new ActiveMqErrorSettings(settings, settings.EntityName + "_error");
         }
 
         public DeadLetterSettings GetDeadLetterSettings(EntitySettings settings)
         {
-            return new RabbitMqDeadLetterSettings(settings, settings.EntityName + "_skipped");
+            return new ActiveMqDeadLetterSettings(settings, settings.EntityName + "_skipped");
         }
 
         protected override IMessageSendTopologyConfigurator CreateMessageTopology<T>(Type type)

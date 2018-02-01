@@ -16,29 +16,30 @@ namespace MassTransit.ActiveMqTransport.Topology.Entities
     using System.Linq;
 
 
-    public class QueueBindingEntity :
-        ExchangeToQueueBinding,
-        QueueBindingHandle
+    public class ConsumerEntity :
+        Consumer,
+        ConsumerHandle
     {
         readonly QueueEntity _queue;
         readonly TopicEntity _topic;
 
-        public QueueBindingEntity(long id, TopicEntity topic, QueueEntity queue, string routingKey)
+        public ConsumerEntity(long id, TopicEntity topic, QueueEntity queue, string selector)
         {
             Id = id;
-            RoutingKey = routingKey;
+            Selector = selector;
             _topic = topic;
             _queue = queue;
         }
 
-        public static IEqualityComparer<QueueBindingEntity> EntityComparer { get; } = new QueueBindingEntityEqualityComparer();
+        public static IEqualityComparer<ConsumerEntity> NameComparer { get; } = new NameEqualityComparer();
+        public static IEqualityComparer<ConsumerEntity> EntityComparer { get; } = new ConsumerEntityEqualityComparer();
 
         public Topic Source => _topic.Topic;
         public Queue Destination => _queue.Queue;
-        public string RoutingKey { get; }
+        public string Selector { get; }
 
         public long Id { get; }
-        public ExchangeToQueueBinding Binding => this;
+        public Consumer Consumer => this;
 
         public override string ToString()
         {
@@ -46,14 +47,14 @@ namespace MassTransit.ActiveMqTransport.Topology.Entities
             {
                 $"source: {Source.EntityName}",
                 $"destination: {Destination.EntityName}",
-                string.IsNullOrWhiteSpace(RoutingKey) ? "" : $"routing-key: {RoutingKey}"
+                string.IsNullOrWhiteSpace(Selector) ? "" : $"selector: {Selector}"
             }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 
 
-        sealed class QueueBindingEntityEqualityComparer : IEqualityComparer<QueueBindingEntity>
+        sealed class ConsumerEntityEqualityComparer : IEqualityComparer<ConsumerEntity>
         {
-            public bool Equals(QueueBindingEntity x, QueueBindingEntity y)
+            public bool Equals(ConsumerEntity x, ConsumerEntity y)
             {
                 if (ReferenceEquals(x, y))
                     return true;
@@ -67,18 +68,46 @@ namespace MassTransit.ActiveMqTransport.Topology.Entities
                 if (x.GetType() != y.GetType())
                     return false;
 
-                return x._topic.Equals(y._topic) && x._queue.Equals(y._queue) && string.Equals(x.RoutingKey, y.RoutingKey);
+                return x._topic.Equals(y._topic) && x._queue.Equals(y._queue) && string.Equals(x.Selector, y.Selector);
             }
 
-            public int GetHashCode(QueueBindingEntity obj)
+            public int GetHashCode(ConsumerEntity obj)
             {
                 unchecked
                 {
                     var hashCode = obj._topic.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj._queue.GetHashCode();
-                    hashCode = (hashCode * 397) ^ obj.RoutingKey.GetHashCode();
+                    if (obj.Selector != null)
+                        hashCode = (hashCode * 397) ^ obj.Selector.GetHashCode();
+
                     return hashCode;
                 }
+            }
+        }
+
+
+        sealed class NameEqualityComparer : IEqualityComparer<ConsumerEntity>
+        {
+            public bool Equals(ConsumerEntity x, ConsumerEntity y)
+            {
+                if (ReferenceEquals(x, y))
+                    return true;
+
+                if (ReferenceEquals(x, null))
+                    return false;
+
+                if (ReferenceEquals(y, null))
+                    return false;
+
+                if (x.GetType() != y.GetType())
+                    return false;
+
+                return string.Equals(x._queue.EntityName, y._queue.EntityName);
+            }
+
+            public int GetHashCode(ConsumerEntity obj)
+            {
+                return obj._queue.EntityName.GetHashCode();
             }
         }
     }

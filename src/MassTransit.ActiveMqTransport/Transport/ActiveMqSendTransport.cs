@@ -19,7 +19,6 @@ namespace MassTransit.ActiveMqTransport.Transport
     using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
-    using Apache.NMS.Util;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -63,9 +62,10 @@ namespace MassTransit.ActiveMqTransport.Transport
             {
                 p.UseFilter(_filter);
 
-                p.UseExecuteAsync(async modelContext =>
+                p.UseExecuteAsync(async sessionContext =>
                 {
-                    var producer = modelContext.GetOrAddPayload(() => CreateMessageProducer(modelContext));
+                    var destination = await sessionContext.GetDestination(_entityName, _destinationType).ConfigureAwait(false);
+                    var producer = await sessionContext.CreateMessageProducer(destination).ConfigureAwait(false);
 
                     var context = new TransportActiveMqSendContext<T>(message, cancelSend);
                     try
@@ -74,7 +74,7 @@ namespace MassTransit.ActiveMqTransport.Transport
 
                         byte[] body = context.Body;
 
-                        var transportMessage = modelContext.Session.CreateBytesMessage();
+                        var transportMessage = sessionContext.Session.CreateBytesMessage();
 
                         KeyValuePair<string, object>[] headers = context.Headers.GetAll()
                             .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().GetTypeInfo().IsValueType))
@@ -112,7 +112,6 @@ namespace MassTransit.ActiveMqTransport.Transport
 
                         await publishTask.UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
 
-
                         context.LogSent();
 
                         await _observers.PostSend(context).ConfigureAwait(false);
@@ -134,21 +133,6 @@ namespace MassTransit.ActiveMqTransport.Transport
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _observers.Connect(observer);
-        }
-
-        IMessageProducer CreateMessageProducer(SessionContext sessionContext)
-        {
-            var destination = SessionUtil.GetDestination(sessionContext.Session, _entityName, _destinationType);
-
-            return sessionContext.Session.CreateProducer(destination);
-        }
-
-        protected override Task StopSupervisor(StopSupervisorContext context)
-        {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping transport: {0}", _entityName);
-
-            return base.StopSupervisor(context);
         }
     }
 }

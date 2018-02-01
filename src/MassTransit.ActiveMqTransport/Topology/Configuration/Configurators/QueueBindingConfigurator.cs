@@ -19,9 +19,8 @@ namespace MassTransit.ActiveMqTransport.Topology.Configurators
         public QueueBindingConfigurator(string queueName, bool durable, bool autoDelete)
             : base(queueName, durable, autoDelete)
         {
-            RoutingKey = "";
         }
 
-        public string RoutingKey { get; set; }
+        public string Selector { get; set; }
     }
 }

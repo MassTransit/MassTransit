@@ -35,7 +35,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
         readonly IActiveMqHost _host;
         readonly ISession _session;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
-        ulong _publishTagMax;
+        readonly MessageProducerCache _messageProducerCache;
 
         public ActiveMqSessionContext(ConnectionContext connectionContext, ISession session, IActiveMqHost host, CancellationToken cancellationToken)
             : base(new PayloadCacheScope(connectionContext), cancellationToken)
@@ -45,9 +45,11 @@ namespace MassTransit.ActiveMqTransport.Contexts
             _host = host;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
+
+            _messageProducerCache = new MessageProducerCache();
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public async Task DisposeAsync(CancellationToken cancellationToken)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Closing session: {0}", _connectionContext.Description);
@@ -56,6 +58,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
             {
                 try
                 {
+                    await _messageProducerCache.Stop(cancellationToken).ConfigureAwait(false);
+
                     _session.Close();
                 }
                 catch (Exception ex)
@@ -65,8 +69,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
                 _session.Dispose();
             }
-
-            return TaskUtil.Completed;
         }
 
         IActiveMqPublishTopology SessionContext.PublishTopology => _host.Topology.PublishTopology;
@@ -85,14 +87,22 @@ namespace MassTransit.ActiveMqTransport.Contexts
             return Task.Factory.StartNew(() => SessionUtil.GetQueue(_session, queueName), CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
+        public Task<IDestination> GetDestination(string destination, DestinationType destinationType)
+        {
+            return Task.Factory.StartNew(() => SessionUtil.GetDestination(_session, destination, destinationType), CancellationToken, TaskCreationOptions.None,
+                _taskScheduler);
+        }
+
         public Task<IMessageProducer> CreateMessageProducer(IDestination destination)
         {
-            return Task.Factory.StartNew(() => _session.CreateProducer(destination), CancellationToken, TaskCreationOptions.None, _taskScheduler);
+            return _messageProducerCache.GetMessageProducer(destination, x =>
+                Task.Factory.StartNew(() => _session.CreateProducer(x), CancellationToken, TaskCreationOptions.None, _taskScheduler));
         }
 
         public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal)
         {
-            return Task.Factory.StartNew(() => _session.CreateConsumer(destination, selector, noLocal), CancellationToken, TaskCreationOptions.None, _taskScheduler);
+            return Task.Factory.StartNew(() => _session.CreateConsumer(destination, selector, noLocal), CancellationToken, TaskCreationOptions.None,
+                _taskScheduler);
         }
     }
 }

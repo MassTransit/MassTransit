@@ -13,7 +13,6 @@
 namespace MassTransit.ActiveMqTransport.Topology.Builders
 {
     using Entities;
-    using MassTransit.Topology.Entities;
 
 
     public class PublishEndpointBrokerTopologyBuilder :
@@ -25,11 +24,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
         public PublishEndpointBrokerTopologyBuilder(PublishBrokerTopologyOptions options = PublishBrokerTopologyOptions.FlattenHierarchy)
         {
             _options = options;
-            Exchanges = new NamedEntityCollection<TopicEntity, TopicHandle>(TopicEntity.EntityComparer, TopicEntity.NameComparer);
-            Queues = new NamedEntityCollection<QueueEntity, QueueHandle>(QueueEntity.QueueComparer, QueueEntity.NameComparer);
-
-            ExchangeBindings = new EntityCollection<ExchangeBindingEntity, ExchangeBindingHandle>(ExchangeBindingEntity.EntityComparer);
-            QueueBindings = new EntityCollection<QueueBindingEntity, QueueBindingHandle>(QueueBindingEntity.EntityComparer);
         }
 
         /// <summary>
@@ -47,7 +41,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
 
         public BrokerTopology BuildBrokerTopology()
         {
-            return new RabbitMqBrokerTopology(Exchanges, ExchangeBindings, Queues, QueueBindings);
+            return new ActiveMqBrokerTopology(Exchanges, Queues, ConsumerBindings);
         }
 
 
@@ -70,8 +64,8 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
                 set
                 {
                     _topic = value;
-                    if (_builder.Topic != null)
-                        _builder.BindTopic(_builder.Topic, _topic, "");
+//                    if (_builder.Topic != null)
+//                        _builder.BindTopic(_builder.Topic, _topic, "");
                 }
             }
 
@@ -88,19 +82,14 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
                 return _builder.CreateTopic(name, durable, autoDelete);
             }
 
-            public ExchangeBindingHandle BindTopic(TopicHandle source, TopicHandle destination, string routingKey)
-            {
-                return _builder.BindTopic(source, destination, routingKey);
-            }
-
             public QueueHandle CreateQueue(string name, bool durable, bool autoDelete)
             {
                 return _builder.CreateQueue(name, durable, autoDelete);
             }
 
-            public QueueBindingHandle BindQueue(TopicHandle topic, QueueHandle queue, string routingKey)
+            public ConsumerHandle BindConsumer(TopicHandle topic, QueueHandle queue, string selector)
             {
-                return _builder.BindQueue(topic, queue, routingKey);
+                return _builder.BindConsumer(topic, queue, selector);
             }
         }
     }

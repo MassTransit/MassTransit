@@ -13,6 +13,7 @@
 namespace MassTransit.ActiveMqTransport.Topology.Specifications
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Builders;
     using Configurators;
     using Entities;
@@ -20,32 +21,40 @@ namespace MassTransit.ActiveMqTransport.Topology.Specifications
 
 
     /// <summary>
-    /// Used to bind an exchange to the consuming queue's exchange
+    /// Used to by a Consumer virtual destination to the receive endpoint, via an additional message consumer
     /// </summary>
-    public class TopicBindingConsumeTopologySpecification :
+    public class ConsumerConsumeTopologySpecification :
         TopicBindingConfigurator,
         IActiveMqConsumeTopologySpecification
     {
-        public TopicBindingConsumeTopologySpecification(string topicName, bool durable = true, bool autoDelete = false)
+        readonly string _consumerName;
+
+        public ConsumerConsumeTopologySpecification(string topicName, string consumerName, bool durable = true, bool autoDelete = false)
             : base(topicName, durable, autoDelete)
         {
+            _consumerName = consumerName;
         }
 
-        public TopicBindingConsumeTopologySpecification(Topic topic)
+        public ConsumerConsumeTopologySpecification(Topic topic, string consumerName)
             : base(topic)
         {
+            _consumerName = consumerName;
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            yield break;
+            return Enumerable.Empty<ValidationResult>();
         }
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
             var exchangeHandle = builder.CreateTopic(EntityName, Durable, AutoDelete);
 
-            var bindingHandle = builder.BindTopic(exchangeHandle, builder.Topic, RoutingKey);
+            var consumerQueueName = _consumerName.Replace("{queue}", builder.Queue.Queue.EntityName);
+
+            var queue = builder.CreateQueue(consumerQueueName, Durable, AutoDelete);
+
+            var consumer = builder.BindConsumer(exchangeHandle, queue, Selector);
         }
     }
 }

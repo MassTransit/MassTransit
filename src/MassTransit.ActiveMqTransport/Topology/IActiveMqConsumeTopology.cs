@@ -17,10 +17,10 @@ namespace MassTransit.ActiveMqTransport.Topology
     using MassTransit.Topology;
 
 
-    public interface IRabbitMqConsumeTopology :
+    public interface IActiveMqConsumeTopology :
         IConsumeTopology
     {
-        new IRabbitMqMessageConsumeTopology<T> GetMessageTopology<T>()
+        new IActiveMqMessageConsumeTopology<T> GetMessageTopology<T>()
             where T : class;
 
         /// <summary>
@@ -32,9 +32,9 @@ namespace MassTransit.ActiveMqTransport.Topology
         /// <summary>
         /// Bind an exchange, using the configurator
         /// </summary>
-        /// <param name="exchangeName"></param>
+        /// <param name="topicName"></param>
         /// <param name="configure"></param>
-        void Bind(string exchangeName, Action<ITopicBindingConfigurator> configure = null);
+        void Bind(string topicName, Action<ITopicBindingConfigurator> configure = null);
 
         string CreateTemporaryQueueName(string prefix);
     }

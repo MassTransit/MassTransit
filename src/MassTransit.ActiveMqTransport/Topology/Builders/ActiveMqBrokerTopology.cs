@@ -18,22 +18,19 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
     using GreenPipes;
 
 
-    public class RabbitMqBrokerTopology :
+    public class ActiveMqBrokerTopology :
         BrokerTopology
     {
-        public RabbitMqBrokerTopology(IEnumerable<Topic> exchanges, IEnumerable<ExchangeToExchangeBinding> exchangeBindings, IEnumerable<Queue> queues,
-            IEnumerable<ExchangeToQueueBinding> queueBindings)
+        public ActiveMqBrokerTopology(IEnumerable<Topic> exchanges, IEnumerable<Queue> queues, IEnumerable<Consumer> consumers)
         {
             Topics = exchanges.ToArray();
             Queues = queues.ToArray();
-            ExchangeBindings = exchangeBindings.ToArray();
-            QueueBindings = queueBindings.ToArray();
+            Consumers = consumers.ToArray();
         }
 
         public Topic[] Topics { get; }
         public Queue[] Queues { get; }
-        public ExchangeToExchangeBinding[] ExchangeBindings { get; }
-        public ExchangeToQueueBinding[] QueueBindings { get; }
+        public Consumer[] Consumers { get; }
 
         void IProbeSite.Probe(ProbeContext context)
         {
@@ -59,25 +56,14 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
                 });
             }
 
-            foreach (var binding in ExchangeBindings)
+            foreach (var binding in Consumers)
             {
-                var exchangeScope = context.CreateScope("exchange-binding");
+                var exchangeScope = context.CreateScope("consumer");
                 exchangeScope.Set(new
                 {
                     Source = binding.Source.EntityName,
                     Destination = binding.Destination.EntityName,
-                    binding.RoutingKey
-                });
-            }
-
-            foreach (var binding in QueueBindings)
-            {
-                var exchangeScope = context.CreateScope("queue-binding");
-                exchangeScope.Set(new
-                {
-                    Source = binding.Source.EntityName,
-                    Destination = binding.Destination.EntityName,
-                    binding.RoutingKey
+                    RoutingKey = binding.Selector
                 });
             }
         }

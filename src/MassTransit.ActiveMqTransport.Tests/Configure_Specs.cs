@@ -12,9 +12,103 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Tests
 {
+    using System;
+    using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
+    using MassTransit.Testing;
     using NUnit.Framework;
+    using TestFramework.Messages;
+    using Testing;
 
+
+    [TestFixture]
+    public class Using_the_handler_test_factory
+    {
+        ActiveMqTestHarness _harness;
+        HandlerTestHarness<A> _handler;
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            _harness = new ActiveMqTestHarness();
+            _handler = _harness.Handler<A>(async context =>
+            {
+                var endpoint = await context.GetSendEndpoint(context.SourceAddress);
+
+                await endpoint.Send(new C());
+
+                await context.Publish(new D());
+            });
+
+            await _harness.Start();
+
+            await _harness.InputQueueSendEndpoint.Send(new A());
+            await _harness.Bus.Publish(new B());
+        }
+
+        [OneTimeTearDown]
+        public async Task Teardown()
+        {
+            await _harness.Stop();
+        }
+
+        [Test]
+        public void Should_have_received_a_message_of_type_a()
+        {
+            Assert.That(_harness.Consumed.Select<A>().Any(), Is.True);
+        }
+
+        [Test]
+        public void Should_have_sent_a_message_of_type_a()
+        {
+            Assert.That(_harness.Sent.Select<A>().Any(), Is.True);
+        }
+
+        [Test]
+        public void Should_have_published_a_message_of_type_b()
+        {
+            Assert.That(_harness.Published.Select<B>().Any(), Is.True);
+        }
+
+        [Test]
+        public void Should_have_sent_a_message_of_type_c()
+        {
+            Assert.That(_harness.Sent.Select<C>().Any(), Is.True);
+        }
+
+        [Test]
+        public void Should_have_published_a_message_of_type_d()
+        {
+            Assert.That(_harness.Published.Select<D>().Any(), Is.True);
+        }
+
+        [Test]
+        public void Should_support_a_simple_handler()
+        {
+            Assert.That(_handler.Consumed.Select().Any(), Is.True);
+        }
+
+
+        class A
+        {
+        }
+
+
+        class B
+        {
+        }
+
+
+        class C
+        {
+        }
+
+
+        class D
+        {
+        }
+    }
 
     [TestFixture]
     public class Configuring_ActiveMQ
@@ -36,6 +130,74 @@ namespace MassTransit.ActiveMqTransport.Tests
             await busControl.StartAsync();
 
             await busControl.StopAsync();
+        }
+
+        [Test]
+        public async Task Should_connect_locally()
+        {
+            var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
+            {
+                cfg.Host("localhost", 61616, h =>
+                {
+                    h.Username("admin");
+                    h.Password("admin");
+                });
+            });
+
+            await busControl.StartAsync(new CancellationTokenSource(10000).Token);
+
+            await busControl.StopAsync(new CancellationTokenSource(10000).Token);
+        }
+
+        [Test]
+        public async Task Should_connect_locally_with_test_harness()
+        {
+            var harness = new ActiveMqTestHarness();
+
+            await harness.Start();
+
+            await harness.Stop();
+        }
+
+        [Test]
+        public async Task Should_connect_locally_with_test_harness_and_a_handler()
+        {
+            var harness = new ActiveMqTestHarness();
+            var handler = harness.Handler<PingMessage>(async context =>
+            {
+            });
+            await harness.Start();
+
+            await harness.InputQueueSendEndpoint.Send(new PingMessage());
+
+            await harness.Stop();
+        }
+
+        [Test]
+        public async Task Should_connect_locally_with_test_harness_and_a_publisher()
+        {
+            var harness = new ActiveMqTestHarness();
+            var handler = harness.Handler<PingMessage>();
+
+            await harness.Start();
+
+            await harness.Bus.Publish(new PingMessage());
+
+            Assert.That(handler.Consumed.Select().Any(), Is.True);
+
+            await harness.Stop();
+        }
+
+        [Test]
+        public async Task Should_connect_locally_with_test_harness_and_publish_without_consumer()
+        {
+            var harness = new ActiveMqTestHarness();
+
+            await harness.Start();
+
+            await harness.Bus.Publish(new PingMessage());
+
+            await harness.Stop();
         }
 
         [Test]

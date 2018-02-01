@@ -12,8 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Pipeline
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
-    using Apache.NMS;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -35,11 +37,11 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         readonly IErrorTransport _errorTransport;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly IRabbitMqReceiveEndpointTopology _topology;
+        readonly IActiveMqReceiveEndpointTopology _topology;
         readonly IReceiveTransportObserver _transportObserver;
 
         public ActiveMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver,
-            IRabbitMqReceiveEndpointTopology topology, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+            IActiveMqReceiveEndpointTopology topology, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
@@ -59,9 +61,39 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostSettings.HostAddress);
 
-            var queue = context.GetPayload<IQueue>();
+            List<Task<ActiveMqBasicConsumer>> consumers = new List<Task<ActiveMqBasicConsumer>>();
 
-            var messageConsumer = await context.CreateMessageConsumer(queue, "*", false).ConfigureAwait(false);
+            consumers.Add(CreateConsumer(context, inputAddress, receiveSettings.EntityName, receiveSettings.Selector));
+
+            consumers.AddRange(_topology.BrokerTopology.Consumers.Select(x => CreateConsumer(context, inputAddress, x.Destination.EntityName, x.Selector)));
+
+            var actualConsumers = await Task.WhenAll(consumers).ConfigureAwait(false);
+
+            await _transportObserver.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
+
+            try
+            {
+                await Task.WhenAll(actualConsumers.Select(x => x.Completed)).ConfigureAwait(false);
+            }
+            finally
+            {
+                var consumerMetrics = actualConsumers.Cast<DeliveryMetrics>().ToArray();
+
+                DeliveryMetrics metrics =
+                    new CombinedDeliveryMetrics(consumerMetrics.Sum(x => x.DeliveryCount), consumerMetrics.Max(x => x.ConcurrentDeliveryCount));
+
+                await _transportObserver.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
+
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Consumer completed: {0} received, {0} concurrent", metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+            }
+        }
+
+        async Task<ActiveMqBasicConsumer> CreateConsumer(SessionContext context, Uri inputAddress, string entityName, string selector)
+        {
+            var queue = await context.GetQueue(entityName).ConfigureAwait(false);
+
+            var messageConsumer = await context.CreateMessageConsumer(queue, selector, false).ConfigureAwait(false);
 
             var consumer = new ActiveMqBasicConsumer(context, messageConsumer, inputAddress, _receivePipe, _receiveObserver, _topology, _deadLetterTransport,
                 _errorTransport);
@@ -70,20 +102,21 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             Add(consumer);
 
-            await _transportObserver.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
+            return consumer;
+        }
 
-            try
-            {
-                await consumer.Completed.ConfigureAwait(false);
-            }
-            finally
-            {
-                DeliveryMetrics metrics = consumer;
-                await _transportObserver.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer completed: {0} received, {0} concurrent", metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+        class CombinedDeliveryMetrics :
+            DeliveryMetrics
+        {
+            public CombinedDeliveryMetrics(long deliveryCount, int concurrentDeliveryCount)
+            {
+                DeliveryCount = deliveryCount;
+                ConcurrentDeliveryCount = concurrentDeliveryCount;
             }
+
+            public long DeliveryCount { get; }
+            public int ConcurrentDeliveryCount { get; }
         }
     }
 }

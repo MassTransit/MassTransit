@@ -19,18 +19,18 @@ namespace MassTransit.ActiveMqTransport.Topology.Configurators
         TopicConfigurator,
         ITopicBindingConfigurator
     {
-        public TopicBindingConfigurator(string topicName, bool durable = true, bool autoDelete = false, string routingKey = null)
+        public TopicBindingConfigurator(string topicName, bool durable = true, bool autoDelete = false, string selector = null)
             : base(topicName, durable, autoDelete)
         {
-            RoutingKey = routingKey ?? "";
+            Selector = selector;
         }
 
-        public TopicBindingConfigurator(Topic topic, string routingKey = null)
+        public TopicBindingConfigurator(Topic topic, string selector = null)
             : base(topic)
         {
-            RoutingKey = routingKey ?? "";
+            Selector = selector;
         }
 
-        public string RoutingKey { get; set; }
+        public string Selector { get; set; }
     }
 }

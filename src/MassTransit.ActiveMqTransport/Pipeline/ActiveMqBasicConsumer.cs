@@ -30,7 +30,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     /// <summary>
     /// Receives messages from RabbitMQ, pushing them to the InboundPipe of the service endpoint.
     /// </summary>
-    public class ActiveMqBasicConsumer :
+    public sealed class ActiveMqBasicConsumer :
         Supervisor,
         DeliveryMetrics
     {
@@ -45,7 +45,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
-        readonly IRabbitMqReceiveEndpointTopology _topology;
+        readonly IActiveMqReceiveEndpointTopology _topology;
         readonly IDeliveryTracker _tracker;
 
         string _consumerTag;
@@ -54,6 +54,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         /// The basic consumer receives messages pushed from the broker.
         /// </summary>
         /// <param name="session">The model context for the consumer</param>
+        /// <param name="messageConsumer"></param>
         /// <param name="inputAddress">The input address for messages received by the consumer</param>
         /// <param name="receivePipe">The receive pipe to dispatch messages</param>
         /// <param name="receiveObserver">The observer for receive events</param>
@@ -61,7 +62,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         /// <param name="deadLetterTransport"></param>
         /// <param name="errorTransport"></param>
         public ActiveMqBasicConsumer(SessionContext session, IMessageConsumer messageConsumer, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
-            IReceiveObserver receiveObserver, IRabbitMqReceiveEndpointTopology topology,
+            IReceiveObserver receiveObserver, IActiveMqReceiveEndpointTopology topology,
             IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
         {
             _session = session;
@@ -82,6 +83,8 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             _deliveryComplete = new TaskCompletionSource<bool>();
 
             messageConsumer.Listener += HandleMessage;
+
+            SetReady();
         }
 
         async void HandleMessage(IMessage message)

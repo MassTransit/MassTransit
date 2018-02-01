@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,29 +13,17 @@
 namespace MassTransit.ActiveMqTransport.Topology.Builders
 {
     using Entities;
-    using MassTransit.Topology.Entities;
 
 
     public class ReceiveEndpointBrokerTopologyBuilder :
         BrokerTopologyBuilder,
         IReceiveEndpointBrokerTopologyBuilder
     {
-        public ReceiveEndpointBrokerTopologyBuilder()
-        {
-            Exchanges = new NamedEntityCollection<TopicEntity, TopicHandle>(TopicEntity.EntityComparer, TopicEntity.NameComparer);
-            Queues = new NamedEntityCollection<QueueEntity, QueueHandle>(QueueEntity.QueueComparer, QueueEntity.NameComparer);
-
-            ExchangeBindings = new EntityCollection<ExchangeBindingEntity, ExchangeBindingHandle>(ExchangeBindingEntity.EntityComparer);
-            QueueBindings = new EntityCollection<QueueBindingEntity, QueueBindingHandle>(QueueBindingEntity.EntityComparer);
-        }
-
         public QueueHandle Queue { get; set; }
-
-        public TopicHandle Topic { get; set; }
 
         public BrokerTopology BuildTopologyLayout()
         {
-            return new RabbitMqBrokerTopology(Exchanges, ExchangeBindings, Queues, QueueBindings);
+            return new ActiveMqBrokerTopology(Exchanges, Queues, ConsumerBindings);
         }
     }
 }

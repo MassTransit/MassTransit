@@ -20,9 +20,8 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
     public abstract class BrokerTopologyBuilder
     {
         long _nextId;
-        protected EntityCollection<ExchangeBindingEntity, ExchangeBindingHandle> ExchangeBindings;
+        protected NamedEntityCollection<ConsumerEntity, ConsumerHandle> ConsumerBindings;
         protected NamedEntityCollection<TopicEntity, TopicHandle> Exchanges;
-        protected EntityCollection<QueueBindingEntity, QueueBindingHandle> QueueBindings;
         protected NamedEntityCollection<QueueEntity, QueueHandle> Queues;
 
         protected BrokerTopologyBuilder()
@@ -30,8 +29,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
             Exchanges = new NamedEntityCollection<TopicEntity, TopicHandle>(TopicEntity.EntityComparer, TopicEntity.NameComparer);
             Queues = new NamedEntityCollection<QueueEntity, QueueHandle>(QueueEntity.QueueComparer, QueueEntity.NameComparer);
 
-            ExchangeBindings = new EntityCollection<ExchangeBindingEntity, ExchangeBindingHandle>(ExchangeBindingEntity.EntityComparer);
-            QueueBindings = new EntityCollection<QueueBindingEntity, QueueBindingHandle>(QueueBindingEntity.EntityComparer);
+            ConsumerBindings = new NamedEntityCollection<ConsumerEntity, ConsumerHandle>(ConsumerEntity.EntityComparer, ConsumerEntity.NameComparer);
         }
 
         long GetNextId()
@@ -48,19 +46,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
             return Exchanges.GetOrAdd(exchange);
         }
 
-        public ExchangeBindingHandle BindTopic(TopicHandle source, TopicHandle destination, string routingKey)
-        {
-            var id = GetNextId();
-
-            var sourceExchange = Exchanges.Get(source);
-
-            var destinationExchange = Exchanges.Get(destination);
-
-            var binding = new ExchangeBindingEntity(id, sourceExchange, destinationExchange, routingKey);
-
-            return ExchangeBindings.GetOrAdd(binding);
-        }
-
         public QueueHandle CreateQueue(string name, bool durable, bool autoDelete)
         {
             var id = GetNextId();
@@ -70,7 +55,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
             return Queues.GetOrAdd(queue);
         }
 
-        public QueueBindingHandle BindQueue(TopicHandle topic, QueueHandle queue, string routingKey)
+        public ConsumerHandle BindConsumer(TopicHandle topic, QueueHandle queue, string selector)
         {
             var id = GetNextId();
 
@@ -78,9 +63,9 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
 
             var queueEntity = Queues.Get(queue);
 
-            var binding = new QueueBindingEntity(id, exchangeEntity, queueEntity, routingKey);
+            var binding = new ConsumerEntity(id, exchangeEntity, queueEntity, selector);
 
-            return QueueBindings.GetOrAdd(binding);
+            return ConsumerBindings.GetOrAdd(binding);
         }
     }
 }

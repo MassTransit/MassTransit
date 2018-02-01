@@ -27,10 +27,5 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
         /// A handle to the consuming queue
         /// </summary>
         QueueHandle Queue { get; }
-
-        /// <summary>
-        /// A handle to the exchange which is bound directly to the consuming queue
-        /// </summary>
-        TopicHandle Topic { get; }
     }
 }

@@ -24,17 +24,18 @@ namespace MassTransit.ActiveMqTransport.Builders
 
     public class ActiveMqReceiveEndpointBuilder :
         ReceiveEndpointBuilder,
-        IActiveMqReceiveEndpointBuilder
+        IReceiveEndpointBuilder
     {
-        readonly bool _bindMessageExchanges;
+        readonly bool _bindMessageTopics;
         readonly IActiveMqEndpointConfiguration _configuration;
         readonly ActiveMqHost _host;
         readonly BusHostCollection<ActiveMqHost> _hosts;
 
-        public ActiveMqReceiveEndpointBuilder(ActiveMqHost host, BusHostCollection<ActiveMqHost> hosts, bool bindMessageExchanges, IActiveMqEndpointConfiguration configuration)
+        public ActiveMqReceiveEndpointBuilder(ActiveMqHost host, BusHostCollection<ActiveMqHost> hosts, bool bindMessageTopics,
+            IActiveMqEndpointConfiguration configuration)
             : base(configuration)
         {
-            _bindMessageExchanges = bindMessageExchanges;
+            _bindMessageTopics = bindMessageTopics;
             _configuration = configuration;
             _host = host;
             _hosts = hosts;
@@ -42,7 +43,7 @@ namespace MassTransit.ActiveMqTransport.Builders
 
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            if (_bindMessageExchanges)
+            if (_bindMessageTopics)
                 _configuration.Topology.Consume
                     .GetMessageTopology<T>()
                     .Bind();
@@ -50,11 +51,11 @@ namespace MassTransit.ActiveMqTransport.Builders
             return base.ConnectConsumePipe(pipe);
         }
 
-        public IRabbitMqReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress, ReceiveSettings settings)
+        public IActiveMqReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress, ReceiveSettings settings)
         {
             var brokerTopology = BuildTopology(settings);
 
-            return new RabbitMqReceiveEndpointTopology(_configuration, inputAddress, _host, _hosts, brokerTopology);
+            return new ActiveMqReceiveEndpointTopology(_configuration, inputAddress, _host, _hosts, brokerTopology);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)
@@ -62,10 +63,6 @@ namespace MassTransit.ActiveMqTransport.Builders
             var topologyBuilder = new ReceiveEndpointBrokerTopologyBuilder();
 
             topologyBuilder.Queue = topologyBuilder.CreateQueue(settings.EntityName, settings.Durable, settings.AutoDelete);
-
-            topologyBuilder.Topic = topologyBuilder.CreateTopic(settings.EntityName, settings.Durable, settings.AutoDelete);
-
-            //            topologyBuilder.QueueBind(topologyBuilder.Topic, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
 
             _configuration.Topology.Consume.Apply(topologyBuilder);
 

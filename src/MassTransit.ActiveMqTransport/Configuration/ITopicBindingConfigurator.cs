@@ -21,6 +21,6 @@ namespace MassTransit.ActiveMqTransport
         /// <summary>
         /// A routing key for the exchange binding
         /// </summary>
-        string RoutingKey { set; }
+        string Selector { set; }
     }
 }

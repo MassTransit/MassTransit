@@ -31,7 +31,7 @@ namespace MassTransit.ActiveMqTransport.Topology
         /// </summary>
         bool Exclusive { get; }
 
-        string RoutingKey { get; }
+        string Selector { get; }
 
         /// <summary>
         /// If True, and a queue name is specified, if the queue exists and has messages, they are purged at startup

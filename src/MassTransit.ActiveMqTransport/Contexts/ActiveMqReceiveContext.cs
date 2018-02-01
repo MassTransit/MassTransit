@@ -25,10 +25,10 @@ namespace MassTransit.ActiveMqTransport.Contexts
         BaseReceiveContext,
         ActiveMqMessageContext
     {
-        readonly IRabbitMqReceiveEndpointTopology _topology;
+        readonly IActiveMqReceiveEndpointTopology _topology;
         readonly IMessage _transportMessage;
 
-        public ActiveMqReceiveContext(Uri inputAddress, IMessage transportMessage, IReceiveObserver observer, IRabbitMqReceiveEndpointTopology topology)
+        public ActiveMqReceiveContext(Uri inputAddress, IMessage transportMessage, IReceiveObserver observer, IActiveMqReceiveEndpointTopology topology)
             : base(inputAddress, transportMessage.NMSRedelivered, observer, topology)
         {
             _transportMessage = transportMessage;

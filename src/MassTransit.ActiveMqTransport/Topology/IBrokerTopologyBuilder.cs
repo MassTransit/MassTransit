@@ -27,15 +27,6 @@ namespace MassTransit.ActiveMqTransport.Topology
         TopicHandle CreateTopic(string name, bool durable, bool autoDelete);
 
         /// <summary>
-        /// Bind an exchange to an exchange, with the specified routing key and arguments
-        /// </summary>
-        /// <param name="source">The source exchange</param>
-        /// <param name="destination">The destination exchange</param>
-        /// <param name="routingKey">The binding routing key</param>
-        /// <returns>An entity handle used to reference the binding in subsequent calls</returns>
-        ExchangeBindingHandle BindTopic(TopicHandle source, TopicHandle destination, string routingKey);
-
-        /// <summary>
         /// Declares a queue
         /// </summary>
         /// <param name="name"></param>
@@ -49,8 +40,8 @@ namespace MassTransit.ActiveMqTransport.Topology
         /// </summary>
         /// <param name="topic"></param>
         /// <param name="queue"></param>
-        /// <param name="routingKey"></param>
+        /// <param name="selector"></param>
         /// <returns></returns>
-        QueueBindingHandle BindQueue(TopicHandle topic, QueueHandle queue, string routingKey);
+        ConsumerHandle BindConsumer(TopicHandle topic, QueueHandle queue, string selector);
     }
 }

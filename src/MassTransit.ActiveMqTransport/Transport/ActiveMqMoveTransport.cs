@@ -39,7 +39,8 @@ namespace MassTransit.ActiveMqTransport.Transport
 
             await _topologyFilter.Send(sessionContext, Pipe.Empty<SessionContext>()).ConfigureAwait(false);
 
-            var queue = SessionUtil.GetQueue(sessionContext.Session, _destination);
+            var queue = await sessionContext.GetQueue(_destination).ConfigureAwait(false);
+
             var producer = await sessionContext.CreateMessageProducer(queue).ConfigureAwait(false);
             byte[] body;
             using (var memoryStream = new MemoryStream())

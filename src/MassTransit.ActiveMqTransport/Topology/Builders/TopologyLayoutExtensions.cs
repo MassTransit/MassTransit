@@ -23,13 +23,13 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
         {
             foreach (var exchange in layout.Topics)
             {
-                _log.InfoFormat("ExchangeName: {0}, type: {1}, durable: {2}, auto-delete: {3}", exchange.EntityName, exchange.Durable, exchange.AutoDelete);
+                _log.InfoFormat("Topic: {0}, type: {1}, durable: {2}, auto-delete: {3}", exchange.EntityName, exchange.Durable, exchange.AutoDelete);
             }
 
-            foreach (var binding in layout.ExchangeBindings)
+            foreach (var consumer in layout.Consumers)
             {
-                _log.InfoFormat("ExchangeName Binding: source {0}, destination: {1}, routingKey: {2}", binding.Source.EntityName, binding.Destination.EntityName,
-                    binding.RoutingKey);
+                _log.InfoFormat("Consumer: source {0}, destination: {1}, selector: {2}", consumer.Source.EntityName, consumer.Destination.EntityName,
+                    consumer.Selector);
             }
         }
     }

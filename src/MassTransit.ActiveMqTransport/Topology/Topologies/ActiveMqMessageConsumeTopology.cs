@@ -24,20 +24,23 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
     using Util;
 
 
-    public class RabbitMqMessageConsumeTopology<TMessage> :
+    public class ActiveMqMessageConsumeTopology<TMessage> :
         MessageConsumeTopology<TMessage>,
-        IRabbitMqMessageConsumeTopologyConfigurator<TMessage>,
-        IRabbitMqMessageConsumeTopologyConfigurator
+        IActiveMqMessageConsumeTopologyConfigurator<TMessage>,
+        IActiveMqMessageConsumeTopologyConfigurator
         where TMessage : class
     {
         readonly IMessageTopology<TMessage> _messageTopology;
         readonly IActiveMqMessagePublishTopology<TMessage> _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
+        string _consumerName;
 
-        public RabbitMqMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IActiveMqMessagePublishTopology<TMessage> publishTopology)
+        public ActiveMqMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IActiveMqMessagePublishTopology<TMessage> publishTopology)
         {
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;
+
+            _consumerName = $"Consumer.{{queue}}.VirtualTopic.{messageTopology.EntityName}";
 
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
         }
@@ -58,7 +61,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
                 return;
             }
 
-            var specification = new TopicBindingConsumeTopologySpecification(_publishTopology.Topic);
+            var specification = new ConsumerConsumeTopologySpecification(_publishTopology.Topic, _consumerName);
 
             configure?.Invoke(specification);
 

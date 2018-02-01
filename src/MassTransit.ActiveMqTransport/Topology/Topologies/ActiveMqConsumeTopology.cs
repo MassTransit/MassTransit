@@ -42,9 +42,9 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
         }
 
-        IRabbitMqMessageConsumeTopology<T> IRabbitMqConsumeTopology.GetMessageTopology<T>()
+        IActiveMqMessageConsumeTopology<T> IActiveMqConsumeTopology.GetMessageTopology<T>()
         {
-            return base.GetMessageTopology<T>() as IRabbitMqMessageConsumeTopologyConfigurator<T>;
+            return base.GetMessageTopology<T>() as IActiveMqMessageConsumeTopologyConfigurator<T>;
         }
 
         public void AddSpecification(IActiveMqConsumeTopologySpecification specification)
@@ -55,9 +55,9 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
             _specifications.Add(specification);
         }
 
-        IRabbitMqMessageConsumeTopologyConfigurator<T> IActiveMqConsumeTopologyConfigurator.GetMessageTopology<T>()
+        IActiveMqMessageConsumeTopologyConfigurator<T> IActiveMqConsumeTopologyConfigurator.GetMessageTopology<T>()
         {
-            return base.GetMessageTopology<T>() as IRabbitMqMessageConsumeTopologyConfigurator<T>;
+            return base.GetMessageTopology<T>() as IActiveMqMessageConsumeTopologyConfigurator<T>;
         }
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
@@ -65,18 +65,25 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
             foreach (var specification in _specifications)
                 specification.Apply(builder);
 
-            ForEach<IRabbitMqMessageConsumeTopologyConfigurator>(x => x.Apply(builder));
+            ForEach<IActiveMqMessageConsumeTopologyConfigurator>(x => x.Apply(builder));
         }
 
-        public void Bind(string exchangeName, Action<ITopicBindingConfigurator> configure = null)
+        public void Bind(string topicName, Action<ITopicBindingConfigurator> configure = null)
         {
-            var specification = new TopicBindingConsumeTopologySpecification(exchangeName);
+            if (topicName.StartsWith("VirtualTopic."))
+            {
+                var consumerName = $"Consumer.{{queue}}{topicName}";
 
-            configure?.Invoke(specification);
+                var specification = new ConsumerConsumeTopologySpecification(topicName, consumerName);
 
-            _specifications.Add(specification);
+                configure?.Invoke(specification);
 
-            _specifications.Add(specification);
+                _specifications.Add(specification);
+            }
+            else
+            {
+                _specifications.Add(new InvalidActiveMqConsumeTopologySpecification("Bind", $"Only virtual topics can be bound: {topicName}"));
+            }
         }
 
         public string CreateTemporaryQueueName(string prefix)
@@ -111,7 +118,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
 
         protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var messageTopology = new RabbitMqMessageConsumeTopology<T>(_messageTopology.GetMessageTopology<T>(), _publishTopology.GetMessageTopology<T>());
+            var messageTopology = new ActiveMqMessageConsumeTopology<T>(_messageTopology.GetMessageTopology<T>(), _publishTopology.GetMessageTopology<T>());
 
             OnMessageTopologyCreated(messageTopology);
 

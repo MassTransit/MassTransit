@@ -15,7 +15,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes;
-    using GreenPipes.Util;
     using Logging;
     using MassTransit.Pipeline;
     using Topology.Builders;
@@ -63,11 +62,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         {
             await Task.WhenAll(_brokerTopology.Topics.Select(exchange => Declare(context, exchange))).ConfigureAwait(false);
 
-            await Task.WhenAll(_brokerTopology.ExchangeBindings.Select(binding => Bind(context, binding))).ConfigureAwait(false);
-
             await Task.WhenAll(_brokerTopology.Queues.Select(queue => Declare(context, queue))).ConfigureAwait(false);
-
-            await Task.WhenAll(_brokerTopology.QueueBindings.Select(binding => Bind(context, binding))).ConfigureAwait(false);
         }
 
         Task Declare(SessionContext context, Topic topic)
@@ -84,22 +79,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 _log.DebugFormat("Declare queue ({0})", queue);
 
             return context.GetQueue(queue.EntityName);
-        }
-
-        Task Bind(SessionContext context, ExchangeToExchangeBinding binding)
-        {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Bind exchange to exchange ({0})", binding);
-
-            return TaskUtil.Completed;
-        }
-
-        Task Bind(SessionContext context, ExchangeToQueueBinding binding)
-        {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Bind exchange to queue ({0})", binding);
-
-            return TaskUtil.Completed;
         }
     }
 }
