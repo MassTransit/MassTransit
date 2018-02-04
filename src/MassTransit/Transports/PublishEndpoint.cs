@@ -17,8 +17,8 @@ namespace MassTransit.Transports
     using System.Threading.Tasks;
     using Context.Converters;
     using GreenPipes;
+    using Initializers;
     using Pipeline;
-    using Util;
 
 
     /// <summary>
@@ -45,21 +45,21 @@ namespace MassTransit.Transports
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            var adapter = new PublishEndpointPipeAdapter<T>(_publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
+            var adapter = new PublishEndpointPipeAdapter<T>(_publishPipe, _publishObserver, _sourceAddress, _consumeContext);
 
             return Publish(cancellationToken, message, adapter);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishEndpointPipeAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
+            var adapter = new PublishEndpointPipeAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext);
 
             return Publish(cancellationToken, message, adapter);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishEndpointPipeAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
+            var adapter = new PublishEndpointPipeAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext);
 
             return Publish(cancellationToken, message, adapter);
         }
@@ -99,11 +99,12 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
-            var adapter = new PublishEndpointPipeAdapter<T>(_publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
+            if (_consumeContext != null)
+                return initializer.Publish(this, initializer.Create(_consumeContext), values);
 
-            return Publish(cancellationToken, message, adapter);
+            return initializer.Publish(this, values, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
@@ -111,11 +112,12 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
-            var adapter = new PublishEndpointPipeAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
+            if (_consumeContext != null)
+                return initializer.Publish(this, initializer.Create(_consumeContext), values, publishPipe);
 
-            return Publish(cancellationToken, message, adapter);
+            return initializer.Publish(this, values, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
@@ -123,11 +125,12 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
-            var adapter = new PublishEndpointPipeAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
+            if (_consumeContext != null)
+                return initializer.Publish(this, initializer.Create(_consumeContext), values, publishPipe);
 
-            return Publish(cancellationToken, message, adapter);
+            return initializer.Publish(this, values, publishPipe, cancellationToken);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)

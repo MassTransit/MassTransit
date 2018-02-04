@@ -26,6 +26,8 @@ namespace MassTransit.Util
         public static Task<bool> False => Cached.FalseTask;
         public static Task<bool> True => Cached.TrueTask;
 
+        public static Task<T> Default<T>() => Cached<T>.DefaultValueTask;
+
         public static Task<T> Faulted<T>(Exception exception)
         {
             var source = new TaskCompletionSource<T>();
@@ -173,6 +175,7 @@ namespace MassTransit.Util
 
         static class Cached<T>
         {
+            public static readonly Task<T> DefaultValueTask = Task.FromResult<T>(default);
             public static readonly Task<T> CanceledTask = GetCanceledTask();
 
             static Task<T> GetCanceledTask()

@@ -24,7 +24,6 @@ namespace MassTransit.Transports
         IPipe<SendContext<T>>
         where T : class
     {
-        readonly T _message;
         readonly IPublishObserver _observer;
         readonly IPipe<PublishContext<T>> _pipe;
         readonly IPublishPipe _publishPipe;
@@ -33,35 +32,32 @@ namespace MassTransit.Transports
         PublishContext<T> _context;
 
         public PublishEndpointPipeAdapter(IPipe<PublishContext<T>> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
-            ConsumeContext consumeContext, T message)
+            ConsumeContext consumeContext)
         {
             _pipe = pipe;
             _publishPipe = publishPipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
             _consumeContext = consumeContext;
-            _message = message;
         }
 
         public PublishEndpointPipeAdapter(IPipe<PublishContext> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
-            ConsumeContext consumeContext, T message)
+            ConsumeContext consumeContext)
         {
             _pipe = pipe;
             _publishPipe = publishPipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
             _consumeContext = consumeContext;
-            _message = message;
         }
 
-        public PublishEndpointPipeAdapter(IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, ConsumeContext consumeContext, T message)
+        public PublishEndpointPipeAdapter(IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, ConsumeContext consumeContext)
         {
             _pipe = Pipe.Empty<PublishContext<T>>();
             _publishPipe = publishPipe;
             _observer = observer;
             _sourceAddress = sourceAddress;
             _consumeContext = consumeContext;
-            _message = message;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -100,7 +96,7 @@ namespace MassTransit.Transports
 
         PublishContext<T> GetDefaultPublishContext()
         {
-            return new FaultedPublishContext<T>(_message, CancellationToken.None)
+            return new FaultedPublishContext<T>(default, CancellationToken.None)
             {
                 SourceAddress = _consumeContext?.ReceiveContext?.InputAddress ?? _sourceAddress,
                 ConversationId = _consumeContext?.ConversationId,

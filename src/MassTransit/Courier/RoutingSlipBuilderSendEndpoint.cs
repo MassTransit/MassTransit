@@ -15,10 +15,10 @@ namespace MassTransit.Courier
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using Context.Converters;
     using Contracts;
     using GreenPipes;
+    using Initializers;
     using MassTransit.Pipeline.Observables;
     using Util;
 
@@ -62,6 +62,23 @@ namespace MassTransit.Courier
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
+            if (pipe == null)
+                throw new ArgumentNullException(nameof(pipe));
+
+            var context = new RoutingSlipSendContext<T>(message, cancellationToken, _destinationAddress);
+
+            await pipe.Send(context).ConfigureAwait(false);
+
+            _builder.AddSubscription(_destinationAddress, _events, _include, _activityName, context.GetMessageEnvelope());
+        }
+
+        public async Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+            where T : class
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -86,42 +103,18 @@ namespace MassTransit.Courier
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
             return SendEndpointConverterCache.Send(this, message, messageType, cancellationToken);
         }
 
-        public Task Send<T>(object values, CancellationToken cancellationToken)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Send(message, cancellationToken);
-        }
-
-        public async Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
-            where T : class
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-            if (pipe == null)
-                throw new ArgumentNullException(nameof(pipe));
-
-            var context = new RoutingSlipSendContext<T>(message, cancellationToken, _destinationAddress);
-
-            await pipe.Send(context).ConfigureAwait(false);
-
-            _builder.AddSubscription(_destinationAddress, _events, _include, _activityName, context.GetMessageEnvelope());
-        }
-
         public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -134,12 +127,23 @@ namespace MassTransit.Courier
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
+
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
             return SendEndpointConverterCache.Send(this, message, messageType, pipe, cancellationToken);
+        }
+
+        public Task Send<T>(object values, CancellationToken cancellationToken)
+            where T : class
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            return MessageInitializerCache<T>.Send(this, values, cancellationToken);
         }
 
         public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -148,9 +152,7 @@ namespace MassTransit.Courier
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Send(message, pipe, cancellationToken);
+            return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
         }
 
         public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -158,12 +160,11 @@ namespace MassTransit.Courier
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
+
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Send(message, pipe, cancellationToken);
+            return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

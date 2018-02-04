@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Initializers;
     using RabbitMqTransport;
     using Scheduling;
     using Util;
@@ -194,13 +195,11 @@ namespace MassTransit
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
             var destinationAddress = GetDestinationAddress<T>(context);
 
             var scheduler = context.GetPayload<MessageSchedulerContext>();
 
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
+            return scheduler.ScheduleSend<T>(destinationAddress, scheduledTime, values, cancellationToken);
         }
 
         /// <summary>
@@ -221,13 +220,11 @@ namespace MassTransit
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
             var destinationAddress = GetDestinationAddress<T>(context);
 
             var scheduler = context.GetPayload<MessageSchedulerContext>();
 
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
+            return scheduler.ScheduleSend(destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
 
         /// <summary>
@@ -248,13 +245,11 @@ namespace MassTransit
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
             var destinationAddress = GetDestinationAddress<T>(context);
 
             var scheduler = context.GetPayload<MessageSchedulerContext>();
 
-            return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
+            return scheduler.ScheduleSend<T>(destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
 
         /// <summary>
@@ -448,7 +443,8 @@ namespace MassTransit
         {
             var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
 
-            if (modelContext.ConnectionContext.Topology.PublishTopology.GetMessageTopology<T>().TryGetPublishAddress(modelContext.ConnectionContext.HostAddress, out var destinationAddress))
+            if (modelContext.ConnectionContext.Topology.PublishTopology.GetMessageTopology<T>()
+                .TryGetPublishAddress(modelContext.ConnectionContext.HostAddress, out var destinationAddress))
                 return destinationAddress;
 
             throw new ArgumentException($"The publish address for the message type was not found: {TypeMetadataCache<T>.ShortName}", nameof(T));
@@ -459,10 +455,11 @@ namespace MassTransit
             var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
 
             if (modelContext.ConnectionContext.Topology.PublishTopology.TryGetPublishAddress(messageType, modelContext.ConnectionContext.HostAddress, out var
-            destinationAddress))
+                destinationAddress))
                 return destinationAddress;
 
-            throw new ArgumentException($"The publish address for the message type was not found: {TypeMetadataCache.GetShortName(messageType)}", nameof(messageType));
+            throw new ArgumentException($"The publish address for the message type was not found: {TypeMetadataCache.GetShortName(messageType)}",
+                nameof(messageType));
         }
     }
 }

@@ -32,10 +32,10 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, T message,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(endpoint);
+            IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(endpoint));
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
         }
@@ -52,10 +52,10 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, T message,
-            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(endpoint);
+            IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(endpoint));
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
@@ -72,10 +72,10 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, T message,
-            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(endpoint);
+            IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(endpoint));
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
@@ -90,9 +90,9 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage> ScheduleSend(this IPublishEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object message,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(endpoint);
+            IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(endpoint));
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
         }
@@ -109,9 +109,9 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage> ScheduleSend(this IPublishEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object message,
-            Type messageType, CancellationToken cancellationToken = default(CancellationToken))
+            Type messageType, CancellationToken cancellationToken = default)
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(endpoint);
+            IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(endpoint));
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, messageType, cancellationToken);
         }
@@ -128,9 +128,9 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage> ScheduleSend(this IPublishEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object message,
-            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(endpoint);
+            IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(endpoint));
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
@@ -148,9 +148,9 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage> ScheduleSend(this IPublishEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object message,
-            Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(endpoint);
+            IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(endpoint));
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, message, messageType, pipe, cancellationToken);
         }
@@ -167,10 +167,10 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object values,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(endpoint);
+            IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(endpoint));
 
             return scheduler.ScheduleSend<T>(destinationAddress, scheduledTime, values, cancellationToken);
         }
@@ -188,10 +188,10 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object values,
-            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(endpoint);
+            IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(endpoint));
 
             return scheduler.ScheduleSend(destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
@@ -209,10 +209,10 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, DateTime scheduledTime, object values,
-            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(endpoint);
+            IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(endpoint));
 
             return scheduler.ScheduleSend<T>(destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
@@ -228,7 +228,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, TimeSpan delay, T message,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
@@ -248,7 +248,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, TimeSpan delay, T message,
-            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
@@ -268,7 +268,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, TimeSpan delay, T message,
-            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
@@ -286,7 +286,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage> ScheduleSend(this IPublishEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object message,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
@@ -305,7 +305,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage> ScheduleSend(this IPublishEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object message,
-            Type messageType, CancellationToken cancellationToken = default(CancellationToken))
+            Type messageType, CancellationToken cancellationToken = default)
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
@@ -324,7 +324,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage> ScheduleSend(this IPublishEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object message,
-            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
@@ -344,7 +344,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage> ScheduleSend(this IPublishEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object message,
-            Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
         {
             var scheduledTime = DateTime.UtcNow + delay;
 
@@ -363,7 +363,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object values,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
@@ -384,7 +384,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object values,
-            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
@@ -405,7 +405,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledMessage<T>> ScheduleSend<T>(this IPublishEndpoint endpoint, Uri destinationAddress, TimeSpan delay, object values,
-            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
             var scheduledTime = DateTime.UtcNow + delay;
@@ -434,7 +434,7 @@ namespace MassTransit
         /// <param name="tokenId">The tokenId of the scheduled message</param>
         public static Task CancelScheduledSend(this IPublishEndpoint endpoint, Guid tokenId)
         {
-            IMessageScheduler scheduler = new PublishMessageScheduler(endpoint);
+            IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(endpoint));
 
             return scheduler.CancelScheduledSend(tokenId);
         }

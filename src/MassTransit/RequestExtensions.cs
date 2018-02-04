@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Initializers;
     using Util;
 
 
@@ -61,14 +62,14 @@ namespace MassTransit
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <returns></returns>
-        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, Uri destinationAddress, object values,
+        public static async Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, Uri destinationAddress, object values,
             CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
-            var message = TypeMetadataCache<TRequest>.InitializeFromObject(values);
+            TRequest message = await MessageInitializerCache<TRequest>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
 
-            return Request<TRequest, TResponse>(bus, destinationAddress, message, cancellationToken, timeout, callback);
+            return await Request<TRequest, TResponse>(bus, destinationAddress, message, cancellationToken, timeout, callback).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -82,7 +83,8 @@ namespace MassTransit
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <returns></returns>
-        public static async Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, TRequest message, CancellationToken cancellationToken = default,
+        public static async Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, TRequest message,
+            CancellationToken cancellationToken = default,
             RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
@@ -109,14 +111,14 @@ namespace MassTransit
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <returns></returns>
-        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, object values, CancellationToken cancellationToken = default,
+        public static async Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, object values, CancellationToken cancellationToken = default,
             RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
-            var message = TypeMetadataCache<TRequest>.InitializeFromObject(values);
+            TRequest message = await MessageInitializerCache<TRequest>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
 
-            return Request<TRequest, TResponse>(bus, message, cancellationToken, timeout, callback);
+            return await Request<TRequest, TResponse>(bus, message, cancellationToken, timeout, callback).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -161,14 +163,14 @@ namespace MassTransit
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <returns></returns>
-        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, Uri destinationAddress,
+        public static async Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, Uri destinationAddress,
             object values, CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
-            var message = TypeMetadataCache<TRequest>.InitializeFromObject(values);
+            TRequest message = await MessageInitializerCache<TRequest>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
 
-            return Request<TRequest, TResponse>(consumeContext, bus, destinationAddress, message, cancellationToken, timeout, callback);
+            return await Request<TRequest, TResponse>(consumeContext, bus, destinationAddress, message, cancellationToken, timeout, callback).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -211,14 +213,14 @@ namespace MassTransit
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <returns></returns>
-        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, object values,
+        public static async Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, object values,
             CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
-            var message = TypeMetadataCache<TRequest>.InitializeFromObject(values);
+            TRequest message = await MessageInitializerCache<TRequest>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
 
-            return Request<TRequest, TResponse>(consumeContext, bus, message, cancellationToken, timeout, callback);
+            return await Request<TRequest, TResponse>(consumeContext, bus, message, cancellationToken, timeout, callback).ConfigureAwait(false);
         }
     }
 }

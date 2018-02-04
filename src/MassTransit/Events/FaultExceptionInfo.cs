@@ -29,6 +29,7 @@ namespace MassTransit.Events
             InnerException = exception.InnerException != null
                 ? new FaultExceptionInfo(exception.InnerException)
                 : null;
+
             StackTrace = ExceptionUtil.GetStackTrace(exception);
             Message = ExceptionUtil.GetMessage(exception);
             Source = exception.Source;

@@ -48,7 +48,7 @@ namespace MassTransit.Internals.Extensions
             {
                 IEnumerable<PropertyInfo> sourceProperties = properties
                     .Concat(typeInfo.ImplementedInterfaces.SelectMany(x => x.GetTypeInfo().DeclaredProperties));
-                
+
                 foreach (PropertyInfo prop in sourceProperties)
                     yield return prop;
 
@@ -143,6 +143,7 @@ namespace MassTransit.Internals.Extensions
             TypeInfo typeInfo = type.GetTypeInfo();
             bool isNullable = typeInfo.IsGenericType
                 && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>);
+
             underlyingType = isNullable ? Nullable.GetUnderlyingType(type) : null;
             return isNullable;
         }
@@ -152,16 +153,14 @@ namespace MassTransit.Internals.Extensions
         /// </summary>
         /// <param name="type">The type</param>
         /// <returns>True if the type is an open generic</returns>
-        public static bool IsOpenGeneric(this Type type)
-            => type.GetTypeInfo().IsOpenGeneric();
+        public static bool IsOpenGeneric(this Type type) => type.GetTypeInfo().IsOpenGeneric();
 
         /// <summary>
         /// Determines if the TypeInfo is an open generic with at least one unspecified generic argument
         /// </summary>
         /// <param name="typeInfo">The TypeInfo</param>
         /// <returns>True if the TypeInfo is an open generic</returns>
-        public static bool IsOpenGeneric(this TypeInfo typeInfo)
-            => typeInfo.IsGenericTypeDefinition || typeInfo.ContainsGenericParameters;
+        public static bool IsOpenGeneric(this TypeInfo typeInfo) => typeInfo.IsGenericTypeDefinition || typeInfo.ContainsGenericParameters;
 
         /// <summary>
         /// Determines if a type can be null
@@ -214,16 +213,15 @@ namespace MassTransit.Internals.Extensions
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static bool IsAnonymousType(this Type type)
-            => type.GetTypeInfo().IsAnonymousType();
+        public static bool IsAnonymousType(this Type type) => type.GetTypeInfo().IsAnonymousType();
 
         /// <summary>
         /// Returns true if the TypeInfo is an anonymous type
         /// </summary>
         /// <param name="typeInfo"></param>
         /// <returns></returns>
-        public static bool IsAnonymousType(this TypeInfo typeInfo)
-            =>typeInfo.HasAttribute<CompilerGeneratedAttribute>() && typeInfo.FullName.Contains("AnonymousType");
+        public static bool IsAnonymousType(this TypeInfo typeInfo) =>
+            typeInfo.HasAttribute<CompilerGeneratedAttribute>() && typeInfo.FullName.Contains("AnonymousType");
 
         /// <summary>
         /// Returns true if the type is contained within the namespace
@@ -235,6 +233,23 @@ namespace MassTransit.Internals.Extensions
         {
             var subNameSpace = nameSpace + ".";
             return type.Namespace != null && (type.Namespace.Equals(nameSpace) || type.Namespace.StartsWith(subNameSpace));
+        }
+
+        /// <summary>
+        /// True if the type is a value type, or an object type that is treated as a value by MassTransit
+        /// </summary>
+        /// <param name="valueType"></param>
+        /// <returns></returns>
+        public static bool IsValueTypeOrObject(this Type valueType)
+        {
+            if (valueType.GetTypeInfo().IsValueType
+                || valueType == typeof(string)
+                || valueType == typeof(Uri)
+                || valueType == typeof(Version)
+                || typeof(Exception).IsAssignableFrom(valueType))
+                return true;
+
+            return false;
         }
     }
 }

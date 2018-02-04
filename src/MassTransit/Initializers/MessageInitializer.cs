@@ -1,22 +1,37 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Initializers
+﻿namespace MassTransit.Initializers
 {
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contexts;
+    using Conventions;
     using GreenPipes;
+
+
+    public static class MessageInitializer
+    {
+        static readonly IList<IInitializerConvention> _conventions;
+        static IInitializerConvention[] _conventionsArray;
+
+        static MessageInitializer()
+        {
+            _conventions = new List<IInitializerConvention>
+            {
+                new CopyMessageInitializerConvention(),
+            };
+        }
+
+        public static IInitializerConvention[] Conventions => _conventionsArray ?? (_conventionsArray = _conventions.ToArray());
+
+        public static void AddConvention<T>()
+            where T : IInitializerConvention, new()
+        {
+            var convention = new T();
+            _conventions.Add(convention);
+            _conventionsArray = null;
+        }
+    }
 
 
     /// <summary>
@@ -25,32 +40,68 @@ namespace MassTransit.Initializers
     /// <typeparam name="TMessage">The message type</typeparam>
     /// <typeparam name="TInput">The input type</typeparam>
     public class MessageInitializer<TMessage, TInput> :
-        IMessageInitializer<TMessage, TInput>
+        IMessageInitializer<TMessage>
         where TMessage : class
         where TInput : class
     {
         readonly IMessageFactory<TMessage> _factory;
-        readonly IMessageHeaderInitializer<TMessage, TInput>[] _headerInitializers;
-        readonly IMessagePropertyInitializer<TMessage, TInput>[] _initializers;
+        readonly IHeaderInitializer<TMessage, TInput>[] _headerInitializers;
+        readonly IPropertyInitializer<TMessage, TInput>[] _initializers;
 
-        public MessageInitializer(IMessageFactory<TMessage> factory, IEnumerable<IMessagePropertyInitializer<TMessage, TInput>> initializers,
-            IEnumerable<IMessageHeaderInitializer<TMessage, TInput>> headerInitializers)
+        public MessageInitializer(IMessageFactory<TMessage> factory, IEnumerable<IPropertyInitializer<TMessage, TInput>> initializers,
+            IEnumerable<IHeaderInitializer<TMessage, TInput>> headerInitializers)
         {
             _factory = factory;
             _initializers = initializers.ToArray();
             _headerInitializers = headerInitializers.ToArray();
         }
 
-        public async Task<TMessage> Initialize(TInput input, CancellationToken cancellationToken)
+        public InitializeContext<TMessage> Create(PipeContext context)
         {
-            var context = await InitializeMessage(input, cancellationToken).ConfigureAwait(false);
+            var baseContext = new BaseInitializeContext(context);
 
-            return context.Message;
+            return _factory.Create(baseContext);
         }
 
-        public async Task Send(ISendEndpoint endpoint, TInput input, IPipe<SendContext<TMessage>> pipe, CancellationToken cancellationToken)
+        public Task<InitializeContext<TMessage>> Initialize(object input, CancellationToken cancellationToken)
         {
-            InitializeMessageContext<TMessage, TInput> messageContext = await InitializeMessage(input, cancellationToken).ConfigureAwait(false);
+            return InitializeMessage((TInput)input, cancellationToken);
+        }
+
+        public Task<InitializeContext<TMessage>> Initialize(InitializeContext<TMessage> context, object input)
+        {
+            return InitializeMessage(context, (TInput)input);
+        }
+
+        public async Task Send(ISendEndpoint endpoint, object input, CancellationToken cancellationToken)
+        {
+            var messageContext = await PrepareMessage((TInput)input, cancellationToken).ConfigureAwait(false);
+
+            if (_headerInitializers.Length > 0)
+            {
+                await endpoint.Send(messageContext.Message, new InitializerSendContextPipe(_headerInitializers, messageContext), cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                await endpoint.Send(messageContext.Message, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        public async Task Send(ISendEndpoint endpoint, InitializeContext<TMessage> context, object input)
+        {
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage(context, (TInput)input).ConfigureAwait(false);
+
+            if (_headerInitializers.Length > 0)
+                await endpoint.Send(messageContext.Message, new InitializerSendContextPipe(_headerInitializers, messageContext),
+                    messageContext.CancellationToken).ConfigureAwait(false);
+            else
+                await endpoint.Send(messageContext.Message, messageContext.CancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task Send(ISendEndpoint endpoint, object input, IPipe<SendContext<TMessage>> pipe, CancellationToken cancellationToken)
+        {
+            var messageContext = await PrepareMessage((TInput)input, cancellationToken).ConfigureAwait(false);
 
             await endpoint.Send(messageContext.Message,
                     _headerInitializers.Length > 0
@@ -59,9 +110,9 @@ namespace MassTransit.Initializers
                 .ConfigureAwait(false);
         }
 
-        public async Task Send(ISendEndpoint endpoint, TInput input, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        public async Task Send(ISendEndpoint endpoint, object input, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
-            InitializeMessageContext<TMessage, TInput> messageContext = await InitializeMessage(input, cancellationToken).ConfigureAwait(false);
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage((TInput)input, cancellationToken).ConfigureAwait(false);
 
             if (_headerInitializers.Length > 0)
                 await endpoint.Send(messageContext.Message, new InitializerSendContextPipe(_headerInitializers, messageContext, pipe), cancellationToken)
@@ -70,18 +121,53 @@ namespace MassTransit.Initializers
                 await endpoint.Send(messageContext.Message, pipe, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task Publish(IPublishEndpoint endpoint, TInput input, IPipe<PublishContext<TMessage>> pipe, CancellationToken cancellationToken)
+        public async Task Send(ISendEndpoint endpoint, InitializeContext<TMessage> context, object input, IPipe<SendContext> pipe)
         {
-            InitializeMessageContext<TMessage, TInput> messageContext = await InitializeMessage(input, cancellationToken).ConfigureAwait(false);
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage(context, (TInput)input).ConfigureAwait(false);
 
-            await endpoint.Publish(messageContext.Message,
-                    _headerInitializers.Length > 0 ? new InitializerPublishContextPipe(_headerInitializers, messageContext, pipe) : pipe, cancellationToken)
-                .ConfigureAwait(false);
+            if (_headerInitializers.Length > 0)
+                await endpoint.Send(messageContext.Message, new InitializerSendContextPipe(_headerInitializers, messageContext, pipe),
+                    messageContext.CancellationToken).ConfigureAwait(false);
+            else
+                await endpoint.Send(messageContext.Message, pipe, messageContext.CancellationToken).ConfigureAwait(false);
         }
 
-        public async Task Publish(IPublishEndpoint endpoint, TInput input, IPipe<PublishContext> pipe, CancellationToken cancellationToken)
+        public async Task Send(ISendEndpoint endpoint, InitializeContext<TMessage> context, object input, IPipe<SendContext<TMessage>> pipe)
         {
-            InitializeMessageContext<TMessage, TInput> messageContext = await InitializeMessage(input, cancellationToken).ConfigureAwait(false);
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage(context, (TInput)input).ConfigureAwait(false);
+
+            var sendPipe = _headerInitializers.Length > 0
+                ? new InitializerSendContextPipe(_headerInitializers, messageContext, pipe)
+                : pipe;
+
+            await endpoint.Send(messageContext.Message, sendPipe, messageContext.CancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task Publish(IPublishEndpoint endpoint, object input, CancellationToken cancellationToken)
+        {
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage((TInput)input, cancellationToken).ConfigureAwait(false);
+
+            if (_headerInitializers.Length > 0)
+                await endpoint.Publish(messageContext.Message, new InitializerPublishContextPipe(_headerInitializers, messageContext), cancellationToken)
+                    .ConfigureAwait(false);
+            else
+                await endpoint.Publish(messageContext.Message, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task Publish(IPublishEndpoint endpoint, InitializeContext<TMessage> context, object input)
+        {
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage(context, (TInput)input).ConfigureAwait(false);
+
+            if (_headerInitializers.Length > 0)
+                await endpoint.Publish(messageContext.Message, new InitializerPublishContextPipe(_headerInitializers, messageContext),
+                    messageContext.CancellationToken).ConfigureAwait(false);
+            else
+                await endpoint.Publish(messageContext.Message, messageContext.CancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task Publish(IPublishEndpoint endpoint, object input, IPipe<PublishContext> pipe, CancellationToken cancellationToken)
+        {
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage((TInput)input, cancellationToken).ConfigureAwait(false);
 
             if (_headerInitializers.Length > 0)
                 await endpoint.Publish(messageContext.Message, new InitializerPublishContextPipe(_headerInitializers, messageContext, pipe), cancellationToken)
@@ -90,13 +176,69 @@ namespace MassTransit.Initializers
                 await endpoint.Publish(messageContext.Message, pipe, cancellationToken).ConfigureAwait(false);
         }
 
-        async Task<InitializeMessageContext<TMessage, TInput>> InitializeMessage(TInput input, CancellationToken cancellationToken)
+        public async Task Publish(IPublishEndpoint endpoint, object input, IPipe<PublishContext<TMessage>> pipe, CancellationToken cancellationToken)
         {
-            var context = new BaseInitializeMessageContext(typeof(TMessage), cancellationToken);
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage((TInput)input, cancellationToken).ConfigureAwait(false);
 
-            InitializeMessageContext<TMessage> messageContext = _factory.Create(context);
+            var publishPipe = _headerInitializers.Length > 0
+                ? new InitializerPublishContextPipe(_headerInitializers, messageContext, pipe)
+                : pipe;
 
-            InitializeMessageContext<TMessage, TInput> inputContext = messageContext.CreateInputContext<TInput>(input);
+            await endpoint.Publish(messageContext.Message, publishPipe, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task Publish(IPublishEndpoint endpoint, InitializeContext<TMessage> context, object input, IPipe<PublishContext> pipe)
+        {
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage(context, (TInput)input).ConfigureAwait(false);
+
+            if (_headerInitializers.Length > 0)
+                await endpoint.Publish(messageContext.Message, new InitializerPublishContextPipe(_headerInitializers, messageContext, pipe),
+                    messageContext.CancellationToken).ConfigureAwait(false);
+            else
+                await endpoint.Publish(messageContext.Message, pipe, messageContext.CancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task Publish(IPublishEndpoint endpoint, InitializeContext<TMessage> context, object input, IPipe<PublishContext<TMessage>> pipe)
+        {
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage(context, (TInput)input).ConfigureAwait(false);
+
+            var publishPipe = _headerInitializers.Length > 0
+                ? new InitializerPublishContextPipe(_headerInitializers, messageContext, pipe)
+                : pipe;
+
+            await endpoint.Publish(messageContext.Message, publishPipe, messageContext.CancellationToken).ConfigureAwait(false);
+        }
+
+        Task<InitializeContext<TMessage>> InitializeMessage(TInput input, CancellationToken cancellationToken)
+        {
+            var context = new BaseInitializeContext(cancellationToken);
+
+            InitializeContext<TMessage> messageContext = _factory.Create(context);
+
+            return InitializeMessage(messageContext, input);
+        }
+
+        async Task<InitializeContext<TMessage>> InitializeMessage(InitializeContext<TMessage> messageContext, TInput input)
+        {
+            InitializeContext<TMessage, TInput> inputContext = messageContext.CreateInputContext(input);
+
+            await Task.WhenAll(_initializers.Select(x => x.Apply(inputContext))).ConfigureAwait(false);
+
+            return inputContext;
+        }
+
+        Task<InitializeContext<TMessage, TInput>> PrepareMessage(TInput input, CancellationToken cancellationToken)
+        {
+            var context = new BaseInitializeContext(cancellationToken);
+
+            InitializeContext<TMessage> messageContext = _factory.Create(context);
+
+            return PrepareMessage(messageContext, input);
+        }
+
+        async Task<InitializeContext<TMessage, TInput>> PrepareMessage(InitializeContext<TMessage> messageContext, TInput input)
+        {
+            InitializeContext<TMessage, TInput> inputContext = messageContext.CreateInputContext(input);
 
             await Task.WhenAll(_initializers.Select(x => x.Apply(inputContext))).ConfigureAwait(false);
 
@@ -107,12 +249,18 @@ namespace MassTransit.Initializers
         class InitializerSendContextPipe :
             IPipe<SendContext<TMessage>>
         {
-            readonly InitializeMessageContext<TMessage, TInput> _context;
-            readonly IMessageHeaderInitializer<TMessage, TInput>[] _initializers;
+            readonly InitializeContext<TMessage, TInput> _context;
+            readonly IHeaderInitializer<TMessage, TInput>[] _initializers;
             readonly IPipe<SendContext<TMessage>> _pipe;
             readonly IPipe<SendContext> _sendPipe;
 
-            public InitializerSendContextPipe(IMessageHeaderInitializer<TMessage, TInput>[] initializers, InitializeMessageContext<TMessage, TInput> context,
+            public InitializerSendContextPipe(IHeaderInitializer<TMessage, TInput>[] initializers, InitializeContext<TMessage, TInput> context)
+            {
+                _initializers = initializers;
+                _context = context;
+            }
+
+            public InitializerSendContextPipe(IHeaderInitializer<TMessage, TInput>[] initializers, InitializeContext<TMessage, TInput> context,
                 IPipe<SendContext<TMessage>> pipe)
             {
                 _initializers = initializers;
@@ -120,7 +268,7 @@ namespace MassTransit.Initializers
                 _context = context;
             }
 
-            public InitializerSendContextPipe(IMessageHeaderInitializer<TMessage, TInput>[] initializers, InitializeMessageContext<TMessage, TInput> context,
+            public InitializerSendContextPipe(IHeaderInitializer<TMessage, TInput>[] initializers, InitializeContext<TMessage, TInput> context,
                 IPipe<SendContext> pipe)
             {
                 _initializers = initializers;
@@ -138,10 +286,10 @@ namespace MassTransit.Initializers
             {
                 await Task.WhenAll(_initializers.Select(x => x.Apply(_context, context))).ConfigureAwait(false);
 
-                if (_pipe != null)
+                if (_pipe.IsNotEmpty())
                     await _pipe.Send(context).ConfigureAwait(false);
 
-                if (_sendPipe != null)
+                if (_sendPipe.IsNotEmpty())
                     await _sendPipe.Send(context).ConfigureAwait(false);
             }
         }
@@ -150,12 +298,18 @@ namespace MassTransit.Initializers
         class InitializerPublishContextPipe :
             IPipe<PublishContext<TMessage>>
         {
-            readonly InitializeMessageContext<TMessage, TInput> _context;
-            readonly IMessageHeaderInitializer<TMessage, TInput>[] _initializers;
+            readonly InitializeContext<TMessage, TInput> _context;
+            readonly IHeaderInitializer<TMessage, TInput>[] _initializers;
             readonly IPipe<PublishContext<TMessage>> _pipe;
             readonly IPipe<PublishContext> _sendPipe;
 
-            public InitializerPublishContextPipe(IMessageHeaderInitializer<TMessage, TInput>[] initializers, InitializeMessageContext<TMessage, TInput> context,
+            public InitializerPublishContextPipe(IHeaderInitializer<TMessage, TInput>[] initializers, InitializeContext<TMessage, TInput> context)
+            {
+                _initializers = initializers;
+                _context = context;
+            }
+
+            public InitializerPublishContextPipe(IHeaderInitializer<TMessage, TInput>[] initializers, InitializeContext<TMessage, TInput> context,
                 IPipe<PublishContext<TMessage>> pipe)
             {
                 _initializers = initializers;
@@ -163,7 +317,7 @@ namespace MassTransit.Initializers
                 _context = context;
             }
 
-            public InitializerPublishContextPipe(IMessageHeaderInitializer<TMessage, TInput>[] initializers, InitializeMessageContext<TMessage, TInput> context,
+            public InitializerPublishContextPipe(IHeaderInitializer<TMessage, TInput>[] initializers, InitializeContext<TMessage, TInput> context,
                 IPipe<PublishContext> pipe)
             {
                 _initializers = initializers;
@@ -181,10 +335,10 @@ namespace MassTransit.Initializers
             {
                 await Task.WhenAll(_initializers.Select(x => x.Apply(_context, context))).ConfigureAwait(false);
 
-                if (_pipe != null)
+                if (_pipe.IsNotEmpty())
                     await _pipe.Send(context).ConfigureAwait(false);
 
-                if (_sendPipe != null)
+                if (_sendPipe.IsNotEmpty())
                     await _sendPipe.Send(context).ConfigureAwait(false);
             }
         }

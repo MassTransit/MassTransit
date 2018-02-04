@@ -18,6 +18,7 @@ namespace MassTransit
     using AzureServiceBusTransport;
     using AzureServiceBusTransport.Scheduling;
     using GreenPipes;
+    using Initializers;
     using Scheduling;
     using Util;
 
@@ -116,6 +117,7 @@ namespace MassTransit
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
@@ -163,6 +165,7 @@ namespace MassTransit
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
@@ -190,9 +193,7 @@ namespace MassTransit
 
             var pipeProxy = new ServiceBusScheduleMessagePipe<T>(scheduledTime);
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Schedule(context, scheduledTime, message, pipeProxy, cancellationToken);
+            return Schedule(context, scheduledTime, values, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -215,9 +216,7 @@ namespace MassTransit
 
             var pipeProxy = new ServiceBusScheduleMessagePipe<T>(scheduledTime, pipe);
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Schedule(context, scheduledTime, message, pipeProxy, cancellationToken);
+            return Schedule(context, scheduledTime, values, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -240,9 +239,7 @@ namespace MassTransit
 
             var pipeProxy = new ServiceBusScheduleMessagePipe<T>(scheduledTime, pipe);
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Schedule(context, scheduledTime, message, pipeProxy, cancellationToken);
+            return Schedule(context, scheduledTime, values, pipeProxy, cancellationToken);
         }
 
         /// <summary>
@@ -444,7 +441,7 @@ namespace MassTransit
             throw new EndpointNotFoundException($"The publish endpoint for the message type could not be found: {TypeMetadataCache<T>.ShortName}");
         }
 
-        static async Task<ScheduledMessage<T>> Schedule<T>(ConsumeContext context, DateTime scheduledTime, T message, ServiceBusScheduleMessagePipe<T> pipe,
+        static async Task<ScheduledMessage<T>> Schedule<T>(ConsumeContext context, DateTime scheduledTime, T message, ScheduleMessageContextPipe<T> pipe,
             CancellationToken cancellationToken)
             where T : class
         {
@@ -455,8 +452,21 @@ namespace MassTransit
             return new ScheduledMessageHandle<T>(pipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress, message);
         }
 
+        static async Task<ScheduledMessage<T>> Schedule<T>(ConsumeContext context, DateTime scheduledTime, object values, ScheduleMessageContextPipe<T> pipe,
+            CancellationToken cancellationToken)
+            where T : class
+        {
+            var message = await MessageInitializerCache<T>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
+
+            await context.Publish(message, pipe, cancellationToken).ConfigureAwait(false);
+
+            var destinationAddress = GetDestinationAddress<T>(context);
+
+            return new ScheduledMessageHandle<T>(pipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress, message);
+        }
+
         static async Task<ScheduledMessage> Schedule(ConsumeContext context, DateTime scheduledTime, object message, Type messageType,
-            ServiceBusScheduleMessagePipe pipe, CancellationToken cancellationToken)
+            ScheduleMessageContextPipe pipe, CancellationToken cancellationToken)
         {
             await context.Publish(message, messageType, pipe, cancellationToken).ConfigureAwait(false);
 

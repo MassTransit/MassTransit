@@ -17,6 +17,8 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Initializers;
+    using Pipeline.Pipes;
 
 
     public class MessageConsumeContext<TMessage> :
@@ -215,17 +217,17 @@ namespace MassTransit.Context
 
         Task ConsumeContext.RespondAsync<T>(object values)
         {
-            return _context.RespondAsync<T>(values);
+            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this));
         }
 
         Task ConsumeContext.RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe)
         {
-            return _context.RespondAsync(values, sendPipe);
+            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this, sendPipe));
         }
 
         Task ConsumeContext.RespondAsync<T>(object values, IPipe<SendContext> sendPipe)
         {
-            return _context.RespondAsync<T>(values, sendPipe);
+            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this, sendPipe));
         }
 
         void ConsumeContext.Respond<T>(T message)
@@ -241,6 +243,33 @@ namespace MassTransit.Context
         Task ConsumeContext.NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
             return _context.NotifyFaulted(context, duration, consumerType, exception);
+        }
+
+        async Task RespondAsyncInternal<T>(object values, IPipe<SendContext<T>> responsePipe)
+            where T : class
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            var context = await MessageInitializerCache<T>.Initialize(Message, _context.CancellationToken).ConfigureAwait(false);
+
+            IMessageInitializer<T> initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+
+            if (_context.ResponseAddress != null)
+            {
+                var endpoint = await _context.GetSendEndpoint(_context.ResponseAddress).ConfigureAwait(false);
+
+                await ConsumeTask(initializer.Send(endpoint, context, values, responsePipe)).ConfigureAwait(false);
+            }
+            else
+                await ConsumeTask(initializer.Publish(_context, context, values, responsePipe)).ConfigureAwait(false);
+        }
+
+        Task ConsumeTask(Task task)
+        {
+            _context.AddConsumeTask(task);
+
+            return task;
         }
     }
 }

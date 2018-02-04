@@ -1,23 +1,11 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Serialization
+﻿namespace MassTransit.Serialization
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Context.Converters;
     using GreenPipes;
-    using Util;
+    using Initializers;
 
 
     /// <summary>
@@ -70,6 +58,20 @@ namespace MassTransit.Serialization
             return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
         }
 
+        public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+            where T : class
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            if (pipe == null)
+                throw new ArgumentNullException(nameof(pipe));
+
+            var sendContextPipe = new ConsumeSendContextPipe<T>(_context, pipe);
+
+            return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
+        }
+
         public Task Send(object message, CancellationToken cancellationToken)
         {
             if (message == null)
@@ -89,31 +91,6 @@ namespace MassTransit.Serialization
                 throw new ArgumentNullException(nameof(messageType));
 
             return SendEndpointConverterCache.Send(this, message, messageType, cancellationToken);
-        }
-
-        public Task Send<T>(object values, CancellationToken cancellationToken)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Send(message, cancellationToken);
-        }
-
-        public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
-            where T : class
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            if (pipe == null)
-                throw new ArgumentNullException(nameof(pipe));
-
-            var sendContextPipe = new ConsumeSendContextPipe<T>(_context, pipe);
-
-            return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
         }
 
         public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -143,15 +120,29 @@ namespace MassTransit.Serialization
             return SendEndpointConverterCache.Send(this, message, messageType, pipe, cancellationToken);
         }
 
+        public Task Send<T>(object values, CancellationToken cancellationToken)
+            where T : class
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+
+            return initializer.Send(this, initializer.Create(_context), values);
+        }
+
         public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            if (pipe == null)
+                throw new ArgumentNullException(nameof(pipe));
 
-            return Send(message, pipe, cancellationToken);
+            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+
+            return initializer.Send(this, initializer.Create(_context), values, pipe);
         }
 
         public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -163,9 +154,9 @@ namespace MassTransit.Serialization
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
-            return Send(message, pipe, cancellationToken);
+            return initializer.Send(this, initializer.Create(_context), values, pipe);
         }
     }
 }

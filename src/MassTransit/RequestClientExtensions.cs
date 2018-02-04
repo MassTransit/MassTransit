@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Initializers;
     using Util;
 
 
@@ -29,14 +30,14 @@ namespace MassTransit
         /// <param name="values">The values to initialize the request object, anonymously</param>
         /// <param name="cancellationToken">A cancellation token for the request</param>
         /// <returns>The response Task</returns>
-        public static Task<TResponse> Request<TRequest, TResponse>(this IRequestClient<TRequest, TResponse> client, object values,
+        public static async Task<TResponse> Request<TRequest, TResponse>(this IRequestClient<TRequest, TResponse> client, object values,
             CancellationToken cancellationToken = default)
             where TRequest : class
             where TResponse : class
         {
-            TRequest request = TypeMetadataCache<TRequest>.InitializeFromObject(values);
+            TRequest request = await MessageInitializerCache<TRequest>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
 
-            return client.Request(request, cancellationToken);
+            return await client.Request(request, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>

@@ -30,7 +30,7 @@ namespace MassTransit
         /// <summary>
         /// The request message that was/will be sent.
         /// </summary>
-        TRequest Message { get; }
+        Task<TRequest> Message { get; }
     }
 
 

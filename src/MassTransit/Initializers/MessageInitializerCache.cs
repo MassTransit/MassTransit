@@ -1,24 +1,11 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Initializers
+﻿namespace MassTransit.Initializers
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Conventions;
-    using GreenPipes.Internals.Extensions;
+    using Factories;
+    using GreenPipes;
 
 
     public class MessageInitializerCache<TMessage> :
@@ -32,61 +19,79 @@ namespace MassTransit.Initializers
             _initializers = new Dictionary<Type, Lazy<IMessageInitializer<TMessage>>>();
         }
 
-        IMessageInitializer<TMessage, TInput> IMessageInitializerCache<TMessage>.GetInitializer<TInput>()
+        IMessageInitializer<TMessage> IMessageInitializerCache<TMessage>.GetInitializer(Type inputType)
         {
             Lazy<IMessageInitializer<TMessage>> result;
             lock (_initializers)
             {
-                if (_initializers.TryGetValue(typeof(TInput), out Lazy<IMessageInitializer<TMessage>> initializer))
-                    return initializer.Value as IMessageInitializer<TMessage, TInput>;
+                if (_initializers.TryGetValue(inputType, out Lazy<IMessageInitializer<TMessage>> initializer))
+                    return initializer.Value;
 
-                result = new Lazy<IMessageInitializer<TMessage>>(CreateMessageInitializer<TInput>);
+                result = new Lazy<IMessageInitializer<TMessage>>(() => CreateMessageInitializer(inputType));
 
-                _initializers[typeof(TInput)] = result;
+                _initializers[inputType] = result;
             }
 
-            return result.Value as IMessageInitializer<TMessage, TInput>;
+            return result.Value;
         }
 
-        static IMessageInitializer<TMessage, TInput> CreateMessageInitializer<TInput>()
-            where TInput : class
+        static IMessageInitializer<TMessage> CreateMessageInitializer(Type inputType)
         {
-            var builder = new MessageInitializerBuilder<TMessage, TInput>();
+            var factoryType = typeof(MessageInitializerFactory<,>).MakeGenericType(typeof(TMessage), inputType);
 
-            var inspectors = CreatePropertyInspectors<TInput>().ToArray();
+            var factory = (IMessageInitializerFactory<TMessage>)Activator.CreateInstance(factoryType, new object[] {MessageInitializer.Conventions});
 
-            var convention = new CopyMessageInitializerConvention();
-            foreach (var inspector in inspectors)
-                inspector.Apply(builder, convention);
-
-            IMessageInitializer<TMessage, TInput> messageInitializer = builder.Build();
-
-            return messageInitializer;
-        }
-
-        static IEnumerable<IMessagePropertyInitializerInspector<TMessage, TInput>> CreatePropertyInspectors<TInput>()
-            where TInput : class
-        {
-            return typeof(TMessage).GetAllProperties().Where(x => x.CanRead)
-                .Select(x => (IMessagePropertyInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
-                    typeof(MessagePropertyInitializerInspector<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), x.PropertyType), x.Name));
+            return factory.CreateMessageInitializer();
         }
 
         /// <summary>
         /// Returns the initializer for the message/input type combination
         /// </summary>
-        /// <typeparam name="TInput"></typeparam>
         /// <returns></returns>
-        public static IMessageInitializer<TMessage, TInput> GetInitializer<TInput>()
-            where TInput : class
+        public static IMessageInitializer<TMessage> GetInitializer(Type inputType)
         {
-            return Cached.InitializerCache.GetInitializer<TInput>();
+            return Cached.InitializerCache.GetInitializer(inputType);
         }
 
-        public static Task<TMessage> Initialize<T>(T input, CancellationToken cancellationToken = default)
-            where T : class
+        public static Task Send(ISendEndpoint endpoint, object values, CancellationToken cancellationToken)
         {
-            return Cached.InitializerCache.GetInitializer<T>().Initialize(input, cancellationToken);
+            return GetInitializer(values.GetType()).Send(endpoint, values, cancellationToken);
+        }
+
+        public static Task Send(ISendEndpoint endpoint, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        {
+            return GetInitializer(values.GetType()).Send(endpoint, values, pipe, cancellationToken);
+        }
+
+        public static Task Send(ISendEndpoint endpoint, object values, IPipe<SendContext<TMessage>> pipe, CancellationToken cancellationToken)
+        {
+            return GetInitializer(values.GetType()).Send(endpoint, values, pipe, cancellationToken);
+        }
+
+        public static Task<InitializeContext<TMessage>> Initialize(object values, CancellationToken cancellationToken = default)
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            return Cached.InitializerCache.GetInitializer(values.GetType()).Initialize(values, cancellationToken);
+        }
+
+        public static async Task<TMessage> InitializeMessage(object values, CancellationToken cancellationToken = default)
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            var context = await Cached.InitializerCache.GetInitializer(values.GetType()).Initialize(values, cancellationToken).ConfigureAwait(false);
+
+            return context.Message;
+        }
+
+        public static Task<InitializeContext<TMessage>> Initialize(InitializeContext<TMessage> context, object values)
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            return Cached.InitializerCache.GetInitializer(values.GetType()).Initialize(context, values);
         }
 
 
