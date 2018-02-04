@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Initializers;
     using Util;
 
 
@@ -182,14 +183,20 @@ namespace MassTransit
         public static async Task Send<T>(this ISendEndpointProvider provider, object values, CancellationToken cancellationToken = default)
             where T : class
         {
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
 
             if (!EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache<T>.ShortName} was not found");
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, cancellationToken).ConfigureAwait(false);
+            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+
+            if (provider is ConsumeContext context)
+                await initializer.Send(endpoint, initializer.Create(context), values).ConfigureAwait(false);
+            else
+                await initializer.Send(endpoint, values, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -205,14 +212,20 @@ namespace MassTransit
             CancellationToken cancellationToken = default)
             where T : class
         {
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
 
             if (!EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache<T>.ShortName} was not found");
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, pipe, cancellationToken).ConfigureAwait(false);
+            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+
+            if (provider is ConsumeContext context)
+                await initializer.Send(endpoint, initializer.Create(context), values, pipe).ConfigureAwait(false);
+            else
+                await initializer.Send(endpoint, values, pipe, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -228,14 +241,20 @@ namespace MassTransit
             CancellationToken cancellationToken = default)
             where T : class
         {
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
 
             if (!EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache<T>.ShortName} was not found");
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, pipe, cancellationToken).ConfigureAwait(false);
+            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+
+            if (provider is ConsumeContext context)
+                await initializer.Send(endpoint, initializer.Create(context), values, pipe).ConfigureAwait(false);
+            else
+                await initializer.Send(endpoint, values, pipe, cancellationToken).ConfigureAwait(false);
         }
     }
 }

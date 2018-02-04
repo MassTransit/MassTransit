@@ -15,22 +15,19 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using MassTransit.Scheduling;
 
 
     /// <summary>
-    /// Sets the message endqueue time when sending the message, and invokes
+    /// Sets the message enqueue time when sending the message, and invokes
     /// any developer-specified pipes.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class ServiceBusScheduleMessagePipe<T> :
-        IPipe<SendContext<T>>,
-        IPipe<PublishContext<T>>
+        ScheduleMessageContextPipe<T>
         where T : class
     {
-        readonly IPipe<SendContext<T>> _pipe;
         readonly DateTime _scheduledTime;
-        readonly IPipe<SendContext> _sendPipe;
-        SendContext _context;
 
         public ServiceBusScheduleMessagePipe(DateTime scheduledTime)
         {
@@ -38,64 +35,34 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
         }
 
         public ServiceBusScheduleMessagePipe(DateTime scheduledTime, IPipe<SendContext<T>> pipe)
-            : this(scheduledTime)
+            : base(pipe)
         {
-            _pipe = pipe;
+            _scheduledTime = scheduledTime;
         }
 
         public ServiceBusScheduleMessagePipe(DateTime scheduledTime, IPipe<SendContext> pipe)
-            : this(scheduledTime)
+            : base(pipe)
         {
-            _sendPipe = pipe;
+            _scheduledTime = scheduledTime;
         }
 
-        public Guid? ScheduledMessageId => _context?.ScheduledMessageId;
-
-        public async Task Send(PublishContext<T> context)
+        public override Task Send(SendContext<T> context)
         {
-            _context = context;
-
             context.SetScheduledEnqueueTime(_scheduledTime);
 
-            if (_pipe.IsNotEmpty())
-                await _pipe.Send(context).ConfigureAwait(false);
-
-            if (_sendPipe.IsNotEmpty())
-                await _sendPipe.Send(context).ConfigureAwait(false);
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            _pipe?.Probe(context);
-            _sendPipe?.Probe(context);
-        }
-
-        public async Task Send(SendContext<T> context)
-        {
-            _context = context;
-
-            context.SetScheduledEnqueueTime(_scheduledTime);
-
-            if (_pipe.IsNotEmpty())
-                await _pipe.Send(context).ConfigureAwait(false);
-
-            if (_sendPipe.IsNotEmpty())
-                await _sendPipe.Send(context).ConfigureAwait(false);
+            return base.Send(context);
         }
     }
 
 
     /// <summary>
-    /// Sets the message endqueue time when sending the message, and invokes
+    /// Sets the message enqueue time when sending the message, and invokes
     /// any developer-specified pipes.
     /// </summary>
     public class ServiceBusScheduleMessagePipe :
-        IPipe<SendContext>,
-        IPipe<PublishContext>
+        ScheduleMessageContextPipe
     {
         readonly DateTime _scheduledTime;
-        readonly IPipe<SendContext> _sendPipe;
-        SendContext _context;
 
         public ServiceBusScheduleMessagePipe(DateTime scheduledTime)
         {
@@ -103,36 +70,16 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
         }
 
         public ServiceBusScheduleMessagePipe(DateTime scheduledTime, IPipe<SendContext> pipe)
-            : this(scheduledTime)
+            : base(pipe)
         {
-            _sendPipe = pipe;
+            _scheduledTime = scheduledTime;
         }
 
-        public Guid? ScheduledMessageId => _context?.ScheduledMessageId;
-
-        public async Task Send(PublishContext context)
+        public override Task Send(SendContext context)
         {
-            _context = context;
-
             context.SetScheduledEnqueueTime(_scheduledTime);
 
-            if (_sendPipe.IsNotEmpty())
-                await _sendPipe.Send(context).ConfigureAwait(false);
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            _sendPipe?.Probe(context);
-        }
-
-        public async Task Send(SendContext context)
-        {
-            _context = context;
-
-            context.SetScheduledEnqueueTime(_scheduledTime);
-
-            if (_sendPipe.IsNotEmpty())
-                await _sendPipe.Send(context).ConfigureAwait(false);
+            return base.Send(context);
         }
     }
 }

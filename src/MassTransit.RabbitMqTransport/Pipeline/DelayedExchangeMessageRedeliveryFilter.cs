@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
+    using MassTransit.Scheduling;
     using Scheduling;
 
 
@@ -38,9 +39,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
 
-                var scheduler = new DelayedExchangeMessageScheduler(context, modelContext.ConnectionContext.Topology, modelContext.ConnectionContext.HostAddress);
+                var provider = new DelayedExchangeScheduleMessageProvider(context, modelContext.ConnectionContext.Topology,
+                    modelContext.ConnectionContext.HostAddress);
 
-                return new DelayedExchangeMessageRedeliveryContext<TMessage>(context, scheduler);
+                return new DelayedExchangeMessageRedeliveryContext<TMessage>(context, new MessageScheduler(provider));
             });
 
             return next.Send(context);

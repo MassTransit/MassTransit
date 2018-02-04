@@ -15,6 +15,7 @@ namespace MassTransit.Clients
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Initializers;
 
 
     public class PublishRequestSendEndpoint :
@@ -25,6 +26,17 @@ namespace MassTransit.Clients
         public PublishRequestSendEndpoint(IPublishEndpoint endpoint)
         {
             _endpoint = endpoint;
+        }
+
+        public async Task<T> CreateMessage<T>(object values, CancellationToken cancellationToken)
+            where T : class
+        {
+            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+
+            if (_endpoint is ConsumeContext context)
+                return (await initializer.Initialize(initializer.Create(context), values).ConfigureAwait(false)).Message;
+
+            return (await initializer.Initialize(values, cancellationToken).ConfigureAwait(false)).Message;
         }
 
         public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)

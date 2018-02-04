@@ -20,6 +20,7 @@ namespace MassTransit.Context
     using Events;
     using GreenPipes;
     using GreenPipes.Payloads;
+    using Initializers;
     using Pipeline.Pipes;
     using Serialization;
     using Util;
@@ -108,7 +109,7 @@ namespace MassTransit.Context
             {
                 var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
+                await ConsumeTask(endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken)).ConfigureAwait(false);
             }
             else
                 await Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
@@ -199,34 +200,38 @@ namespace MassTransit.Context
         public virtual Task RespondAsync<T>(object values)
             where T : class
         {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return RespondAsync(message);
+            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this));
         }
 
         public virtual Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe)
             where T : class
         {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return RespondAsync(message, sendPipe);
+            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this, sendPipe));
         }
 
         public virtual Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe)
             where T : class
         {
+            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this, sendPipe));
+        }
+
+        async Task RespondAsyncInternal<T>(object values, IPipe<SendContext<T>> responsePipe)
+            where T : class
+        {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
+            IMessageInitializer<T> initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+            var context = initializer.Create(this);
 
-            return RespondAsync(message, sendPipe);
+            if (ResponseAddress != null)
+            {
+                var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
+
+                await ConsumeTask(initializer.Send(endpoint, context, values, responsePipe)).ConfigureAwait(false);
+            }
+            else
+                await ConsumeTask(initializer.Publish(_publishEndpoint.Value, context, values, responsePipe)).ConfigureAwait(false);
         }
 
         public virtual void Respond<T>(T message)
@@ -329,7 +334,7 @@ namespace MassTransit.Context
             return _receiveContext.PublishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, this);
         }
 
-        protected Task ConsumeTask(Task task)
+        Task ConsumeTask(Task task)
         {
             AddConsumeTask(task);
 

@@ -18,6 +18,7 @@ namespace MassTransit.Transformation.TransformConfigurators
     using System.Linq.Expressions;
     using System.Reflection;
     using GreenPipes;
+    using Initializers.Factories;
     using Internals.Extensions;
     using TransformBuilders;
     using Util;
@@ -85,7 +86,7 @@ namespace MassTransit.Transformation.TransformConfigurators
 
         protected ITransform<TMessage, TMessage> Build()
         {
-            var builder = new MessageTransformBuilder<TMessage, TMessage>(() => TypeMetadataCache<TMessage>.InitializeFromObject(new object()));
+            var builder = new MessageTransformBuilder<TMessage, TMessage>(MessageFactoryCache<TMessage>.CreateMessage);
 
             for (var i = 0; i < _specifications.Count; i++)
                 _specifications[i].Configure(builder);

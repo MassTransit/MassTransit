@@ -16,6 +16,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using MassTransit.Scheduling;
     using Scheduling;
 
 
@@ -35,7 +36,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
         {
             context.GetOrAddPayload<MessageSchedulerContext>(() =>
             {
-                var scheduler = new ServiceBusMessageScheduler(context);
+                var scheduler = new MessageScheduler(new ServiceBusScheduleMessageProvider(context));
 
                 return new ConsumeMessageSchedulerContext(scheduler, context.ReceiveContext.InputAddress);
             });

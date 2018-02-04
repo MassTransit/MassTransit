@@ -13,7 +13,6 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
-    using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
@@ -40,14 +39,16 @@ namespace MassTransit.Pipeline.Filters
             scope.Add("address", _schedulerAddress);
         }
 
-        [DebuggerNonUserCode]
         Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
-            var scheduler = new EndpointMessageScheduler(context, _schedulerAddress);
+            MessageSchedulerContext PayloadFactory()
+            {
+                var scheduler = new MessageScheduler(new EndpointScheduleMessageProvider(() => context.GetSendEndpoint(_schedulerAddress)));
 
-            MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(scheduler, context.ReceiveContext.InputAddress);
+                return new ConsumeMessageSchedulerContext(scheduler, context.ReceiveContext.InputAddress);
+            }
 
-            context.GetOrAddPayload(() => schedulerContext);
+            context.GetOrAddPayload(PayloadFactory);
 
             return next.Send(context);
         }

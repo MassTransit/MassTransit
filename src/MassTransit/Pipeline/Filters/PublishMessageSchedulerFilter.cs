@@ -34,11 +34,14 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
-            var scheduler = new PublishMessageScheduler(context);
+            MessageSchedulerContext PayloadFactory()
+            {
+                IMessageScheduler scheduler = new MessageScheduler(new PublishScheduleMessageProvider(context));
 
-            MessageSchedulerContext schedulerContext = new ConsumeMessageSchedulerContext(scheduler, context.ReceiveContext.InputAddress);
+                return new ConsumeMessageSchedulerContext(scheduler, context.ReceiveContext.InputAddress);
+            }
 
-            context.GetOrAddPayload(() => schedulerContext);
+            context.GetOrAddPayload(PayloadFactory);
 
             return next.Send(context);
         }

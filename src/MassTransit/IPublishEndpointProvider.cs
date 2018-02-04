@@ -31,7 +31,6 @@ namespace MassTransit
         /// Return the SendEndpoint used for publishing the specified message
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="message"></param>
         /// <returns></returns>
         Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
             where T : class;

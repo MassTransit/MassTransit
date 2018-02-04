@@ -30,7 +30,7 @@ namespace MassTransit.Clients
     {
         readonly CancellationToken _cancellationToken;
         readonly ClientFactoryContext _context;
-        readonly TRequest _message;
+        readonly Task<TRequest> _message;
         readonly IBuildPipeConfigurator<SendContext<TRequest>> _pipeConfigurator;
         readonly TaskCompletionSource<bool> _readyToSend;
         readonly Guid _requestId;
@@ -43,7 +43,7 @@ namespace MassTransit.Clients
         Timer _timeoutTimer;
         RequestTimeout _timeToLive;
 
-        public ClientRequestHandle(ClientFactoryContext context, IRequestSendEndpoint requestSendEndpoint, TRequest message,
+        public ClientRequestHandle(ClientFactoryContext context, IRequestSendEndpoint requestSendEndpoint, Task<TRequest> message,
             CancellationToken cancellationToken = default, RequestTimeout timeout = default, Guid? requestId = default, TaskScheduler taskScheduler = default)
         {
             _context = context;
@@ -148,13 +148,15 @@ namespace MassTransit.Clients
             _registration.Dispose();
         }
 
-        TRequest RequestHandle<TRequest>.Message => _message;
+        Task<TRequest> RequestHandle<TRequest>.Message => _message;
 
         async Task SendRequest()
         {
             try
             {
-                await _requestSendEndpoint.Send(_message, this, _cancellationToken).ConfigureAwait(false);
+                var message = await _message.ConfigureAwait(false);
+
+                await _requestSendEndpoint.Send(message, this, _cancellationToken).ConfigureAwait(false);
             }
             catch (RequestException exception)
             {

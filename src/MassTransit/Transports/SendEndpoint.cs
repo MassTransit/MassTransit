@@ -17,8 +17,8 @@ namespace MassTransit.Transports
     using System.Threading.Tasks;
     using Context.Converters;
     using GreenPipes;
+    using Initializers;
     using Pipeline;
-    using Util;
 
 
     public class SendEndpoint :
@@ -120,9 +120,7 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Send(message, cancellationToken);
+            return MessageInitializerCache<T>.Send(this, values, cancellationToken);
         }
 
         public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -172,9 +170,7 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Send(message, pipe, cancellationToken);
+            return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
         }
 
         public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -186,9 +182,7 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Send(message, pipe, cancellationToken);
+            return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
         }
 
 

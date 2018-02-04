@@ -22,6 +22,7 @@ namespace MassTransit.Tests
     using GreenPipes;
     using GreenPipes.Caching;
     using GreenPipes.Payloads;
+    using Initializers;
     using log4net.Filter;
     using Logging;
     using NUnit.Framework;
@@ -41,10 +42,7 @@ namespace MassTransit.Tests
 
             var clientId = NewId.NextGuid();
 
-            await Bus.Publish<Link<DeployPayload>>(new
-            {
-                ClientId = clientId
-            }, context => context.ResponseAddress = Bus.Address);
+            await Bus.Publish<Link<DeployPayload>>(new {ClientId = clientId}, context => context.ResponseAddress = Bus.Address);
 
             var up = await upHandler;
 
@@ -52,11 +50,8 @@ namespace MassTransit.Tests
 
             var acceptHandler = SubscribeHandler<Accept<DeployPayload>>();
 
-            await serviceEndpoint.Send<Ask<DeployPayload>>(new
-            {
-                ClientId = clientId,
-                up.Message.ServiceAddress
-            }, context => context.ResponseAddress = Bus.Address);
+            await serviceEndpoint.Send<Ask<DeployPayload>>(new {ClientId = clientId, up.Message.ServiceAddress},
+                context => context.ResponseAddress = Bus.Address);
 
             var accept = await acceptHandler;
 
@@ -154,11 +149,7 @@ namespace MassTransit.Tests
 
                 await _runtime.Linked(context.Message.ClientId).ConfigureAwait(false);
 
-                await context.RespondAsync<Up<DeployPayload>>(new
-                {
-                    _settings.ServiceAddress,
-                    Endpoint = (EndpointInfo)_settings,
-                });
+                await context.RespondAsync<Up<DeployPayload>>(new {_settings.ServiceAddress, Endpoint = (EndpointInfo)_settings,});
             }
         }
 
@@ -228,10 +219,7 @@ namespace MassTransit.Tests
 
             static Task<ClientInfo> CreateClientInfo(Guid clientId)
             {
-                return Task.FromResult(new ClientInfo()
-                {
-                    ClientId = clientId
-                });
+                return Task.FromResult(new ClientInfo() {ClientId = clientId});
             }
 
             public Task Linked(Guid clientId)
@@ -246,11 +234,7 @@ namespace MassTransit.Tests
 
                 entry.Add(count);
 
-                return TypeMetadataCache<Accept<T>>.InitializeFromObject(new
-                {
-                    Endpoint = (EndpointInfo)_settings,
-                    Count = count,
-                });
+                return TypeMetadataCache<Accept<T>>.InitializeFromObject(new {Endpoint = (EndpointInfo)_settings, Count = count,});
             }
 
             public async Task<(bool accepted, int remaining)> Accept<T>(Guid clientId)
@@ -541,9 +525,7 @@ namespace MassTransit.Tests
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Send(message, cancellationToken);
+            return MessageInitializerCache<T>.Send(this, values, cancellationToken);
         }
 
         public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -593,9 +575,7 @@ namespace MassTransit.Tests
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Send(message, pipe, cancellationToken);
+            return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
         }
 
         public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -607,9 +587,7 @@ namespace MassTransit.Tests
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var message = TypeMetadataCache<T>.InitializeFromObject(values);
-
-            return Send(message, pipe, cancellationToken);
+            return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
         }
     }
 

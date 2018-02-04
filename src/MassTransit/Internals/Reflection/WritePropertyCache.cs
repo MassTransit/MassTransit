@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using Util;
 
 
@@ -13,7 +14,7 @@
 
         WritePropertyCache()
         {
-            _implementationType = TypeMetadataCache<T>.ImplementationType;
+            _implementationType = typeof(T).GetTypeInfo().IsInterface ? TypeMetadataCache<T>.ImplementationType : typeof(T);
 
             _properties = new Dictionary<string, IWriteProperty<T>>(StringComparer.OrdinalIgnoreCase);
         }

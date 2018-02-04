@@ -29,13 +29,13 @@ namespace MassTransit.Context.Converters
 
         ISendEndpointConverter this[Type type] => _types.GetOrAdd(type, CreateTypeConverter).Value;
 
-        public static Task Send(ISendEndpoint endpoint, object message, Type messageType, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task Send(ISendEndpoint endpoint, object message, Type messageType, CancellationToken cancellationToken = default)
         {
             return Cached.Converters.Value[messageType].Send(endpoint, message, cancellationToken);
         }
 
         public static Task Send(ISendEndpoint endpoint, object message, Type messageType, IPipe<SendContext> pipe,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return Cached.Converters.Value[messageType].Send(endpoint, message, pipe, cancellationToken);
         }

@@ -81,11 +81,23 @@ namespace MassTransit.Testing
             return CreateRequestClient<TRequest, TResponse>(InputQueueAddress);
         }
 
+        public virtual IRequestClient<TRequest> CreateRequestClient<TRequest>()
+            where TRequest : class
+        {
+            return CreateRequestClient<TRequest>(InputQueueAddress);
+        }
+
         public virtual IRequestClient<TRequest, TResponse> CreateRequestClient<TRequest, TResponse>(Uri destinationAddress)
             where TRequest : class
             where TResponse : class
         {
             return Bus.CreateRequestClient<TRequest, TResponse>(destinationAddress, TestTimeout);
+        }
+
+        public virtual IRequestClient<TRequest> CreateRequestClient<TRequest>(Uri destinationAddress)
+            where TRequest : class
+        {
+            return Bus.CreateRequestClient<TRequest>(destinationAddress, TestTimeout);
         }
 
         protected virtual void ConnectObservers(IBus bus)
