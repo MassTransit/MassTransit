@@ -48,16 +48,12 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public ISendEndpointProvider CreateSendEndpointProvider(ReceiveContext receiveContext)
         {
-            var transportProvider = new ReceiveContextSendTransportProvider(_hosts, receiveContext);
-
-            return new SendEndpointProvider(transportProvider, SendObservers, Serializer, InputAddress, SendPipe);
+            return SendEndpointProvider;
         }
 
         public IPublishEndpointProvider CreatePublishEndpointProvider(ReceiveContext receiveContext)
         {
-            var transportProivder = new ReceiveContextPublishTransportProvider(receiveContext, _host, _publishTopology);
-
-            return new PublishEndpointProvider(transportProivder, _host.Address, PublishObservers, SendObservers, Serializer, InputAddress, PublishPipe, _publishTopology);
+            return PublishEndpointProvider;
         }
 
         ISendTransportProvider CreateSendTransportProvider()
