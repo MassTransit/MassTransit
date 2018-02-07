@@ -56,7 +56,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             var description = configurator.GetSubscriptionDescription();
             var subscriptionPath = EntityNameFormatter.FormatSubscriptionPath(description.TopicPath, description.Name);
 
-            var queueDescription = Defaults.CreateQueueDescription(subscriptionPath + "_error");
+            var queueDescription = Defaults.CreateQueueDescription(EntityNameFormatter.FormatSubQueuePath(subscriptionPath, "error"));
             queueDescription.DefaultMessageTimeToLive = description.DefaultMessageTimeToLive;
             queueDescription.AutoDeleteOnIdle = description.AutoDeleteOnIdle;
 
@@ -76,7 +76,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             var description = configurator.GetSubscriptionDescription();
             var subscriptionPath = EntityNameFormatter.FormatSubscriptionPath(description.TopicPath, description.Name);
 
-            var queueDescription = Defaults.CreateQueueDescription(subscriptionPath + "_skipped");
+
+            var queueDescription = Defaults.CreateQueueDescription(EntityNameFormatter.FormatDeadLetterPath(subscriptionPath));
             queueDescription.DefaultMessageTimeToLive = description.DefaultMessageTimeToLive;
             queueDescription.AutoDeleteOnIdle = description.AutoDeleteOnIdle;
 
