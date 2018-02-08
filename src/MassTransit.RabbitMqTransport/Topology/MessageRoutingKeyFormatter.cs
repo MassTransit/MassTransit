@@ -23,7 +23,7 @@ namespace MassTransit.RabbitMqTransport.Topology
             _formatter = formatter;
         }
 
-        public string FormatRoutingKey(SendContext<TMessage> context)
+        public string FormatRoutingKey(RabbitMqSendContext<TMessage> context)
         {
             return _formatter.FormatRoutingKey(context);
         }

@@ -26,8 +26,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Conventions.RoutingKey
         {
             DefaultFormatter = new EmptyRoutingKeyFormatter();
 
-            _typeCache = new ConventionTypeCache<IMessageSendTopologyConvention>(typeof(IRoutingKeyMessageSendTopologyConvention<>),
-                new CacheFactory(this));
+            _typeCache = new ConventionTypeCache<IMessageSendTopologyConvention>(typeof(IRoutingKeyMessageSendTopologyConvention<>), new CacheFactory());
         }
 
         bool IMessageSendTopologyConvention.TryGetMessageSendTopologyConvention<T>(out IMessageSendTopologyConvention<T> convention)
@@ -41,16 +40,9 @@ namespace MassTransit.RabbitMqTransport.Topology.Conventions.RoutingKey
         class CacheFactory :
             IConventionTypeCacheFactory<IMessageSendTopologyConvention>
         {
-            readonly IRoutingKeySendTopologyConvention _convention;
-
-            public CacheFactory(IRoutingKeySendTopologyConvention convention)
-            {
-                _convention = convention;
-            }
-
             IMessageSendTopologyConvention IConventionTypeCacheFactory<IMessageSendTopologyConvention>.Create<T>()
             {
-                return new RoutingKeyMessageSendTopologyConvention<T>(_convention.DefaultFormatter);
+                return new RoutingKeyMessageSendTopologyConvention<T>(null);
             }
         }
     }

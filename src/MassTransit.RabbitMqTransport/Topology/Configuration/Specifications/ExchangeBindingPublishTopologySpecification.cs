@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Topology.Specifications
 {
     using System.Collections.Generic;
+    using Builders;
     using Configurators;
     using GreenPipes;
 

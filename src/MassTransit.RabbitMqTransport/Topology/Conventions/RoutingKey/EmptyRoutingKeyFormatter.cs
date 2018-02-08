@@ -15,9 +15,9 @@ namespace MassTransit.RabbitMqTransport.Topology.Conventions.RoutingKey
     public class EmptyRoutingKeyFormatter :
         IRoutingKeyFormatter
     {
-        string IRoutingKeyFormatter.FormatRoutingKey<T>(SendContext<T> context)
+        string IRoutingKeyFormatter.FormatRoutingKey<T>(RabbitMqSendContext<T> context)
         {
-            return "";
+            return context.RoutingKey;
         }
     }
 }

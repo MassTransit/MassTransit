@@ -54,7 +54,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
         {
-            var exchangeHandle = ExchangeDeclare(builder);
+            var exchangeHandle = builder.ExchangeDeclare(_exchange.ExchangeName, _exchange.ExchangeType, _exchange.Durable, _exchange.AutoDelete,
+                _exchange.ExchangeArguments);
 
             if (builder.Exchange != null)
                 builder.ExchangeBind(builder.Exchange, exchangeHandle, "", new Dictionary<string, object>());
@@ -110,12 +111,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         void IExchangeConfigurator.SetExchangeArgument(string key, TimeSpan value)
         {
             _exchange.SetExchangeArgument(key, value);
-        }
-
-        ExchangeHandle ExchangeDeclare(IBrokerTopologyBuilder builder)
-        {
-            return builder.ExchangeDeclare(_exchange.ExchangeName, _exchange.ExchangeType, _exchange.Durable,
-                _exchange.AutoDelete, _exchange.ExchangeArguments);
         }
 
         public void AddImplementedMessageConfigurator<T>(IRabbitMqMessagePublishTopologyConfigurator<T> configurator, bool direct)

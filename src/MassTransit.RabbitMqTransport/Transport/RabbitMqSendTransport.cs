@@ -105,7 +105,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
                         await _observers.PreSend(context).ConfigureAwait(false);
 
-                        var publishTask = modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey, context.Mandatory,
+                        var publishTask = modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey ?? "", context.Mandatory,
                             context.BasicProperties, body, context.AwaitAck);
 
                         await publishTask.WithCancellation(context.CancellationToken).ConfigureAwait(false);

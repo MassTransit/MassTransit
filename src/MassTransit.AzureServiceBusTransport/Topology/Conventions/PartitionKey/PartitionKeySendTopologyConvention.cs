@@ -25,8 +25,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Conventions.PartitionKey
         {
             DefaultFormatter = new EmptyPartitionKeyFormatter();
 
-            _typeCache = new ConventionTypeCache<IMessageSendTopologyConvention>(typeof(IPartitionKeyMessageSendTopologyConvention<>),
-                new CacheFactory(this));
+            _typeCache = new ConventionTypeCache<IMessageSendTopologyConvention>(typeof(IPartitionKeyMessageSendTopologyConvention<>), new CacheFactory());
         }
 
         bool IMessageSendTopologyConvention.TryGetMessageSendTopologyConvention<T>(out IMessageSendTopologyConvention<T> convention)
@@ -40,16 +39,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Conventions.PartitionKey
         class CacheFactory :
             IConventionTypeCacheFactory<IMessageSendTopologyConvention>
         {
-            readonly IPartitionKeySendTopologyConvention _convention;
-
-            public CacheFactory(IPartitionKeySendTopologyConvention convention)
-            {
-                _convention = convention;
-            }
-
             IMessageSendTopologyConvention IConventionTypeCacheFactory<IMessageSendTopologyConvention>.Create<T>()
             {
-                return new PartitionKeyMessageSendTopologyConvention<T>(_convention.DefaultFormatter);
+                return new PartitionKeyMessageSendTopologyConvention<T>(null);
             }
         }
     }

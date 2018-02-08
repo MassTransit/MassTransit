@@ -26,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Conventions.RoutingKey
             _formatter = formatter;
         }
 
-        public string FormatRoutingKey(SendContext<TMessage> context)
+        public string FormatRoutingKey(RabbitMqSendContext<TMessage> context)
         {
             return _formatter(context) ?? "";
         }

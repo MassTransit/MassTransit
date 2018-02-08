@@ -25,8 +25,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Conventions.SessionId
         {
             DefaultFormatter = new EmptySessionIdFormatter();
 
-            _typeCache = new ConventionTypeCache<IMessageSendTopologyConvention>(typeof(ISessionIdMessageSendTopologyConvention<>),
-                new CacheFactory(this));
+            _typeCache = new ConventionTypeCache<IMessageSendTopologyConvention>(typeof(ISessionIdMessageSendTopologyConvention<>), new CacheFactory());
         }
 
         bool IMessageSendTopologyConvention.TryGetMessageSendTopologyConvention<T>(out IMessageSendTopologyConvention<T> convention)
@@ -40,16 +39,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Conventions.SessionId
         class CacheFactory :
             IConventionTypeCacheFactory<IMessageSendTopologyConvention>
         {
-            readonly ISessionIdSendTopologyConvention _convention;
-
-            public CacheFactory(ISessionIdSendTopologyConvention convention)
-            {
-                _convention = convention;
-            }
-
             IMessageSendTopologyConvention IConventionTypeCacheFactory<IMessageSendTopologyConvention>.Create<T>()
             {
-                return new SessionIdMessageSendTopologyConvention<T>(_convention.DefaultFormatter);
+                return new SessionIdMessageSendTopologyConvention<T>(null);
             }
         }
     }

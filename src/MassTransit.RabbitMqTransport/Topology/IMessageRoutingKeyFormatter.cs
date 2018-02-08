@@ -15,6 +15,6 @@ namespace MassTransit.RabbitMqTransport.Topology
     public interface IMessageRoutingKeyFormatter<in TMessage>
         where TMessage : class
     {
-        string FormatRoutingKey(SendContext<TMessage> context);
+        string FormatRoutingKey(RabbitMqSendContext<TMessage> context);
     }
 }
