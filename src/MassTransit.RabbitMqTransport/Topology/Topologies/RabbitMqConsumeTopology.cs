@@ -74,13 +74,14 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         public void Bind(string exchangeName, Action<IExchangeBindingConfigurator> configure = null)
         {
+            if (string.IsNullOrWhiteSpace(exchangeName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(exchangeName));
+
             var exchangeType = ExchangeTypeSelector.DefaultExchangeType;
 
             var specification = new ExchangeBindingConsumeTopologySpecification(exchangeName, exchangeType);
 
             configure?.Invoke(specification);
-
-            _specifications.Add(specification);
 
             _specifications.Add(specification);
         }

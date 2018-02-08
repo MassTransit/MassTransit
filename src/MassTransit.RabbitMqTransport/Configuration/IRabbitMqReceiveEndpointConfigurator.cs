@@ -44,31 +44,17 @@ namespace MassTransit.RabbitMqTransport
         void ConnectManagementEndpoint(IManagementEndpointConfigurator management);
 
         /// <summary>
-        /// Bind an existing exchange to the receive endpoint queue by name
-        /// </summary>
-        /// <param name="exchangeName">The exchange name</param>
-        void Bind(string exchangeName);
-
-        /// <summary>
-        /// Bind an existing exchange for the message type to the receive endpoint by name
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        void Bind<T>()
-            where T : class;
-
-        /// <summary>
         /// Bind an exchange to the receive endpoint exchange
         /// </summary>
         /// <param name="exchangeName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback);
+        void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback = null);
 
         /// <summary>
         /// Bind an exchange to the receive endpoint exchange
         /// </summary>
-        /// <param name="exchangeName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Bind<T>(Action<IExchangeBindingConfigurator> callback)
+        void Bind<T>(Action<IExchangeBindingConfigurator> callback = null)
             where T : class;
     }
 }

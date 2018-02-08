@@ -185,27 +185,10 @@ namespace MassTransit.RabbitMqTransport.EndpointSpecifications
             management.Instance(consumer);
         }
 
-        public void Bind(string exchangeName)
-        {
-            if (exchangeName == null)
-                throw new ArgumentNullException(nameof(exchangeName));
-
-            _configuration.Topology.Consume.Bind(exchangeName);
-        }
-
-        public void Bind<T>()
-            where T : class
-        {
-            _configuration.Topology.Consume.GetMessageTopology<T>().Bind();
-        }
-
         public void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback)
         {
             if (exchangeName == null)
                 throw new ArgumentNullException(nameof(exchangeName));
-
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
 
             _configuration.Topology.Consume.Bind(exchangeName, callback);
         }
@@ -213,9 +196,6 @@ namespace MassTransit.RabbitMqTransport.EndpointSpecifications
         public void Bind<T>(Action<IExchangeBindingConfigurator> callback)
             where T : class
         {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-
             _configuration.Topology.Consume.GetMessageTopology<T>().Bind(callback);
         }
 

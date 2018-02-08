@@ -54,6 +54,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
         public void Subscribe(string subscriptionName, Action<ISubscriptionConfigurator> configure = null)
         {
+            if (string.IsNullOrWhiteSpace(subscriptionName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(subscriptionName));
+
             if (!IsBindableMessageType)
             {
                 _specifications.Add(new InvalidServiceBusConsumeTopologySpecification(TypeMetadataCache<TMessage>.ShortName, "Is not a bindable message type"));

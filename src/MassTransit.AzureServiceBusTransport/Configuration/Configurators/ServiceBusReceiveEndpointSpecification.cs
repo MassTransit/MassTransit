@@ -23,6 +23,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Settings;
     using Specifications;
     using Topology;
+    using Topology.Configuration;
     using Topology.Configuration.Configurators;
     using Transport;
     using Transports;
@@ -113,6 +114,17 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             set => _settings.RemoveSubscriptions = value;
         }
 
+        public void Subscribe(string topicName, string subscriptionName, Action<ISubscriptionConfigurator> callback)
+        {
+            _configuration.Topology.Consume.Subscribe(topicName, subscriptionName, callback);
+        }
+
+        public void Subscribe<T>(string subscriptionName, Action<ISubscriptionConfigurator> callback)
+            where T : class
+        {
+            _configuration.Topology.Consume.GetMessageTopology<T>().Subscribe(subscriptionName, callback);
+        }
+
         public override void SelectBasicTier()
         {
             base.SelectBasicTier();
@@ -167,7 +179,8 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextCache(host, settings));
         }
 
-        protected override IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings, IPipe<NamespaceContext> namespacePipe)
+        protected override IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings,
+            IPipe<NamespaceContext> namespacePipe)
         {
             return new QueueSendEndpointContextFactory(host.MessagingFactoryCache, host.NamespaceCache, Pipe.Empty<MessagingFactoryContext>(), namespacePipe, settings);
         }

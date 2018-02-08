@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology
 {
+    using System;
     using MassTransit.Topology;
 
 
@@ -23,5 +24,12 @@ namespace MassTransit.RabbitMqTransport.Topology
             where T : class;
 
         void AddSpecification(IRabbitMqConsumeTopologySpecification specification);
+
+        /// <summary>
+        /// Bind an exchange, using the configurator
+        /// </summary>
+        /// <param name="exchangeName"></param>
+        /// <param name="configure"></param>
+        void Bind(string exchangeName, Action<IExchangeBindingConfigurator> configure = null);
     }
 }

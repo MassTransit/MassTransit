@@ -31,13 +31,6 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <param name="builder"></param>
         void Apply(IReceiveEndpointBrokerTopologyBuilder builder);
 
-        /// <summary>
-        /// Bind an exchange, using the configurator
-        /// </summary>
-        /// <param name="exchangeName"></param>
-        /// <param name="configure"></param>
-        void Bind(string exchangeName, Action<IExchangeBindingConfigurator> configure = null);
-
         string CreateTemporaryQueueName(string prefix);
     }
 }

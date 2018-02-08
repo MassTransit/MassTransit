@@ -12,6 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
+    using System;
+    using Topology.Configuration;
+
+
     /// <summary>
     /// Configure an Azure Service Bus receive endpoint
     /// </summary>
@@ -34,5 +38,21 @@ namespace MassTransit.AzureServiceBusTransport
         /// queues from creating abandoned subscriptions on the topic, resulting in a quota overflow.
         /// </summary>
         bool RemoveSubscriptions { set; }
+
+        /// <summary>
+        /// Create a topic subscription on the endpoint
+        /// </summary>
+        /// <param name="topicName">The topic name</param>
+        /// <param name="subscriptionName">The name for the subscription</param>
+        /// <param name="callback">Configure the exchange and binding</param>
+        void Subscribe(string topicName, string subscriptionName, Action<ISubscriptionConfigurator> callback = null);
+
+        /// <summary>
+        /// Create a topic subscription for the message type
+        /// </summary>
+        /// <param name="subscriptionName">The name for the subscription</param>
+        /// <param name="callback">Configure the topic subscription</param>
+        void Subscribe<T>(string subscriptionName, Action<ISubscriptionConfigurator> callback = null)
+            where T : class;
     }
 }

@@ -17,6 +17,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
     using System.Linq;
     using Builders;
     using Configuration;
+    using Configuration.Configurators;
+    using Configuration.Specifications;
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
@@ -51,6 +53,24 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         {
             if (specification == null)
                 throw new ArgumentNullException(nameof(specification));
+
+            _specifications.Add(specification);
+        }
+
+        public void Subscribe(string topicName, string subscriptionName, Action<ISubscriptionConfigurator> callback = null)
+        {
+            if (string.IsNullOrWhiteSpace(topicName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(topicName));
+            if (string.IsNullOrWhiteSpace(subscriptionName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(subscriptionName));
+
+            var topicDescription = Defaults.CreateTopicDescription(topicName);
+
+            var subscriptionConfigurator = new SubscriptionConfigurator(topicDescription.Path, subscriptionName);
+
+            callback?.Invoke(subscriptionConfigurator);
+
+            var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription());
 
             _specifications.Add(specification);
         }
