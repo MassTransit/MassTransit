@@ -62,5 +62,13 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="exchangeName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
         void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback);
+
+        /// <summary>
+        /// Bind an exchange to the receive endpoint exchange
+        /// </summary>
+        /// <param name="exchangeName">The exchange name</param>
+        /// <param name="callback">Configure the exchange and binding</param>
+        void Bind<T>(Action<IExchangeBindingConfigurator> callback)
+            where T : class;
     }
 }

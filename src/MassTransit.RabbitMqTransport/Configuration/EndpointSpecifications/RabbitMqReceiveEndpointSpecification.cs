@@ -210,6 +210,15 @@ namespace MassTransit.RabbitMqTransport.EndpointSpecifications
             _configuration.Topology.Consume.Bind(exchangeName, callback);
         }
 
+        public void Bind<T>(Action<IExchangeBindingConfigurator> callback)
+            where T : class
+        {
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+
+            _configuration.Topology.Consume.GetMessageTopology<T>().Bind(callback);
+        }
+
         public override IEnumerable<ValidationResult> Validate()
         {
             foreach (var result in base.Validate())

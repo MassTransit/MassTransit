@@ -15,13 +15,13 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using MassTransit.Topology;
     using MassTransit.Topology.EntityNameFormatters;
     using NUnit.Framework;
     using Topology;
     using Topology.Builders;
     using Topology.Topologies;
     using TopologyTestTypes;
+
 
     namespace TopologyTestTypes
     {
@@ -45,6 +45,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             SecondInterface
         {
         }
+
+
+        public interface AnotherThirdInterface :
+            SecondInterface
+        {
+        }
     }
 
 
@@ -55,7 +61,8 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_be_received()
         {
-            await Bus.Publish<ThirdInterface>(new {});
+            await Bus.Publish<ThirdInterface>(new { });
+            await Bus.Publish<AnotherThirdInterface>(new { });
 
             var received = await _receivedA;
         }
@@ -74,7 +81,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             _receivedA = Handled<FirstInterface>(configurator);
         }
     }
-    
+
+
     [TestFixture]
     public class Configuring_a_topology :
         RabbitMqTestFixture
@@ -82,13 +90,13 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_not_consume_the_messages()
         {
-            await Bus.Publish<ThirdInterface>(new {});
+            await Bus.Publish<ThirdInterface>(new { });
         }
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.DeployTopologyOnly = true;
-            
+
             configurator.PublishTopology.BrokerTopologyOptions = PublishBrokerTopologyOptions.MaintainHierarchy;
         }
 
@@ -155,6 +163,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _builder.Queue = _builder.QueueDeclare(_inputQueueName, true, false, false, new Dictionary<string, object>());
             _builder.Exchange = _builder.ExchangeDeclare(_inputQueueName, _consumeTopology.ExchangeTypeSelector.DefaultExchangeType, true, false,
                 new Dictionary<string, object>());
+
             _builder.QueueBind(_builder.Exchange, _builder.Queue, "", new Dictionary<string, object>());
         }
 
@@ -261,6 +270,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.That(topology.ExchangeBindings.Length, Is.EqualTo(2));
             Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == secondInterfaceName && x.Destination.ExchangeName == firstInterfaceName),
                 Is.True);
+
             Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == thirdInterfaceName && x.Destination.ExchangeName == secondInterfaceName),
                 Is.True);
 
