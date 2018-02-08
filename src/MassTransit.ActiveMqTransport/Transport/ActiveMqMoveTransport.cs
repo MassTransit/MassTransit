@@ -16,7 +16,6 @@ namespace MassTransit.ActiveMqTransport.Transport
     using System.IO;
     using System.Threading.Tasks;
     using Apache.NMS;
-    using Apache.NMS.Util;
     using Contexts;
     using GreenPipes;
 

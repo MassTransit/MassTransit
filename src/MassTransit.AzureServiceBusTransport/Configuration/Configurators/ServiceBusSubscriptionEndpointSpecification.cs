@@ -23,7 +23,6 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using Settings;
     using Specifications;
     using Topology;
-    using Topology.Configuration;
     using Transport;
     using Transports;
 
@@ -74,14 +73,14 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         protected override IErrorTransport CreateErrorTransport(ServiceBusHost host)
         {
-            var settings = _sendTopology.GetErrorSettings(_settings.SubscriptionConfigurator);
+            var settings = _sendTopology.GetErrorSettings(_settings.SubscriptionConfigurator, host.Address.AbsolutePath);
 
             return new BrokeredMessageErrorTransport(CreateSendEndpointContextCache(host, settings));
         }
 
         protected override IDeadLetterTransport CreateDeadLetterTransport(ServiceBusHost host)
         {
-            var settings = _sendTopology.GetDeadLetterSettings(_settings.SubscriptionConfigurator);
+            var settings = _sendTopology.GetDeadLetterSettings(_settings.SubscriptionConfigurator, host.Address.AbsolutePath);
 
             return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextCache(host, settings));
         }

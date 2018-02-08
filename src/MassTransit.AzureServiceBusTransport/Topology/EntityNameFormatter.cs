@@ -18,7 +18,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         const string Subscriptions = "Subscriptions";
         const string SubQueuePrefix = "$";
         const string DeadLetterQueueSuffix = "DeadLetterQueue";
+        const string ErrorQueueSuffix = "Error";
         const string DeadLetterQueueName = SubQueuePrefix + DeadLetterQueueSuffix;
+        const string ErrorQueueName = SubQueuePrefix + ErrorQueueSuffix;
         const string Transfer = "Transfer";
         const string TransferDeadLetterQueueName = SubQueuePrefix + Transfer + PathDelimiter + DeadLetterQueueName;
 
@@ -30,6 +32,16 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         public static string FormatDeadLetterPath(string entityPath)
         {
             return FormatSubQueuePath(entityPath, DeadLetterQueueName);
+        }
+
+        /// <summary>
+        /// Formats the dead letter path for either a queue, or a subscription.
+        /// </summary>
+        /// <param name="entityPath">The name of the queue, or path of the subscription.</param>
+        /// <returns>The path as a string of the dead letter entity.</returns>
+        public static string FormatErrorPath(string entityPath)
+        {
+            return FormatSubQueuePath(entityPath, ErrorQueueName);
         }
 
         /// <summary>

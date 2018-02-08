@@ -26,6 +26,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         SendTopology,
         IServiceBusSendTopologyConfigurator
     {
+        const string ErrorQueueSuffix = "_error";
+        const string DeadLetterQueueSuffix = "_skipped";
+
         IServiceBusMessageSendTopology<T> IServiceBusSendTopology.GetMessageTopology<T>()
         {
             return GetMessageTopology<T>() as IServiceBusMessageSendTopologyConfigurator<T>;
@@ -46,17 +49,21 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         public SendSettings GetErrorSettings(IQueueConfigurator configurator)
         {
             var description = configurator.GetQueueDescription();
-            description.Path = description.Path + "_error";
+            description.Path = description.Path + ErrorQueueSuffix;
 
             return new QueueSendSettings(description);
         }
 
-        public SendSettings GetErrorSettings(ISubscriptionConfigurator configurator)
+        public SendSettings GetErrorSettings(ISubscriptionConfigurator configurator, string basePath)
         {
             var description = configurator.GetSubscriptionDescription();
-            var subscriptionPath = EntityNameFormatter.FormatSubscriptionPath(description.TopicPath, description.Name);
 
-            var queueDescription = Defaults.CreateQueueDescription(EntityNameFormatter.FormatSubQueuePath(subscriptionPath, "error"));
+            basePath = basePath.Trim('/');
+
+            var path = description.Name + ErrorQueueSuffix;
+            var queuePath = string.IsNullOrEmpty(basePath) ? path : $"{basePath}/{path.Trim('/')}";
+
+            var queueDescription = Defaults.CreateQueueDescription(queuePath);
             queueDescription.DefaultMessageTimeToLive = description.DefaultMessageTimeToLive;
             queueDescription.AutoDeleteOnIdle = description.AutoDeleteOnIdle;
 
@@ -66,18 +73,21 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         public SendSettings GetDeadLetterSettings(IQueueConfigurator configurator)
         {
             var description = configurator.GetQueueDescription();
-            description.Path = description.Path + "_skipped";
+            description.Path = description.Path + DeadLetterQueueSuffix;
 
             return new QueueSendSettings(description);
         }
 
-        public SendSettings GetDeadLetterSettings(ISubscriptionConfigurator configurator)
+        public SendSettings GetDeadLetterSettings(ISubscriptionConfigurator configurator, string basePath)
         {
             var description = configurator.GetSubscriptionDescription();
-            var subscriptionPath = EntityNameFormatter.FormatSubscriptionPath(description.TopicPath, description.Name);
 
+            basePath = basePath.Trim('/');
 
-            var queueDescription = Defaults.CreateQueueDescription(EntityNameFormatter.FormatDeadLetterPath(subscriptionPath));
+            var path = description.Name + DeadLetterQueueSuffix;
+            var queuePath = string.IsNullOrEmpty(basePath) ? path : $"{basePath}/{path.Trim('/')}";
+            
+            var queueDescription = Defaults.CreateQueueDescription(queuePath);
             queueDescription.DefaultMessageTimeToLive = description.DefaultMessageTimeToLive;
             queueDescription.AutoDeleteOnIdle = description.AutoDeleteOnIdle;
 

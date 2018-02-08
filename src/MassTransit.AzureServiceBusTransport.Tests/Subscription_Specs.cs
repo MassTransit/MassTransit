@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
     {
         using System.Threading.Tasks;
         using NUnit.Framework;
+        using TestFramework;
 
 
         [TestFixture]
@@ -50,6 +51,49 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 });
             }
         }
+        
+        [TestFixture]
+        public class Using_a_subscription_endpoint_that_faults :
+            AzureServiceBusTestFixture
+        {
+            [Test]
+            public async Task Should_succeed()
+            {
+                await Bus.Publish(new MessageC());
+                await Bus.Publish(new MessageB());
+
+                await _handledA;
+
+                await Task.Delay(3000);
+            }
+
+            Task<ConsumeContext<MessageA>> _handledA;
+            Task<ConsumeContext<MessageB>> _handledB;
+
+            protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+            {
+                _handledA = Handled<MessageA>(configurator);
+            }
+
+            protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+            {
+                base.ConfigureServiceBusBusHost(configurator, host);
+
+                configurator.SubscriptionEndpoint<MessageB>(host, "phatboyg_you_know_me", x =>
+                {
+                    _handledB = Handler<MessageB>(x, async context =>
+                    {
+                        await context.Publish(new MessageA());
+                        
+                        throw new IntentionalTestException("Oh, dang.");
+                    });
+                });
+                
+                configurator.SubscriptionEndpoint<MessageC>(host, "no_handlers", x =>
+                {
+                });
+            }
+        }
 
 
         public class MessageA
@@ -59,6 +103,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
 
         public class MessageB
+        {
+            public string Value { get; set; }
+        }
+        
+        public class MessageC
         {
             public string Value { get; set; }
         }

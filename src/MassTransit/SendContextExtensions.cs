@@ -48,6 +48,7 @@ namespace MassTransit
 
             headers.Set(MessageHeaders.Reason, "fault");
 
+            headers.Set(MessageHeaders.FaultExceptionType, TypeMetadataCache.GetShortName(exception.GetType()));
             headers.Set(MessageHeaders.FaultMessage, exceptionMessage);
             headers.Set(MessageHeaders.FaultTimestamp, exceptionTimestamp.ToString("O"));
             headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
