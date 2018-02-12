@@ -72,6 +72,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
     }
 
+
     [TestFixture]
     public class Delaying_a_message_retry_with_policy :
         RabbitMqTestFixture
@@ -104,7 +105,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             }, x => x.UseDelayedRedelivery(r => r.Intervals(100, 200)));
         }
     }
-    
+
+
     [TestFixture]
     public class Retrying_a_message_retry_with_policy :
         RabbitMqTestFixture
@@ -137,7 +139,65 @@ namespace MassTransit.RabbitMqTransport.Tests
             }, x => x.UseRetry(r => r.Intervals(100, 200)));
         }
     }
-    
+
+
+    [TestFixture]
+    public class Using_delayed_exchange_redelivery_with_a_consumer :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_retry_each_message_type()
+        {
+            var pingMessage = new PingMessage();
+
+            var pingFault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            var pongFault = SubscribeHandler<Fault<PongMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+
+            await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
+            await InputQueueSendEndpoint.Send(new PongMessage(pingMessage.CorrelationId), x => x.FaultAddress = Bus.Address);
+
+            ConsumeContext<Fault<PingMessage>> pingFaultContext = await pingFault;
+            ConsumeContext<Fault<PongMessage>> pongFaultContext = await pongFault;
+
+            Assert.That(_consumer.PingCount, Is.EqualTo(3));
+            Assert.That(_consumer.PongCount, Is.EqualTo(3));
+        }
+
+        Consumer _consumer;
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseDelayedRedelivery(r => r.Intervals(100, 200));
+
+            _consumer = new Consumer();
+            configurator.Consumer(() => _consumer);
+        }
+
+
+        class Consumer :
+            IConsumer<PingMessage>,
+            IConsumer<PongMessage>
+        {
+            public int PingCount;
+            public int PongCount;
+
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                Interlocked.Increment(ref PingCount);
+
+                throw new IntentionalTestException();
+            }
+
+            public Task Consume(ConsumeContext<PongMessage> context)
+            {
+                Interlocked.Increment(ref PongCount);
+
+                throw new IntentionalTestException();
+            }
+        }
+    }
+
+
     [TestFixture]
     public class Delaying_a_message_retry_with_policy_but_no_retries :
         RabbitMqTestFixture

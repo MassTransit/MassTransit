@@ -17,10 +17,10 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
     using GreenPipes;
     using Builders;
     using MassTransit.Builders;
-    using MassTransit.Configuration;
     using MassTransit.Hosting;
     using MassTransit.Saga;
     using MassTransit.Topology;
+    using SagaConfigurators;
 
 
     /// <summary>

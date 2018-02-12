@@ -16,11 +16,11 @@ namespace MassTransit.BusConfigurators
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
-    using Configuration;
     using ConsumeConfigurators;
     using EndpointSpecifications;
     using GreenPipes;
     using Saga;
+    using SagaConfigurators;
     using Topology;
 
 

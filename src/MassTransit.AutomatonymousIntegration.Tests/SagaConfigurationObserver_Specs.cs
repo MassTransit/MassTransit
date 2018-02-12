@@ -19,6 +19,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using GreenPipes;
     using NUnit.Framework;
     using Saga;
+    using SagaConfigurators;
     using Util;
 
 

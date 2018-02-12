@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using GreenPipes;
     using Saga;
+    using SagaConfigurators;
 
 
     /// <summary>

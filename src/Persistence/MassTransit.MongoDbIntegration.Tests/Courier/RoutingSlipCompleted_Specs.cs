@@ -22,7 +22,6 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
     using MongoDB.Driver;
     using NUnit.Framework;
     using Testing;
-    using Util;
 
 
     [TestFixture]

@@ -17,6 +17,7 @@ namespace Automatonymous.SagaConfigurators
     using GreenPipes;
     using MassTransit;
     using MassTransit.Saga;
+    using MassTransit.SagaConfigurators;
     using StateMachineConnectors;
 
 

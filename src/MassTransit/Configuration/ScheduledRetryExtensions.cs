@@ -66,5 +66,23 @@ namespace MassTransit
 
             configurator.AddPipeSpecification(retrySpecification);
         }
+
+        /// <summary>
+        /// Configure scheduled redelivery for all message types
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configureRetry"></param>
+        public static void UseScheduledRedelivery(this IReceiveEndpointConfigurator configurator, Action<IRetryConfigurator> configureRetry)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            if (configureRetry == null)
+                throw new ArgumentNullException(nameof(configureRetry));
+
+            configurator.ConnectConsumerConfigurationObserver(new ScheduledRedeliveryConsumerConfigurationObserver(configureRetry));
+
+            configurator.ConnectSagaConfigurationObserver(new ScheduledRedeliverySagaConfigurationObserver(configureRetry));
+        }
     }
 }

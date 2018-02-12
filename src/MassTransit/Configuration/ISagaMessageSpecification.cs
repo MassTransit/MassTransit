@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using GreenPipes;
     using Saga;
+    using SagaConfigurators;
 
 
     public interface ISagaMessageSpecification<TSaga> :

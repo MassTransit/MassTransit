@@ -15,10 +15,8 @@ namespace MassTransit.ConsumerSpecifications
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configuration;
     using ConsumeConfigurators;
     using GreenPipes;
-    using Observables;
     using Util;
 
 

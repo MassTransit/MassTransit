@@ -13,10 +13,10 @@
 namespace MassTransit
 {
     using System;
-    using Configuration;
     using ConsumeConfigurators;
     using GreenPipes;
     using Saga;
+    using SagaConfigurators;
 
 
     /// <summary>

@@ -152,6 +152,79 @@ namespace MassTransit.QuartzIntegration.Tests
         }
     }
 
+    [TestFixture]
+    public class Using_a_scheduled_delay_retry_mechanism_for_consumer_without_message :
+        QuartzInMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_properly_defer_the_message_delivery()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            ConsumeContext<PingMessage> context = await _consumer.Received;
+
+            Assert.GreaterOrEqual(_consumer.ReceivedTimeSpan, TimeSpan.FromSeconds(1));
+        }
+
+        MyConsumer _consumer;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            base.ConfigureInMemoryBus(configurator);
+
+            configurator.UseMessageScheduler(QuartzAddress);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new MyConsumer(GetTask<ConsumeContext<PingMessage>>());
+
+            configurator.UseScheduledRedelivery(r => r.Intervals(1000, 2000));
+            configurator.Consumer(() => _consumer);
+        }
+
+
+        class MyConsumer :
+            IConsumer<PingMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<PingMessage>> _received;
+            int _count;
+            TimeSpan _receivedTimeSpan;
+            Stopwatch _timer;
+
+            public MyConsumer(TaskCompletionSource<ConsumeContext<PingMessage>> taskCompletionSource)
+            {
+                _received = taskCompletionSource;
+            }
+
+            public Task<ConsumeContext<PingMessage>> Received => _received.Task;
+
+            public IComparable ReceivedTimeSpan => _receivedTimeSpan;
+
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                if (_timer == null)
+                    _timer = Stopwatch.StartNew();
+
+                if (_count++ < 2)
+                {
+                    Console.WriteLine("{0} now is not a good time", DateTime.UtcNow);
+                    throw new IntentionalTestException("I'm so not ready for this jelly.");
+                }
+
+                _timer.Stop();
+
+                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow, context.Headers.Get("MT-Redelivery-Count", default(int?)));
+
+                // okay, ready.
+                _receivedTimeSpan = _timer.Elapsed;
+                _received.TrySetResult(context);
+
+                return TaskUtil.Completed;
+            }
+        }
+    }
+
 
     [TestFixture]
     public class Using_an_explicit_retry_later_via_scheduling :

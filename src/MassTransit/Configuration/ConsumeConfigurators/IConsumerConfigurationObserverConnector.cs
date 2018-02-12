@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConfigurators
 {
-    using Configuration;
     using GreenPipes;
 
 

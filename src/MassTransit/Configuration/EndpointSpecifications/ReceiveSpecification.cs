@@ -15,12 +15,12 @@ namespace MassTransit.EndpointSpecifications
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configuration;
     using ConsumeConfigurators;
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using Saga;
+    using SagaConfigurators;
 
 
     public abstract class ReceiveSpecification :

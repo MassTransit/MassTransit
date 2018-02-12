@@ -17,7 +17,6 @@ namespace MassTransit.Containers.Tests
     using System.Threading.Tasks;
     using Autofac;
     using AutofacIntegration;
-    using Configuration;
     using ConsumeConfigurators;
     using GreenPipes;
     using NUnit.Framework;

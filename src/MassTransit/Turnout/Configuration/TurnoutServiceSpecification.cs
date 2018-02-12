@@ -17,8 +17,8 @@ namespace MassTransit.Turnout.Configuration
     using Builders;
     using ConsumeConfigurators;
     using GreenPipes;
-    using MassTransit.Configuration;
     using Saga;
+    using SagaConfigurators;
 
 
     public class TurnoutServiceSpecification<TCommand> :

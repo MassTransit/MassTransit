@@ -16,8 +16,8 @@ namespace MassTransit.SagaSpecifications
     using System.Collections.Generic;
     using System.Linq;
     using GreenPipes;
-    using Observables;
     using Saga;
+    using SagaConfigurators;
     using Util;
 
 

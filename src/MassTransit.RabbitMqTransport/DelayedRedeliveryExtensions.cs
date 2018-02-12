@@ -16,10 +16,12 @@ namespace MassTransit
     using GreenPipes;
     using GreenPipes.Configurators;
     using PipeConfigurators;
+    using RabbitMqTransport;
+    using RabbitMqTransport.Configurators;
     using RabbitMqTransport.Specifications;
 
 
-    public static class DelayedExchangeRetryExtensions
+    public static class DelayedRedeliveryExtensions
     {
         /// <summary>
         /// Use the message scheduler to schedule redelivery of a specific message type based upon the retry policy, via
@@ -27,6 +29,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="retryPolicy"></param>
+        [Obsolete("Use the delegate method to configure the retry")]
         public static void UseDelayedRedelivery<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IRetryPolicy retryPolicy)
             where T : class
         {
@@ -65,6 +68,24 @@ namespace MassTransit
             configure?.Invoke(retrySpecification);
 
             configurator.AddPipeSpecification(retrySpecification);
+        }
+
+        /// <summary>
+        /// Configure delayed exchange RabbitMQ redelivery for all message types
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configureRetry"></param>
+        public static void UseDelayedRedelivery(this IRabbitMqReceiveEndpointConfigurator configurator, Action<IRetryConfigurator> configureRetry)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            if (configureRetry == null)
+                throw new ArgumentNullException(nameof(configureRetry));
+
+            configurator.ConnectConsumerConfigurationObserver(new DelayedExchangeRedeliveryConsumerConfigurationObserver(configureRetry));
+
+            configurator.ConnectSagaConfigurationObserver(new DelayedExchangeRedeliverySagaConfigurationObserver(configureRetry));
         }
     }
 }

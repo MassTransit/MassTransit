@@ -14,12 +14,10 @@ namespace MassTransit.ConsumerSpecifications
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
     using ConsumeConfigurators;
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
-    using Observables;
     using Util;
 
 

@@ -13,13 +13,13 @@
 namespace MassTransit.RabbitMqTransport.Hosting
 {
     using System;
-    using Configuration;
     using ConsumeConfigurators;
     using GreenPipes;
     using MassTransit.Builders;
     using MassTransit.Hosting;
     using MassTransit.Topology;
     using Saga;
+    using SagaConfigurators;
 
 
     /// <summary>

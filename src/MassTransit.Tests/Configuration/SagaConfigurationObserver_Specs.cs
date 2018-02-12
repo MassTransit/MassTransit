@@ -18,6 +18,7 @@ namespace MassTransit.Tests.Configuration
     using GreenPipes;
     using MassTransit.Saga;
     using NUnit.Framework;
+    using SagaConfigurators;
     using TestFramework.Messages;
     using Util;
 

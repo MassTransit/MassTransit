@@ -16,18 +16,16 @@ namespace MassTransit.ConsumePipeSpecifications
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using Configuration;
     using ConsumeConfigurators;
-    using Context;
     using Context.Converters;
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Filters;
     using Metadata;
-    using Observables;
     using Pipeline;
     using Pipeline.Pipes;
     using Saga;
+    using SagaConfigurators;
 
 
     public class ConsumePipeSpecification :
