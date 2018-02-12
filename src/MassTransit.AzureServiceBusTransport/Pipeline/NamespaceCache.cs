@@ -19,7 +19,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
 
     public class NamespaceCache :
-        CacheContextSupervisor<NamespaceContext>,
+        PipeContextSupervisor<NamespaceContext>,
         INamespaceCache
     {
         readonly string _description;

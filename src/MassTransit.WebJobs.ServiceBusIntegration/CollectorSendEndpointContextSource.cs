@@ -19,7 +19,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
 
 
     public class CollectorSendEndpointContextSource :
-        ISource<SendEndpointContext>
+        IPipeContextSource<SendEndpointContext>
     {
         readonly SendEndpointContext _context;
 

@@ -25,9 +25,9 @@ namespace GreenPipes.Agents
     /// usage.
     /// </summary>
     /// <typeparam name="TContext"></typeparam>
-    public class CacheContextSupervisor<TContext> :
+    public class PipeContextSupervisor<TContext> :
         Supervisor,
-        ICacheContextSupervisor<TContext>
+        ISupervisor<TContext>
         where TContext : class, PipeContext
     {
         static readonly string Caption = $"Cache<{TypeCache<TContext>.ShortName}>";
@@ -41,14 +41,14 @@ namespace GreenPipes.Agents
         /// Create the cache
         /// </summary>
         /// <param name="contextFactory">Factory used to create the underlying and active contexts</param>
-        public CacheContextSupervisor(IPipeContextFactory<TContext> contextFactory)
+        public PipeContextSupervisor(IPipeContextFactory<TContext> contextFactory)
         {
             _contextFactory = contextFactory;
             
             _contextSupervisor = new Supervisor();
         }
 
-        async Task ISource<TContext>.Send(IPipe<TContext> pipe, CancellationToken cancellationToken)
+        async Task IPipeContextSource<TContext>.Send(IPipe<TContext> pipe, CancellationToken cancellationToken)
         {
             var activeContext = CreateActiveContext(cancellationToken);
 
@@ -67,6 +67,8 @@ namespace GreenPipes.Agents
             finally
             {
                 await activeContext.Stop(cancellationToken).ConfigureAwait(false);
+
+                await activeContext.DisposeAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 

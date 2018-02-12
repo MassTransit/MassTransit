@@ -17,7 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
 
     public interface ISendEndpointContextCache :
-        ICacheContextSupervisor<SendEndpointContext>
+        ISupervisor<SendEndpointContext>
     {
     }
 }

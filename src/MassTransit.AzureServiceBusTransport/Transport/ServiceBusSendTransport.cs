@@ -41,9 +41,9 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly Uri _address;
         readonly SendObservable _observers;
 
-        readonly ISource<SendEndpointContext> _source;
+        readonly IPipeContextSource<SendEndpointContext> _source;
 
-        public ServiceBusSendTransport(ISource<SendEndpointContext> source, Uri address)
+        public ServiceBusSendTransport(IPipeContextSource<SendEndpointContext> source, Uri address)
         {
             _source = source;
             _address = address;

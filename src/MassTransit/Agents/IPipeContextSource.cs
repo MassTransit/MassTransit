@@ -20,7 +20,7 @@ namespace GreenPipes
     /// A source provides the context which is sent to the specified pipe.
     /// </summary>
     /// <typeparam name="TContext">The pipe context type</typeparam>
-    public interface ISource<out TContext> :
+    public interface IPipeContextSource<out TContext> :
         IProbeSite
         where TContext : class, PipeContext
     {

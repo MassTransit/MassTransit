@@ -18,7 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
 
     public class SendEndpointContextCache :
-        CacheContextSupervisor<SendEndpointContext>,
+        PipeContextSupervisor<SendEndpointContext>,
         ISendEndpointContextCache
     {
         readonly string _description;

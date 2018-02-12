@@ -35,11 +35,8 @@ namespace GreenPipes.Agents
         /// </summary>
         /// <param name="context"></param>
         public PipeContextAgent(TContext context)
+            : this(Task.FromResult(context))
         {
-            _context = Task.FromResult(context);
-            _inactive = new TaskCompletionSource<DateTime>();
-
-            SetReady(_context);
         }
 
         /// <summary>
@@ -60,7 +57,9 @@ namespace GreenPipes.Agents
         /// <inheritdoc />
         public async Task DisposeAsync(CancellationToken cancellationToken)
         {
-            _inactive.TrySetResult(DateTime.UtcNow);
+            // dispose only once
+            if (!_inactive.TrySetResult(DateTime.UtcNow))
+                return;
 
             if (_context.Status == TaskStatus.RanToCompletion)
             {

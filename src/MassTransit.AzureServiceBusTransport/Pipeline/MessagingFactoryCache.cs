@@ -20,7 +20,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
 
     public class MessagingFactoryCache :
-        CacheContextSupervisor<MessagingFactoryContext>,
+        PipeContextSupervisor<MessagingFactoryContext>,
         IMessagingFactoryCache
     {
         readonly string _description;

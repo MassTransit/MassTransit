@@ -17,7 +17,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
 
     public class RabbitMqModelCache :
-        CacheContextSupervisor<ModelContext>,
+        PipeContextSupervisor<ModelContext>,
         IModelCache
 
     {

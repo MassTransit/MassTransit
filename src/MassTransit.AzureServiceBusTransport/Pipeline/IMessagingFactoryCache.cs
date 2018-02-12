@@ -16,7 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
 
     public interface IMessagingFactoryCache :
-        ICacheContextSupervisor<MessagingFactoryContext>
+        ISupervisor<MessagingFactoryContext>
     {
     }
 }

@@ -124,7 +124,7 @@ namespace GreenPipes.Tests.Agents
         [Test]
         public async Task Should_allow_active_instances()
         {
-            ICacheContextSupervisor<SimpleContext> supervisor = new CacheContextSupervisor<SimpleContext>(new SimpleContextFactory());
+            ISupervisor<SimpleContext> supervisor = new PipeContextSupervisor<SimpleContext>(new SimpleContextFactory());
 
             int count = 0;
             string lastValue = string.Empty;
@@ -152,7 +152,7 @@ namespace GreenPipes.Tests.Agents
         [Test]
         public async Task Should_support_disconnection()
         {
-            ICacheContextSupervisor<SimpleContext> supervisor = new CacheContextSupervisor<SimpleContext>(new SimpleContextFactory());
+            ISupervisor<SimpleContext> supervisor = new PipeContextSupervisor<SimpleContext>(new SimpleContextFactory());
 
             int count = 0;
             string lastValue = string.Empty;

@@ -50,10 +50,14 @@ namespace GreenPipes.Agents
     }
 
 
-    public interface IAgent<out T> :
+    /// <summary>
+    /// An agent that is also a pipe context source, of the specified context type
+    /// </summary>
+    /// <typeparam name="TContext"></typeparam>
+    public interface IAgent<out TContext> :
         IAgent,
-        ISource<T>
-        where T : class, PipeContext
+        IPipeContextSource<TContext>
+        where TContext : class, PipeContext
     {
     }
 }

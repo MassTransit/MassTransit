@@ -31,7 +31,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         public ClientContextFactory(IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache,
             IPipe<MessagingFactoryContext> messagingFactoryPipe, IPipe<NamespaceContext> namespacePipe,
             ClientSettings settings)
-            : base(messagingFactoryCache, namespaceCache, messagingFactoryPipe, namespacePipe)
+            : base(namespaceCache, namespacePipe, messagingFactoryCache, messagingFactoryPipe)
         {
             _settings = settings;
         }

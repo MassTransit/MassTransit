@@ -18,7 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
 
     public class ClientCache :
-        CacheContextSupervisor<ClientContext>,
+        PipeContextSupervisor<ClientContext>,
         IClientCache
     {
         readonly string _description;

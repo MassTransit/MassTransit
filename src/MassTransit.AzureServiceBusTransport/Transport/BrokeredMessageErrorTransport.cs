@@ -23,7 +23,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         BrokeredMessageMoveTransport,
         IErrorTransport
     {
-        public BrokeredMessageErrorTransport(ISource<SendEndpointContext> source)
+        public BrokeredMessageErrorTransport(IPipeContextSource<SendEndpointContext> source)
             : base(source)
         {
         }

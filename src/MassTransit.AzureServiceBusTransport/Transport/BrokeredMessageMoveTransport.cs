@@ -24,9 +24,9 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
     public class BrokeredMessageMoveTransport
     {
-        readonly ISource<SendEndpointContext> _source;
+        readonly IPipeContextSource<SendEndpointContext> _source;
 
-        protected BrokeredMessageMoveTransport(ISource<SendEndpointContext> source)
+        protected BrokeredMessageMoveTransport(IPipeContextSource<SendEndpointContext> source)
         {
             _source = source;
         }

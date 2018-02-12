@@ -18,7 +18,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
 
     public class RabbitMqConnectionCache :
-        CacheContextSupervisor<ConnectionContext>,
+        PipeContextSupervisor<ConnectionContext>,
         IConnectionCache
     {
         readonly string _description;

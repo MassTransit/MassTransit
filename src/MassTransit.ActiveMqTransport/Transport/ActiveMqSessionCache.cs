@@ -17,7 +17,7 @@ namespace MassTransit.ActiveMqTransport.Transport
 
 
     public class ActiveMqSessionCache :
-        CacheContextSupervisor<SessionContext>,
+        PipeContextSupervisor<SessionContext>,
         ISessionCache
 
     {

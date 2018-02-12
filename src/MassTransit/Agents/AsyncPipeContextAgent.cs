@@ -46,7 +46,6 @@ namespace GreenPipes.Agents
         }
 
         Task IAgent.Ready => _agent.Ready;
-
         Task IAgent.Completed => _agent.Completed;
 
         CancellationToken IAgent.Stopping => _agent.Stopping;
@@ -68,19 +67,19 @@ namespace GreenPipes.Agents
         {
             _context.SetCanceled();
 
-            return TaskUtil.Completed;
+            return _agent.Stop("Create Canceled", CancellationToken.None);
         }
 
         Task IAsyncPipeContextHandle<TContext>.CreateFaulted(Exception exception)
         {
             _context.SetException(exception);
 
-            return TaskUtil.Completed;
+            return _agent.Stop($"Create Faulted: {exception.GetBaseException().Message}", CancellationToken.None);
         }
 
         Task IAsyncPipeContextHandle<TContext>.Faulted(Exception exception)
         {
-            return _agent.DisposeAsync(CancellationToken.None);
+            return _agent.Stop($"Faulted: {exception.GetBaseException().Message}", CancellationToken.None);
         }
 
         /// <inheritdoc />

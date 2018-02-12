@@ -36,6 +36,10 @@ namespace GreenPipes.Agents
     }
 
 
+    /// <summary>
+    /// A supervisor that is also a <see cref="IPipeContextSource{TContext}"/>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface ISupervisor<out T> :
         ISupervisor,
         IAgent<T>

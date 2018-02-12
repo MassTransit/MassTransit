@@ -19,7 +19,7 @@ namespace MassTransit.ActiveMqTransport.Transport
     /// Creates and caches a session on the connection
     /// </summary>
     public interface ISessionCache :
-        ICacheContextSupervisor<SessionContext>
+        ISupervisor<SessionContext>
     {
     }
 }

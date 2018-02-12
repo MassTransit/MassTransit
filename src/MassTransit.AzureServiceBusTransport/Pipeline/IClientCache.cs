@@ -16,7 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
 
     public interface IClientCache :
-        ICacheContextSupervisor<ClientContext>
+        ISupervisor<ClientContext>
     {
     }
 }

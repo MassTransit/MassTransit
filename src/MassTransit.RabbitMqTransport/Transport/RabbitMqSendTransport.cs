@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         readonly string _exchange;
         readonly IFilter<ModelContext> _filter;
-        readonly ISource<ModelContext> _modelSource;
+        readonly IPipeContextSource<ModelContext> _modelSource;
         readonly SendObservable _observers;
 
         public RabbitMqSendTransport(IAgent<ModelContext> modelSource, IFilter<ModelContext> preSendFilter, string exchange)

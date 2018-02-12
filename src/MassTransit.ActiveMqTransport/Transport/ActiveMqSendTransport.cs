@@ -34,7 +34,7 @@ namespace MassTransit.ActiveMqTransport.Transport
         readonly DestinationType _destinationType;
         readonly string _entityName;
         readonly IFilter<SessionContext> _filter;
-        readonly ISource<SessionContext> _sessionAgent;
+        readonly IPipeContextSource<SessionContext> _sessionAgent;
         readonly SendObservable _observers;
 
         public ActiveMqSendTransport(IAgent<SessionContext> sessionAgent, IFilter<SessionContext> preSendFilter, string entityName,

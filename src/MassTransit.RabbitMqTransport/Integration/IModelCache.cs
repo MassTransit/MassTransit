@@ -19,7 +19,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     /// Attaches a model context to the value
     /// </summary>
     public interface IModelCache :
-        ICacheContextSupervisor<ModelContext>
+        ISupervisor<ModelContext>
     {
     }
 }

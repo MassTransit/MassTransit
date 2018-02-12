@@ -18,7 +18,7 @@ namespace MassTransit.ActiveMqTransport.Transport
 
 
     public class ActiveMqConnectionCache :
-        CacheContextSupervisor<ConnectionContext>,
+        PipeContextSupervisor<ConnectionContext>,
         IConnectionCache
     {
         readonly string _description;

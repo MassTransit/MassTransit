@@ -28,11 +28,12 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     {
         static readonly ILog _log = Logger.Get<JoinContextFactory<TLeft, TRight, TContext>>();
         readonly IPipe<TLeft> _leftPipe;
-        readonly ISource<TLeft> _leftSource;
+        readonly IPipeContextSource<TLeft> _leftSource;
         readonly IPipe<TRight> _rightPipe;
-        readonly ISource<TRight> _rightSource;
+        readonly IPipeContextSource<TRight> _rightSource;
 
-        protected JoinContextFactory(ISource<TRight> rightSource, ISource<TLeft> leftSource, IPipe<TRight> rightPipe, IPipe<TLeft> leftPipe)
+        protected JoinContextFactory(IPipeContextSource<TLeft> leftSource, IPipe<TLeft> leftPipe, IPipeContextSource<TRight> rightSource,
+            IPipe<TRight> rightPipe)
         {
             _rightSource = rightSource;
             _leftSource = leftSource;
@@ -44,7 +45,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         {
             IAsyncPipeContextAgent<TContext> asyncContext = supervisor.AddAsyncContext<TContext>();
 
-            Task<TContext> context = CreateClient(asyncContext, supervisor.Stopped);
+            Task<TContext> context = CreateJoinContext(asyncContext, supervisor.Stopped);
 
             IPipeContextAgent<TContext> contextHandle = supervisor.AddContext(context);
 
@@ -57,7 +58,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             return supervisor.AddActiveContext(context, CreateSharedContext(context.Context, cancellationToken));
         }
 
-        async Task<TContext> CreateClient(IAsyncPipeContextAgent<TContext> asyncContext, CancellationToken cancellationToken)
+        async Task<TContext> CreateJoinContext(IAsyncPipeContextAgent<TContext> asyncContext, CancellationToken cancellationToken)
         {
             IAsyncPipeContextAgent<TLeft> leftAgent = new AsyncPipeContextAgent<TLeft>();
             IAsyncPipeContextAgent<TRight> rightAgent = new AsyncPipeContextAgent<TRight>();
@@ -112,7 +113,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 catch (Exception exception)
                 {
                     if (_log.IsWarnEnabled)
-                        _log.Debug($"Faulted Task", exception);
+                        _log.Debug("Faulted Task", exception);
                 }
             }
 

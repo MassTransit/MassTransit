@@ -30,7 +30,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         public QueueSendEndpointContextFactory(IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache, IPipe<MessagingFactoryContext> messagingFactoryPipe,
             IPipe<NamespaceContext> namespacePipe, SendSettings settings)
-            : base(messagingFactoryCache, namespaceCache, messagingFactoryPipe, namespacePipe)
+            : base(namespaceCache, namespacePipe, messagingFactoryCache, messagingFactoryPipe)
         {
             _settings = settings;
         }

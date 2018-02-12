@@ -23,7 +23,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         BrokeredMessageMoveTransport,
         IDeadLetterTransport
     {
-        public BrokeredMessageDeadLetterTransport(ISource<SendEndpointContext> source)
+        public BrokeredMessageDeadLetterTransport(IPipeContextSource<SendEndpointContext> source)
             : base(source)
         {
         }

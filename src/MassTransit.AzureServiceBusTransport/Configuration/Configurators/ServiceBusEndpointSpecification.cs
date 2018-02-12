@@ -200,7 +200,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         protected abstract IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings,
             IPipe<NamespaceContext> namespacePipe);
 
-        protected ISource<SendEndpointContext> CreateSendEndpointContextCache(ServiceBusHost host, SendSettings settings)
+        protected IPipeContextSource<SendEndpointContext> CreateSendEndpointContextCache(ServiceBusHost host, SendSettings settings)
         {
             var brokerTopology = settings.GetBrokerTopology();
 
