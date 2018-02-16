@@ -15,6 +15,9 @@ namespace MassTransit.EndpointSpecifications
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Mime;
+    using Builders;
+    using Configuration;
     using ConsumeConfigurators;
     using GreenPipes;
     using GreenPipes.Builders;
@@ -105,20 +108,21 @@ namespace MassTransit.EndpointSpecifications
             callback(Configuration.Send.Configurator);
         }
 
-        public void AddEndpointSpecification(IReceiveEndpointSpecification configurator)
+        public void AddEndpointSpecification(IReceiveEndpointSpecification specification)
         {
-            Specifications.Add(configurator);
+            Specifications.Add(specification);
         }
 
-        /// <summary>
-        /// Before configuring any topology options, calling this will make it so that send and publish
-        /// topologies are completely separated for this bus. This means that some types may not properly
-        /// follow the topology rules, so use with caution.
-        /// </summary>
-        public void SeparatePublishFromSendTopology()
+        public void SetMessageSerializer(SerializerFactory serializerFactory)
         {
-            Configuration.Topology.SeparatePublishFromSendTopology();
+            Configuration.Serialization.SetSerializer(serializerFactory);
         }
+
+        public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
+        {
+            Configuration.Serialization.AddDeserializer(contentType, deserializerFactory);
+        }
+
 
         public virtual IEnumerable<ValidationResult> Validate()
         {

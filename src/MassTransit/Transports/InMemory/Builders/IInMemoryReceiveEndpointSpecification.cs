@@ -16,7 +16,7 @@ namespace MassTransit.Transports.InMemory.Builders
 
 
     public interface IInMemoryReceiveEndpointSpecification :
-        IReceiveEndpointSpecification<IInMemoryBusBuilder>
+        IReceiveEndpointSpecification<IBusBuilder>
     {
     }
 }

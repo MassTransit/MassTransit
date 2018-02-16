@@ -17,6 +17,7 @@ namespace MassTransit
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Context;
     using Events;
     using GreenPipes;
@@ -35,23 +36,23 @@ namespace MassTransit
         static readonly ILog _log = Logger.Get<MassTransitBus>();
         readonly IBusObserver _busObservable;
         readonly IConsumePipe _consumePipe;
-        readonly IBusHostCollection _hosts;
+        readonly IReadOnlyHostCollection _hosts;
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
         readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ISendEndpointProvider _sendEndpointProvider;
         Handle _busHandle;
 
         public MassTransitBus(Uri address, IConsumePipe consumePipe, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider, IBusHostCollection hosts,
-            IBusObserver busObservable, IBusTopology topology)
+            IPublishEndpointProvider publishEndpointProvider, IReadOnlyHostCollection hosts, IBusObserver busObservable)
         {
             Address = address;
             _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpointProvider = publishEndpointProvider;
             _busObservable = busObservable;
-            Topology = topology;
             _hosts = hosts;
+
+            Topology = hosts.GetBusTopology();
 
             _publishEndpoint = new Lazy<IPublishEndpoint>(() => publishEndpointProvider.CreatePublishEndpoint(address));
         }

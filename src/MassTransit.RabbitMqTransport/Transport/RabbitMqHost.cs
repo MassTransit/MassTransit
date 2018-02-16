@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -29,14 +30,13 @@ namespace MassTransit.RabbitMqTransport.Transport
 
     public class RabbitMqHost :
         Supervisor,
-        IRabbitMqHost,
-        IBusHostControl
+        IRabbitMqHostControl
     {
         readonly RabbitMqHostSettings _settings;
         readonly IRabbitMqHostTopology _topology;
         HostHandle _handle;
 
-        public RabbitMqHost(RabbitMqHostSettings settings, IRabbitMqHostTopology topology)
+        public RabbitMqHost(IRabbitMqBusConfiguration busConfiguration, RabbitMqHostSettings settings, IRabbitMqHostTopology topology)
         {
             _settings = settings;
             _topology = topology;
@@ -51,9 +51,11 @@ namespace MassTransit.RabbitMqTransport.Transport
             });
 
             ConnectionCache = new RabbitMqConnectionCache(settings, _topology);
+
+            ReceiveEndpointFactory = new RabbitMqReceiveEndpointFactory(busConfiguration, this);
         }
 
-        public IRabbitMqReceiveEndpointFactory ReceiveEndpointFactory { get; set; }
+        public IRabbitMqReceiveEndpointFactory ReceiveEndpointFactory { get; }
 
         public IReceiveEndpointCollection ReceiveEndpoints { get; }
 
@@ -77,6 +79,11 @@ namespace MassTransit.RabbitMqTransport.Transport
             var settings = address.GetHostSettings();
 
             return RabbitMqHostEqualityComparer.Default.Equals(_settings, settings);
+        }
+
+        public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
+        {
+            ReceiveEndpoints.Add(endpointName, receiveEndpoint);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -180,12 +187,12 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             async Task HostHandle.Stop(CancellationToken cancellationToken)
             {
-                    await Task.WhenAll(_handles.Select(x => x.StopAsync(cancellationToken))).ConfigureAwait(false);
-                    
-                    await _host.Stop("Host Stopped", cancellationToken).ConfigureAwait(false);
-                    
-                    await _connectionCache.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
-                }
+                await Task.WhenAll(_handles.Select(x => x.StopAsync(cancellationToken))).ConfigureAwait(false);
+
+                await _host.Stop("Host Stopped", cancellationToken).ConfigureAwait(false);
+
+                await _connectionCache.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
+            }
 
             async Task<HostReady> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> endpoints)
             {

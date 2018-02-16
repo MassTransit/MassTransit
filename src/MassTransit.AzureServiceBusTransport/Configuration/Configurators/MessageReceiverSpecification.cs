@@ -18,10 +18,10 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
     using EndpointSpecifications;
     using GreenPipes;
     using Logging;
+    using MassTransit.Configuration;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Pipes;
-    using Specifications;
     using Transport;
 
 
@@ -30,11 +30,13 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         IReceiverConfigurator,
         ISpecification
     {
-        protected ILog _log = Logger.Get<BrokeredMessageReceiver>();
+        readonly IReceiveEndpointConfiguration _configuration;
+        ILog _log = Logger.Get<BrokeredMessageReceiver>();
 
-        protected MessageReceiverSpecification(IServiceBusEndpointConfiguration configuration)
+        protected MessageReceiverSpecification(IReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
+            _configuration = configuration;
             InputAddress = new Uri("sb://localhost/");
         }
 
@@ -54,7 +56,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         protected IReceivePipe CreateReceivePipe()
         {
-            var builder = new MessageReceiverBuilder(Configuration);
+            var builder = new MessageReceiverBuilder(_configuration);
 
             foreach (var specification in Specifications)
                 specification.Configure(builder);

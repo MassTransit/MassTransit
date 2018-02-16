@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using BusConfigurators;
 
 
     public static class BusObserverExtensions
@@ -25,7 +24,7 @@ namespace MassTransit
         /// <param name="observer"></param>
         public static void BusObserver(this IBusFactoryConfigurator configurator, IBusObserver observer)
         {
-            configurator.AddBusFactorySpecification(new BusObserverSpecification(() => observer));
+            configurator.ConnectBusObserver(observer);
         }
 
         /// <summary>
@@ -36,7 +35,7 @@ namespace MassTransit
         public static void BusObserver<T>(this IBusFactoryConfigurator configurator, Func<T> observerFactory)
             where T : IBusObserver
         {
-            configurator.AddBusFactorySpecification(new BusObserverSpecification(() => observerFactory()));
+            configurator.ConnectBusObserver(observerFactory());
         }
     }
 }

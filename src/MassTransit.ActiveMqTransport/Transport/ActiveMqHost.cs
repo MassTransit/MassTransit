@@ -18,6 +18,7 @@ namespace MassTransit.ActiveMqTransport.Transport
     using System.Threading;
     using System.Threading.Tasks;
     using Builders;
+    using Configuration;
     using Configurators;
     using Events;
     using GreenPipes;
@@ -30,14 +31,13 @@ namespace MassTransit.ActiveMqTransport.Transport
 
     public class ActiveMqHost :
         Supervisor,
-        IActiveMqHost,
-        IBusHostControl
+        IActiveMqHostControl
     {
         readonly ActiveMqHostSettings _settings;
         readonly IActiveMqHostTopology _topology;
         HostHandle _handle;
 
-        public ActiveMqHost(ActiveMqHostSettings settings, IActiveMqHostTopology topology)
+        public ActiveMqHost(IActiveMqBusConfiguration busConfiguration, ActiveMqHostSettings settings, IActiveMqHostTopology topology)
         {
             _settings = settings;
             _topology = topology;
@@ -52,6 +52,8 @@ namespace MassTransit.ActiveMqTransport.Transport
             });
 
             ConnectionCache = new ActiveMqConnectionCache(settings, _topology);
+
+            ReceiveEndpointFactory = new ActiveMqReceiveEndpointFactory(busConfiguration, this);
         }
 
         public IActiveMqReceiveEndpointFactory ReceiveEndpointFactory { get; set; }
@@ -72,7 +74,7 @@ namespace MassTransit.ActiveMqTransport.Transport
                 _settings.Host,
                 _settings.Port,
                 _settings.Username,
-                Password = new string('*', _settings.Password.Length),
+                Password = new string('*', _settings.Password.Length)
             });
 
             ConnectionCache.Probe(scope);
@@ -148,6 +150,11 @@ namespace MassTransit.ActiveMqTransport.Transport
             ReceiveEndpointFactory.CreateReceiveEndpoint(queueName, configure);
 
             return ReceiveEndpoints.Start(queueName);
+        }
+
+        public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
+        {
+            ReceiveEndpoints.Add(endpointName, receiveEndpoint);
         }
 
 

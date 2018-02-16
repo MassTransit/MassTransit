@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,18 +14,13 @@ namespace MassTransit.HttpTransport
 {
     using Hosting;
     using Transport;
-    using Util;
 
 
-    public interface IHttpHost : IHost
+    public interface IHttpHost : 
+        IHost
     {
         HttpHostSettings Settings { get; }
 
-        IOwinHostCache OwinHostCache { get; }
-
-        /// <summary>
-        /// The supervisor for the host, which indicates when it's being stopped
-        /// </summary>
-        ITaskSupervisor Supervisor { get; }
+        IHttpHostCache HttpHostCache { get; }
     }
 }

@@ -27,9 +27,6 @@ namespace MassTransit.HttpTransport.Testing
 
         public HttpTestHarness(Uri hostAddress = null, Uri inputQueueAddress = null)
         {
-            if (hostAddress == null)
-                throw new ArgumentNullException(nameof(hostAddress));
-
             HostAddress = hostAddress ?? new Uri("http://localhost:8080");
 
             _inputQueueAddress = inputQueueAddress ?? HostAddress;

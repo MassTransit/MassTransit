@@ -13,6 +13,7 @@
 namespace MassTransit.Topology
 {
     using System;
+    using Pipeline.Observables;
 
 
     /// <summary>
@@ -25,5 +26,9 @@ namespace MassTransit.Topology
         /// The input address of the receive endpoint
         /// </summary>
         Uri InputAddress { get; }
+
+        ReceiveObservable ReceiveObservers { get; }
+
+        ReceiveTransportObservable TransportObservers { get; }
     }
 }

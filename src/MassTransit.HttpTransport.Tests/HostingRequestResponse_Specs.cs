@@ -18,6 +18,7 @@ namespace MassTransit.HttpTransport.Tests
         using System.Collections.Generic;
         using System.Diagnostics;
         using System.Net.Http;
+        using System.Net.Http.Headers;
         using System.Text;
         using System.Threading.Tasks;
         using Newtonsoft.Json;
@@ -49,9 +50,69 @@ namespace MassTransit.HttpTransport.Tests
 
                         var timer = Stopwatch.StartNew();
 
-                        string response;
                         using (var result = await client.PostAsync(HostAddress, content))
                         {
+                            var response = await result.Content.ReadAsStringAsync();
+
+                            if (!result.IsSuccessStatusCode)
+                                await Console.Out.WriteAsync(response);
+
+                            result.EnsureSuccessStatusCode();
+                        }
+
+                        timer.Stop();
+
+                        await Console.Out.WriteLineAsync($"Request complete: {timer.ElapsedMilliseconds}ms");
+                    }
+                }
+            }
+
+            protected override void ConfigureHttpReceiveEndpoint(IHttpReceiveEndpointConfigurator configurator)
+            {
+                configurator.Consumer<HttpRequestConsumer>();
+            }
+        }
+
+
+        [TestFixture]
+        public class Sending_a_request_just_like_the_transport :
+            HttpTestFixture
+        {
+            [Test]
+            public async Task Should_create_a_host_that_responds_to_requests()
+            {
+                using (var client = new HttpClient())
+                {
+                    var request = new Request {Value = "Hello"};
+                    var envelope = new HttpMessageEnvelope(request, TypeMetadataCache<Request>.MessageTypeNames);
+                    envelope.RequestId = NewId.NextGuid().ToString();
+                    envelope.DestinationAddress = HostAddress.ToString();
+                    envelope.ResponseAddress = new Uri("reply://localhost:8080/").ToString();
+
+                    var messageBody = JsonConvert.SerializeObject(envelope, JsonMessageSerializer.SerializerSettings);
+
+                    for (var i = 0; i < 5; i++)
+                    {
+                        //                        var content = new StringContent(messageBody, Encoding.UTF8, "application/vnd.masstransit+json");
+
+                        var content = new ByteArrayContent(Encoding.UTF8.GetBytes(messageBody));
+                        content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.masstransit+json");
+
+
+                        var timer = Stopwatch.StartNew();
+
+                        var message = new HttpRequestMessage(HttpMethod.Post, HostAddress);
+                        message.Content = content;
+
+
+                        message.Headers.Add(Clients.HttpHeaders.RequestId, envelope.RequestId);
+
+
+                        string response;
+                        using (var result = await client.SendAsync(message))
+                        {
+                            result.EnsureSuccessStatusCode();
+
                             response = await result.Content.ReadAsStringAsync();
                         }
 
@@ -122,7 +183,7 @@ namespace MassTransit.HttpTransport.Tests
             [Test]
             public async Task Should_work_with_the_message_request_client_too()
             {
-                IRequestClient<Request, Response> client = HttpTestHarness.CreateRequestClient<Request, Response>();
+                IRequestClient<Request, Response> client = HttpTestHarness.CreateRequestClient<Request, Response>(HostAddress);
 
                 var request = new Request {Value = "Hello"};
 

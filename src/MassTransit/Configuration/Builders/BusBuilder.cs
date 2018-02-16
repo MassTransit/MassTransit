@@ -13,61 +13,28 @@
 namespace MassTransit.Builders
 {
     using System;
-    using System.Net.Mime;
-    using EndpointSpecifications;
-    using GreenPipes;
-    using Pipeline;
+    using Configuration;
     using Pipeline.Observables;
-    using Transports;
     using Util;
 
 
     public abstract class BusBuilder :
         IBusBuilder
     {
+        readonly IReceiveEndpointConfiguration _busEndpointConfiguration;
         readonly BusObservable _busObservable;
-        readonly IEndpointConfiguration _configuration;
-        readonly IBusHostCollection _hosts;
-        readonly Lazy<Uri> _inputAddress;
+        readonly IBusConfiguration _configuration;
 
-        protected BusBuilder(IBusHostCollection hosts, IEndpointConfiguration configuration, bool deployTopologyOnly)
+        protected BusBuilder(IBusConfiguration configuration, IReceiveEndpointConfiguration busEndpointConfiguration, BusObservable busObservable)
         {
-            _hosts = hosts;
             _configuration = configuration;
-            DeployTopologyOnly = deployTopologyOnly;
+            _busEndpointConfiguration = busEndpointConfiguration;
 
-            _busObservable = new BusObservable();
-
-            _inputAddress = new Lazy<Uri>(GetInputAddress);
-
-            ConsumePipe = _configuration.Consume.CreatePipe();
+            _busObservable = busObservable;
         }
 
-        protected BusObservable BusObservable => _busObservable;
-        protected Uri InputAddress => _inputAddress.Value;
-        protected IConsumePipe ConsumePipe { get; }
-
-        public abstract ISendEndpointProvider SendEndpointProvider { get; }
-        public abstract IPublishEndpointProvider PublishEndpointProvider { get; }
-
-        public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
-        {
-            _configuration.Serialization.AddDeserializer(contentType, deserializerFactory);
-        }
-
-        public void SetMessageSerializer(SerializerFactory serializerFactory)
-        {
-            _configuration.Serialization.SetSerializer(serializerFactory);
-        }
-
-        public ConnectHandle ConnectBusObserver(IBusObserver observer)
-        {
-            return _busObservable.Connect(observer);
-        }
-
-        public bool DeployTopologyOnly { get; }
-
-        protected abstract Uri GetInputAddress();
+        protected abstract ISendEndpointProvider SendEndpointProvider { get; }
+        protected abstract IPublishEndpointProvider PublishEndpointProvider { get; }
 
         public IBusControl Build()
         {
@@ -75,9 +42,8 @@ namespace MassTransit.Builders
             {
                 PreBuild();
 
-                var hostTopology = _hosts.GetHost(InputAddress).Topology;
-
-                var bus = new MassTransitBus(InputAddress, ConsumePipe, SendEndpointProvider, PublishEndpointProvider, _hosts, BusObservable, hostTopology);
+                var bus = new MassTransitBus(_busEndpointConfiguration.InputAddress, _busEndpointConfiguration.ConsumePipe, SendEndpointProvider,
+                    PublishEndpointProvider, _configuration.Hosts, _busObservable);
 
                 TaskUtil.Await(() => _busObservable.PostCreate(bus));
 
@@ -85,7 +51,7 @@ namespace MassTransit.Builders
             }
             catch (Exception exception)
             {
-                TaskUtil.Await(() => BusObservable.CreateFaulted(exception));
+                TaskUtil.Await(() => _busObservable.CreateFaulted(exception));
 
                 throw;
             }

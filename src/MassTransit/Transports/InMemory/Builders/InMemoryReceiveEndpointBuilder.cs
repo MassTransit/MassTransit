@@ -12,9 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory.Builders
 {
-    using System;
     using System.Linq;
-    using EndpointSpecifications;
+    using Configuration;
     using GreenPipes;
     using MassTransit.Builders;
     using Topology;
@@ -25,14 +24,12 @@ namespace MassTransit.Transports.InMemory.Builders
         IReceiveEndpointBuilder
     {
         readonly InMemoryHost _host;
-        readonly ISendTransportProvider _sendTransportProvider;
-        readonly IInMemoryEndpointConfiguration _configuration;
+        readonly IInMemoryReceiveEndpointConfiguration _configuration;
 
-        public InMemoryReceiveEndpointBuilder(InMemoryHost host, ISendTransportProvider sendTransportProvider, IInMemoryEndpointConfiguration configuration)
+        public InMemoryReceiveEndpointBuilder(InMemoryHost host, IInMemoryReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
             _host = host;
-            _sendTransportProvider = sendTransportProvider;
             _configuration = configuration;
         }
 
@@ -45,11 +42,11 @@ namespace MassTransit.Transports.InMemory.Builders
             return base.ConnectConsumePipe(pipe);
         }
 
-        public IInMemoryReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress)
+        public IInMemoryReceiveEndpointTopology CreateReceiveEndpointTopology()
         {
             var builder = _host.CreateConsumeTopologyBuilder();
 
-            var queueName = inputAddress.AbsolutePath.Split('/').Last();
+            var queueName = _configuration.InputAddress.AbsolutePath.Split('/').Last();
 
             builder.Queue = queueName;
             builder.QueueDeclare(queueName);
@@ -58,7 +55,7 @@ namespace MassTransit.Transports.InMemory.Builders
 
             _configuration.Topology.Consume.Apply(builder);
 
-            return new InMemoryReceiveEndpointTopology(_configuration, inputAddress, _sendTransportProvider);
+            return new InMemoryReceiveEndpointTopology(_configuration, _host);
         }
     }
 }

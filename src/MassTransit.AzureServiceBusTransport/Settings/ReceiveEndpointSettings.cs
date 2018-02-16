@@ -27,6 +27,7 @@ namespace MassTransit.AzureServiceBusTransport.Settings
         readonly QueueConfigurator _queueConfigurator;
 
         public ReceiveEndpointSettings(string queueName, QueueConfigurator queueConfigurator)
+            : base(queueConfigurator)
         {
             _queueConfigurator = queueConfigurator;
 

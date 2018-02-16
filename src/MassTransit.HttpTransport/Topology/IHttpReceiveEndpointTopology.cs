@@ -13,12 +13,12 @@
 namespace MassTransit.HttpTransport.Topology
 {
     using MassTransit.Topology;
-    using Microsoft.Owin;
+    using Microsoft.AspNetCore.Http;
 
 
     public interface IHttpReceiveEndpointTopology :
         IReceiveEndpointTopology
     {
-        IReceiveEndpointTopology CreateResponseEndpointTopology(IOwinContext owinContext);
+        IReceiveEndpointTopology CreateResponseEndpointTopology(HttpContext httpContext);
     }
 }

@@ -15,6 +15,7 @@ namespace MassTransit.EndpointSpecifications
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Configuration;
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
@@ -77,7 +78,8 @@ namespace MassTransit.EndpointSpecifications
         {
             return Specifications.SelectMany(x => x.Validate())
                 .Concat(Configuration.Validate())
-                .Concat(_lateConfigurationKeys.Select(x => new ConfigurationValidationResult(ValidationResultDisposition.Failure, x, "was configured after being used")));
+                .Concat(_lateConfigurationKeys.Select(x =>
+                    new ConfigurationValidationResult(ValidationResultDisposition.Failure, x, "was configured after being used")));
         }
 
         protected abstract Uri GetInputAddress();

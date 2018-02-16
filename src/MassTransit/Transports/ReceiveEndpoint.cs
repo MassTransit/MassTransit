@@ -19,6 +19,7 @@ namespace MassTransit.Transports
     using GreenPipes;
     using Pipeline;
     using Pipeline.Observables;
+    using Topology;
 
 
     /// <summary>
@@ -29,13 +30,15 @@ namespace MassTransit.Transports
     public class ReceiveEndpoint :
         IReceiveEndpointControl
     {
+        public IReceiveEndpointTopology Topology { get; }
         readonly ReceiveEndpointObservable _observers;
         readonly IReceivePipe _receivePipe;
         readonly IReceiveTransport _receiveTransport;
         ConnectHandle _handle;
 
-        public ReceiveEndpoint(IReceiveTransport receiveTransport, IReceivePipe receivePipe)
+        public ReceiveEndpoint(IReceiveTransport receiveTransport, IReceivePipe receivePipe, IReceiveEndpointTopology topology)
         {
+            Topology = topology;
             _receiveTransport = receiveTransport;
             _receivePipe = receivePipe;
 

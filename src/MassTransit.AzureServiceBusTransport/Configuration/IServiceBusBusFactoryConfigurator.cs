@@ -27,17 +27,9 @@ namespace MassTransit.AzureServiceBusTransport
         new IServiceBusPublishTopologyConfigurator PublishTopology { get; }
 
         /// <summary>
-        /// In most cases, this is not needed and should not be used. However, if for any reason the default bus
-        /// endpoint queue name needs to be changed, this will do it. Do NOT set it to the same name as a receive
-        /// endpoint or you will screw things up.
+        /// Set to true if the topology should be deployed only
         /// </summary>
-        void OverrideDefaultBusEndpointQueueName(string value);
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddBusFactorySpecification(IBusFactorySpecification<IBusBuilder> specification);
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
+        bool DeployTopologyOnly { set; }
 
         /// <summary>
         /// Configure the send topology of the message type
@@ -55,12 +47,15 @@ namespace MassTransit.AzureServiceBusTransport
         void Publish<T>(Action<IServiceBusMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class;
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
+
         /// <summary>
-        /// Before configuring any topology options, calling this will make it so that send and publish
-        /// topologies are completely separated for this bus. This means that some types may not properly
-        /// follow the topology rules, so use with caution.
+        /// In most cases, this is not needed and should not be used. However, if for any reason the default bus
+        /// endpoint queue name needs to be changed, this will do it. Do NOT set it to the same name as a receive
+        /// endpoint or you will screw things up.
         /// </summary>
-        void SeparatePublishFromSendTopology();
+        void OverrideDefaultBusEndpointQueueName(string value);
 
         /// <summary>
         /// Configures a host
@@ -92,8 +87,9 @@ namespace MassTransit.AzureServiceBusTransport
         /// </summary>
         /// <param name="host">The host for this endpoint</param>
         /// <param name="subscriptionName">The name of the subscription</param>
-        /// <param name="topicName">The topic name to subscribe</param>
+        /// <param name="topicPath">The topic name to subscribe</param>
         /// <param name="configure"></param>
-        void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicName, Action<IServiceBusSubscriptionEndpointConfigurator> configure);
+        void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicPath,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure);
     }
 }

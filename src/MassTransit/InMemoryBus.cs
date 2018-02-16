@@ -17,8 +17,8 @@ namespace MassTransit
     using Topology;
     using Topology.EntityNameFormatters;
     using Topology.Topologies;
+    using Transports.InMemory.Configuration;
     using Transports.InMemory.Configurators;
-    using Transports.InMemory.EndpointSpecifications;
 
 
     public static class InMemoryBus
@@ -32,16 +32,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IBusControl Create(Action<IInMemoryBusFactoryConfigurator> configure)
         {
-            var configurator = new InMemoryBusFactoryConfigurator(CreateEndpointConfiguration());
-
-            configure(configurator);
-
-            return configurator.Build();
-        }
-
-        static InMemoryEndpointConfiguration CreateEndpointConfiguration()
-        {
-            return new InMemoryEndpointConfiguration(new InMemoryTopologyConfiguration(MessageTopology));
+            return Create(null, configure);
         }
 
         /// <summary>
@@ -52,7 +43,11 @@ namespace MassTransit
         /// <returns></returns>
         public static IBusControl Create(Uri baseAddress, Action<IInMemoryBusFactoryConfigurator> configure)
         {
-            var configurator = new InMemoryBusFactoryConfigurator(CreateEndpointConfiguration(), baseAddress);
+            var topologyConfiguration = new InMemoryTopologyConfiguration(MessageTopology);
+            var busConfiguration = new InMemoryBusConfiguration(topologyConfiguration);
+            var endpointConfiguration = busConfiguration.CreateEndpointConfiguration();
+
+            var configurator = new InMemoryBusFactoryConfigurator(busConfiguration, endpointConfiguration, baseAddress);
 
             configure(configurator);
 

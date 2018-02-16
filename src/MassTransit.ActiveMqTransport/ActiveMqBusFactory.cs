@@ -14,8 +14,8 @@ namespace MassTransit.ActiveMqTransport
 {
     using System;
     using System.Threading;
+    using Configuration;
     using Configurators;
-    using EndpointSpecifications;
     using MassTransit.Topology;
     using MassTransit.Topology.EntityNameFormatters;
     using MassTransit.Topology.Topologies;
@@ -32,7 +32,11 @@ namespace MassTransit.ActiveMqTransport
         /// <returns></returns>
         public static IBusControl Create(Action<IActiveMqBusFactoryConfigurator> configure)
         {
-            var configurator = new ActiveMqBusFactoryConfigurator(new ActiveMqEndpointConfiguration(new ActiveMqTopologyConfiguration(MessageTopology)));
+            var topologyConfiguration = new ActiveMqTopologyConfiguration(MessageTopology);
+            var busConfiguration = new ActiveMqBusConfiguration(topologyConfiguration);
+            var busEndpoingConfiguration = busConfiguration.CreateEndpointConfiguration();
+
+            var configurator = new ActiveMqBusFactoryConfigurator(busConfiguration, busEndpoingConfiguration);
 
             configure(configurator);
 

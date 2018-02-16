@@ -24,15 +24,15 @@ namespace MassTransit.HttpTransport
     public class HttpPublishEndpointProvider :
         IPublishEndpointProvider
     {
-        readonly IHttpHost _host;
         readonly PublishObservable _publishObservable;
         readonly IPublishPipe _publishPipe;
+        readonly Uri _hostAddress;
         readonly IMessageSerializer _serializer;
         readonly ISendTransportProvider _transportProvider;
 
-        public HttpPublishEndpointProvider(IHttpHost host, IMessageSerializer serializer, ISendTransportProvider transportProvider, IPublishPipe publishPipe)
+        public HttpPublishEndpointProvider(Uri hostAddress, IMessageSerializer serializer, ISendTransportProvider transportProvider, IPublishPipe publishPipe)
         {
-            _host = host;
+            _hostAddress = hostAddress;
             _serializer = serializer;
             _transportProvider = transportProvider;
             _publishPipe = publishPipe;
@@ -57,7 +57,7 @@ namespace MassTransit.HttpTransport
 
             var transport = await _transportProvider.GetSendTransport(destinationAddress).ConfigureAwait(false);
 
-            return new SendEndpoint(transport, _serializer, destinationAddress, _host.Address, SendPipe.Empty);
+            return new SendEndpoint(transport, _serializer, destinationAddress, _hostAddress, SendPipe.Empty);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

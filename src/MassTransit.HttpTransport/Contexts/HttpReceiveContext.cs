@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,33 +12,35 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Contexts
 {
+    using System;
     using System.IO;
     using Context;
     using Hosting;
     using MassTransit.Topology;
-    using Microsoft.Owin;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.Extensions;
 
 
     public class HttpReceiveContext :
         BaseReceiveContext
     {
-        readonly IOwinContext _requestContext;
+        readonly HttpContext _httpContext;
 
-        public HttpReceiveContext(IOwinContext requestContext, bool redelivered, IReceiveObserver receiveObserver, IReceiveEndpointTopology topology)
-            : base(requestContext.Request.Uri, redelivered, receiveObserver, topology)
+        public HttpReceiveContext(HttpContext httpContext, bool redelivered, IReceiveObserver receiveObserver, IReceiveEndpointTopology topology)
+            : base(new Uri(httpContext.Request.GetDisplayUrl()), redelivered, receiveObserver, topology)
         {
-            _requestContext = requestContext;
+            _httpContext = httpContext;
 
-            HeaderProvider = new HttpHeaderProvider(requestContext.Request.Headers);
+            HeaderProvider = new HttpHeaderProvider(httpContext.Request.Headers);
         }
 
         protected override IHeaderProvider HeaderProvider { get; }
 
-        public IOwinContext RequestContext => _requestContext;
+        public HttpContext HttpContext => _httpContext;
 
         protected override Stream GetBodyStream()
         {
-            return _requestContext.Request.Body;
+            return _httpContext.Request.Body;
         }
     }
 }

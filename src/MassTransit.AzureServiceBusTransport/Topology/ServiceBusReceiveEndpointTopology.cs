@@ -13,8 +13,8 @@
 namespace MassTransit.AzureServiceBusTransport.Topology
 {
     using System;
+    using AzureServiceBusTransport.Configuration;
     using MassTransit.Topology;
-    using Specifications;
     using Transport;
     using Transports;
 
@@ -23,18 +23,16 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         ReceiveEndpointTopology,
         IServiceBusReceiveEndpointTopology
     {
-        readonly IServiceBusHost _host;
-        readonly BusHostCollection<ServiceBusHost> _hosts;
+        readonly IServiceBusEntityEndpointConfiguration _configuration;
         readonly IServiceBusPublishTopology _publish;
         readonly Lazy<IPublishTransportProvider> _publishTransportProvider;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
 
-        public ServiceBusReceiveEndpointTopology(IServiceBusEndpointConfiguration configuration, Uri inputAddress, IServiceBusHost host, BusHostCollection<ServiceBusHost> hosts,
-            BrokerTopology brokerTopology)
-            : base(configuration, inputAddress, host.Address)
+        public ServiceBusReceiveEndpointTopology(IServiceBusEntityEndpointConfiguration configuration, BrokerTopology brokerTopology)
+            : base(configuration)
         {
-            _host = host;
-            _hosts = hosts;
+            _configuration = configuration;
+
             BrokerTopology = brokerTopology;
 
             _publish = configuration.Topology.Publish;
@@ -47,12 +45,12 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
         ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendEndpointSendTransportProvider(_hosts);
+            return new SendEndpointSendTransportProvider(_configuration.BusConfiguration);
         }
 
         IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_hosts, _host);
+            return new PublishTransportProvider(_configuration.BusConfiguration);
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
@@ -62,7 +60,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
         protected override IPublishEndpointProvider CreatePublishEndpointProvider()
         {
-            return new PublishEndpointProvider(_publishTransportProvider.Value, _host.Address, PublishObservers, SendObservers, Serializer, InputAddress, PublishPipe, _publish);
+            return new PublishEndpointProvider(_publishTransportProvider.Value, _configuration.HostAddress, PublishObservers, SendObservers, Serializer,
+                InputAddress, PublishPipe, _publish);
         }
     }
 }

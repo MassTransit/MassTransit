@@ -13,11 +13,13 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
 {
     using System;
+    using GreenPipes;
     using Microsoft.ServiceBus.Messaging;
 
 
     public interface ISubscriptionConfigurator :
-        IEndpointEntityConfigurator
+        IEndpointEntityConfigurator,
+        ISpecification
     {
         /// <summary>
         /// The path of the subscription's topic

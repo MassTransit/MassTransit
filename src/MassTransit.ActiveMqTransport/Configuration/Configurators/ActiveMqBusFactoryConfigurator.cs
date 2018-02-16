@@ -14,33 +14,30 @@ namespace MassTransit.ActiveMqTransport.Configurators
 {
     using System;
     using System.Collections.Generic;
-    using Builders;
     using BusConfigurators;
+    using Configuration;
     using EndpointSpecifications;
     using GreenPipes;
     using MassTransit.Builders;
     using Topology;
     using Topology.Settings;
-    using Topology.Topologies;
     using Transport;
-    using Transports;
 
 
     public class ActiveMqBusFactoryConfigurator :
-        BusFactoryConfigurator<IBusBuilder>,
+        BusFactoryConfigurator,
         IActiveMqBusFactoryConfigurator,
         IBusFactory
     {
-        readonly IActiveMqEndpointConfiguration _configuration;
-        readonly BusHostCollection<ActiveMqHost> _hosts;
+        readonly IActiveMqBusConfiguration _configuration;
+        readonly IActiveMqEndpointConfiguration _busEndpointConfiguration;
         readonly QueueReceiveSettings _settings;
 
-        public ActiveMqBusFactoryConfigurator(IActiveMqEndpointConfiguration configuration)
-            : base(configuration)
+        public ActiveMqBusFactoryConfigurator(IActiveMqBusConfiguration configuration, IActiveMqEndpointConfiguration busEndpointConfiguration)
+            : base(configuration, busEndpointConfiguration)
         {
             _configuration = configuration;
-
-            _hosts = new BusHostCollection<ActiveMqHost>();
+            _busEndpointConfiguration = busEndpointConfiguration;
 
             var queueName = _configuration.Topology.Consume.CreateTemporaryQueueName("bus-");
             _settings = new QueueReceiveSettings(queueName, false, true);
@@ -48,7 +45,9 @@ namespace MassTransit.ActiveMqTransport.Configurators
 
         public IBusControl CreateBus()
         {
-            var builder = new ActiveMqBusBuilder(_hosts, _settings, _configuration, DeployTopologyOnly);
+            var busReceiveEndpointConfiguration = _configuration.CreateReceiveEndpointConfiguration(_settings, _busEndpointConfiguration);
+
+            var builder = new ConfigurationBusBuilder(_configuration, busReceiveEndpointConfiguration, BusObservable);
 
             ApplySpecifications(builder);
 
@@ -60,51 +59,34 @@ namespace MassTransit.ActiveMqTransport.Configurators
             foreach (var result in base.Validate())
                 yield return result;
 
-            if (_hosts.Count == 0)
-                yield return this.Failure("Host", "At least one host must be defined");
-
             if (string.IsNullOrWhiteSpace(_settings.EntityName))
                 yield return this.Failure("Bus", "The bus queue name must not be null or empty");
         }
 
-        public ushort PrefetchCount
-        {
-            set { _settings.PrefetchCount = value; }
-        }
-
         public bool Durable
         {
-            set { _settings.Durable = value; }
+            set => _settings.Durable = value;
         }
 
         public bool AutoDelete
         {
-            set { _settings.AutoDelete = value; }
-        }
-
-        public bool PurgeOnStartup
-        {
-            set { _settings.PurgeOnStartup = value; }
+            set => _settings.AutoDelete = value;
         }
 
         public bool Lazy
         {
-            set { _settings.Lazy = value; }
+            set => _settings.Lazy = value;
         }
 
         public IActiveMqHost Host(ActiveMqHostSettings settings)
         {
-            var hostTopology = new ActiveMqHostTopology(new ActiveMqMessageNameFormatter(), settings.HostAddress, _configuration.Topology);
+            var hostTopology = _configuration.CreateHostTopology(settings.HostAddress);
 
-            var host = new ActiveMqHost(settings, hostTopology);
-            _hosts.Add(host);
+            var host = new ActiveMqHost(_configuration, settings, hostTopology);
+
+            _configuration.CreateHostConfiguration(host);
 
             return host;
-        }
-
-        public string CreateTemporaryQueueName(string prefix)
-        {
-            return _configuration.Topology.Consume.CreateTemporaryQueueName(prefix);
         }
 
         void IActiveMqBusFactoryConfigurator.Send<T>(Action<IActiveMqMessageSendTopologyConfigurator<T>> configureTopology)
@@ -124,28 +106,38 @@ namespace MassTransit.ActiveMqTransport.Configurators
         public new IActiveMqSendTopologyConfigurator SendTopology => _configuration.Topology.Send;
         public new IActiveMqPublishTopologyConfigurator PublishTopology => _configuration.Topology.Publish;
 
+        public bool DeployTopologyOnly
+        {
+            set => _configuration.DeployTopologyOnly = value;
+        }
+
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            if (_hosts.Count == 0)
-                throw new ArgumentException("At least one host must be configured before configuring a receive endpoint");
+            var configuration = _configuration.CreateReceiveEndpointConfiguration(queueName, _configuration.CreateEndpointConfiguration());
 
-            ReceiveEndpoint(_hosts[0], queueName, configureEndpoint);
+            ConfigureReceiveEndpoint(configuration, configureEndpoint);
         }
 
         public void ReceiveEndpoint(IActiveMqHost host, string queueName, Action<IActiveMqReceiveEndpointConfigurator> configure)
         {
-            var rabbitMqHost = host as ActiveMqHost ?? throw new ArgumentException("The host must be an ActiveMQ host", nameof(host));
+            if (!_configuration.TryGetHost(host, out var hostConfiguration))
+                throw new ArgumentException("The host was not configured on this bus", nameof(host));
 
-            var endpointTopologySpecification = _configuration.CreateNewConfiguration();
+            var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
-            var specification = new ActiveMqReceiveEndpointSpecification(rabbitMqHost, endpointTopologySpecification, queueName);
+            ConfigureReceiveEndpoint(configuration, configure);
+        }
 
-            specification.ConnectConsumerConfigurationObserver(this);
-            specification.ConnectSagaConfigurationObserver(this);
+        void ConfigureReceiveEndpoint(IActiveMqReceiveEndpointConfiguration configuration, Action<IActiveMqReceiveEndpointConfigurator> configure)
+        {
+            configuration.ConnectConsumerConfigurationObserver(this);
+            configuration.ConnectSagaConfigurationObserver(this);
+
+            configure?.Invoke(configuration.Configurator);
+
+            var specification = new ConfigurationReceiveEndpointSpecification(configuration);
 
             AddReceiveEndpointSpecification(specification);
-
-            configure?.Invoke(specification);
         }
     }
 }

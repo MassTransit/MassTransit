@@ -13,6 +13,7 @@
 namespace MassTransit.HttpTransport
 {
     using System;
+    using Configuration;
     using Specifications;
 
 
@@ -25,7 +26,11 @@ namespace MassTransit.HttpTransport
         /// <returns></returns>
         public static IBusControl Create(Action<IHttpBusFactoryConfigurator> configure)
         {
-            var configurator = new HttpBusFactoryConfigurator(new HttpEndpointConfiguration(new HttpTopologyConfiguration(InMemoryBus.MessageTopology)));
+            var topologyConfiguration = new HttpTopologyConfiguration(InMemoryBus.MessageTopology);
+            var busConfiguration = new HttpBusConfiguration(topologyConfiguration);
+            var endpointConfiguration = busConfiguration.CreateEndpointConfiguration();
+
+            var configurator = new HttpBusFactoryConfigurator(busConfiguration, endpointConfiguration);
 
             configure(configurator);
 

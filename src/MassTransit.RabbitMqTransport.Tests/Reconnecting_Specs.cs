@@ -72,42 +72,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             Console.WriteLine("");
             Console.WriteLine("Resuming");
 
-            await Bus.Publish(new ReconnectMessage { Value = "After" });
-
-            bool afterFound = await Task.Run(() => _consumer.Received.Select<ReconnectMessage>(x => x.Context.Message.Value == "After").Any());
-            Assert.IsTrue(afterFound);
-        }
-
-        [Test, Explicit, Category("SlowAF")]
-        public async Task Should_not_lock_when_sending_during_unavailable()
-        {
-            Console.WriteLine("Okay, stop RabbitMQ");
-
-            for (int i = 0; i < 15; i++)
-            {
-                await Task.Delay(1000);
-
-                Console.Write($"{i}. ");
-            }
-
-            Console.WriteLine("Sending");
-
-            Assert.That(async () => await Bus.Publish(new ReconnectMessage { Value = "Before" }), Throws.TypeOf<RabbitMqConnectionException>());
-
-            Console.WriteLine("Start it back up");
-
-            for (int i = 0; i < 15; i++)
-            {
-                await Task.Delay(1000);
-
-                Console.Write($"{i}. ");
-            }
-
-            Console.WriteLine("Sending");
-
-            await Bus.Publish(new ReconnectMessage { Value = "After" });
-
-            Console.WriteLine("Sent");
+            await Bus.Publish(new ReconnectMessage {Value = "After"});
 
             bool afterFound = await Task.Run(() => _consumer.Received.Select<ReconnectMessage>(x => x.Context.Message.Value == "After").Any());
             Assert.IsTrue(afterFound);

@@ -45,6 +45,6 @@
     <Reference Include="System.Transactions" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Configuration\Configuration" />
+    <Folder Include="Monitoring\Performance\Configuration" />
   </ItemGroup>
 </Project>

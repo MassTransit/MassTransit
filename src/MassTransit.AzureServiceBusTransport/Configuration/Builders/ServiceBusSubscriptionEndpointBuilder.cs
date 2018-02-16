@@ -12,36 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Builders
 {
-    using System;
+    using Configuration;
     using MassTransit.Builders;
-    using Specifications;
     using Topology;
     using Topology.Builders;
     using Transport;
-    using Transports;
 
 
     public class ServiceBusSubscriptionEndpointBuilder :
         ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
-        readonly IServiceBusEndpointConfiguration _configuration;
-        readonly IServiceBusHost _host;
-        readonly BusHostCollection<ServiceBusHost> _hosts;
+        readonly IServiceBusSubscriptionEndpointConfiguration _configuration;
 
-        public ServiceBusSubscriptionEndpointBuilder(BusHostCollection<ServiceBusHost> hosts, IServiceBusHost host, IServiceBusEndpointConfiguration configuration)
+        public ServiceBusSubscriptionEndpointBuilder(IServiceBusSubscriptionEndpointConfiguration configuration)
             : base(configuration)
         {
             _configuration = configuration;
-            _hosts = hosts;
-            _host = host;
         }
 
-        public IServiceBusReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress, SubscriptionSettings settings)
+        public IServiceBusReceiveEndpointTopology CreateReceiveEndpointTopology()
         {
-            var topologyLayout = BuildTopology(settings);
+            var topologyLayout = BuildTopology(_configuration.Settings);
 
-            return new ServiceBusReceiveEndpointTopology(_configuration, inputAddress, _host, _hosts, topologyLayout);
+            return new ServiceBusReceiveEndpointTopology(_configuration, topologyLayout);
         }
 
         BrokerTopology BuildTopology(SubscriptionSettings settings)

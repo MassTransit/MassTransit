@@ -15,6 +15,7 @@ namespace MassTransit.ActiveMqTransport.Transport
     using System;
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Configuration;
     using GreenPipes.Agents;
     using Pipeline;
     using Topology;
@@ -24,11 +25,11 @@ namespace MassTransit.ActiveMqTransport.Transport
     public class SendTransportProvider :
         ISendTransportProvider
     {
-        readonly BusHostCollection<ActiveMqHost> _hosts;
+        readonly IActiveMqBusConfiguration _busConfiguration;
 
-        public SendTransportProvider(BusHostCollection<ActiveMqHost> hosts)
+        public SendTransportProvider(IActiveMqBusConfiguration busConfiguration)
         {
-            _hosts = hosts;
+            _busConfiguration = busConfiguration;
         }
 
         Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
@@ -38,7 +39,10 @@ namespace MassTransit.ActiveMqTransport.Transport
 
         ISendTransport GetSendTransport(Uri address)
         {
-            var host = _hosts.GetHost(address);
+            if (!_busConfiguration.TryGetHost(address, out var hostConfiguration))
+                throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
+
+            var host = hostConfiguration.Host;
 
             var settings = host.Topology.SendTopology.GetSendSettings(address);
 
@@ -54,7 +58,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             return transport;
         }
 
-        protected virtual IAgent<SessionContext> GetSessionAgent(ActiveMqHost host)
+        protected virtual IAgent<SessionContext> GetSessionAgent(IActiveMqHost host)
         {
             return new ActiveMqSessionCache(host, host.ConnectionCache);
         }

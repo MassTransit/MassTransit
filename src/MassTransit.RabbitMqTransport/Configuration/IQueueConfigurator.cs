@@ -22,11 +22,6 @@ namespace MassTransit.RabbitMqTransport
         IExchangeConfigurator
     {
         /// <summary>
-        /// The queue name, which may possibly differ from the exchange name
-        /// </summary>
-        string QueueName { set; }
-
-        /// <summary>
         /// Specify that the queue is exclusive to this process and cannot be accessed by other processes
         /// at the same time.
         /// </summary>

@@ -13,37 +13,34 @@
 namespace MassTransit.HttpTransport.Transport
 {
     using System;
-    using Builders;
+    using Configuration;
     using Configurators;
-    using Specifications;
-    using Transports;
 
 
     public class HttpReceiveEndpointFactory :
         IHttpReceiveEndpointFactory
     {
-        readonly HttpBusBuilder _builder;
-        readonly IHttpEndpointConfiguration _configuration;
+        readonly IHttpBusConfiguration _configuration;
         readonly IHttpHost _host;
-        readonly BusHostCollection<HttpHost> _hosts;
 
-        public HttpReceiveEndpointFactory(HttpBusBuilder builder, IHttpHost host, BusHostCollection<HttpHost> hosts, IHttpEndpointConfiguration configuration)
+        public HttpReceiveEndpointFactory(IHttpBusConfiguration configuration, IHttpHost host)
         {
-            _builder = builder;
             _host = host;
-            _hosts = hosts;
             _configuration = configuration;
         }
 
         public void CreateReceiveEndpoint(string pathMatch, Action<IHttpReceiveEndpointConfigurator> configure)
         {
-            var endpointConfigurator = new HttpReceiveEndpointSpecification(_host, _hosts, pathMatch, _configuration);
+            if (!_configuration.TryGetHost(_host, out var hostConfiguration))
+                throw new ConfigurationException("The host was not properly configured");
 
-            configure?.Invoke(endpointConfigurator);
+            var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(pathMatch);
 
-            BusConfigurationResult.CompileResults(endpointConfigurator.Validate());
+            configure?.Invoke(configuration.Configurator);
 
-            endpointConfigurator.Apply(_builder);
+            BusConfigurationResult.CompileResults(configuration.Validate());
+
+            configuration.Build();
         }
     }
 }

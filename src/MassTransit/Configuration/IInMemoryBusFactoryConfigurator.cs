@@ -16,7 +16,6 @@ namespace MassTransit
     using System.ComponentModel;
     using Builders;
     using Transports.InMemory;
-    using Transports.InMemory.Builders;
     using Transports.InMemory.Topology.Configurators;
 
 
@@ -42,26 +41,8 @@ namespace MassTransit
         void Publish<T>(Action<IInMemoryMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class;
 
-        /// <summary>
-        /// Before configuring any topology options, calling this will make it so that send and publish
-        /// topologies are completely separated for this bus. This means that some types may not properly
-        /// follow the topology rules, so use with caution.
-        /// </summary>
-        void SeparatePublishFromSendTopology();
-
-        /// <summary>
-        /// Sets the transport provider for the InMemory bus, used to share a transport cache between multiple
-        /// bus instances. Normally this method is not used.
-        /// </summary>
-        /// <param name="transportProvider"></param>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        void SetHost(IInMemoryHost transportProvider);
-
         [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddBusFactorySpecification(IBusFactorySpecification<IInMemoryBusBuilder> specification);
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IInMemoryBusBuilder> specification);
+        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
 
         /// <summary>
         /// Specify a receive endpoint for the bus, with the specified queue name

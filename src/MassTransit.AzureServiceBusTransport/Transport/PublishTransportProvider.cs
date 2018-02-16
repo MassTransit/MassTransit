@@ -13,8 +13,8 @@
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
+    using Configuration;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -26,13 +26,14 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     public class PublishTransportProvider :
         IPublishTransportProvider
     {
-        readonly BusHostCollection<ServiceBusHost> _hosts;
+        readonly IServiceBusBusConfiguration _busConfiguration;
         readonly IServiceBusPublishTopology _publishTopology;
 
-        public PublishTransportProvider(BusHostCollection<ServiceBusHost> hosts, IServiceBusHost host)
+        public PublishTransportProvider(IServiceBusBusConfiguration busConfiguration)
         {
-            _hosts = hosts;
-            _publishTopology = host.Topology.PublishTopology;
+            _busConfiguration = busConfiguration;
+
+            _publishTopology = _busConfiguration.Topology.Publish;
         }
 
         Task<ISendTransport> IPublishTransportProvider.GetPublishTransport<T>(Uri publishAddress)
@@ -43,7 +44,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         ISendTransport GetSendTransport<T>(Uri address)
             where T : class
         {
-            var host = GetMatchingHost(address);
+            var host = _busConfiguration.GetHost(address);
 
             var settings = _publishTopology.GetMessageTopology<T>().GetSendSettings();
 
@@ -58,25 +59,13 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         protected virtual IAgent<SendEndpointContext> GetSendEndpointContextSource(ServiceBusHost host, SendSettings settings, BrokerTopology brokerTopology)
         {
-            IPipe<NamespaceContext> pipe = Pipe.New<NamespaceContext>(x => x.UseFilter(new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology, false)));
+            IPipe<NamespaceContext> pipe =
+                Pipe.New<NamespaceContext>(x => x.UseFilter(new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology, false)));
 
-            var contextFactory = new TopicSendEndpointContextFactory(host.MessagingFactoryCache, host.NamespaceCache, Pipe.Empty<MessagingFactoryContext>(), pipe, settings);
+            var contextFactory = new TopicSendEndpointContextFactory(host.MessagingFactoryCache, host.NamespaceCache, Pipe.Empty<MessagingFactoryContext>(),
+                pipe, settings);
 
             return new SendEndpointContextCache(contextFactory);
-        }
-
-        ServiceBusHost GetMatchingHost(Uri address)
-        {
-            var host = _hosts.GetHosts(address)
-                .OrderByDescending(x => address.AbsolutePath.StartsWith(x.Settings.ServiceUri.AbsolutePath, StringComparison.OrdinalIgnoreCase)
-                    ? 1
-                    : 0)
-                .FirstOrDefault();
-
-            if (host == null)
-                throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
-
-            return host;
         }
     }
 }

@@ -29,9 +29,9 @@ namespace MassTransit.Transports
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="message">The message</param>
         /// <param name="pipe">The pipe invoked when sending a message, to do extra stuff</param>
-        /// <param name="cancelSend">Cancel the send operation (if possible)</param>
+        /// <param name="cancellationToken">Cancel the send operation (if possible)</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
+        Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class;
     }
 }

@@ -38,5 +38,13 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         {
             return _regex.Match(name).Success;
         }
+
+        public static IEntityNameValidator Validator => Cached.EntityNameValidator;
+
+
+        static class Cached
+        {
+            internal static readonly IEntityNameValidator EntityNameValidator = new ServiceBusEntityNameValidator();
+        }
     }
 }

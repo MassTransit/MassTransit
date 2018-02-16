@@ -22,7 +22,6 @@ namespace MassTransit.HttpTransport.Clients
     public interface ClientContext :
         PipeContext
     {
-        //HttpClient Client { get; }
         Uri BaseAddress { get; }
 
         Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken);

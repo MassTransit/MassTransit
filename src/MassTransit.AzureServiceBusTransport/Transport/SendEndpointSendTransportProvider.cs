@@ -13,8 +13,8 @@
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
+    using Configuration;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -26,11 +26,11 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     public class SendEndpointSendTransportProvider :
         ISendTransportProvider
     {
-        readonly BusHostCollection<ServiceBusHost> _hosts;
+        readonly IServiceBusBusConfiguration _busConfiguration;
 
-        public SendEndpointSendTransportProvider(BusHostCollection<ServiceBusHost> hosts)
+        public SendEndpointSendTransportProvider(IServiceBusBusConfiguration busConfiguration)
         {
-            _hosts = hosts;
+            _busConfiguration = busConfiguration;
         }
 
         Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
@@ -40,7 +40,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         ISendTransport GetSendTransport(Uri address)
         {
-            var host = GetMatchingHost(address);
+            var host = _busConfiguration.GetHost(address);
 
             var settings = host.Topology.SendTopology.GetSendSettings(address);
 
@@ -53,28 +53,15 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             return transport;
         }
 
-        IAgent<SendEndpointContext> GetSendEndpointContextSource(ServiceBusHost host, SendSettings settings, BrokerTopology brokerTopology)
+        IAgent<SendEndpointContext> GetSendEndpointContextSource(IServiceBusHost host, SendSettings settings, BrokerTopology brokerTopology)
         {
-            IPipe<NamespaceContext> namespacePipe = Pipe.New<NamespaceContext>(x => x.UseFilter(new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology, false)));
+            IPipe<NamespaceContext> namespacePipe =
+                Pipe.New<NamespaceContext>(x => x.UseFilter(new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology, false)));
 
             var contextFactory = new QueueSendEndpointContextFactory(host.MessagingFactoryCache, host.NamespaceCache, Pipe.Empty<MessagingFactoryContext>(),
                 namespacePipe, settings);
 
             return new SendEndpointContextCache(contextFactory);
-        }
-
-        ServiceBusHost GetMatchingHost(Uri address)
-        {
-            var host = _hosts.GetHosts(address)
-                .OrderByDescending(x => address.AbsolutePath.StartsWith(x.Settings.ServiceUri.AbsolutePath, StringComparison.OrdinalIgnoreCase)
-                    ? 1
-                    : 0)
-                .FirstOrDefault();
-
-            if (host == null)
-                throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
-
-            return host;
         }
     }
 }

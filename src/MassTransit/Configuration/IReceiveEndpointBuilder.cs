@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System.Net.Mime;
-    using Builders;
     using Pipeline;
 
 
@@ -24,18 +22,5 @@ namespace MassTransit
         IConsumePipe ConsumePipe { get; }
 
         IMessageDeserializer MessageDeserializer { get; }
-
-        /// <summary>
-        /// Sets the outbound message serializer
-        /// </summary>
-        /// <param name="serializerFactory">The factory to create the message serializer</param>
-        void SetMessageSerializer(SerializerFactory serializerFactory);
-
-        /// <summary>
-        /// Adds an inbound message deserializer to the available deserializers
-        /// </summary>
-        /// <param name="contentType">The content type of the deserializer</param>
-        /// <param name="deserializerFactory">The factory to create the deserializer</param>
-        void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory);
     }
 }

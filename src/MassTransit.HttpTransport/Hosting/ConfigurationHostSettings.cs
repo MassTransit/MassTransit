@@ -24,7 +24,11 @@ namespace MassTransit.HttpTransport.Hosting
             Host = host;
             Port = port;
             Method = method;
+
+            Description = $"{Host}:{Port}";
         }
+
+        public string Description { get; }
 
         public HttpMethod Method { get; set; }
         public string Scheme { get; }

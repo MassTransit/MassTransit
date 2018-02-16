@@ -109,9 +109,6 @@ namespace MassTransit.ActiveMqTransport.Testing
 
                 x.ReceiveEndpoint(Host, InputQueueName, e =>
                 {
-                    e.PrefetchCount = 16;
-                    e.PurgeOnStartup = true;
-
                     ConfigureReceiveEndpoint(e);
 
                     ConfigureActiveMqReceiveEndpoint(e);

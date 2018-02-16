@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,12 +14,13 @@ namespace MassTransit.HttpTransport.Hosting
 {
     using System.Collections.Generic;
     using System.Linq;
-    using System.Net;
     using Context;
-    using Microsoft.Owin;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Primitives;
 
 
-    public class HttpHeaderProvider : IHeaderProvider
+    public class HttpHeaderProvider :
+        IHeaderProvider
     {
         readonly IHeaderDictionary _headers;
 
@@ -35,9 +36,8 @@ namespace MassTransit.HttpTransport.Hosting
 
         public bool TryGetHeader(string key, out object value)
         {
-            string[] values;
-            var result = _headers.TryGetValue(key, out values);
-            value = values?.FirstOrDefault();
+            var result = _headers.TryGetValue(key, out StringValues values);
+            value = values.FirstOrDefault();
             return result;
         }
     }

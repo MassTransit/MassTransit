@@ -14,11 +14,11 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Threading;
+    using Configuration;
     using Configurators;
     using MassTransit.Topology;
     using MassTransit.Topology.EntityNameFormatters;
     using MassTransit.Topology.Topologies;
-    using Specifications;
 
 
     public static class AzureBusFactory
@@ -32,7 +32,11 @@ namespace MassTransit.AzureServiceBusTransport
         /// <returns></returns>
         public static IBusControl CreateUsingServiceBus(Action<IServiceBusBusFactoryConfigurator> configure)
         {
-            var configurator = new ServiceBusBusFactoryConfigurator(new ServiceBusEndpointConfiguration(new ServiceBusTopologyConfiguration(MessageTopology)));
+            var topologyConfiguration = new ServiceBusTopologyConfiguration(MessageTopology);
+            var busConfiguration = new ServiceBusBusConfiguration(topologyConfiguration);
+            var busEndpointConfiguration = busConfiguration.CreateEndpointConfiguration();
+
+            var configurator = new ServiceBusBusFactoryConfigurator(busConfiguration, busEndpointConfiguration);
 
             configure(configurator);
 

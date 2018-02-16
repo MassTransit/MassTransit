@@ -41,9 +41,9 @@ namespace MassTransit.Transports.InMemory
 
         public string ExchangeName => _exchange.Name;
 
-        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
+        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
-            var context = new InMemorySendContext<T>(message, cancelSend);
+            var context = new InMemorySendContext<T>(message, cancellationToken);
 
             try
             {

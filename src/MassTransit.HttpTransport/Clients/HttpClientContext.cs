@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -17,6 +17,7 @@ namespace MassTransit.HttpTransport.Clients
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Payloads;
     using Logging;
     using MassTransit.Pipeline;
     using Util;
@@ -25,26 +26,18 @@ namespace MassTransit.HttpTransport.Clients
     public class HttpClientContext :
         BasePipeContext,
         ClientContext,
-        IDisposable
+        IAsyncDisposable
     {
         static readonly ILog _log = Logger.Get<HttpClientContext>();
         readonly HttpClient _client;
-        readonly ITaskParticipant _participant;
         readonly IReceivePipe _receivePipe;
 
-        public HttpClientContext(HttpClient client, IReceivePipe receivePipe, ITaskScope taskScope)
-            : this(client, receivePipe, taskScope.CreateParticipant($"{TypeMetadataCache<HttpClientContext>.ShortName} - {client.BaseAddress}"))
-        {
-        }
-
-        public HttpClientContext(HttpClient client, IReceivePipe receivePipe, ITaskParticipant participant)
+        public HttpClientContext(HttpClient client, IReceivePipe receivePipe, CancellationToken cancellationToken)
+            : base(new PayloadCache(), cancellationToken)
         {
             _client = client;
             _receivePipe = receivePipe;
-            _participant = participant;
         }
-
-        CancellationToken PipeContext.CancellationToken => _participant.StoppedToken;
 
         public Uri BaseAddress => _client.BaseAddress;
 
@@ -58,28 +51,15 @@ namespace MassTransit.HttpTransport.Clients
             return _receivePipe.Send(receiveContext);
         }
 
-        public void Dispose()
-        {
-            Close("ClientContext Disposed");
-        }
-
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption)
-        {
-            return await _client.SendAsync(request, completionOption);
-        }
-
-        public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken)
-        {
-            return await _client.SendAsync(request, completionOption, cancellationToken);
-        }
-
-        void Close(string reason)
+        public Task DisposeAsync(CancellationToken cancellationToken)
         {
             if (_log.IsDebugEnabled)
                 _log.Debug($"Closing client: {_client.BaseAddress}");
 
             try
             {
+                _client.CancelPendingRequests();
+
                 _client.Dispose();
             }
             catch (Exception ex)
@@ -88,69 +68,7 @@ namespace MassTransit.HttpTransport.Clients
                     _log.Error("Fault waiting for Dispose", ex);
             }
 
-            _participant.SetComplete();
-        }
-
-        public void CancelPendingRequests()
-        {
-            _client.CancelPendingRequests();
-        }
-    }
-
-
-    public class SharedHttpClientContext :
-        ClientContext,
-        IDisposable
-    {
-        readonly CancellationToken _cancellationToken;
-        readonly ClientContext _context;
-        readonly ITaskParticipant _participant;
-
-        public SharedHttpClientContext(ClientContext context, CancellationToken cancellationToken, ITaskScope scope)
-        {
-            _context = context;
-            _cancellationToken = cancellationToken;
-
-            _participant = scope.CreateParticipant($"{TypeMetadataCache<SharedHttpClientContext>.ShortName} - {context.BaseAddress}");
-
-            _participant.SetReady();
-        }
-
-        CancellationToken PipeContext.CancellationToken => _cancellationToken;
-
-        bool PipeContext.HasPayloadType(Type contextType)
-        {
-            return _context.HasPayloadType(contextType);
-        }
-
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            return _context.TryGetPayload(out payload);
-        }
-
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            return _context.GetOrAddPayload(payloadFactory);
-        }
-
-       void IDisposable.Dispose()
-        {
-            _participant.SetComplete();
-        }
-
-        public Uri BaseAddress
-        {
-            get { return _context.BaseAddress; }
-        }
-
-        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            return _context.SendAsync(request, cancellationToken);
-        }
-
-        public Task ReceiveResponse(ReceiveContext receiveContext)
-        {
-            return _context.ReceiveResponse(receiveContext);
+            return TaskUtil.Completed;
         }
     }
 }

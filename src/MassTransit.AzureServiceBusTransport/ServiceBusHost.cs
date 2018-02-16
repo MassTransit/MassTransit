@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -39,11 +40,13 @@ namespace MassTransit.AzureServiceBusTransport
     {
         static readonly ILog _log = Logger.Get<ServiceBusHost>();
         readonly IReceiveEndpointCollection _receiveEndpoints;
+        readonly IServiceBusBusConfiguration _busConfiguration;
 
-        public ServiceBusHost(ServiceBusHostSettings settings, IServiceBusHostTopology hostTopology)
+        public ServiceBusHost(ServiceBusHostSettings settings, IServiceBusHostTopology hostTopology, IServiceBusBusConfiguration busConfiguration)
         {
             Settings = settings;
             Topology = hostTopology;
+            _busConfiguration = busConfiguration;
 
             _receiveEndpoints = new ReceiveEndpointCollection();
 
@@ -71,11 +74,20 @@ namespace MassTransit.AzureServiceBusTransport
             NetMessagingFactoryCache = settings.TransportType == TransportType.NetMessaging
                 ? MessagingFactoryCache
                 : new MessagingFactoryCache(settings.ServiceUri, CreateMessagingFactorySettings(settings, true), serviceBusRetryPolicy);
+
+            ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(_busConfiguration, this);
+            SubscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(_busConfiguration, this);
         }
 
-        public IServiceBusReceiveEndpointFactory ReceiveEndpointFactory { private get; set; }
-        public IServiceBusSubscriptionEndpointFactory SubscriptionEndpointFactory { private get; set; }
+        public IServiceBusReceiveEndpointFactory ReceiveEndpointFactory {  get; }
+        public IServiceBusSubscriptionEndpointFactory SubscriptionEndpointFactory {  get; }
+
         public IReceiveEndpointCollection ReceiveEndpoints => _receiveEndpoints;
+
+        public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
+        {
+            _receiveEndpoints.Add(endpointName, receiveEndpoint);
+        }
 
         public async Task<HostHandle> Start()
         {

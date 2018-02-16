@@ -17,6 +17,7 @@ namespace MassTransit.Transports.InMemory
     using System.Threading;
     using System.Threading.Tasks;
     using Builders;
+    using Configuration;
     using Fabric;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -32,17 +33,17 @@ namespace MassTransit.Transports.InMemory
     /// </summary>
     public class InMemoryHost :
         Supervisor,
-        IInMemoryHost,
-        ISendTransportProvider,
-        IBusHostControl
+        IInMemoryHostControl,
+        ISendTransportProvider
     {
         static readonly ILog _log = Logger.Get<InMemoryHost>();
         readonly Uri _baseUri;
         readonly IIndex<string, InMemorySendTransport> _index;
         readonly IMessageFabric _messageFabric;
         readonly IReceiveEndpointCollection _receiveEndpoints;
+        readonly IInMemoryReceiveEndpointFactory _receiveEndpointFactory;
 
-        public InMemoryHost(int concurrencyLimit, IHostTopology topology, Uri baseAddress = null)
+        public InMemoryHost(IInMemoryBusConfiguration busConfiguration, int concurrencyLimit, IHostTopology topology, Uri baseAddress = null)
         {
             Topology = topology;
             _baseUri = baseAddress ?? new Uri("loopback://localhost/");
@@ -53,11 +54,16 @@ namespace MassTransit.Transports.InMemory
 
             var cache = new GreenCache<InMemorySendTransport>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
             _index = cache.AddIndex("exchangeName", x => x.ExchangeName);
+
+            _receiveEndpointFactory = new InMemoryReceiveEndpointFactory(busConfiguration);
         }
 
-        public IInMemoryReceiveEndpointFactory ReceiveEndpointFactory { private get; set; }
-
         public IReceiveEndpointCollection ReceiveEndpoints => _receiveEndpoints;
+
+        public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
+        {
+            ReceiveEndpoints.Add(endpointName, receiveEndpoint);
+        }
 
         public async Task<HostHandle> Start()
         {
@@ -102,10 +108,7 @@ namespace MassTransit.Transports.InMemory
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure = null)
         {
-            if (ReceiveEndpointFactory == null)
-                throw new ConfigurationException("The receive endpoint factory was not specified");
-
-            ReceiveEndpointFactory.CreateReceiveEndpoint(queueName, configure);
+            _receiveEndpointFactory.CreateReceiveEndpoint(queueName, configure);
 
             return _receiveEndpoints.Start(queueName);
         }
@@ -155,7 +158,7 @@ namespace MassTransit.Transports.InMemory
 
                 var exchange = _messageFabric.GetExchange(queueName);
 
-                var transport = new InMemorySendTransport(exchange);    
+                var transport = new InMemorySendTransport(exchange);
 
                 return transport;
             });

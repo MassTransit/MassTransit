@@ -13,6 +13,7 @@
 namespace MassTransit.ActiveMqTransport
 {
     using System;
+    using GreenPipes;
 
 
     /// <summary>
@@ -34,16 +35,10 @@ namespace MassTransit.ActiveMqTransport
         bool BindMessageTopics { set; }
 
         /// <summary>
-        /// Bind an existing exchange to the receive endpoint queue by name
-        /// </summary>
-        /// <param name="topicName">The exchange name</param>
-        void Bind(string topicName);
-
-        /// <summary>
         /// Bind an existing exchange for the message type to the receive endpoint by name
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        void Bind<T>()
+        void Bind<T>(Action<ITopicBindingConfigurator> callback = null)
             where T : class;
 
         /// <summary>
@@ -52,5 +47,8 @@ namespace MassTransit.ActiveMqTransport
         /// <param name="topicName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
         void Bind(string topicName, Action<ITopicBindingConfigurator> callback);
+
+        void ConfigureSession(Action<IPipeConfigurator<SessionContext>> configure);
+        void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure);
     }
 }

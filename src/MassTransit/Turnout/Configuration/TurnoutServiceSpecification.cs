@@ -14,6 +14,7 @@ namespace MassTransit.Turnout.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.Net.Mime;
     using Builders;
     using ConsumeConfigurators;
     using GreenPipes;
@@ -90,6 +91,16 @@ namespace MassTransit.Turnout.Configuration
         void IReceiveEndpointConfigurator.AddEndpointSpecification(IReceiveEndpointSpecification configurator)
         {
             _configurator.AddEndpointSpecification(configurator);
+        }
+
+        void IReceiveEndpointConfigurator.SetMessageSerializer(SerializerFactory serializerFactory)
+        {
+            _configurator.SetMessageSerializer(serializerFactory);
+        }
+
+        void IReceiveEndpointConfigurator.AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
+        {
+            _configurator.AddMessageDeserializer(contentType, deserializerFactory);
         }
 
         Uri IReceiveEndpointConfigurator.InputAddress => _configurator.InputAddress;

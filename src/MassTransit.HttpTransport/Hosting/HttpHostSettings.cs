@@ -33,5 +33,7 @@ namespace MassTransit.HttpTransport.Hosting
         /// The HTTP Method to use
         /// </summary>
         HttpMethod Method { get; }
+
+        string Description { get; }
     }
 }

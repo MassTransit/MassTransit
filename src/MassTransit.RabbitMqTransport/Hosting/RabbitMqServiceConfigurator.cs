@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Hosting
 {
     using System;
+    using System.Net.Mime;
     using ConsumeConfigurators;
     using GreenPipes;
     using MassTransit.Builders;
@@ -65,6 +66,11 @@ namespace MassTransit.RabbitMqTransport.Hosting
             _configurator.AddPrePipeSpecification(specification);
         }
 
+        public ConnectHandle ConnectBusObserver(IBusObserver observer)
+        {
+            return _configurator.ConnectBusObserver(observer);
+        }
+
         public IMessageTopologyConfigurator MessageTopology => _configurator.MessageTopology;
 
         public ISendTopologyConfigurator SendTopology => _configurator.SendTopology;
@@ -97,6 +103,16 @@ namespace MassTransit.RabbitMqTransport.Hosting
             where T : class
         {
             ((IBusFactoryConfigurator)_configurator).Publish(configureTopology);
+        }
+
+        public void SetMessageSerializer(SerializerFactory serializerFactory)
+        {
+            _configurator.SetMessageSerializer(serializerFactory);
+        }
+
+        public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
+        {
+            _configurator.AddMessageDeserializer(contentType, deserializerFactory);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)

@@ -27,6 +27,11 @@ namespace MassTransit.RabbitMqTransport
         new IRabbitMqPublishTopologyConfigurator PublishTopology { get; }
 
         /// <summary>
+        /// Set to true if the topology should be deployed only
+        /// </summary>
+        bool DeployTopologyOnly { set; }
+
+        /// <summary>
         /// Configure the send topology of the message type
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -41,16 +46,6 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="configureTopology"></param>
         void Publish<T>(Action<IRabbitMqMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class;
-
-        /// <summary>
-        /// Before configuring any topology options, calling this will make it so that send and publish
-        /// topologies are completely separated for this bus. This means that some types may not properly
-        /// follow the topology rules, so use with caution.
-        /// </summary>
-        void SeparatePublishFromSendTopology();
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddBusFactorySpecification(IBusFactorySpecification<IBusBuilder> specification);
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
@@ -69,13 +64,6 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="settings"></param>
         /// <returns></returns>
         IRabbitMqHost Host(RabbitMqHostSettings settings);
-
-        /// <summary>
-        /// Create a temporary queue name, using the configured consume topology
-        /// </summary>
-        /// <param name="prefix"></param>
-        /// <returns></returns>
-        string CreateTemporaryQueueName(string prefix);
 
         /// <summary>
         /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.

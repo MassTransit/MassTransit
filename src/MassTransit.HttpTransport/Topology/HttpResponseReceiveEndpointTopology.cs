@@ -13,27 +13,28 @@
 namespace MassTransit.HttpTransport.Topology
 {
     using System;
-    using Clients;
     using GreenPipes;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using MassTransit.Topology;
-    using Microsoft.Owin;
+    using Microsoft.AspNetCore.Http;
+    using Transport;
 
 
     public class HttpResponseReceiveEndpointTopology :
         IReceiveEndpointTopology
     {
-        readonly IOwinContext _owinContext;
+        readonly HttpContext _httpContext;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ISendPipe _sendPipe;
         readonly IMessageSerializer _serializer;
         readonly IReceiveEndpointTopology _topology;
 
-        public HttpResponseReceiveEndpointTopology(IReceiveEndpointTopology topology, IOwinContext owinContext, ISendPipe sendPipe,
+        public HttpResponseReceiveEndpointTopology(IReceiveEndpointTopology topology, HttpContext httpContext, ISendPipe sendPipe,
             IMessageSerializer serializer)
         {
             _topology = topology;
-            _owinContext = owinContext;
+            _httpContext = httpContext;
             _sendPipe = sendPipe;
             _serializer = serializer;
 
@@ -41,6 +42,8 @@ namespace MassTransit.HttpTransport.Topology
         }
 
         Uri IReceiveEndpointTopology.InputAddress => _topology.InputAddress;
+        ReceiveObservable IReceiveEndpointTopology.ReceiveObservers => _topology.ReceiveObservers;
+        ReceiveTransportObservable IReceiveEndpointTopology.TransportObservers => _topology.TransportObservers;
 
         ISendTopology IReceiveTopology.Send => _topology.Send;
         IPublishTopology IReceiveTopology.Publish => _topology.Publish;
@@ -60,7 +63,7 @@ namespace MassTransit.HttpTransport.Topology
 
         ISendEndpointProvider CreateSendEndpointProvider()
         {
-            return new HttpResponseSendEndpointProvider(_owinContext, _topology.InputAddress, _sendPipe, _serializer, _topology.SendEndpointProvider);
+            return new HttpResponseSendEndpointProvider(_httpContext, _topology.InputAddress, _sendPipe, _serializer, _topology.SendEndpointProvider);
         }
     }
 }

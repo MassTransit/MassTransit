@@ -27,8 +27,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         SendSettings GetSendSettings(Uri address);
 
         SendSettings GetErrorSettings(IQueueConfigurator configurator);
-
         SendSettings GetDeadLetterSettings(IQueueConfigurator configurator);
+
         SendSettings GetErrorSettings(ISubscriptionConfigurator configurator, string basePath);
         SendSettings GetDeadLetterSettings(ISubscriptionConfigurator configurator, string basePath);
     }

@@ -14,7 +14,9 @@ namespace MassTransit
 {
     using System;
     using System.ComponentModel;
+    using System.Net.Mime;
     using Builders;
+    using GreenPipes;
     using Topology;
 
 
@@ -23,16 +25,18 @@ namespace MassTransit
         ISendPipelineConfigurator,
         IPublishPipelineConfigurator
     {
+        /// <summary>
+        /// Connects a bus observer to the bus to observe lifecycle events on the bus
+        /// </summary>
+        /// <param name="observer"></param>
+        /// <returns></returns>
+        ConnectHandle ConnectBusObserver(IBusObserver observer);
+
         IMessageTopologyConfigurator MessageTopology { get; }
 
         ISendTopologyConfigurator SendTopology { get; }
 
         IPublishTopologyConfigurator PublishTopology { get; }
-
-        /// <summary>
-        /// Set to true if the topology should be deployed only
-        /// </summary>
-        bool DeployTopologyOnly { set; }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddBusFactorySpecification(IBusFactorySpecification specification);
@@ -60,6 +64,19 @@ namespace MassTransit
         /// <param name="configureTopology"></param>
         void Publish<T>(Action<IMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class;
+
+        /// <summary>
+        /// Sets the outbound message serializer
+        /// </summary>
+        /// <param name="serializerFactory">The factory to create the message serializer</param>
+        void SetMessageSerializer(SerializerFactory serializerFactory);
+
+        /// <summary>
+        /// Adds an inbound message deserializer to the available deserializers
+        /// </summary>
+        /// <param name="contentType">The content type of the deserializer</param>
+        /// <param name="deserializerFactory">The factory to create the deserializer</param>
+        void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory);
 
         /// <summary>
         /// Specify a receive endpoint for the bus, with the specified queue name

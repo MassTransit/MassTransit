@@ -13,42 +13,35 @@
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
-    using Builders;
-    using Configurators;
+    using Configuration;
     using MassTransit.Configurators;
     using Settings;
-    using Specifications;
-    using Transports;
 
 
     public class ServiceBusSubscriptionEndpointFactory :
         IServiceBusSubscriptionEndpointFactory
     {
-        readonly ServiceBusBusBuilder _builder;
-        readonly BusHostCollection<ServiceBusHost> _hosts;
-        readonly IServiceBusEndpointConfiguration _configuration;
-        readonly ServiceBusHost _host;
+        readonly IServiceBusBusConfiguration _configuration;
+        readonly IServiceBusHost _host;
 
-        public ServiceBusSubscriptionEndpointFactory(ServiceBusBusBuilder builder, BusHostCollection<ServiceBusHost> hosts, ServiceBusHost host,
-            IServiceBusEndpointConfiguration configuration)
+        public ServiceBusSubscriptionEndpointFactory(IServiceBusBusConfiguration configuration, IServiceBusHost host)
         {
-            _builder = builder;
-            _hosts = hosts;
-            _host = host;
             _configuration = configuration;
+            _host = host;
         }
 
         public void CreateSubscriptionEndpoint(SubscriptionEndpointSettings settings, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
-            var endpointConfiguration = _configuration.CreateNewConfiguration();
+            if (!_configuration.TryGetHost(_host, out var hostConfiguration))
+                throw new ConfigurationException("The host was not properly configured");
 
-            var endpointConfigurator = new ServiceBusSubscriptionEndpointSpecification(_hosts, _host, settings, endpointConfiguration);
+            var configuration = hostConfiguration.CreateSubscriptionEndpointConfiguration(settings);
 
-            configure?.Invoke(endpointConfigurator);
+            configure?.Invoke(configuration.Configurator);
 
-            BusConfigurationResult.CompileResults(endpointConfigurator.Validate());
+            BusConfigurationResult.CompileResults(configuration.Validate());
 
-            endpointConfigurator.Apply(_builder);
+            configuration.Build();
         }
     }
 }

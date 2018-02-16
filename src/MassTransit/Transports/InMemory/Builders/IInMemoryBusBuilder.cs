@@ -18,9 +18,5 @@ namespace MassTransit.Transports.InMemory.Builders
     public interface IInMemoryBusBuilder :
         IBusBuilder
     {
-        /// <summary>
-        /// The receive transport provider
-        /// </summary>
-        IInMemoryHost InMemoryHost { get; }
     }
 }

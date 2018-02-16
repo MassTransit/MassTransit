@@ -13,8 +13,8 @@
 namespace MassTransit.Transports.InMemory.Topology
 {
     using System;
+    using Configuration;
     using Configurators;
-    using EndpointSpecifications;
     using MassTransit.Topology;
     using Pipeline.Observables;
 
@@ -28,8 +28,8 @@ namespace MassTransit.Transports.InMemory.Topology
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryReceiveEndpointTopology(IInMemoryEndpointConfiguration configuration, Uri inputAddress, ISendTransportProvider sendTransportProvider)
-            : base(configuration, inputAddress, new Uri(inputAddress.GetLeftPart(UriPartial.Authority)))
+        public InMemoryReceiveEndpointTopology(IInMemoryReceiveEndpointConfiguration configuration, ISendTransportProvider sendTransportProvider)
+            : base(configuration)
         {
             _sendTransportProvider = sendTransportProvider;
 
@@ -51,7 +51,8 @@ namespace MassTransit.Transports.InMemory.Topology
         {
             var transportProvider = new InMemoryPublishTransportProvider(_sendTransportProvider, _publish);
 
-            return new PublishEndpointProvider(transportProvider, HostAddress, PublishObservers, new SendObservable(), Serializer, InputAddress, PublishPipe, _publish);
+            return new PublishEndpointProvider(transportProvider, HostAddress, PublishObservers, new SendObservable(), Serializer, InputAddress, PublishPipe,
+                _publish);
         }
     }
 }

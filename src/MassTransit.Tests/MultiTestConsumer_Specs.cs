@@ -15,11 +15,9 @@ namespace MassTransit.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using GreenPipes;
     using MassTransit.Testing;
     using MassTransit.Testing.MessageObservers;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -39,11 +37,11 @@ namespace MassTransit.Tests
             {
                 var pingMessage = new PingMessage();
                 var pingMessage2 = new PingMessage();
-                Bus.Publish(pingMessage);
-                Bus.Publish(pingMessage2);
+                await Bus.Publish(pingMessage);
+                await Bus.Publish(pingMessage2);
 
-                consumer.Received.Select<PingMessage>(received => received.Context.Message.CorrelationId == pingMessage.CorrelationId).Any().ShouldBe(true);
-                consumer.Received.Select<PingMessage>(received => received.Context.Message.CorrelationId == pingMessage2.CorrelationId).Any().ShouldBe(true);
+                Assert.IsTrue(consumer.Received.Select<PingMessage>(received => received.Context.Message.CorrelationId == pingMessage.CorrelationId).Any());
+                Assert.IsTrue(consumer.Received.Select<PingMessage>(received => received.Context.Message.CorrelationId == pingMessage2.CorrelationId).Any());
             }
             finally
             {
@@ -62,9 +60,9 @@ namespace MassTransit.Tests
 
             try
             {
-                Bus.Publish(new PingMessage());
+                await Bus.Publish(new PingMessage());
 
-                received.Select().Any().ShouldBe(true);
+                Assert.IsTrue(received.Select().Any());
             }
             finally
             {
@@ -83,11 +81,11 @@ namespace MassTransit.Tests
             try
             {
                 var pingMessage = new PingMessage();
-                Bus.Publish(pingMessage);
-                Bus.Publish(new PongMessage(pingMessage.CorrelationId));
+                await Bus.Publish(pingMessage);
+                await Bus.Publish(new PongMessage(pingMessage.CorrelationId));
 
-                consumer.Received.Select<PingMessage>().Any().ShouldBe(true);
-                consumer.Received.Select<PongMessage>(received => received.Context.Message.CorrelationId == pingMessage.CorrelationId).Any().ShouldBe(true);
+                Assert.IsTrue(consumer.Received.Select<PingMessage>().Any());
+                Assert.IsTrue(consumer.Received.Select<PongMessage>(received => received.Context.Message.CorrelationId == pingMessage.CorrelationId).Any());
             }
             finally
             {

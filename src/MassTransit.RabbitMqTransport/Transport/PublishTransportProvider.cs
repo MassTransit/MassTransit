@@ -24,10 +24,10 @@ namespace MassTransit.RabbitMqTransport.Transport
     public class PublishTransportProvider :
         IPublishTransportProvider
     {
-        readonly RabbitMqHost _host;
+        readonly IRabbitMqHostControl _host;
         readonly IRabbitMqPublishTopology _publishTopology;
 
-        public PublishTransportProvider(RabbitMqHost host, IRabbitMqPublishTopology publishTopology)
+        public PublishTransportProvider(IRabbitMqHostControl host, IRabbitMqPublishTopology publishTopology)
         {
             _publishTopology = publishTopology;
             _host = host;

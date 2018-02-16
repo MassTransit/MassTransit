@@ -13,7 +13,7 @@
 namespace MassTransit.Topology
 {
     using System;
-    using EndpointSpecifications;
+    using Configuration;
     using GreenPipes;
     using Pipeline;
     using Pipeline.Observables;
@@ -32,16 +32,19 @@ namespace MassTransit.Topology
         protected readonly PublishObservable PublishObservers;
         protected readonly SendObservable SendObservers;
 
-        protected ReceiveEndpointTopology(IEndpointConfiguration configuration, Uri inputAddress, Uri hostAddress)
+        protected ReceiveEndpointTopology(IReceiveEndpointConfiguration configuration)
         {
-            InputAddress = inputAddress;
-            HostAddress = hostAddress;
+            InputAddress = configuration.InputAddress;
+            HostAddress = configuration.HostAddress;
 
             _send = configuration.Topology.Send;
             _publish = configuration.Topology.Publish;
 
             SendObservers = new SendObservable();
             PublishObservers = new PublishObservable();
+
+            ReceiveObservers = new ReceiveObservable();
+            TransportObservers = new ReceiveTransportObservable();
 
             _sendPipe = new Lazy<ISendPipe>(() => configuration.Send.CreatePipe());
             _publishPipe = new Lazy<IPublishPipe>(() => configuration.Publish.CreatePipe());
@@ -55,6 +58,10 @@ namespace MassTransit.Topology
         protected ISendPipe SendPipe => _sendPipe.Value;
         protected IMessageSerializer Serializer => _serializer.Value;
 
+        protected Uri HostAddress { get; }
+        public ReceiveObservable ReceiveObservers { get; }
+        public ReceiveTransportObservable TransportObservers { get; }
+
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
             return SendObservers.Connect(observer);
@@ -65,7 +72,6 @@ namespace MassTransit.Topology
             return PublishObservers.Connect(observer);
         }
 
-        protected Uri HostAddress { get; }
         public Uri InputAddress { get; }
 
         ISendTopology IReceiveTopology.Send => _send;

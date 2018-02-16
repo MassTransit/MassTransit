@@ -15,7 +15,6 @@ namespace MassTransit.HttpTransport.Tests
     using System;
     using System.Threading.Tasks;
     using Logging;
-    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using Testing;

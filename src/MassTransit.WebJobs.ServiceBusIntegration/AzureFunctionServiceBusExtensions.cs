@@ -14,7 +14,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
 {
     using System;
     using AzureServiceBusTransport;
-    using AzureServiceBusTransport.Specifications;
+    using AzureServiceBusTransport.Configuration;
     using AzureServiceBusTransport.Transport;
     using Configuration;
     using Microsoft.Azure.WebJobs;
@@ -31,9 +31,11 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            var endpointConfiguration = new ServiceBusEndpointConfiguration(new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology));
+            var topologyConfiguration = new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology);
+            var busConfiguration = new ServiceBusBusConfiguration(topologyConfiguration);
+            var busEndpointConfiguration = busConfiguration.CreateReceiveEndpointConfiguration(new Uri("sb://localhost/"), new Uri("sb://localhost/"));
 
-            var configurator = new WebJobBrokeredMessageReceiverSpecification(binder, endpointConfiguration);
+            var configurator = new WebJobBrokeredMessageReceiverSpecification(binder, busEndpointConfiguration);
 
             configure(configurator);
 
@@ -51,7 +53,11 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
 
             var endpointConfiguration = new ServiceBusEndpointConfiguration(new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology));
 
-            var configurator = new WebJobEventDataReceiverSpecification(binder, endpointConfiguration);
+            var topologyConfiguration = new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology);
+            var busConfiguration = new ServiceBusBusConfiguration(topologyConfiguration);
+            var busEndpointConfiguration = busConfiguration.CreateReceiveEndpointConfiguration(new Uri("sb://localhost/"), new Uri("sb://localhost/"));
+
+            var configurator = new WebJobEventDataReceiverSpecification(binder, busEndpointConfiguration);
 
             configure(configurator);
 

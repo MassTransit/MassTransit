@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurators
 {
+    using System;
+    using System.Collections.Generic;
+    using GreenPipes;
     using Microsoft.ServiceBus.Messaging;
 
 
@@ -32,6 +35,18 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
         public string TopicPath { get; }
 
         public string SubscriptionName { get; }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (!ServiceBusEntityNameValidator.Validator.IsValidEntityName(TopicPath))
+                yield return this.Failure("TopicPath", "must be a valid topic name");
+
+            if (!ServiceBusEntityNameValidator.Validator.IsValidEntityName(SubscriptionName))
+                yield return this.Failure("SubscriptionName", "must be a valid entity name");
+
+            if (AutoDeleteOnIdle.HasValue && AutoDeleteOnIdle != TimeSpan.Zero && AutoDeleteOnIdle < TimeSpan.FromMinutes(5))
+                yield return this.Failure("AutoDeleteOnIdle", "must be zero, or >= 5:00");
+        }
 
         public SubscriptionDescription GetSubscriptionDescription()
         {

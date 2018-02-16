@@ -14,7 +14,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
 {
     using System;
     using System.Text;
-    using EndpointSpecifications;
+    using Configuration;
     using MassTransit.Topology.Topologies;
     using Settings;
     using Transports;

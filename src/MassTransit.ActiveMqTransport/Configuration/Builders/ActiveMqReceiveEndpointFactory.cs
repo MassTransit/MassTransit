@@ -13,7 +13,7 @@
 namespace MassTransit.ActiveMqTransport.Builders
 {
     using System;
-    using EndpointSpecifications;
+    using Configuration;
     using MassTransit.Configurators;
     using Transport;
 
@@ -21,28 +21,27 @@ namespace MassTransit.ActiveMqTransport.Builders
     public class ActiveMqReceiveEndpointFactory :
         IActiveMqReceiveEndpointFactory
     {
-        readonly ActiveMqBusBuilder _builder;
-        readonly IActiveMqEndpointConfiguration _configuration;
+        readonly IActiveMqBusConfiguration _configuration;
         readonly ActiveMqHost _host;
 
-        public ActiveMqReceiveEndpointFactory(ActiveMqBusBuilder builder, ActiveMqHost host, IActiveMqEndpointConfiguration configuration)
+        public ActiveMqReceiveEndpointFactory(IActiveMqBusConfiguration configuration, ActiveMqHost host)
         {
-            _builder = builder;
             _host = host;
             _configuration = configuration;
         }
 
         public void CreateReceiveEndpoint(string queueName, Action<IActiveMqReceiveEndpointConfigurator> configure)
         {
-            var endpointTopologySpecification = _configuration.CreateNewConfiguration();
+            if (!_configuration.TryGetHost(_host, out var hostConfiguration))
+                throw new ConfigurationException("The host was not properly configured");
 
-            var endpointConfigurator = new ActiveMqReceiveEndpointSpecification(_host, endpointTopologySpecification, queueName);
+            var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
-            configure?.Invoke(endpointConfigurator);
+            configure?.Invoke(configuration.Configurator);
 
-            BusConfigurationResult.CompileResults(endpointConfigurator.Validate());
+            BusConfigurationResult.CompileResults(configuration.Validate());
 
-            endpointConfigurator.Apply(_builder);
+            configuration.Build();
         }
     }
 }

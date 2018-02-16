@@ -131,7 +131,7 @@
 
             valueIndex.Remove("The key is key29");
 
-            await Task.Delay(10);
+            await Task.Delay(300);
 
             Assert.That(async () => await index.Get("key29"), Throws.TypeOf<KeyNotFoundException>());
 

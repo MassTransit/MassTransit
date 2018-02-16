@@ -14,7 +14,7 @@ namespace MassTransit.ActiveMqTransport.Topology
 {
     using System;
     using Builders;
-    using EndpointSpecifications;
+    using Configuration;
     using MassTransit.Topology;
     using Transport;
     using Transports;
@@ -24,20 +24,17 @@ namespace MassTransit.ActiveMqTransport.Topology
         ReceiveEndpointTopology,
         IActiveMqReceiveEndpointTopology
     {
-        readonly ActiveMqHost _host;
-        readonly BusHostCollection<ActiveMqHost> _hosts;
+        readonly IActiveMqReceiveEndpointConfiguration _configuration;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IPublishTransportProvider> _publishTransportProvider;
         readonly IActiveMqPublishTopology _publishTopology;
 
-        public ActiveMqReceiveEndpointTopology(IActiveMqEndpointConfiguration configuration, Uri inputAddress, ActiveMqHost host,
-            BusHostCollection<ActiveMqHost> hosts, BrokerTopology brokerTopology)
-            : base(configuration, inputAddress, host.Address)
+        public ActiveMqReceiveEndpointTopology(IActiveMqReceiveEndpointConfiguration configuration, BrokerTopology brokerTopology)
+            : base(configuration)
         {
-            _host = host;
+            _configuration = configuration;
             BrokerTopology = brokerTopology;
 
-            _hosts = hosts;
             _publishTopology = configuration.Topology.Publish;
 
             _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
@@ -58,12 +55,12 @@ namespace MassTransit.ActiveMqTransport.Topology
 
         ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendTransportProvider(_hosts);
+            return new SendTransportProvider(_configuration.BusConfiguration);
         }
 
         IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_host, _publishTopology);
+            return new PublishTransportProvider(_configuration.Host, _publishTopology);
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
@@ -73,9 +70,8 @@ namespace MassTransit.ActiveMqTransport.Topology
 
         protected override IPublishEndpointProvider CreatePublishEndpointProvider()
         {
-            return new PublishEndpointProvider(_publishTransportProvider.Value, _host.Address, PublishObservers, SendObservers, Serializer, InputAddress,
-                PublishPipe,
-                _publishTopology);
+            return new PublishEndpointProvider(_publishTransportProvider.Value, _configuration.HostAddress, PublishObservers, SendObservers, Serializer,
+                InputAddress, PublishPipe, _publishTopology);
         }
     }
 }

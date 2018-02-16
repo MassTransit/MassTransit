@@ -12,58 +12,53 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Builders
 {
-    using System;
-    using EndpointSpecifications;
+    using Configuration;
     using GreenPipes;
     using MassTransit.Builders;
     using Topology;
     using Topology.Builders;
-    using Transport;
-    using Transports;
 
 
     public class RabbitMqReceiveEndpointBuilder :
         ReceiveEndpointBuilder,
-        IRabbitMqReceiveEndpointBuilder
+        IReceiveEndpointBuilder
     {
-        readonly bool _bindMessageExchanges;
-        readonly IRabbitMqEndpointConfiguration _configuration;
-        readonly RabbitMqHost _host;
-        readonly BusHostCollection<RabbitMqHost> _hosts;
+        readonly IRabbitMqReceiveEndpointConfiguration _configuration;
 
-        public RabbitMqReceiveEndpointBuilder(RabbitMqHost host, BusHostCollection<RabbitMqHost> hosts, bool bindMessageExchanges, IRabbitMqEndpointConfiguration configuration)
+        public RabbitMqReceiveEndpointBuilder(IRabbitMqReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
-            _bindMessageExchanges = bindMessageExchanges;
             _configuration = configuration;
-            _host = host;
-            _hosts = hosts;
         }
 
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            if (_bindMessageExchanges)
+            if (_configuration.BindMessageExchanges)
+            {
                 _configuration.Topology.Consume
                     .GetMessageTopology<T>()
                     .Bind();
+            }
 
             return base.ConnectConsumePipe(pipe);
         }
 
-        public IRabbitMqReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress, ReceiveSettings settings)
+        public IRabbitMqReceiveEndpointTopology CreateReceiveEndpointTopology()
         {
-            var brokerTopology = BuildTopology(settings);
+            var brokerTopology = BuildTopology(_configuration.Settings);
 
-            return new RabbitMqReceiveEndpointTopology(_configuration, inputAddress, _host, _hosts, brokerTopology);
+            return new RabbitMqReceiveEndpointTopology(_configuration, brokerTopology);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)
         {
             var topologyBuilder = new ReceiveEndpointBrokerTopologyBuilder();
 
-            topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, settings.AutoDelete, settings.Exclusive, settings.QueueArguments);
+            topologyBuilder.Queue =
+                topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, settings.AutoDelete, settings.Exclusive, settings.QueueArguments);
 
-            topologyBuilder.Exchange = topologyBuilder.ExchangeDeclare(settings.ExchangeName ?? settings.QueueName, settings.ExchangeType, settings.Durable, settings.AutoDelete,
+            topologyBuilder.Exchange = topologyBuilder.ExchangeDeclare(settings.ExchangeName ?? settings.QueueName, settings.ExchangeType, settings.Durable,
+                settings.AutoDelete,
                 settings.ExchangeArguments);
 
             topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);

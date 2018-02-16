@@ -14,43 +14,31 @@ namespace MassTransit.AzureServiceBusTransport.Builders
 {
     using System;
     using System.Linq;
+    using Configuration;
     using GreenPipes;
     using MassTransit.Builders;
-    using Specifications;
     using Topology;
     using Topology.Builders;
     using Transport;
-    using Transports;
 
 
     public class ServiceBusReceiveEndpointBuilder :
         ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
-        readonly IServiceBusEndpointConfiguration _configuration;
-        readonly IServiceBusHost _host;
-        readonly bool _subscribeMessageTopics;
-        readonly BusHostCollection<ServiceBusHost> _hosts;
+        readonly IServiceBusReceiveEndpointConfiguration _configuration;
 
-        public ServiceBusReceiveEndpointBuilder(BusHostCollection<ServiceBusHost> hosts, IServiceBusHost host, bool subscribeMessageTopics,
-            IServiceBusEndpointConfiguration configuration)
+        public ServiceBusReceiveEndpointBuilder(IServiceBusReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
-            _subscribeMessageTopics = subscribeMessageTopics;
             _configuration = configuration;
-            _hosts = hosts;
-            _host = host;
         }
 
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            if (_subscribeMessageTopics)
+            if (_configuration.SubscribeMessageTopics)
             {
-                var subscriptionName = "{queuePath}";
-
-                var suffix = _host.Address.AbsolutePath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
-                if (!string.IsNullOrWhiteSpace(suffix))
-                    subscriptionName += $"-{suffix}";
+                var subscriptionName = GenerateSubscriptionName();
 
                 _configuration.Topology.Consume
                     .GetMessageTopology<T>()
@@ -60,11 +48,22 @@ namespace MassTransit.AzureServiceBusTransport.Builders
             return base.ConnectConsumePipe(pipe);
         }
 
-        public IServiceBusReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress, ReceiveSettings settings)
+        public IServiceBusReceiveEndpointTopology CreateReceiveEndpointTopology()
         {
-            var topologyLayout = BuildTopology(settings);
+            var topologyLayout = BuildTopology(_configuration.Settings);
 
-            return new ServiceBusReceiveEndpointTopology(_configuration, inputAddress, _host, _hosts, topologyLayout);
+            return new ServiceBusReceiveEndpointTopology(_configuration, topologyLayout);
+        }
+
+        string GenerateSubscriptionName()
+        {
+            var subscriptionName = "{queuePath}";
+
+            var suffix = _configuration.HostAddress.AbsolutePath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+            if (!string.IsNullOrWhiteSpace(suffix))
+                subscriptionName += $"-{suffix}";
+
+            return subscriptionName;
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)

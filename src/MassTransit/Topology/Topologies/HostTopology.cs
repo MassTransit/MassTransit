@@ -13,6 +13,7 @@
 namespace MassTransit.Topology.Topologies
 {
     using System.Text;
+    using Configuration;
     using EndpointSpecifications;
     using NewIdFormatters;
     using Util;

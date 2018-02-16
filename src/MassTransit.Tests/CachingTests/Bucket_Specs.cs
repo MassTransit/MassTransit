@@ -57,7 +57,7 @@
                 currentTime = currentTime.Add(TimeSpan.FromSeconds(1));
             }
 
-            await Task.Delay(1000);
+            await Task.Delay(2000);
 
             Assert.That(cache.Statistics.Count, Is.EqualTo(60));
 
@@ -88,7 +88,7 @@
                     currentTime = currentTime.Add(TimeSpan.FromSeconds(1));
             }
 
-            await Task.Delay(100);
+            await Task.Delay(300);
 
             Assert.That(cache.Statistics.Count, Is.EqualTo(101));
 

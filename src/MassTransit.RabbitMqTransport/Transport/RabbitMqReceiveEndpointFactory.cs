@@ -13,36 +13,34 @@
 namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
-    using Builders;
-    using EndpointSpecifications;
+    using Configuration;
     using MassTransit.Configurators;
 
 
     public class RabbitMqReceiveEndpointFactory :
         IRabbitMqReceiveEndpointFactory
     {
-        readonly RabbitMqBusBuilder _builder;
-        readonly IRabbitMqEndpointConfiguration _configuration;
-        readonly RabbitMqHost _host;
+        readonly IRabbitMqBusConfiguration _configuration;
+        readonly IRabbitMqHost _host;
 
-        public RabbitMqReceiveEndpointFactory(RabbitMqBusBuilder builder, RabbitMqHost host, IRabbitMqEndpointConfiguration configuration)
+        public RabbitMqReceiveEndpointFactory(IRabbitMqBusConfiguration configuration, IRabbitMqHost host)
         {
-            _builder = builder;
-            _host = host;
             _configuration = configuration;
+            _host = host;
         }
 
         public void CreateReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var endpointTopologySpecification = _configuration.CreateNewConfiguration();
+            if (!_configuration.TryGetHost(_host, out var hostConfiguration))
+                throw new ConfigurationException("The host was not properly configured");
 
-            var endpointConfigurator = new RabbitMqReceiveEndpointSpecification(_host, endpointTopologySpecification, queueName);
+            var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
-            configure?.Invoke(endpointConfigurator);
+            configure?.Invoke(configuration.Configurator);
 
-            BusConfigurationResult.CompileResults(endpointConfigurator.Validate());
+            BusConfigurationResult.CompileResults(configuration.Validate());
 
-            endpointConfigurator.Apply(_builder);
+            configuration.Build();
         }
     }
 }

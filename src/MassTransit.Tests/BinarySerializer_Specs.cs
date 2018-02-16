@@ -32,11 +32,12 @@ namespace MassTransit.Tests
             configurator.UseBinarySerializer();
             base.ConfigureInMemoryBus(configurator);
         }
+
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             base.ConfigureInMemoryReceiveEndpoint(configurator);
 
-            #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
             configurator.Handler<A>(async m =>
             {
@@ -48,8 +49,7 @@ namespace MassTransit.Tests
                 _faultTaskTcs.TrySetResult(m.Message);
             });
 
-            #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-
+        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         }
 
 
@@ -57,7 +57,6 @@ namespace MassTransit.Tests
         class A
         {
         }
-
 
 
         [Test]
@@ -81,6 +80,7 @@ namespace MassTransit.Tests
             public int Value { get; set; }
         }
 
+
         [Serializable]
         public class Base
         {
@@ -88,71 +88,67 @@ namespace MassTransit.Tests
             public int PropBase { get; set; }
         }
 
+
         [Serializable]
         public class Derived : Base
         {
             public int PropDerived { get; set; }
         }
 
+
         [Test]
         public async Task Should_be_able_to_consume_messages_polymorphically_if_the_receiving_bus_support_the_binary_serializer()
         {
             var consumed = new TaskCompletionSource<Base>();
 
-            IInMemoryHost inMemoryHost = null;
-            var sourceBus = Bus.Factory.CreateUsingInMemory(x =>
+            var bus = Bus.Factory.CreateUsingInMemory(x =>
             {
-                inMemoryHost = x.Host;
-                x.UseBinarySerializer();
-            });
-            var recvBus = Bus.Factory.CreateUsingInMemory(x =>
-            {
-                x.SetHost(inMemoryHost);
                 x.SupportBinaryMessageDeserializer();
-                x.UseJsonSerializer();
+                x.UseBinarySerializer();
                 x.ReceiveEndpoint("input_queue", configurator =>
                 {
-                    #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+                #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
                     configurator.Handler<Base>(async ctx =>
                     {
                         consumed.TrySetResult(ctx.Message);
                     });
-                    #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+                #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
                 });
             });
-            await sourceBus.StartAsync();
-            await recvBus.StartAsync();
 
-            // Create a recursive list
-            var head = new ListNode { Value = 100 };
-            var tail = new ListNode { Next = head, Value = 200 };
-            head.Next = tail;
-
-            var messageToSend = new Derived()
+            await bus.StartAsync();
+            try
             {
-                PropBase = 10,
-                PropDerived = 20,
-                Head = head
-            };
-            await sourceBus.Publish(messageToSend);
+                // Create a recursive list
+                var head = new ListNode {Value = 100};
+                var tail = new ListNode {Next = head, Value = 200};
+                head.Next = tail;
 
-            var completedTask = await Task.WhenAny(consumed.Task, Task.Delay(250));
+                var messageToSend = new Derived()
+                {
+                    PropBase = 10,
+                    PropDerived = 20,
+                    Head = head
+                };
 
-            Assert.AreEqual(consumed.Task, completedTask,
-                "Timeout while waiting to receive the message sent on the source bus.");
+                await bus.Publish(messageToSend);
 
-            var message = await consumed.Task;
-            Assert.NotNull(message);
-            Assert.AreEqual(messageToSend.PropBase, message.PropBase);
-            Assert.AreEqual(head.Value, message.Head.Value);
-            Assert.AreEqual(tail.Value, message.Head.Next.Value);
-            Assert.AreEqual(head.Value, message.Head.Next.Next.Value);
+                var completedTask = await Task.WhenAny(consumed.Task, Task.Delay(250));
 
-            await sourceBus.StopAsync();
-            await recvBus.StopAsync();
+                Assert.AreEqual(consumed.Task, completedTask,
+                    "Timeout while waiting to receive the message sent on the source bus.");
+
+                var message = await consumed.Task;
+                Assert.NotNull(message);
+                Assert.AreEqual(messageToSend.PropBase, message.PropBase);
+                Assert.AreEqual(head.Value, message.Head.Value);
+                Assert.AreEqual(tail.Value, message.Head.Next.Value);
+                Assert.AreEqual(head.Value, message.Head.Next.Next.Value);
+            }
+            finally
+            {
+                await bus.StopAsync();
+            }
         }
-
-
     }
-
 }

@@ -13,7 +13,7 @@
 namespace MassTransit
 {
     using System;
-    using Monitoring.Performance.Configuration;
+    using Monitoring.Performance;
     using Monitoring.Performance.StatsD;
     using Monitoring.Performance.Windows;
 
@@ -42,8 +42,8 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new PerformanceCounterBusFactorySpecification(new WindowsCounterFactory());
-            configurator.AddBusFactorySpecification(specification);
+            var observer = new PerformanceCounterBusObserver(new WindowsCounterFactory());
+            configurator.ConnectBusObserver(observer);
         }
 
         public static void EnableStatsdPerformanceCounters(this IBusFactoryConfigurator configurator, Action<StatsDConfiguration> action)
@@ -54,9 +54,8 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new PerformanceCounterBusFactorySpecification(new StatsDCounterFactory(statsDConfiguration));
-            configurator.AddBusFactorySpecification(specification);
+            var observer = new PerformanceCounterBusObserver(new StatsDCounterFactory(statsDConfiguration));
+            configurator.ConnectBusObserver(observer);
         }
-
     }
 }

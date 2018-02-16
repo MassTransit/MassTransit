@@ -12,15 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Builders
 {
-    using EndpointSpecifications;
     using MassTransit.Builders;
+    using MassTransit.Configuration;
 
 
     public class MessageReceiverBuilder :
         ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
-        public MessageReceiverBuilder(IEndpointConfiguration configuration)
+        public MessageReceiverBuilder(IReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
         }

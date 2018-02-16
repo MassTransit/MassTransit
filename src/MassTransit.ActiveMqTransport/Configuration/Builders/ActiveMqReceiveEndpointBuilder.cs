@@ -12,50 +12,42 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Builders
 {
-    using System;
-    using EndpointSpecifications;
+    using Configuration;
     using GreenPipes;
     using MassTransit.Builders;
     using Topology;
     using Topology.Builders;
-    using Transport;
-    using Transports;
 
 
     public class ActiveMqReceiveEndpointBuilder :
         ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
-        readonly bool _bindMessageTopics;
-        readonly IActiveMqEndpointConfiguration _configuration;
-        readonly ActiveMqHost _host;
-        readonly BusHostCollection<ActiveMqHost> _hosts;
+        readonly IActiveMqReceiveEndpointConfiguration _configuration;
 
-        public ActiveMqReceiveEndpointBuilder(ActiveMqHost host, BusHostCollection<ActiveMqHost> hosts, bool bindMessageTopics,
-            IActiveMqEndpointConfiguration configuration)
+        public ActiveMqReceiveEndpointBuilder(IActiveMqReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
-            _bindMessageTopics = bindMessageTopics;
             _configuration = configuration;
-            _host = host;
-            _hosts = hosts;
         }
 
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            if (_bindMessageTopics)
+            if (_configuration.BindMessageTopics)
+            {
                 _configuration.Topology.Consume
                     .GetMessageTopology<T>()
                     .Bind();
+            }
 
             return base.ConnectConsumePipe(pipe);
         }
 
-        public IActiveMqReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress, ReceiveSettings settings)
+        public IActiveMqReceiveEndpointTopology CreateReceiveEndpointTopology()
         {
-            var brokerTopology = BuildTopology(settings);
+            var brokerTopology = BuildTopology(_configuration.Settings);
 
-            return new ActiveMqReceiveEndpointTopology(_configuration, inputAddress, _host, _hosts, brokerTopology);
+            return new ActiveMqReceiveEndpointTopology(_configuration, brokerTopology);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)

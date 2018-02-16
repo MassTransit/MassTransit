@@ -12,10 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 {
-    using System;
     using System.Threading;
-    using EndpointSpecifications;
     using Logging;
+    using MassTransit.Configuration;
     using Microsoft.Azure.WebJobs;
     using Topology;
     using Transports;
@@ -29,8 +28,8 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
         readonly ILog _log;
         readonly IPublishTopology _publishTopology;
 
-        public WebJobMessageReceiverEndpointTopology(IEndpointConfiguration configuration, Uri inputAddress, ILog log, IBinder binder, CancellationToken cancellationToken)
-            : base(configuration, inputAddress, new Uri(inputAddress.GetLeftPart(UriPartial.Authority)))
+        public WebJobMessageReceiverEndpointTopology(IReceiveEndpointConfiguration configuration, ILog log, IBinder binder, CancellationToken cancellationToken)
+            : base(configuration)
         {
             _binder = binder;
             _cancellationToken = cancellationToken;
@@ -50,7 +49,8 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
         {
             var publishTransportProvider = new ServiceBusAttributePublishTransportProvider(_binder, _log, _cancellationToken);
 
-            return new PublishEndpointProvider(publishTransportProvider, HostAddress, PublishObservers, SendObservers, Serializer, InputAddress, PublishPipe, _publishTopology);
+            return new PublishEndpointProvider(publishTransportProvider, HostAddress, PublishObservers, SendObservers, Serializer, InputAddress, PublishPipe,
+                _publishTopology);
         }
     }
 }

@@ -12,9 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Transport
 {
+    using Configuration;
+    using EndpointSpecifications;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Transports;
 
 
     public class ReceiveContextSendTransportProvider :
@@ -23,15 +24,15 @@ namespace MassTransit.RabbitMqTransport.Transport
         readonly ModelContext _modelContext;
         readonly ReceiveContext _receiveContext;
 
-        public ReceiveContextSendTransportProvider(BusHostCollection<RabbitMqHost> hosts, ReceiveContext receiveContext)
-            : base(hosts)
+        public ReceiveContextSendTransportProvider(IRabbitMqBusConfiguration busConfiguration, ReceiveContext receiveContext)
+            : base(busConfiguration)
         {
             _receiveContext = receiveContext;
 
             _modelContext = receiveContext.GetPayload<ModelContext>();
         }
 
-        protected override IAgent<ModelContext> GetModelSource(RabbitMqHost host)
+        protected override IAgent<ModelContext> GetModelSource(IRabbitMqHostControl rabbitMqHostControl)
         {
             return new ReceiveModelSource(_modelContext, _receiveContext);
         }

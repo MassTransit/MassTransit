@@ -14,8 +14,8 @@ namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Threading;
+    using Configuration;
     using Configurators;
-    using EndpointSpecifications;
     using MassTransit.Topology;
     using MassTransit.Topology.EntityNameFormatters;
     using MassTransit.Topology.Topologies;
@@ -32,7 +32,11 @@ namespace MassTransit.RabbitMqTransport
         /// <returns></returns>
         public static IBusControl Create(Action<IRabbitMqBusFactoryConfigurator> configure)
         {
-            var configurator = new RabbitMqBusFactoryConfigurator(new RabbitMqEndpointConfiguration(new RabbitMqTopologyConfiguration(MessageTopology)));
+            var topologyConfiguration = new RabbitMqTopologyConfiguration(MessageTopology);
+            var busConfiguration = new RabbitMqBusConfiguration(topologyConfiguration);
+            var busEndpointConfiguration = busConfiguration.CreateEndpointConfiguration();
+
+            var configurator = new RabbitMqBusFactoryConfigurator(busConfiguration, busEndpointConfiguration);
 
             configure(configurator);
 

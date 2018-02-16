@@ -14,14 +14,12 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 {
     using System;
     using System.Threading;
-    using AzureServiceBusTransport.Builders;
     using AzureServiceBusTransport.Configurators;
-    using AzureServiceBusTransport.Specifications;
     using AzureServiceBusTransport.Transport;
     using Configurators;
+    using MassTransit.Configuration;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Host;
-    using Pipeline;
     using Topology;
     using Transports;
 
@@ -32,10 +30,10 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
         IWebJobHandlerFactory
     {
         readonly IBinder _binder;
-        readonly IServiceBusEndpointConfiguration _endpointConfiguration;
+        readonly IReceiveEndpointConfiguration _endpointConfiguration;
         CancellationToken _cancellationToken;
 
-        public WebJobBrokeredMessageReceiverSpecification(IBinder binder, IServiceBusEndpointConfiguration endpointConfiguration,
+        public WebJobBrokeredMessageReceiverSpecification(IBinder binder, IReceiveEndpointConfiguration endpointConfiguration,
             CancellationToken cancellationToken = default(CancellationToken))
             : base(endpointConfiguration)
         {
@@ -58,7 +56,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 
         protected virtual IReceiveEndpointTopology CreateReceiveTopology()
         {
-            return new WebJobMessageReceiverEndpointTopology(_endpointConfiguration, InputAddress, Log, _binder, _cancellationToken);
+            return new WebJobMessageReceiverEndpointTopology(_endpointConfiguration, Log, _binder, _cancellationToken);
         }
 
         public IBrokeredMessageReceiver Build()
@@ -67,7 +65,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 
             try
             {
-                return new BrokeredMessageReceiver(InputAddress, CreateReceivePipe(), _log, CreateReceiveTopology());
+                return new BrokeredMessageReceiver(InputAddress, CreateReceivePipe(), Log, CreateReceiveTopology());
             }
             catch (Exception ex)
             {

@@ -13,41 +13,34 @@
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
-    using Builders;
-    using Configurators;
+    using Configuration;
     using MassTransit.Configurators;
-    using Specifications;
-    using Transports;
 
 
     public class ServiceBusReceiveEndpointFactory :
         IServiceBusReceiveEndpointFactory
     {
-        readonly ServiceBusBusBuilder _builder;
-        readonly IServiceBusEndpointConfiguration _configuration;
-        readonly ServiceBusHost _host;
-        readonly BusHostCollection<ServiceBusHost> _hosts;
+        readonly IServiceBusBusConfiguration _configuration;
+        readonly IServiceBusHost _host;
 
-        public ServiceBusReceiveEndpointFactory(ServiceBusBusBuilder builder, BusHostCollection<ServiceBusHost> hosts, ServiceBusHost host,
-            IServiceBusEndpointConfiguration configuration)
+        public ServiceBusReceiveEndpointFactory(IServiceBusBusConfiguration configuration, IServiceBusHost host)
         {
-            _builder = builder;
-            _host = host;
             _configuration = configuration;
-            _hosts = hosts;
+            _host = host;
         }
 
         public void CreateReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var endpointTopologySpecification = _configuration.CreateNewConfiguration();
+            if (!_configuration.TryGetHost(_host, out var hostConfiguration))
+                throw new ConfigurationException("The host was not properly configured");
 
-            var specification = new ServiceBusReceiveEndpointSpecification(_hosts, _host, queueName, endpointTopologySpecification);
+            var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
-            configure?.Invoke(specification);
+            configure?.Invoke(configuration.Configurator);
 
-            BusConfigurationResult.CompileResults(specification.Validate());
+            BusConfigurationResult.CompileResults(configuration.Validate());
 
-            specification.Apply(_builder);
+            configuration.Build();
         }
     }
 }

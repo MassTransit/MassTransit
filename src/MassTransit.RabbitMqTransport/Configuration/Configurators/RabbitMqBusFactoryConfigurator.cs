@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,43 +14,43 @@ namespace MassTransit.RabbitMqTransport.Configurators
 {
     using System;
     using System.Collections.Generic;
-    using Builders;
     using BusConfigurators;
+    using Configuration;
     using EndpointSpecifications;
     using GreenPipes;
     using MassTransit.Builders;
     using Topology;
     using Topology.Settings;
-    using Topology.Topologies;
     using Transport;
-    using Transports;
 
 
     public class RabbitMqBusFactoryConfigurator :
-        BusFactoryConfigurator<IBusBuilder>,
+        BusFactoryConfigurator,
         IRabbitMqBusFactoryConfigurator,
         IBusFactory
     {
-        readonly IRabbitMqEndpointConfiguration _configuration;
-        readonly BusHostCollection<RabbitMqHost> _hosts;
+        readonly IRabbitMqEndpointConfiguration _busEndpointConfiguration;
+        readonly IRabbitMqBusConfiguration _configuration;
         readonly RabbitMqReceiveSettings _settings;
 
-        public RabbitMqBusFactoryConfigurator(IRabbitMqEndpointConfiguration configuration)
-            : base(configuration)
+        public RabbitMqBusFactoryConfigurator(IRabbitMqBusConfiguration configuration, IRabbitMqEndpointConfiguration busEndpointConfiguration)
+            : base(configuration, busEndpointConfiguration)
         {
             _configuration = configuration;
+            _busEndpointConfiguration = busEndpointConfiguration;
 
-            _hosts = new BusHostCollection<RabbitMqHost>();
+            var queueName = busEndpointConfiguration.Topology.Consume.CreateTemporaryQueueName("bus-");
 
-            var queueName = _configuration.Topology.Consume.CreateTemporaryQueueName("bus-");
-            _settings = new RabbitMqReceiveSettings(queueName, "fanout", false, true);
+            _settings = new RabbitMqReceiveSettings(queueName, busEndpointConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, false, true);
             _settings.SetQueueArgument("x-expires", TimeSpan.FromMinutes(1));
             _settings.SetExchangeArgument("x-expires", TimeSpan.FromMinutes(1));
         }
 
         public IBusControl CreateBus()
         {
-            var builder = new RabbitMqBusBuilder(_hosts, _settings, _configuration, DeployTopologyOnly);
+            var busReceiveEndpointConfiguration = _configuration.CreateReceiveEndpointConfiguration(_settings, _busEndpointConfiguration);
+
+            var builder = new ConfigurationBusBuilder(_configuration, busReceiveEndpointConfiguration, BusObservable);
 
             ApplySpecifications(builder);
 
@@ -62,50 +62,43 @@ namespace MassTransit.RabbitMqTransport.Configurators
             foreach (var result in base.Validate())
                 yield return result;
 
-            if (_hosts.Count == 0)
-                yield return this.Failure("Host", "At least one host must be defined");
             if (string.IsNullOrWhiteSpace(_settings.QueueName))
                 yield return this.Failure("Bus", "The bus queue name must not be null or empty");
         }
 
         public ushort PrefetchCount
         {
-            set { _settings.PrefetchCount = value; }
+            set => _settings.PrefetchCount = value;
         }
 
         public bool Durable
         {
-            set { _settings.Durable = value; }
-        }
-
-        public string QueueName
-        {
-            set { _settings.QueueName = value; }
+            set => _settings.Durable = value;
         }
 
         public bool Exclusive
         {
-            set { _settings.Exclusive = value; }
+            set => _settings.Exclusive = value;
         }
 
         public bool AutoDelete
         {
-            set { _settings.AutoDelete = value; }
+            set => _settings.AutoDelete = value;
         }
 
         public string ExchangeType
         {
-            set { _settings.ExchangeType = value; }
+            set => _settings.ExchangeType = value;
         }
 
         public bool PurgeOnStartup
         {
-            set { _settings.PurgeOnStartup = value; }
+            set => _settings.PurgeOnStartup = value;
         }
 
         public bool Lazy
         {
-            set { _settings.Lazy = value; }
+            set => _settings.Lazy = value;
         }
 
         public void SetQueueArgument(string key, object value)
@@ -135,18 +128,13 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public IRabbitMqHost Host(RabbitMqHostSettings settings)
         {
-            var hostTopology = new RabbitMqHostTopology(new FanoutExchangeTypeSelector(), new RabbitMqMessageNameFormatter(), settings.HostAddress,
-                _configuration.Topology);
+            var hostTopology = _configuration.CreateHostTopology(settings.HostAddress);
 
-            var host = new RabbitMqHost(settings, hostTopology);
-            _hosts.Add(host);
+            var host = new RabbitMqHost(_configuration, settings, hostTopology);
+
+            _configuration.CreateHostConfiguration(host);
 
             return host;
-        }
-
-        public string CreateTemporaryQueueName(string prefix)
-        {
-            return _configuration.Topology.Consume.CreateTemporaryQueueName(prefix);
         }
 
         void IRabbitMqBusFactoryConfigurator.Send<T>(Action<IRabbitMqMessageSendTopologyConfigurator<T>> configureTopology)
@@ -166,6 +154,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public new IRabbitMqSendTopologyConfigurator SendTopology => _configuration.Topology.Send;
         public new IRabbitMqPublishTopologyConfigurator PublishTopology => _configuration.Topology.Publish;
 
+        public bool DeployTopologyOnly
+        {
+            set => _configuration.DeployTopologyOnly = value;
+        }
+
         public void OverrideDefaultBusEndpointQueueName(string value)
         {
             _settings.ExchangeName = value;
@@ -174,26 +167,31 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            if (_hosts.Count == 0)
-                throw new ArgumentException("At least one host must be configured before configuring a receive endpoint");
+            var configuration = _configuration.CreateReceiveEndpointConfiguration(queueName, _configuration.CreateEndpointConfiguration());
 
-            ReceiveEndpoint(_hosts[0], queueName, configureEndpoint);
+            ConfigureReceiveEndpoint(configuration, configureEndpoint);
         }
 
         public void ReceiveEndpoint(IRabbitMqHost host, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var rabbitMqHost = host as RabbitMqHost ?? throw new ArgumentException("The host must be a RabbitMqHost", nameof(host));
+            if (!_configuration.TryGetHost(host, out var hostConfiguration))
+                throw new ArgumentException("The host was not configured on this bus", nameof(host));
 
-            var endpointTopologySpecification = _configuration.CreateNewConfiguration();
+            var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
-            var specification = new RabbitMqReceiveEndpointSpecification(rabbitMqHost, endpointTopologySpecification, queueName);
+            ConfigureReceiveEndpoint(configuration, configure);
+        }
 
-            specification.ConnectConsumerConfigurationObserver(this);
-            specification.ConnectSagaConfigurationObserver(this);
+        void ConfigureReceiveEndpoint(IRabbitMqReceiveEndpointConfiguration configuration, Action<IRabbitMqReceiveEndpointConfigurator> configure)
+        {
+            configuration.ConnectConsumerConfigurationObserver(this);
+            configuration.ConnectSagaConfigurationObserver(this);
+
+            configure?.Invoke(configuration.Configurator);
+
+            var specification = new ConfigurationReceiveEndpointSpecification(configuration);
 
             AddReceiveEndpointSpecification(specification);
-
-            configure?.Invoke(specification);
         }
     }
 }

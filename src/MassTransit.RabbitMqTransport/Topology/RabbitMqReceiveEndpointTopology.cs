@@ -14,7 +14,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using Builders;
-    using EndpointSpecifications;
+    using Configuration;
     using MassTransit.Topology;
     using Transport;
     using Transports;
@@ -24,20 +24,16 @@ namespace MassTransit.RabbitMqTransport.Topology
         ReceiveEndpointTopology,
         IRabbitMqReceiveEndpointTopology
     {
-        readonly RabbitMqHost _host;
-        readonly BusHostCollection<RabbitMqHost> _hosts;
+        readonly IRabbitMqReceiveEndpointConfiguration _configuration;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
         readonly Lazy<IPublishTransportProvider> _publishTransportProvider;
         readonly IRabbitMqPublishTopology _publishTopology;
 
-        public RabbitMqReceiveEndpointTopology(IRabbitMqEndpointConfiguration configuration, Uri inputAddress, RabbitMqHost host, BusHostCollection<RabbitMqHost> hosts,
-            BrokerTopology brokerTopology)
-            : base(configuration, inputAddress, host.Address)
+        public RabbitMqReceiveEndpointTopology(IRabbitMqReceiveEndpointConfiguration configuration, BrokerTopology brokerTopology)
+            : base(configuration)
         {
-            _host = host;
+            _configuration = configuration;
             BrokerTopology = brokerTopology;
-
-            _hosts = hosts;
             _publishTopology = configuration.Topology.Publish;
 
             _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
@@ -58,12 +54,12 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendTransportProvider(_hosts);
+            return new SendTransportProvider(_configuration.BusConfiguration);
         }
 
         IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_host, _publishTopology);
+            return new PublishTransportProvider(_configuration.Host, _publishTopology);
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
@@ -73,8 +69,8 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         protected override IPublishEndpointProvider CreatePublishEndpointProvider()
         {
-            return new PublishEndpointProvider(_publishTransportProvider.Value, _host.Address, PublishObservers, SendObservers, Serializer, InputAddress, PublishPipe,
-                _publishTopology);
+            return new PublishEndpointProvider(_publishTransportProvider.Value, _configuration.HostAddress, PublishObservers, SendObservers, Serializer,
+                InputAddress, PublishPipe, _publishTopology);
         }
     }
 }

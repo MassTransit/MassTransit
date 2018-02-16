@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             Add(modelSource);
         }
 
-        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancelSend)
+        async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             if (IsStopped)
                 throw new TransportUnavailableException($"The RabbitMQ send transport is stopped: {_exchange}");
@@ -63,7 +63,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                 {
                     var properties = modelContext.Model.CreateBasicProperties();
 
-                    var context = new BasicPublishRabbitMqSendContext<T>(properties, _exchange, message, cancelSend);
+                    var context = new BasicPublishRabbitMqSendContext<T>(properties, _exchange, message, cancellationToken);
                     try
                     {
                         await pipe.Send(context).ConfigureAwait(false);
@@ -125,7 +125,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                 });
             });
 
-            await _modelSource.Send(modelPipe, cancelSend).ConfigureAwait(false);
+            await _modelSource.Send(modelPipe, cancellationToken).ConfigureAwait(false);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

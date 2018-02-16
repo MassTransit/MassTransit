@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -34,6 +34,7 @@ namespace MassTransit.AzureServiceBusTransport.Settings
         }
 
         public SubscriptionEndpointSettings(TopicDescription topicDescription, string subscriptionName)
+            : this(topicDescription, new SubscriptionConfigurator(topicDescription.Path, subscriptionName))
         {
             _topicDescription = topicDescription;
             _subscriptionConfigurator = new SubscriptionConfigurator(topicDescription.Path, subscriptionName);
@@ -44,6 +45,20 @@ namespace MassTransit.AzureServiceBusTransport.Settings
             PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
         }
 
+        SubscriptionEndpointSettings(TopicDescription topicDescription, SubscriptionConfigurator configurator)
+            : base(configurator)
+        {
+            _topicDescription = topicDescription;
+            _subscriptionConfigurator = configurator;
+
+            Name = Path = EntityNameFormatter.FormatSubscriptionPath(_subscriptionConfigurator.TopicPath, _subscriptionConfigurator.SubscriptionName);
+
+            MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
+            PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
+        }
+
+        public ISubscriptionConfigurator SubscriptionConfigurator => _subscriptionConfigurator;
+
         TopicDescription SubscriptionSettings.TopicDescription => _topicDescription;
         SubscriptionDescription SubscriptionSettings.SubscriptionDescription => _subscriptionConfigurator.GetSubscriptionDescription();
 
@@ -52,6 +67,8 @@ namespace MassTransit.AzureServiceBusTransport.Settings
         public override string Path { get; }
 
         public override bool RequiresSession => _subscriptionConfigurator.RequiresSession ?? false;
+
+        public bool RemoveSubscriptions { get; set; }
 
         protected override IEnumerable<string> GetQueryStringOptions()
         {
@@ -65,7 +82,5 @@ namespace MassTransit.AzureServiceBusTransport.Settings
             _subscriptionConfigurator.AutoDeleteOnIdle = default(TimeSpan?);
             _subscriptionConfigurator.DefaultMessageTimeToLive = Defaults.BasicMessageTimeToLive;
         }
-
-        public ISubscriptionConfigurator SubscriptionConfigurator => _subscriptionConfigurator;
     }
 }

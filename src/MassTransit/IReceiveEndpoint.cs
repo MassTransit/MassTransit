@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using GreenPipes;
     using Pipeline;
+    using Topology;
     using Transports;
 
 
@@ -31,5 +32,6 @@ namespace MassTransit
         ISendObserverConnector,
         IProbeSite
     {
+        IReceiveEndpointTopology Topology { get; }
     }
 }

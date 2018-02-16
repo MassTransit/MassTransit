@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using GreenPipes;
 
 
     /// <summary>
@@ -56,5 +57,17 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="callback">Configure the exchange and binding</param>
         void Bind<T>(Action<IExchangeBindingConfigurator> callback = null)
             where T : class;
+
+        /// <summary>
+        /// Add middleware to the model pipe
+        /// </summary>
+        /// <param name="configure"></param>
+        void ConfigureModel(Action<IPipeConfigurator<ModelContext>> configure);
+
+        /// <summary>
+        /// Add middleware to the connection pipe
+        /// </summary>
+        /// <param name="configure"></param>
+        void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure);
     }
 }

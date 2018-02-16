@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Topology
 {
+    using Configuration;
     using MassTransit.Topology.Topologies;
-    using Specifications;
 
 
     public class HttpHostTopology :

@@ -12,33 +12,26 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Builders
 {
-    using System;
+    using Configuration;
     using MassTransit.Builders;
-    using Specifications;
     using Topology;
-    using Transport;
-    using Transports;
 
 
     public class HttpReceiveEndpointBuilder :
         ReceiveEndpointBuilder,
         IHttpReceiveEndpointBuilder
     {
-        readonly IHttpEndpointConfiguration _configuration;
-        readonly IHttpHost _host;
-        readonly BusHostCollection<HttpHost> _hosts;
+        readonly IHttpReceiveEndpointConfiguration _configuration;
 
-        public HttpReceiveEndpointBuilder(IHttpHost host, BusHostCollection<HttpHost> hosts, IHttpEndpointConfiguration configuration)
+        public HttpReceiveEndpointBuilder(IHttpReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
-            _host = host;
             _configuration = configuration;
-            _hosts = hosts;
         }
 
-        public IHttpReceiveEndpointTopology CreateReceiveEndpointTopology(Uri inputAddress)
+        public IHttpReceiveEndpointTopology CreateReceiveEndpointTopology()
         {
-            return new HttpReceiveEndpointTopology(_configuration, inputAddress, _host, _hosts);
+            return new HttpReceiveEndpointTopology(_configuration);
         }
     }
 }

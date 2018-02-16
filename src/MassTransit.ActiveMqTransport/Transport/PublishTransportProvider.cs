@@ -24,10 +24,10 @@ namespace MassTransit.ActiveMqTransport.Transport
     public class PublishTransportProvider :
         IPublishTransportProvider
     {
-        readonly ActiveMqHost _host;
+        readonly IActiveMqHostControl _host;
         readonly IActiveMqPublishTopology _publishTopology;
 
-        public PublishTransportProvider(ActiveMqHost host, IActiveMqPublishTopology publishTopology)
+        public PublishTransportProvider(IActiveMqHostControl host, IActiveMqPublishTopology publishTopology)
         {
             _publishTopology = publishTopology;
             _host = host;

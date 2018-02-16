@@ -13,15 +13,14 @@
 namespace MassTransit.HttpTransport.Topology
 {
     using System;
-    using Clients;
+    using Configuration;
     using GreenPipes;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Observables;
     using MassTransit.Pipeline.Pipes;
     using MassTransit.Topology;
-    using Microsoft.Owin;
-    using Specifications;
+    using Microsoft.AspNetCore.Http;
     using Transport;
     using Transports;
 
@@ -30,27 +29,23 @@ namespace MassTransit.HttpTransport.Topology
         ReceiveEndpointTopology,
         IHttpReceiveEndpointTopology
     {
-        readonly IHttpEndpointConfiguration _configuration;
+        readonly IHttpReceiveEndpointConfiguration _configuration;
         readonly IConsumePipe _consumePipe;
-        readonly IHttpHost _host;
-        readonly BusHostCollection<HttpHost> _hosts;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
 
-        public HttpReceiveEndpointTopology(IHttpEndpointConfiguration configuration, Uri inputAddress, IHttpHost host, BusHostCollection<HttpHost> hosts)
-            : base(configuration, inputAddress, host.Address)
+        public HttpReceiveEndpointTopology(IHttpReceiveEndpointConfiguration configuration)
+            : base(configuration)
         {
             _configuration = configuration;
-            _host = host;
-            _hosts = hosts;
 
             _consumePipe = configuration.Consume.CreatePipe();
 
             _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
         }
 
-        public IReceiveEndpointTopology CreateResponseEndpointTopology(IOwinContext owinContext)
+        public IReceiveEndpointTopology CreateResponseEndpointTopology(HttpContext httpContext)
         {
-            return new HttpResponseReceiveEndpointTopology(this, owinContext, SendPipe, Serializer);
+            return new HttpResponseReceiveEndpointTopology(this, httpContext, SendPipe, Serializer);
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
@@ -60,7 +55,7 @@ namespace MassTransit.HttpTransport.Topology
 
         protected override IPublishEndpointProvider CreatePublishEndpointProvider()
         {
-            return new HttpPublishEndpointProvider(_host, Serializer, _sendTransportProvider.Value, PublishPipe);
+            return new HttpPublishEndpointProvider(_configuration.HostAddress, Serializer, _sendTransportProvider.Value, PublishPipe);
         }
 
         ISendTransportProvider CreateSendTransportProvider()
@@ -72,7 +67,7 @@ namespace MassTransit.HttpTransport.Topology
 
             var receivePipe = new ReceivePipe(pipe, _consumePipe);
 
-            return new HttpSendTransportProvider(_hosts, receivePipe, new ReceiveObservable(), this);
+            return new HttpSendTransportProvider(_configuration.BusConfiguration, receivePipe, new ReceiveObservable(), this);
         }
     }
 }

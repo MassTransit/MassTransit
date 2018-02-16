@@ -12,51 +12,27 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory.Builders
 {
-    using System;
-    using EndpointSpecifications;
+    using Configuration;
     using MassTransit.Builders;
+    using EndpointSpecifications;
+    using Pipeline.Observables;
 
 
     public class InMemoryBusBuilder :
-        BusBuilder,
-        IInMemoryBusBuilder
+        BusBuilder
     {
-        readonly InMemoryReceiveEndpointSpecification _busEndpointSpecification;
-        readonly Uri _inputAddress;
+        readonly ConfigurationReceiveEndpointSpecification _busEndpointSpecification;
 
-        public InMemoryBusBuilder(InMemoryHost inMemoryHost, ISendTransportProvider sendTransportProvider, BusHostCollection<IBusHostControl> hosts,
-            IInMemoryEndpointConfiguration configuration, bool deployTopologyOnly)
-            : base(hosts, configuration, deployTopologyOnly)
+        public InMemoryBusBuilder(IInMemoryBusConfiguration configuration, IInMemoryReceiveEndpointConfiguration busEndpointConfiguration,
+            BusObservable busObservable)
+            : base(configuration, busEndpointConfiguration, busObservable)
         {
-            if (inMemoryHost == null)
-                throw new ArgumentNullException(nameof(inMemoryHost));
-
-            if (sendTransportProvider == null)
-                throw new ArgumentNullException(nameof(sendTransportProvider));
-
-            var busQueueName = inMemoryHost.Topology.CreateTemporaryQueueName("bus");
-            _inputAddress = new Uri(inMemoryHost.Address, $"{busQueueName}");
-
-            InMemoryHost = inMemoryHost;
-
-            var busEndpointSpecification = configuration.CreateNewConfiguration(ConsumePipe);
-
-            _busEndpointSpecification = new InMemoryReceiveEndpointSpecification(inMemoryHost.Address, busQueueName, sendTransportProvider,
-                busEndpointSpecification);
-
-            inMemoryHost.ReceiveEndpointFactory = new InMemoryReceiveEndpointFactory(this, sendTransportProvider, configuration);
+            _busEndpointSpecification = new ConfigurationReceiveEndpointSpecification(busEndpointConfiguration);
         }
 
-        public override IPublishEndpointProvider PublishEndpointProvider => _busEndpointSpecification.PublishEndpointProvider;
+        protected override IPublishEndpointProvider PublishEndpointProvider => _busEndpointSpecification.PublishEndpointProvider;
 
-        public override ISendEndpointProvider SendEndpointProvider => _busEndpointSpecification.SendEndpointProvider;
-
-        public IInMemoryHost InMemoryHost { get; }
-
-        protected override Uri GetInputAddress()
-        {
-            return _inputAddress;
-        }
+        protected override ISendEndpointProvider SendEndpointProvider => _busEndpointSpecification.SendEndpointProvider;
 
         protected override void PreBuild()
         {
