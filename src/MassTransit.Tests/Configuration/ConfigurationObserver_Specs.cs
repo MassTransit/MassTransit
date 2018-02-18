@@ -52,6 +52,50 @@ namespace MassTransit.Tests.Configuration
             Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PingMessage))));
             Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PongMessage))));
         }
+        
+        [Test]
+        public void Should_invoke_the_observers_for_object_consumer_and_message_type()
+        {
+            var observer = new ConsumerConfigurationObserver();
+
+            var bus = Bus.Factory.CreateUsingInMemory(cfg =>
+            {
+                cfg.ConnectConsumerConfigurationObserver(observer);
+
+                cfg.ReceiveEndpoint("hello", e =>
+                {
+                    e.UseRetry(x => x.Immediate(1));
+
+                    e.Consumer(typeof(MyConsumer), _ => new MyConsumer());
+                });
+            });
+
+            Assert.That(observer.ConsumerTypes.Contains(typeof(MyConsumer)));
+            Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PingMessage))));
+            Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PongMessage))));
+        }
+        
+        [Test]
+        public void Should_invoke_the_observers_for_regular_consumer_and_message_type()
+        {
+            var observer = new ConsumerConfigurationObserver();
+
+            var bus = Bus.Factory.CreateUsingInMemory(cfg =>
+            {
+                cfg.ConnectConsumerConfigurationObserver(observer);
+
+                cfg.ReceiveEndpoint("hello", e =>
+                {
+                    e.UseRetry(x => x.Immediate(1));
+
+                    e.Consumer<MyConsumer>();
+                });
+            });
+
+            Assert.That(observer.ConsumerTypes.Contains(typeof(MyConsumer)));
+            Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PingMessage))));
+            Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PongMessage))));
+        }
 
 
         class MyConsumer :

@@ -22,7 +22,6 @@ namespace MassTransit.ConsumeConfigurators
 
     public class ConsumerConfigurator<TConsumer> :
         IConsumerConfigurator<TConsumer>,
-        IConsumerConfigurationObserverConnector,
         IReceiveEndpointSpecification
         where TConsumer : class, IConsumer
     {

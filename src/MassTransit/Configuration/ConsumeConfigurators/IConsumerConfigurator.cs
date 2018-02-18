@@ -25,6 +25,7 @@ namespace MassTransit.ConsumeConfigurators
 
     public interface IConsumerConfigurator<TConsumer> :
         IPipeConfigurator<ConsumerConsumeContext<TConsumer>>,
+        IConsumerConfigurationObserverConnector,
         IConsumeConfigurator
         where TConsumer : class
     {

@@ -171,7 +171,7 @@ namespace MassTransit
                 _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType.GetTypeName());
 
             var consumerConfigurator = (IReceiveEndpointSpecification)Activator.CreateInstance(
-                typeof(UntypedConsumerConfigurator<>).MakeGenericType(consumerType), consumerFactory);
+                typeof(UntypedConsumerConfigurator<>).MakeGenericType(consumerType), consumerFactory, configurator);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
         }

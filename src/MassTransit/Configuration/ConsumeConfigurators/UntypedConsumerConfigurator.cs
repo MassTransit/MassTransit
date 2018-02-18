@@ -30,11 +30,13 @@ namespace MassTransit.ConsumeConfigurators
         readonly IConsumerFactory<TConsumer> _consumerFactory;
         readonly IConsumerSpecification<TConsumer> _specification;
 
-        public UntypedConsumerConfigurator(Func<Type, object> consumerFactory)
+        public UntypedConsumerConfigurator(Func<Type, object> consumerFactory, IConsumerConfigurationObserver observer)
         {
             _consumerFactory = new DelegateConsumerFactory<TConsumer>(() => (TConsumer)consumerFactory(typeof(TConsumer)));
 
             _specification = ConsumerConnectorCache<TConsumer>.Connector.CreateConsumerSpecification<TConsumer>();
+
+            _specification.ConnectConsumerConfigurationObserver(observer);
         }
 
         public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
