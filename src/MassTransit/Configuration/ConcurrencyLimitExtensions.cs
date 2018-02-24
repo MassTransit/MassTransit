@@ -28,20 +28,19 @@ namespace GreenPipes
         /// <param name="concurrencyLimit">The concurrency limit for the subsequent filters in the pipeline</param>
         /// <param name="managementEndpointConfigurator">A management endpoint configurator to support runtime adjustment</param>
         /// <param name="id">An identifier for the concurrency limit to allow selective adjustment</param>
-        public static void UseConcurrencyLimit<T>(this IPipeConfigurator<T> configurator, int concurrencyLimit,
+        public static void UseConcurrencyLimit(this IConsumePipeConfigurator configurator, int concurrencyLimit,
             IManagementEndpointConfigurator managementEndpointConfigurator, string id = null)
-            where T : class, PipeContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
             if (managementEndpointConfigurator != null)
             {
-                configurator.AddPipeSpecification(new ConcurrencyLimitPipeSpecification<T>(concurrencyLimit, managementEndpointConfigurator, id));
+                configurator.AddPrePipeSpecification(new ConcurrencyLimitPipeSpecification<ConsumeContext>(concurrencyLimit, managementEndpointConfigurator, id));
             }
             else
             {
-                configurator.AddPipeSpecification(new Specifications.ConcurrencyLimitPipeSpecification<T>(concurrencyLimit));
+                configurator.AddPrePipeSpecification(new ConcurrencyLimitPipeSpecification<ConsumeContext>(concurrencyLimit));
             }
         }
     }
