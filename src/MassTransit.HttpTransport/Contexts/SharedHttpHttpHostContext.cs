@@ -49,6 +49,11 @@ namespace MassTransit.HttpTransport.Contexts
             return _context.GetOrAddPayload(payloadFactory);
         }
 
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
         public HttpHostSettings HostSettings => _context.HostSettings;
 
         void HttpHostContext.RegisterEndpointHandler(string pathMatch, HttpConsumer handler)

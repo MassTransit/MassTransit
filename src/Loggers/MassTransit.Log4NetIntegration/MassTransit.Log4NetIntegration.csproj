@@ -4,13 +4,16 @@
     <AssemblyName>MassTransit.Log4NetIntegration</AssemblyName>
     <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
     <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>portable</DebugType>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.Log4Net</PackageId><Title>MassTransit.Log4Net</Title>
+    <PackageId>MassTransit.Log4Net</PackageId>
+    <Title>MassTransit.Log4Net</Title>
     <Description>MassTransit Log4Net logger support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Log4NetIntegration.xml</DocumentationFile>
   </PropertyGroup>
@@ -18,9 +21,9 @@
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="1.2.1" />
+    <PackageReference Include="GreenPipes" Version="2.0.0" />
     <PackageReference Include="log4net" Version="2.0.8" />
-	  <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-	  <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

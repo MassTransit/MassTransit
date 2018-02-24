@@ -20,6 +20,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Internals.Extensions;
     using Logging;
     using Topology;

@@ -15,6 +15,7 @@ namespace MassTransit.HttpTransport.Transport
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
+    using GreenPipes;
     using GreenPipes.Agents;
     using Hosting;
     using Logging;
@@ -31,7 +32,7 @@ namespace MassTransit.HttpTransport.Transport
             _settings = settings;
         }
 
-        public PipeContextHandle<HttpHostContext> CreateContext(ISupervisor supervisor)
+        IPipeContextAgent<HttpHostContext> IPipeContextFactory<HttpHostContext>.CreateContext(ISupervisor supervisor)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Connecting: {0}", _settings.Description);
@@ -48,8 +49,9 @@ namespace MassTransit.HttpTransport.Transport
             return contextHandle;
         }
 
-        public ActivePipeContextHandle<HttpHostContext> CreateActiveContext(ISupervisor supervisor, PipeContextHandle<HttpHostContext> context,
-            CancellationToken cancellationToken = default(CancellationToken))
+        IActivePipeContextAgent<HttpHostContext> IPipeContextFactory<HttpHostContext>.CreateActiveContext(ISupervisor supervisor,
+            PipeContextHandle<HttpHostContext> context,
+            CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));
         }

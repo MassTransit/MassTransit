@@ -24,7 +24,7 @@ namespace MassTransit.Context
     using Util;
 
 
-    public class SendRequestConfigurator<TRequest> : 
+    public class SendRequestConfigurator<TRequest> :
         IRequestConfigurator<TRequest>
         where TRequest : class
     {
@@ -41,8 +41,10 @@ namespace MassTransit.Context
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
+
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
+
             if (!context.RequestId.HasValue)
                 throw new ArgumentException("The requestId must be initialized");
 
@@ -178,6 +180,11 @@ namespace MassTransit.Context
         TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
+        }
+
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
         }
 
         public TimeSpan Timeout { get; set; }

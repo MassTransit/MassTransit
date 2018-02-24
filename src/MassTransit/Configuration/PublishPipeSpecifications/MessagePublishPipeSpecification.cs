@@ -19,8 +19,8 @@ namespace MassTransit.PublishPipeSpecifications
     using GreenPipes;
     using GreenPipes.Pipes;
     using GreenPipes.Specifications;
+    using GreenPipes.Util;
     using PipeBuilders;
-    using Pipeline;
     using Util;
 
 

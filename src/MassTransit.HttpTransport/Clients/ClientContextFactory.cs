@@ -15,6 +15,7 @@ namespace MassTransit.HttpTransport.Clients
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using GreenPipes.Agents;
     using MassTransit.Pipeline;
 
@@ -29,7 +30,7 @@ namespace MassTransit.HttpTransport.Clients
             _receivePipe = receivePipe;
         }
 
-        public PipeContextHandle<ClientContext> CreateContext(ISupervisor supervisor)
+        public IPipeContextAgent<ClientContext> CreateContext(ISupervisor supervisor)
         {
             var client = new HttpClient();
             ClientContext clientContext = new HttpClientContext(client, _receivePipe, supervisor.Stopped);
@@ -37,7 +38,7 @@ namespace MassTransit.HttpTransport.Clients
             return supervisor.AddContext(clientContext);
         }
 
-        public ActivePipeContextHandle<ClientContext> CreateActiveContext(ISupervisor supervisor, PipeContextHandle<ClientContext> context,
+        public IActivePipeContextAgent<ClientContext> CreateActiveContext(ISupervisor supervisor, PipeContextHandle<ClientContext> context,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));

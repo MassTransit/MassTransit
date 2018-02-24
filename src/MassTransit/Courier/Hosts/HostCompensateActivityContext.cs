@@ -36,7 +36,8 @@ namespace MassTransit.Courier.Hosts
 
         CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
 
-        public CompensateActivityContext<T, TLog> PopContext<T>() where T : class, CompensateActivity<TLog>
+        public CompensateActivityContext<T, TLog> PopContext<T>()
+            where T : class, CompensateActivity<TLog>
         {
             var context = this as CompensateActivityContext<T, TLog>;
             if (context == null)
@@ -59,6 +60,11 @@ namespace MassTransit.Courier.Hosts
         TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
+        }
+
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)

@@ -18,6 +18,7 @@ namespace MassTransit.HttpTransport.Transport
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Hosting;
     using Internals.Extensions;
     using Logging;

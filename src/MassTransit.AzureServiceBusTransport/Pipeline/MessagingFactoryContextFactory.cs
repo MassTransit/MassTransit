@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
+    using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
     using Microsoft.ServiceBus;
@@ -38,7 +39,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             _retryPolicy = retryPolicy;
         }
 
-        PipeContextHandle<MessagingFactoryContext> IPipeContextFactory<MessagingFactoryContext>.CreateContext(ISupervisor supervisor)
+        IPipeContextAgent<MessagingFactoryContext> IPipeContextFactory<MessagingFactoryContext>.CreateContext(ISupervisor supervisor)
         {
             Task<MessagingFactoryContext> context = CreateConnection(supervisor);
 
@@ -47,7 +48,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             return contextHandle;
         }
 
-        ActivePipeContextHandle<MessagingFactoryContext> IPipeContextFactory<MessagingFactoryContext>.CreateActiveContext(ISupervisor supervisor,
+        IActivePipeContextAgent<MessagingFactoryContext> IPipeContextFactory<MessagingFactoryContext>.CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<MessagingFactoryContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));

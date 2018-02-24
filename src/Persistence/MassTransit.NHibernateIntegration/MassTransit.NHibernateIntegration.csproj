@@ -7,20 +7,21 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageId>MassTransit.NHibernate</PackageId><Title>MassTransit.NHibernate</Title>
+    <PackageId>MassTransit.NHibernate</PackageId>
+    <Title>MassTransit.NHibernate</Title>
     <Description>MassTransit NHiberate support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.NHibernateIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="1.2.1" />
+    <PackageReference Include="GreenPipes" Version="2.0.0" />
     <PackageReference Include="Iesi.Collections" Version="4.0.1.4000" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
     <PackageReference Include="NHibernate" Version="4.1.1.4000" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
-	<ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

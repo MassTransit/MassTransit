@@ -50,14 +50,21 @@ namespace MassTransit.Context
             return _context.HasPayloadType(contextType);
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload) where TPayload : class
+        public bool TryGetPayload<TPayload>(out TPayload payload)
+            where TPayload : class
         {
             return _context.TryGetPayload(out payload);
         }
 
-        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory) where TPayload : class
+        public TPayload GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
+            where TPayload : class
         {
             return _context.GetOrAddPayload(payloadFactory);
+        }
+
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
         }
 
         public Uri SourceAddress
@@ -146,7 +153,8 @@ namespace MassTransit.Context
             set { _context.Serializer = value; }
         }
 
-        public SendContext<T> CreateProxy<T>(T message) where T : class
+        public SendContext<T> CreateProxy<T>(T message)
+            where T : class
         {
             return _context.CreateProxy(message);
         }

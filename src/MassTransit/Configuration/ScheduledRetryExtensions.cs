@@ -80,9 +80,9 @@ namespace MassTransit
             if (configureRetry == null)
                 throw new ArgumentNullException(nameof(configureRetry));
 
-            configurator.ConnectConsumerConfigurationObserver(new ScheduledRedeliveryConsumerConfigurationObserver(configureRetry));
+            configurator.ConnectConsumerConfigurationObserver(new ScheduledRedeliveryConsumerConfigurationObserver(configurator, configureRetry));
 
-            configurator.ConnectSagaConfigurationObserver(new ScheduledRedeliverySagaConfigurationObserver(configureRetry));
+            configurator.ConnectSagaConfigurationObserver(new ScheduledRedeliverySagaConfigurationObserver(configurator, configureRetry));
         }
     }
 }

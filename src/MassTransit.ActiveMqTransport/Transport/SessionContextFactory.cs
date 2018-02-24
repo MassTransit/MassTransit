@@ -34,7 +34,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             _host = host;
         }
 
-        PipeContextHandle<SessionContext> IPipeContextFactory<SessionContext>.CreateContext(ISupervisor supervisor)
+        IPipeContextAgent<SessionContext> IPipeContextFactory<SessionContext>.CreateContext(ISupervisor supervisor)
         {
             IAsyncPipeContextAgent<SessionContext> asyncContext = supervisor.AddAsyncContext<SessionContext>();
 
@@ -43,7 +43,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             return supervisor.AddContext(context);
         }
 
-        ActivePipeContextHandle<SessionContext> IPipeContextFactory<SessionContext>.CreateActiveContext(ISupervisor supervisor,
+        IActivePipeContextAgent<SessionContext> IPipeContextFactory<SessionContext>.CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<SessionContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedSession(context.Context, cancellationToken));

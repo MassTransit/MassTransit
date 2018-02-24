@@ -15,7 +15,6 @@ namespace MassTransit
     using System;
     using System.ComponentModel;
     using System.Net.Mime;
-    using Builders;
 
 
     /// <summary>

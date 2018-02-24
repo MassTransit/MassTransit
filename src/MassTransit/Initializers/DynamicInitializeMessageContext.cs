@@ -52,6 +52,11 @@ namespace MassTransit.Initializers
             return _context.GetOrAddPayload(payloadFactory);
         }
 
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
         CancellationToken PipeContext.CancellationToken => _context.CancellationToken;
 
         Type InitializeMessageContext.MessageType => _context.MessageType;
@@ -94,6 +99,11 @@ namespace MassTransit.Initializers
         TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
         {
             return _context.GetOrAddPayload(payloadFactory);
+        }
+
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
         }
 
         CancellationToken PipeContext.CancellationToken => _context.CancellationToken;

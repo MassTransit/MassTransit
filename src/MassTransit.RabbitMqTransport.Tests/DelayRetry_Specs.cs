@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Introspection;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -191,6 +192,60 @@ namespace MassTransit.RabbitMqTransport.Tests
             public Task Consume(ConsumeContext<PongMessage> context)
             {
                 Interlocked.Increment(ref PongCount);
+
+                throw new IntentionalTestException();
+            }
+        }
+    }
+
+
+    [TestFixture]
+    public class Using_delayed_exchange_redelivery_with_a_consumer_and_retry :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_retry_and_redeliver()
+        {
+            var pingMessage = new PingMessage();
+
+            var pingFault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+
+            await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
+            await InputQueueSendEndpoint.Send(new PongMessage(pingMessage.CorrelationId), x => x.FaultAddress = Bus.Address);
+
+            ConsumeContext<Fault<PingMessage>> pingFaultContext = await pingFault;
+
+            Assert.That(_consumer.PingCount, Is.EqualTo(6));
+        }
+
+        [Test, Explicit]
+        public async Task Show_me_the_pipeline()
+        {
+            ProbeResult result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
+        Consumer _consumer;
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseDelayedRedelivery(r => r.Intervals(100));
+            configurator.UseMessageRetry(x => x.Immediate(2));
+
+            _consumer = new Consumer();
+            configurator.Consumer(() => _consumer);
+        }
+
+
+        class Consumer :
+            IConsumer<PingMessage>
+        {
+            public int PingCount;
+
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                Interlocked.Increment(ref PingCount);
 
                 throw new IntentionalTestException();
             }

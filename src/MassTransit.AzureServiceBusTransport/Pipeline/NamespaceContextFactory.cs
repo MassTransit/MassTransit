@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
+    using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
     using Microsoft.ServiceBus;
@@ -35,7 +36,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             _settings = settings;
         }
 
-        PipeContextHandle<NamespaceContext> IPipeContextFactory<NamespaceContext>.CreateContext(ISupervisor supervisor)
+        IPipeContextAgent<NamespaceContext> IPipeContextFactory<NamespaceContext>.CreateContext(ISupervisor supervisor)
         {
             Task<NamespaceContext> context = CreateNamespaceContext(supervisor);
 
@@ -44,7 +45,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             return contextHandle;
         }
 
-        ActivePipeContextHandle<NamespaceContext> IPipeContextFactory<NamespaceContext>.CreateActiveContext(ISupervisor supervisor,
+        IActivePipeContextAgent<NamespaceContext> IPipeContextFactory<NamespaceContext>.CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<NamespaceContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));

@@ -49,6 +49,11 @@ namespace MassTransit.HttpTransport.Clients
             return _context.GetOrAddPayload(payloadFactory);
         }
 
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
         public Uri BaseAddress => _context.BaseAddress;
 
         public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

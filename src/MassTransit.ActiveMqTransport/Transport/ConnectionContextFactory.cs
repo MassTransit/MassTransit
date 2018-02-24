@@ -17,6 +17,7 @@ namespace MassTransit.ActiveMqTransport.Transport
     using System.Threading.Tasks;
     using Apache.NMS;
     using Contexts;
+    using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
     using Topology;
@@ -41,7 +42,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             _connectionFactory = new Lazy<IConnectionFactory>(settings.CreateConnectionFactory);
         }
 
-        PipeContextHandle<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
+        IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
             Task<ConnectionContext> context = CreateConnection(supervisor);
 
@@ -50,7 +51,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             return contextHandle;
         }
 
-        ActivePipeContextHandle<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
+        IActivePipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<ConnectionContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));

@@ -21,12 +21,14 @@ namespace MassTransit.PipeConfigurators
     public class ScheduledRedeliverySagaConfigurationObserver :
         ISagaConfigurationObserver
     {
+        readonly IReceiveEndpointConfigurator _configurator;
         readonly Action<IRetryConfigurator> _configure;
         readonly HashSet<Tuple<Type, Type>> _messageTypes;
         readonly HashSet<Type> _sagaTypes;
 
-        public ScheduledRedeliverySagaConfigurationObserver(Action<IRetryConfigurator> configure)
+        public ScheduledRedeliverySagaConfigurationObserver(IReceiveEndpointConfigurator configurator, Action<IRetryConfigurator> configure)
         {
+            _configurator = configurator;
             _configure = configure;
             _sagaTypes = new HashSet<Type>();
             _messageTypes = new HashSet<Tuple<Type, Type>>();
@@ -45,7 +47,15 @@ namespace MassTransit.PipeConfigurators
 
             _messageTypes.Add(key);
 
-            configurator.Message(x => x.UseScheduledRedelivery(_configure));
+            var redeliverySpecification = new ScheduleMessageRedeliveryPipeSpecification<TMessage>();
+
+            _configurator.AddPipeSpecification(redeliverySpecification);
+
+            var retrySpecification = new RedeliveryRetryPipeSpecification<TMessage>();
+
+            _configure?.Invoke(retrySpecification);
+
+            _configurator.AddPipeSpecification(retrySpecification);
         }
     }
 }

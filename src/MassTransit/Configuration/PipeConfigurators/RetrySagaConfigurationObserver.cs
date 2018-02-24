@@ -10,25 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Configurators
+namespace MassTransit.PipeConfigurators
 {
     using System;
     using System.Collections.Generic;
+    using Context;
     using GreenPipes.Configurators;
-    using PipeConfigurators;
     using SagaConfigurators;
-    using Specifications;
 
 
-    public class DelayedExchangeRedeliverySagaConfigurationObserver :
+    public class RetrySagaConfigurationObserver :
         ISagaConfigurationObserver
     {
-        readonly IRabbitMqReceiveEndpointConfigurator _configurator;
+        readonly IReceiveEndpointConfigurator _configurator;
         readonly Action<IRetryConfigurator> _configure;
         readonly HashSet<Tuple<Type, Type>> _messageTypes;
         readonly HashSet<Type> _sagaTypes;
 
-        public DelayedExchangeRedeliverySagaConfigurationObserver(IRabbitMqReceiveEndpointConfigurator configurator, Action<IRetryConfigurator> configure)
+        public RetrySagaConfigurationObserver(IReceiveEndpointConfigurator configurator, Action<IRetryConfigurator> configure)
         {
             _configurator = configurator;
             _configure = configure;
@@ -49,15 +48,12 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             _messageTypes.Add(key);
 
-            var redeliverySpecification = new DelayedExchangeRedeliveryPipeSpecification<TMessage>();
+            var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<TMessage>,
+                RetryConsumeContext<TMessage>>(x => new RetryConsumeContext<TMessage>(x));
 
-            _configurator.AddPipeSpecification(redeliverySpecification);
+            _configure?.Invoke(specification);
 
-            var retrySpecification = new RedeliveryRetryPipeSpecification<TMessage>();
-
-            _configure(retrySpecification);
-
-            _configurator.AddPipeSpecification(retrySpecification);
+            _configurator.AddPipeSpecification(specification);
         }
     }
 }

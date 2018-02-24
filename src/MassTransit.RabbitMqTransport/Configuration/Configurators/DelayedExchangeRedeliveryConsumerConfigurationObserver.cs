@@ -25,10 +25,12 @@ namespace MassTransit.RabbitMqTransport.Configurators
     {
         readonly HashSet<Type> _consumerTypes;
         readonly HashSet<Tuple<Type, Type>> _messageTypes;
+        readonly IRabbitMqReceiveEndpointConfigurator _configurator;
         readonly Action<IRetryConfigurator> _configure;
 
-        public DelayedExchangeRedeliveryConsumerConfigurationObserver(Action<IRetryConfigurator> configure)
+        public DelayedExchangeRedeliveryConsumerConfigurationObserver(IRabbitMqReceiveEndpointConfigurator configurator, Action<IRetryConfigurator> configure)
         {
+            _configurator = configurator;
             _configure = configure;
             _consumerTypes = new HashSet<Type>();
             _messageTypes = new HashSet<Tuple<Type, Type>>();
@@ -47,18 +49,15 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             _messageTypes.Add(key);
 
-            configurator.Message(x =>
-            {
-                var redeliverySpecification = new DelayedExchangeRedeliveryPipeSpecification<TMessage>();
+            var redeliverySpecification = new DelayedExchangeRedeliveryPipeSpecification<TMessage>();
 
-                x.AddPipeSpecification(redeliverySpecification);
+            _configurator.AddPipeSpecification(redeliverySpecification);
 
-                var retrySpecification = new RedeliveryRetryPipeSpecification<TMessage>();
+            var retrySpecification = new RedeliveryRetryPipeSpecification<TMessage>();
 
-                _configure(retrySpecification);
+            _configure(retrySpecification);
 
-                x.AddPipeSpecification(retrySpecification);
-            });
+            _configurator.AddPipeSpecification(retrySpecification);
         }
     }
 }

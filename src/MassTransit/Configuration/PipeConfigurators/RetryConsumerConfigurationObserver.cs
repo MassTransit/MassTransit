@@ -15,18 +15,19 @@ namespace MassTransit.PipeConfigurators
     using System;
     using System.Collections.Generic;
     using ConsumeConfigurators;
+    using Context;
     using GreenPipes.Configurators;
 
 
-    public class ScheduledRedeliveryConsumerConfigurationObserver :
+    public class RetryConsumerConfigurationObserver :
         IConsumerConfigurationObserver
     {
-        readonly HashSet<Type> _consumerTypes;
-        readonly HashSet<Tuple<Type, Type>> _messageTypes;
         readonly IReceiveEndpointConfigurator _configurator;
         readonly Action<IRetryConfigurator> _configure;
+        readonly HashSet<Type> _consumerTypes;
+        readonly HashSet<Tuple<Type, Type>> _messageTypes;
 
-        public ScheduledRedeliveryConsumerConfigurationObserver(IReceiveEndpointConfigurator configurator, Action<IRetryConfigurator> configure)
+        public RetryConsumerConfigurationObserver(IReceiveEndpointConfigurator configurator, Action<IRetryConfigurator> configure)
         {
             _configurator = configurator;
             _configure = configure;
@@ -47,15 +48,12 @@ namespace MassTransit.PipeConfigurators
 
             _messageTypes.Add(key);
 
-            var redeliverySpecification = new ScheduleMessageRedeliveryPipeSpecification<TMessage>();
+            var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<TMessage>,
+                RetryConsumeContext<TMessage>>(x => new RetryConsumeContext<TMessage>(x));
 
-            _configurator.AddPipeSpecification(redeliverySpecification);
+            _configure?.Invoke(specification);
 
-            var retrySpecification = new RedeliveryRetryPipeSpecification<TMessage>();
-
-            _configure?.Invoke(retrySpecification);
-
-            _configurator.AddPipeSpecification(retrySpecification);
+            _configurator.AddPipeSpecification(specification);
         }
     }
 }

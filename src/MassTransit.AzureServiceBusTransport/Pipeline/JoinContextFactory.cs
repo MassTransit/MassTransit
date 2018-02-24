@@ -41,7 +41,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             _leftPipe = leftPipe;
         }
 
-        PipeContextHandle<TContext> IPipeContextFactory<TContext>.CreateContext(ISupervisor supervisor)
+        IPipeContextAgent<TContext> IPipeContextFactory<TContext>.CreateContext(ISupervisor supervisor)
         {
             IAsyncPipeContextAgent<TContext> asyncContext = supervisor.AddAsyncContext<TContext>();
 
@@ -52,7 +52,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             return contextHandle;
         }
 
-        ActivePipeContextHandle<TContext> IPipeContextFactory<TContext>.CreateActiveContext(ISupervisor supervisor, PipeContextHandle<TContext> context,
+        IActivePipeContextAgent<TContext> IPipeContextFactory<TContext>.CreateActiveContext(ISupervisor supervisor, PipeContextHandle<TContext> context,
             CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedContext(context.Context, cancellationToken));

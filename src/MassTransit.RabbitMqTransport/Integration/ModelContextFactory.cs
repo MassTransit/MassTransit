@@ -35,7 +35,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             _host = host;
         }
 
-        PipeContextHandle<ModelContext> IPipeContextFactory<ModelContext>.CreateContext(ISupervisor supervisor)
+        IPipeContextAgent<ModelContext> IPipeContextFactory<ModelContext>.CreateContext(ISupervisor supervisor)
         {
             IAsyncPipeContextAgent<ModelContext> asyncContext = supervisor.AddAsyncContext<ModelContext>();
 
@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             return contextHandle;
         }
 
-        ActivePipeContextHandle<ModelContext> IPipeContextFactory<ModelContext>.CreateActiveContext(ISupervisor supervisor,
+        IActivePipeContextAgent<ModelContext> IPipeContextFactory<ModelContext>.CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<ModelContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedModel(context.Context, cancellationToken));

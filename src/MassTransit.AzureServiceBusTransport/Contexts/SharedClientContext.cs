@@ -45,13 +45,19 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             return _context.GetOrAddPayload(payloadFactory);
         }
 
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
         public CancellationToken CancellationToken { get; }
 
         Uri ClientContext.InputAddress => _context.InputAddress;
 
         string ClientContext.EntityPath => _context.EntityPath;
 
-        Task ClientContext.RegisterSessionHandlerFactoryAsync(IMessageSessionAsyncHandlerFactory factory, EventHandler<ExceptionReceivedEventArgs> exceptionHandler)
+        Task ClientContext.RegisterSessionHandlerFactoryAsync(IMessageSessionAsyncHandlerFactory factory,
+            EventHandler<ExceptionReceivedEventArgs> exceptionHandler)
         {
             return _context.RegisterSessionHandlerFactoryAsync(factory, exceptionHandler);
         }

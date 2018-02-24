@@ -45,7 +45,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             _connectionFactory = new Lazy<ConnectionFactory>(settings.GetConnectionFactory);
         }
 
-        PipeContextHandle<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
+        IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
             var context = CreateConnection(supervisor);
 
@@ -67,7 +67,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             return contextHandle;
         }
 
-        ActivePipeContextHandle<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
+        IActivePipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<ConnectionContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));

@@ -147,6 +147,11 @@ namespace MassTransit.Courier.Hosts
             return _context.GetOrAddPayload(payloadFactory);
         }
 
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
             return _context.Publish(message, cancellationToken);

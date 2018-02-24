@@ -19,6 +19,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Internals.Extensions;
     using Logging;
     using RabbitMQ.Client;

@@ -83,9 +83,9 @@ namespace MassTransit
             if (configureRetry == null)
                 throw new ArgumentNullException(nameof(configureRetry));
 
-            configurator.ConnectConsumerConfigurationObserver(new DelayedExchangeRedeliveryConsumerConfigurationObserver(configureRetry));
+            configurator.ConnectConsumerConfigurationObserver(new DelayedExchangeRedeliveryConsumerConfigurationObserver(configurator, configureRetry));
 
-            configurator.ConnectSagaConfigurationObserver(new DelayedExchangeRedeliverySagaConfigurationObserver(configureRetry));
+            configurator.ConnectSagaConfigurationObserver(new DelayedExchangeRedeliverySagaConfigurationObserver(configurator, configureRetry));
         }
     }
 }

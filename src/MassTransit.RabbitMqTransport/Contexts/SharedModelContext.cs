@@ -66,6 +66,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return _context.GetOrAddPayload(payloadFactory);
         }
 
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            if (_payloadCache != null)
+                return _payloadCache.AddOrUpdatePayload(addFactory, updateFactory);
+
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
         ConnectionContext ModelContext.ConnectionContext => _context.ConnectionContext;
 
         public IRabbitMqPublishTopology PublishTopology => _context.PublishTopology;

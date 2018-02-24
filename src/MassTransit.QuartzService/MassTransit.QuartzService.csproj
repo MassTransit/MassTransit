@@ -16,10 +16,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="1.2.1" />
+    <PackageReference Include="GreenPipes" Version="2.0.0" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="Quartz" Version="3.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="Quartz" Version="3.0.3" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.104.0" />
     <PackageReference Include="Topshelf" Version="4.0.3" />
     <PackageReference Include="Topshelf.Log4Net" Version="4.0.3" />

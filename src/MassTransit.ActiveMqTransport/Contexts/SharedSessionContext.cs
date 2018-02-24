@@ -65,6 +65,11 @@ namespace MassTransit.ActiveMqTransport.Contexts
             return _context.GetOrAddPayload(payloadFactory);
         }
 
+        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
         public ISession Session => _context.Session;
 
         ConnectionContext SessionContext.ConnectionContext => _context.ConnectionContext;

@@ -133,5 +133,25 @@ namespace GreenPipes
 
             configurator.AddPipeSpecification(specification);
         }
+
+        /// <summary>
+        /// Uses the Consumer/Saga configuration observers to configure a retry filter on the pipeline. Use if nesting multiple retries and
+        /// second-level retries together, to ensure the pipe is built properly. A retry is setup for each message type, versus a single filter. This
+        /// is similar to how message redelivery works so that you can stack redelivery with retry.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configureRetry"></param>
+        public static void UseMessageRetry(this IReceiveEndpointConfigurator configurator, Action<IRetryConfigurator> configureRetry)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            if (configureRetry == null)
+                throw new ArgumentNullException(nameof(configureRetry));
+
+            configurator.ConnectConsumerConfigurationObserver(new RetryConsumerConfigurationObserver(configurator, configureRetry));
+
+            configurator.ConnectSagaConfigurationObserver(new RetrySagaConfigurationObserver(configurator, configureRetry));
+        }
     }
 }

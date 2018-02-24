@@ -15,6 +15,7 @@ namespace MassTransit.HttpTransport
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Util;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
     using MassTransit.Pipeline.Pipes;

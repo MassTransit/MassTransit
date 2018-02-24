@@ -21,6 +21,7 @@ namespace MassTransit
     using Context;
     using Events;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using Internals.Extensions;
     using Logging;
     using Pipeline;
