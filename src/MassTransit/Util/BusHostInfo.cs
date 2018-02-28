@@ -32,13 +32,13 @@ namespace MassTransit.Util
             var entryAssembly = System.Reflection.Assembly.GetEntryAssembly() ?? System.Reflection.Assembly.GetCallingAssembly();
             var currentProcess = Process.GetCurrentProcess();
             MachineName = Environment.MachineName;
-            MassTransitVersion = FileVersionInfo.GetVersionInfo(typeof(IBus).GetTypeInfo().Assembly.Location).FileVersion;
+            MassTransitVersion = typeof(IBus).GetTypeInfo().Assembly.GetName().Version.ToString();
             ProcessId = currentProcess.Id;
             ProcessName = currentProcess.ProcessName;
             
             var assemblyName = entryAssembly.GetName();
             Assembly = assemblyName.Name;
-            AssemblyVersion = FileVersionInfo.GetVersionInfo(entryAssembly.Location).FileVersion;
+            AssemblyVersion = assemblyName.Version.ToString();
         }
 
         public string MachineName { get; private set; }
