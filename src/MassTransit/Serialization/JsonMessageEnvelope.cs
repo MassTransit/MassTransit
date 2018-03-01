@@ -56,6 +56,8 @@ namespace MassTransit.Serialization
             if (context.TimeToLive.HasValue)
                 ExpirationTime = DateTime.UtcNow + context.TimeToLive;
 
+            SentTime = DateTime.UtcNow;
+
             Headers = new Dictionary<string, object>();
 
             foreach (var header in context.Headers.GetAll())
@@ -76,6 +78,7 @@ namespace MassTransit.Serialization
         public string[] MessageType { get; }
         public object Message { get; }
         public DateTime? ExpirationTime { get; }
+        public DateTime? SentTime { get; }
         public IDictionary<string, object> Headers { get; }
         public HostInfo Host { get; }
     }

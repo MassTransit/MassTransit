@@ -23,11 +23,8 @@ namespace MassTransit.TestFramework
     using GreenPipes;
     using GreenPipes.Payloads;
     using GreenPipes.Util;
-    using Pipeline;
     using Pipeline.Observables;
     using Transports;
-    using Transports.InMemory;
-    using Util;
 
 
     public class TestConsumeContext<TMessage> :
@@ -36,88 +33,45 @@ namespace MassTransit.TestFramework
         where TMessage : class
     {
         Task _completeTask;
-        Guid? _conversationId;
-        Guid? _correlationId;
-        Guid? _initiatorId;
-        Uri _destinationAddress;
-        DateTime? _expirationTime;
-        Uri _faultAddress;
-        Headers _headers;
-        TMessage _message;
-        Guid? _messageId;
         ReceiveContext _receiveContext;
-        Guid? _requestId;
-        Uri _responseAddress;
-        Uri _sourceAddress;
 
         public TestConsumeContext(TMessage message)
             : base(new PayloadCache())
         {
-            _message = message;
+            Message = message;
 
-            _messageId = NewId.NextGuid();
-            _sourceAddress = new Uri("loopback://localhost/input_queue");
-            _destinationAddress = new Uri("loopback://localhost/input_queue");
+            MessageId = NewId.NextGuid();
+            SourceAddress = new Uri("loopback://localhost/input_queue");
+            DestinationAddress = new Uri("loopback://localhost/input_queue");
 
-            _receiveContext = new TestReceiveContext(_sourceAddress);
+            _receiveContext = new TestReceiveContext(SourceAddress);
         }
 
-        public Guid? MessageId
-        {
-            get { return _messageId; }
-        }
+        public Guid? MessageId { get; }
 
-        public Guid? RequestId
-        {
-            get { return _requestId; }
-        }
+        public Guid? RequestId { get; }
 
-        public Guid? CorrelationId
-        {
-            get { return _correlationId; }
-        }
+        public Guid? CorrelationId { get; }
 
-        Guid? MessageContext.ConversationId => _conversationId;
+        public Guid? ConversationId { get; }
 
-        public Guid? InitiatorId
-        {
-            get { return _initiatorId; }
-        }
+        public Guid? InitiatorId { get; }
 
-        public DateTime? ExpirationTime
-        {
-            get { return _expirationTime; }
-        }
+        public DateTime? ExpirationTime { get; }
 
-        public Uri SourceAddress
-        {
-            get { return _sourceAddress; }
-        }
+        public Uri SourceAddress { get; }
 
-        public Uri DestinationAddress
-        {
-            get { return _destinationAddress; }
-        }
+        public Uri DestinationAddress { get; }
 
-        public Uri ResponseAddress
-        {
-            get { return _responseAddress; }
-        }
+        public Uri ResponseAddress { get; }
 
-        public Uri FaultAddress
-        {
-            get { return _faultAddress; }
-        }
+        public Uri FaultAddress { get; }
 
-        public Headers Headers
-        {
-            get { return _headers; }
-        }
+        public DateTime? SentTime { get; }
 
-        public HostInfo Host
-        {
-            get { return null; }
-        }
+        public Headers Headers { get; }
+
+        public HostInfo Host { get; } = null;
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
@@ -266,10 +220,7 @@ namespace MassTransit.TestFramework
         {
         }
 
-        public TMessage Message
-        {
-            get { return _message; }
-        }
+        public TMessage Message { get; }
 
         public Task NotifyConsumed(TimeSpan duration, string consumerType)
         {

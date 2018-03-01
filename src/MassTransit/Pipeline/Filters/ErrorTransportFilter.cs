@@ -12,12 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Filters
 {
-    using System;
     using System.Threading.Tasks;
-    using Events;
     using GreenPipes;
     using Transports;
-    using Util;
 
 
     /// <summary>
@@ -37,29 +34,9 @@ namespace MassTransit.Pipeline.Filters
             if (!context.TryGetPayload(out IErrorTransport transport))
                 throw new TransportException(context.InputAddress, $"The {nameof(IErrorTransport)} was not available on the {nameof(ReceiveContext)}.");
 
-            if (!context.IsFaulted)
-                GenerateFault(context);
-
             await transport.Send(context).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
-
-            await next.Send(context).ConfigureAwait(false);
-        }
-
-        static void GenerateFault(ExceptionReceiveContext context)
-        {
-            Guid? faultedMessageId = context.TransportHeaders.Get("MessageId", default(Guid?));
-
-            ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType.MediaType, faultedMessageId);
-
-            var publishEndpoint = context.PublishEndpointProvider.CreatePublishEndpoint(context.InputAddress);
-
-            var publishTask = publishEndpoint.Publish(fault, context.CancellationToken);
-
-            context.AddPendingTask(publishTask);
-
-            context.AddPendingTask(context.NotifyFaulted(context.Exception));
         }
     }
 }

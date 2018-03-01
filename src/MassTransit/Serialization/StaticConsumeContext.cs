@@ -40,6 +40,7 @@ namespace MassTransit.Serialization
         Guid? _requestId;
         Uri _responseAddress;
         Uri _sourceAddress;
+        DateTime? _sentTime;
 
         public StaticConsumeContext(ReceiveContext receiveContext, object message, Header[] headers)
             : base(receiveContext)
@@ -60,6 +61,7 @@ namespace MassTransit.Serialization
         public override Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = GetHeaderUri(BinaryMessageSerializer.DestinationAddressKey));
         public override Uri ResponseAddress => _responseAddress ?? (_responseAddress = GetHeaderUri(BinaryMessageSerializer.ResponseAddressKey));
         public override Uri FaultAddress => _faultAddress ?? (_faultAddress = GetHeaderUri(BinaryMessageSerializer.FaultAddressKey));
+        public override DateTime? SentTime => _sentTime ?? (_sentTime = GetHeaderDateTime(BinaryMessageSerializer.SentTimeKey));
         public override Headers Headers => _headers ?? (_headers = new StaticHeaders(_binaryHeaders));
         public override HostInfo Host => _host ?? (_host = GetHeaderObject<HostInfo>(BinaryMessageSerializer.HostInfoKey));
         public override IEnumerable<string> SupportedMessageTypes => _supportedTypes;

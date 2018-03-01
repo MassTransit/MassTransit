@@ -257,6 +257,8 @@ namespace MassTransit.HttpTransport.Tests
 
                 Message = message;
 
+                SentTime = DateTime.UtcNow;
+
                 Headers = new Dictionary<string, object>();
 
                 Host = HostMetadataCache.Host;
@@ -274,6 +276,7 @@ namespace MassTransit.HttpTransport.Tests
             public string[] MessageType { get; }
             public object Message { get; }
             public DateTime? ExpirationTime { get; set; }
+            public DateTime? SentTime { get; }
             public IDictionary<string, object> Headers { get; }
             public HostInfo Host { get; }
         }

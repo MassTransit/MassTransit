@@ -64,6 +64,7 @@ namespace MassTransit.Serialization
         public override Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = ConvertToUri(_envelope.DestinationAddress));
         public override Uri ResponseAddress => _responseAddress ?? (_responseAddress = ConvertToUri(_envelope.ResponseAddress));
         public override Uri FaultAddress => _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress));
+        public override DateTime? SentTime => _envelope.SentTime;
         public override Headers Headers => _headers ?? (_headers = new JsonMessageHeaders(_objectTypeDeserializer, _envelope.Headers));
         public override HostInfo Host => _envelope.Host;
         public override IEnumerable<string> SupportedMessageTypes => _supportedTypes;

@@ -98,6 +98,8 @@ namespace MassTransit.Context
         public virtual Uri DestinationAddress => _context.DestinationAddress;
         public virtual Uri ResponseAddress => _context.ResponseAddress;
         public virtual Uri FaultAddress => _context.FaultAddress;
+        public virtual DateTime? SentTime => _context.SentTime;
+
         public virtual Headers Headers => _context.Headers;
         public HostInfo Host => _context.Host;
 
