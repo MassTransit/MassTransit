@@ -72,13 +72,7 @@ namespace MassTransit.Tests.Courier
 
         string GetBodyString(ReceiveContext context)
         {
-            using (var stream = context.GetBody())
-            using (var ms = new MemoryStream())
-            {
-                stream.CopyTo(ms);
-
-                return Encoding.UTF8.GetString(ms.ToArray());
-            }
+            return Encoding.UTF8.GetString(context.GetBody());
         }
 
 

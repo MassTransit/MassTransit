@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System;
     using System.Collections.Generic;
     using Builders;
+    using Context;
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Builders;
@@ -91,9 +92,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public override Uri InputAddress => _inputAddress.Value;
 
         public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            IReceiveEndpointTopology topology)
+            ReceiveEndpointContext receiveEndpointContext)
         {
-            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, topology);
+            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, receiveEndpointContext);
 
             _hostConfiguration.Host.AddReceiveEndpoint(endpointName, receiveEndpoint);
 
@@ -110,9 +111,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             var receivePipe = CreateReceivePipe();
 
-            var topology = builder.CreateReceiveEndpointTopology();
+            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
-            _modelConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, topology.BrokerTopology));
+            _modelConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
 
             IAgent consumerAgent;
             if (_hostConfiguration.BusConfiguration.DeployTopologyOnly)
@@ -133,7 +134,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
                 var errorTransport = CreateErrorTransport();
 
-                var consumerFilter = new RabbitMqConsumerFilter(receivePipe, builder.ReceiveObservers, builder.TransportObservers, topology,
+                var consumerFilter = new RabbitMqConsumerFilter(receivePipe, builder.ReceiveObservers, builder.TransportObservers, receiveEndpointContext,
                     deadLetterTransport, errorTransport);
 
                 _modelConfigurator.UseFilter(consumerFilter);
@@ -145,12 +146,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             _connectionConfigurator.UseFilter(modelFilter);
 
-            var transport = new RabbitMqReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), topology,
+            var transport = new RabbitMqReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext,
                 builder.ReceiveObservers, builder.TransportObservers);
 
             transport.Add(consumerAgent);
 
-            return CreateReceiveEndpoint(_settings.QueueName ?? NewId.Next().ToString(), transport, receivePipe, topology);
+            return CreateReceiveEndpoint(_settings.QueueName ?? NewId.Next().ToString(), transport, receivePipe, receiveEndpointContext);
         }
 
         IRabbitMqHost IRabbitMqReceiveEndpointConfigurator.Host => Host;

@@ -25,8 +25,8 @@ namespace MassTransit.HttpTransport.Transport
     using Contexts;
     using GreenPipes;
     using Logging;
+    using MassTransit.Context;
     using MassTransit.Pipeline.Observables;
-    using MassTransit.Topology;
     using Transports;
     using Util;
 
@@ -40,9 +40,9 @@ namespace MassTransit.HttpTransport.Transport
         readonly SendObservable _observers;
         readonly IReceiveObserver _receiveObserver;
         readonly HttpSendSettings _sendSettings;
-        readonly IReceiveEndpointTopology _topology;
+        readonly ReceiveEndpointContext _topology;
 
-        public HttpSendTransport(IClientCache clientCache, HttpSendSettings sendSettings, IReceiveObserver receiveObserver, IReceiveEndpointTopology topology)
+        public HttpSendTransport(IClientCache clientCache, HttpSendSettings sendSettings, IReceiveObserver receiveObserver, ReceiveEndpointContext topology)
         {
             _clientCache = clientCache;
             _sendSettings = sendSettings;

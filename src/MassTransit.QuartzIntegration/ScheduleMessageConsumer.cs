@@ -114,16 +114,7 @@ namespace MassTransit.QuartzIntegration
 
         static async Task<IJobDetail> CreateJobDetail(ConsumeContext context, Uri destination, JobKey jobKey, Guid? tokenId = default(Guid?))
         {
-            string body;
-            using (var ms = new MemoryStream())
-            {
-                using (var bodyStream = context.ReceiveContext.GetBody())
-                {
-                    await bodyStream.CopyToAsync(ms).ConfigureAwait(false);
-                }
-
-                body = Encoding.UTF8.GetString(ms.ToArray());
-            }
+            string body = Encoding.UTF8.GetString(context.ReceiveContext.GetBody());
 
             if (string.Compare(context.ReceiveContext.ContentType.MediaType, JsonMessageSerializer.JsonContentType.MediaType,
                 StringComparison.OrdinalIgnoreCase) == 0)

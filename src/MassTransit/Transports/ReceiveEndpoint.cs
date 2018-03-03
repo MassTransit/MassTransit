@@ -15,6 +15,7 @@ namespace MassTransit.Transports
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Events;
     using GreenPipes;
     using Pipeline;
@@ -30,13 +31,13 @@ namespace MassTransit.Transports
     public class ReceiveEndpoint :
         IReceiveEndpointControl
     {
-        public IReceiveEndpointTopology Topology { get; }
+        public ReceiveEndpointContext Topology { get; }
         readonly ReceiveEndpointObservable _observers;
         readonly IReceivePipe _receivePipe;
         readonly IReceiveTransport _receiveTransport;
         ConnectHandle _handle;
 
-        public ReceiveEndpoint(IReceiveTransport receiveTransport, IReceivePipe receivePipe, IReceiveEndpointTopology topology)
+        public ReceiveEndpoint(IReceiveTransport receiveTransport, IReceivePipe receivePipe, ReceiveEndpointContext topology)
         {
             Topology = topology;
             _receiveTransport = receiveTransport;

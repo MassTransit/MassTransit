@@ -16,8 +16,8 @@ namespace MassTransit.HttpTransport.Transport
     using System.Threading.Tasks;
     using Configuration;
     using Clients;
+    using MassTransit.Context;
     using MassTransit.Pipeline;
-    using MassTransit.Topology;
     using Transports;
 
 
@@ -27,10 +27,10 @@ namespace MassTransit.HttpTransport.Transport
         readonly IReceiveObserver _receiveObserver;
         readonly IHttpBusConfiguration _busConfiguration;
         readonly IReceivePipe _receivePipe;
-        readonly IReceiveEndpointTopology _topology;
+        readonly ReceiveEndpointContext _topology;
 
         public HttpSendTransportProvider(IHttpBusConfiguration busConfiguration, IReceivePipe receivePipe, IReceiveObserver receiveObserver,
-            IReceiveEndpointTopology topology)
+            ReceiveEndpointContext topology)
         {
             _busConfiguration = busConfiguration;
             _receivePipe = receivePipe;

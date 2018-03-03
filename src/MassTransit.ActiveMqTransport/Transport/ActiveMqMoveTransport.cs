@@ -41,16 +41,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             var queue = await sessionContext.GetQueue(_destination).ConfigureAwait(false);
 
             var producer = await sessionContext.CreateMessageProducer(queue).ConfigureAwait(false);
-            byte[] body;
-            using (var memoryStream = new MemoryStream())
-            {
-                using (var bodyStream = context.GetBody())
-                {
-                    await bodyStream.CopyToAsync(memoryStream).ConfigureAwait(false);
-                }
-
-                body = memoryStream.ToArray();
-            }
+            byte[] body = context.GetBody();
 
             var message = producer.CreateBytesMessage(body);
 

@@ -18,6 +18,7 @@ namespace MassTransit.Transports.InMemory
     using System.Threading.Tasks;
     using Builders;
     using Configuration;
+    using Context;
     using Fabric;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -90,7 +91,7 @@ namespace MassTransit.Transports.InMemory
             _receiveEndpoints.Probe(scope);
         }
 
-        public IReceiveTransport GetReceiveTransport(string queueName, IReceivePipe receivePipe, IReceiveEndpointTopology topology)
+        public IReceiveTransport GetReceiveTransport(string queueName, IReceivePipe receivePipe, ReceiveEndpointContext topology)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating receive transport for queue: {0}", queueName);

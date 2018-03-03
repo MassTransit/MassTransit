@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contexts;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -37,20 +38,20 @@ namespace MassTransit.RabbitMqTransport.Transport
         readonly ReceiveObservable _receiveObservable;
         readonly ReceiveTransportObservable _receiveTransportObservable;
         readonly ReceiveSettings _settings;
-        readonly IRabbitMqReceiveEndpointTopology _topology;
+        readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
 
         public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IPipe<ConnectionContext> connectionPipe,
-            IRabbitMqReceiveEndpointTopology topology, ReceiveObservable receiveObservable, ReceiveTransportObservable receiveTransportObservable)
+            RabbitMqReceiveEndpointContext receiveEndpointContext, ReceiveObservable receiveObservable, ReceiveTransportObservable receiveTransportObservable)
         {
             _host = host;
             _settings = settings;
-            _topology = topology;
+            _receiveEndpointContext = receiveEndpointContext;
             _connectionPipe = connectionPipe;
 
             _receiveObservable = receiveObservable;
             _receiveTransportObservable = receiveTransportObservable;
 
-            _inputAddress = topology.InputAddress;
+            _inputAddress = receiveEndpointContext.InputAddress;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -59,7 +60,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             scope.Add("type", "RabbitMQ");
             scope.Set(_settings);
             var topologyScope = scope.CreateScope("topology");
-            _topology.BrokerTopology.Probe(topologyScope);
+            _receiveEndpointContext.BrokerTopology.Probe(topologyScope);
         }
 
         /// <summary>
@@ -86,12 +87,12 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _topology.ConnectPublishObserver(observer);
+            return _receiveEndpointContext.ConnectPublishObserver(observer);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _topology.ConnectSendObserver(observer);
+            return _receiveEndpointContext.ConnectSendObserver(observer);
         }
 
         async Task Receiver()

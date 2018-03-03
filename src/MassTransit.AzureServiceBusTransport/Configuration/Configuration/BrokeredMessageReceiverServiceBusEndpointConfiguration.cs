@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
+    using Context;
     using MassTransit.Configuration;
     using MassTransit.Pipeline;
     using MassTransit.Topology;
@@ -22,7 +23,7 @@
         public override Uri InputAddress { get; }
 
         public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            IReceiveEndpointTopology topology)
+            ReceiveEndpointContext topology)
         {
             throw new NotImplementedException();
         }

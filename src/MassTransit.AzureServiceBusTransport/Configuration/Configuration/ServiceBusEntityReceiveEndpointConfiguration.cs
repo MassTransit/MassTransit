@@ -133,7 +133,7 @@
         }
 
         protected IReceiveEndpoint CreateReceiveEndpoint(ReceiveEndpointBuilder builder, IReceivePipe receivePipe,
-            IServiceBusReceiveEndpointTopology topology)
+            ServiceBusReceiveEndpointContext context)
         {
             var transportObserver = builder.TransportObservers;
 
@@ -147,7 +147,7 @@
             }
             else
             {
-                var messageReceiver = new BrokeredMessageReceiver(InputAddress, receivePipe, Logger.Get<Receiver>(), topology);
+                var messageReceiver = new BrokeredMessageReceiver(InputAddress, receivePipe, Logger.Get<Receiver>(), context);
 
                 var errorTransport = CreateErrorTransport(_hostConfiguration.Host);
                 var deadLetterTransport = CreateDeadLetterTransport(_hostConfiguration.Host);
@@ -165,12 +165,12 @@
 
             var clientCache = CreateClientCache(InputAddress, _hostConfiguration.Host.MessagingFactoryCache, _hostConfiguration.Host.NamespaceCache);
 
-            var transport = new ReceiveTransport(_hostConfiguration.Host, _settings, topology.PublishEndpointProvider, topology.SendEndpointProvider,
+            var transport = new ReceiveTransport(_hostConfiguration.Host, _settings, context.PublishEndpointProvider, context.SendEndpointProvider,
                 clientCache, clientPipe, transportObserver);
 
             transport.Add(consumerAgent);
 
-            return CreateReceiveEndpoint(_settings.Name, transport, receivePipe, topology);
+            return CreateReceiveEndpoint(_settings.Name, transport, receivePipe, context);
         }
 
         protected abstract IErrorTransport CreateErrorTransport(ServiceBusHost host);

@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
+    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -45,7 +46,7 @@
         }
 
         public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            IReceiveEndpointTopology topology)
+            ReceiveEndpointContext topology)
         {
             var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, topology);
 
@@ -163,12 +164,12 @@
 
             var receivePipe = CreateReceivePipe();
 
-            var topology = builder.CreateReceiveEndpointTopology();
+            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
-            NamespacePipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, topology.BrokerTopology,
+            NamespacePipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology,
                 _settings.RemoveSubscriptions));
 
-            return CreateReceiveEndpoint(builder, receivePipe, topology);
+            return CreateReceiveEndpoint(builder, receivePipe, receiveEndpointContext);
         }
 
         protected override IErrorTransport CreateErrorTransport(ServiceBusHost host)

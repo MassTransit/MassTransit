@@ -14,6 +14,7 @@ namespace MassTransit.HttpTransport.Topology
 {
     using System;
     using GreenPipes;
+    using MassTransit.Context;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
     using MassTransit.Topology;
@@ -21,19 +22,19 @@ namespace MassTransit.HttpTransport.Topology
     using Transport;
 
 
-    public class HttpResponseReceiveEndpointTopology :
-        IReceiveEndpointTopology
+    public class HttpResponseReceiveEndpointContext :
+        ReceiveEndpointContext
     {
         readonly HttpContext _httpContext;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ISendPipe _sendPipe;
         readonly IMessageSerializer _serializer;
-        readonly IReceiveEndpointTopology _topology;
+        readonly ReceiveEndpointContext _receiveEndpointContext;
 
-        public HttpResponseReceiveEndpointTopology(IReceiveEndpointTopology topology, HttpContext httpContext, ISendPipe sendPipe,
+        public HttpResponseReceiveEndpointContext(ReceiveEndpointContext receiveEndpointContext, HttpContext httpContext, ISendPipe sendPipe,
             IMessageSerializer serializer)
         {
-            _topology = topology;
+            _receiveEndpointContext = receiveEndpointContext;
             _httpContext = httpContext;
             _sendPipe = sendPipe;
             _serializer = serializer;
@@ -41,29 +42,29 @@ namespace MassTransit.HttpTransport.Topology
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
         }
 
-        Uri IReceiveEndpointTopology.InputAddress => _topology.InputAddress;
-        ReceiveObservable IReceiveEndpointTopology.ReceiveObservers => _topology.ReceiveObservers;
-        ReceiveTransportObservable IReceiveEndpointTopology.TransportObservers => _topology.TransportObservers;
+        Uri ReceiveEndpointContext.InputAddress => _receiveEndpointContext.InputAddress;
+        ReceiveObservable ReceiveEndpointContext.ReceiveObservers => _receiveEndpointContext.ReceiveObservers;
+        ReceiveTransportObservable ReceiveEndpointContext.TransportObservers => _receiveEndpointContext.TransportObservers;
 
-        ISendTopology IReceiveTopology.Send => _topology.Send;
-        IPublishTopology IReceiveTopology.Publish => _topology.Publish;
+        ISendTopology ReceiveEndpointContext.Send => _receiveEndpointContext.Send;
+        IPublishTopology ReceiveEndpointContext.Publish => _receiveEndpointContext.Publish;
 
-        ISendEndpointProvider IReceiveTopology.SendEndpointProvider => _sendEndpointProvider.Value;
-        IPublishEndpointProvider IReceiveTopology.PublishEndpointProvider => _topology.PublishEndpointProvider;
+        ISendEndpointProvider ReceiveEndpointContext.SendEndpointProvider => _sendEndpointProvider.Value;
+        IPublishEndpointProvider ReceiveEndpointContext.PublishEndpointProvider => _receiveEndpointContext.PublishEndpointProvider;
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _topology.ConnectSendObserver(observer);
+            return _receiveEndpointContext.ConnectSendObserver(observer);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _topology.ConnectPublishObserver(observer);
+            return _receiveEndpointContext.ConnectPublishObserver(observer);
         }
 
         ISendEndpointProvider CreateSendEndpointProvider()
         {
-            return new HttpResponseSendEndpointProvider(_httpContext, _topology.InputAddress, _sendPipe, _serializer, _topology.SendEndpointProvider);
+            return new HttpResponseSendEndpointProvider(_httpContext, _receiveEndpointContext.InputAddress, _sendPipe, _serializer, _receiveEndpointContext.SendEndpointProvider);
         }
     }
 }

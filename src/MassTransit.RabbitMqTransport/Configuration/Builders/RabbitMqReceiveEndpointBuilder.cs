@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Builders
 {
     using Configuration;
+    using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
     using Topology;
@@ -43,11 +44,11 @@ namespace MassTransit.RabbitMqTransport.Builders
             return base.ConnectConsumePipe(pipe);
         }
 
-        public IRabbitMqReceiveEndpointTopology CreateReceiveEndpointTopology()
+        public RabbitMqReceiveEndpointContext CreateReceiveEndpointContext()
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            return new RabbitMqReceiveEndpointTopology(_configuration, brokerTopology);
+            return new RabbitMqQueueReceiveEndpointContext(_configuration, brokerTopology, ReceiveObservers, TransportObservers);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)

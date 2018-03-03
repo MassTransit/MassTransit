@@ -13,6 +13,7 @@
 namespace MassTransit.ActiveMqTransport.Builders
 {
     using Configuration;
+    using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
     using Topology;
@@ -43,11 +44,11 @@ namespace MassTransit.ActiveMqTransport.Builders
             return base.ConnectConsumePipe(pipe);
         }
 
-        public IActiveMqReceiveEndpointTopology CreateReceiveEndpointTopology()
+        public ActiveMqReceiveEndpointContext CreateReceiveEndpointContext()
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            return new ActiveMqReceiveEndpointTopology(_configuration, brokerTopology);
+            return new ActiveMqConsumerReceiveEndpointContext(_configuration, brokerTopology, ReceiveObservers, TransportObservers);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)

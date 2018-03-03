@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
     using System;
     using System.Linq;
     using Configuration;
+    using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
     using Topology;
@@ -48,11 +49,11 @@ namespace MassTransit.AzureServiceBusTransport.Builders
             return base.ConnectConsumePipe(pipe);
         }
 
-        public IServiceBusReceiveEndpointTopology CreateReceiveEndpointTopology()
+        public ServiceBusReceiveEndpointContext CreateReceiveEndpointContext()
         {
             var topologyLayout = BuildTopology(_configuration.Settings);
 
-            return new ServiceBusReceiveEndpointTopology(_configuration, topologyLayout);
+            return new ServiceBusEntityReceiveEndpointContext(_configuration, topologyLayout, ReceiveObservers, TransportObservers);
         }
 
         string GenerateSubscriptionName()

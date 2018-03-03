@@ -13,7 +13,7 @@
 namespace MassTransit.HttpTransport.Clients
 {
     using System.Threading;
-    using Context;
+    using MassTransit.Context;
 
 
     public class HttpSendContextImpl<T> :

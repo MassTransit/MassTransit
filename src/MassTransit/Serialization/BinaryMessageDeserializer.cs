@@ -30,7 +30,7 @@ namespace MassTransit.Serialization
         {
             object obj;
             var headers = new Header[0];
-            using (Stream body = receiveContext.GetBody())
+            using (Stream body = receiveContext.GetBodyStream())
             {
                 obj = _formatter.Deserialize(body, x => headers = x);
             }

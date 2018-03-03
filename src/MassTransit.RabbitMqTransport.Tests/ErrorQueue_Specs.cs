@@ -251,7 +251,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var context = await _errorHandler;
 
-            using (var body = context.ReceiveContext.GetBody())
+            using (var body = context.ReceiveContext.GetBodyStream())
             using (var output = new MemoryStream())
             {
                 await body.CopyToAsync(output);

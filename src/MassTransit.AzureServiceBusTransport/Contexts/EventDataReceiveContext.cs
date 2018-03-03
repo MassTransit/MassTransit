@@ -28,8 +28,8 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         readonly EventData _message;
         byte[] _body;
 
-        public EventDataReceiveContext(Uri inputAddress, EventData message, IReceiveObserver observer, IReceiveEndpointTopology topology)
-            : base(inputAddress, false, observer, topology)
+        public EventDataReceiveContext(Uri inputAddress, EventData message, IReceiveObserver observer, ReceiveEndpointContext receiveEndpointContext)
+            : base(inputAddress, false, observer, receiveEndpointContext)
         {
             _message = message;
 
@@ -46,16 +46,18 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         public long SerializedSizeInBytes => _message.SerializedSizeInBytes;
         public IDictionary<string, object> SystemProperties => _message.SystemProperties;
 
-        protected override Stream GetBodyStream()
+        public override byte[] GetBody()
         {
             if (_body == null)
-                using (var bodyStream = _message.GetBodyStream())
-                using (var ms = new MemoryStream())
-                {
-                    bodyStream.CopyTo(ms);
+                _body = _message.GetBytes();
 
-                    _body = ms.ToArray();
-                }
+            return _body;
+        }
+
+        public override Stream GetBodyStream()
+        {
+            if (_body == null)
+                _body = _message.GetBytes();
 
             return new MemoryStream(_body, false);
         }

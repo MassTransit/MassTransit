@@ -47,25 +47,25 @@ namespace MassTransit.Tests.Configuration
         [Test]
         public void Should_have_an_a()
         {
-            _factory.Connectors.First().MessageType.ShouldBe(typeof(A));
+            _factory.Connectors.Any(x => x.MessageType == typeof(A)).ShouldBeTrue();
         }
 
         [Test]
         public void Should_have_a_b()
         {
-            _factory.Connectors.Skip(1).First().MessageType.ShouldBe(typeof(B));
+            _factory.Connectors.Any(x => x.MessageType == typeof(B)).ShouldBeTrue();
         }
 
         [Test]
         public void Should_have_a_c()
         {
-            _factory.Connectors.Skip(2).First().MessageType.ShouldBe(typeof(IC));
+            _factory.Connectors.Any(x => x.MessageType == typeof(IC)).ShouldBeTrue();
         }
 
         [Test]
         public void Should_have_a_d()
         {
-            _factory.Connectors.Skip(3).First().MessageType.ShouldBe(typeof(D<A>));
+            _factory.Connectors.Any(x => x.MessageType == typeof(D<A>)).ShouldBeTrue();
         }
 
 

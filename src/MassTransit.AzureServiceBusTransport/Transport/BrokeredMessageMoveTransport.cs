@@ -38,7 +38,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 if (!context.TryGetPayload(out BrokeredMessageContext messageContext))
                     throw new ArgumentException("The ReceiveContext must contain a BrokeredMessageContext (from Azure Service Bus)", nameof(context));
 
-                using (var messageBodyStream = context.GetBody())
+                using (var messageBodyStream = context.GetBodyStream())
                 using (var message = new BrokeredMessage(messageBodyStream)
                 {
                     ContentType = context.ContentType.MediaType,

@@ -10,37 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.InMemory.Topology
+namespace MassTransit.Transports.InMemory.Contexts
 {
-    using System;
     using Configuration;
-    using Configurators;
-    using MassTransit.Topology;
+    using Context;
     using Pipeline.Observables;
+    using Topology.Configurators;
 
 
-    public class InMemoryReceiveEndpointTopology :
-        ReceiveEndpointTopology,
-        IInMemoryReceiveEndpointTopology
+    public class InMemoryReceiveEndpointContext :
+        BaseReceiveEndpointContext
     {
         readonly IInMemoryPublishTopologyConfigurator _publish;
-        readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
-        readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryReceiveEndpointTopology(IInMemoryReceiveEndpointConfiguration configuration, ISendTransportProvider sendTransportProvider)
-            : base(configuration)
+        public InMemoryReceiveEndpointContext(IInMemoryReceiveEndpointConfiguration configuration, ISendTransportProvider sendTransportProvider,
+            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers)
+            : base(configuration, receiveObservers, transportObservers)
         {
             _sendTransportProvider = sendTransportProvider;
 
             _publish = configuration.Topology.Publish;
-
-            _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
-            _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
         }
-
-        ISendEndpointProvider IReceiveTopology.SendEndpointProvider => _sendEndpointProvider.Value;
-        IPublishEndpointProvider IReceiveTopology.PublishEndpointProvider => _publishEndpointProvider.Value;
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
@@ -51,8 +42,9 @@ namespace MassTransit.Transports.InMemory.Topology
         {
             var transportProvider = new InMemoryPublishTransportProvider(_sendTransportProvider, _publish);
 
-            return new PublishEndpointProvider(transportProvider, HostAddress, PublishObservers, new SendObservable(), Serializer, InputAddress, PublishPipe,
-                _publish);
+            var sendObserversAreAutomaticallyConnected = new SendObservable();
+            return new PublishEndpointProvider(transportProvider, HostAddress, PublishObservers, sendObserversAreAutomaticallyConnected, Serializer,
+                InputAddress, PublishPipe, _publish);
         }
     }
 }

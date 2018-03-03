@@ -55,7 +55,12 @@ namespace MassTransit.Context
             return _context.AddOrUpdatePayload(addFactory, updateFactory);
         }
 
-        public virtual Stream GetBody()
+        public Stream GetBodyStream()
+        {
+            return _context.GetBodyStream();
+        }
+
+        byte[] ReceiveContext.GetBody()
         {
             return _context.GetBody();
         }
@@ -93,6 +98,6 @@ namespace MassTransit.Context
 
         ISendEndpointProvider ReceiveContext.SendEndpointProvider => _context.SendEndpointProvider;
         IPublishEndpointProvider ReceiveContext.PublishEndpointProvider => _context.PublishEndpointProvider;
-        IReceiveTopology ReceiveContext.Topology => _context.Topology;
+        IPublishTopology ReceiveContext.PublishTopology => _context.PublishTopology;
     }
 }

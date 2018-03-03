@@ -30,8 +30,8 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         readonly BrokeredMessage _message;
         byte[] _body;
 
-        public ServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message, IReceiveObserver observer, IReceiveEndpointTopology topology)
-            : base(inputAddress, message.DeliveryCount > 1, observer, topology)
+        public ServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message, IReceiveObserver observer, ReceiveEndpointContext receiveEndpointContext)
+            : base(inputAddress, message.DeliveryCount > 1, observer, receiveEndpointContext)
         {
             _message = message;
 
@@ -87,20 +87,31 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             return _message.RenewLockAsync();
         }
 
-        protected override Stream GetBodyStream()
+        public override byte[] GetBody()
         {
             if (_body == null)
-            {
-                using (var bodyStream = _message.GetBody<Stream>())
-                using (var ms = new MemoryStream())
-                {
-                    bodyStream.CopyTo(ms);
+                GetBodyAsByteArray();
 
-                    _body = ms.ToArray();
-                }
-            }
+            return _body;
+        }
+
+        public override Stream GetBodyStream()
+        {
+            if (_body == null)
+                GetBodyAsByteArray();
 
             return new MemoryStream(_body, false);
+        }
+
+        void GetBodyAsByteArray()
+        {
+            using (var bodyStream = _message.GetBody<Stream>())
+            using (var ms = new MemoryStream())
+            {
+                bodyStream.CopyTo(ms);
+
+                _body = ms.ToArray();
+            }
         }
 
         protected override ContentType GetContentType()

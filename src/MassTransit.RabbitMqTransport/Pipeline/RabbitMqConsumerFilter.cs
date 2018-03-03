@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
     using System.Threading.Tasks;
+    using Contexts;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -33,16 +34,16 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly IErrorTransport _errorTransport;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly IRabbitMqReceiveEndpointTopology _topology;
+        readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
         readonly IReceiveTransportObserver _transportObserver;
 
         public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver,
-            IRabbitMqReceiveEndpointTopology topology, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+            RabbitMqReceiveEndpointContext receiveEndpointContext, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _transportObserver = transportObserver;
-            _topology = topology;
+            _receiveEndpointContext = receiveEndpointContext;
             _deadLetterTransport = deadLetterTransport;
             _errorTransport = errorTransport;
         }
@@ -57,7 +58,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostSettings.HostAddress);
 
-            var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, _topology, _deadLetterTransport, _errorTransport);
+            var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, _receiveEndpointContext, _deadLetterTransport, _errorTransport);
 
             await context.BasicConsume(receiveSettings.QueueName, false, consumer).ConfigureAwait(false);
 

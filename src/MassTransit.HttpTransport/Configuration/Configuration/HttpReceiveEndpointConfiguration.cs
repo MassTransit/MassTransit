@@ -18,8 +18,8 @@ namespace MassTransit.HttpTransport.Configuration
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using MassTransit.Configuration;
+    using MassTransit.Context;
     using MassTransit.Pipeline;
-    using MassTransit.Topology;
     using Transport;
     using Transports;
 
@@ -49,9 +49,9 @@ namespace MassTransit.HttpTransport.Configuration
         }
 
         public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            IReceiveEndpointTopology topology)
+            ReceiveEndpointContext receiveEndpointContext)
         {
-            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, topology);
+            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, receiveEndpointContext);
 
             _hostConfiguration.Host.AddReceiveEndpoint(endpointName, receiveEndpoint);
 
@@ -76,17 +76,17 @@ namespace MassTransit.HttpTransport.Configuration
 
             var receivePipe = CreateReceivePipe();
 
-            var topology = builder.CreateReceiveEndpointTopology();
+            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
             var receiveSettings = new Settings(_pathMatch);
 
             _httpHostPipeConfigurator.UseFilter(new HttpConsumerFilter(receivePipe, builder.ReceiveObservers, builder.TransportObservers,
-                _hostConfiguration.Host.Settings, receiveSettings, topology));
+                _hostConfiguration.Host.Settings, receiveSettings, receiveEndpointContext));
 
-            var transport = new HttpReceiveTransport(_hostConfiguration.Host, topology, builder.ReceiveObservers, builder.TransportObservers,
+            var transport = new HttpReceiveTransport(_hostConfiguration.Host, receiveEndpointContext, builder.ReceiveObservers, builder.TransportObservers,
                 _httpHostPipeConfigurator.Build());
 
-            return CreateReceiveEndpoint(string.IsNullOrWhiteSpace(_pathMatch) ? NewId.Next().ToString() : _pathMatch, transport, receivePipe, topology);
+            return CreateReceiveEndpoint(string.IsNullOrWhiteSpace(_pathMatch) ? NewId.Next().ToString() : _pathMatch, transport, receivePipe, receiveEndpointContext);
         }
 
 

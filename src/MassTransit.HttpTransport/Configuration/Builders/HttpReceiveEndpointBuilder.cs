@@ -13,6 +13,7 @@
 namespace MassTransit.HttpTransport.Builders
 {
     using Configuration;
+    using Contexts;
     using MassTransit.Builders;
     using Topology;
 
@@ -29,9 +30,9 @@ namespace MassTransit.HttpTransport.Builders
             _configuration = configuration;
         }
 
-        public IHttpReceiveEndpointTopology CreateReceiveEndpointTopology()
+        public HttpReceiveEndpointContext CreateReceiveEndpointContext()
         {
-            return new HttpReceiveEndpointTopology(_configuration);
+            return new HttpTransportReceiveEndpointContext(_configuration, ReceiveObservers, TransportObservers);
         }
     }
 }

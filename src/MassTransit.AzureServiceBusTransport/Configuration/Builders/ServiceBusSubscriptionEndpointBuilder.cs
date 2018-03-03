@@ -13,6 +13,7 @@
 namespace MassTransit.AzureServiceBusTransport.Builders
 {
     using Configuration;
+    using Contexts;
     using MassTransit.Builders;
     using Topology;
     using Topology.Builders;
@@ -31,11 +32,11 @@ namespace MassTransit.AzureServiceBusTransport.Builders
             _configuration = configuration;
         }
 
-        public IServiceBusReceiveEndpointTopology CreateReceiveEndpointTopology()
+        public ServiceBusReceiveEndpointContext CreateReceiveEndpointContext()
         {
             var topologyLayout = BuildTopology(_configuration.Settings);
 
-            return new ServiceBusReceiveEndpointTopology(_configuration, topologyLayout);
+            return new ServiceBusEntityReceiveEndpointContext(_configuration, topologyLayout, ReceiveObservers, TransportObservers);
         }
 
         BrokerTopology BuildTopology(SubscriptionSettings settings)

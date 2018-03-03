@@ -13,6 +13,7 @@
 namespace MassTransit.Configuration
 {
     using System;
+    using Context;
     using Pipeline;
     using Topology;
     using Transports;
@@ -39,9 +40,9 @@ namespace MassTransit.Configuration
         /// <param name="endpointName">The unique name for the endpoint</param>
         /// <param name="receiveTransport"></param>
         /// <param name="receivePipe"></param>
-        /// <param name="topology"></param>
+        /// <param name="receiveEndpointContext"></param>
         IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            IReceiveEndpointTopology topology);
+            ReceiveEndpointContext receiveEndpointContext);
 
         /// <summary>
         /// Builds the receive endpoint

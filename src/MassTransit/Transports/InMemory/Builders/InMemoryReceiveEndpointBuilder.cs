@@ -14,8 +14,11 @@ namespace MassTransit.Transports.InMemory.Builders
 {
     using System.Linq;
     using Configuration;
+    using Context;
+    using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
+    using MassTransit.Topology;
     using Topology;
 
 
@@ -42,7 +45,7 @@ namespace MassTransit.Transports.InMemory.Builders
             return base.ConnectConsumePipe(pipe);
         }
 
-        public IInMemoryReceiveEndpointTopology CreateReceiveEndpointTopology()
+        public ReceiveEndpointContext CreateReceiveEndpointContext()
         {
             var builder = _host.CreateConsumeTopologyBuilder();
 
@@ -55,7 +58,7 @@ namespace MassTransit.Transports.InMemory.Builders
 
             _configuration.Topology.Consume.Apply(builder);
 
-            return new InMemoryReceiveEndpointTopology(_configuration, _host);
+            return new InMemoryReceiveEndpointContext(_configuration, _host, ReceiveObservers, TransportObservers);
         }
     }
 }

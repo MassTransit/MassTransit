@@ -254,7 +254,13 @@ namespace MassTransit.TestFramework
         }
 
         protected override IHeaderProvider HeaderProvider { get; }
-        protected override Stream GetBodyStream()
+
+        public override byte[] GetBody()
+        {
+            return new byte[0];
+        }
+
+        public override Stream GetBodyStream()
         {
             return new MemoryStream();
         }

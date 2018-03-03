@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using GreenPipes;
     using Logging;
@@ -34,9 +35,9 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly Uri _inputAddress;
         readonly ReceiveObservable _receiveObservers;
         readonly IReceivePipe _receivePipe;
-        readonly IReceiveEndpointTopology _receiveTopology;
+        readonly ReceiveEndpointContext _receiveTopology;
 
-        public EventDataReceiver(Uri inputAddress, IReceivePipe receivePipe, ILog log, IReceiveEndpointTopology receiveTopology)
+        public EventDataReceiver(Uri inputAddress, IReceivePipe receivePipe, ILog log, ReceiveEndpointContext receiveTopology)
         {
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;

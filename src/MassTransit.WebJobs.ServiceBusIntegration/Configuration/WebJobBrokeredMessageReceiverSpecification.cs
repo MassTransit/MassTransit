@@ -17,9 +17,12 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
     using AzureServiceBusTransport.Configurators;
     using AzureServiceBusTransport.Transport;
     using Configurators;
+    using Context;
+    using Contexts;
     using MassTransit.Configuration;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Host;
+    using Pipeline.Observables;
     using Topology;
     using Transports;
 
@@ -54,9 +57,10 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
             ReceiveEndpointLoggingExtensions.SetLog(Log);
         }
 
-        protected virtual IReceiveEndpointTopology CreateReceiveTopology()
+        protected virtual ReceiveEndpointContext CreateReceiveTopology()
         {
-            return new WebJobMessageReceiverEndpointTopology(_endpointConfiguration, Log, _binder, _cancellationToken);
+            return new WebJobMessageReceiverEndpointContext(_endpointConfiguration, Log, _binder, _cancellationToken, new ReceiveObservable(),
+                new ReceiveTransportObservable());
         }
 
         public IBrokeredMessageReceiver Build()

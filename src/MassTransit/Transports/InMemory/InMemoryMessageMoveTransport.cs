@@ -32,11 +32,7 @@ namespace MassTransit.Transports.InMemory
         {
             var messageId = GetMessageId(context);
 
-            byte[] body;
-            using (var bodyStream = context.GetBody())
-            {
-                body = await GetMessageBody(bodyStream).ConfigureAwait(false);
-            }
+            byte[] body = context.GetBody();
 
             var messageType = "Unknown";
             if (context.TryGetPayload(out InMemoryTransportMessage receivedMessage))

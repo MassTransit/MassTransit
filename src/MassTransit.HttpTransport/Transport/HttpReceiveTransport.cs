@@ -14,6 +14,7 @@ namespace MassTransit.HttpTransport.Transport
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
     using MassTransit.Pipeline.Observables;
@@ -29,13 +30,13 @@ namespace MassTransit.HttpTransport.Transport
         readonly IPipe<HttpHostContext> _hostPipe;
         readonly ReceiveObservable _receiveObservable;
         readonly ReceiveTransportObservable _receiveTransportObservable;
-        readonly IHttpReceiveEndpointTopology _topology;
+        readonly HttpReceiveEndpointContext _context;
 
-        public HttpReceiveTransport(IHttpHost host, IHttpReceiveEndpointTopology topology, ReceiveObservable receiveObservable,
+        public HttpReceiveTransport(IHttpHost host, HttpReceiveEndpointContext context, ReceiveObservable receiveObservable,
             ReceiveTransportObservable receiveTransportObservable, IPipe<HttpHostContext> hostPipe)
         {
             _host = host;
-            _topology = topology;
+            _context = context;
             _receiveObservable = receiveObservable;
             _receiveTransportObservable = receiveTransportObservable;
             _hostPipe = hostPipe;
@@ -67,12 +68,12 @@ namespace MassTransit.HttpTransport.Transport
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _topology.ConnectPublishObserver(observer);
+            return _context.ConnectPublishObserver(observer);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _topology.ConnectSendObserver(observer);
+            return _context.ConnectSendObserver(observer);
         }
 
 

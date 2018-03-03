@@ -38,14 +38,14 @@ namespace MassTransit.HttpTransport.Transport
         readonly ILog _log = Logger.Get<HttpConsumer>();
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly IHttpReceiveEndpointTopology _topology;
+        readonly HttpReceiveEndpointContext _context;
         readonly IDeliveryTracker _tracker;
 
-        public HttpConsumer(IReceiveObserver receiveObserver, HttpHostSettings settings, IPipe<ReceiveContext> receivePipe, IHttpReceiveEndpointTopology topology)
+        public HttpConsumer(IReceiveObserver receiveObserver, HttpHostSettings settings, IPipe<ReceiveContext> receivePipe, HttpReceiveEndpointContext context)
         {
             _receiveObserver = receiveObserver;
             _receivePipe = receivePipe;
-            _topology = topology;
+            _context = context;
 
             _tracker = new DeliveryTracker(OnDeliveryComplete);
             _inputAddress = settings.GetInputAddress();
@@ -73,7 +73,7 @@ namespace MassTransit.HttpTransport.Transport
 
             using (_tracker.BeginDelivery())
             {
-                var responseEndpointTopology = _topology.CreateResponseEndpointTopology(httpContext);
+                var responseEndpointTopology = _context.CreateResponseEndpointContext(httpContext);
 
                 var context = new HttpReceiveContext(httpContext, false, _receiveObserver, responseEndpointTopology);
 
@@ -121,7 +121,7 @@ namespace MassTransit.HttpTransport.Transport
         protected override async Task StopAgent(StopContext context)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping consumer: {0}", _topology.InputAddress);
+                _log.DebugFormat("Stopping consumer: {0}", _context.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
@@ -139,7 +139,7 @@ namespace MassTransit.HttpTransport.Transport
                 catch (OperationCanceledException)
                 {
                     if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _topology.InputAddress);
+                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _context.InputAddress);
                 }
             }
         }

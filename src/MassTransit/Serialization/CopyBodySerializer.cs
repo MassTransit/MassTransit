@@ -34,7 +34,7 @@ namespace MassTransit.Serialization
 
         void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
         {
-            using (var bodyStream = _context.GetBody())
+            using (var bodyStream = _context.GetBodyStream())
             {
                 bodyStream.CopyTo(stream);
             }

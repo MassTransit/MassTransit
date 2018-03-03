@@ -54,15 +54,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                 properties = modelContext.Model.CreateBasicProperties();
                 properties.Headers = new Dictionary<string, object>();
 
-                using (var memoryStream = new MemoryStream())
-                {
-                    using (var bodyStream = context.GetBody())
-                    {
-                        await bodyStream.CopyToAsync(memoryStream).ConfigureAwait(false);
-                    }
-
-                    body = memoryStream.ToArray();
-                }
+                body = context.GetBody();
             }
 
             SendHeaders headers = new RabbitMqSendHeaders(properties);

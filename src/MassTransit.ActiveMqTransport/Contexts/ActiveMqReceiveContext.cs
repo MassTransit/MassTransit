@@ -25,14 +25,14 @@ namespace MassTransit.ActiveMqTransport.Contexts
         BaseReceiveContext,
         ActiveMqMessageContext
     {
-        readonly IActiveMqReceiveEndpointTopology _topology;
+        readonly ActiveMqReceiveEndpointContext _context;
         readonly IMessage _transportMessage;
 
-        public ActiveMqReceiveContext(Uri inputAddress, IMessage transportMessage, IReceiveObserver observer, IActiveMqReceiveEndpointTopology topology)
-            : base(inputAddress, transportMessage.NMSRedelivered, observer, topology)
+        public ActiveMqReceiveContext(Uri inputAddress, IMessage transportMessage, IReceiveObserver observer, ActiveMqReceiveEndpointContext context)
+            : base(inputAddress, transportMessage.NMSRedelivered, observer, context)
         {
             _transportMessage = transportMessage;
-            _topology = topology;
+            _context = context;
         }
 
         protected override IHeaderProvider HeaderProvider => new ActiveMqHeaderProvider(_transportMessage.Properties);
@@ -45,15 +45,26 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
         protected override ISendEndpointProvider GetSendEndpointProvider()
         {
-            return _topology.CreateSendEndpointProvider(this);
+            return _context.CreateSendEndpointProvider(this);
         }
 
         protected override IPublishEndpointProvider GetPublishEndpointProvider()
         {
-            return _topology.CreatePublishEndpointProvider(this);
+            return _context.CreatePublishEndpointProvider(this);
         }
 
-        protected override Stream GetBodyStream()
+        public override byte[] GetBody()
+        {
+            if (_transportMessage is ITextMessage textMessage)
+                return Encoding.UTF8.GetBytes(textMessage.Text);
+
+            if (_transportMessage is IBytesMessage bytesMessage)
+                return bytesMessage.Content;
+
+            throw new ActiveMqTransportException($"The message type is not supported: {TypeMetadataCache.GetShortName(_transportMessage.GetType())}");
+        }
+
+        public override Stream GetBodyStream()
         {
             if (_transportMessage is ITextMessage textMessage)
                 return new MemoryStream(Encoding.UTF8.GetBytes(textMessage.Text));

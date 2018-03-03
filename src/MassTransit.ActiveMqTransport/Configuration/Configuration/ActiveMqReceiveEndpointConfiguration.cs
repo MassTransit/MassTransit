@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using Builders;
+    using Context;
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Builders;
@@ -10,7 +11,6 @@
     using MassTransit.Configuration;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
-    using MassTransit.Topology;
     using Pipeline;
     using Topology;
     using Topology.Settings;
@@ -75,9 +75,9 @@
         public override Uri InputAddress => _inputAddress.Value;
 
         public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            IReceiveEndpointTopology topology)
+            ReceiveEndpointContext receiveEndpointContext)
         {
-            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, topology);
+            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, receiveEndpointContext);
 
             _hostConfiguration.Host.AddReceiveEndpoint(endpointName, receiveEndpoint);
 
@@ -94,9 +94,9 @@
 
             var receivePipe = CreateReceivePipe();
 
-            var topology = builder.CreateReceiveEndpointTopology();
+            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
-            _sessionConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, topology.BrokerTopology));
+            _sessionConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
 
             IAgent consumerAgent;
             if (_hostConfiguration.BusConfiguration.DeployTopologyOnly)
@@ -112,7 +112,7 @@
 
                 var errorTransport = CreateErrorTransport();
 
-                var consumerFilter = new ActiveMqConsumerFilter(receivePipe, builder.ReceiveObservers, builder.TransportObservers, topology,
+                var consumerFilter = new ActiveMqConsumerFilter(receivePipe, builder.ReceiveObservers, builder.TransportObservers, receiveEndpointContext,
                     deadLetterTransport, errorTransport);
 
                 _sessionConfigurator.UseFilter(consumerFilter);
@@ -124,12 +124,12 @@
 
             _connectionConfigurator.UseFilter(sessionFilter);
 
-            var transport = new ActiveMqReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), topology,
+            var transport = new ActiveMqReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext,
                 builder.ReceiveObservers, builder.TransportObservers);
 
             transport.Add(consumerAgent);
 
-            return CreateReceiveEndpoint(_settings.EntityName ?? NewId.Next().ToString(), transport, receivePipe, topology);
+            return CreateReceiveEndpoint(_settings.EntityName ?? NewId.Next().ToString(), transport, receivePipe, receiveEndpointContext);
         }
 
         IActiveMqHost IActiveMqReceiveEndpointConfigurator.Host => Host;

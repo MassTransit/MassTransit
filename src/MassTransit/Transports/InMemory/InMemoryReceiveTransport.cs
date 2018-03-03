@@ -15,6 +15,7 @@ namespace MassTransit.Transports.InMemory
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using Events;
     using Fabric;
@@ -38,7 +39,7 @@ namespace MassTransit.Transports.InMemory
         readonly Uri _inputAddress;
         readonly IInMemoryQueue _queue;
         readonly ReceiveObservable _receiveObservable;
-        readonly IReceiveEndpointTopology _topology;
+        readonly ReceiveEndpointContext _topology;
         readonly IDeliveryTracker _tracker;
         readonly ReceiveTransportObservable _transportObservable;
         readonly IPipe<ReceiveContext> _receivePipe;
@@ -46,7 +47,7 @@ namespace MassTransit.Transports.InMemory
         readonly IDeadLetterTransport _deadLetterTransport;
 
         public InMemoryReceiveTransport(Uri inputAddress, IInMemoryQueue queue, IPipe<ReceiveContext> receivePipe, IInMemoryExchange errorExchange,
-            IInMemoryExchange deadLetterExchange, IReceiveEndpointTopology topology)
+            IInMemoryExchange deadLetterExchange, ReceiveEndpointContext topology)
         {
             _inputAddress = inputAddress;
             _queue = queue;

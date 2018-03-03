@@ -49,7 +49,7 @@ namespace MassTransit.Serialization
             try
             {
                 MessageEnvelope envelope;
-                using (Stream body = receiveContext.GetBody())
+                using (Stream body = receiveContext.GetBodyStream())
                 using (var jsonReader = new BsonDataReader(body))
                 {
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);

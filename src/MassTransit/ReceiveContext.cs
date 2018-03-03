@@ -69,7 +69,13 @@ namespace MassTransit
         /// Returns the message body as a stream that can be deserialized. The stream
         /// must be disposed by the caller, a reference is not retained
         /// </summary>
-        Stream GetBody();
+        Stream GetBodyStream();
+
+        /// <summary>
+        /// Returns the body as a byte[]
+        /// </summary>
+        /// <returns></returns>
+        byte[] GetBody();
 
         /// <summary>
         /// Notify that a message has been consumed from the received context
@@ -116,8 +122,8 @@ namespace MassTransit
         IPublishEndpointProvider PublishEndpointProvider { get; }
 
         /// <summary>
-        /// The topology of the receive endpoint
+        /// The publish topology of the underlying transport
         /// </summary>
-        IReceiveTopology Topology { get; }
+        IPublishTopology PublishTopology { get; }
     }
 }

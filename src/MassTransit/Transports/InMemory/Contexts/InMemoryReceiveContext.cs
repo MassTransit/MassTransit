@@ -25,8 +25,8 @@ namespace MassTransit.Transports.InMemory.Contexts
         readonly byte[] _body;
         readonly InMemoryTransportMessage _message;
 
-        public InMemoryReceiveContext(Uri inputAddress, InMemoryTransportMessage message, IReceiveObserver observer, IReceiveEndpointTopology topology)
-            : base(inputAddress, message.DeliveryCount > 0, observer, topology)
+        public InMemoryReceiveContext(Uri inputAddress, InMemoryTransportMessage message, IReceiveObserver observer, ReceiveEndpointContext receiveEndpointContext)
+            : base(inputAddress, message.DeliveryCount > 0, observer, receiveEndpointContext)
         {
             _body = message.Body;
             _message = message;
@@ -36,7 +36,12 @@ namespace MassTransit.Transports.InMemory.Contexts
 
         protected override IHeaderProvider HeaderProvider => new DictionaryHeaderProvider(_message.Headers);
 
-        protected override Stream GetBodyStream()
+        public override byte[] GetBody()
+        {
+            return _body;
+        }
+
+        public override Stream GetBodyStream()
         {
             return new MemoryStream(_body, 0, _body.Length, false);
         }

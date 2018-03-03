@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Internals.Extensions;
     using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
@@ -48,7 +47,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
-        readonly IRabbitMqReceiveEndpointTopology _topology;
+        readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
         readonly IDeliveryTracker _tracker;
 
         string _consumerTag;
@@ -60,17 +59,17 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// <param name="inputAddress">The input address for messages received by the consumer</param>
         /// <param name="receivePipe">The receive pipe to dispatch messages</param>
         /// <param name="receiveObserver">The observer for receive events</param>
-        /// <param name="topology">The topology</param>
+        /// <param name="receiveEndpointContext">The topology</param>
         /// <param name="deadLetterTransport"></param>
         /// <param name="errorTransport"></param>
-        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IRabbitMqReceiveEndpointTopology topology,
-            IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver,
+            RabbitMqReceiveEndpointContext receiveEndpointContext, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
         {
             _model = model;
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
-            _topology = topology;
+            _receiveEndpointContext = receiveEndpointContext;
             _deadLetterTransport = deadLetterTransport;
             _errorTransport = errorTransport;
 
@@ -90,7 +89,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         void IBasicConsumer.HandleBasicConsumeOk(string consumerTag)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("ConsumerOk: {0} - {1}", _topology.InputAddress, consumerTag);
+                _log.DebugFormat("ConsumerOk: {0} - {1}", _receiveEndpointContext.InputAddress, consumerTag);
 
             _consumerTag = consumerTag;
 
@@ -105,7 +104,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         void IBasicConsumer.HandleBasicCancelOk(string consumerTag)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Consumer Cancel Ok: {0} - {1}", _topology.InputAddress, consumerTag);
+                _log.DebugFormat("Consumer Cancel Ok: {0} - {1}", _receiveEndpointContext.InputAddress, consumerTag);
 
             _deliveryComplete.TrySetResult(true);
             SetCompleted(TaskUtil.Completed);
@@ -154,7 +153,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             using (var delivery = _tracker.BeginDelivery())
             {
                 var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
-                    _receiveObserver, _topology);
+                    _receiveObserver, _receiveEndpointContext);
 
                 context.GetOrAddPayload(() => _errorTransport);
                 context.GetOrAddPayload(() => _deadLetterTransport);
@@ -216,7 +215,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             if (IsStopping)
             {
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer shutdown completed: {0}", _topology.InputAddress);
+                    _log.DebugFormat("Consumer shutdown completed: {0}", _receiveEndpointContext.InputAddress);
 
                 _deliveryComplete.TrySetResult(true);
             }
@@ -240,7 +239,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         protected override async Task StopSupervisor(StopSupervisorContext context)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping consumer: {0}", _topology.InputAddress);
+                _log.DebugFormat("Stopping consumer: {0}", _receiveEndpointContext.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
@@ -260,7 +259,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 catch (OperationCanceledException)
                 {
                     if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _topology.InputAddress);
+                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _receiveEndpointContext.InputAddress);
                 }
             }
 
@@ -271,7 +270,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             catch (OperationCanceledException)
             {
                 if (_log.IsWarnEnabled)
-                    _log.WarnFormat("Exception canceling the consumer: {0}", _topology.InputAddress);
+                    _log.WarnFormat("Exception canceling the consumer: {0}", _receiveEndpointContext.InputAddress);
             }
         }
     }

@@ -14,9 +14,8 @@ namespace MassTransit.HttpTransport.Contexts
 {
     using System.IO;
     using System.Net.Http;
-    using Context;
     using Hosting;
-    using MassTransit.Topology;
+    using MassTransit.Context;
 
 
     public class HttpClientReceiveContext :
@@ -24,9 +23,10 @@ namespace MassTransit.HttpTransport.Contexts
     {
         readonly HttpResponseMessage _responseMessage;
         readonly Stream _responseStream;
+        byte[] _body;
 
         public HttpClientReceiveContext(HttpResponseMessage responseMessage, Stream responseStream, bool redelivered, IReceiveObserver receiveObserver,
-            IReceiveEndpointTopology topology)
+            ReceiveEndpointContext topology)
             : base(responseMessage.RequestMessage.RequestUri, redelivered, receiveObserver, topology)
         {
             _responseMessage = responseMessage;
@@ -39,9 +39,30 @@ namespace MassTransit.HttpTransport.Contexts
 
         public HttpResponseMessage ResponseMessage => _responseMessage;
 
-        protected override Stream GetBodyStream()
+        public override byte[] GetBody()
         {
-            return _responseStream;
+            if (_body == null)
+                GetBodyAsByteArray();
+
+            return _body;
+        }
+
+        public override Stream GetBodyStream()
+        {
+            if (_body == null)
+                GetBodyAsByteArray();
+
+            return new MemoryStream(_body, false);
+        }
+
+        void GetBodyAsByteArray()
+        {
+            using (var ms = new MemoryStream())
+            {
+                _responseStream.CopyTo(ms);
+
+                _body = ms.ToArray();
+            }
         }
     }
 }

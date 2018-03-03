@@ -436,7 +436,7 @@ namespace MassTransit
         {
             var namespaceContext = context.ReceiveContext.GetPayload<NamespaceContext>();
 
-            if (context.ReceiveContext.Topology.Publish.GetMessageTopology<T>().TryGetPublishAddress(namespaceContext.ServiceAddress, out var publishAddress))
+            if (context.ReceiveContext.PublishTopology.GetMessageTopology<T>().TryGetPublishAddress(namespaceContext.ServiceAddress, out var publishAddress))
             {
                 return publishAddress;
             }

@@ -16,6 +16,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Contexts;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -37,16 +38,16 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         readonly IErrorTransport _errorTransport;
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
-        readonly IActiveMqReceiveEndpointTopology _topology;
+        readonly ActiveMqReceiveEndpointContext _context;
         readonly IReceiveTransportObserver _transportObserver;
 
         public ActiveMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver,
-            IActiveMqReceiveEndpointTopology topology, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+            ActiveMqReceiveEndpointContext context, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _transportObserver = transportObserver;
-            _topology = topology;
+            _context = context;
             _deadLetterTransport = deadLetterTransport;
             _errorTransport = errorTransport;
         }
@@ -65,7 +66,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             consumers.Add(CreateConsumer(context, inputAddress, receiveSettings.EntityName, receiveSettings.Selector));
 
-            consumers.AddRange(_topology.BrokerTopology.Consumers.Select(x => CreateConsumer(context, inputAddress, x.Destination.EntityName, x.Selector)));
+            consumers.AddRange(_context.BrokerTopology.Consumers.Select(x => CreateConsumer(context, inputAddress, x.Destination.EntityName, x.Selector)));
 
             var actualConsumers = await Task.WhenAll(consumers).ConfigureAwait(false);
 
@@ -95,7 +96,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var messageConsumer = await context.CreateMessageConsumer(queue, selector, false).ConfigureAwait(false);
 
-            var consumer = new ActiveMqBasicConsumer(context, messageConsumer, inputAddress, _receivePipe, _receiveObserver, _topology, _deadLetterTransport,
+            var consumer = new ActiveMqBasicConsumer(context, messageConsumer, inputAddress, _receivePipe, _receiveObserver, _context, _deadLetterTransport,
                 _errorTransport);
 
             await consumer.Ready.ConfigureAwait(false);

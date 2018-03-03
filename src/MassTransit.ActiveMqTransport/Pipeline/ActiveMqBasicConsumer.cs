@@ -21,7 +21,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Internals.Extensions;
     using Logging;
     using Topology;
     using Transports;
@@ -46,10 +45,8 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
-        readonly IActiveMqReceiveEndpointTopology _topology;
+        readonly ActiveMqReceiveEndpointContext _context;
         readonly IDeliveryTracker _tracker;
-
-        string _consumerTag;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -59,11 +56,11 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         /// <param name="inputAddress">The input address for messages received by the consumer</param>
         /// <param name="receivePipe">The receive pipe to dispatch messages</param>
         /// <param name="receiveObserver">The observer for receive events</param>
-        /// <param name="topology">The topology</param>
+        /// <param name="context">The topology</param>
         /// <param name="deadLetterTransport"></param>
         /// <param name="errorTransport"></param>
         public ActiveMqBasicConsumer(SessionContext session, IMessageConsumer messageConsumer, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
-            IReceiveObserver receiveObserver, IActiveMqReceiveEndpointTopology topology,
+            IReceiveObserver receiveObserver, ActiveMqReceiveEndpointContext context,
             IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
         {
             _session = session;
@@ -71,7 +68,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
-            _topology = topology;
+            _context = context;
             _deadLetterTransport = deadLetterTransport;
             _errorTransport = errorTransport;
 
@@ -98,7 +95,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             using (var delivery = _tracker.BeginDelivery())
             {
-                var context = new ActiveMqReceiveContext(_inputAddress, message, _receiveObserver, _topology);
+                var context = new ActiveMqReceiveContext(_inputAddress, message, _receiveObserver, _context);
 
                 context.GetOrAddPayload(() => _errorTransport);
                 context.GetOrAddPayload(() => _deadLetterTransport);
@@ -154,7 +151,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             if (IsStopping)
             {
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer shutdown completed: {0}", _topology.InputAddress);
+                    _log.DebugFormat("Consumer shutdown completed: {0}", _context.InputAddress);
 
                 _deliveryComplete.TrySetResult(true);
             }
@@ -176,7 +173,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         protected override async Task StopSupervisor(StopSupervisorContext context)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping consumer: {0}", _topology.InputAddress);
+                _log.DebugFormat("Stopping consumer: {0}", _context.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
@@ -196,7 +193,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 catch (OperationCanceledException)
                 {
                     if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _topology.InputAddress);
+                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _context.InputAddress);
                 }
             }
 
@@ -208,7 +205,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             catch (OperationCanceledException)
             {
                 if (_log.IsWarnEnabled)
-                    _log.WarnFormat("Exception canceling the consumer: {0}", _topology.InputAddress);
+                    _log.WarnFormat("Exception canceling the consumer: {0}", _context.InputAddress);
             }
         }
     }

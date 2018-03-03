@@ -42,14 +42,14 @@ namespace MassTransit.Context
         readonly IReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
-        readonly IReceiveEndpointTopology _topology;
+        readonly ReceiveEndpointContext _topology;
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, IReceiveEndpointTopology topology)
-            : this(inputAddress, redelivered, receiveObserver, new CancellationTokenSource(), topology)
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, ReceiveEndpointContext receiveEndpointContext)
+            : this(inputAddress, redelivered, receiveObserver, new CancellationTokenSource(), receiveEndpointContext)
         {
         }
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, CancellationTokenSource source, IReceiveEndpointTopology topology)
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, CancellationTokenSource source, ReceiveEndpointContext topology)
             : base(new PayloadCache(), source.Token)
         {
             _receiveTimer = Stopwatch.StartNew();
@@ -81,7 +81,7 @@ namespace MassTransit.Context
         public bool IsFaulted { get; private set; }
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
-        public IReceiveTopology Topology => _topology;
+        public IPublishTopology PublishTopology => _topology.Publish;
 
         public Task CompleteTask
         {
@@ -153,10 +153,8 @@ namespace MassTransit.Context
             return _receiveObserver.ReceiveFault(this, exception);
         }
 
-        public virtual Stream GetBody()
-        {
-            return GetBodyStream();
-        }
+        public abstract byte[] GetBody();
+        public abstract Stream GetBodyStream();
 
         public TimeSpan ElapsedTime => _receiveTimer.Elapsed;
         public Uri InputAddress { get; }
@@ -171,8 +169,6 @@ namespace MassTransit.Context
         {
             return _topology.PublishEndpointProvider;
         }
-
-        protected abstract Stream GetBodyStream();
 
         protected virtual ContentType GetContentType()
         {

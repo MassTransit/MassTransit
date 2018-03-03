@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using Context;
     using GreenPipes;
     using Pipeline;
     using Topology;
@@ -32,6 +33,6 @@ namespace MassTransit
         ISendObserverConnector,
         IProbeSite
     {
-        IReceiveEndpointTopology Topology { get; }
+        ReceiveEndpointContext Topology { get; }
     }
 }

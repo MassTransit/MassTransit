@@ -24,18 +24,19 @@ namespace MassTransit.RabbitMqTransport.Contexts
         RabbitMqBasicConsumeContext
     {
         readonly byte[] _body;
-        readonly IRabbitMqReceiveEndpointTopology _topology;
+        readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
 
-        public RabbitMqReceiveContext(Uri inputAddress, string exchange, string routingKey, string consumerTag, ulong deliveryTag, byte[] body, bool redelivered,
-            IBasicProperties properties, IReceiveObserver observer, IRabbitMqReceiveEndpointTopology topology)
-            : base(inputAddress, redelivered, observer, topology)
+        public RabbitMqReceiveContext(Uri inputAddress, string exchange, string routingKey, string consumerTag, ulong deliveryTag, byte[] body,
+            bool redelivered,
+            IBasicProperties properties, IReceiveObserver observer, RabbitMqReceiveEndpointContext receiveEndpointContext)
+            : base(inputAddress, redelivered, observer, receiveEndpointContext)
         {
             Exchange = exchange;
             RoutingKey = routingKey;
             ConsumerTag = consumerTag;
             DeliveryTag = deliveryTag;
             _body = body;
-            _topology = topology;
+            _receiveEndpointContext = receiveEndpointContext;
             Properties = properties;
         }
 
@@ -51,15 +52,20 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         protected override ISendEndpointProvider GetSendEndpointProvider()
         {
-            return _topology.CreateSendEndpointProvider(this);
+            return _receiveEndpointContext.CreateSendEndpointProvider(this);
         }
 
         protected override IPublishEndpointProvider GetPublishEndpointProvider()
         {
-            return _topology.CreatePublishEndpointProvider(this);
+            return _receiveEndpointContext.CreatePublishEndpointProvider(this);
         }
 
-        protected override Stream GetBodyStream()
+        public override byte[] GetBody()
+        {
+            return _body;
+        }
+
+        public override Stream GetBodyStream()
         {
             return new MemoryStream(_body, false);
         }

@@ -13,6 +13,7 @@
 namespace MassTransit.HttpTransport.Transport
 {
     using System.Threading.Tasks;
+    using Contexts;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -31,21 +32,18 @@ namespace MassTransit.HttpTransport.Transport
         readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
-        readonly IHttpReceiveEndpointTopology _topology;
+        readonly HttpReceiveEndpointContext _context;
         readonly IReceiveTransportObserver _transportObserver;
 
-        public HttpConsumerFilter(IPipe<ReceiveContext> receivePipe,
-            IReceiveObserver receiveObserver,
-            IReceiveTransportObserver transportObserver,
-            HttpHostSettings hostSettings,
-            ReceiveSettings receiveSettings, IHttpReceiveEndpointTopology topology)
+        public HttpConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver,
+            HttpHostSettings hostSettings, ReceiveSettings receiveSettings, HttpReceiveEndpointContext context)
         {
             _receivePipe = receivePipe;
             _receiveObserver = receiveObserver;
             _transportObserver = transportObserver;
             _hostSettings = hostSettings;
             _receiveSettings = receiveSettings;
-            _topology = topology;
+            _context = context;
         }
 
         public void Probe(ProbeContext context)
@@ -57,7 +55,7 @@ namespace MassTransit.HttpTransport.Transport
         {
             var inputAddress = context.HostSettings.GetInputAddress();
 
-            var consumer = new HttpConsumer(_receiveObserver, _hostSettings, _receivePipe, _topology);
+            var consumer = new HttpConsumer(_receiveObserver, _hostSettings, _receivePipe, _context);
 
             context.RegisterEndpointHandler(_receiveSettings.PathMatch, consumer);
 

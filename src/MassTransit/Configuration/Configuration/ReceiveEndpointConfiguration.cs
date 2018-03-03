@@ -17,6 +17,7 @@ namespace MassTransit.Configuration
     using System.Linq;
     using System.Net.Mime;
     using ConsumeConfigurators;
+    using Context;
     using GreenPipes;
     using Pipeline;
     using Saga;
@@ -156,7 +157,7 @@ namespace MassTransit.Configuration
         }
 
         public abstract IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            IReceiveEndpointTopology topology);
+            ReceiveEndpointContext receiveEndpointContext);
 
         public abstract IReceiveEndpoint Build();
 

@@ -42,16 +42,7 @@ namespace MassTransit.Steward.Core.Consumers
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("DispatchMessage: {0} at {1}", context.Message.DispatchId, context.Message.CreateTime);
 
-            string body;
-            using (var ms = new MemoryStream())
-            {
-                using (Stream bodyStream = context.ReceiveContext.GetBody())
-                {
-                    await bodyStream.CopyToAsync(ms);
-                }
-
-                body = Encoding.UTF8.GetString(ms.ToArray());
-            }
+            string body = Encoding.UTF8.GetString(context.ReceiveContext.GetBody());
 
             if (string.Compare(context.ReceiveContext.ContentType.MediaType, JsonMessageSerializer.JsonContentType.MediaType,
                 StringComparison.OrdinalIgnoreCase)

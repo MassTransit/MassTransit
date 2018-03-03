@@ -14,6 +14,7 @@ namespace MassTransit.Transports.InMemory.Configuration
 {
     using System;
     using Builders;
+    using Context;
     using MassTransit.Configuration;
     using MassTransit.Topology;
     using Pipeline;
@@ -41,9 +42,9 @@ namespace MassTransit.Transports.InMemory.Configuration
         }
 
         public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            IReceiveEndpointTopology topology)
+            ReceiveEndpointContext receiveEndpointContext)
         {
-            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, topology);
+            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, receiveEndpointContext);
 
             _hostConfiguration.Host.AddReceiveEndpoint(endpointName, receiveEndpoint);
 
@@ -66,11 +67,11 @@ namespace MassTransit.Transports.InMemory.Configuration
 
             var receivePipe = CreateReceivePipe();
 
-            var topology = builder.CreateReceiveEndpointTopology();
+            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
-            var transport = _hostConfiguration.Host.GetReceiveTransport(_queueName, receivePipe, topology);
+            var transport = _hostConfiguration.Host.GetReceiveTransport(_queueName, receivePipe, receiveEndpointContext);
 
-            return CreateReceiveEndpoint(_queueName, transport, receivePipe, topology);
+            return CreateReceiveEndpoint(_queueName, transport, receivePipe, receiveEndpointContext);
         }
     }
 }
