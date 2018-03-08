@@ -65,8 +65,7 @@ namespace MassTransit.ConsumerSpecifications
 
         public IConsumerMessageSpecification<TConsumer, T> GetMessageSpecification<T>() where T : class
         {
-            IConsumerMessageSpecification<TConsumer> specification;
-            if (!_messageTypes.TryGetValue(typeof(T), out specification))
+            if (!_messageTypes.TryGetValue(typeof(T), out IConsumerMessageSpecification<TConsumer> specification))
             {
                 throw new ArgumentException($"MessageType {TypeMetadataCache<T>.ShortName} is not consumed by {TypeMetadataCache<TConsumer>.ShortName}");
             }
