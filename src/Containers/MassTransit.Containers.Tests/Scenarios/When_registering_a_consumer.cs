@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Scenarios
 {
+    using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using Shouldly;
@@ -68,6 +69,26 @@ namespace MassTransit.Containers.Tests.Scenarios
 
             lastConsumer.Dependency.SomethingDone
                 .ShouldBe(true); //Dependency was disposed before consumer executed");
+        }
+    }
+
+    [TestFixture]
+    public abstract class When_registering_a_consumer_with_scope_filter :
+        Given_a_service_bus_instance
+    {
+        [Test]
+        public async Task Should_receive_initialized_scoped_dependency()
+        {
+            const string name = "Joe";
+
+            await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
+
+            ConsumerForScopedFilter consumer = await ConsumerForScopedFilter.Current;
+            consumer.ShouldNotBe(null);
+
+            Guid identifier = consumer.Dependency.Id;
+            identifier
+                .ShouldNotBeNull($"{nameof(identifier)} should be specified.");
         }
     }
 }

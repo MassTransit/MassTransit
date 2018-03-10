@@ -13,7 +13,11 @@
 namespace MassTransit.Containers.Tests
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using ExtensionsDependencyInjectionIntegration;
+    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Saga;
     using Scenarios;
@@ -75,6 +79,84 @@ namespace MassTransit.Containers.Tests
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {
             return _services.GetService<ISagaRepository<T>>();
+        }
+    }
+
+
+    public interface IIdentifier
+    {
+        Guid Id { get; set; }
+    }
+
+
+    public class Identifier : IIdentifier
+    {
+        public Guid Id { get; set; }
+    }
+
+
+    public class CorrelationIdentityFilter<T> : IFilter<T> where T : class, ConsumeContext
+    {
+        public void Probe(ProbeContext context)
+        {
+        }
+
+        public async Task Send(T context, IPipe<T> next)
+        {
+            if (context.TryGetPayload(out IServiceScope scope))
+            {
+                var identifier = scope.ServiceProvider.GetRequiredService<IIdentifier>();
+                identifier.Id = Guid.NewGuid();
+            }
+
+            await next.Send(context);
+        }
+    }
+
+    public class CorrelationIdentitySpecification<T> : IPipeSpecification<T> where T : class, ConsumeContext
+    {
+        public void Apply(IPipeBuilder<T> builder)
+        {
+            builder.AddFilter(new CorrelationIdentityFilter<T>());
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return Enumerable.Empty<ValidationResult>();
+        }
+    }
+
+
+    public class ExtensionsDependencyInjectionIntegration_ScopedConsumer :
+        When_registering_a_consumer_with_scope_filter
+    {
+        readonly IServiceProvider _services;
+
+        public ExtensionsDependencyInjectionIntegration_ScopedConsumer()
+        {
+            var collection = new ServiceCollection();
+
+            collection.AddScoped<ConsumerForScopedFilter>();
+
+            collection.AddScoped<IIdentifier, Identifier>();
+
+            collection.AddMassTransit(x =>
+            {
+                x.AddConsumer<ConsumerForScopedFilter>();
+            });
+
+            _services = collection.BuildServiceProvider();
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseScope(_services);
+            configurator.AddPipeSpecification(new CorrelationIdentitySpecification<ConsumeContext>());
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.LoadFrom(_services);
         }
     }
 }
