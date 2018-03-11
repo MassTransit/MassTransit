@@ -11,13 +11,13 @@
     <PackageReference Include="Iesi.Collections" Version="4.0.1.4000" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.Azure.DocumentDB" Version="1.19.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
+    <PackageReference Include="microsoft.net.test.sdk" Version="15.6.1" />
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
     <PackageReference Include="NHibernate" Version="4.1.1.4000" />
     <PackageReference Include="NUnit" Version="3.9.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
-    <PackageReference Include="Quartz" Version="3.0.3" />
+    <PackageReference Include="Quartz" Version="3.0.4" />
     <PackageReference Include="Shouldly" Version="3.0.0" />
     <Reference Include="System" />
     <Reference Include="System.Core" />

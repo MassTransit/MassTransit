@@ -16,9 +16,9 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AutofacIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.6.2"/>
-    <PackageReference Include="GreenPipes" Version="2.0.0"/>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.1"/>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+    <PackageReference Include="Autofac" Version="4.6.1" />
+    <PackageReference Include="GreenPipes" Version="2.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

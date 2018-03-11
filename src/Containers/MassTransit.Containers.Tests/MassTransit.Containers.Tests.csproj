@@ -4,12 +4,12 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.6.2" />
+    <PackageReference Include="Autofac" Version="4.6.1" />
     <PackageReference Include="Automatonymous" Version="4.0.1" />
     <PackageReference Include="Castle.Core" Version="4.2.0" />
     <PackageReference Include="Castle.Windsor" Version="4.1.0" />
     <PackageReference Include="GreenPipes" Version="2.0.0" />
-    <PackageReference Include="microsoft.net.test.sdk" Version="15.0.0" />
+    <PackageReference Include="microsoft.net.test.sdk" Version="15.6.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
     <PackageReference Include="NUnit" Version="3.9.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />

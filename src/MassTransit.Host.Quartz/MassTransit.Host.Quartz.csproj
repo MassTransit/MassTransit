@@ -16,11 +16,11 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.6.2" />
+    <PackageReference Include="Autofac" Version="4.6.1" />
     <PackageReference Include="GreenPipes" Version="2.0.0" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
-    <PackageReference Include="Quartz" Version="3.0.3" />
+    <PackageReference Include="Quartz" Version="3.0.4" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.104.0" />
     <ProjectReference Include="..\MassTransit.Host\MassTransit.Host.csproj" />
     <ProjectReference Include="..\MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj" />
