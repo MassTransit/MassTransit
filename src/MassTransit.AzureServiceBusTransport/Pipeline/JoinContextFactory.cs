@@ -47,9 +47,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
             Task<TContext> context = CreateJoinContext(asyncContext, supervisor.Stopped);
 
-            IPipeContextAgent<TContext> contextHandle = supervisor.AddContext(context);
-
-            return contextHandle;
+            return asyncContext;
         }
 
         IActivePipeContextAgent<TContext> IPipeContextFactory<TContext>.CreateActiveContext(ISupervisor supervisor, PipeContextHandle<TContext> context,

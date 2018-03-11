@@ -41,22 +41,20 @@ namespace MassTransit.RabbitMqTransport.Integration
 
             var context = CreateModel(asyncContext, supervisor.Stopped);
 
-            IPipeContextAgent<ModelContext> contextHandle = supervisor.AddContext(context);
-
             void HandleShutdown(object sender, ShutdownEventArgs args)
             {
                 if (args.Initiator != ShutdownInitiator.Application)
-                    contextHandle.Stop(args.ReplyText);
+                    asyncContext.Stop(args.ReplyText);
             }
 
             context.ContinueWith(task =>
             {
                 task.Result.Model.ModelShutdown += HandleShutdown;
 
-                contextHandle.Completed.ContinueWith(_ => task.Result.Model.ModelShutdown -= HandleShutdown);
+                asyncContext.Completed.ContinueWith(_ => task.Result.Model.ModelShutdown -= HandleShutdown);
             }, TaskContinuationOptions.OnlyOnRanToCompletion);
 
-            return contextHandle;
+            return asyncContext;
         }
 
         IActivePipeContextAgent<ModelContext> IPipeContextFactory<ModelContext>.CreateActiveContext(ISupervisor supervisor,

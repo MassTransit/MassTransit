@@ -38,9 +38,9 @@ namespace MassTransit.ActiveMqTransport.Transport
         {
             IAsyncPipeContextAgent<SessionContext> asyncContext = supervisor.AddAsyncContext<SessionContext>();
 
-            Task<SessionContext> context = CreateSession(asyncContext, supervisor.Stopped);
+            CreateSession(asyncContext, supervisor.Stopped);
 
-            return supervisor.AddContext(context);
+            return asyncContext;
         }
 
         IActivePipeContextAgent<SessionContext> IPipeContextFactory<SessionContext>.CreateActiveContext(ISupervisor supervisor,
@@ -56,7 +56,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             return new SharedSessionContext(sessionContext, cancellationToken);
         }
 
-        async Task<SessionContext> CreateSession(IAsyncPipeContextAgent<SessionContext> asyncContext, CancellationToken cancellationToken)
+        void CreateSession(IAsyncPipeContextAgent<SessionContext> asyncContext, CancellationToken cancellationToken)
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
@@ -84,8 +84,6 @@ namespace MassTransit.ActiveMqTransport.Transport
             });
 
             _connectionCache.Send(connectionPipe, cancellationToken).ConfigureAwait(false);
-
-            return await asyncContext.Context.ConfigureAwait(false);
         }
     }
 }
