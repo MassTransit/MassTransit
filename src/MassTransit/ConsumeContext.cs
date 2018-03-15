@@ -19,6 +19,7 @@ namespace MassTransit
 
 
     public interface ConsumeContext :
+        PipeContext,
         MessageContext,
         IPublishEndpoint,
         ISendEndpointProvider

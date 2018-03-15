@@ -14,9 +14,11 @@ namespace MassTransit.Turnout
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
     public interface JobContext :
+        PipeContext,
         MessageContext,
         ISendEndpointProvider,
         IPublishEndpoint

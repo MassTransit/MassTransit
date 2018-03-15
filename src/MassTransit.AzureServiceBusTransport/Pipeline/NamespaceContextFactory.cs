@@ -38,7 +38,8 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         IPipeContextAgent<NamespaceContext> IPipeContextFactory<NamespaceContext>.CreateContext(ISupervisor supervisor)
         {
-            Task<NamespaceContext> context = CreateNamespaceContext(supervisor);
+            var context = Task.Factory.StartNew(() => CreateNamespaceContext(supervisor), supervisor.Stopping, TaskCreationOptions.None, TaskScheduler.Default)
+                .Unwrap();
 
             IPipeContextAgent<NamespaceContext> contextHandle = supervisor.AddContext(context);
 

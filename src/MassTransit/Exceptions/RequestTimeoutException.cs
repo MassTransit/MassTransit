@@ -18,7 +18,7 @@ namespace MassTransit
 
     [Serializable]
     public class RequestTimeoutException :
-        MassTransitException
+        RequestException
     {
         public RequestTimeoutException()
         {

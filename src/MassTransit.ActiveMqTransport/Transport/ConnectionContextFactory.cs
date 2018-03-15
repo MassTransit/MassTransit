@@ -44,7 +44,8 @@ namespace MassTransit.ActiveMqTransport.Transport
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
-            Task<ConnectionContext> context = CreateConnection(supervisor);
+            var context = Task.Factory.StartNew(() => CreateConnection(supervisor), supervisor.Stopping, TaskCreationOptions.None, TaskScheduler.Default)
+                .Unwrap();
 
             IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 

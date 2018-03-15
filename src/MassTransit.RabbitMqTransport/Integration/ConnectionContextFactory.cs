@@ -47,7 +47,8 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
-            var context = CreateConnection(supervisor);
+            var context = Task.Factory.StartNew(() => CreateConnection(supervisor), supervisor.Stopping, TaskCreationOptions.None, TaskScheduler.Default)
+                .Unwrap();
 
             IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 
