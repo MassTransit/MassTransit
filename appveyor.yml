@@ -19,7 +19,7 @@ nuget:
 install:
   # Install DocumentDB Emulator
   - ps: Start-FileDownload 'https://aka.ms/cosmosdb-emulator' -FileName 'C:\CosmosDB.Emulator.msi'
-  - msiexec.exe /i C:\CosmosDB.Emulator.msi /quiet /qn /log install.log
+  - cmd: cmd /c start /wait msiexec.exe /i C:\CosmosDB.Emulator.msi /quiet /qn /norestart /log install.log
   - ps: >-
       & "${env:ProgramFiles}\Azure Cosmos DB Emulator\CosmosDB.Emulator.exe" /NoExplorer /NoUI /NoFirewall
 build_script:
