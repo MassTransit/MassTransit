@@ -127,13 +127,57 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     await busHandle.StopAsync();
                 }
 
-//                }))
-//                {
-//                    var queueAddress = new Uri(hostAddress, "input_queue");
-//                    ISendEndpoint endpoint = bus.GetSendEndpoint(queueAddress);
-//
-//                    await endpoint.Send(new A());
-//                }
+                //                }))
+                //                {
+                //                    var queueAddress = new Uri(hostAddress, "input_queue");
+                //                    ISendEndpoint endpoint = bus.GetSendEndpoint(queueAddress);
+                //
+                //                    await endpoint.Send(new A());
+                //                }
+            }
+
+            [Test]
+            public async Task Should_not_fail_when_slash_is_missing()
+            {
+                ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
+
+                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
+                    "Test.Namespace");
+
+               // serviceUri = new Uri(serviceUri.ToString().Trim('/'));
+
+                IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                {
+                    IServiceBusHost host = x.Host(serviceUri, h =>
+                    {
+                        h.SharedAccessSignature(s =>
+                        {
+                            s.KeyName = settings.KeyName;
+                            s.SharedAccessKey = settings.SharedAccessKey;
+                            s.TokenTimeToLive = settings.TokenTimeToLive;
+                            s.TokenScope = settings.TokenScope;
+                        });
+                    });
+
+                    x.ReceiveEndpoint(host, "test-queue", e =>
+                    {
+                        // Add a message handler and configure the pipeline to retry the handler
+                        // if an exception is thrown
+                        e.Handler<A>(Handle, h =>
+                        {
+                            h.UseRetry(r => r.Interval(5, 100));
+                        });
+                    });
+                });
+
+                BusHandle busHandle = await bus.StartAsync();
+                try
+                {
+                }
+                finally
+                {
+                    await busHandle.StopAsync();
+                }
             }
 
             public Configuring_a_bus_instance()

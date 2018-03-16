@@ -12,8 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
 {
+    using GreenPipes;
+
+
     public interface ITopicConfigurator :
-        IMessageEntityConfigurator
+        IMessageEntityConfigurator,
+        ISpecification
     {
         /// <summary>
         /// If messages should be filtered before publishing

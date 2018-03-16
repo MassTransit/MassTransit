@@ -13,6 +13,8 @@
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurators
 {
     using System;
+    using System.Collections.Generic;
+    using GreenPipes;
     using Microsoft.ServiceBus.Messaging;
 
 
@@ -31,6 +33,15 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
         }
 
         public bool? EnableFilteringMessagesBeforePublishing { get; set; }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (!ServiceBusEntityNameValidator.Validator.IsValidEntityName(Path))
+                yield return this.Failure("Path", $"must be a valid topic path: {Path}");
+
+            if (AutoDeleteOnIdle.HasValue && AutoDeleteOnIdle != TimeSpan.Zero && AutoDeleteOnIdle < TimeSpan.FromMinutes(5))
+                yield return this.Failure("AutoDeleteOnIdle", "must be zero, or >= 5:00");
+        }
 
         public TopicDescription GetTopicDescription()
         {

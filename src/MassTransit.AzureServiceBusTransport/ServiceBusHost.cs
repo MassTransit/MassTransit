@@ -21,7 +21,6 @@ namespace MassTransit.AzureServiceBusTransport
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
     using MassTransit.Pipeline;
     using MassTransit.Topology;
     using Microsoft.ServiceBus;
@@ -38,15 +37,15 @@ namespace MassTransit.AzureServiceBusTransport
         IServiceBusHost,
         IBusHostControl
     {
-        static readonly ILog _log = Logger.Get<ServiceBusHost>();
+        readonly IServiceBusReceiveEndpointFactory _receiveEndpointFactory;
         readonly IReceiveEndpointCollection _receiveEndpoints;
-        readonly IServiceBusBusConfiguration _busConfiguration;
+        readonly IServiceBusSubscriptionEndpointFactory _subscriptionEndpointFactory;
 
         public ServiceBusHost(ServiceBusHostSettings settings, IServiceBusHostTopology hostTopology, IServiceBusBusConfiguration busConfiguration)
         {
             Settings = settings;
             Topology = hostTopology;
-            _busConfiguration = busConfiguration;
+            var busConfiguration1 = busConfiguration;
 
             _receiveEndpoints = new ReceiveEndpointCollection();
 
@@ -66,6 +65,8 @@ namespace MassTransit.AzureServiceBusTransport
                 x.Interval(5, TimeSpan.FromSeconds(10));
             });
 
+            BasePath = settings.ServiceUri.AbsolutePath.Trim('/');
+
             var serviceBusRetryPolicy = CreateRetryPolicy(settings);
 
             MessagingFactoryCache = new MessagingFactoryCache(settings.ServiceUri, CreateMessagingFactorySettings(settings), serviceBusRetryPolicy);
@@ -75,19 +76,11 @@ namespace MassTransit.AzureServiceBusTransport
                 ? MessagingFactoryCache
                 : new MessagingFactoryCache(settings.ServiceUri, CreateMessagingFactorySettings(settings, true), serviceBusRetryPolicy);
 
-            ReceiveEndpointFactory = new ServiceBusReceiveEndpointFactory(_busConfiguration, this);
-            SubscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(_busConfiguration, this);
+            _receiveEndpointFactory = new ServiceBusReceiveEndpointFactory(busConfiguration1, this);
+            _subscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(busConfiguration1, this);
         }
-
-        public IServiceBusReceiveEndpointFactory ReceiveEndpointFactory {  get; }
-        public IServiceBusSubscriptionEndpointFactory SubscriptionEndpointFactory {  get; }
 
         public IReceiveEndpointCollection ReceiveEndpoints => _receiveEndpoints;
-
-        public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
-        {
-            _receiveEndpoints.Add(endpointName, receiveEndpoint);
-        }
 
         public async Task<HostHandle> Start()
         {
@@ -103,6 +96,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public IRetryPolicy RetryPolicy { get; }
         public ServiceBusHostSettings Settings { get; }
+        public string BasePath { get; }
 
         public IServiceBusHostTopology Topology { get; }
 
@@ -136,24 +130,23 @@ namespace MassTransit.AzureServiceBusTransport
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure = null)
         {
-            if (ReceiveEndpointFactory == null)
+            if (_receiveEndpointFactory == null)
                 throw new ConfigurationException("The receive endpoint factory was not specified");
 
-            ReceiveEndpointFactory.CreateReceiveEndpoint(queueName, configure);
+            _receiveEndpointFactory.CreateReceiveEndpoint(queueName, configure);
 
             return _receiveEndpoints.Start(queueName);
         }
 
-        public HostReceiveEndpointHandle ConnectSubscriptionEndpoint<T>(string subscriptionName,
-            Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
+        public HostReceiveEndpointHandle ConnectSubscriptionEndpoint<T>(string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
             where T : class
         {
-            if (SubscriptionEndpointFactory == null)
+            if (_subscriptionEndpointFactory == null)
                 throw new ConfigurationException("The subscription endpoint factory was not specified");
 
             var settings = new SubscriptionEndpointSettings(Topology.Publish<T>().TopicDescription, subscriptionName);
 
-            SubscriptionEndpointFactory.CreateSubscriptionEndpoint(settings, configure);
+            _subscriptionEndpointFactory.CreateSubscriptionEndpoint(settings, configure);
 
             return _receiveEndpoints.Start(settings.Path);
         }
@@ -161,12 +154,12 @@ namespace MassTransit.AzureServiceBusTransport
         public HostReceiveEndpointHandle ConnectSubscriptionEndpoint(string subscriptionName, string topicName,
             Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
         {
-            if (SubscriptionEndpointFactory == null)
+            if (_subscriptionEndpointFactory == null)
                 throw new ConfigurationException("The subscription endpoint factory was not specified");
 
             var settings = new SubscriptionEndpointSettings(topicName, subscriptionName);
 
-            SubscriptionEndpointFactory.CreateSubscriptionEndpoint(settings, configure);
+            _subscriptionEndpointFactory.CreateSubscriptionEndpoint(settings, configure);
 
             return _receiveEndpoints.Start(settings.Path);
         }
@@ -203,11 +196,16 @@ namespace MassTransit.AzureServiceBusTransport
             return _receiveEndpoints.ConnectSendObserver(observer);
         }
 
+        public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
+        {
+            _receiveEndpoints.Add(endpointName, receiveEndpoint);
+        }
+
         protected override async Task StopSupervisor(StopSupervisorContext context)
         {
             await _receiveEndpoints.Stop(context).ConfigureAwait(false);
-            
-            await  base.StopSupervisor(context).ConfigureAwait(false);
+
+            await base.StopSupervisor(context).ConfigureAwait(false);
         }
 
         static RetryPolicy CreateRetryPolicy(ServiceBusHostSettings settings)

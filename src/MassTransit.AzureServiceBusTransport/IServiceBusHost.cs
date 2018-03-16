@@ -27,6 +27,11 @@ namespace MassTransit.AzureServiceBusTransport
         ServiceBusHostSettings Settings { get; }
 
         /// <summary>
+        /// The base path used for queues on this host
+        /// </summary>
+        string BasePath { get; }
+
+        /// <summary>
         /// Returns the topology of the service bus host
         /// </summary>
         new IServiceBusHostTopology Topology { get; }
@@ -74,8 +79,7 @@ namespace MassTransit.AzureServiceBusTransport
         /// <param name="subscriptionName">The subscription name for this endpoint</param>
         /// <param name="configure">Configuration callback for the endpoint</param>
         /// <returns></returns>
-        HostReceiveEndpointHandle ConnectSubscriptionEndpoint<T>(string subscriptionName,
-            Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
+        HostReceiveEndpointHandle ConnectSubscriptionEndpoint<T>(string subscriptionName,Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
             where T : class;
 
         /// <summary>

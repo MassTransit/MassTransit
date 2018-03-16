@@ -9,7 +9,6 @@
     using GreenPipes;
     using GreenPipes.Agents;
     using MassTransit.Pipeline;
-    using MassTransit.Topology;
     using Pipeline;
     using Settings;
     using Topology.Configuration;
@@ -41,8 +40,12 @@
             _endpointConfiguration = endpointConfiguration;
             _settings = settings;
 
+            _settings.QueueConfigurator.BasePath = hostConfiguration.Host.BasePath;
+
             HostAddress = hostConfiguration.Host.Address;
             InputAddress = new Uri(hostConfiguration.Host.Address, $"{settings.Name}");
+
+            SubscribeMessageTopics = true;
         }
 
         public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,

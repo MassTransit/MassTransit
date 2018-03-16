@@ -39,10 +39,10 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
         public IEnumerable<ValidationResult> Validate()
         {
             if (!ServiceBusEntityNameValidator.Validator.IsValidEntityName(TopicPath))
-                yield return this.Failure("TopicPath", "must be a valid topic name");
+                yield return this.Failure("TopicPath", $"must be a valid topic path: {TopicPath}");
 
-            if (!ServiceBusEntityNameValidator.Validator.IsValidEntityName(SubscriptionName))
-                yield return this.Failure("SubscriptionName", "must be a valid entity name");
+            if (!ServiceBusSubscriptionNameValidator.Validator.IsValidEntityName(SubscriptionName))
+                yield return this.Failure("SubscriptionName", $"must be a valid subscription name: {SubscriptionName}");
 
             if (AutoDeleteOnIdle.HasValue && AutoDeleteOnIdle != TimeSpan.Zero && AutoDeleteOnIdle < TimeSpan.FromMinutes(5))
                 yield return this.Failure("AutoDeleteOnIdle", "must be zero, or >= 5:00");

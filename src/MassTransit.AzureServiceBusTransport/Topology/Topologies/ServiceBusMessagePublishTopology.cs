@@ -57,15 +57,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
         public TopicDescription TopicDescription => _topicDescription.Value;
 
-        public BrokerTopology GetBrokerTopology()
-        {
-            var builder = new PublishEndpointBrokerTopologyBuilder();
-
-            builder.Topic = builder.CreateTopic(_topicDescription.Value);
-
-            return builder.BuildBrokerTopology();
-        }
-
         public SendSettings GetSendSettings()
         {
             var description = GetTopicDescription();
