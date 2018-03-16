@@ -23,8 +23,7 @@ namespace MassTransit.Transports.InMemory.Builders
     {
         readonly ConfigurationReceiveEndpointSpecification _busEndpointSpecification;
 
-        public InMemoryBusBuilder(IInMemoryBusConfiguration configuration, IInMemoryReceiveEndpointConfiguration busEndpointConfiguration,
-            BusObservable busObservable)
+        public InMemoryBusBuilder(IInMemoryBusConfiguration configuration, IInMemoryReceiveEndpointConfiguration busEndpointConfiguration, BusObservable busObservable)
             : base(configuration, busEndpointConfiguration, busObservable)
         {
             _busEndpointSpecification = new ConfigurationReceiveEndpointSpecification(busEndpointConfiguration);

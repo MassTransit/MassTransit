@@ -24,6 +24,7 @@ namespace MassTransit.Builders
         readonly IConsumePipe _consumePipe;
         public readonly ReceiveObservable ReceiveObservers;
         public readonly ReceiveTransportObservable TransportObservers;
+        public readonly ReceiveEndpointObservable EndpointObservers;
 
         protected ReceiveEndpointBuilder(IReceiveEndpointConfiguration configuration)
         {
@@ -33,6 +34,7 @@ namespace MassTransit.Builders
 
             ReceiveObservers = new ReceiveObservable();
             TransportObservers = new ReceiveTransportObservable();
+            EndpointObservers = new ReceiveEndpointObservable();
         }
 
         public IConsumePipe ConsumePipe => _consumePipe;
@@ -50,6 +52,11 @@ namespace MassTransit.Builders
             where T : class
         {
             return _consumePipe.ConnectConsumeMessageObserver(observer);
+        }
+
+        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return EndpointObservers.Connect(observer);
         }
     }
 }

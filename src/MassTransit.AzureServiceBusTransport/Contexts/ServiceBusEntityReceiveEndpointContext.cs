@@ -31,8 +31,8 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
 
         public ServiceBusEntityReceiveEndpointContext(IServiceBusEntityEndpointConfiguration configuration, BrokerTopology brokerTopology,
-            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers)
-            : base(configuration, receiveObservers, transportObservers)
+            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
+            : base(configuration, receiveObservers, transportObservers, endpointObservers)
         {
             _configuration = configuration;
 

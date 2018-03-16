@@ -24,6 +24,7 @@ namespace MassTransit
     /// </summary>
     /// <typeparam name="TRequest">The request message type</typeparam>
     /// <typeparam name="TResponse">The response message type</typeparam>
+    [Obsolete("Use the new ClientFactory syntax to create requests")]
     public class PublishRequestClient<TRequest, TResponse> :
         RequestClient<TRequest, TResponse>
         where TRequest : class

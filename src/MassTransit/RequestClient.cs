@@ -20,6 +20,7 @@ namespace MassTransit
     using Pipeline;
 
 
+    [Obsolete]
     public abstract class RequestClient<TRequest, TResponse> :
         IRequestClient<TRequest, TResponse>
         where TRequest : class

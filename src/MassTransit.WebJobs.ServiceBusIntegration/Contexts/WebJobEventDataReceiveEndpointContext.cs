@@ -33,8 +33,9 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Contexts
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
 
         public WebJobEventDataReceiveEndpointContext(IReceiveEndpointConfiguration configuration, ILog log, IBinder binder,
-            CancellationToken cancellationToken, ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers)
-            : base(configuration, receiveObservers, transportObservers)
+            CancellationToken cancellationToken, ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers,
+            ReceiveEndpointObservable endpointObservers)
+            : base(configuration, receiveObservers, transportObservers, endpointObservers)
         {
             _binder = binder;
             _cancellationToken = cancellationToken;

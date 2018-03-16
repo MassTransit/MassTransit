@@ -59,7 +59,6 @@ namespace MassTransit.Initializers
             foreach (var inspector in inspectors)
                 inspector.Apply(builder, convention);
 
-
             IMessageInitializer<TMessage, TInput> messageInitializer = builder.Build();
 
             return messageInitializer;
@@ -84,7 +83,7 @@ namespace MassTransit.Initializers
             return Cached.InitializerCache.GetInitializer<TInput>();
         }
 
-        public static Task<TMessage> Initialize<T>(T input, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task<TMessage> Initialize<T>(T input, CancellationToken cancellationToken = default)
             where T : class
         {
             return Cached.InitializerCache.GetInitializer<T>().Initialize(input, cancellationToken);

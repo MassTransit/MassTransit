@@ -13,11 +13,13 @@
 namespace MassTransit
 {
     using Pipeline;
+    using Transports;
 
 
     public interface IReceiveEndpointBuilder :
         IConsumePipeConnector,
-        IConsumeMessageObserverConnector
+        IConsumeMessageObserverConnector,
+        IReceiveEndpointObserverConnector
     {
         IConsumePipe ConsumePipe { get; }
 

@@ -13,8 +13,8 @@
 namespace MassTransit.HttpTransport.Topology
 {
     using System;
+    using Context;
     using GreenPipes;
-    using MassTransit.Context;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
     using MassTransit.Topology;
@@ -26,10 +26,10 @@ namespace MassTransit.HttpTransport.Topology
         ReceiveEndpointContext
     {
         readonly HttpContext _httpContext;
+        readonly ReceiveEndpointContext _receiveEndpointContext;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ISendPipe _sendPipe;
         readonly IMessageSerializer _serializer;
-        readonly ReceiveEndpointContext _receiveEndpointContext;
 
         public HttpResponseReceiveEndpointContext(ReceiveEndpointContext receiveEndpointContext, HttpContext httpContext, ISendPipe sendPipe,
             IMessageSerializer serializer)
@@ -45,6 +45,7 @@ namespace MassTransit.HttpTransport.Topology
         Uri ReceiveEndpointContext.InputAddress => _receiveEndpointContext.InputAddress;
         ReceiveObservable ReceiveEndpointContext.ReceiveObservers => _receiveEndpointContext.ReceiveObservers;
         ReceiveTransportObservable ReceiveEndpointContext.TransportObservers => _receiveEndpointContext.TransportObservers;
+        public ReceiveEndpointObservable EndpointObservers => _receiveEndpointContext.EndpointObservers;
 
         ISendTopology ReceiveEndpointContext.Send => _receiveEndpointContext.Send;
         IPublishTopology ReceiveEndpointContext.Publish => _receiveEndpointContext.Publish;
@@ -64,7 +65,8 @@ namespace MassTransit.HttpTransport.Topology
 
         ISendEndpointProvider CreateSendEndpointProvider()
         {
-            return new HttpResponseSendEndpointProvider(_httpContext, _receiveEndpointContext.InputAddress, _sendPipe, _serializer, _receiveEndpointContext.SendEndpointProvider);
+            return new HttpResponseSendEndpointProvider(_httpContext, _receiveEndpointContext.InputAddress, _sendPipe, _serializer,
+                _receiveEndpointContext.SendEndpointProvider);
         }
     }
 }

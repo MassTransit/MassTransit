@@ -33,7 +33,8 @@ namespace MassTransit.Context
         protected readonly PublishObservable PublishObservers;
         protected readonly SendObservable SendObservers;
 
-        protected BaseReceiveEndpointContext(IReceiveEndpointConfiguration configuration, ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers)
+        protected BaseReceiveEndpointContext(IReceiveEndpointConfiguration configuration, ReceiveObservable receiveObservers,
+            ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
         {
             InputAddress = configuration.InputAddress;
             HostAddress = configuration.HostAddress;
@@ -43,6 +44,7 @@ namespace MassTransit.Context
 
             SendObservers = new SendObservable();
             PublishObservers = new PublishObservable();
+            EndpointObservers = endpointObservers;
 
             ReceiveObservers = receiveObservers;
             TransportObservers = transportObservers;
@@ -60,8 +62,10 @@ namespace MassTransit.Context
         protected IMessageSerializer Serializer => _serializer.Value;
 
         protected Uri HostAddress { get; }
+
         public ReceiveObservable ReceiveObservers { get; }
         public ReceiveTransportObservable TransportObservers { get; }
+        public ReceiveEndpointObservable EndpointObservers { get; }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {

@@ -35,8 +35,8 @@ namespace MassTransit.HttpTransport.Contexts
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
 
         public HttpTransportReceiveEndpointContext(IHttpReceiveEndpointConfiguration configuration, ReceiveObservable receiveObservers,
-            ReceiveTransportObservable transportObservers)
-            : base(configuration, receiveObservers, transportObservers)
+            ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
+            : base(configuration, receiveObservers, transportObservers, endpointObservers)
         {
             _configuration = configuration;
 

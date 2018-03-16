@@ -16,7 +16,6 @@ namespace MassTransit.Transports.InMemory.Configuration
     using Builders;
     using Context;
     using MassTransit.Configuration;
-    using MassTransit.Topology;
     using Pipeline;
 
 

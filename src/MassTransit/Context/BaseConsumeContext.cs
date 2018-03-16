@@ -16,6 +16,7 @@ namespace MassTransit.Context
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Converters;
     using Events;
     using GreenPipes;
     using Pipeline.Pipes;

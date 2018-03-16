@@ -27,7 +27,7 @@ namespace MassTransit.Serialization
         {
             _consumeContext = consumeContext;
 
-            _pipe = default(IPipe<SendContext<T>>);
+            _pipe = default;
         }
 
         public ConsumeSendContextPipe(ConsumeContext consumeContext, IPipe<SendContext<T>> pipe)
@@ -52,7 +52,7 @@ namespace MassTransit.Serialization
             if (_consumeContext != null)
                 context.TransferConsumeContextHeaders(_consumeContext);
 
-            if (_pipe != null)
+            if (_pipe.IsNotEmpty())
                 await _pipe.Send(context).ConfigureAwait(false);
         }
     }

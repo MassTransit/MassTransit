@@ -23,6 +23,16 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
+    public class SmartEndpointTestFixture :
+        InMemoryTestFixture
+    {
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+        }
+    }
+
+
+    [TestFixture]
     public class Using_the_new_request_client_syntax :
         InMemoryTestFixture
     {
@@ -31,9 +41,9 @@ namespace MassTransit.Tests
         {
             var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
 
-            Result<Value> result = await client.GetResult<Value>(new GetValue());
+            Response<Value> response = await client.GetResponse<Value>(new GetValue());
 
-            Assert.That(result.RequestId.HasValue, Is.True);
+            Assert.That(response.RequestId.HasValue, Is.True);
         }
 
         [Test]
@@ -41,16 +51,16 @@ namespace MassTransit.Tests
         {
             var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
 
-            Result<Value> result;
-            using (RequestHandle<GetValue> request = client.Send(new GetValue()))
+            Response<Value> response;
+            using (RequestHandle<GetValue> request = client.Create(new GetValue()))
             {
                 request.UseExecute(context => context.Headers.Set("Frank", "Mary"));
 
-                result = await request.GetResult<Value>();
+                response = await request.GetResponse<Value>();
             }
 
-            Assert.That(result.RequestId.HasValue, Is.True);
-            Assert.That(result.Headers.TryGetHeader("Frank", out object value), Is.True);
+            Assert.That(response.RequestId.HasValue, Is.True);
+            Assert.That(response.Headers.TryGetHeader("Frank", out object value), Is.True);
             Assert.That(value, Is.EqualTo("Mary"));
         }
 
@@ -59,7 +69,7 @@ namespace MassTransit.Tests
         {
             var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
 
-            Assert.That(async () => await client.GetResult<Value>(new GetValue {BlowUp = true}), Throws.TypeOf<RequestFaultException>());
+            Assert.That(async () => await client.GetResponse<Value>(new GetValue {BlowUp = true}), Throws.TypeOf<RequestFaultException>());
         }
 
         [Test]
@@ -69,7 +79,7 @@ namespace MassTransit.Tests
 
             try
             {
-                await client.GetResult<Value>(new GetValue {BlowUp = true});
+                await client.GetResponse<Value>(new GetValue {BlowUp = true});
 
                 Assert.Fail("Should have thrown");
             }
@@ -87,9 +97,9 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_throw_a_timeout_exception()
         {
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress, MassTransit.Timeout.After(s: 1));
+            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress, MassTransit.RequestTimeout.After(s: 1));
 
-            Assert.That(async () => await client.GetResult<Value>(new GetValue {Discard = true}), Throws.TypeOf<RequestTimeoutException>());
+            Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}), Throws.TypeOf<RequestTimeoutException>());
         }
 
         [Test]
@@ -97,7 +107,7 @@ namespace MassTransit.Tests
         {
             var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress, 100);
 
-            Assert.That(async () => await client.GetResult<Value>(new GetValue {Discard = true}), Throws.TypeOf<RequestTimeoutException>());
+            Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}), Throws.TypeOf<RequestTimeoutException>());
         }
 
         [Test]
@@ -107,7 +117,7 @@ namespace MassTransit.Tests
 
             using (var source = new CancellationTokenSource(100))
             {
-                Assert.That(async () => await client.GetResult<Value>(new GetValue {Discard = true}, source.Token), Throws.TypeOf<TaskCanceledException>());
+                Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}, source.Token), Throws.TypeOf<TaskCanceledException>());
             }
         }
 
@@ -120,7 +130,7 @@ namespace MassTransit.Tests
             {
                 source.Cancel();
 
-                Assert.That(async () => await client.GetResult<Value>(new GetValue {Discard = true}, source.Token), Throws.TypeOf<TaskCanceledException>());
+                Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}, source.Token), Throws.TypeOf<TaskCanceledException>());
             }
         }
 
@@ -152,6 +162,69 @@ namespace MassTransit.Tests
 
         public class Value
         {
+        }
+    }
+
+
+    [TestFixture]
+    public class Using_the_request_with_multiple_result_types :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_match_the_first_result()
+        {
+            var client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
+
+            var (registered, existing) = await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember());
+
+            Assert.That(registered.Status, Is.EqualTo(TaskStatus.RanToCompletion));
+            Assert.That(existing.Status, Is.EqualTo(TaskStatus.Canceled));
+        }
+
+        [Test]
+        public async Task Should_match_the_second_result()
+        {
+            var client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
+
+            var (registered, existing) = await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember() {MemberId = "Johnny5"});
+
+            Assert.That(registered.Status, Is.EqualTo(TaskStatus.Canceled));
+            Assert.That(existing.Status, Is.EqualTo(TaskStatus.RanToCompletion));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            Handler<RegisterMember>(configurator, context =>
+            {
+                if (context.Message.MemberId == "Johnny5")
+                    return context.RespondAsync<ExistingMemberFound>(new
+                    {
+                        context.Message.MemberId,
+                    });
+
+                return context.RespondAsync<MemberRegistered>(new
+                {
+                    context.Message.MemberId,
+                });
+            });
+        }
+
+
+        public class RegisterMember
+        {
+            public string MemberId { get; set; }
+        }
+
+
+        public class MemberRegistered
+        {
+            public string MemberId { get; set; }
+        }
+
+
+        public class ExistingMemberFound
+        {
+            public string MemberId { get; set; }
         }
     }
 }

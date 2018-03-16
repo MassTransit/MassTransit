@@ -31,8 +31,8 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Contexts
         readonly IPublishTopology _publishTopology;
 
         public WebJobMessageReceiverEndpointContext(IReceiveEndpointConfiguration configuration, ILog log, IBinder binder, CancellationToken cancellationToken,
-            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers)
-            : base(configuration, receiveObservers, transportObservers)
+            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
+            : base(configuration, receiveObservers, transportObservers, endpointObservers)
         {
             _binder = binder;
             _cancellationToken = cancellationToken;

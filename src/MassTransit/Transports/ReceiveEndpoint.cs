@@ -19,8 +19,6 @@ namespace MassTransit.Transports
     using Events;
     using GreenPipes;
     using Pipeline;
-    using Pipeline.Observables;
-    using Topology;
 
 
     /// <summary>
@@ -31,22 +29,21 @@ namespace MassTransit.Transports
     public class ReceiveEndpoint :
         IReceiveEndpointControl
     {
-        public ReceiveEndpointContext Topology { get; }
-        readonly ReceiveEndpointObservable _observers;
         readonly IReceivePipe _receivePipe;
         readonly IReceiveTransport _receiveTransport;
         ConnectHandle _handle;
+        readonly ReceiveEndpointContext _context;
 
-        public ReceiveEndpoint(IReceiveTransport receiveTransport, IReceivePipe receivePipe, ReceiveEndpointContext topology)
+        public ReceiveEndpoint(IReceiveTransport receiveTransport, IReceivePipe receivePipe, ReceiveEndpointContext context)
         {
-            Topology = topology;
+            _context = context;
             _receiveTransport = receiveTransport;
             _receivePipe = receivePipe;
 
-            _observers = new ReceiveEndpointObservable();
-
-            _handle = receiveTransport.ConnectReceiveTransportObserver(new Observer(this, _observers));
+            _handle = receiveTransport.ConnectReceiveTransportObserver(new Observer(this, context.EndpointObservers));
         }
+
+        ReceiveEndpointContext IReceiveEndpoint.Context => _context;
 
         ReceiveEndpointHandle IReceiveEndpointControl.Start()
         {
@@ -69,7 +66,7 @@ namespace MassTransit.Transports
 
         ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
-            return _observers.Connect(observer);
+            return _context.EndpointObservers.Connect(observer);
         }
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
@@ -100,6 +97,22 @@ namespace MassTransit.Transports
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
             return _receiveTransport.ConnectSendObserver(observer);
+        }
+
+        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        {
+            return _context.SendEndpointProvider.GetSendEndpoint(address);
+        }
+
+        public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, ConsumeContext context = null)
+        {
+            return _context.PublishEndpointProvider.CreatePublishEndpoint(sourceAddress, context);
+        }
+
+        public Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
+            where T : class
+        {
+            return _context.PublishEndpointProvider.GetPublishSendEndpoint(message);
         }
 
 

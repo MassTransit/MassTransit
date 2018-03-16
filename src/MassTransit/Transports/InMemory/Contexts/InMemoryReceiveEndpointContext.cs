@@ -25,8 +25,8 @@ namespace MassTransit.Transports.InMemory.Contexts
         readonly ISendTransportProvider _sendTransportProvider;
 
         public InMemoryReceiveEndpointContext(IInMemoryReceiveEndpointConfiguration configuration, ISendTransportProvider sendTransportProvider,
-            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers)
-            : base(configuration, receiveObservers, transportObservers)
+            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
+            : base(configuration, receiveObservers, transportObservers, endpointObservers)
         {
             _sendTransportProvider = sendTransportProvider;
 

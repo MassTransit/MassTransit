@@ -58,10 +58,8 @@ namespace MassTransit.Util.Caching
 
             lock (_lock)
             {
-                INode<TValue> existingNode;
-                WeakReference<INode<TValue>> existingReference;
-                if (!_index.TryGetValue(key, out existingReference)
-                    || !existingReference.TryGetTarget(out existingNode)
+                if (!_index.TryGetValue(key, out WeakReference<INode<TValue>> existingReference)
+                    || !existingReference.TryGetTarget(out INode<TValue> existingNode)
                     || existingNode.Value == null)
                 {
                     _index[key] = new WeakReference<INode<TValue>>(node, false);
@@ -105,8 +103,7 @@ namespace MassTransit.Util.Caching
         {
             lock (_lock)
             {
-                INode<TValue> existingNode;
-                if (TryGetExistingNode(key, out existingNode))
+                if (TryGetExistingNode(key, out INode<TValue> existingNode))
                 {
                     if (existingNode.HasValue)
                     {
@@ -143,8 +140,7 @@ namespace MassTransit.Util.Caching
         {
             lock (_lock)
             {
-                INode<TValue> existingNode;
-                if (!TryGetExistingNode(key, out existingNode))
+                if (!TryGetExistingNode(key, out INode<TValue> existingNode))
                     return false;
 
                 var result = _index.Remove(key);
@@ -160,8 +156,7 @@ namespace MassTransit.Util.Caching
 
         bool TryGetExistingNode(TKey key, out INode<TValue> existingNode)
         {
-            WeakReference<INode<TValue>> existingReference;
-            if (_index.TryGetValue(key, out existingReference)
+            if (_index.TryGetValue(key, out WeakReference<INode<TValue>> existingReference)
                 && existingReference.TryGetTarget(out existingNode)
                 && existingNode.Value != null)
             {

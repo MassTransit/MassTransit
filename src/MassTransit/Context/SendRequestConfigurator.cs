@@ -24,6 +24,7 @@ namespace MassTransit.Context
     using Util;
 
 
+    [Obsolete]
     public class SendRequestConfigurator<TRequest> :
         IRequestConfigurator<TRequest>
         where TRequest : class

@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.InMemory.Configurators
 {
     using System;
-    using System.Linq;
     using Builders;
     using BusConfigurators;
     using Configuration;
@@ -30,6 +29,7 @@ namespace MassTransit.Transports.InMemory.Configurators
         readonly IInMemoryEndpointConfiguration _busEndpointConfiguration;
         readonly IInMemoryBusConfiguration _configuration;
         readonly InMemoryHost _inMemoryHost;
+        readonly IInMemoryHostConfiguration _inMemoryHostConfiguration;
 
         public InMemoryBusFactoryConfigurator(IInMemoryBusConfiguration configuration, IInMemoryEndpointConfiguration busEndpointConfiguration,
             Uri baseAddress = null)
@@ -43,9 +43,8 @@ namespace MassTransit.Transports.InMemory.Configurators
             var hostTopology = new InMemoryHostTopology(busEndpointConfiguration.Topology);
             var host = new InMemoryHost(configuration, TransportConcurrencyLimit, hostTopology, baseAddress ?? new Uri("loopback://localhost/"));
 
-            _configuration.CreateHostConfiguration(host);
-
             _inMemoryHost = host;
+            _inMemoryHostConfiguration = _configuration.CreateHostConfiguration(host);
         }
 
         public IBusControl CreateBus()
@@ -75,9 +74,7 @@ namespace MassTransit.Transports.InMemory.Configurators
 
         public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
-            var host = _configuration.Hosts.FirstOrDefault();
-
-            var configuration = host.CreateReceiveEndpointConfiguration(queueName);
+            var configuration = _inMemoryHostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
             configuration.ConnectConsumerConfigurationObserver(this);
             configuration.ConnectSagaConfigurationObserver(this);

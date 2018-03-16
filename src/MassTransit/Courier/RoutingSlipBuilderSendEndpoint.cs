@@ -16,6 +16,7 @@ namespace MassTransit.Courier
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Context.Converters;
     using Contracts;
     using GreenPipes;
     using MassTransit.Pipeline.Observables;

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,7 +32,7 @@ namespace MassTransit
         /// <param name="callback">Callback when the request is sent</param>
         /// <returns></returns>
         public static async Task<IRequestClient<TRequest, TResponse>> CreateRequestClient<TRequest, TResponse>(this IRabbitMqHost host,
-            ISendEndpointProvider sendEndpointProvider, Uri address, TimeSpan timeout, TimeSpan? ttl = default(TimeSpan?),
+            ISendEndpointProvider sendEndpointProvider, Uri address, TimeSpan timeout, TimeSpan? ttl = default,
             Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
@@ -46,6 +46,34 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory"/>.
+        /// </summary>
+        /// <param name="host">The host to connect the new receive endpoint</param>
+        /// <param name="timeout">The default request timeout</param>
+        /// <returns></returns>
+        public static Task<IClientFactory> CreateClientFactory(this IRabbitMqHost host, RequestTimeout timeout = default)
+        {
+            var receiveEndpointHandle = host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryQueueName("response"));
+
+            return receiveEndpointHandle.CreateClientFactory(timeout);
+        }
+
+        /// <summary>
+        /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory"/>.
+        /// </summary>
+        /// <param name="host">The host to connect the new receive endpoint</param>
+        /// <param name="destinationAddress">The request service address</param>
+        /// <param name="timeout">The default request timeout</param>
+        /// <returns></returns>
+        public static async Task<IRequestClient<T>> CreateRequestClient<T>(this IRabbitMqHost host, Uri destinationAddress, RequestTimeout timeout = default)
+            where T : class
+        {
+            var clientFactory = await CreateClientFactory(host, timeout).ConfigureAwait(false);
+
+            return clientFactory.CreateRequestClient<T>(destinationAddress);
+        }
+
+        /// <summary>
         /// Creates a request client factory which can be used to create a request client per message within a consume context.
         /// </summary>
         /// <typeparam name="TRequest"></typeparam>
@@ -56,8 +84,9 @@ namespace MassTransit
         /// <param name="timeToLive">The request time to live</param>
         /// <param name="callback">Customize the send context</param>
         /// <returns></returns>
+        [Obsolete("Use ConnectClientFactory or ConnectRequestClient instead")]
         public static async Task<IRequestClientFactory<TRequest, TResponse>> CreateRequestClientFactory<TRequest, TResponse>(this IRabbitMqHost host,
-            Uri address, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
+            Uri address, TimeSpan timeout, TimeSpan? timeToLive = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
@@ -65,9 +94,9 @@ namespace MassTransit
 
             var ready = await endpoint.Ready.ConfigureAwait(false);
 
-            return new MessageRequestClientFactory<TRequest, TResponse>(endpoint, ready.ReceiveEndpoint, ready.InputAddress, address, timeout, timeToLive, callback);
+            return new MessageRequestClientFactory<TRequest, TResponse>(endpoint, ready.ReceiveEndpoint, ready.InputAddress, address, timeout, timeToLive,
+                callback);
         }
-
 
         /// <summary>
         /// Creates a request client that uses the bus to publish a request.
@@ -80,8 +109,9 @@ namespace MassTransit
         /// <param name="host"></param>
         /// <param name="publishEndpoint"></param>
         /// <returns></returns>
+        [Obsolete("Use ConnectClientFactory or ConnectRequestClient instead")]
         public static async Task<IRequestClient<TRequest, TResponse>> CreatePublishRequestClient<TRequest, TResponse>(this IRabbitMqHost host,
-            IPublishEndpoint publishEndpoint, TimeSpan timeout, TimeSpan? ttl = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
+            IPublishEndpoint publishEndpoint, TimeSpan timeout, TimeSpan? ttl = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
@@ -91,6 +121,5 @@ namespace MassTransit
 
             return new PublishRequestClient<TRequest, TResponse>(publishEndpoint, ready.ReceiveEndpoint, ready.InputAddress, timeout, ttl, callback);
         }
-
     }
 }

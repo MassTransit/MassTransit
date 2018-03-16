@@ -23,6 +23,7 @@ namespace MassTransit.Context
     /// Handles the sending of a request to the endpoint specified
     /// </summary>
     /// <typeparam name="TRequest">The request type</typeparam>
+    [Obsolete]
     public class SendRequest<TRequest> :
         IPipe<SendContext<TRequest>>,
         Request<TRequest>

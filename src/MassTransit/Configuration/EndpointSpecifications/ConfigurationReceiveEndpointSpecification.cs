@@ -33,9 +33,9 @@ namespace MassTransit.EndpointSpecifications
             _configuration = configuration;
         }
 
-        public ISendEndpointProvider SendEndpointProvider => _receiveEndpoint?.Topology.SendEndpointProvider;
+        public ISendEndpointProvider SendEndpointProvider => _receiveEndpoint?.Context.SendEndpointProvider;
 
-        public IPublishEndpointProvider PublishEndpointProvider => _receiveEndpoint?.Topology.PublishEndpointProvider;
+        public IPublishEndpointProvider PublishEndpointProvider => _receiveEndpoint?.Context.PublishEndpointProvider;
 
         public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {

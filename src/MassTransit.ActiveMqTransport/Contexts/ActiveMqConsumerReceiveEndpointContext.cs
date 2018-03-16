@@ -32,8 +32,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
         readonly IActiveMqPublishTopology _publishTopology;
 
         public ActiveMqConsumerReceiveEndpointContext(IActiveMqReceiveEndpointConfiguration configuration, BrokerTopology brokerTopology,
-            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers)
-            : base(configuration, receiveObservers, transportObservers)
+            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
+            : base(configuration, receiveObservers, transportObservers, endpointObservers)
         {
             _configuration = configuration;
             BrokerTopology = brokerTopology;

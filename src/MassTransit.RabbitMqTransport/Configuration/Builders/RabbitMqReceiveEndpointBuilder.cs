@@ -48,7 +48,7 @@ namespace MassTransit.RabbitMqTransport.Builders
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            return new RabbitMqQueueReceiveEndpointContext(_configuration, brokerTopology, ReceiveObservers, TransportObservers);
+            return new RabbitMqQueueReceiveEndpointContext(_configuration, brokerTopology, ReceiveObservers, TransportObservers, EndpointObservers);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)

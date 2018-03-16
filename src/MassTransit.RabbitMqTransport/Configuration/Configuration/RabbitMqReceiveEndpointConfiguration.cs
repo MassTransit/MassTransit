@@ -25,7 +25,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Pipes;
-    using MassTransit.Topology;
     using Pipeline;
     using Topology;
     using Topology.Settings;

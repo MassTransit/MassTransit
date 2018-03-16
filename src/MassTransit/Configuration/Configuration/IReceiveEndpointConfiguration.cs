@@ -15,7 +15,6 @@ namespace MassTransit.Configuration
     using System;
     using Context;
     using Pipeline;
-    using Topology;
     using Transports;
 
 

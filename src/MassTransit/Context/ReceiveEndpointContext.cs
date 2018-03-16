@@ -33,6 +33,8 @@ namespace MassTransit.Context
 
         ReceiveTransportObservable TransportObservers { get; }
 
+        ReceiveEndpointObservable EndpointObservers { get; }
+
         ISendTopology Send { get; }
 
         IPublishTopology Publish { get; }

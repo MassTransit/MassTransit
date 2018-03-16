@@ -15,7 +15,6 @@ namespace MassTransit.Initializers
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Conventions;
     using Util;
 
 

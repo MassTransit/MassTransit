@@ -22,7 +22,6 @@ namespace MassTransit.Configuration
     using Pipeline;
     using Saga;
     using SagaConfigurators;
-    using Topology;
     using Transports;
 
 
