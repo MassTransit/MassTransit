@@ -9,24 +9,28 @@
     using System.Data.Entity.Core.Objects;
     using System.Data.Entity.Infrastructure;
 
-    public static class DbContextExtensions
+    public class EntityFrameworkMetadataHelper : IRelationalEntityMetadataHelper
     {
-        private static readonly ConcurrentDictionary<Type, string> TableNames = new ConcurrentDictionary<Type, string>();
+        protected static readonly ConcurrentDictionary<Type, string> TableNames = new ConcurrentDictionary<Type, string>();
 
-        public static string GetTableName<T>(this DbContext context) where T : class
+        protected string SchemaTableFormat { get; } = "{0}.{1}";
+
+        public EntityFrameworkMetadataHelper()
         {
-            ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
-            return objectContext.GetTableName(typeof(T));
         }
 
-        public static string GetTableName(this DbContext context, Type t)
+        public EntityFrameworkMetadataHelper(string schemaTableFormat)
         {
-            ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
-            return objectContext.GetTableName(t);
+            SchemaTableFormat = schemaTableFormat;
         }
 
+        public string GetTableName<T>(DbContext context) where T : class
+        {
+            ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
+            return GetTableName(objectContext, typeof(T));
+        }
 
-        public static string GetTableName(this ObjectContext context, Type t)
+        public virtual string GetTableName(ObjectContext context, Type t)
         {
             string result;
 
@@ -42,7 +46,7 @@
                     EntitySet entitySet;
                     if (ecm.StoreEntityContainer.TryGetEntitySetByName(entityName, true, out entitySet))
                     {
-                        result = $"[{entitySet.Schema}].[{entitySet.Table}]";
+                        result = string.Format(SchemaTableFormat, entitySet.Schema, entitySet.Table);
                         break;
                     }
                 }

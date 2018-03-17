@@ -37,12 +37,14 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
         readonly IsolationLevel _isolationLevel;
         readonly SagaDbContextFactory _sagaDbContextFactory;
         readonly bool _optimistic;
+        readonly IRelationalEntityMetadataHelper _relationalEntityMetadataHelper;
 
-        public EntityFrameworkSagaRepository(SagaDbContextFactory sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, bool optimistic = false)
+        public EntityFrameworkSagaRepository(SagaDbContextFactory sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, bool optimistic = false, IRelationalEntityMetadataHelper relationalEntityMetadataHelper = null)
         {
             _sagaDbContextFactory = sagaDbContextFactory;
             _isolationLevel = isolationLevel;
             _optimistic = optimistic;
+            _relationalEntityMetadataHelper = relationalEntityMetadataHelper ?? new EntityFrameworkMetadataHelper();
         }
 
         async Task<IEnumerable<Guid>> IQuerySagaRepository<TSaga>.Find(ISagaQuery<TSaga> query)
@@ -86,7 +88,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                 if (!_optimistic)
                 {
                     // Hack for locking row for the duration of the transaction.
-                    var tableName = dbContext.GetTableName<TSaga>();
+                    var tableName = _relationalEntityMetadataHelper.GetTableName<TSaga>(dbContext);
                     await dbContext.Database.ExecuteSqlCommandAsync($"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0", sagaId)
                         .ConfigureAwait(false);
                 }
@@ -202,7 +204,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         var missingCorrelationIds = new List<Guid>();
                         if (correlationIds.Any())
                         {
-                            var tableName = dbContext.GetTableName<TSaga>();
+                            var tableName = _relationalEntityMetadataHelper.GetTableName<TSaga>(dbContext);
                             foreach (var correlationId in correlationIds)
                             {
                                 if (!_optimistic)
