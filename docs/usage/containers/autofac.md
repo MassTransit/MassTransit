@@ -37,7 +37,7 @@ namespace Example
             var builder = new ContainerBuilder();
 
             // register a specific consumer
-            builder.RegisterType<<UpdateCustomerAddressConsumer>();
+            builder.RegisterType<UpdateCustomerAddressConsumer>();
 
             // just register all the consumers
             builder.RegisterConsumers(Assembly.GetExecutingAssembly());
