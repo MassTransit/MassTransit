@@ -46,9 +46,9 @@ namespace MassTransit.HttpTransport
             return _publishObservable.Connect(observer);
         }
 
-        public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId = null, Guid? conversationId = null)
+        public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, ConsumeContext consumeContext)
         {
-            return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, correlationId, conversationId);
+            return new PublishEndpoint(sourceAddress, this, _publishObservable, _publishPipe, consumeContext);
         }
 
         async Task<ISendEndpoint> IPublishEndpointProvider.GetPublishSendEndpoint<T>(T message)

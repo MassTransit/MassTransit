@@ -18,7 +18,7 @@
     <PackageReference Include="Apache.NMS.Core" Version="1.7.1.1" />
     <PackageReference Include="GreenPipes" Version="2.0.0" />
     <PackageReference Include="NewId" Version="3.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />

@@ -20,7 +20,13 @@ namespace MassTransit
         IPublishObserverConnector,
         ISendObserverConnector
     {
-        IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId = default(Guid?), Guid? conversationId = default(Guid?));
+        /// <summary>
+        /// Creates a publish endpoint, using the optional <see cref="ConsumeContext"/> for the correlation identifiers
+        /// </summary>
+        /// <param name="sourceAddress"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, ConsumeContext context = null);
 
         /// <summary>
         /// Return the SendEndpoint used for publishing the specified message

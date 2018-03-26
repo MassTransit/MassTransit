@@ -149,7 +149,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_be_received_properly()
         {
-            await Bus.Publish<PingMessage>(new {});
+            await Bus.Publish<PingMessage>(new { });
 
             ConsumeContext<PingMessage> context = await _received;
         }
@@ -170,7 +170,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_be_received_properly()
         {
-            await Bus.Publish<PingMessage>(new {}, v => v.RequestId = _requestId);
+            await Bus.Publish<PingMessage>(new { }, v => v.RequestId = _requestId);
 
             ConsumeContext<PingMessage> context = await _received;
 

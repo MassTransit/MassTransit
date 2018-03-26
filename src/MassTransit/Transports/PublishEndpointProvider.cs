@@ -51,9 +51,9 @@ namespace MassTransit.Transports
             _cache = new SendEndpointCache<Type>();
         }
 
-        public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, Guid? correlationId, Guid? conversationId)
+        public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, ConsumeContext consumeContext)
         {
-            return new PublishEndpoint(sourceAddress, this, _publishObservers, _publishPipe, correlationId, conversationId);
+            return new PublishEndpoint(sourceAddress, this, _publishObservers, _publishPipe, consumeContext);
         }
 
         public Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)

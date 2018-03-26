@@ -27,38 +27,36 @@ namespace MassTransit.Transports
         readonly IPublishEndpointProvider _endpointProvider;
         readonly IPublishObserver _publishObserver;
         readonly IPublishPipe _publishPipe;
-        readonly Guid? _correlationId;
-        readonly Guid? _conversationId;
+        readonly ConsumeContext _consumeContext;
         readonly Uri _sourceAddress;
 
-        public PublishEndpoint(Uri sourceAddress, IPublishEndpointProvider endpointProvider, IPublishObserver publishObserver, IPublishPipe publishPipe, Guid? correlationId,
-            Guid? conversationId)
+        public PublishEndpoint(Uri sourceAddress, IPublishEndpointProvider endpointProvider, IPublishObserver publishObserver, IPublishPipe publishPipe,
+            ConsumeContext consumeContext)
         {
             _sourceAddress = sourceAddress;
             _endpointProvider = endpointProvider;
             _publishObserver = publishObserver;
             _publishPipe = publishPipe;
-            _correlationId = correlationId;
-            _conversationId = conversationId;
+            _consumeContext = consumeContext;
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(_publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
+            var adapter = new PublishPipeContextAdapter<T>(_publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
 
             return Publish(cancellationToken, message, adapter);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
 
             return Publish(cancellationToken, message, adapter);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
 
             return Publish(cancellationToken, message, adapter);
         }
@@ -100,7 +98,7 @@ namespace MassTransit.Transports
 
             var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
-            var adapter = new PublishPipeContextAdapter<T>(_publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
+            var adapter = new PublishPipeContextAdapter<T>(_publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
 
             return Publish(cancellationToken, message, adapter);
         }
@@ -113,7 +111,7 @@ namespace MassTransit.Transports
 
             var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
 
             return Publish(cancellationToken, message, adapter);
         }
@@ -126,7 +124,7 @@ namespace MassTransit.Transports
 
             var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
-            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _correlationId, _conversationId, message);
+            var adapter = new PublishPipeContextAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext, message);
 
             return Publish(cancellationToken, message, adapter);
         }

@@ -36,7 +36,7 @@ namespace MassTransit.Context
             _receiveContext = receiveContext;
 
             _publishEndpoint = new Lazy<IPublishEndpoint>(() =>
-                receiveContext.PublishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, CorrelationId, ConversationId));
+                receiveContext.PublishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, this));
         }
 
         public ReceiveContext ReceiveContext => _receiveContext;

@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using Util;
 
 
@@ -52,6 +53,32 @@ namespace MassTransit
             headers.Set(MessageHeaders.FaultMessage, exceptionMessage);
             headers.Set(MessageHeaders.FaultTimestamp, exceptionTimestamp.ToString("O"));
             headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
+        }
+
+        /// <summary>
+        /// Transfer the header information from the ConsumeContext to the SendContext, including any non-MT headers.
+        /// </summary>
+        /// <param name="sendContext"></param>
+        /// <param name="consumeContext"></param>
+        public static void TransferConsumeContextHeaders(this SendContext sendContext, ConsumeContext consumeContext)
+        {
+            sendContext.GetOrAddPayload(() => consumeContext);
+
+            sendContext.SourceAddress = consumeContext.ReceiveContext.InputAddress;
+
+            if (consumeContext.ConversationId.HasValue)
+                sendContext.ConversationId = consumeContext.ConversationId;
+
+            if (consumeContext.CorrelationId.HasValue)
+                sendContext.InitiatorId = consumeContext.CorrelationId;
+
+            foreach (KeyValuePair<string, object> header in consumeContext.Headers.GetAll())
+            {
+                if (header.Key.StartsWith("MT-"))
+                    continue;
+
+                sendContext.Headers.Set(header.Key, header.Value);
+            }
         }
     }
 }

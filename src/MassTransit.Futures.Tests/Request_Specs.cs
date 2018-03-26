@@ -18,7 +18,6 @@ namespace MassTransit.Tests
     using System.Threading.Tasks;
     using GreenPipes;
     using NUnit.Framework;
-    using NUnit.Framework.Interfaces;
     using TestFramework;
     using Util;
 
@@ -137,10 +136,8 @@ namespace MassTransit.Tests
 
                 await context.RespondAsync(new Value(), responseContext =>
                 {
-                    foreach (var header in context.Headers.GetAll())
-                    {
-                        responseContext.Headers.Set(header.Key, header.Value);
-                    }
+                    if (!responseContext.TryGetPayload(out ConsumeContext cc))
+                        throw new InvalidOperationException("Expected to find a ConsumeContext there");
                 });
             });
         }

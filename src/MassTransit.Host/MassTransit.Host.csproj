@@ -15,7 +15,7 @@
     <PackageReference Include="Autofac" Version="4.6.1" />
     <PackageReference Include="GreenPipes" Version="2.0.0" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />

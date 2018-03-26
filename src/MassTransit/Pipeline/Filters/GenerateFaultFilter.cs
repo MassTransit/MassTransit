@@ -16,6 +16,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading.Tasks;
     using Events;
     using GreenPipes;
+    using Serialization;
     using Util;
 
 
@@ -40,13 +41,26 @@ namespace MassTransit.Pipeline.Filters
 
         static void GenerateFault(ExceptionReceiveContext context)
         {
-            Guid? faultedMessageId = context.TransportHeaders.Get("MessageId", default(Guid?));
+            IPublishEndpoint publishEndpoint;
+            Guid? faultedMessageId;
+
+            if (context.TryGetPayload(out ConsumeContext consumeContext))
+            {
+                publishEndpoint = consumeContext;
+                faultedMessageId = consumeContext.MessageId;
+            }
+            else
+            {
+                faultedMessageId = context.TransportHeaders.Get("MessageId", default(Guid?));
+
+                publishEndpoint = context.PublishEndpointProvider.CreatePublishEndpoint(context.InputAddress);
+            }
 
             ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType.MediaType, faultedMessageId);
 
-            var publishEndpoint = context.PublishEndpointProvider.CreatePublishEndpoint(context.InputAddress);
+            var contextPipe = new ConsumeSendContextPipe<ReceiveFault>(consumeContext);
 
-            var publishTask = publishEndpoint.Publish(fault, context.CancellationToken);
+            var publishTask = publishEndpoint.Publish(fault, contextPipe, context.CancellationToken);
 
             context.AddPendingTask(publishTask);
 
