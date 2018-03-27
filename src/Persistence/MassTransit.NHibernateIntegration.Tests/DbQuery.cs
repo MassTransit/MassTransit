@@ -14,6 +14,7 @@ namespace MassTransit.NHibernateIntegration.Tests
 {
 	using System.Data.SqlClient;
 
+
 	public class DbQuery
 	{
 		readonly string _connectionString;
