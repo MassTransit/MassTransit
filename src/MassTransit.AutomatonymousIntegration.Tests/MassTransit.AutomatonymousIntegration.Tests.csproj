@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net452</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
@@ -8,13 +8,13 @@
     <PackageReference Include="Automatonymous.NHibernate" Version="4.0.1" />
     <PackageReference Include="EntityFramework" Version="6.2.0" />
     <PackageReference Include="GreenPipes" Version="2.0.0" />
-    <PackageReference Include="Iesi.Collections" Version="4.0.1.4000" />
+    <PackageReference Include="Iesi.Collections" Version="4.0.4" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.Azure.DocumentDB" Version="1.19.1" />
     <PackageReference Include="microsoft.net.test.sdk" Version="15.6.1" />
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="NHibernate" Version="4.1.1.4000" />
+    <PackageReference Include="NHibernate" Version="5.1.0" />
     <PackageReference Include="NUnit" Version="3.10.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
     <PackageReference Include="Quartz" Version="3.0.4" />

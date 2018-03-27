@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net452</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -14,9 +14,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="2.0.0" />
-    <PackageReference Include="Iesi.Collections" Version="4.0.1.4000" />
+    <PackageReference Include="Iesi.Collections" Version="4.0.4" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="NHibernate" Version="4.1.1.4000" />
+    <PackageReference Include="NHibernate" Version="5.1.0" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
