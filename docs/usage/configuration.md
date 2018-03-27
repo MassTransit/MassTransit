@@ -21,7 +21,7 @@ namespace EventPublisher
 
     public class Program
     {
-        public void static Main()
+        public static void Main()
         {
             var busControl = ConfigureBus();
             busControl.Start();
@@ -87,9 +87,9 @@ namespace EventService
 
     public class Program
     {
-        public int static Main()
+        public static void Main()
         {
-            return HostFactory.Run(cfg => cfg.Service(x => new EventConsumerService());
+            HostFactory.Run(cfg => cfg.Service(x => new EventConsumerService());
         }
     }
 
