@@ -14,7 +14,9 @@ namespace MassTransit.NHibernateIntegration
 {
 	using System;
 	using System.Data;
+	using System.Data.Common;
 	using NHibernate;
+	using NHibernate.Engine;
 	using NHibernate.SqlTypes;
 	using NHibernate.UserTypes;
 
@@ -41,47 +43,33 @@ namespace MassTransit.NHibernateIntegration
 			return x.GetHashCode();
 		}
 
-		public object NullSafeGet(IDataReader rs, string[] names, object owner)
+		public object NullSafeGet(DbDataReader rs, string[] names, ISessionImplementor session, object owner)
 		{
-			string value = (string) NHibernateUtil.String.NullSafeGet(rs, names);
+			string value = (string) NHibernateUtil.String.NullSafeGet(rs, names, session);
 
-			Uri uri = new Uri(value);
-
-			return uri;
+			return new Uri(value);
 		}
 
-		public void NullSafeSet(IDbCommand cmd, object value, int index)
+		public void NullSafeSet(DbCommand cmd, object value, int index, ISessionImplementor session)
 		{
 			if (value == null)
 			{
-				NHibernateUtil.String.NullSafeSet(cmd, null, index);
+				NHibernateUtil.String.NullSafeSet(cmd, null, index, session);
 				return;
 			}
 
 			value = value.ToString();
 
-			NHibernateUtil.String.NullSafeSet(cmd, value, index);
+			NHibernateUtil.String.NullSafeSet(cmd, value, index, session);
 		}
 
-		public object DeepCopy(object value)
-		{
-			return value ?? null;
-		}
+		public object DeepCopy(object value) => value ?? null;
 
-		public object Replace(object original, object target, object owner)
-		{
-			return original;
-		}
+		public object Replace(object original, object target, object owner) => original;
 
-		public object Assemble(object cached, object owner)
-		{
-			return cached;
-		}
+		public object Assemble(object cached, object owner) => cached;
 
-		public object Disassemble(object value)
-		{
-			return value;
-		}
+		public object Disassemble(object value) => value;
 
 		public SqlType[] SqlTypes => new[] {NHibernateUtil.String.SqlType};
 

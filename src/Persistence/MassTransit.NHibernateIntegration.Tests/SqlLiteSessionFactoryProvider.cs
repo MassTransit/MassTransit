@@ -14,6 +14,7 @@ namespace MassTransit.NHibernateIntegration.Tests
 {
     using System;
     using System.Data;
+    using System.Data.Common;
     using System.Data.SQLite;
     using NHibernate;
     using NHibernate.Cache;
@@ -98,7 +99,7 @@ namespace MassTransit.NHibernateIntegration.Tests
             return _sessionFactory;
         }
 
-        static void BuildSchema(Configuration config, IDbConnection connection)
+        static void BuildSchema(Configuration config, DbConnection connection)
         {
             new SchemaExport(config).Execute(true, true, false, connection, null);
         }

@@ -14,7 +14,9 @@ namespace MassTransit.NHibernateIntegration
 {
     using System;
     using System.Data;
+    using System.Data.Common;
     using NHibernate;
+    using NHibernate.Engine;
     using NHibernate.SqlTypes;
     using NHibernate.UserTypes;
 
@@ -22,32 +24,20 @@ namespace MassTransit.NHibernateIntegration
     public class BinaryGuidType :
         IUserType
     {
-        static readonly int[] _byteOrder = new[] {10, 11, 12, 13, 14, 15, 8, 9, 6, 7, 4, 5, 0, 1, 2, 3};
-        static readonly SqlType[] _types = new[] {new SqlType(DbType.Binary)};
+        static readonly int[] _byteOrder = {10, 11, 12, 13, 14, 15, 8, 9, 6, 7, 4, 5, 0, 1, 2, 3};
+        static readonly SqlType[] _types = {new SqlType(DbType.Binary)};
 
-        public SqlType[] SqlTypes
-        {
-            get { return _types; }
-        }
+        public SqlType[] SqlTypes => _types;
 
-        public Type ReturnedType
-        {
-            get { return typeof(Guid); }
-        }
+        public Type ReturnedType => typeof(Guid);
 
-        public new bool Equals(object x, object y)
-        {
-            return (x != null && x.Equals(y));
-        }
+        public new bool Equals(object x, object y) => x != null && x.Equals(y);
 
-        public int GetHashCode(object x)
+        public int GetHashCode(object x) => x.GetHashCode();
+        
+        public object NullSafeGet(DbDataReader rs, string[] names, ISessionImplementor session, object owner)
         {
-            return x.GetHashCode();
-        }
-
-        public object NullSafeGet(IDataReader rs, string[] names, object owner)
-        {
-            var bytes = (byte[])NHibernateUtil.Binary.NullSafeGet(rs, names[0]);
+            var bytes = (byte[])NHibernateUtil.Binary.NullSafeGet(rs, names[0], session);
             if (bytes == null || bytes.Length == 0)
                 return null;
 
@@ -59,7 +49,7 @@ namespace MassTransit.NHibernateIntegration
             return new Guid(reorderedBytes);
         }
 
-        public void NullSafeSet(IDbCommand cmd, object value, int index)
+        public void NullSafeSet(DbCommand cmd, object value, int index, ISessionImplementor session)
         {
             if (null != value)
             {
@@ -69,35 +59,20 @@ namespace MassTransit.NHibernateIntegration
                 for (int i = 0; i < 16; i++)
                     reorderedBytes[i] = bytes[_byteOrder[i]];
 
-                NHibernateUtil.Binary.NullSafeSet(cmd, reorderedBytes, index);
+                NHibernateUtil.Binary.NullSafeSet(cmd, reorderedBytes, index, session);
             }
             else
-                NHibernateUtil.Binary.NullSafeSet(cmd, null, index);
+                NHibernateUtil.Binary.NullSafeSet(cmd, null, index, session);
         }
 
-        public object DeepCopy(object value)
-        {
-            return value;
-        }
+        public object DeepCopy(object value) => value;
 
-        public bool IsMutable
-        {
-            get { return false; }
-        }
+        public bool IsMutable => false;
 
-        public object Replace(object original, object target, object owner)
-        {
-            return original;
-        }
+        public object Replace(object original, object target, object owner) => original;
 
-        public object Assemble(object cached, object owner)
-        {
-            return cached;
-        }
+        public object Assemble(object cached, object owner) => cached;
 
-        public object Disassemble(object value)
-        {
-            return value;
-        }
+        public object Disassemble(object value) => value;
     }
 }
