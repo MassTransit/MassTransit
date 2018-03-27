@@ -1,7 +1,7 @@
 # Using Courier
 
 Developing applications using a distributed, message-based architecture significantly increases the complexity of 
-performing operations transactionally, where an end-to-end set of steps much be completed entirely, or not at all. 
+performing operations transactionally, where an end-to-end set of steps must be completed entirely, or not at all. 
 In an application using an ACID database, this is typically done using SQL transactions, where partial operations 
 are rolled back if the transaction cannot be completed. However, this doesn't scale when the steps being to include 
 dependencies outside of a single database. And in the distributed, *microservices* based architectures, the use of 
