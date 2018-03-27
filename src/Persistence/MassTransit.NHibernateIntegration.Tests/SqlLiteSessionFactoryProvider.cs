@@ -15,7 +15,7 @@ namespace MassTransit.NHibernateIntegration.Tests
     using System;
     using System.Data;
     using System.Data.Common;
-    using System.Data.SQLite;
+    using Microsoft.Data.Sqlite;
     using NHibernate;
     using NHibernate.Cache;
     using NHibernate.Cfg;
@@ -34,7 +34,7 @@ namespace MassTransit.NHibernateIntegration.Tests
         const string InMemoryConnectionString = "Data Source=:memory:;Version=3;New=True;Pooling=True;Max Pool Size=1;";
         bool _disposed;
         ISessionFactory _innerSessionFactory;
-        SQLiteConnection _openConnection;
+        SqliteConnection _openConnection;
         SingleConnectionSessionFactory _sessionFactory;
 
         public SQLiteSessionFactoryProvider(string connectionString, params Type[] mappedTypes)
@@ -86,7 +86,7 @@ namespace MassTransit.NHibernateIntegration.Tests
         public override ISessionFactory GetSessionFactory()
         {
             string connectionString = Configuration.Properties[NHibernate.Cfg.Environment.ConnectionString];
-            _openConnection = new SQLiteConnection(connectionString);
+            _openConnection = new SqliteConnection(connectionString);
             _openConnection.Open();
 
             BuildSchema(Configuration, _openConnection);
