@@ -41,24 +41,21 @@ namespace MassTransit.NHibernateIntegration.Saga
 
         SagaConsumeContext<TSaga, T> SagaConsumeContext<TSaga>.PopContext<T>()
         {
-            var context = this as SagaConsumeContext<TSaga, T>;
-            if (context == null)
+            if (!(this is SagaConsumeContext<TSaga, T> context))
                 throw new ContextException($"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
 
             return context;
         }
 
-        Task SagaConsumeContext<TSaga>.SetCompleted()
+        async Task SagaConsumeContext<TSaga>.SetCompleted()
         {
-            _session.Delete(Saga);
+            await _session.DeleteAsync(Saga).ConfigureAwait(false);
             IsCompleted = true;
             if (_log.IsDebugEnabled)
             {
                 _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName,
                     Saga.CorrelationId);
             }
-
-            return TaskUtil.Completed;
         }
 
         public bool IsCompleted { get; private set; }

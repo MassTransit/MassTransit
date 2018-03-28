@@ -32,35 +32,25 @@ namespace MassTransit.NHibernateIntegration.Saga
     {
         static readonly ILog _log = Logger.Get<NHibernateSagaRepository<TSaga>>();
         readonly ISessionFactory _sessionFactory;
-        System.Data.IsolationLevel _insertIsolationLevel;
 
         public NHibernateSagaRepository(ISessionFactory sessionFactory)
         {
             _sessionFactory = sessionFactory;
-
-            _insertIsolationLevel = System.Data.IsolationLevel.ReadCommitted;
         }
 
         public NHibernateSagaRepository(ISessionFactory sessionFactory, System.Data.IsolationLevel isolationLevel)
         {
             _sessionFactory = sessionFactory;
-
-            _insertIsolationLevel = isolationLevel;
         }
 
-        public Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
+        public async Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {
-            using (var scope = new TransactionScope(TransactionScopeOption.RequiresNew))
             using (var session = _sessionFactory.OpenSession())
             {
-                IList<Guid> result = session.QueryOver<TSaga>()
+                return await session.QueryOver<TSaga>()
                     .Where(query.FilterExpression)
                     .Select(x => x.CorrelationId)
-                    .List<Guid>();
-
-                scope.Complete();
-
-                return Task.FromResult<IEnumerable<Guid>>(result);
+                    .ListAsync<Guid>().ConfigureAwait(false);
             }
         }
 
@@ -86,14 +76,13 @@ namespace MassTransit.NHibernateIntegration.Saga
             {
                 var inserted = false;
 
-                TSaga instance;
-                if (policy.PreInsertInstance(context, out instance))
-                    inserted = PreInsertSagaInstance<T>(session, instance);
+                if (policy.PreInsertInstance(context, out var instance))
+                    inserted = await PreInsertSagaInstance<T>(session, instance).ConfigureAwait(false);
 
                 try
                 {
                     if (instance == null)
-                        instance = session.Get<TSaga>(sagaId, LockMode.Upgrade);
+                        instance = await session.GetAsync<TSaga>(sagaId, LockMode.Upgrade).ConfigureAwait(false);
                     if (instance == null)
                     {
                         var missingSagaPipe = new MissingPipe<T>(session, next);
@@ -110,11 +99,11 @@ namespace MassTransit.NHibernateIntegration.Saga
                         await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
                         if (inserted && !sagaConsumeContext.IsCompleted)
-                            session.Update(instance);
+                            await session.UpdateAsync(instance).ConfigureAwait(false);
                     }
 
                     if (transaction.IsActive)
-                        transaction.Commit();
+                        await transaction.CommitAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -122,7 +111,7 @@ namespace MassTransit.NHibernateIntegration.Saga
                         _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 
                     if (transaction.IsActive)
-                        transaction.Rollback();
+                        await transaction.RollbackAsync().ConfigureAwait(false);
 
                     throw;
                 }
@@ -137,9 +126,10 @@ namespace MassTransit.NHibernateIntegration.Saga
             {
                 try
                 {
-                    IList<TSaga> instances = session.QueryOver<TSaga>()
+                    IList<TSaga> instances = await session.QueryOver<TSaga>()
                         .Where(context.Query.FilterExpression)
-                        .List<TSaga>();
+                        .ListAsync<TSaga>()
+                        .ConfigureAwait(false);
 
                     if (instances.Count == 0)
                     {
@@ -152,7 +142,7 @@ namespace MassTransit.NHibernateIntegration.Saga
                     // TODO partial failure should not affect them all
 
                     if (transaction.IsActive)
-                        transaction.Commit();
+                        await transaction.CommitAsync().ConfigureAwait(false);
                 }
                 catch (SagaException sex)
                 {
@@ -160,7 +150,7 @@ namespace MassTransit.NHibernateIntegration.Saga
                         _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
 
                     if (transaction.IsActive)
-                        transaction.Rollback();
+                        await transaction.RollbackAsync().ConfigureAwait(false);
 
                     throw;
                 }
@@ -170,21 +160,21 @@ namespace MassTransit.NHibernateIntegration.Saga
                         _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 
                     if (transaction.IsActive)
-                        transaction.Rollback();
+                        await transaction.RollbackAsync().ConfigureAwait(false);
 
                     throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                 }
             }
         }
 
-        static bool PreInsertSagaInstance<T>(ISession session, TSaga instance)
+        static async Task<bool> PreInsertSagaInstance<T>(ISession session, TSaga instance)
         {
             bool inserted = false;
 
             try
             {
-                session.Save(instance);
-                session.Flush();
+                await session.SaveAsync(instance).ConfigureAwait(false);
+                await session.FlushAsync().ConfigureAwait(false);
 
                 inserted = true;
 
@@ -202,7 +192,7 @@ namespace MassTransit.NHibernateIntegration.Saga
             return inserted;
         }
 
-        async Task SendToInstance<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, TSaga instance,
+        static Task SendToInstance<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, TSaga instance,
             IPipe<SagaConsumeContext<TSaga, T>> next, ISession session)
             where T : class
         {
@@ -213,7 +203,7 @@ namespace MassTransit.NHibernateIntegration.Saga
 
                 var sagaConsumeContext = new NHibernateSagaConsumeContext<TSaga, T>(session, context, instance);
 
-                await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
+                return policy.Existing(sagaConsumeContext, next);
             }
             catch (SagaException)
             {
@@ -261,7 +251,7 @@ namespace MassTransit.NHibernateIntegration.Saga
                 await _next.Send(proxy).ConfigureAwait(false);
 
                 if (!proxy.IsCompleted)
-                    _session.Save(context.Saga);
+                    await _session.SaveAsync(context.Saga).ConfigureAwait(false);
             }
         }
     }
