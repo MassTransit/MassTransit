@@ -20,7 +20,6 @@ namespace MassTransit.TestFramework
     using Util;
 
 
-    [TestFixture]
     public class InMemoryTestFixture :
         BusTestFixture
     {

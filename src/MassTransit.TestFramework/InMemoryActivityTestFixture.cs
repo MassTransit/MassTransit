@@ -15,11 +15,9 @@ namespace MassTransit.TestFramework
     using System;
     using System.Collections.Generic;
     using MassTransit.Courier;
-    using NUnit.Framework;
     using Testing;
 
 
-    [TestFixture]
     public abstract class InMemoryActivityTestFixture :
         InMemoryTestFixture
     {

@@ -44,4 +44,32 @@ namespace MassTransit.Pipeline.Filters
             scope.Add("type", "in-memory");
         }
     }
+
+    public class InMemoryOutboxFilter<T> :
+        IFilter<ConsumeContext<T>>
+        where T : class
+    {
+        public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
+        {
+            var outboxContext = new InMemoryOutboxConsumeContext<T>(context);
+            try
+            {
+                await next.Send(outboxContext).ConfigureAwait(false);
+
+                await outboxContext.ExecutePendingActions().ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                await outboxContext.DiscardPendingActions().ConfigureAwait(false);
+
+                throw;
+            }
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateFilterScope("outbox");
+            scope.Add("type", "in-memory");
+        }
+    }
 }

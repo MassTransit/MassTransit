@@ -30,4 +30,20 @@ namespace MassTransit.PipeConfigurators
             yield break;
         }
     }
+
+
+    public class InMemoryOutboxSpecification<T> :
+        IPipeSpecification<ConsumeContext<T>>
+        where T : class
+    {
+        public void Apply(IPipeBuilder<ConsumeContext<T>> builder)
+        {
+            builder.AddFilter(new InMemoryOutboxFilter<T>());
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            yield break;
+        }
+    }
 }
