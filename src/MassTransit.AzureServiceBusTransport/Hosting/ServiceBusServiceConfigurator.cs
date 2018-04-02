@@ -159,5 +159,7 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         {
             _configurator.SagaMessageConfigured(configurator);
         }
+
+        public void OverrideDefaultBusEndpointQueueName(string value) => _configurator.OverrideDefaultBusEndpointQueueName(value);
     }
 }

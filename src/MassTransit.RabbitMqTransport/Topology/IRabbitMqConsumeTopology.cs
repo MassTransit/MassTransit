@@ -31,5 +31,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         void Apply(IReceiveEndpointBrokerTopologyBuilder builder);
 
         string CreateTemporaryQueueName(string prefix);
+
+        string CreateTemporaryQueueNameUsingFormat(string format);
     }
 }

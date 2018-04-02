@@ -95,5 +95,7 @@ namespace MassTransit.Transports.InMemory.Configurators
         }
 
         public IInMemoryHost Host => _inMemoryHost;
+
+        public void OverrideDefaultBusEndpointQueueName(string value) => throw new NotSupportedException("Overriding default bus queue name is not supported for InMemory transport.");
     }
 }

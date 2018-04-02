@@ -161,8 +161,10 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void OverrideDefaultBusEndpointQueueName(string value)
         {
-            _settings.ExchangeName = value;
-            _settings.QueueName = value;
+            string queueName = _busEndpointConfiguration.Topology.Consume.CreateTemporaryQueueNameUsingFormat(value);
+
+            _settings.ExchangeName = queueName;
+            _settings.QueueName = queueName;
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
