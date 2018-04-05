@@ -48,12 +48,9 @@ namespace MassTransit.Context
 
         public Task Send(PublishContext<T> context)
         {
-            if (_context.ConversationId.HasValue)
-                context.ConversationId = _context.ConversationId;
-
-            if (_context.CorrelationId.HasValue)
-                context.InitiatorId = _context.CorrelationId;
-
+            if (_context != null)
+                context.TransferConsumeContextHeaders(_context);
+            
             return _pipe.Send(context);
         }
     }

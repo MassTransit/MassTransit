@@ -22,7 +22,7 @@ namespace MassTransit
             where T : class, PipeContext
         {
             if (pipe == null)
-                return true;
+                return false;
 
             if (pipe is EmptyPipe<T>)
                 return false;
