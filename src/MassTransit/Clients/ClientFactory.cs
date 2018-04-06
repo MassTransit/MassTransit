@@ -32,7 +32,7 @@ namespace MassTransit.Clients
         public RequestHandle<T> CreateRequest<T>(T message, CancellationToken cancellationToken, RequestTimeout timeout)
             where T : class
         {
-            IRequestClient<T> client = CreateRequestClient(message, timeout);
+            IRequestClient<T> client = CreateRequestClient<T>(timeout);
 
             return client.Create(message, cancellationToken, timeout);
         }
@@ -48,7 +48,7 @@ namespace MassTransit.Clients
         public RequestHandle<T> CreateRequest<T>(ConsumeContext consumeContext, T message, CancellationToken cancellationToken, RequestTimeout timeout)
             where T : class
         {
-            IRequestClient<T> client = CreateRequestClient(consumeContext, message, timeout);
+            IRequestClient<T> client = CreateRequestClient<T>(consumeContext, timeout);
 
             return client.Create(message, cancellationToken, timeout);
         }
@@ -62,19 +62,19 @@ namespace MassTransit.Clients
             return client.Create(message, cancellationToken, timeout);
         }
 
-        public IRequestClient<T> CreateRequestClient<T>(T message, RequestTimeout timeout)
+        public IRequestClient<T> CreateRequestClient<T>(RequestTimeout timeout)
             where T : class
         {
-            if (EndpointConvention.TryGetDestinationAddress(message, out var destinationAddress))
+            if (EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 return CreateRequestClient<T>(destinationAddress, timeout);
 
             return new RequestClient<T>(_context, new PublishRequestSendEndpoint(_context.PublishEndpoint), timeout);
         }
 
-        public IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, T message, RequestTimeout timeout)
+        public IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, RequestTimeout timeout)
             where T : class
         {
-            if (EndpointConvention.TryGetDestinationAddress(message, out var destinationAddress))
+            if (EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 return CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
 
             return new RequestClient<T>(_context, new PublishRequestSendEndpoint(consumeContext), timeout);

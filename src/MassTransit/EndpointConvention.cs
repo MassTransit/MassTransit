@@ -25,7 +25,7 @@ namespace MassTransit
         public static void Map<T>(Uri destinationAddress)
             where T : class
         {
-            EndpointConventionCache<T>.Map((T message, out Uri address) =>
+            EndpointConventionCache<T>.Map((out Uri address) =>
             {
                 address = destinationAddress;
                 return true;
@@ -43,18 +43,15 @@ namespace MassTransit
             EndpointConventionCache<T>.Map(endpointAddressProvider);
         }
 
-        public static bool TryGetDestinationAddress<T>(T message, out Uri destinationAddress)
+        public static bool TryGetDestinationAddress<T>(out Uri destinationAddress)
             where T : class
         {
-            return EndpointConventionCache<T>.TryGetEndpointAddress(message, out destinationAddress);
+            return EndpointConventionCache<T>.TryGetEndpointAddress(out destinationAddress);
         }
 
-        public static bool TryGetDestinationAddress(object message, out Uri destinationAddress)
+        public static bool TryGetDestinationAddress(Type messageType, out Uri destinationAddress)
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return EndpointConventionCache.TryGetEndpointAddress(message, out destinationAddress);
+            return EndpointConventionCache.TryGetEndpointAddress(messageType, out destinationAddress);
         }
     }
 }

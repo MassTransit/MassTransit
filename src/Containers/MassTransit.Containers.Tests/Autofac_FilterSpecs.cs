@@ -32,48 +32,19 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_fail_on_bad_validation()
         {
-            Task<B> result = null;
-            Request<A> request = await _harness.Bus.Request(_harness.InputQueueSendEndpoint, (new A {PostalCode = "74011"}), r =>
-            {
-                r.Timeout = _harness.TestTimeout;
-                result = r.Handle<B>(context =>
-                {
-                });
-            });
+            var result = _harness.Bus.Request<A, B>(_harness.InputQueueAddress, new A {PostalCode = "74011"}, TestCancellationToken, TestTimeout);
 
             Assert.That(async () => await result, Throws.TypeOf<RequestFaultException>());
         }
 
         [Test]
-        public async Task Should_fail_on_bad_validation_at_the_request_task()
-        {
-            Task<B> result = null;
-            Request<A> request = await _harness.Bus.Request(_harness.InputQueueSendEndpoint, (new A {PostalCode = "74011"}), r =>
-            {
-                r.Timeout = _harness.TestTimeout;
-                result = r.Handle<B>(context =>
-                {
-                });
-            });
-
-            Assert.That(async () => await request.Task, Throws.TypeOf<RequestFaultException>());
-        }
-
-        [Test]
         public async Task Should_pass_a_good_validation()
         {
-            Task<B> result = null;
-            await _harness.Bus.Request(_harness.InputQueueSendEndpoint, (new A {PostalCode = "90210"}), r =>
-            {
-                r.Timeout = _harness.TestTimeout;
-                result = r.Handle<B>(context =>
-                {
-                });
-            });
+            var result = _harness.Bus.Request<A, B>(_harness.InputQueueAddress, new A {PostalCode = "90210"}, TestCancellationToken, TestTimeout);
 
             var b = await result;
 
-            Assert.That(b.Success, Is.True);
+            Assert.That(b.Message.Success, Is.True);
         }
 
         InMemoryTestHarness _harness;
@@ -132,6 +103,7 @@ namespace MassTransit.Containers.Tests
             {
                 if (string.IsNullOrWhiteSpace(message.PostalCode))
                     throw new ArgumentException("The postal code was not specified");
+
                 if (message.PostalCode != "90210")
                     throw new ArgumentException("Only Beverly Hills will do!");
             }

@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -97,13 +96,14 @@ namespace MassTransit
 
 
     /// <summary>
-    /// An abstraction that allows a message handler to respond to a request with all
-    /// processing handled under the covers
+    /// The legacy request client interface, which combines the request and response type into a single interface. This will eventually
+    /// be marked obsolete.
     /// </summary>
     /// <typeparam name="TRequest">The request type</typeparam>
     /// <typeparam name="TResponse">The response type</typeparam>
-    [Obsolete("The original RequestClient is deprecated. The new IRequestClient<T> should be used instead.")]
     public interface IRequestClient<in TRequest, TResponse>
+        where TRequest : class
+        where TResponse : class
     {
         /// <summary>
         /// Send the request, and complete the response task when the response is received. If
@@ -113,6 +113,6 @@ namespace MassTransit
         /// <param name="request">The request message</param>
         /// <param name="cancellationToken">A cancellation token for the request</param>
         /// <returns>The response Task</returns>
-        Task<TResponse> Request(TRequest request, CancellationToken cancellationToken = default(CancellationToken));
+        Task<TResponse> Request(TRequest request, CancellationToken cancellationToken = default);
     }
 }

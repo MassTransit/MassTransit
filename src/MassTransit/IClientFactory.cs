@@ -77,22 +77,20 @@ namespace MassTransit
         /// <summary>
         /// Create a request client for the specified message type
         /// </summary>
-        /// <param name="message"></param>
         /// <param name="timeout"></param>
         /// <typeparam name="T">The message type</typeparam>
         /// <returns></returns>
-        IRequestClient<T> CreateRequestClient<T>(T message, RequestTimeout timeout = default)
+        IRequestClient<T> CreateRequestClient<T>(RequestTimeout timeout = default)
             where T : class;
 
         /// <summary>
         /// Create a request client for the specified message type
         /// </summary>
         /// <param name="consumeContext">The consumeContext currently being processed</param>
-        /// <param name="message"></param>
         /// <param name="timeout"></param>
         /// <typeparam name="T">The message type</typeparam>
         /// <returns></returns>
-        IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, T message, RequestTimeout timeout = default)
+        IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, RequestTimeout timeout = default)
             where T : class;
 
         /// <summary>

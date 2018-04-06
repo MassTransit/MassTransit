@@ -13,10 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using GreenPipes;
-    using Pipeline;
 
 
     /// <summary>
@@ -24,14 +20,11 @@ namespace MassTransit
     /// </summary>
     /// <typeparam name="TRequest">The request message type</typeparam>
     /// <typeparam name="TResponse">The response message type</typeparam>
-    [Obsolete("Use the new ClientFactory syntax to create requests")]
     public class PublishRequestClient<TRequest, TResponse> :
-        RequestClient<TRequest, TResponse>
+        MessageRequestClient<TRequest, TResponse>
         where TRequest : class
         where TResponse : class
     {
-        readonly IPublishEndpoint _publishEndpoint;
-
         /// <summary>
         /// Creates a message request client for the bus and endpoint specified
         /// </summary>
@@ -39,31 +32,20 @@ namespace MassTransit
         /// <param name="timeout">The request timeout</param>
         /// <param name="timeToLive">The time that the request will live for</param>
         /// <param name="callback"></param>
-        public PublishRequestClient(IBus bus, TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
-            : base(bus, bus.Address, timeout, timeToLive, callback)
+        public PublishRequestClient(IBus bus, TimeSpan timeout, TimeSpan? timeToLive = default, Action<SendContext<TRequest>> callback = null)
+            : base(bus.CreateClientFactory(timeout).CreateRequestClient<TRequest>(), timeToLive, callback)
         {
-            _publishEndpoint = bus;
         }
 
         /// <summary>
         /// Creates a message request client for the bus and endpoint specified
         /// </summary>
-        /// <param name="publishEndpoint"></param>
-        /// <param name="connector">The bus instance</param>
-        /// <param name="responseAddress">The response address of the connector</param>
-        /// <param name="timeout">The request timeout</param>
+        /// <param name="client"></param>
         /// <param name="timeToLive">The time that the request will live for</param>
         /// <param name="callback"></param>
-        public PublishRequestClient(IPublishEndpoint publishEndpoint, IRequestPipeConnector connector, Uri responseAddress,
-            TimeSpan timeout, TimeSpan? timeToLive = default(TimeSpan?), Action<SendContext<TRequest>> callback = null)
-            : base(connector, responseAddress, timeout, timeToLive, callback)
+        public PublishRequestClient(IRequestClient<TRequest> client, TimeSpan? timeToLive = default, Action<SendContext<TRequest>> callback = null)
+            : base(client, timeToLive, callback)
         {
-            _publishEndpoint = publishEndpoint;
-        }
-
-        protected override Task SendRequest(TRequest request, IPipe<SendContext<TRequest>> requestPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(request, requestPipe, cancellationToken);
         }
     }
 }

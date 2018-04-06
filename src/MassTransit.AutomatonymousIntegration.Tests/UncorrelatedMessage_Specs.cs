@@ -29,18 +29,13 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         [Test, Explicit]
         public async Task Should_retry_the_status_message()
         {
-            Task<Status> statusTask = null;
-            Request<CheckStatus> request = await Bus.Request(InputQueueAddress, new CheckStatus("A"), x =>
-            {
-                statusTask = x.Handle<Status>();
-                x.Timeout = TestTimeout;
-            }, TestCancellationToken);
+            var statusTask = Bus.Request<CheckStatus, Status>(InputQueueAddress, new CheckStatus("A"), TestCancellationToken);
 
             await InputQueueSendEndpoint.Send(new Start("A", Guid.NewGuid()));
 
-            Status status = await statusTask;
+            Response<Status> status = await statusTask;
 
-            Assert.AreEqual("A", status.ServiceName);
+            Assert.AreEqual("A", status.Message.ServiceName);
         }
 
         [Test, Explicit]
@@ -54,48 +49,21 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         [Test]
         public async Task Should_start_and_handle_the_status_request()
         {
-            Task<StartupComplete> startupCompletedTask = null;
-            await Bus.Request(InputQueueAddress, new Start("A", Guid.NewGuid()), x =>
-            {
-                startupCompletedTask = x.Handle<StartupComplete>();
-                x.Timeout = TestTimeout;
-            }, TestCancellationToken);
+            var startupComplete = await Bus.Request<Start, StartupComplete>(InputQueueAddress, new Start("A", Guid.NewGuid()), TestCancellationToken);
 
-            StartupComplete startupComplete = await startupCompletedTask;
+            var status = await Bus.Request<CheckStatus, Status>(InputQueueAddress, new CheckStatus("A"), TestCancellationToken);
 
-            Task<Status> statusTask = null;
-            await Bus.Request(InputQueueAddress, new CheckStatus("A"), x =>
-            {
-                statusTask = x.Handle<Status>();
-                x.Timeout = TestTimeout;
-            }, TestCancellationToken);
-
-            Status status = await statusTask;
-
-            Assert.AreEqual("A", status.ServiceName);
+            Assert.AreEqual("A", status.Message.ServiceName);
         }
 
         [Test]
         public async Task Should_start_and_handle_the_status_request_awaited()
         {
-            Request<Start> request = await Bus.Request(InputQueueAddress, new Start("B", Guid.NewGuid()), x =>
-            {
-                x.Handle<StartupComplete>();
-                x.Timeout = TestTimeout;
-            }, TestCancellationToken);
+            var startupComplete = await Bus.Request<Start, StartupComplete>(InputQueueAddress, new Start("B", Guid.NewGuid()), TestCancellationToken);
 
-            await request.Task;
+            var status = await Bus.Request<CheckStatus, Status>(InputQueueAddress, new CheckStatus("B"), TestCancellationToken);
 
-            Task<Status> statusTask = null;
-            await Bus.Request(InputQueueAddress, new CheckStatus("B"), x =>
-            {
-                statusTask = x.Handle<Status>();
-                x.Timeout = TestTimeout;
-            }, TestCancellationToken);
-
-            Status status = await statusTask;
-
-            Assert.AreEqual("B", status.ServiceName);
+            Assert.AreEqual("B", status.Message.ServiceName);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -138,6 +106,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 Event(() => Started, x => x
                     .CorrelateBy(instance => instance.ServiceName, context => context.Message.ServiceName)
                     .SelectId(context => context.Message.ServiceId));
+
                 Event(() => CheckStatus, x => x
                     .CorrelateBy(instance => instance.ServiceName, context => context.Message.ServiceName));
 

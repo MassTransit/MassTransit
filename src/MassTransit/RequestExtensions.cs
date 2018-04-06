@@ -15,78 +15,202 @@ namespace MassTransit
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
+    using GreenPipes;
+    using Util;
 
 
     public static class RequestExtensions
     {
         /// <summary>
-        /// Send a request from the bus to the endpoint, establishing response handlers
+        /// Send a request from the bus to the endpoint, and return a Task which can be awaited for the response.
         /// </summary>
-        /// <typeparam name="TRequest">The request message type</typeparam>
-        /// <param name="bus">The bus instance</param>
-        /// <param name="address">The service endpoint address</param>
+        /// <param name="bus">A started bus instance</param>
+        /// <param name="destinationAddress">The service address</param>
         /// <param name="message">The request message</param>
-        /// <param name="callback">A callback to configure the request and response handlers</param>
-        /// <param name="cancellationToken">Can be used to cancel the request</param>
-        /// <returns>An awaitable task that completes once the request is sent</returns>
-        public static async Task<Request<TRequest>> Request<TRequest>(this IBus bus, Uri address, TRequest message,
-            Action<IRequestConfigurator<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
+        /// <param name="cancellationToken">An optional cancellationToken for this request</param>
+        /// <param name="timeout">An optional timeout for the request (defaults to 30 seconds)</param>
+        /// <param name="callback">A callback, which can modify the <see cref="SendContext"/> of the request</param>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <returns></returns>
+        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, Uri destinationAddress, TRequest message,
+            CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
+            where TResponse : class
         {
-            ISendEndpoint endpoint = await bus.GetSendEndpoint(address).ConfigureAwait(false);
+            var requestClient = bus.CreateRequestClient<TRequest>(destinationAddress, timeout);
 
-            return await Request(bus, endpoint, message, callback, cancellationToken).ConfigureAwait(false);
+            var requestHandle = requestClient.Create(message, cancellationToken);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
+
+            return requestHandle.GetResponse<TResponse>();
         }
 
         /// <summary>
-        /// Send a request from the bus to the endpoint, establishing response handlers
+        /// Send a request from the bus to the endpoint, and return a Task which can be awaited for the response.
         /// </summary>
-        /// <typeparam name="TRequest">The request message type</typeparam>
-        /// <param name="bus">The bus instance</param>
-        /// <param name="sendEndpoint">The service endpoint</param>
-        /// <param name="message">The request message</param>
-        /// <param name="callback">A callback to configure the request and response handlers</param>
-        /// <param name="cancellationToken">Can be used to cancel the request</param>
-        /// <returns>An awaitable task that completes once the request is sent</returns>
-        public static async Task<Request<TRequest>> Request<TRequest>(this IBus bus, ISendEndpoint sendEndpoint, TRequest message,
-            Action<IRequestConfigurator<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
+        /// <param name="bus">A started bus instance</param>
+        /// <param name="destinationAddress">The service address</param>
+        /// <param name="values">The values used to initialize the request message</param>
+        /// <param name="cancellationToken">An optional cancellationToken for this request</param>
+        /// <param name="timeout">An optional timeout for the request (defaults to 30 seconds)</param>
+        /// <param name="callback">A callback, which can modify the <see cref="SendContext"/> of the request</param>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <returns></returns>
+        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, Uri destinationAddress, object values,
+            CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
+            where TResponse : class
         {
-            TaskScheduler taskScheduler = SynchronizationContext.Current == null
-                ? TaskScheduler.Default
-                : TaskScheduler.FromCurrentSynchronizationContext();
+            var message = TypeMetadataCache<TRequest>.InitializeFromObject(values);
 
-            var pipe = new SendRequest<TRequest>(bus, bus.Address, taskScheduler, callback);
-
-            await sendEndpoint.Send(message, pipe, cancellationToken).ConfigureAwait(false);
-
-            return pipe;
+            return Request<TRequest, TResponse>(bus, destinationAddress, message, cancellationToken, timeout, callback);
         }
 
         /// <summary>
-        /// Publish a request from the bus, establishing response handlers. Using Request with an address is highly
-        /// recommended, but this was requested by several users.
+        /// Send a request from the bus to the endpoint, and return a Task which can be awaited for the response.
         /// </summary>
-        /// <typeparam name="TRequest">The request message type</typeparam>
-        /// <param name="bus">The bus instance</param>
+        /// <param name="bus">A started bus instance</param>
         /// <param name="message">The request message</param>
-        /// <param name="callback">A callback to configure the request and response handlers</param>
-        /// <param name="cancellationToken">Can be used to cancel the request</param>
-        /// <returns>An awaitable task that completes once the request is sent</returns>
-        public static async Task<Request<TRequest>> PublishRequest<TRequest>(this IBus bus, TRequest message,
-            Action<IRequestConfigurator<TRequest>> callback, CancellationToken cancellationToken = default(CancellationToken))
+        /// <param name="cancellationToken">An optional cancellationToken for this request</param>
+        /// <param name="timeout">An optional timeout for the request (defaults to 30 seconds)</param>
+        /// <param name="callback">A callback, which can modify the <see cref="SendContext"/> of the request</param>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <returns></returns>
+        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, TRequest message, CancellationToken cancellationToken = default,
+            RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
+            where TResponse : class
         {
-            TaskScheduler taskScheduler = SynchronizationContext.Current == null
-                ? TaskScheduler.Default
-                : TaskScheduler.FromCurrentSynchronizationContext();
+            var requestClient = bus.CreateRequestClient<TRequest>(timeout);
 
-            var pipe = new SendRequest<TRequest>(bus, bus.Address, taskScheduler, callback);
+            var requestHandle = requestClient.Create(message, cancellationToken);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
 
-            await bus.Publish(message, pipe, cancellationToken).ConfigureAwait(false);
+            return requestHandle.GetResponse<TResponse>();
+        }
 
-            return pipe;
+        /// <summary>
+        /// Send a request from the bus to the endpoint, and return a Task which can be awaited for the response.
+        /// </summary>
+        /// <param name="bus">A started bus instance</param>
+        /// <param name="values">The values used to initialize the request message</param>
+        /// <param name="cancellationToken">An optional cancellationToken for this request</param>
+        /// <param name="timeout">An optional timeout for the request (defaults to 30 seconds)</param>
+        /// <param name="callback">A callback, which can modify the <see cref="SendContext"/> of the request</param>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <returns></returns>
+        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, object values, CancellationToken cancellationToken = default,
+            RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
+            where TRequest : class
+            where TResponse : class
+        {
+            var message = TypeMetadataCache<TRequest>.InitializeFromObject(values);
+
+            return Request<TRequest, TResponse>(bus, message, cancellationToken, timeout, callback);
+        }
+
+        /// <summary>
+        /// Send a request from the bus to the endpoint, and return a Task which can be awaited for the response.
+        /// </summary>
+        /// <param name="consumeContext"></param>
+        /// <param name="bus">A started bus instance</param>
+        /// <param name="destinationAddress">The service address</param>
+        /// <param name="message">The request message</param>
+        /// <param name="cancellationToken">An optional cancellationToken for this request</param>
+        /// <param name="timeout">An optional timeout for the request (defaults to 30 seconds)</param>
+        /// <param name="callback">A callback, which can modify the <see cref="SendContext"/> of the request</param>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <returns></returns>
+        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, Uri destinationAddress,
+            TRequest message, CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
+            where TRequest : class
+            where TResponse : class
+        {
+            var requestClient = consumeContext.CreateRequestClient<TRequest>(bus, destinationAddress, timeout);
+
+            var requestHandle = requestClient.Create(message, cancellationToken);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
+
+            return requestHandle.GetResponse<TResponse>();
+        }
+
+        /// <summary>
+        /// Send a request from the bus to the endpoint, and return a Task which can be awaited for the response.
+        /// </summary>
+        /// <param name="consumeContext"></param>
+        /// <param name="bus">A started bus instance</param>
+        /// <param name="destinationAddress">The service address</param>
+        /// <param name="values">The values used to initialize the request message</param>
+        /// <param name="cancellationToken">An optional cancellationToken for this request</param>
+        /// <param name="timeout">An optional timeout for the request (defaults to 30 seconds)</param>
+        /// <param name="callback">A callback, which can modify the <see cref="SendContext"/> of the request</param>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <returns></returns>
+        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, Uri destinationAddress,
+            object values, CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
+            where TRequest : class
+            where TResponse : class
+        {
+            var message = TypeMetadataCache<TRequest>.InitializeFromObject(values);
+
+            return Request<TRequest, TResponse>(consumeContext, bus, destinationAddress, message, cancellationToken, timeout, callback);
+        }
+
+        /// <summary>
+        /// Send a request from the bus to the endpoint, and return a Task which can be awaited for the response.
+        /// </summary>
+        /// <param name="consumeContext"></param>
+        /// <param name="bus">A started bus instance</param>
+        /// <param name="message">The request message</param>
+        /// <param name="cancellationToken">An optional cancellationToken for this request</param>
+        /// <param name="timeout">An optional timeout for the request (defaults to 30 seconds)</param>
+        /// <param name="callback">A callback, which can modify the <see cref="SendContext"/> of the request</param>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <returns></returns>
+        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, TRequest message,
+            CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
+            where TRequest : class
+            where TResponse : class
+        {
+            var requestClient = consumeContext.CreateRequestClient<TRequest>(bus, timeout);
+
+            var requestHandle = requestClient.Create(message, cancellationToken);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
+
+            return requestHandle.GetResponse<TResponse>();
+        }
+
+        /// <summary>
+        /// Send a request from the bus to the endpoint, and return a Task which can be awaited for the response.
+        /// </summary>
+        /// <param name="consumeContext"></param>
+        /// <param name="bus">A started bus instance</param>
+        /// <param name="values">The values used to initialize the request message</param>
+        /// <param name="cancellationToken">An optional cancellationToken for this request</param>
+        /// <param name="timeout">An optional timeout for the request (defaults to 30 seconds)</param>
+        /// <param name="callback">A callback, which can modify the <see cref="SendContext"/> of the request</param>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <returns></returns>
+        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, object values,
+            CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
+            where TRequest : class
+            where TResponse : class
+        {
+            var message = TypeMetadataCache<TRequest>.InitializeFromObject(values);
+
+            return Request<TRequest, TResponse>(consumeContext, bus, message, cancellationToken, timeout, callback);
         }
     }
 }

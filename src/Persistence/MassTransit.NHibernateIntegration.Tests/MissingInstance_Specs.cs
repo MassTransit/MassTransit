@@ -61,21 +61,14 @@ namespace MassTransit.NHibernateIntegration.Tests
             [Test]
             public async Task Should_publish_the_event_of_the_missing_instance()
             {
-                Task<Status> statusTask = null;
-                Task<InstanceNotFound> notFoundTask = null;
-                await Bus.Request(InputQueueAddress, new CheckStatus("A"), x =>
-                {
-                    statusTask = x.Handle<Status>();
-                    notFoundTask = x.Handle<InstanceNotFound>();
-                    x.Timeout = TestTimeout;
-                }, TestCancellationToken);
+                var requestClient = Bus.CreateRequestClient<CheckStatus>(InputQueueAddress, TestTimeout);
 
-                await Task.WhenAny(statusTask, notFoundTask);
+                var (status, notFound) = await requestClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("A"), TestCancellationToken);
 
-                Assert.AreEqual(TaskStatus.WaitingForActivation, statusTask.Status);
-                Assert.AreEqual(TaskStatus.RanToCompletion, notFoundTask.Status);
+                Assert.AreEqual(TaskStatus.WaitingForActivation, status.Status);
+                Assert.AreEqual(TaskStatus.RanToCompletion, notFound.Status);
 
-                Assert.AreEqual("A", notFoundTask.Result.ServiceName);
+                Assert.AreEqual("A", notFound.Result.Message.ServiceName);
             }
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

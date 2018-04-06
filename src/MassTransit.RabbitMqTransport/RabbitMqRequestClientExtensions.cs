@@ -14,6 +14,8 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
+    using Clients;
+    using Clients.Contexts;
     using RabbitMqTransport;
 
 
@@ -25,24 +27,96 @@ namespace MassTransit
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <param name="host"></param>
-        /// <param name="sendEndpointProvider"></param>
-        /// <param name="address">The service address that handles the request</param>
+        /// <param name="destinationAddress">The service address that handles the request</param>
         /// <param name="timeout">The timeout before the request is cancelled</param>
-        /// <param name="ttl">THe time to live for the request message</param>
+        /// <param name="timeToLive">THe time to live for the request message</param>
         /// <param name="callback">Callback when the request is sent</param>
         /// <returns></returns>
-        public static async Task<IRequestClient<TRequest, TResponse>> CreateRequestClient<TRequest, TResponse>(this IRabbitMqHost host,
-            ISendEndpointProvider sendEndpointProvider, Uri address, TimeSpan timeout, TimeSpan? ttl = default,
-            Action<SendContext<TRequest>> callback = null)
+        public static async Task<IRequestClient<TRequest, TResponse>> CreateRequestClient<TRequest, TResponse>(this IRabbitMqHost host, Uri destinationAddress,
+            TimeSpan timeout, TimeSpan? timeToLive = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
-            var endpoint = host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryQueueName("response"));
+            var clientFactory = await host.CreateClientFactory(timeout).ConfigureAwait(false);
 
-            var ready = await endpoint.Ready.ConfigureAwait(false);
+            IRequestClient<TRequest> requestClient = clientFactory.CreateRequestClient<TRequest>(destinationAddress);
 
-            return new MessageRequestClient<TRequest, TResponse>(sendEndpointProvider, ready.ReceiveEndpoint, ready.InputAddress, address, timeout, ttl,
-                callback);
+            return new MessageRequestClient<TRequest, TResponse>(requestClient, timeToLive, callback);
+        }
+
+        /// <summary>
+        /// Creates a request client that uses the bus to publish a request.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <param name="timeout">The timeout before the request is cancelled</param>
+        /// <param name="callback">Callback when the request is sent</param>
+        /// <param name="timeToLive">The time that the request will live for</param>
+        /// <param name="host"></param>
+        /// <returns></returns>
+        public static async Task<IRequestClient<TRequest, TResponse>> CreatePublishRequestClient<TRequest, TResponse>(this IRabbitMqHost host, TimeSpan timeout,
+            TimeSpan? timeToLive = default, Action<SendContext<TRequest>> callback = null)
+            where TRequest : class
+            where TResponse : class
+        {
+            var clientFactory = await host.CreateClientFactory(timeout).ConfigureAwait(false);
+
+            IRequestClient<TRequest> requestClient = clientFactory.CreateRequestClient<TRequest>();
+
+            return new MessageRequestClient<TRequest, TResponse>(requestClient, timeToLive, callback);
+        }
+
+        /// <summary>
+        /// Creates a request client factory which can be used to create a request client per message within a consume context.
+        /// </summary>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResponse"></typeparam>
+        /// <param name="host">The host for the response endpoint</param>
+        /// <param name="destinationAddress">The service address</param>
+        /// <param name="timeout">The request timeout</param>
+        /// <param name="timeToLive">The request time to live</param>
+        /// <param name="callback">Customize the send context</param>
+        /// <returns></returns>
+        public static async Task<IRequestClientFactory<TRequest, TResponse>> CreateRequestClientFactory<TRequest, TResponse>(this IRabbitMqHost host,
+            Uri destinationAddress, TimeSpan timeout, TimeSpan? timeToLive = default, Action<SendContext<TRequest>> callback = null)
+            where TRequest : class
+            where TResponse : class
+        {
+            var receiveEndpointHandle = ConnectResponseEndpoint(host);
+
+            var ready = await receiveEndpointHandle.Ready.ConfigureAwait(false);
+
+            var context = new HostReceiveEndpointClientFactoryContext(receiveEndpointHandle, ready, timeout);
+
+            IClientFactory clientFactory = new ClientFactory(context);
+
+            return new MessageRequestClientFactory<TRequest, TResponse>(context, clientFactory, destinationAddress, timeToLive, callback);
+        }
+
+        /// <summary>
+        /// Creates a request client factory which can be used to create a request client per message within a consume context.
+        /// </summary>
+        /// <typeparam name="TRequest"></typeparam>
+        /// <typeparam name="TResponse"></typeparam>
+        /// <param name="host">The host for the response endpoint</param>
+        /// <param name="timeout">The request timeout</param>
+        /// <param name="timeToLive">The request time to live</param>
+        /// <param name="callback">Customize the send context</param>
+        /// <returns></returns>
+        public static async Task<IRequestClientFactory<TRequest, TResponse>> CreatePublishRequestClientFactory<TRequest, TResponse>(this IRabbitMqHost host,
+            TimeSpan timeout, TimeSpan? timeToLive = default, Action<SendContext<TRequest>> callback = null)
+            where TRequest : class
+            where TResponse : class
+        {
+            var receiveEndpointHandle = ConnectResponseEndpoint(host);
+
+            var ready = await receiveEndpointHandle.Ready.ConfigureAwait(false);
+
+            var context = new HostReceiveEndpointClientFactoryContext(receiveEndpointHandle, ready, timeout);
+
+            IClientFactory clientFactory = new ClientFactory(context);
+
+            return new MessageRequestClientFactory<TRequest, TResponse>(context, clientFactory, null, timeToLive, callback);
         }
 
         /// <summary>
@@ -53,7 +127,7 @@ namespace MassTransit
         /// <returns></returns>
         public static Task<IClientFactory> CreateClientFactory(this IRabbitMqHost host, RequestTimeout timeout = default)
         {
-            var receiveEndpointHandle = host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryQueueName("response"));
+            var receiveEndpointHandle = ConnectResponseEndpoint(host);
 
             return receiveEndpointHandle.CreateClientFactory(timeout);
         }
@@ -74,52 +148,26 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Creates a request client factory which can be used to create a request client per message within a consume context.
+        /// Create a request client from the bus, creating a response endpoint, and publishing the request versus sending it.
         /// </summary>
-        /// <typeparam name="TRequest"></typeparam>
-        /// <typeparam name="TResponse"></typeparam>
-        /// <param name="host">The host for the response endpoint</param>
-        /// <param name="address">The service address</param>
-        /// <param name="timeout">The request timeout</param>
-        /// <param name="timeToLive">The request time to live</param>
-        /// <param name="callback">Customize the send context</param>
+        /// <param name="host">The host to connect the new receive endpoint</param>
+        /// <param name="timeout">The default request timeout</param>
         /// <returns></returns>
-        [Obsolete("Use ConnectClientFactory or ConnectRequestClient instead")]
-        public static async Task<IRequestClientFactory<TRequest, TResponse>> CreateRequestClientFactory<TRequest, TResponse>(this IRabbitMqHost host,
-            Uri address, TimeSpan timeout, TimeSpan? timeToLive = default, Action<SendContext<TRequest>> callback = null)
-            where TRequest : class
-            where TResponse : class
+        public static async Task<IRequestClient<T>> CreateRequestClient<T>(this IRabbitMqHost host, RequestTimeout timeout = default)
+            where T : class
         {
-            var endpoint = host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryQueueName("response"));
+            var clientFactory = await CreateClientFactory(host, timeout).ConfigureAwait(false);
 
-            var ready = await endpoint.Ready.ConfigureAwait(false);
-
-            return new MessageRequestClientFactory<TRequest, TResponse>(endpoint, ready.ReceiveEndpoint, ready.InputAddress, address, timeout, timeToLive,
-                callback);
+            return clientFactory.CreateRequestClient<T>();
         }
 
-        /// <summary>
-        /// Creates a request client that uses the bus to publish a request.
-        /// </summary>
-        /// <typeparam name="TRequest">The request type</typeparam>
-        /// <typeparam name="TResponse">The response type</typeparam>
-        /// <param name="timeout">The timeout before the request is cancelled</param>
-        /// <param name="callback">Callback when the request is sent</param>
-        /// <param name="ttl">The time that the request will live for</param>
-        /// <param name="host"></param>
-        /// <param name="publishEndpoint"></param>
-        /// <returns></returns>
-        [Obsolete("Use ConnectClientFactory or ConnectRequestClient instead")]
-        public static async Task<IRequestClient<TRequest, TResponse>> CreatePublishRequestClient<TRequest, TResponse>(this IRabbitMqHost host,
-            IPublishEndpoint publishEndpoint, TimeSpan timeout, TimeSpan? ttl = default, Action<SendContext<TRequest>> callback = null)
-            where TRequest : class
-            where TResponse : class
+        static HostReceiveEndpointHandle ConnectResponseEndpoint(IRabbitMqHost host)
         {
-            var endpoint = host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryQueueName("response"));
-
-            var ready = await endpoint.Ready.ConfigureAwait(false);
-
-            return new PublishRequestClient<TRequest, TResponse>(publishEndpoint, ready.ReceiveEndpoint, ready.InputAddress, timeout, ttl, callback);
+            return host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryResponseQueueName(), x =>
+            {
+                x.Durable = false;
+                x.AutoDelete = true;
+            });
         }
     }
 }

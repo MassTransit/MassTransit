@@ -47,7 +47,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                     throw new InvalidOperationException("The job was not created and cannot be started");
 
                 JobStatus = JobStatus.Running;
-                context.Respond(new JobStarted { JobId = JobId });
+                context.Respond(new JobStarted {JobId = JobId});
 
                 return TaskUtil.Completed;
             }
@@ -109,22 +109,15 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             [Test]
             public async Task The_saga_should_be_loaded()
             {
-                Task<JobCreated> created = null;
-                await Bus.Request(InputQueueSendEndpoint, new CreateJob(_jobId), x =>
+                var created = await Bus.Request<CreateJob, JobCreated>(InputQueueAddress, new CreateJob(_jobId), TestCancellationToken, TestTimeout, x =>
                 {
                     x.SetSessionId(_jobId.ToString());
-                    created = x.Handle<JobCreated>();
                 });
-                await created;
 
-
-                Task<JobStarted> started = null;
-                await Bus.Request(InputQueueSendEndpoint, new StartJob(_jobId), x =>
+                var started = await Bus.Request<StartJob, JobStarted>(InputQueueAddress, new StartJob(_jobId), TestCancellationToken, TestTimeout, x =>
                 {
                     x.SetSessionId(_jobId.ToString());
-                    started = x.Handle<JobStarted>();
                 });
-                await started;
             }
 
             public Using_a_message_session_as_a_saga_repository()

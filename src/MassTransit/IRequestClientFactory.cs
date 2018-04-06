@@ -27,7 +27,7 @@ namespace MassTransit
         where TRequest : class
         where TResponse : class
     {
-        IRequestClient<TRequest, TResponse> CreateRequestClient(ISendEndpointProvider sendEndpointProvider, TimeSpan? timeout = null,
+        IRequestClient<TRequest, TResponse> CreateRequestClient(ConsumeContext consumeContext, TimeSpan? timeout = null,
             TimeSpan? timeToLive = null, Action<SendContext<TRequest>> callback = null);
     }
 }

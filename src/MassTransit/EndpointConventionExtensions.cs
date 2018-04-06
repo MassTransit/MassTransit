@@ -29,14 +29,11 @@ namespace MassTransit
         /// <param name="message">The message</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static async Task Send<T>(this ISendEndpointProvider provider, T message, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task Send<T>(this ISendEndpointProvider provider, T message, CancellationToken cancellationToken = default)
             where T : class
         {
-            Uri destinationAddress;
-            if (!EndpointConvention.TryGetDestinationAddress(message, out destinationAddress))
-            {
+            if (!EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache<T>.ShortName} was not found");
-            }
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -53,14 +50,11 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send<T>(this ISendEndpointProvider provider, T message, IPipe<SendContext<T>> pipe,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
-            Uri destinationAddress;
-            if (!EndpointConvention.TryGetDestinationAddress(message, out destinationAddress))
-            {
+            if (!EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache<T>.ShortName} was not found");
-            }
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -76,15 +70,11 @@ namespace MassTransit
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static async Task Send<T>(this ISendEndpointProvider provider, T message, IPipe<SendContext> pipe,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task Send<T>(this ISendEndpointProvider provider, T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            Uri destinationAddress;
-            if (!EndpointConvention.TryGetDestinationAddress(message, out destinationAddress))
-            {
+            if (!EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache<T>.ShortName} was not found");
-            }
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -98,22 +88,19 @@ namespace MassTransit
         /// <param name="message">The message</param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static async Task Send(this ISendEndpointProvider provider, object message, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task Send(this ISendEndpointProvider provider, object message, CancellationToken cancellationToken = default)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
             var messageType = message.GetType();
 
-            Uri destinationAddress;
-            if (!EndpointConvention.TryGetDestinationAddress(message, out destinationAddress))
-            {
+            if (!EndpointConvention.TryGetDestinationAddress(messageType, out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache.GetShortName(messageType)} was not found");
-            }
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, cancellationToken).ConfigureAwait(false);
+            await endpoint.Send(message, messageType, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -124,14 +111,10 @@ namespace MassTransit
         /// <param name="messageType"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static async Task Send(this ISendEndpointProvider provider, object message, Type messageType,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task Send(this ISendEndpointProvider provider, object message, Type messageType, CancellationToken cancellationToken = default)
         {
-            Uri destinationAddress;
-            if (!EndpointConvention.TryGetDestinationAddress(message, out destinationAddress))
-            {
+            if (!EndpointConvention.TryGetDestinationAddress(messageType, out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache.GetShortName(messageType)} was not found");
-            }
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -148,18 +131,16 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send(this ISendEndpointProvider provider, object message, Type messageType, IPipe<SendContext> pipe,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
-            Uri destinationAddress;
-            if (!EndpointConvention.TryGetDestinationAddress(message, out destinationAddress))
-            {
+            if (!EndpointConvention.TryGetDestinationAddress(messageType, out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache.GetShortName(messageType)} was not found");
-            }
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -175,18 +156,15 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send(this ISendEndpointProvider provider, object message, IPipe<SendContext> pipe,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
             var messageType = message.GetType();
 
-            Uri destinationAddress;
-            if (!EndpointConvention.TryGetDestinationAddress(message, out destinationAddress))
-            {
+            if (!EndpointConvention.TryGetDestinationAddress(messageType, out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache.GetShortName(messageType)} was not found");
-            }
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -201,20 +179,17 @@ namespace MassTransit
         /// <param name="values"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static async Task Send<T>(this ISendEndpointProvider provider, object values, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task Send<T>(this ISendEndpointProvider provider, object values, CancellationToken cancellationToken = default)
             where T : class
         {
             var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
-            Uri destinationAddress;
-            if (!EndpointConvention.TryGetDestinationAddress(message, out destinationAddress))
-            {
+            if (!EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache<T>.ShortName} was not found");
-            }
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
+            await endpoint.Send(message, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -227,20 +202,17 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send<T>(this ISendEndpointProvider provider, object values, IPipe<SendContext<T>> pipe,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
             var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
-            Uri destinationAddress;
-            if (!EndpointConvention.TryGetDestinationAddress(message, out destinationAddress))
-            {
+            if (!EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache<T>.ShortName} was not found");
-            }
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send(values, pipe, cancellationToken).ConfigureAwait(false);
+            await endpoint.Send(message, pipe, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -253,20 +225,17 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static async Task Send<T>(this ISendEndpointProvider provider, object values, IPipe<SendContext> pipe,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
             var message = TypeMetadataCache<T>.InitializeFromObject(values);
 
-            Uri destinationAddress;
-            if (!EndpointConvention.TryGetDestinationAddress(message, out destinationAddress))
-            {
+            if (!EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 throw new ArgumentException($"A convention for the message type {TypeMetadataCache<T>.ShortName} was not found");
-            }
 
             var endpoint = await provider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send<T>(values, pipe, cancellationToken).ConfigureAwait(false);
+            await endpoint.Send(message, pipe, cancellationToken).ConfigureAwait(false);
         }
     }
 }

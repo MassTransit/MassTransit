@@ -91,7 +91,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _requestClient = await Host.CreateRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
+            _requestClient = await Host.CreateRequestClient<PingMessage, PongMessage>(InputQueueAddress, TestTimeout);
 
             _response = _requestClient.Request(new PingMessage());
         }

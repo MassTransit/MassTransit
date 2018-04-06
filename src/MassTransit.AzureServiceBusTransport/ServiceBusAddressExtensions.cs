@@ -102,7 +102,7 @@ namespace MassTransit.AzureServiceBusTransport
             IServiceBusReceiveEndpointConfigurator specification = null;
             configurator.ReceiveEndpoint(host, queueName, x =>
             {
-                x.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
+                x.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle;
                 x.EnableExpress = true;
 
                 configure?.Invoke(x);

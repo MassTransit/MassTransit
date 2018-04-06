@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Clients;
     using Clients.Contexts;
+    using Transports.InMemory;
 
 
     public static class ClientFactoryExtensions
@@ -33,6 +34,52 @@ namespace MassTransit
             var clientFactory = new ClientFactory(new BusClientFactoryContext(bus, timeout));
 
             return clientFactory.CreateRequestClient<TRequest>(destinationAddress, timeout);
+        }
+
+        /// <summary>
+        /// Create a request client from the bus, using the default bus endpoint for responses, and publishing the request versus sending it.
+        /// </summary>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="timeout">The default request timeout</param>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        public static IRequestClient<TRequest> CreateRequestClient<TRequest>(this IBus bus, RequestTimeout timeout = default)
+            where TRequest : class
+        {
+            var clientFactory = new ClientFactory(new BusClientFactoryContext(bus, timeout));
+
+            return clientFactory.CreateRequestClient<TRequest>(timeout);
+        }
+
+        /// <summary>
+        /// Create a request client from the bus, using the default bus endpoint for responses
+        /// </summary>
+        /// <param name="consumeContext"></param>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="destinationAddress">The request service address</param>
+        /// <param name="timeout">The default request timeout</param>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        public static IRequestClient<TRequest> CreateRequestClient<TRequest>(this ConsumeContext consumeContext, IBus bus, Uri destinationAddress,
+            RequestTimeout timeout = default)
+            where TRequest : class
+        {
+            var clientFactory = new ClientFactory(new BusClientFactoryContext(bus, timeout));
+
+            return clientFactory.CreateRequestClient<TRequest>(consumeContext, destinationAddress, timeout);
+        }
+
+        /// <summary>
+        /// Create a request client from the bus, using the default bus endpoint for responses
+        /// </summary>
+        /// <param name="consumeContext"></param>
+        /// <param name="bus">The bus instance</param>
+        /// <param name="timeout">The default request timeout</param>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        public static IRequestClient<TRequest> CreateRequestClient<TRequest>(this ConsumeContext consumeContext, IBus bus, RequestTimeout timeout = default)
+            where TRequest : class
+        {
+            var clientFactory = new ClientFactory(new BusClientFactoryContext(bus, timeout));
+
+            return clientFactory.CreateRequestClient<TRequest>(consumeContext, timeout);
         }
 
         /// <summary>
@@ -72,6 +119,19 @@ namespace MassTransit
             var context = new HostReceiveEndpointClientFactoryContext(receiveEndpointHandle, ready, timeout);
 
             return new ClientFactory(context);
+        }
+
+        /// <summary>
+        /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory"/>.
+        /// </summary>
+        /// <param name="host">The host to connect the new receive endpoint</param>
+        /// <param name="timeout">The default request timeout</param>
+        /// <returns></returns>
+        public static Task<IClientFactory> CreateClientFactory(this IInMemoryHost host, RequestTimeout timeout = default)
+        {
+            var receiveEndpointHandle = host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryResponseQueueName());
+
+            return receiveEndpointHandle.CreateClientFactory(timeout);
         }
     }
 }

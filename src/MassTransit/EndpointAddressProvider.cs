@@ -17,9 +17,8 @@ namespace MassTransit
     /// <summary>
     /// Returns the address for the message provided
     /// </summary>
-    /// <param name="message"></param>
     /// <param name="address"></param>
     /// <returns></returns>
-    public delegate bool EndpointAddressProvider<in T>(T message, out Uri address)
+    public delegate bool EndpointAddressProvider<in T>(out Uri address)
         where T : class;
 }

@@ -75,6 +75,7 @@ namespace MassTransit.AzureServiceBusTransport
         }
 
         public static TimeSpan AutoDeleteOnIdle => TimeSpan.FromDays(427);
+        public static TimeSpan TemporaryAutoDeleteOnIdle => TimeSpan.FromMinutes(5);
         public static TimeSpan LockDuration = TimeSpan.FromMinutes(5);
         public static TimeSpan DefaultMessageTimeToLive = TimeSpan.FromDays(365 + 1);
         public static TimeSpan BasicMessageTimeToLive = TimeSpan.FromDays(14);

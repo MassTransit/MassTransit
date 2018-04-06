@@ -17,6 +17,7 @@ namespace MassTransit.Tests
     using GreenPipes;
     using GreenPipes.Introspection;
     using NUnit.Framework;
+    using NUnit.Framework.Constraints;
     using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
@@ -85,10 +86,10 @@ namespace MassTransit.Tests
             _correlationId = Guid.NewGuid();
 
             InputQueueSendEndpoint.Send(new PingMessage(), Pipe.New<SendContext<PingMessage>>(x => x.UseExecute(context =>
-            {
-                context.CorrelationId = _correlationId;
-                context.Headers.Set("One", "1");
-            })))
+                {
+                    context.CorrelationId = _correlationId;
+                    context.Headers.Set("One", "1");
+                })))
                 .Wait(TestCancellationToken);
         }
 
@@ -106,9 +107,9 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_have_received_the_response_on_the_handler()
         {
-            PongMessage message = await _response;
+            Response<PongMessage> message = await _request;
 
-            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            message.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
 
         [Test]
@@ -151,20 +152,10 @@ namespace MassTransit.Tests
             context.ConversationId.ShouldBe(_conversationId);
         }
 
-        [Test]
-        public async Task Should_call_the_middleware()
-        {
-            ConsumeContext<PongMessage> context = await _responseMiddleware.Task;
-
-            context.ConversationId.ShouldBe(_conversationId);
-        }
-
         Task<ConsumeContext<PingMessage>> _ping;
         Task<ConsumeContext<PongMessage>> _responseHandler;
-        Task<Request<PingMessage>> _request;
-        Task<PongMessage> _response;
+        Task<Response<PongMessage>> _request;
         Guid? _conversationId;
-        TaskCompletionSource<ConsumeContext<PongMessage>> _responseMiddleware;
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -172,20 +163,10 @@ namespace MassTransit.Tests
             _responseHandler = SubscribeHandler<PongMessage>();
             _conversationId = NewId.NextGuid();
 
-            _responseMiddleware = GetTask<ConsumeContext<PongMessage>>();
-
-            _request = Bus.Request(InputQueueAddress, new PingMessage(), x =>
+            _request = Bus.Request<PingMessage, PongMessage>(InputQueueAddress, new PingMessage(), TestCancellationToken, TestTimeout, x =>
             {
                 x.ConversationId = _conversationId;
-
-                _response = x.Handle<PongMessage>(async context =>
-                {
-                    Console.WriteLine("Response received");
-                }, cfg => cfg.UseExecute(context => _responseMiddleware.TrySetResult(context)));
-                x.Timeout = TestTimeout;
             });
-
-            await _request;
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -202,42 +183,38 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_have_received_the_actual_response()
         {
-            PingNotSupported message = await _notSupported;
+            var (_, notSupported) = await _request;
 
-            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            Response<PingNotSupported> message = await notSupported;
+
+            message.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
 
         [Test]
         public async Task Should_not_complete_the_handler()
         {
-            await _notSupported;
+            var (_, notSupported) = await _request;
+
+            Response<PingNotSupported> message = await notSupported;
 
             await BusSendEndpoint.Send(new PongMessage((await _ping).Message.CorrelationId));
 
-            Assert.That(async () => await _response, Throws.TypeOf<TaskCanceledException>());
+            var (completed, _) = await _request;
+
+            Assert.That(async () => await completed, Throws.TypeOf<TaskCanceledException>());
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
         Task<ConsumeContext<PongMessage>> _responseHandler;
-        Task<Request<PingMessage>> _request;
-        Task<PongMessage> _response;
-        Task<PingNotSupported> _notSupported;
+        Task<(Task<Response<PingMessage>>, Task<Response<PingNotSupported>>)> _request;
 
         [OneTimeSetUp]
         public async Task Setup()
         {
             _responseHandler = SubscribeHandler<PongMessage>();
 
-            _request = Bus.Request(InputQueueAddress, new PingMessage(), x =>
-            {
-                _response = x.Handle<PongMessage>(async _ =>
-                {
-                });
-
-                _notSupported = x.Handle<PingNotSupported>(async _ =>
-                {
-                });
-            });
+            IRequestClient<PingMessage> requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
+            _request = requestClient.GetResponse<PingMessage, PingNotSupported>(new PingMessage(), TestCancellationToken);
 
             await _request;
         }
@@ -248,53 +225,31 @@ namespace MassTransit.Tests
         }
     }
 
+
     [TestFixture]
-    public class Publishing_a_request:
+    public class Publishing_a_request :
         InMemoryTestFixture
     {
         [Test]
         public async Task Should_have_received_the_response_on_the_handler()
         {
-            PongMessage message = await _response;
+            Response<PongMessage> message = await _request;
 
-            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            message.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
-
-        [Test, Explicit]
-        public async Task Should_wonderful_display()
-        {
-            ProbeResult result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-
-        }
-
 
         Task<ConsumeContext<PingMessage>> _ping;
-        Task<ConsumeContext<PongMessage>> _responseHandler;
-        Task<Request<PingMessage>> _request;
-        Task<PongMessage> _response;
+        Task<Response<PongMessage>> _request;
 
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _responseHandler = SubscribeHandler<PongMessage>();
-
-
-            _request = Bus.PublishRequest(new PingMessage(), x =>
-            {
-                x.Timeout = TimeSpan.FromSeconds(10);
-                _response = x.Handle<PongMessage>(async _ =>
-                {
-                });
-
-            });
-            await _request;
+            _request = Bus.Request<PingMessage, PongMessage>(new PingMessage(), TestCancellationToken, TestTimeout);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
+            _ping = Handler<PingMessage>(configurator, x => x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
         }
     }
 
@@ -306,36 +261,25 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_receive_a_request_timeout_exception_on_the_handler()
         {
-            Assert.That(async () => await _response, Throws.TypeOf<RequestTimeoutException>());
+            Assert.That(async () => await _request, Throws.TypeOf<RequestTimeoutException>());
         }
 
         [Test]
         public async Task Should_receive_a_request_timeout_exception_on_the_request()
         {
             Assert.That(async () =>
-            {
-                Request<PingMessage> request = await _request;
-
-                await request.Task;
-            }, 
-            Throws.TypeOf<RequestTimeoutException>());
+                {
+                    Response<PongMessage> response = await _request;
+                },
+                Throws.TypeOf<RequestTimeoutException>());
         }
 
-        Task<Request<PingMessage>> _request;
-        Task<PongMessage> _response;
+        Task<Response<PongMessage>> _request;
 
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _request = Bus.Request(InputQueueAddress, new PingMessage(), x =>
-            {
-                x.Timeout = TimeSpan.FromSeconds(1);
-
-                _response = x.Handle<PongMessage>(async _ =>
-                {
-                });
-            });
-            await _request;
+            _request = Bus.Request<PingMessage, PongMessage>(new PingMessage(), TestCancellationToken, RequestTimeout.After(s: 1));
         }
     }
 }

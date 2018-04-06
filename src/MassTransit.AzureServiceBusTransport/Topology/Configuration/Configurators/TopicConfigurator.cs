@@ -27,7 +27,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
         {
             if (temporary)
             {
-                AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
+                AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle;
                 EnableExpress = true;
             }
         }

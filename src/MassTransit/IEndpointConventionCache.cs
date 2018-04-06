@@ -21,9 +21,8 @@ namespace MassTransit
         /// <summary>
         /// Returns the endpoint address for the message
         /// </summary>
-        /// <param name="message"></param>
         /// <param name="address"></param>
         /// <returns></returns>
-        bool TryGetEndpointAddress(TMessage message, out Uri address);
+        bool TryGetEndpointAddress(out Uri address);
     }
 }

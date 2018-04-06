@@ -40,7 +40,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
             _queueConfigurator = new QueueConfigurator("no-host-configured")
             {
-                AutoDeleteOnIdle = TimeSpan.FromMinutes(5),
+                AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle,
                 EnableExpress = true
             };
 
