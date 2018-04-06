@@ -31,30 +31,18 @@ namespace MassTransit.Tests
             Task<ConsumeContext<PongMessage>> responseHandler = SubscribeHandler<PongMessage>();
 
             Assert.That(async () =>
-            {
-                Task<PongMessage> response = null;
-                Request<PingMessage> request = await Bus.Request(InputQueueSendEndpoint, new PingMessage(), x =>
                 {
-                    x.Timeout = TimeSpan.FromSeconds(3);
-                    response = x.Handle<PongMessage>(context => Console.Out.WriteLineAsync("Pong received"));
-                });
-
-                await request.Task;
-
-                Console.WriteLine("Request was okay");
-
-                await response;
-
-                Console.WriteLine("Response was okay");
-            }, 
-            Throws.TypeOf<RequestFaultException>());
+                    var response = await Bus.Request<PingMessage, PongMessage>(InputQueueAddress, new PingMessage(), TestCancellationToken,
+                        RequestTimeout.After(s: 3));
+                },
+                Throws.TypeOf<RequestFaultException>());
 
             await _pingReceived.Task;
 
             Console.WriteLine("Ping was received");
 
             Assert.That(
-                async () => await responseHandler.WithCancellation(new CancellationTokenSource(300).Token), 
+                async () => await responseHandler.WithCancellation(new CancellationTokenSource(300).Token),
                 Throws.TypeOf<TaskCanceledException>());
         }
 

@@ -16,17 +16,19 @@ namespace MassTransit
     using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading;
-    using Saga;
     using Util;
 
 
     public static class EndpointConventionCache
     {
-        public static bool TryGetEndpointAddress(object message, out Uri address)
+        public static bool TryGetEndpointAddress<T>(out Uri address)
         {
-            var messageType = message.GetType();
+            return GetOrAdd(typeof(T)).TryGetEndpointAddress(typeof(T), out address);
+        }
 
-            return GetOrAdd(messageType).TryGetEndpointAddress(message, out address);
+        public static bool TryGetEndpointAddress(Type messageType, out Uri address)
+        {
+            return GetOrAdd(messageType).TryGetEndpointAddress(messageType, out address);
         }
 
         static CachedConvention GetOrAdd(Type type)
@@ -44,7 +46,7 @@ namespace MassTransit
 
         interface CachedConvention
         {
-            bool TryGetEndpointAddress(object message, out Uri address);
+            bool TryGetEndpointAddress(Type messageType, out Uri address);
         }
 
 
@@ -52,13 +54,12 @@ namespace MassTransit
             CachedConvention
             where TMessage : class
         {
-            bool CachedConvention.TryGetEndpointAddress(object message, out Uri address)
+            bool CachedConvention.TryGetEndpointAddress(Type messageType, out Uri address)
             {
-                var messageOfT = message as TMessage;
-                if (messageOfT == null)
-                    throw new ArgumentException($"Message was not a valid type: {TypeMetadataCache<TMessage>.ShortName}", nameof(message));
+                if (!typeof(TMessage).IsAssignableFrom(messageType))
+                    throw new ArgumentException($"Message was not a valid type: {TypeMetadataCache<TMessage>.ShortName}", nameof(messageType));
 
-                return EndpointConventionCache<TMessage>.TryGetEndpointAddress(messageOfT, out address);
+                return EndpointConventionCache<TMessage>.TryGetEndpointAddress(out address);
             }
         }
     }
@@ -84,9 +85,9 @@ namespace MassTransit
             _endpointAddressProvider = new Lazy<EndpointAddressProvider<TMessage>>(() => endpointAddressProvider);
         }
 
-        bool IEndpointConventionCache<TMessage>.TryGetEndpointAddress(TMessage message, out Uri address)
+        bool IEndpointConventionCache<TMessage>.TryGetEndpointAddress(out Uri address)
         {
-            return _endpointAddressProvider.Value(message, out address);
+            return _endpointAddressProvider.Value(out address);
         }
 
         internal static void Map(EndpointAddressProvider<TMessage> endpointAddressProvider)
@@ -97,9 +98,9 @@ namespace MassTransit
             Cached.Metadata = new Lazy<IEndpointConventionCache<TMessage>>(() => new EndpointConventionCache<TMessage>(endpointAddressProvider));
         }
 
-        internal static bool TryGetEndpointAddress(TMessage message, out Uri address)
+        internal static bool TryGetEndpointAddress(out Uri address)
         {
-            return Cached.Metadata.Value.TryGetEndpointAddress(message, out address);
+            return Cached.Metadata.Value.TryGetEndpointAddress(out address);
         }
 
         EndpointAddressProvider<TMessage> CreateDefaultConvention()
@@ -112,11 +113,11 @@ namespace MassTransit
 
             if (implementedTypes.Any())
             {
-                return (TMessage message, out Uri address) =>
+                return (out Uri address) =>
                 {
                     for (var i = 0; i < implementedTypes.Length; i++)
                     {
-                        if (implementedTypes[i].TryGetEndpointAddress(message, out address))
+                        if (implementedTypes[i].TryGetEndpointAddress(out address))
                             return true;
                     }
 
@@ -125,9 +126,9 @@ namespace MassTransit
                 };
             }
 
-            return (TMessage message, out Uri address) =>
+            return (out Uri address) =>
             {
-                address = default(Uri);
+                address = default;
                 return false;
             };
         }
@@ -137,15 +138,14 @@ namespace MassTransit
             IEndpointConventionCache<TMessage>
             where TAdapter : class
         {
-            bool IEndpointConventionCache<TMessage>.TryGetEndpointAddress(TMessage message, out Uri address)
+            bool IEndpointConventionCache<TMessage>.TryGetEndpointAddress(out Uri address)
             {
-                var messageOfT = message as TAdapter;
-                if (messageOfT != null)
+                if (typeof(TAdapter).IsAssignableFrom(typeof(TMessage)))
                 {
-                    return EndpointConventionCache<TAdapter>.TryGetEndpointAddress(messageOfT, out address);
+                    return EndpointConventionCache<TAdapter>.TryGetEndpointAddress(out address);
                 }
 
-                address = default(Uri);
+                address = default;
                 return false;
             }
         }

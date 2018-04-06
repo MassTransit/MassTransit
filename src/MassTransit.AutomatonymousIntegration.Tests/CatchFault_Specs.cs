@@ -136,6 +136,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             public Guid CorrelationId { get; set; }
         }
 
+
         public class ServiceFaulted :
             CorrelatedBy<Guid>
         {
@@ -160,13 +161,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             var serviceFaulted = ConnectPublishHandler<ServiceFaulted>();
 
-            Task<StartFaulted> faulted = null;
-            var request = await Bus.Request(InputQueueSendEndpoint, message, x =>
-            {
-                faulted = x.Handle<StartFaulted>();
-            });
-
-            var startFaulted = await faulted;
+            var startFaulted = await Bus.Request<Start, StartFaulted>(InputQueueAddress, message, TestCancellationToken, TestTimeout);
 
             Assert.AreEqual(message.CorrelationId, startFaulted.CorrelationId);
 

@@ -27,22 +27,14 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         [Test]
         public async Task Should_publish_the_event_of_the_missing_instance()
         {
-            Task<Status> statusTask = null;
-            Task<InstanceNotFound> notFoundTask = null;
-            await Bus.Request(InputQueueAddress, new CheckStatus("A"), x =>
-            {
-                statusTask = x.Handle<Status>();
-                notFoundTask = x.Handle<InstanceNotFound>();
-                x.Timeout = TestTimeout;
-            }, TestCancellationToken).ConfigureAwait(false);
+            IRequestClient<CheckStatus> requestClient = Bus.CreateRequestClient<CheckStatus>(InputQueueAddress, TestTimeout);
+            var (status, notFound) = await requestClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("A"), TestCancellationToken);
 
-            await Task.WhenAny(statusTask, notFoundTask).ConfigureAwait(false);
+            Assert.That(async () => await status, Throws.TypeOf<TaskCanceledException>());
 
-            Assert.That(async() => await statusTask, Throws.TypeOf<TaskCanceledException>());
+            await notFound;
 
-            await notFoundTask;
-
-            Assert.AreEqual("A", notFoundTask.Result.ServiceName);
+            Assert.AreEqual("A", notFound.Result.Message.ServiceName);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -111,8 +103,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                     When(CheckStatus)
                         .Then(context => Console.WriteLine("Status check!"))
                         .Respond(context => new Status("Running", context.Instance.ServiceName)));
-
-                
             }
 
             public State Running { get; private set; }
@@ -130,6 +120,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             public string ServiceName { get; set; }
         }
+
 
         class Status
         {

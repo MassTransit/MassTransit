@@ -219,7 +219,7 @@ namespace MassTransit.Transports
                 if (_endpoint._sendPipe != null)
                     await _endpoint._sendPipe.Send(context).ConfigureAwait(false);
                 
-                if(_pipe.IsNotEmpty())
+                if (_pipe.IsNotEmpty())
                     await _pipe.Send(context).ConfigureAwait(false);
                
                 if (_sendPipe.IsNotEmpty())

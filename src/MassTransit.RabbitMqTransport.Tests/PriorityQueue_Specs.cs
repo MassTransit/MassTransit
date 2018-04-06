@@ -27,13 +27,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_allow_priority_to_be_specified()
         {
-            var endpoint = await Bus.GetSendEndpoint(_endpointAddress);
-
-            await Bus.Request(endpoint, new PingMessage(), x =>
+            await Bus.Request<PingMessage, PongMessage>(_endpointAddress, new PingMessage(), TestCancellationToken, TestTimeout, x =>
             {
                 x.SetPriority(2);
-
-                x.Handle<PongMessage>();
             });
         }
 

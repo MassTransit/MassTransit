@@ -49,7 +49,7 @@ namespace MassTransit.Transports.InMemory.Configurators
 
         public IBusControl CreateBus()
         {
-            var busQueueName = _inMemoryHost.Topology.CreateTemporaryQueueName("bus");
+            var busQueueName = _inMemoryHost.Topology.CreateTemporaryQueueName("bus-");
 
             var busReceiveEndpointConfiguration = _configuration.CreateReceiveEndpointConfiguration(busQueueName, _busEndpointConfiguration);
 

@@ -50,7 +50,7 @@ namespace MassTransit
                     turnoutEndpointConfigurator.EnableDeadLetteringOnMessageExpiration = true;
                     turnoutEndpointConfigurator.ForwardDeadLetteredMessagesTo = expiredQueueName;
 
-                    turnoutEndpointConfigurator.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
+                    turnoutEndpointConfigurator.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle;
 
                     // configure the input queue endpoint
                     busFactoryConfigurator.ReceiveEndpoint(host, queueName, commandEndpointConfigurator =>

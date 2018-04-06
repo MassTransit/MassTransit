@@ -16,7 +16,6 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
 
 
     public class MessageRequestClientFactory<TRequest, TResponse> :
@@ -25,41 +24,51 @@ namespace MassTransit
         where TResponse : class
     {
         readonly Action<SendContext<TRequest>> _callback;
-        readonly IRequestPipeConnector _connector;
+        readonly IAsyncDisposable _context;
         readonly Uri _destinationAddress;
-        readonly HostReceiveEndpointHandle _endpointHandle;
-        readonly Uri _responseAddress;
-        readonly TimeSpan _timeout;
+        readonly IClientFactory _clientFactory;
         readonly TimeSpan? _timeToLive;
 
-        public MessageRequestClientFactory(HostReceiveEndpointHandle endpointHandle, IRequestPipeConnector connector, Uri responseAddress,
-            Uri destinationAddress, TimeSpan timeout, TimeSpan? timeToLive,
+        public MessageRequestClientFactory(IAsyncDisposable context, IClientFactory clientFactory, Uri destinationAddress, TimeSpan? timeToLive,
             Action<SendContext<TRequest>> callback)
         {
-            _endpointHandle = endpointHandle;
-            _connector = connector;
-            _responseAddress = responseAddress;
+            _context = context;
+            _clientFactory = clientFactory;
             _destinationAddress = destinationAddress;
-            _timeout = timeout;
             _timeToLive = timeToLive;
             _callback = callback;
         }
 
-        public IRequestClient<TRequest, TResponse> CreateRequestClient(ISendEndpointProvider sendEndpointProvider, TimeSpan? timeout = null,
-            TimeSpan? timeToLive = null, Action<SendContext<TRequest>> callback = null)
+        IRequestClient<TRequest, TResponse> IRequestClientFactory<TRequest, TResponse>.CreateRequestClient(ConsumeContext consumeContext,
+            TimeSpan? timeout, TimeSpan? timeToLive, Action<SendContext<TRequest>> callback)
         {
-            return new MessageRequestClient<TRequest, TResponse>(sendEndpointProvider, _connector, _responseAddress, _destinationAddress, timeout ?? _timeout,
-                timeToLive ?? _timeToLive, context =>
-                {
-                    _callback?.Invoke(context);
+            Action<SendContext<TRequest>> actualCallback = null;
+            if (_callback != null)
+            {
+                if (callback != null)
+                    actualCallback = x =>
+                    {
+                        _callback(x);
+                        callback(x);
+                    };
+                else
+                    actualCallback = _callback;
+            }
+            else if (callback != null)
+                actualCallback = callback;
 
-                    callback?.Invoke(context);
-                });
+            RequestTimeout requestTimeout = timeout ?? RequestTimeout.None;
+
+            var client = _destinationAddress == null
+                ? _clientFactory.CreateRequestClient<TRequest>(consumeContext, requestTimeout)
+                : _clientFactory.CreateRequestClient<TRequest>(consumeContext, _destinationAddress, requestTimeout);
+
+            return new MessageRequestClient<TRequest, TResponse>(client, timeToLive ?? _timeToLive, actualCallback);
         }
 
-        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        public Task DisposeAsync(CancellationToken cancellationToken)
         {
-            return _endpointHandle.StopAsync(cancellationToken);
+            return _context.DisposeAsync(cancellationToken);
         }
     }
 }
