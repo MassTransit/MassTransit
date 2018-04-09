@@ -126,14 +126,30 @@ namespace MassTransit.RedisIntegration
 
         async Task UpdateRedisSaga(TSaga instance)
         {
-            ITypedDatabase<TSaga> sagas = _redisDbFactory().As<TSaga>();
+            RedisKey key = $"saga_lock_{instance.CorrelationId}";
+            RedisValue token = Environment.MachineName + Guid.NewGuid();
+            var db = _redisDbFactory();
+            ITypedDatabase<TSaga> sagas = db.As<TSaga>();
+            if(db.LockTake(key, token, TimeSpan.FromMinutes(1)))
+            {
+                try
+                {
+                    instance.Version++;
+                    var old = await sagas.Get(instance.CorrelationId).ConfigureAwait(false);
+                    if (old.Version >= instance.Version)
+                        throw new RedisSagaConcurrencyException($"Version conflict for saga with id {instance.CorrelationId}");
 
-            instance.Version++;
-            var old = await sagas.Get(instance.CorrelationId).ConfigureAwait(false);
-            if (old.Version > instance.Version)
+                    await sagas.Put(instance.CorrelationId, instance).ConfigureAwait(false);
+                }
+                finally {
+                    db.LockRelease(key, token);
+                }
+
+            }
+            else
+            {
                 throw new RedisSagaConcurrencyException($"Version conflict for saga with id {instance.CorrelationId}");
-
-            await sagas.Put(instance.CorrelationId, instance).ConfigureAwait(false);
+            }
         }
 
 
