@@ -147,7 +147,6 @@ namespace MassTransit.RedisIntegration
                 {
                     db.LockRelease(key, token);
                 }
-
             }
             else
             {
