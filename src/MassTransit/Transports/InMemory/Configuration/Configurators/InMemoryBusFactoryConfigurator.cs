@@ -13,10 +13,10 @@
 namespace MassTransit.Transports.InMemory.Configurators
 {
     using System;
-    using Builders;
     using BusConfigurators;
     using Configuration;
     using EndpointSpecifications;
+    using MassTransit.Builders;
     using Topology.Configurators;
     using Topology.Topologies;
 
@@ -53,7 +53,7 @@ namespace MassTransit.Transports.InMemory.Configurators
 
             var busReceiveEndpointConfiguration = _configuration.CreateReceiveEndpointConfiguration(busQueueName, _busEndpointConfiguration);
 
-            var builder = new InMemoryBusBuilder(_configuration, busReceiveEndpointConfiguration, BusObservable);
+            var builder = new ConfigurationBusBuilder(_configuration, busReceiveEndpointConfiguration, BusObservable);
 
             ApplySpecifications(builder);
 

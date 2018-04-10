@@ -43,9 +43,8 @@ namespace MassTransit.Builders
             {
                 _busEndpointSpecification.Apply(this);
 
-                var bus = new MassTransitBus(_busEndpointConfiguration.InputAddress, _busEndpointConfiguration.ConsumePipe,
-                    _busEndpointSpecification.SendEndpointProvider, _busEndpointSpecification.PublishEndpointProvider,
-                    _configuration.Hosts, _busObservable);
+                var bus = new MassTransitBus(_busEndpointConfiguration.InputAddress, _busEndpointConfiguration.ConsumePipe, _busEndpointSpecification.SendEndpointProvider,
+                    _busEndpointSpecification.PublishEndpointProvider, _configuration.Hosts, _busObservable);
 
                 TaskUtil.Await(() => _busObservable.PostCreate(bus));
 

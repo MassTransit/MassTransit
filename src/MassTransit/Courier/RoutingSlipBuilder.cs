@@ -201,7 +201,7 @@ namespace MassTransit.Courier
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if (value == null || (value is string && string.IsNullOrEmpty((string)value)))
+            if (value == null || (value is string s && string.IsNullOrEmpty(s)))
                 _variables.Remove(key);
             else
                 _variables[key] = value;
@@ -400,7 +400,7 @@ namespace MassTransit.Courier
         {
             foreach (KeyValuePair<string, object> value in values)
             {
-                if (value.Value == null || (value.Value is string && string.IsNullOrEmpty((string)value.Value)))
+                if (value.Value == null || (value.Value is string s && string.IsNullOrEmpty(s)))
                     _variables.Remove(value.Key);
                 else
                     _variables[value.Key] = value.Value;

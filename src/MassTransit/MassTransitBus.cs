@@ -18,7 +18,6 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
-    using Context;
     using Context.Converters;
     using Events;
     using GreenPipes;
@@ -31,15 +30,13 @@ namespace MassTransit
 
 
     public class MassTransitBus :
-        IBusControl,
-        IDisposable
+        IBusControl
     {
         static readonly ILog _log = Logger.Get<MassTransitBus>();
         readonly IBusObserver _busObservable;
         readonly IConsumePipe _consumePipe;
         readonly IReadOnlyHostCollection _hosts;
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
         readonly ISendEndpointProvider _sendEndpointProvider;
         Handle _busHandle;
 
@@ -49,7 +46,6 @@ namespace MassTransit
             Address = address;
             _consumePipe = consumePipe;
             _sendEndpointProvider = sendEndpointProvider;
-            _publishEndpointProvider = publishEndpointProvider;
             _busObservable = busObservable;
             _hosts = hosts;
 
@@ -98,8 +94,7 @@ namespace MassTransit
             return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
         }
 
-        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
+        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
         }
@@ -243,15 +238,6 @@ namespace MassTransit
 
             foreach (var host in _hosts)
                 host.Probe(scope);
-        }
-
-        void IDisposable.Dispose()
-        {
-            if (_busHandle != null && !_busHandle.Stopped)
-                throw new MassTransitException("The bus was disposed without being stopped. Explicitly call StopAsync before the bus instance is disposed.");
-
-            (_sendEndpointProvider as IDisposable)?.Dispose();
-            (_publishEndpointProvider as IDisposable)?.Dispose();
         }
 
 

@@ -118,10 +118,9 @@ namespace MassTransit.Courier.Hosts
                 JToken activityLogsToken = _messageToken["compensateLogs"];
 
                 JToken activityLogToken;
-                if (activityLogsToken is JArray)
+                if (activityLogsToken is JArray logsToken)
                 {
-                    var logsToken = activityLogsToken as JArray;
-                    activityLogToken = activityLogsToken[logsToken.Count - 1];
+                    activityLogToken = logsToken[logsToken.Count - 1];
                 }
                 else
                     activityLogToken = activityLogsToken;

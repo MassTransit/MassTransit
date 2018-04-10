@@ -14,7 +14,6 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes.Agents;
     using Util.Caching;
 
 
@@ -22,7 +21,6 @@ namespace MassTransit.Transports
     /// Caches SendEndpoint instances by address (ignoring the query string entirely, case insensitive)
     /// </summary>
     public class SendEndpointCache<TKey> :
-        Agent,
         ISendEndpointCache<TKey>
     {
         readonly IIndex<TKey, CachedSendEndpoint<TKey>> _index;

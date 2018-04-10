@@ -93,7 +93,7 @@ namespace MassTransit
         internal static void Map(EndpointAddressProvider<TMessage> endpointAddressProvider)
         {
             if (Cached.Metadata.IsValueCreated)
-                throw new InvalidOperationException("The correlationId pipe has already been created");
+                throw new InvalidOperationException("The endpoint convention has already been created and can no longer be modified.");
 
             Cached.Metadata = new Lazy<IEndpointConventionCache<TMessage>>(() => new EndpointConventionCache<TMessage>(endpointAddressProvider));
         }
