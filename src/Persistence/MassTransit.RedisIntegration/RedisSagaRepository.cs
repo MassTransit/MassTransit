@@ -126,7 +126,6 @@ namespace MassTransit.RedisIntegration
 
         async Task UpdateRedisSaga(TSaga instance)
         {
-            RedisKey key = $"saga_lock_{instance.CorrelationId}";
             RedisKey key = $"{instance.CorrelationId}_lock";
             RedisValue token = Environment.MachineName + Guid.NewGuid();
             var db = _redisDbFactory();
