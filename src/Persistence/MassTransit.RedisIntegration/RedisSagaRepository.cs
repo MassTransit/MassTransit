@@ -31,7 +31,7 @@ namespace MassTransit.RedisIntegration
         public RedisSagaRepository(Func<IDatabase> redisDbFactory) =>
             _redisDbFactory = redisDbFactory;
 
-        public async Task<TSaga> GetSaga(Guid correlationId) => 
+        public async Task<TSaga> GetSaga(Guid correlationId) =>
             await _redisDbFactory().As<TSaga>().Get(correlationId).ConfigureAwait(false);
 
         public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy,
@@ -131,7 +131,7 @@ namespace MassTransit.RedisIntegration
             var db = _redisDbFactory();
             ITypedDatabase<TSaga> sagas = db.As<TSaga>();
 
-            if(db.LockTake(key, token, TimeSpan.FromMinutes(1)))
+            if (await db.LockTakeAsync(key, token, TimeSpan.FromMinutes(1)))
             {
                 try
                 {
@@ -145,7 +145,7 @@ namespace MassTransit.RedisIntegration
                 }
                 finally
                 {
-                    db.LockRelease(key, token);
+                    await db.LockReleaseAsync(key, token);
                 }
             }
             else
