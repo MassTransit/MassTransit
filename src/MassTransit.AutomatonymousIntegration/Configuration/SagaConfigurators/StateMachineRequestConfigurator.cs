@@ -13,6 +13,7 @@
 namespace Automatonymous.SagaConfigurators
 {
     using System;
+    using MassTransit;
 
 
     public class StateMachineRequestConfigurator<T, TRequest, TResponse> :
@@ -31,6 +32,11 @@ namespace Automatonymous.SagaConfigurators
         {
             get
             {
+                if (ServiceAddress == null && EndpointConvention.TryGetDestinationAddress<TRequest>(out var serviceAddress))
+                {
+                    ServiceAddress = serviceAddress;
+                }
+
                 if (ServiceAddress == null)
                     throw new AutomatonymousException("The ServiceAddress was not specified.");
 

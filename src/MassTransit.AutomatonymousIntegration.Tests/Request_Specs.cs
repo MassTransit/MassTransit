@@ -327,8 +327,14 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                     x.SelectId(context => NewId.NextGuid());
                 });
 
+                EndpointConvention.Map<ValidateName>(settings.ServiceAddress);
+
                 Request(() => ValidateAddress, x => x.ValidateAddressRequestId, settings);
-                Request(() => ValidateName, x => x.ValidateNameRequestId, settings);
+                Request(() => ValidateName, x => x.ValidateNameRequestId, cfg =>
+                {
+                    cfg.SchedulingServiceAddress = settings.SchedulingServiceAddress;
+                    cfg.Timeout = settings.Timeout;
+                });
 
                 Initially(
                     When(Register)

@@ -52,8 +52,7 @@ namespace MassTransit.NHibernateIntegration.Tests
         {
             Configuration.SetProperty(NHibernate.Cfg.Environment.UseSecondLevelCache, "true");
             Configuration.SetProperty(NHibernate.Cfg.Environment.UseQueryCache, "true");
-            Configuration.SetProperty(NHibernate.Cfg.Environment.CacheProvider,
-                typeof(HashtableCacheProvider).AssemblyQualifiedName);
+            Configuration.SetProperty(NHibernate.Cfg.Environment.CacheProvider, typeof(HashtableCacheProvider).AssemblyQualifiedName);
         }
 
         public void Dispose()
@@ -71,6 +70,7 @@ namespace MassTransit.NHibernateIntegration.Tests
         {
             if (_disposed)
                 return;
+
             if (disposing)
             {
                 if (_openConnection != null)

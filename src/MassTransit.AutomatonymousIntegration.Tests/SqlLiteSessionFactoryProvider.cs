@@ -15,7 +15,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using System;
     using System.Data;
     using System.Data.Common;
-    using Automatonymous;
     using Microsoft.Data.Sqlite;
     using NHibernate;
     using NHibernate.Cache;
@@ -53,8 +52,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             Configuration.SetProperty(NHibernate.Cfg.Environment.UseSecondLevelCache, "true");
             Configuration.SetProperty(NHibernate.Cfg.Environment.UseQueryCache, "true");
-            Configuration.SetProperty(NHibernate.Cfg.Environment.CacheProvider,
-                typeof(HashtableCacheProvider).AssemblyQualifiedName);
+            Configuration.SetProperty(NHibernate.Cfg.Environment.CacheProvider,typeof(HashtableCacheProvider).AssemblyQualifiedName);
         }
 
         public void Dispose()

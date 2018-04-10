@@ -18,7 +18,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using NUnit.Framework;
     using Request_Specs;
     using Saga;
-    using TestFramework;
     using Testing;
 
 
@@ -81,7 +80,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             base.ConfigureInMemoryReceiveEndpoint(configurator);
 
-            _repository = new InMemorySagaRepository<Request_Specs.TestState>();
+            _repository = new InMemorySagaRepository<TestState>();
 
             var settings = new RequestSettingsImpl(ServiceQueueAddress, QuartzQueueAddress, TimeSpan.FromSeconds(1));
 
