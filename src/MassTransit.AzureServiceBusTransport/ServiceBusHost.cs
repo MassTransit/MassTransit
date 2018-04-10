@@ -123,7 +123,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure = null)
         {
-            var queueName = this.GetTemporaryQueueName("endpoint");
+            var queueName = Topology.CreateTemporaryQueueName("endpoint-");
 
             return ConnectReceiveEndpoint(queueName, configure);
         }

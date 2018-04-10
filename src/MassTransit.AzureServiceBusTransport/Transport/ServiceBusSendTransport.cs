@@ -115,6 +115,8 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                             if (context.CorrelationId.HasValue)
                                 brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
 
+                            CopyIncomingIdentifiersIfPresent(context);
+
                             if (context.PartitionKey != null)
                                 brokeredMessage.PartitionKey = context.PartitionKey;
 
@@ -160,6 +162,23 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             });
 
             return _source.Send(clientPipe, cancellationToken);
+        }
+
+        void CopyIncomingIdentifiersIfPresent<T>(AzureServiceBusSendContext<T> sendContext)
+            where T : class
+        {
+            if (sendContext.TryGetPayload<ConsumeContext>(out var consumeContext))
+                if (consumeContext.TryGetPayload<BrokeredMessageContext>(out var brokeredMessageContext))
+                {
+                    if (sendContext.SessionId == null && brokeredMessageContext.ReplyToSessionId != null)
+                        sendContext.SessionId = brokeredMessageContext.ReplyToSessionId;
+                    
+                    if (sendContext.SessionId == null && brokeredMessageContext.SessionId != null)
+                        sendContext.SessionId = brokeredMessageContext.SessionId;
+
+                    if (sendContext.PartitionKey == null && brokeredMessageContext.PartitionKey != null)
+                        sendContext.PartitionKey = brokeredMessageContext.PartitionKey;
+                }
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

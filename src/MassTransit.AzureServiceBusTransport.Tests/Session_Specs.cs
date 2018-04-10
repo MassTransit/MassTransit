@@ -33,7 +33,27 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         [Test]
         public async Task Should_succeed()
         {
-            await _handler;
+            var context = await _handler;
+
+            var sessionId = await _handlerSessionId;
+
+            Assert.That(sessionId, Is.EqualTo(_correlationId.ToString("D")));
+        }
+
+        [Test]
+        public async Task Should_receive_published_message()
+        {
+            var context = await _received;
+
+            Assert.That(context.SessionId(), Is.EqualTo(_correlationId.ToString("D")));
+        }
+
+        [Test]
+        public async Task Should_receive_sent_message()
+        {
+            var context = await _accepted;
+
+            Assert.That(context.SessionId(), Is.EqualTo(_correlationId.ToString("D")));
         }
 
         public Sending_a_message_to_a_session()
@@ -43,22 +63,52 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         Task<ConsumeContext<PingMessage>> _handler;
+        Task<ConsumeContext<PingAccepted>> _accepted;
+        Task<ConsumeContext<PingReceived>> _received;
+        Task<string> _handlerSessionId;
+        Guid _correlationId;
 
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             configurator.RequiresSession = true;
 
-            _handler = Handled<PingMessage>(configurator);
+            TaskCompletionSource<string> handlerSessionId = GetTask<string>();
+            _handlerSessionId = handlerSessionId.Task;
+
+            _handler = Handler<PingMessage>(configurator, async context =>
+            {
+                await context.Publish<PingReceived>(context.Message);
+                await context.Send<PingAccepted>(InputQueueAddress, context.Message);
+
+                handlerSessionId.TrySetResult(context.SessionId());
+            });
+
+            _accepted = Handled<PingAccepted>(configurator);
+            _received = Handled<PingReceived>(configurator);
         }
 
         [OneTimeSetUp]
         public async Task Setup()
         {
             var message = new PingMessage();
+            _correlationId = message.CorrelationId;
+
             await InputQueueSendEndpoint.Send(message, context =>
             {
                 context.SetSessionId(message.CorrelationId.ToString());
             });
+        }
+
+
+        public interface PingReceived
+        {
+            Guid CorrelationId { get; }
+        }
+
+
+        public interface PingAccepted
+        {
+            Guid CorrelationId { get; }
         }
     }
 }
