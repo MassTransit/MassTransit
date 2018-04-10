@@ -13,6 +13,8 @@
 namespace MassTransit.Tests.Pipeline
 {
     using System;
+    using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
     using NUnit.Framework;
@@ -82,6 +84,7 @@ namespace MassTransit.Tests.Pipeline
         }
     }
 
+
     [TestFixture]
     public class Configuring_a_message_in_an_instance :
         InMemoryTestFixture
@@ -119,6 +122,91 @@ namespace MassTransit.Tests.Pipeline
                 cfg.Message<PingMessage>(m => m.UseExecute(context => _message.TrySetResult(context.Message)));
                 cfg.ConsumerMessage<PingMessage>(m => m.UseExecute(context => _consumerMessage.TrySetResult(Tuple.Create(context.Consumer, context.Message))));
             });
+        }
+
+
+        class MyConsumer :
+            IConsumer<PingMessage>
+        {
+            readonly TaskCompletionSource<PingMessage> _received;
+
+            public MyConsumer(TaskCompletionSource<PingMessage> received)
+            {
+                _received = received;
+            }
+
+            public Task<PingMessage> Received => _received.Task;
+
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                _received.TrySetResult(context.Message);
+
+                return TaskUtil.Completed;
+            }
+        }
+    }
+
+
+    [TestFixture]
+    public class Filters_on_the_send_pipeline :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_only_be_called_once()
+        {
+            await Bus.Publish(new PingMessage());
+
+            await _consumer.Received;
+
+            Assert.That(_sendFilter.Count, Is.EqualTo(1));
+        }
+
+        MyConsumer _consumer;
+        SendFilter _sendFilter;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            _sendFilter = new SendFilter();
+            
+            configurator.ConfigurePublish(pc => pc.AddPipeSpecification(_sendFilter));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new MyConsumer(GetTask<PingMessage>());
+
+            configurator.Instance(_consumer);
+        }
+
+
+        public class SendFilter :
+            IFilter<SendContext>,
+            IPipeSpecification<SendContext>
+        {
+            int _count;
+
+            public int Count => _count;
+
+            void IPipeSpecification<SendContext>.Apply(IPipeBuilder<SendContext> builder)
+            {
+                builder.AddFilter(this);
+            }
+
+            void IProbeSite.Probe(ProbeContext context)
+            {
+            }
+
+            Task IFilter<SendContext>.Send(SendContext context, IPipe<SendContext> next)
+            {
+                Interlocked.Increment(ref _count);
+
+                return next.Send(context);
+            }
+
+            IEnumerable<ValidationResult> ISpecification.Validate()
+            {
+                yield break;
+            }
         }
 
 

@@ -43,8 +43,8 @@ namespace MassTransit.Transports.InMemory.Contexts
             var transportProvider = new InMemoryPublishTransportProvider(_sendTransportProvider, _publish);
 
             var sendObserversAreAutomaticallyConnected = new SendObservable();
-            return new PublishEndpointProvider(transportProvider, HostAddress, PublishObservers, sendObserversAreAutomaticallyConnected, Serializer,
-                InputAddress, PublishPipe, _publish);
+            return new PublishEndpointProvider(transportProvider, HostAddress, PublishObservers, sendObserversAreAutomaticallyConnected, Serializer, InputAddress, PublishPipe,
+                _publish);
         }
     }
 }
