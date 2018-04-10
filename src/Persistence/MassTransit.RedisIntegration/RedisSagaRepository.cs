@@ -131,7 +131,7 @@ namespace MassTransit.RedisIntegration
             var db = _redisDbFactory();
             ITypedDatabase<TSaga> sagas = db.As<TSaga>();
 
-            if (await db.LockTakeAsync(key, token, TimeSpan.FromMinutes(1)))
+            if (await db.LockTakeAsync(key, token, TimeSpan.FromSeconds(30)))
             {
                 try
                 {
