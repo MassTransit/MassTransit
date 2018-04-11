@@ -65,7 +65,7 @@ namespace MassTransit.NHibernateIntegration.Tests
 
                 var (status, notFound) = await requestClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("A"), TestCancellationToken);
 
-                Assert.AreEqual(TaskStatus.WaitingForActivation, status.Status);
+                Assert.AreEqual(TaskStatus.Canceled, status.Status);
                 Assert.AreEqual(TaskStatus.RanToCompletion, notFound.Status);
 
                 Assert.AreEqual("A", notFound.Result.Message.ServiceName);
