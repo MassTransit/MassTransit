@@ -109,8 +109,7 @@ namespace MassTransit.NHibernateIntegration.Tests
 
             configuration.DataBaseIntegration(c =>
             {
-                if (_databaseIntegration != null)
-                    _databaseIntegration(c);
+                _databaseIntegration?.Invoke(c);
 
                 c.KeywordsAutoImport = Hbm2DDLKeyWords.AutoQuote;
                 c.SchemaAction = SchemaAutoAction.Update;
