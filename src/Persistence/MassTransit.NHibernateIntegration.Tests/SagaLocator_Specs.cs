@@ -80,10 +80,8 @@ namespace MassTransit.NHibernateIntegration.Tests
         [OneTimeTearDown]
         public void Teardown()
         {
-            if (_sessionFactory != null)
-                _sessionFactory.Dispose();
-            if (_provider != null)
-                _provider.Dispose();
+            _sessionFactory?.Dispose();
+            _provider?.Dispose();
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
