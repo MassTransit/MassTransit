@@ -27,6 +27,12 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         public class Sending_a_request_from_a_state_machine :
             StateMachineTestFixture
         {
+            static Sending_a_request_from_a_state_machine()
+            {
+                _serviceAddress = new Uri("loopback://localhost/service_queue");
+                EndpointConvention.Map<ValidateName>(_serviceAddress);
+            }
+
             [Test]
             public async Task Should_handle_the_response()
             {
@@ -45,6 +51,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
                 Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == registerMember.MemberNumber
                     && GetCurrentState(x) == _machine.Registered, TestTimeout);
+
                 Assert.IsTrue(saga.HasValue);
 
                 var sagaInstance = _repository[saga.Value].Instance;
@@ -61,10 +68,11 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             public Sending_a_request_from_a_state_machine()
             {
-                _serviceQueueAddress = new Uri("loopback://localhost/service_queue");
+                _serviceQueueAddress = _serviceAddress;
             }
 
             Uri _serviceQueueAddress;
+            static readonly Uri _serviceAddress;
 
             Uri ServiceQueueAddress
             {
@@ -295,6 +303,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
+
         class ValidateNameRequest :
             ValidateName
         {
@@ -316,6 +325,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
+
         class TestStateMachine :
             MassTransitStateMachine<TestState>
         {
@@ -326,8 +336,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                     x.CorrelateBy(p => p.MemberNumber, p => p.Message.MemberNumber);
                     x.SelectId(context => NewId.NextGuid());
                 });
-
-                EndpointConvention.Map<ValidateName>(settings.ServiceAddress);
 
                 Request(() => ValidateAddress, x => x.ValidateAddressRequestId, settings);
                 Request(() => ValidateName, x => x.ValidateNameRequestId, cfg =>
