@@ -15,7 +15,10 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using ExtensionsDependencyInjectionIntegration;
+    using GreenPipes;
+    using GreenPipes.Specifications;
     using Microsoft.Extensions.DependencyInjection;
+    using Pipeline.Filters;
 
 
     public static class ExtensionsDependencyInjectionIntegrationExtensions
@@ -35,6 +38,14 @@ namespace MassTransit
 
             foreach (var saga in sagas)
                 saga.Configure(configurator, serviceProvider);
+        }
+
+        public static void UseScope(this IPipeConfigurator<ConsumeContext> configurator, IServiceProvider serviceProvider)
+        {
+            var scopeProvider = new DependencyInjectionConsumerScopeProvider(serviceProvider);
+            var specification = new FilterPipeSpecification<ConsumeContext>(new ScopeFilter(scopeProvider));
+
+            configurator.AddPipeSpecification(specification);
         }
     }
 }
