@@ -17,6 +17,7 @@ namespace MassTransit.Containers.Tests
     using Autofac;
     using NUnit.Framework;
     using TestFramework;
+    using Testing.Observers;
 
 
     public class AutofacRequestClient_Specs :
@@ -39,6 +40,8 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_receive_the_response()
         {
+            Bus.ConnectAutofacConsumeMessageObserver<InitialRequest>(_container);
+
             var client = _container.Resolve<IRequestClient<InitialRequest>>();
 
             _correlationId = NewId.NextGuid();
@@ -49,6 +52,10 @@ namespace MassTransit.Containers.Tests
             Assert.That(response.ConversationId.Value, Is.EqualTo(response.Message.OriginalConversationId));
             Assert.That(response.InitiatorId.Value, Is.EqualTo(_correlationId));
             Assert.That(response.Message.OriginalInitiatorId, Is.EqualTo(_correlationId));
+
+            var observer = _container.Resolve<TestConsumeMessageObserver<InitialRequest>>();
+
+            await observer.PostConsumed;
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -58,6 +65,11 @@ namespace MassTransit.Containers.Tests
             builder.Register(context => Bus)
                 .As<IBus>()
                 .ExternallyOwned();
+
+            builder.Register(context => GetConsumeObserver<InitialRequest>())
+                .As<IConsumeMessageObserver<InitialRequest>>()
+                .AsSelf()
+                .SingleInstance();
 
             builder.Register(context => context.Resolve<IBus>().CreateClientFactory())
                 .As<IClientFactory>();
