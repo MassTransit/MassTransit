@@ -34,10 +34,12 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _scheduler = scheduler;
         }
 
-        Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay)
+        Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext> callback = null)
         {
+            Action<ConsumeContext, SendContext> combinedCallback = UpdateDeliveryContext + callback;
+
             return _scheduler.ScheduleSend(_context.ReceiveContext.InputAddress, delay, _context.Message,
-                _context.CreateCopyContextPipe(UpdateDeliveryContext));
+                _context.CreateCopyContextPipe(combinedCallback));
         }
 
         static void UpdateDeliveryContext(ConsumeContext context, SendContext sendContext)
