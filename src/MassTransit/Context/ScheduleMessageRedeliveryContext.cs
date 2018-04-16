@@ -34,9 +34,16 @@ namespace MassTransit.Context
             _context = context;
         }
 
-        Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay)
+        Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext> callback = null)
         {
-            return _scheduler.ScheduleSend(delay, _context.Message, _context.CreateCopyContextPipe(GetScheduledMessageHeaders));
+            Action<ConsumeContext, SendContext> combinedAction = AddMessageHeaderAction + callback;
+            return _scheduler.ScheduleSend(delay, _context.Message, _context.CreateCopyContextPipe(combinedAction));
+        }
+
+        void AddMessageHeaderAction(ConsumeContext consumeContext, SendContext sendContext)
+        {
+            foreach (KeyValuePair<string, object> additionalHeader in GetScheduledMessageHeaders(consumeContext))
+                sendContext.Headers.Set(additionalHeader.Key, additionalHeader.Value);
         }
 
         static IEnumerable<KeyValuePair<string, object>> GetScheduledMessageHeaders(ConsumeContext context)

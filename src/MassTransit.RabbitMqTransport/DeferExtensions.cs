@@ -28,8 +28,9 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="context"></param>
         /// <param name="delay"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        public static Task Defer<T>(this ConsumeContext<T> context, TimeSpan delay)
+        public static Task Defer<T>(this ConsumeContext<T> context, TimeSpan delay, Action<ConsumeContext, SendContext> callback = null)
             where T : class
         {
             var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
@@ -38,7 +39,7 @@ namespace MassTransit
 
             MessageRedeliveryContext redeliveryContext = new DelayedExchangeMessageRedeliveryContext<T>(context, scheduler);
 
-            return redeliveryContext.ScheduleRedelivery(delay);
+            return redeliveryContext.ScheduleRedelivery(delay, callback);
         }
     }
 }

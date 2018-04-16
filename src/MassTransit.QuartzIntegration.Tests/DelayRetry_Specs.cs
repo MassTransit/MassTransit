@@ -281,4 +281,66 @@ namespace MassTransit.QuartzIntegration.Tests
             });
         }
     }
+
+    [TestFixture]
+    public class Using_an_explicit_retry_later_via_scheduling_with_custom_callback :
+       QuartzInMemoryTestFixture
+    {
+        [Test]
+        public async Task callback_executed_before_defer_the_message_delivery()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            ConsumeContext<PingMessage> context = await _received.Task;
+
+            Assert.GreaterOrEqual(_receivedTimeSpan, TimeSpan.FromSeconds(1));
+            int? customHeaderValue = context.Headers.Get(customHeader, default(int?));
+            Assert.AreEqual(2, customHeaderValue);
+        }
+
+        TaskCompletionSource<ConsumeContext<PingMessage>> _received;
+        TimeSpan _receivedTimeSpan;
+        Stopwatch _timer;
+        int _count;
+        string customHeader = "Custom-Header";
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            base.ConfigureInMemoryBus(configurator);
+
+            configurator.UseMessageScheduler(QuartzAddress);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _count = 0;
+
+            _received = GetTask<ConsumeContext<PingMessage>>();
+
+            configurator.Handler<PingMessage>(async context =>
+            {
+                if (_timer == null)
+                    _timer = Stopwatch.StartNew();
+
+                if (_count++ < 2)
+                {
+                    Console.WriteLine("{0} now is not a good time", DateTime.UtcNow);
+                    await context.Redeliver(TimeSpan.FromMilliseconds(1000), (consumeContext, sendContext) =>
+                                                                             {
+                                                                                 sendContext.Headers.Set(customHeader, 2);
+                                                                             });
+                    return;
+                }
+
+                _timer.Stop();
+
+                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow,
+                    context.Headers.Get(MessageHeaders.RedeliveryCount, default(int?)));
+
+                // okay, ready.
+                _receivedTimeSpan = _timer.Elapsed;
+                _received.TrySetResult(context);
+            });
+        }
+    }
 }

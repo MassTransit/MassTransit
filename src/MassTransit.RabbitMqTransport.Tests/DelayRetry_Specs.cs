@@ -335,4 +335,58 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
     }
+
+    [TestFixture]
+    public class execute_callback_function_during_defer :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_execute_callback_during_defer_the_message_delivery()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            ConsumeContext<PingMessage> context = await _received.Task;
+
+            Assert.GreaterOrEqual(_receivedTimeSpan, TimeSpan.FromSeconds(1));
+            Assert.IsTrue(_hit);
+        }
+
+        TaskCompletionSource<ConsumeContext<PingMessage>> _received;
+        TimeSpan _receivedTimeSpan;
+        Stopwatch _timer;
+        int _count;
+        bool _hit;
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _count = 0;
+
+            _received = GetTask<ConsumeContext<PingMessage>>();
+
+            configurator.Handler<PingMessage>(async context =>
+                                              {
+                                                  if (_timer == null)
+                                                      _timer = Stopwatch.StartNew();
+
+                                                  if (_count++ < 2)
+                                                  {
+                                                      Console.WriteLine("{0} now is not a good time", DateTime.UtcNow);
+
+                                                      await context.Defer(TimeSpan.FromMilliseconds(1000), (consumeContext, sendContext) =>
+                                                                                                           {
+                                                                                                               _hit = true;
+                                                                                                           });
+                                                      return;
+                                                  }
+
+                                                  _timer.Stop();
+
+                                                  Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow, context.Headers.Get("MT-Redelivery-Count", default(int?)));
+
+                                                  // okay, ready.
+                                                  _receivedTimeSpan = _timer.Elapsed;
+                                                  _received.TrySetResult(context);
+                                              });
+        }
+    }
 }
