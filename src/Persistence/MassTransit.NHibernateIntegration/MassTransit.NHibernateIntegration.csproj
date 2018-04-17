@@ -16,7 +16,7 @@
     <PackageReference Include="GreenPipes" Version="2.0.0" />
     <PackageReference Include="Iesi.Collections" Version="4.0.4" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="NHibernate" Version="5.1.0" />
+    <PackageReference Include="NHibernate" Version="5.1.1" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
