@@ -11,9 +11,12 @@ behavior into a single receive endpoint, a single consumer, a saga, or the entir
 Middleware components are configured via extension methods on any pipe configurator `IPipeConfigurator<T>`,
 and the extension methods all begin with `Use` to separate them from other methods.
 
+* [Receive Pipeline](receive.md)
+
 The details of many of the built-in middleware components follow.
 
 * [Circuit breaker](circuit-breaker.md)
 * [Rate limiter](rate-limiter.md)
 * [Latest](latest.md)
 * [Custom](custom.md)
+

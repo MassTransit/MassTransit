@@ -93,8 +93,4 @@ The exchanges and queues for the send example are shown.
 
 ![rabbitmq-send-topology](images/rabbitmq-send-topology.png)
 
-
-
-
 > Note that the broker topology can now be configured using the [topology](../advanced/topology/README.md) API.
-

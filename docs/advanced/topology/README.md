@@ -10,11 +10,11 @@ Topology also defines how things are named, including RabbitMQ exchanges and Azu
 * [Consume](consume.md)
 * [Conventions](conventions.md)
 * [RabbitMQ](rabbitmq/README.md)
-    * [Exchange Binding](rabbitmq/binding.md)
-    * [RoutingKey](rabbitmq/routingkey.md)
+  * [Exchange Binding](rabbitmq/binding.md)
+  * [RoutingKey](rabbitmq/routingkey.md)
 * [Azure Service Bus](servicebus/README.md)
-    * [SessionId](servicebus/sessionid.md)
-    * [PartitionKey](servicebus/partitionkey.md)
-    * [Topic Subscription](servicebus/topicsub.md)
+  * [SessionId](servicebus/sessionid.md)
+  * [PartitionKey](servicebus/partitionkey.md)
+  * [Topic Subscription](servicebus/topicsub.md)
 
 You can also view a visual representation of the [default broker topologies](../../understand/default-topology.md) created.

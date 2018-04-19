@@ -68,12 +68,12 @@ string OperatingSystemVersion
 
 Examples include:
 
-```
+```text
 urn:message:MyProject.Messages:UpdateAccount
 urn:message:MyProject.Messages.Events:AccountUpdated
 urn:message:MyProject:ChangeAccount
 urn:message:MyProject.AccountService:MyService+AccountUpdatedEvent
-``` 
+```
 
 The last one is a nested class, as indicated by the '+' symbol.
 
@@ -97,7 +97,4 @@ This is a minimal message:
 
 ## Encrypted Messages
 
-If you use the encrypted message serializer, it uses BSON under the hood. 
-The encryption format is AES-256. Assuming the same Key/IV pair, an encrypted message 
-should be compatible across the wire.
-
+If you use the encrypted message serializer, it uses BSON under the hood. The encryption format is AES-256. Assuming the same Key/IV pair, an encrypted message should be compatible across the wire.

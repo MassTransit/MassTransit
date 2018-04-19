@@ -8,7 +8,7 @@ MassTransit has built-in defaults for naming messaging entities (these are thing
 
 For instance, to change the topic name used by a message, just do it!
 
-```
+```csharp
 Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
 {
     cfg.Message<OrderSubmitted>(x =>
@@ -20,7 +20,7 @@ Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
 
 It's also possible to create a message-specific entity name formatter, by implmenting `IMessageEntityNameFormatter<T>` and specifying it during configuration.
 
-```
+```csharp
 class FancyNameFormatter<T> :
     IMessageEntityNameFormatter<T>
 {
@@ -42,7 +42,7 @@ Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
 
 It's also possible to replace the entity name formatter for the entire topology.
 
-```
+```csharp
 class FancyNameFormatter<T> :
     IMessageEntityNameFormatter<T>
 {
@@ -78,6 +78,3 @@ Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
     });
 });
 ```
-
-
-

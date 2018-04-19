@@ -32,6 +32,7 @@
 * [Using MassTransit](usage/README.md)
     * [Configure MassTransit](usage/configuration.md)
     * [Choose a transport](usage/transports.md)
+      * [Azure Functions](usage/azure-functions.md)
     * [Create message contracts](usage/message-contracts.md)
     * [Create message consumers](usage/message-consumers.md)
     * [Produce messages](usage/producing-messages.md)
@@ -60,7 +61,7 @@
         * [Testing consumers](usage/testing/testing-consumers.md)
         * [Testing sagas](usage/testing/testing-sagas.md)
 
-## Advanced 
+## Advanced
 * [Sagas](advanced/sagas/README.md)
     * [Automatonymous](advanced/sagas/automatonymous.md)
     * [Persistence](advanced/sagas/persistence.md)
@@ -71,6 +72,7 @@
     * [Events](advanced/courier/events.md)
     * [Subscriptions](advanced/courier/subscriptions.md)
 * [Middleware](advanced/middleware/README.md)
+    * [Receive Pipeline](advanced/middleware/receive.md)
     * [Circuit breaker](advanced/middleware/circuit-breaker.md)
     * [Rate limiter](advanced/middleware/rate-limiter.md)
     * [Latest](advanced/middleware/latest.md)

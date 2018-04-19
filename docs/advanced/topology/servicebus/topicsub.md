@@ -2,7 +2,7 @@
 
 To create a topic subscription which will forward messages to the receive endpoint:
 
-```
+```csharp
 cfg.ReceiveEndpoint(host, "input-queue", e =>
 {
     e.Subscribe("topic-name");
@@ -12,7 +12,7 @@ cfg.ReceiveEndpoint(host, "input-queue", e =>
 
 The properties of the topic subscription may also be configured:
 
-```
+```csharp
 cfg.ReceiveEndpoint(host, "input-queue", e =>
 {
     e.Subscribe("topic-name", x =>
@@ -21,4 +21,3 @@ cfg.ReceiveEndpoint(host, "input-queue", e =>
     });
 })
 ```
-

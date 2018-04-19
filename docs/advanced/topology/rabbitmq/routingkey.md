@@ -4,7 +4,7 @@ The routing key on published/sent messages can be configured by convention, allo
 
 When configuring a bus, the send topology can be used to specify a routing key formatter for a particular message type.
 
-```
+```csharp
 public interface SubmitOrder
 {
     string CustomerType { get; }
@@ -27,7 +27,7 @@ Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
 
 The consumer could then be created:
 
-```
+```csharp
 public class OrderConsumer :
     IConsumer<SubmitOrder>
 {
@@ -40,13 +40,13 @@ public class OrderConsumer :
 
 And then connected to a receive endpoint:
 
-```
+```csharp
 Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
 {
     cfg.ReceiveEndpoint(host, "priority-orders", x)
     {
         x.BindMessageExchanges = false;
-        
+
         x.Consumer<OrderConsumer>();
 
         x.Bind("submitorder", s => 
@@ -59,7 +59,7 @@ Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
     cfg.ReceiveEndpoint(host, "regular-orders", x)
     {
         x.BindMessageExchanges = false;
-        
+
         x.Consumer<OrderConsumer>();
 
         x.Bind("submitorder", s => 

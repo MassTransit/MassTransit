@@ -11,13 +11,13 @@ container. The two bus interfaces, `IBus` and `IBusControl`, are included.
 </div>
 
 ```csharp
-public static void Main(string[] args) 
+public static void Main(string[] args)
 {
     var container = new Container(cfg =>
     {
         // register each consumer
         cfg.ForConcreteType<UpdateCustomerAddressConsumer>();
-        
+
         //or use StructureMap's excellent scanning capabilities
     });
 
@@ -31,10 +31,14 @@ public static void Main(string[] args)
 
         sbc.ReceiveEndpoint("customer_update_queue", ec =>
         {
+            // if only one consumer in the consumer for this queue
             ec.LoadFrom(container);
+
+            // otherwise, be smart, register explicitly
+            ec.Consumer<UpdateCustomerConsumer>(container);
         })
     });
-    
+
     container.Configure(cfg =>
     {
         For<IBusControl>()
@@ -57,7 +61,7 @@ class BusRegistry : Registry
     public BusRegistry()
     {
         For<IBusControl>(new SingletonLifecycle())
-            .Use(context => Bus.Factory.CreateUsingInMemory(x => 
+            .Use(context => Bus.Factory.CreateUsingInMemory(x =>
             {
                 x.ReceiveEndpoint("customer_update_queue", e => e.LoadFrom(context));
             }));

@@ -54,7 +54,11 @@ namespace Example
 
                     cfg.ReceiveEndpoint("customer_update_queue", ec =>
                     {
+                        // if only one consumer in the consumer for this queue
                         ec.LoadFrom(context);
+
+                        // otherwise, be smart, register explicitly
+                        ec.Consumer<UpdateCustomerConsumer>(context);
                     });
                 });
 
@@ -189,8 +193,8 @@ Below you find samples of how to register different saga persistence implementat
 For NHibernate you can scan an assembly where your saga instance mappings are defined to find
 the mapping classes, and then give the list of mapping types as a parameter to the session factory provider.
 
-Then, you instruct Autofac to use the session factory provider to get the `ISession` instance. 
-NHibernate saga repository is then registered as generic and since it only uses the `ISession`, 
+Then, you instruct Autofac to use the session factory provider to get the `ISession` instance.
+NHibernate saga repository is then registered as generic and since it only uses the `ISession`,
 everything will just work.
 
 ```csharp
@@ -199,7 +203,7 @@ var mappings = mappingsAssembly
     .Where(t => t.BaseType != null && t.BaseType.IsGenericType &&
         (t.BaseType.GetGenericTypeDefinition() == typeof(SagaClassMapping<>) ||
         t.BaseType.GetGenericTypeDefinition() == typeof(ClassMapping<>)))
-    .ToArray();    
+    .ToArray();
 builder.Register(c => new SqlServerSessionFactoryProvider(connString, mappings).GetSessionFactory())
     .As<ISessionFactory>()
     .SingleInstance();

@@ -4,7 +4,7 @@ The PartitionKey on published/sent messages can be configured by convention, all
 
 When configuring a bus, the send topology can be used to specify a routing key formatter for a particular message type.
 
-```
+```csharp
 public interface SubmitOrder
 {
     string CustomerId { get; }

@@ -30,9 +30,9 @@ coupled.
 To see how this plays out, consider the following message types:
 
 ```csharp
-namespace Company.Messages 
+namespace Company.Messages
 {
-    public interface CustomerAddressUpdated 
+    public interface CustomerAddressUpdated
     {
     }
 
@@ -40,7 +40,7 @@ namespace Company.Messages
     {
     }
 
-    public class UpdateCustomerAddressCommand : 
+    public class UpdateCustomerAddressCommand :
         UpdateCustomerAddress
     {
     }
@@ -48,7 +48,8 @@ namespace Company.Messages
 ```
 
 Once the messages have been published, exchanges are created in RabbitMQ for each of the message types:
-```
+
+```text
 Exchanges
 
 Company.Messages.CustomerAddressUpdated
@@ -77,7 +78,8 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 ```
 
 This results in the creation of a queue, as well as a binding to the queue from the `UpdateCustomerAddress` exchange.
-```
+
+```text
 Exchanges
 
 customer_update_queue
@@ -89,8 +91,7 @@ customer_update_queue
     - Includes a binding from the customer_update_queue exchange
 ```
 
-
-> Because RabbitMQ only allows messages to be sent to exchanges, an exchange matching the name of the queue is created and bound to the queue. 
+> Because RabbitMQ only allows messages to be sent to exchanges, an exchange matching the name of the queue is created and bound to the queue.
 This makes it easy to send messages directly to the queue using the same name. It's actually a pretty cool abstraction, and RabbitMQ makes
 it very flexible by allowing exchange-to-exchange bindings. By keeping the bindings at the exchange level, it eliminates any impact to message
 flow. Dru [shared his experience][3] with this as well.
@@ -98,8 +99,8 @@ flow. Dru [shared his experience][3] with this as well.
 ### Balancing the load
 
 Because RabbitMQ is a message broker, it supports multiple readers from the same queue. This makes it super easy to setup a
-load balancing scenario where the same service is running on multiple servers, each of which is connected to the same queue. As 
-messages arrive on the queue, they are delivered to the first available consumer that can receive the message. To get good 
+load balancing scenario where the same service is running on multiple servers, each of which is connected to the same queue. As
+messages arrive on the queue, they are delivered to the first available consumer that can receive the message. To get good
 load balancing, it's important to set the `PrefetchCount` to a sensible value on the consumer so that messages are well distributed.
 
 ### Routing on Azure Service Bus
@@ -107,7 +108,6 @@ load balancing, it's important to set the `PrefetchCount` to a sensible value on
 MassTransit uses a similar approach for Azure Service Bus, but uses Topics, Subscriptions, and Queues.
 
 > More details to come...
-    
 
 [1]: http://www.enterpriseintegrationpatterns.com/patterns/messaging/PublishSubscribeChannel.html
 [2]: http://spring.io/blog/2011/04/01/routing-topologies-for-performance-and-scalability-with-rabbitmq/

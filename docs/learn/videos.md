@@ -5,7 +5,6 @@ There are several videos of presentations featuring MassTransit.
 [Event Driven Architecture][1]
 Presented at the North Dallas .NET User Group in February, 2010 by Chris Patterson.
 
-
 [Loosely coupled applications with MassTransit and RabbitMq][2]
 Presented at NDC Oslo 2016 by Roland Guijt (he is also the author of the MassTransit Intro course on Pluralsight)
 
