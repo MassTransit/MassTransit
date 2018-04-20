@@ -17,7 +17,7 @@ namespace MassTransit.RedisIntegration
     using StackExchange.Redis;
 
 
-    public class TypedDatabase<T> : ITypedDatabase<T> where T: class
+    public class TypedDatabase<T> : ITypedDatabase<T> where T : class
     {
         readonly IDatabase _db;
 
@@ -25,17 +25,17 @@ namespace MassTransit.RedisIntegration
 
         public async Task<T> Get(Guid key)
         {
-            var value = await _db.StringGetAsync(key.ToString()).ConfigureAwait(false);
+            var value = await _db.StringGetAsync(DatabaseExtensions.SagaPrefix + key.ToString()).ConfigureAwait(false);
             return value.IsNullOrEmpty ? null : SagaSerializer.Deserialize<T>(value);
         }
 
         public async Task Put(Guid key, T value) =>
-            await _db.StringSetAsync(key.ToString(), SagaSerializer.Serialize(value)).ConfigureAwait(false);
-        
-        public async Task Delete(Guid key) => await _db.KeyDeleteAsync(key.ToString()).ConfigureAwait(false);
+            await _db.StringSetAsync(DatabaseExtensions.SagaPrefix + key.ToString(), SagaSerializer.Serialize(value)).ConfigureAwait(false);
+
+        public async Task Delete(Guid key) => await _db.KeyDeleteAsync(DatabaseExtensions.SagaPrefix + key.ToString()).ConfigureAwait(false);
     }
 
-    public interface ITypedDatabase<T> where T: class
+    public interface ITypedDatabase<T> where T : class
     {
         Task<T> Get(Guid key);
         Task Put(Guid key, T value);
@@ -44,7 +44,89 @@ namespace MassTransit.RedisIntegration
 
     public static class DatabaseExtensions
     {
-        public static ITypedDatabase<T> As<T>(this IDatabase db) where T: class =>
+        public const string SagaPrefix = "saga:";
+        public const string SagaLockSuffix = "_lock";
+
+        public static ITypedDatabase<T> As<T>(this IDatabase db) where T : class =>
             new TypedDatabase<T>(db);
+
+        public static Task<IDisposable> AcquireLockAsync(this IDatabase db, Guid sagaId, TimeSpan? expiry = null, TimeSpan? retryTimeout = null)
+        {
+            return AcquireLockAsync(db, sagaId.ToString(), expiry, retryTimeout = null);
+        }
+
+        public static Task<IDisposable> AcquireLockAsync(this IDatabase db, string sagaId, TimeSpan? expiry = null, TimeSpan? retryTimeout = null)
+        {
+            if (db == null)
+            {
+                throw new ArgumentNullException("db");
+            }
+
+            if (sagaId == null)
+            {
+                throw new ArgumentNullException("sagaId");
+            }
+
+            return DataCacheLock.AcquireAsync(db, sagaId, expiry, retryTimeout);
+        }
+
+        private class DataCacheLock : IDisposable
+        {
+            private static StackExchange.Redis.IDatabase _db;
+            public readonly RedisKey Key;
+            public readonly RedisValue Value;
+            public readonly TimeSpan? Expiry;
+
+            private DataCacheLock(IDatabase db, string sagaId, TimeSpan? expiry)
+            {
+                _db = db;
+                Key = $"{DatabaseExtensions.SagaPrefix}{sagaId}{DatabaseExtensions.SagaLockSuffix}";
+                Value = Guid.NewGuid().ToString();
+                Expiry = expiry;
+            }
+
+            public static async Task<IDisposable> AcquireAsync(IDatabase db, string sagaId, TimeSpan? expiry, TimeSpan? retryTimeout)
+            {
+                DataCacheLock dataCacheLock = new DataCacheLock(db, sagaId, expiry);
+                Func<Task<bool>> task = async () =>
+                {
+                    try
+                    {
+                        return await _db.LockTakeAsync(dataCacheLock.Key, dataCacheLock.Value, dataCacheLock.Expiry ?? TimeSpan.MaxValue);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                };
+
+                await RetryUntilTrueAsync(task, retryTimeout);
+                return dataCacheLock;
+            }
+            public void Dispose()
+            {
+                _db.LockReleaseAsync(Key, Value).Wait();
+            }
+        }
+
+        private static readonly Random _random = new Random();
+
+        private static async Task<bool> RetryUntilTrueAsync(Func<Task<bool>> task, TimeSpan? retryTimeout)
+        {
+            int i = 0;
+            DateTime utcNow = DateTime.UtcNow;
+            while (!retryTimeout.HasValue || DateTime.UtcNow - utcNow < retryTimeout.Value)
+            {
+                i++;
+                if (await task())
+                {
+                    return true;
+                }
+                var waitFor = _random.Next((int)Math.Pow(i, 2), (int)Math.Pow(i + 1, 2) + 1);
+                await Task.Delay(waitFor);
+            }
+
+            throw new TimeoutException(string.Format("Exceeded timeout of {0}", retryTimeout.Value));
+        }
     }
 }
