@@ -25,14 +25,14 @@ namespace MassTransit.RedisIntegration
 
         public async Task<T> Get(Guid key)
         {
-            var value = await _db.StringGetAsync(key.ToString()).ConfigureAwait(false);
+            var value = await _db.StringGetAsync(DatabaseExtensions.SagaPrefix + key.ToString()).ConfigureAwait(false);
             return value.IsNullOrEmpty ? null : SagaSerializer.Deserialize<T>(value);
         }
 
         public async Task Put(Guid key, T value) =>
-            await _db.StringSetAsync(key.ToString(), SagaSerializer.Serialize(value)).ConfigureAwait(false);
+            await _db.StringSetAsync(DatabaseExtensions.SagaPrefix + key.ToString(), SagaSerializer.Serialize(value)).ConfigureAwait(false);
         
-        public async Task Delete(Guid key) => await _db.KeyDeleteAsync(key.ToString()).ConfigureAwait(false);
+        public async Task Delete(Guid key) => await _db.KeyDeleteAsync(DatabaseExtensions.SagaPrefix + key.ToString()).ConfigureAwait(false);
     }
 
     public interface ITypedDatabase<T> where T: class
@@ -44,6 +44,9 @@ namespace MassTransit.RedisIntegration
 
     public static class DatabaseExtensions
     {
+        public const string SagaPrefix = "saga:";
+        public const string SagaLockSuffix = "_lock";
+
         public static ITypedDatabase<T> As<T>(this IDatabase db) where T: class =>
             new TypedDatabase<T>(db);
     }
