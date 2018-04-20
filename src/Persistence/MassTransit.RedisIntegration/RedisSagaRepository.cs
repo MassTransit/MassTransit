@@ -45,20 +45,23 @@ namespace MassTransit.RedisIntegration
             TSaga instance;
             ITypedDatabase<TSaga> sagas = db.As<TSaga>();
 
-            if (policy.PreInsertInstance(context, out instance))
-                await PreInsertSagaInstance<T>(sagas, instance).ConfigureAwait(false);
-
-            if (instance == null)
-                instance = await sagas.Get(sagaId).ConfigureAwait(false);
-
-            if (instance == null)
+            using (var pesimisticLock = db.AcquireLockAsync(sagaId))
             {
-                var missingSagaPipe = new MissingPipe<T>(db, next);
-                await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
-            }
-            else
-            {
-                await SendToInstance(context, policy, next, instance).ConfigureAwait(false);
+                if (policy.PreInsertInstance(context, out instance))
+                    await PreInsertSagaInstance<T>(sagas, instance).ConfigureAwait(false);
+
+                if (instance == null)
+                    instance = await sagas.Get(sagaId).ConfigureAwait(false);
+
+                if (instance == null)
+                {
+                    var missingSagaPipe = new MissingPipe<T>(db, next);
+                    await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
+                }
+                else
+                {
+                    await SendToInstance(context, policy, next, instance).ConfigureAwait(false);
+                }
             }
         }
 
@@ -126,32 +129,15 @@ namespace MassTransit.RedisIntegration
 
         async Task UpdateRedisSaga(TSaga instance)
         {
-            RedisKey key = $"{instance.CorrelationId}_lock";
-            RedisValue token = Environment.MachineName + Guid.NewGuid();
-            var db = _redisDbFactory();
-            ITypedDatabase<TSaga> sagas = db.As<TSaga>();
+            ITypedDatabase<TSaga> sagas = _redisDbFactory().As<TSaga>();
 
-            if (await db.LockTakeAsync(key, token, TimeSpan.FromSeconds(30)))
-            {
-                try
-                {
-                    instance.Version++;
-                    var old = await sagas.Get(instance.CorrelationId).ConfigureAwait(false);
+            instance.Version++;
+            var old = await sagas.Get(instance.CorrelationId).ConfigureAwait(false);
 
-                    if (old.Version >= instance.Version)
-                        throw new RedisSagaConcurrencyException($"Version conflict for saga with id {instance.CorrelationId}");
-
-                    await sagas.Put(instance.CorrelationId, instance).ConfigureAwait(false);
-                }
-                finally
-                {
-                    await db.LockReleaseAsync(key, token);
-                }
-            }
-            else
-            {
+            if (old.Version >= instance.Version)
                 throw new RedisSagaConcurrencyException($"Version conflict for saga with id {instance.CorrelationId}");
-            }
+
+            await sagas.Put(instance.CorrelationId, instance).ConfigureAwait(false);
         }
 
 
