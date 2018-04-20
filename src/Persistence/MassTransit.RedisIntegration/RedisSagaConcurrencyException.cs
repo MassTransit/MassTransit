@@ -15,19 +15,16 @@ namespace MassTransit.RedisIntegration
     using System;
 
 
-    public class RedisSagaConcurrencyException : MassTransitException
+    [Serializable]
+    public class RedisSagaConcurrencyException :
+        SagaException
     {
         public RedisSagaConcurrencyException()
         {
         }
 
-        public RedisSagaConcurrencyException(string message)
-            : base(message)
-        {
-        }
-
-        public RedisSagaConcurrencyException(string message, Exception inner)
-            : base(message, inner)
+        public RedisSagaConcurrencyException(string message, Type sagaType, Type messageType, Guid correlationId)
+            : base(message, sagaType, messageType, correlationId)
         {
         }
     }

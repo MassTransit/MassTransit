@@ -23,7 +23,8 @@ namespace MassTransit.RedisIntegration.Tests
 
     [TestFixture]
     [Category("Integration")]
-    public class LocatingAnExistingSaga : InMemoryTestFixture
+    public class LocatingAnExistingSaga :
+        InMemoryTestFixture
     {
         [Test]
         public async Task A_correlated_message_should_find_the_correct_saga()
@@ -69,9 +70,8 @@ namespace MassTransit.RedisIntegration.Tests
         {
             var redis = ConnectionMultiplexer.Connect("localhost");
             redis.PreserveAsyncOrder = false;
-            
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(
-                () => new RedisSagaRepository<SimpleSaga>(() => redis.GetDatabase()));
+
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new RedisSagaRepository<SimpleSaga>(() => redis.GetDatabase()));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

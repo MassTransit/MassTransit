@@ -25,6 +25,10 @@ namespace MassTransit
         readonly Type _messageType;
         readonly Type _sagaType;
 
+        protected SagaException()
+        {
+        }
+
         public SagaException(string message, Type sagaType, Type messageType, Guid correlationId)
             : base(FormatMessage(sagaType, correlationId, messageType, message))
         {
@@ -76,7 +80,8 @@ namespace MassTransit
 
         static string FormatMessage(Type sagaType, Guid correlationId, Type messageType, string message)
         {
-            return $"{TypeMetadataCache.GetShortName(sagaType)}({correlationId}) Saga exception on receipt of {TypeMetadataCache.GetShortName(messageType)}: {message}";
+            return
+                $"{TypeMetadataCache.GetShortName(sagaType)}({correlationId}) Saga exception on receipt of {TypeMetadataCache.GetShortName(messageType)}: {message}";
         }
     }
 }

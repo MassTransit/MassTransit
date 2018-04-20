@@ -17,7 +17,8 @@ namespace MassTransit.RedisIntegration
     using Saga;
 
 
-    public interface IRetrieveSagaFromRepository<TSaga> where TSaga: ISaga
+    public interface IRetrieveSagaFromRepository<TSaga>
+        where TSaga : ISaga
     {
         Task<TSaga> GetSaga(Guid correlationId);
     }
