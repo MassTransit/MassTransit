@@ -45,7 +45,7 @@ namespace MassTransit.RedisIntegration
             TSaga instance;
             ITypedDatabase<TSaga> sagas = db.As<TSaga>();
 
-            using (var pesimisticLock = db.AcquireLockAsync(sagaId))
+            using (var pesimisticLock = await db.AcquireLockAsync(sagaId))
             {
                 if (policy.PreInsertInstance(context, out instance))
                     await PreInsertSagaInstance<T>(sagas, instance).ConfigureAwait(false);
