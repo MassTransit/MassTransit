@@ -62,6 +62,36 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
     [TestFixture]
+    public class Sending_a_request_with_the_broker_down_using_the_request_client :
+        RabbitMqTestFixture
+    {
+        [Test, Explicit, Category("SlowAF")]
+        public async Task Should_receive_the_response()
+        {
+            await Task.Delay(15000);
+
+            var response = _requestClient.Request(new PingMessage());
+
+            Assert.That(async () => await response, Throws.TypeOf<RequestException>());
+        }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        IRequestClient<PingMessage, PongMessage> _requestClient;
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            _requestClient = Bus.CreatePublishRequestClient<PingMessage, PongMessage>(TestTimeout);
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
+        }
+    }
+
+
+    [TestFixture]
     public class Sending_a_request_using_the_new_request_client :
         RabbitMqTestFixture
     {
@@ -241,6 +271,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
         }
     }
+
 
     [TestFixture]
     public class Sending_a_request_using_the_new_request_client_in_a_consumer_also :

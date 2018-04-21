@@ -99,7 +99,13 @@ namespace MassTransit.RabbitMqTransport.Integration
                 }
             });
 
-            _connectionCache.Send(connectionPipe, cancellationToken).ConfigureAwait(false);
+            var connectionTask = _connectionCache.Send(connectionPipe, cancellationToken);
+
+            await Task.WhenAny(connectionTask, asyncContext.Context).ConfigureAwait(false);
+            if (connectionTask.IsFaulted)
+                await asyncContext.CreateFaulted(connectionTask.Exception).ConfigureAwait(false);
+            else if (connectionTask.IsCanceled)
+                await asyncContext.CreateCanceled().ConfigureAwait(false);
 
             return await asyncContext.Context.ConfigureAwait(false);
         }

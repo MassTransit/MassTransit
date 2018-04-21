@@ -51,7 +51,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 .Unwrap();
 
             IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
-
+            
             void HandleShutdown(object sender, ShutdownEventArgs args)
             {
                 if (args.Initiator != ShutdownInitiator.Application)

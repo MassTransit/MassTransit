@@ -157,12 +157,16 @@ namespace MassTransit.Clients
             {
                 await _requestSendEndpoint.Send(_message, this, _cancellationToken).ConfigureAwait(false);
             }
-            catch (RequestException)
+            catch (RequestException exception)
             {
+                Fail(exception);
+
                 throw;
             }
             catch (Exception exception)
             {
+                Fail(exception);
+
                 throw new RequestException($"An exception occurred while processing the {typeof(TRequest).Name} request", exception);
             }
         }
@@ -212,6 +216,9 @@ namespace MassTransit.Clients
 
         void Fail(Exception exception)
         {
+            _readyToSend.TrySetException(exception);
+            _sendContext.TrySetException(exception);
+
             lock (_responseHandlers)
             {
                 foreach (var handle in _responseHandlers.Values)
