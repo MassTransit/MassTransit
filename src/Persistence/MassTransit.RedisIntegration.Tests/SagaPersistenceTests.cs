@@ -68,7 +68,7 @@ namespace MassTransit.RedisIntegration.Tests
 
         public LocatingAnExistingSaga()
         {
-            var redis = ConnectionMultiplexer.Connect("localhost");
+            var redis = ConnectionMultiplexer.Connect("127.0.0.1");
             redis.PreserveAsyncOrder = false;
 
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new RedisSagaRepository<SimpleSaga>(() => redis.GetDatabase()));

@@ -28,10 +28,17 @@ namespace MassTransit.RedisIntegration
     {
         static readonly ILog _log = Logger.Get<RedisSagaRepository<TSaga>>();
         readonly Func<IDatabase> _redisDbFactory;
+        readonly bool _optimistic;
+        TimeSpan _lockTimeout;
+        TimeSpan _lockRetryTimeout;
 
-        public RedisSagaRepository(Func<IDatabase> redisDbFactory)
+        public RedisSagaRepository(Func<IDatabase> redisDbFactory, bool optimistic = true, TimeSpan? lockTimeout = null, TimeSpan? lockRetryTimeout = null)
         {
             _redisDbFactory = redisDbFactory;
+            _optimistic = optimistic;
+
+            _lockTimeout = lockTimeout ?? TimeSpan.FromSeconds(30);
+            _lockRetryTimeout = lockRetryTimeout ?? TimeSpan.FromSeconds(30);
         }
 
         async Task<TSaga> IRetrieveSagaFromRepository<TSaga>.GetSaga(Guid correlationId)
@@ -50,7 +57,11 @@ namespace MassTransit.RedisIntegration
 
             ITypedDatabase<TSaga> sagas = db.As<TSaga>();
 
-            var pessimisticLock = await db.AcquireLockAsync(sagaId).ConfigureAwait(false);
+            IAsyncDisposable pessimisticLock = null;
+
+            if (!_optimistic)
+                pessimisticLock = await db.AcquireLockAsync(sagaId, _lockTimeout, _lockRetryTimeout).ConfigureAwait(false);
+
             try
             {
                 if (policy.PreInsertInstance(context, out var instance))
@@ -70,7 +81,8 @@ namespace MassTransit.RedisIntegration
             }
             finally
             {
-                await pessimisticLock.DisposeAsync().ConfigureAwait(false);
+                if (!_optimistic)
+                    await pessimisticLock.DisposeAsync().ConfigureAwait(false);
             }
         }
 
@@ -89,7 +101,7 @@ namespace MassTransit.RedisIntegration
             });
         }
 
-        static async Task SendToInstance<T>(ITypedDatabase<TSaga> sagas, ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy,
+        async Task SendToInstance<T>(ITypedDatabase<TSaga> sagas, ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next, TSaga instance)
             where T : class
         {
@@ -138,16 +150,33 @@ namespace MassTransit.RedisIntegration
             }
         }
 
-        static async Task UpdateRedisSaga<T>(ITypedDatabase<TSaga> sagas, TSaga instance)
+        async Task UpdateRedisSaga<T>(ITypedDatabase<TSaga> sagas, TSaga instance)
             where T : class
         {
-            instance.Version++;
-            var old = await sagas.Get(instance.CorrelationId).ConfigureAwait(false);
+            IAsyncDisposable updateLock = null;
 
-            if (old.Version >= instance.Version)
-                throw new RedisSagaConcurrencyException("Saga version conflict", typeof(TSaga), typeof(T), instance.CorrelationId);
+            if (_optimistic)
+                updateLock = await sagas.Database.AcquireLockAsync(instance.CorrelationId, _lockTimeout, _lockRetryTimeout).ConfigureAwait(false);
 
-            await sagas.Put(instance.CorrelationId, instance).ConfigureAwait(false);
+            try
+            {
+                instance.Version++;
+                var old = await sagas.Get(instance.CorrelationId).ConfigureAwait(false);
+
+                if (old.Version >= instance.Version)
+                    throw new RedisSagaConcurrencyException("Saga version conflict", typeof(TSaga), typeof(T), instance.CorrelationId);
+
+                await sagas.Put(instance.CorrelationId, instance).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                throw new SagaException("Failed to updated saga", typeof(TSaga), typeof(T), instance.CorrelationId, exception);
+            }
+            finally
+            {
+                if (_optimistic)
+                    await updateLock.DisposeAsync().ConfigureAwait(false);
+            }
         }
 
 

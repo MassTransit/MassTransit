@@ -23,26 +23,28 @@ namespace MassTransit.RedisIntegration
     {
         readonly IDatabase _db;
 
+        IDatabase ITypedDatabase<T>.Database => _db;
+
         public TypedDatabase(IDatabase db)
         {
             _db = db;
         }
 
-        public async Task<T> Get(Guid key)
+        async Task<T> ITypedDatabase<T>.Get(Guid key)
         {
-            var value = await _db.StringGetAsync(DatabaseExtensions.FormatSagaKey(key)).ConfigureAwait(false);
+            var value = await _db.StringGetAsync(key.ToString()).ConfigureAwait(false);
 
             return value.IsNullOrEmpty ? null : SagaSerializer.Deserialize<T>(value);
         }
 
-        public Task Put(Guid key, T value)
+        Task ITypedDatabase<T>.Put(Guid key, T value)
         {
-            return _db.StringSetAsync(DatabaseExtensions.FormatSagaKey(key), SagaSerializer.Serialize(value));
+            return _db.StringSetAsync(key.ToString(), SagaSerializer.Serialize(value));
         }
 
-        public Task Delete(Guid key)
+        Task ITypedDatabase<T>.Delete(Guid key)
         {
-            return _db.KeyDeleteAsync(DatabaseExtensions.FormatSagaKey(key));
+            return _db.KeyDeleteAsync(key.ToString());
         }
     }
 }

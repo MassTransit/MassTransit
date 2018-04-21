@@ -17,19 +17,14 @@ namespace MassTransit.RedisIntegration
     using System.Threading.Tasks;
     using GreenPipes;
     using StackExchange.Redis;
+    using Util;
 
 
     public static class DatabaseExtensions
     {
-        public const string SagaPrefix = "saga:";
         public const string SagaLockSuffix = "_lock";
 
         static readonly Random _random = new Random();
-
-        public static string FormatSagaKey(Guid key)
-        {
-            return $"{SagaPrefix}{key}";
-        }
 
         public static ITypedDatabase<T> As<T>(this IDatabase db)
             where T : class
@@ -38,11 +33,6 @@ namespace MassTransit.RedisIntegration
         }
 
         public static Task<IAsyncDisposable> AcquireLockAsync(this IDatabase db, Guid sagaId, TimeSpan? expiry = null, TimeSpan? retryTimeout = null)
-        {
-            return AcquireLockAsync(db, sagaId.ToString(), expiry, retryTimeout);
-        }
-
-        static Task<IAsyncDisposable> AcquireLockAsync(this IDatabase db, string sagaId, TimeSpan? expiry = null, TimeSpan? retryTimeout = null)
         {
             if (db == null)
                 throw new ArgumentNullException(nameof(db));
@@ -75,25 +65,25 @@ namespace MassTransit.RedisIntegration
         class DataCacheLock :
             IAsyncDisposable
         {
-            static IDatabase _db;
+            readonly IDatabase _db;
             readonly TimeSpan? _expiry;
             readonly RedisKey _key;
-            readonly RedisValue _value;
+            readonly RedisValue _token;
 
-            DataCacheLock(IDatabase db, string sagaId, TimeSpan? expiry)
+            DataCacheLock(IDatabase db, Guid sagaId, TimeSpan? expiry)
             {
                 _db = db;
-                _key = $"{SagaPrefix}{sagaId}{SagaLockSuffix}";
-                _value = Guid.NewGuid().ToString();
+                _key = $"{sagaId}{SagaLockSuffix}";
+                _token = $"{HostMetadataCache.Host.MachineName}:{NewId.NextGuid()}";
                 _expiry = expiry;
             }
 
             public Task DisposeAsync(CancellationToken cancellationToken)
             {
-                return _db.LockReleaseAsync(_key, _value);
+                return _db.LockReleaseAsync(_key, _token);
             }
 
-            public static Task<IAsyncDisposable> AcquireAsync(IDatabase db, string sagaId, TimeSpan? expiry, TimeSpan? retryTimeout)
+            public static Task<IAsyncDisposable> AcquireAsync(IDatabase db, Guid sagaId, TimeSpan? expiry, TimeSpan? retryTimeout)
             {
                 var dataCacheLock = new DataCacheLock(db, sagaId, expiry);
 
@@ -101,7 +91,7 @@ namespace MassTransit.RedisIntegration
                 {
                     try
                     {
-                        var result = await _db.LockTakeAsync(dataCacheLock._key, dataCacheLock._value, dataCacheLock._expiry ?? TimeSpan.MaxValue)
+                        var result = await db.LockTakeAsync(dataCacheLock._key, dataCacheLock._token, dataCacheLock._expiry ?? TimeSpan.MaxValue)
                             .ConfigureAwait(false);
 
                         if (result)

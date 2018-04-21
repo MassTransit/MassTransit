@@ -14,6 +14,7 @@ namespace MassTransit.RedisIntegration
 {
     using System;
     using System.Threading.Tasks;
+    using StackExchange.Redis;
 
 
     public interface ITypedDatabase<T>
@@ -22,5 +23,6 @@ namespace MassTransit.RedisIntegration
         Task<T> Get(Guid key);
         Task Put(Guid key, T value);
         Task Delete(Guid key);
+        IDatabase Database { get; }
     }
 }
