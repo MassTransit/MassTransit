@@ -22,6 +22,8 @@ namespace RapidTransit.Sample
     {
         public void Configure(IServiceConfigurator configurator)
         {
+            configurator.OverrideDefaultBusEndpointQueueName("bus-{MachineName}-{Guid}");
+
             configurator.UseRetry(x => x.Interval(5, TimeSpan.FromMilliseconds(100)));
         }
     }

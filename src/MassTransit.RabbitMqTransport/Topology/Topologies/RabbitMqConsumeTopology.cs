@@ -86,6 +86,35 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             _specifications.Add(specification);
         }
 
+        public string CreateTemporaryQueueNameUsingFormat(string format)
+        {
+            string GetSafe(string value)
+            {
+                var sb = new StringBuilder();
+
+                foreach (var c in value)
+                    if (char.IsLetterOrDigit(c))
+                        sb.Append(c);
+                    else if (c == '.' || c == '_' || c == '-' || c == ':')
+                        sb.Append(c);
+
+                return sb.ToString();
+            }
+
+            var host = HostMetadataCache.Host;
+
+            string queueName = format
+                .Replace("{MachineName}", GetSafe(host.MachineName))
+                .Replace("{ProcessName}", GetSafe(host.ProcessName))
+                .Replace("{ProcessId}", host.ProcessId.ToString())
+                .Replace("{OperatingSystemVersion}", GetSafe(host.OperatingSystemVersion))
+                .Replace("{AssemblyVersion}", GetSafe(host.AssemblyVersion))
+                .Replace("{FrameworkVersion}", GetSafe(host.FrameworkVersion))
+                .Replace("{Guid}", NewId.Next().ToString(_formatter));
+
+            return queueName;
+        }
+
         public string CreateTemporaryQueueName(string prefix)
         {
             var sb = new StringBuilder(prefix);

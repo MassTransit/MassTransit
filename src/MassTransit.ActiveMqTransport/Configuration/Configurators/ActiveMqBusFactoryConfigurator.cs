@@ -139,5 +139,7 @@ namespace MassTransit.ActiveMqTransport.Configurators
 
             AddReceiveEndpointSpecification(specification);
         }
+
+        public void OverrideDefaultBusEndpointQueueName(string value) => throw new NotSupportedException("Overriding default bus queue name is not supported for ActiveMq transport.");
     }
 }

@@ -104,5 +104,7 @@ namespace MassTransit.HttpTransport.Specifications
 
             ConfigureReceiveEndpoint(configuration, configure);
         }
+
+        public void OverrideDefaultBusEndpointQueueName(string value) => throw new NotSupportedException("Overriding default bus queue name is not supported for Http transport.");
     }
 }

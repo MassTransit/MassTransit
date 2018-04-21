@@ -84,5 +84,12 @@ namespace MassTransit
         /// <param name="queueName">The queue name for the receiving endpoint</param>
         /// <param name="configureEndpoint">The configuration callback</param>
         void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint);
+
+        /// <summary>
+        /// In most cases, this is not needed and should not be used. However, if for any reason the default bus
+        /// endpoint queue name needs to be changed, this will do it. Do NOT set it to the same name as a receive
+        /// endpoint or you will screw things up.
+        /// </summary>
+        void OverrideDefaultBusEndpointQueueName(string value);
     }
 }

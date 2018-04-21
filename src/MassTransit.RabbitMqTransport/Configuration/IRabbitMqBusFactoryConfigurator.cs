@@ -51,13 +51,6 @@ namespace MassTransit.RabbitMqTransport
         void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
 
         /// <summary>
-        /// In most cases, this is not needed and should not be used. However, if for any reason the default bus
-        /// endpoint queue name needs to be changed, this will do it. Do NOT set it to the same name as a receive
-        /// endpoint or you will screw things up.
-        /// </summary>
-        void OverrideDefaultBusEndpointQueueName(string value);
-
-        /// <summary>
         /// Configure a Host that can be connected. If only one host is specified, it is used as the default
         /// host for receive endpoints.
         /// </summary>
