@@ -182,5 +182,16 @@ namespace MassTransit.BusConfigurators
         {
             _busEndpointConfiguration.Consume.Configurator.SagaMessageConfigured(configurator);
         }
+
+        public ConnectHandle ConnectHandlerConfigurationObserver(IHandlerConfigurationObserver observer)
+        {
+            return _busEndpointConfiguration.Consume.Configurator.ConnectHandlerConfigurationObserver(observer);
+        }
+
+        public void HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
+            where TMessage : class
+        {
+            _busEndpointConfiguration.Consume.Configurator.HandlerConfigured(configurator);
+        }
     }
 }

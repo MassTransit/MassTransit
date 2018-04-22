@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -32,13 +32,14 @@ namespace MassTransit.ConsumePipeSpecifications
         IConsumePipeConfigurator,
         IConsumePipeSpecification
     {
+        readonly IList<IPipeSpecification<ConsumeContext>> _consumeContextSpecifications;
         readonly ConsumerConfigurationObservable _consumerObservers;
+        readonly HandlerConfigurationObservable _handlerObservers;
         readonly object _lock = new object();
         readonly ConcurrentDictionary<Type, IMessageConsumePipeSpecification> _messageSpecifications;
         readonly ConsumePipeSpecificationObservable _observers;
         readonly SagaConfigurationObservable _sagaObservers;
         readonly IList<IPipeSpecification<ConsumeContext>> _specifications;
-        readonly IList<IPipeSpecification<ConsumeContext>> _consumeContextSpecifications;
 
         public ConsumePipeSpecification()
         {
@@ -46,8 +47,10 @@ namespace MassTransit.ConsumePipeSpecifications
             _consumeContextSpecifications = new List<IPipeSpecification<ConsumeContext>>();
             _messageSpecifications = new ConcurrentDictionary<Type, IMessageConsumePipeSpecification>();
             _observers = new ConsumePipeSpecificationObservable();
+
             _consumerObservers = new ConsumerConfigurationObservable();
             _sagaObservers = new SagaConfigurationObservable();
+            _handlerObservers = new HandlerConfigurationObservable();
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
@@ -57,9 +60,7 @@ namespace MassTransit.ConsumePipeSpecifications
                 _specifications.Add(specification);
 
                 foreach (var messageSpecification in _messageSpecifications.Values)
-                {
                     messageSpecification.AddPipeSpecification(specification);
-                }
             }
         }
 
@@ -71,6 +72,11 @@ namespace MassTransit.ConsumePipeSpecifications
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
         {
             return _sagaObservers.Connect(observer);
+        }
+        
+        public ConnectHandle ConnectHandlerConfigurationObserver(IHandlerConfigurationObserver observer)
+        {
+            return _handlerObservers.Connect(observer);
         }
 
         public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
@@ -99,7 +105,8 @@ namespace MassTransit.ConsumePipeSpecifications
             _consumerObservers.ConsumerMessageConfigured(configurator);
         }
 
-        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator) where TSaga : class, ISaga
+        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
+            where TSaga : class, ISaga
         {
             _sagaObservers.SagaConfigured(configurator);
         }
@@ -109,6 +116,12 @@ namespace MassTransit.ConsumePipeSpecifications
             where TMessage : class
         {
             _sagaObservers.SagaMessageConfigured(configurator);
+        }
+
+        public void HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
+            where TMessage : class
+        {
+            _handlerObservers.HandlerConfigured(configurator);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -135,15 +148,12 @@ namespace MassTransit.ConsumePipeSpecifications
             var filter = new DynamicFilter<ConsumeContext, Guid>(new ConsumeContextConverterFactory(), GetRequestId);
 
             foreach (var specification in _messageSpecifications.Values)
-            {
                 specification.Connect(filter);
-            }
 
             var builder = new PipeBuilder<ConsumeContext>();
-            foreach (var specification in _consumeContextSpecifications)
-            {
+            foreach (IPipeSpecification<ConsumeContext> specification in _consumeContextSpecifications)
                 specification.Apply(builder);
-            }
+
             builder.AddFilter(filter);
 
             return new ConsumePipe(filter, builder.Build());
@@ -159,10 +169,8 @@ namespace MassTransit.ConsumePipeSpecifications
         {
             var specification = new MessageConsumePipeSpecification<T>();
 
-            foreach (var pipeSpecification in _specifications)
-            {
+            foreach (IPipeSpecification<ConsumeContext> pipeSpecification in _specifications)
                 specification.AddPipeSpecification(pipeSpecification);
-            }
 
             _observers.MessageSpecificationCreated(specification);
 

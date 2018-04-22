@@ -78,6 +78,7 @@ namespace MassTransit.Transports.InMemory.Configurators
 
             configuration.ConnectConsumerConfigurationObserver(this);
             configuration.ConnectSagaConfigurationObserver(this);
+            configuration.ConnectHandlerConfigurationObserver(this);
 
             configureEndpoint?.Invoke(configuration.Configurator);
 

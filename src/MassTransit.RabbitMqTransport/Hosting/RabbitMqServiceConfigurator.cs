@@ -162,5 +162,16 @@ namespace MassTransit.RabbitMqTransport.Hosting
         {
             _configurator.SagaMessageConfigured(configurator);
         }
+
+        public ConnectHandle ConnectHandlerConfigurationObserver(IHandlerConfigurationObserver observer)
+        {
+            return _configurator.ConnectHandlerConfigurationObserver(observer);
+        }
+
+        public void HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
+            where TMessage : class
+        {
+            _configurator.HandlerConfigured(configurator);
+        }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,19 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConfigurators
 {
-    using GreenPipes;
-
-
-    /// <summary>
-    /// Configure a message handler, including specifying filters that are executed around
-    /// the handler itself
-    /// </summary>
-    /// <typeparam name="TMessage"></typeparam>
-    public interface IHandlerConfigurator<TMessage> :
-        IConsumeConfigurator,
-        IHandlerConfigurationObserverConnector,
-        IPipeConfigurator<ConsumeContext<TMessage>>
-        where TMessage : class
+    public interface IHandlerConfigurationObserver
     {
+        /// <summary>
+        /// Called when a consumer/message combination is configured
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <param name="configurator"></param>
+        void HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
+            where TMessage : class;
     }
 }

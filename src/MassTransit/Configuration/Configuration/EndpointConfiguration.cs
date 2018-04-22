@@ -110,6 +110,17 @@ namespace MassTransit.Configuration
             Consume.Configurator.SagaMessageConfigured(configurator);
         }
 
+        public ConnectHandle ConnectHandlerConfigurationObserver(IHandlerConfigurationObserver observer)
+        {
+            return Consume.Configurator.ConnectHandlerConfigurationObserver(observer);
+        }
+
+        public void HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
+            where TMessage : class
+        {
+            Consume.Configurator.HandlerConfigured(configurator);
+        }
+
         public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
         {
             if (callback == null)

@@ -41,7 +41,9 @@ namespace MassTransit.Tests.Configuration
                     {
                         x.Message<PingMessage>(m => m.UseConsoleLog(context => Task.FromResult("Hello")));
                         x.Message<PongMessage>(m => m.UseConsoleLog(context => Task.FromResult("Hello")));
-                        x.ConsumerMessage<PingMessage>(m => m.UseExecute(context => {}));
+                        x.ConsumerMessage<PingMessage>(m => m.UseExecute(context =>
+                        {
+                        }));
 
                         x.UseExecuteAsync(context => TaskUtil.Completed);
                     });
@@ -52,7 +54,7 @@ namespace MassTransit.Tests.Configuration
             Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PingMessage))));
             Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PongMessage))));
         }
-        
+
         [Test]
         public void Should_invoke_the_observers_for_object_consumer_and_message_type()
         {
@@ -74,7 +76,29 @@ namespace MassTransit.Tests.Configuration
             Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PingMessage))));
             Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PongMessage))));
         }
-        
+
+        [Test]
+        public void Should_invoke_for_the_handler()
+        {
+            var observer = new HandlerConfigurationObserver();
+
+            var bus = Bus.Factory.CreateUsingInMemory(cfg =>
+            {
+                cfg.ConnectHandlerConfigurationObserver(observer);
+
+                cfg.ReceiveEndpoint("hello", e =>
+                {
+                    e.UseRetry(x => x.Immediate(1));
+
+                    e.Handler<PingMessage>(async context =>
+                    {
+                    });
+                });
+            });
+
+            Assert.That(observer.MessageTypes.Contains(typeof(PingMessage)));
+        }
+
         [Test]
         public void Should_invoke_the_observers_for_regular_consumer_and_message_type()
         {
@@ -112,6 +136,27 @@ namespace MassTransit.Tests.Configuration
                 return TaskUtil.Completed;
             }
         }
+
+
+        class HandlerConfigurationObserver :
+            IHandlerConfigurationObserver
+        {
+            readonly HashSet<Type> _messageTypes;
+
+            public HashSet<Type> MessageTypes => _messageTypes;
+
+            public HandlerConfigurationObserver()
+            {
+                _messageTypes = new HashSet<Type>();
+            }
+
+            public void HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
+                where TMessage : class
+            {
+                _messageTypes.Add(typeof(TMessage));
+            }
+        }
+
 
         class ConsumerConfigurationObserver :
             IConsumerConfigurationObserver

@@ -104,6 +104,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         {
             configuration.ConnectConsumerConfigurationObserver(this);
             configuration.ConnectSagaConfigurationObserver(this);
+            configuration.ConnectHandlerConfigurationObserver(this);
 
             configure?.Invoke(configuration.Configurator);
 
@@ -117,6 +118,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         {
             configuration.ConnectConsumerConfigurationObserver(this);
             configuration.ConnectSagaConfigurationObserver(this);
+            configuration.ConnectHandlerConfigurationObserver(this);
 
             configure?.Invoke(configuration.Configurator);
 

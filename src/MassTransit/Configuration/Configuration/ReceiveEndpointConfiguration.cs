@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Configuration
 {
@@ -30,8 +30,8 @@ namespace MassTransit.Configuration
     {
         readonly IEndpointConfiguration _configuration;
         readonly Lazy<IConsumePipe> _consumePipe;
-        readonly IList<IReceiveEndpointSpecification> _specifications;
         readonly IList<string> _lateConfigurationKeys;
+        readonly IList<IReceiveEndpointSpecification> _specifications;
 
         protected ReceiveEndpointConfiguration(IEndpointConfiguration configuration)
         {
@@ -92,6 +92,17 @@ namespace MassTransit.Configuration
             _configuration.SagaMessageConfigured(configurator);
         }
 
+        public ConnectHandle ConnectHandlerConfigurationObserver(IHandlerConfigurationObserver observer)
+        {
+            return _configuration.ConnectHandlerConfigurationObserver(observer);
+        }
+
+        public void HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
+            where TMessage : class
+        {
+            _configuration.HandlerConfigured(configurator);
+        }
+
         public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
             where T : class
         {
@@ -140,16 +151,6 @@ namespace MassTransit.Configuration
         public abstract Uri HostAddress { get; }
         public abstract Uri InputAddress { get; }
 
-        public void SetMessageSerializer(SerializerFactory serializerFactory)
-        {
-            _configuration.Serialization.SetSerializer(serializerFactory);
-        }
-
-        public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
-        {
-            _configuration.Serialization.AddDeserializer(contentType, deserializerFactory);
-        }
-
         public IReceivePipe CreateReceivePipe()
         {
             return _configuration.Receive.CreatePipe(ConsumePipe, _configuration.Serialization.Deserializer);
@@ -160,12 +161,20 @@ namespace MassTransit.Configuration
 
         public abstract IReceiveEndpoint Build();
 
+        public void SetMessageSerializer(SerializerFactory serializerFactory)
+        {
+            _configuration.Serialization.SetSerializer(serializerFactory);
+        }
+
+        public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
+        {
+            _configuration.Serialization.AddDeserializer(contentType, deserializerFactory);
+        }
+
         protected void ApplySpecifications(IReceiveEndpointBuilder builder)
         {
-            for (int i = 0; i < _specifications.Count; i++)
-            {
+            for (var i = 0; i < _specifications.Count; i++)
                 _specifications[i].Configure(builder);
-            }
         }
 
         public void AddEndpointSpecification(IReceiveEndpointSpecification specification)

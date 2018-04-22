@@ -32,8 +32,8 @@ namespace MassTransit
             Action<IHandlerConfigurator<T>> configure = null)
             where T : class
         {
-            var handlerConfigurator = new HandlerConfigurator<T>(handler);
-
+            var handlerConfigurator = new HandlerConfigurator<T>(handler, configurator);
+            
             configure?.Invoke(handlerConfigurator);
 
             configurator.AddEndpointSpecification(handlerConfigurator);

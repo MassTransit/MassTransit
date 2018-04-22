@@ -16,7 +16,6 @@ namespace MassTransit.EndpointSpecifications
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Mime;
-    using Builders;
     using Configuration;
     using ConsumeConfigurators;
     using GreenPipes;
@@ -91,6 +90,18 @@ namespace MassTransit.EndpointSpecifications
         {
             Configuration.Consume.Configurator.SagaMessageConfigured(configurator);
         }
+
+        public ConnectHandle ConnectHandlerConfigurationObserver(IHandlerConfigurationObserver observer)
+        {
+            return Configuration.Consume.Configurator.ConnectHandlerConfigurationObserver(observer);
+        }
+
+        public void HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
+            where TMessage : class
+        {
+            Configuration.Consume.Configurator.HandlerConfigured(configurator);
+        }
+
 
         public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
         {

@@ -23,7 +23,8 @@ namespace MassTransit.EndpointSpecifications
     public class ConfigurationReceiveEndpointSpecification :
         IReceiveEndpointSpecification<IBusBuilder>,
         IConsumerConfigurationObserverConnector,
-        ISagaConfigurationObserverConnector
+        ISagaConfigurationObserverConnector,
+        IHandlerConfigurationObserverConnector
     {
         readonly IReceiveEndpointConfiguration _configuration;
         IReceiveEndpoint _receiveEndpoint;
@@ -55,6 +56,11 @@ namespace MassTransit.EndpointSpecifications
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
         {
             return _configuration.ConnectSagaConfigurationObserver(observer);
+        }
+
+        public ConnectHandle ConnectHandlerConfigurationObserver(IHandlerConfigurationObserver observer)
+        {
+            return _configuration.ConnectHandlerConfigurationObserver(observer);
         }
     }
 }

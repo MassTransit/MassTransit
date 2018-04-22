@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Introspection;
+    using Logging;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -215,7 +216,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             ConsumeContext<Fault<PingMessage>> pingFaultContext = await pingFault;
 
-            Assert.That(_consumer.PingCount, Is.EqualTo(6));
+            Assert.That(Consumer.PingCount, Is.EqualTo(6));
         }
 
         [Test, Explicit]
@@ -226,22 +227,27 @@ namespace MassTransit.RabbitMqTransport.Tests
             Console.WriteLine(result.ToJsonString());
         }
 
-        Consumer _consumer;
-
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             configurator.UseDelayedRedelivery(r => r.Intervals(100));
             configurator.UseMessageRetry(x => x.Immediate(2));
 
-            _consumer = new Consumer();
-            configurator.Consumer(() => _consumer);
+            Consumer.PingCount = 0;
+            
+            configurator.Consumer(() => new Consumer());
         }
 
 
         class Consumer :
             IConsumer<PingMessage>
         {
-            public int PingCount;
+            readonly ILog _log = Logger.Get<Consumer>();
+            public static int PingCount;
+
+            public Consumer()
+            {
+                _log.InfoFormat("Creating consumer");
+            }
 
             public Task Consume(ConsumeContext<PingMessage> context)
             {
@@ -336,6 +342,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
     }
 
+
     [TestFixture]
     public class execute_callback_function_during_defer :
         RabbitMqTestFixture
@@ -364,29 +371,30 @@ namespace MassTransit.RabbitMqTransport.Tests
             _received = GetTask<ConsumeContext<PingMessage>>();
 
             configurator.Handler<PingMessage>(async context =>
-                                              {
-                                                  if (_timer == null)
-                                                      _timer = Stopwatch.StartNew();
+            {
+                if (_timer == null)
+                    _timer = Stopwatch.StartNew();
 
-                                                  if (_count++ < 2)
-                                                  {
-                                                      Console.WriteLine("{0} now is not a good time", DateTime.UtcNow);
+                if (_count++ < 2)
+                {
+                    Console.WriteLine("{0} now is not a good time", DateTime.UtcNow);
 
-                                                      await context.Defer(TimeSpan.FromMilliseconds(1000), (consumeContext, sendContext) =>
-                                                                                                           {
-                                                                                                               _hit = true;
-                                                                                                           });
-                                                      return;
-                                                  }
+                    await context.Defer(TimeSpan.FromMilliseconds(1000), (consumeContext, sendContext) =>
+                    {
+                        _hit = true;
+                    });
 
-                                                  _timer.Stop();
+                    return;
+                }
 
-                                                  Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow, context.Headers.Get("MT-Redelivery-Count", default(int?)));
+                _timer.Stop();
 
-                                                  // okay, ready.
-                                                  _receivedTimeSpan = _timer.Elapsed;
-                                                  _received.TrySetResult(context);
-                                              });
+                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow, context.Headers.Get("MT-Redelivery-Count", default(int?)));
+
+                // okay, ready.
+                _receivedTimeSpan = _timer.Elapsed;
+                _received.TrySetResult(context);
+            });
         }
     }
 }

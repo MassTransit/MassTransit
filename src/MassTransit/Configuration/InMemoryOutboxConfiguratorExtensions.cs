@@ -30,9 +30,7 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new InMemoryOutboxSpecification();
-
-            configurator.AddPipeSpecification(specification);
+            var observer = new InMemoryOutboxConfigurationObserver(configurator);
         }
 
         /// <summary>

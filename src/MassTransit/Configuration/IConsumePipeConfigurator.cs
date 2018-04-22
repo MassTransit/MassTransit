@@ -22,8 +22,10 @@ namespace MassTransit
         IPipeConfigurator<ConsumeContext>,
         IConsumerConfigurationObserverConnector,
         ISagaConfigurationObserverConnector,
+        IHandlerConfigurationObserverConnector,
         IConsumerConfigurationObserver,
-        ISagaConfigurationObserver
+        ISagaConfigurationObserver,
+        IHandlerConfigurationObserver
     {
         /// <summary>
         /// Adds a type-specific pipe specification to the consume pipe

@@ -71,7 +71,8 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configure delayed exchange RabbitMQ redelivery for all message types
+        /// For all configured messages type (handlers, consumers, and sagas), configures delayed redelivery using the retry configuration specified.
+        /// Redelivery is configured once for each message type, and is added prior to the consumer factory or saga repository in the pipeline.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configureRetry"></param>
@@ -83,9 +84,7 @@ namespace MassTransit
             if (configureRetry == null)
                 throw new ArgumentNullException(nameof(configureRetry));
 
-            configurator.ConnectConsumerConfigurationObserver(new DelayedExchangeRedeliveryConsumerConfigurationObserver(configurator, configureRetry));
-
-            configurator.ConnectSagaConfigurationObserver(new DelayedExchangeRedeliverySagaConfigurationObserver(configurator, configureRetry));
+            var observer = new DelayedExchangeRedeliveryConfigurationObserver(configurator, configureRetry);
         }
     }
 }

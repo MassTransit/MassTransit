@@ -12,23 +12,25 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.PipeConfigurators
 {
-    using System.Collections.Generic;
-    using GreenPipes;
-    using Pipeline.Filters;
+    using ConsumeConfigurators;
 
 
-    public class InMemoryOutboxSpecification<T> :
-        IPipeSpecification<ConsumeContext<T>>
-        where T : class
+    public class InMemoryOutboxConfigurationObserver :
+        ConfigurationObserver,
+        IMessageConfigurationObserver
     {
-        public void Apply(IPipeBuilder<ConsumeContext<T>> builder)
+        public InMemoryOutboxConfigurationObserver(IConsumePipeConfigurator configurator)
+            : base(configurator)
         {
-            builder.AddFilter(new InMemoryOutboxFilter<T>());
+            Connect(this);
         }
 
-        public IEnumerable<ValidationResult> Validate()
+        public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
+            where TMessage : class
         {
-            yield break;
+            var specification = new InMemoryOutboxSpecification<TMessage>();
+
+            configurator.AddPipeSpecification(specification);
         }
     }
 }

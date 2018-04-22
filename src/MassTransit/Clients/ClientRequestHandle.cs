@@ -39,7 +39,6 @@ namespace MassTransit.Clients
         readonly Task _send;
         readonly TaskCompletionSource<SendContext<TRequest>> _sendContext;
         readonly TaskScheduler _taskScheduler;
-        readonly RequestTimeout _timeout;
         CancellationTokenRegistration _registration;
         Timer _timeoutTimer;
         RequestTimeout _timeToLive;
@@ -52,8 +51,8 @@ namespace MassTransit.Clients
             _requestSendEndpoint = requestSendEndpoint;
             _cancellationToken = cancellationToken;
 
-            _timeout = timeout.HasValue ? timeout : _context.DefaultTimeout.HasValue ? _context.DefaultTimeout.Value : RequestTimeout.Default;
-            _timeToLive = _timeout;
+            var requestTimeout = timeout.HasValue ? timeout : _context.DefaultTimeout.HasValue ? _context.DefaultTimeout.Value : RequestTimeout.Default;
+            _timeToLive = requestTimeout;
 
             _requestId = requestId ?? NewId.NextGuid();
 
@@ -67,7 +66,7 @@ namespace MassTransit.Clients
             _readyToSend = new TaskCompletionSource<bool>();
             _responseHandlers = new Dictionary<Type, HandlerConnectHandle>();
 
-            _timeoutTimer = new Timer(TimeoutExpired, this, (long)_timeout.Value.TotalMilliseconds, -1L);
+            _timeoutTimer = new Timer(TimeoutExpired, this, (long)requestTimeout.Value.TotalMilliseconds, -1L);
 
             if (cancellationToken != default && cancellationToken.CanBeCanceled)
                 _registration = cancellationToken.Register(Cancel);

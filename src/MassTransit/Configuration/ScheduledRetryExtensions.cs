@@ -72,7 +72,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configureRetry"></param>
-        public static void UseScheduledRedelivery(this IReceiveEndpointConfigurator configurator, Action<IRetryConfigurator> configureRetry)
+        public static void UseScheduledRedelivery(this IConsumePipeConfigurator configurator, Action<IRetryConfigurator> configureRetry)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
@@ -80,9 +80,7 @@ namespace MassTransit
             if (configureRetry == null)
                 throw new ArgumentNullException(nameof(configureRetry));
 
-            configurator.ConnectConsumerConfigurationObserver(new ScheduledRedeliveryConsumerConfigurationObserver(configurator, configureRetry));
-
-            configurator.ConnectSagaConfigurationObserver(new ScheduledRedeliverySagaConfigurationObserver(configurator, configureRetry));
+            var observer = new ScheduledRedeliveryConfigurationObserver(configurator, configureRetry);
         }
     }
 }

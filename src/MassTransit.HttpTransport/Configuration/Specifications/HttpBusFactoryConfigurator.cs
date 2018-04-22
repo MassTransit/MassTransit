@@ -90,6 +90,7 @@ namespace MassTransit.HttpTransport.Specifications
         {
             configuration.ConnectConsumerConfigurationObserver(this);
             configuration.ConnectSagaConfigurationObserver(this);
+            configuration.ConnectHandlerConfigurationObserver(this);
 
             configure?.Invoke(configuration.Configurator);
 

@@ -52,10 +52,13 @@ namespace MassTransit.Turnout.Configuration
         {
             if (JobFactory == null)
                 yield return this.Failure("JobFactory", "must be specified");
+
             if (ManagementAddress == null)
                 yield return this.Failure("ControlAddress", "must be a valid address");
+
             if (SuperviseInterval < TimeSpan.FromSeconds(1))
                 yield return this.Failure("SuperviseInterval", "must be >= 1 second");
+
             if (PartitionCount < 1)
                 yield return this.Failure("PartitionCount", "must be > 0");
         }
@@ -122,12 +125,15 @@ namespace MassTransit.Turnout.Configuration
             return new JobService(_jobRegistry, _configurator.InputAddress, ManagementAddress, SuperviseInterval);
         }
 
-        public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator) where TConsumer : class
+        public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
+            where TConsumer : class
         {
             _configurator.ConsumerConfigured(configurator);
         }
 
-        public void ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator) where TConsumer : class where TMessage : class
+        public void ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
+            where TConsumer : class
+            where TMessage : class
         {
             _configurator.ConsumerMessageConfigured(configurator);
         }
@@ -137,14 +143,28 @@ namespace MassTransit.Turnout.Configuration
             return _configurator.ConnectSagaConfigurationObserver(observer);
         }
 
-        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator) where TSaga : class, ISaga
+        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
+            where TSaga : class, ISaga
         {
             _configurator.SagaConfigured(configurator);
         }
 
-        public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator) where TSaga : class, ISaga where TMessage : class
+        public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
+            where TSaga : class, ISaga
+            where TMessage : class
         {
             _configurator.SagaMessageConfigured(configurator);
+        }
+
+        public ConnectHandle ConnectHandlerConfigurationObserver(IHandlerConfigurationObserver observer)
+        {
+            return _configurator.ConnectHandlerConfigurationObserver(observer);
+        }
+
+        public void HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
+            where TMessage : class
+        {
+            _configurator.HandlerConfigured(configurator);
         }
     }
 }

@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using System.Net.Mime;
-    using Builders;
     using ConsumeConfigurators;
     using GreenPipes;
     using SagaConfigurators;
@@ -105,6 +104,16 @@ namespace MassTransit
         void ISagaConfigurationObserver.SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
         {
             _configurator.SagaMessageConfigured(configurator);
+        }
+
+        ConnectHandle IHandlerConfigurationObserverConnector.ConnectHandlerConfigurationObserver(IHandlerConfigurationObserver observer)
+        {
+            return _configurator.ConnectHandlerConfigurationObserver(observer);
+        }
+
+        void IHandlerConfigurationObserver.HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
+        {
+            _configurator.HandlerConfigured(configurator);
         }
     }
 }
