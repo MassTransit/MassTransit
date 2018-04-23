@@ -11,33 +11,32 @@ container. The two bus interfaces, `IBus` and `IBusControl`, are included.
 </div>
 
 ```csharp
-public static void Main(string[] args) 
+public static void Main(string[] args)
 {
     var container = new WindsorContainer();
-    
+
     // register each consumer manually
     container.Register(Component.For<YourConsumer>().LifestyleTransient());
-    
+
     //or use Windsor's excellent scanning capabilities
     container.Register(AllTypes.FromThisAssembly().BasedOn<IConsumer>());
-    
-    var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+
+    var busControl = Bus.Factory.CreateUsingRabbitMq(config =>
     {
-        var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
+        cfg.Host(new Uri("rabbitmq://localhost/"), host =>
         {
-            h.Username("guest");
-            h.Password("guest");
+            host.Username("guest");
+            host.Password("guest");
         });
 
-        sbc.ReceiveEndpoint("customer_update_queue", ec =>
+        config.ReceiveEndpoint("customer_update_queue", endpoint =>
         {
-            ec.EnableMessageScope();
-            ec.LoadFrom(container);
+            endpoint.EnableMessageScope();
+            endpoint.LoadFrom(container);
         })
     });
-    
-    container.Register(Component.For<IBus>().Instance(busControl));
-    container.Register(Component.For<IBusControl>().Instance(busControl));
+
+    container.Register(Component.For<IBus, IBusControl>().Instance(busControl));
 
     busControl.Start();
 }
@@ -49,32 +48,32 @@ It is sometimes useful to put the initialization into an installer, so that it c
 the container for configuration.
 
 ```csharp
-public class MassTransitInstaller : IWindsorInstaller
+public class MassTransitInstaller :
+    IWindsorInstaller
 {
-    public void Install(IWindsorContainer container, 
+    public void Install(IWindsorContainer container,
         Castle.MicroKernel.SubSystems.Configuration.IConfigurationStore store)
     {
         var busConfig = container.Resolve<BusConfiguration>();
 
-        var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+        var busControl = Bus.Factory.CreateUsingRabbitMq(config =>
         {
-            var host = cfg.Host(busConfig.HostAddress, h =>
+            config.Host(busConfig.HostAddress, host =>
             {
-                h.Username(busConfig.Username);
-                h.Password(busConfig.Password);
+                host.Username(busConfig.Username);
+                host.Password(busConfig.Password);
             });
 
-            sbc.ReceiveEndpoint(busConfig.QueueName, ec =>
+            config.ReceiveEndpoint(busConfig.QueueName, endpoint =>
             {
-                ec.EnableMessageScope();
-                ec.LoadFrom(container);
+                endpoint.EnableMessageScope();
+                endpoint.LoadFrom(container);
             })
         });
 
         container.Release(busConfig);
 
-        container.Register(Component.For<IBus>().Instance(busControl));
-        container.Register(Component.For<IBusControl>().Instance(busControl));
+        container.Register(Component.For<IBus, IBusControl>().Instance(busControl));
 
         busControl.Start();
     }
