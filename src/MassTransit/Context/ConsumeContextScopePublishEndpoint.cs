@@ -89,16 +89,14 @@ namespace MassTransit.Context
             return _publishEndpoint.Publish(values, contextPipe, cancellationToken);
         }
 
-        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe,
-            CancellationToken cancellationToken)
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
             var contextPipe = new ConsumeContextScopePublishContextPipe<T>(publishPipe, _context);
 
             return _publishEndpoint.Publish(values, contextPipe, cancellationToken);
         }
 
-        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
+        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             var contextPipe = new ConsumeContextScopePublishContextPipe<T>(publishPipe, _context);
 

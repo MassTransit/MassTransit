@@ -13,7 +13,6 @@
 namespace MassTransit.ActiveMqTransport.Transport
 {
     using System;
-    using System.IO;
     using System.Threading.Tasks;
     using Apache.NMS;
     using Contexts;
@@ -56,13 +55,14 @@ namespace MassTransit.ActiveMqTransport.Transport
             preSend(message, headers);
 
             var task = Task.Run(() => producer.Send(message));
-            task.ContinueWith(_ =>
+            var closeTask = task.ContinueWith(_ =>
             {
                 producer.Close();
                 producer.Dispose();
             });
 
             context.AddPendingTask(task);
+            context.AddPendingTask(closeTask);
         }
     }
 }
