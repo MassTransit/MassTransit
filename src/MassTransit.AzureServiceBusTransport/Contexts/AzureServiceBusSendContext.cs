@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,22 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using System;
     using System.Threading;
     using Context;
+
+
+    static class ScheduledMessageToken
+    {
+        internal static readonly ulong Tag;
+        internal static readonly byte[] Key;
+
+        static ScheduledMessageToken()
+        {
+            var guid = new Guid("E25FC12B-FF28-4476-A6E1-DE45E154A675");
+
+            Key = guid.ToByteArray();
+
+            Tag = BitConverter.ToUInt64(Key, 8);
+        }
+    }
 
 
     public class AzureServiceBusSendContext<T> :
@@ -37,13 +53,16 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 
         public void SetScheduledMessageId(long sequenceNumber)
         {
-            var id = NewId.NextGuid();
+            byte[] key = ScheduledMessageToken.Key;
 
-            byte[] bytes = id.ToByteArray();
+            var bytes = new byte[16];
+            Buffer.BlockCopy(key, 8, bytes, 8, 8);
 
-            byte[] sequencyNumberBytes = BitConverter.GetBytes(sequenceNumber);
+            byte[] sequenceNumberBytes = BitConverter.GetBytes(sequenceNumber);
 
-            Buffer.BlockCopy(sequencyNumberBytes, 0, bytes, 0, sequencyNumberBytes.Length);
+            var sequenceLength = sequenceNumberBytes.Length;
+
+            Buffer.BlockCopy(sequenceNumberBytes, 0, bytes, 0, sequenceLength);
 
             ScheduledMessageId = new Guid(bytes);
         }
@@ -51,12 +70,23 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         public bool TryGetScheduledMessageId(out long sequenceNumber)
         {
             if (ScheduledMessageId.HasValue)
+                return TryGetSequencyNumber(ScheduledMessageId.Value, out sequenceNumber);
+
+            sequenceNumber = 0;
+            return false;
+        }
+
+        public bool TryGetSequencyNumber(Guid id, out long sequenceNumber)
+        {
+            byte[] bytes = id.ToByteArray();
+
+            if (BitConverter.ToUInt64(bytes, 8) == ScheduledMessageToken.Tag)
             {
-                sequenceNumber = GetSequenceNumber(ScheduledMessageId.Value);
+                sequenceNumber = BitConverter.ToInt64(bytes, 0);
                 return true;
             }
 
-            sequenceNumber = 0;
+            sequenceNumber = default;
             return false;
         }
 

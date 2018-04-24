@@ -57,10 +57,10 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
 
             context.SetScheduledEnqueueTime(_scheduledTime);
 
-            if (_pipe != null)
+            if (_pipe.IsNotEmpty())
                 await _pipe.Send(context).ConfigureAwait(false);
 
-            if (_sendPipe != null)
+            if (_sendPipe.IsNotEmpty())
                 await _sendPipe.Send(context).ConfigureAwait(false);
         }
 
@@ -76,10 +76,10 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
 
             context.SetScheduledEnqueueTime(_scheduledTime);
 
-            if (_pipe != null)
+            if (_pipe.IsNotEmpty())
                 await _pipe.Send(context).ConfigureAwait(false);
 
-            if (_sendPipe != null)
+            if (_sendPipe.IsNotEmpty())
                 await _sendPipe.Send(context).ConfigureAwait(false);
         }
     }
@@ -116,7 +116,7 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
 
             context.SetScheduledEnqueueTime(_scheduledTime);
 
-            if (_sendPipe != null)
+            if (_sendPipe.IsNotEmpty())
                 await _sendPipe.Send(context).ConfigureAwait(false);
         }
 
@@ -131,7 +131,7 @@ namespace MassTransit.AzureServiceBusTransport.Scheduling
 
             context.SetScheduledEnqueueTime(_scheduledTime);
 
-            if (_sendPipe != null)
+            if (_sendPipe.IsNotEmpty())
                 await _sendPipe.Send(context).ConfigureAwait(false);
         }
     }
