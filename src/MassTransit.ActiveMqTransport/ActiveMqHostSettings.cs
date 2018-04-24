@@ -49,10 +49,8 @@ namespace MassTransit.ActiveMqTransport
 
         bool UseSsl { get; }
 
-        /// <summary>
-        /// Create a connection factory for the host settings
-        /// </summary>
-        /// <returns></returns>
-        IConnectionFactory CreateConnectionFactory();
+        Uri BrokerAddress { get; }
+
+        IConnection CreateConnection();
     }
 }

@@ -16,6 +16,10 @@ namespace MassTransit.ActiveMqTransport.Transport
     using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Apache.NMS.ActiveMQ;
+    using Apache.NMS.ActiveMQ.Transport;
+    using Apache.NMS.ActiveMQ.Transport.Tcp;
+    using Apache.NMS.ActiveMQ.Util;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -27,7 +31,6 @@ namespace MassTransit.ActiveMqTransport.Transport
         IPipeContextFactory<ConnectionContext>
     {
         static readonly ILog _log = Logger.Get<ConnectionContextFactory>();
-        readonly Lazy<IConnectionFactory> _connectionFactory;
         readonly string _description;
         readonly ActiveMqHostSettings _settings;
         readonly IActiveMqHostTopology _topology;
@@ -38,8 +41,6 @@ namespace MassTransit.ActiveMqTransport.Transport
             _topology = topology;
 
             _description = settings.ToString();
-
-            _connectionFactory = new Lazy<IConnectionFactory>(settings.CreateConnectionFactory);
         }
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
@@ -78,7 +79,7 @@ namespace MassTransit.ActiveMqTransport.Transport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting: {0}", _description);
 
-                connection = _connectionFactory.Value.CreateConnection(_settings.Username, _settings.Password);
+                connection = _settings.CreateConnection();
 
                 connection.Start();
 
