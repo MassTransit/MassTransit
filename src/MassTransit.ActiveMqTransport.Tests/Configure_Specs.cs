@@ -16,6 +16,7 @@ namespace MassTransit.ActiveMqTransport.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes.Internals.Extensions;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework.Messages;
@@ -110,24 +111,53 @@ namespace MassTransit.ActiveMqTransport.Tests
         }
     }
 
+
     [TestFixture]
     public class Configuring_ActiveMQ
     {
         [Test]
         public async Task Should_succeed_and_connect_when_properly_configured()
         {
+            TaskCompletionSource<bool> received = new TaskCompletionSource<bool>();
+            
+            Uri sendAddress = null;
+
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
-                cfg.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", 61617, h =>
+                var host = cfg.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", 61617, h =>
                 {
                     h.Username("masstransit-build");
                     h.Password("build-Br0k3r");
 
                     h.UseSsl();
                 });
+
+                cfg.ReceiveEndpoint(host, "input-queue", x =>
+                {
+                    x.Handler<PingMessage>(async context =>
+                    {
+                        await context.Publish(new PongMessage(context.Message.CorrelationId));
+                    });
+
+                    sendAddress = x.InputAddress;
+                });
+                
+                cfg.ReceiveEndpoint(host, "input-queue-too", x =>
+                {
+                    x.Handler<PongMessage>(async context =>
+                    {
+                        received.TrySetResult(true);
+                    });
+                });
             });
 
             await busControl.StartAsync();
+
+            var sendEndpoint = await busControl.GetSendEndpoint(sendAddress);
+
+            await sendEndpoint.Send(new PingMessage());
+
+            await received.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
 
             await busControl.StopAsync();
         }
@@ -166,6 +196,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             var handler = harness.Handler<PingMessage>(async context =>
             {
             });
+
             await harness.Start();
 
             await harness.InputQueueSendEndpoint.Send(new PingMessage());

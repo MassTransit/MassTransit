@@ -15,16 +15,21 @@ namespace MassTransit.ActiveMqTransport.Configurators
     using System;
     using Apache.NMS;
     using Apache.NMS.ActiveMQ;
+    using Apache.NMS.ActiveMQ.Transport;
+    using Apache.NMS.ActiveMQ.Transport.Tcp;
+    using Apache.NMS.ActiveMQ.Util;
 
 
     public class ConfigurationHostSettings :
         ActiveMqHostSettings
     {
         readonly Lazy<Uri> _hostAddress;
+        readonly Lazy<Uri> _brokerAddress;
 
         public ConfigurationHostSettings()
         {
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
+            _brokerAddress = new Lazy<Uri>(FormatBrokerAddress);
         }
 
         public string Host { get; set; }
@@ -34,18 +39,30 @@ namespace MassTransit.ActiveMqTransport.Configurators
         public bool UseSsl { get; set; }
 
         public Uri HostAddress => _hostAddress.Value;
+        public Uri BrokerAddress => _brokerAddress.Value;
 
-        public IConnectionFactory CreateConnectionFactory()
+        public IConnection CreateConnection()
         {
-            // create broker URI: http://activemq.apache.org/nms/activemq-uri-configuration.html
-            var brokerUri = new UriBuilder
+            ITransport transport;
+            if (UseSsl)
             {
-                Scheme = UseSsl ? "ssl" : "tcp",
-                Host = Host,
-                Port = Port
-            }.Uri;
+                var sslTransportFactory = new SslTransportFactory
+                {
+                    SslProtocol = "Tls"
+                };
 
-            return new ConnectionFactory(brokerUri);
+                transport = sslTransportFactory.CreateTransport(BrokerAddress);
+            }
+            else
+            {
+                transport = TransportFactory.CreateTransport(BrokerAddress);
+            }
+
+            return new Connection(BrokerAddress, transport, new IdGenerator())
+            {
+                UserName = Username,
+                Password = Password
+            };
         }
 
         Uri FormatHostAddress()
@@ -61,9 +78,28 @@ namespace MassTransit.ActiveMqTransport.Configurators
             return builder.Uri;
         }
 
+        Uri FormatBrokerAddress()
+        {
+            // create broker URI: http://activemq.apache.org/nms/activemq-uri-configuration.html
+            var builder = new UriBuilder
+            {
+                Scheme = UseSsl ? "ssl" : "tcp",
+                Host = Host,
+                Port = Port,
+                Query = "wireFormat.tightEncodingEnabled=true&nms.AsyncSend=true"
+            };
+
+            return builder.Uri;
+        }
+
         public override string ToString()
         {
-            return _hostAddress.Value.ToString();
+            return new UriBuilder
+            {
+                Scheme = UseSsl ? "ssl" : "tcp",
+                Host = Host,
+                Port = Port
+            }.Uri.ToString();
         }
     }
 }

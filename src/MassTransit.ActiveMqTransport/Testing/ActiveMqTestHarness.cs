@@ -122,8 +122,7 @@ namespace MassTransit.ActiveMqTransport.Testing
         {
             try
             {
-                var connectionFactory = host.Settings.CreateConnectionFactory();
-                using (var connection = connectionFactory.CreateConnection())
+                using (var connection = host.Settings.CreateConnection())
                 using (var model = connection.CreateSession())
                 {
                     CleanUpQueue(model, "input_queue");
