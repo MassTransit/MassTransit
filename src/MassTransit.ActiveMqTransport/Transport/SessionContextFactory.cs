@@ -83,7 +83,15 @@ namespace MassTransit.ActiveMqTransport.Transport
                 }
             });
 
-            _connectionCache.Send(connectionPipe, cancellationToken).ConfigureAwait(false);
+            var connectionTask = _connectionCache.Send(connectionPipe, cancellationToken);
+
+            Task NotifyCreateCanceled(Task task) => asyncContext.CreateCanceled();
+
+            connectionTask.ContinueWith(NotifyCreateCanceled, TaskContinuationOptions.OnlyOnCanceled);
+
+            Task NotifyCreateFaulted(Task task) => asyncContext.CreateFaulted(task.Exception);
+
+            connectionTask.ContinueWith(NotifyCreateFaulted, TaskContinuationOptions.OnlyOnFaulted);
         }
     }
 }
