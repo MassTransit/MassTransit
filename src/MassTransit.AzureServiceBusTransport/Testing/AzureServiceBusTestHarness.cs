@@ -41,6 +41,8 @@ namespace MassTransit.AzureServiceBusTransport.Testing
             InputQueueName = inputQueueName ?? "input_queue";
 
             ServiceBusEnvironment.SystemConnectivity.Mode = ConnectivityMode.Https;
+
+            ConfigureMessageScheduler = true;
         }
 
         public string SharedAccessKeyName { get; }
@@ -49,6 +51,7 @@ namespace MassTransit.AzureServiceBusTransport.Testing
         public TokenScope TokenScope { get; set; }
         public string InputQueueName { get; }
         public IServiceBusHost Host { get; private set; }
+        public bool ConfigureMessageScheduler { get; set; }
 
         public override Uri InputQueueAddress => _inputQueueAddress;
 
@@ -90,7 +93,8 @@ namespace MassTransit.AzureServiceBusTransport.Testing
 
                 ConfigureServiceBusBus(x);
 
-                x.UseServiceBusMessageScheduler();
+                if (ConfigureMessageScheduler)
+                    x.UseServiceBusMessageScheduler();
 
                 ConfigureServiceBusBusHost(x, Host);
 

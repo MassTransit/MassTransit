@@ -16,7 +16,6 @@ namespace MassTransit.QuartzIntegration
     using Logging;
     using Quartz;
     using Scheduling;
-    using Util;
 
 
     public class CancelScheduledMessageConsumer :

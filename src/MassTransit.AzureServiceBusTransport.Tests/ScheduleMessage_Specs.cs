@@ -56,6 +56,118 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         {
         }
     }
+    
+    [TestFixture]
+    public class Scheduling_a_message_using_quartz :
+        AzureServiceBusTestFixture
+    {
+        TimeSpan _testOffset;
+
+        public Scheduling_a_message_using_quartz()
+        {
+            _testOffset = TimeSpan.Zero;
+            AzureServiceBusTestHarness.ConfigureMessageScheduler = false;
+        }
+
+        Uri QuartzAddress { get; set; }
+
+
+        [Test]
+        public async Task Should_get_the_message()
+        {
+            await InputQueueSendEndpoint.Send(new FirstMessage());
+
+            await _first;
+
+            await _second;
+        }
+
+        Task<ConsumeContext<SecondMessage>> _second;
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+            _first = Handler<FirstMessage>(configurator, async context =>
+            {
+                await context.ScheduleSend(DateTime.Now, new SecondMessage());
+            });
+
+            _second = Handled<SecondMessage>(configurator);
+        }
+
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        {
+            QuartzAddress = configurator.UseInMemoryScheduler();
+        }
+
+
+        public class FirstMessage
+        {
+        }
+
+
+        public class SecondMessage
+        {
+        }
+    }
+    
+    [TestFixture]
+    public class Scheduling_a_message_using_quartz_and_cancelling_it :
+        AzureServiceBusTestFixture
+    {
+        TimeSpan _testOffset;
+
+        public Scheduling_a_message_using_quartz_and_cancelling_it()
+        {
+            _testOffset = TimeSpan.Zero;
+            AzureServiceBusTestHarness.ConfigureMessageScheduler = false;
+        }
+
+        Uri QuartzAddress { get; set; }
+
+
+        [Test]
+        public async Task Should_not_get_the_message()
+        {
+            await InputQueueSendEndpoint.Send(new FirstMessage());
+
+            await _first;
+
+            Assert.That(async () => await _second.WithTimeout(5000), Throws.TypeOf<TaskCanceledException>());
+        }
+
+        Task<ConsumeContext<SecondMessage>> _second;
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+            _first = Handler<FirstMessage>(configurator, async context =>
+            {
+                ScheduledMessage<SecondMessage> scheduledMessage = await context.ScheduleSend(DateTime.Now + TimeSpan.FromSeconds(5), new SecondMessage());
+
+                await Task.Delay(1000);
+                
+                await context.CancelScheduledSend(scheduledMessage);
+            });
+
+            _second = Handled<SecondMessage>(configurator);
+        }
+
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        {
+            QuartzAddress = configurator.UseInMemoryScheduler();
+        }
+
+
+        public class FirstMessage
+        {
+        }
+
+
+        public class SecondMessage
+        {
+        }
+    }
 
 
     public class Scheduling_a_published_message :

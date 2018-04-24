@@ -24,13 +24,15 @@ namespace MassTransit
 
     public static class QuartzIntegrationExtensions
     {
-        public static void UseInMemoryScheduler(this IBusFactoryConfigurator configurator, string queueName = "quartz")
+        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, string queueName = "quartz")
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
             var scheduler = TaskUtil.Await(() => schedulerFactory.GetScheduler());
+
+            Uri inputAddress = null;
 
             configurator.ReceiveEndpoint(queueName, e =>
             {
@@ -46,7 +48,11 @@ namespace MassTransit
 
                 var observer = new SchedulerBusObserver(scheduler, e.InputAddress);
                 configurator.ConnectBusObserver(observer);
+
+                inputAddress = e.InputAddress;
             });
+
+            return inputAddress;
         }
     }
 }
