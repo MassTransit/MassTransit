@@ -33,82 +33,62 @@ namespace MassTransit.Context
         ConsumeContextProxy<TMessage>
         where TMessage : class
     {
-        readonly Lazy<IPublishEndpoint> _publishEndpoint;
+        readonly IPublishEndpoint _publishEndpoint;
 
         protected ConsumeContextProxyScope(ConsumeContext<TMessage> context)
             : base(context, new PayloadCacheScope(context))
         {
-            _publishEndpoint = new Lazy<IPublishEndpoint>(() => new ConsumeContextScopePublishEndpoint(this, context));
+            _publishEndpoint = new ConsumeContextScopePublishEndpoint(this, context);
         }
 
         public override Task Publish<T>(T message, CancellationToken cancellationToken)
         {
-            var task = _publishEndpoint.Value.Publish(message, cancellationToken);
-            ReceiveContext.AddPendingTask(task);
-            return task;
+            return _publishEndpoint.Publish(message, cancellationToken);
         }
 
         public override Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            var task = _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
-            ReceiveContext.AddPendingTask(task);
-            return task;
+            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         public override Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            var task = _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
-            ReceiveContext.AddPendingTask(task);
-            return task;
+            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         public override Task Publish(object message, CancellationToken cancellationToken)
         {
-            var task = _publishEndpoint.Value.Publish(message, cancellationToken);
-            ReceiveContext.AddPendingTask(task);
-            return task;
+            return _publishEndpoint.Publish(message, cancellationToken);
         }
 
         public override Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            var task = _publishEndpoint.Value.Publish(message, publishPipe, cancellationToken);
-            ReceiveContext.AddPendingTask(task);
-            return task;
+            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         public override Task Publish(object message, Type messageType, CancellationToken cancellationToken)
         {
-            var task = _publishEndpoint.Value.Publish(message, messageType, cancellationToken);
-            ReceiveContext.AddPendingTask(task);
-            return task;
+            return _publishEndpoint.Publish(message, messageType, cancellationToken);
         }
 
         public override Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            var task = _publishEndpoint.Value.Publish(message, messageType, publishPipe, cancellationToken);
-            ReceiveContext.AddPendingTask(task);
-            return task;
+            return _publishEndpoint.Publish(message, messageType, publishPipe, cancellationToken);
         }
 
         public override Task Publish<T>(object values, CancellationToken cancellationToken)
         {
-            var task = _publishEndpoint.Value.Publish<T>(values, cancellationToken);
-            ReceiveContext.AddPendingTask(task);
-            return task;
+            return _publishEndpoint.Publish<T>(values, cancellationToken);
         }
 
         public override Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            var task = _publishEndpoint.Value.Publish(values, publishPipe, cancellationToken);
-            ReceiveContext.AddPendingTask(task);
-            return task;
+            return _publishEndpoint.Publish(values, publishPipe, cancellationToken);
         }
 
         public override Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            var task = _publishEndpoint.Value.Publish<T>(values, publishPipe, cancellationToken);
-            ReceiveContext.AddPendingTask(task);
-            return task;
+            return _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
         }
     }
 }
