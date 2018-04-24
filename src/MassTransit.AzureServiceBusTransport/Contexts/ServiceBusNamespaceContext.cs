@@ -159,7 +159,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             return topicDescription;
         }
 
-        public async Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription description)
+        public async Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription description, RuleDescription rule, Filter filter)
         {
             var create = true;
             SubscriptionDescription subscriptionDescription = null;
@@ -218,8 +218,11 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
                     if (_log.IsDebugEnabled)
                         _log.DebugFormat("Creating subscription {0} -> {1}", description.TopicPath, description.ForwardTo);
 
-
-                    subscriptionDescription = await _namespaceManager.CreateSubscriptionAsync(description).ConfigureAwait(false);
+                    subscriptionDescription = rule != null
+                        ? await _namespaceManager.CreateSubscriptionAsync(description, rule).ConfigureAwait(false)
+                        : filter != null
+                            ? await _namespaceManager.CreateSubscriptionAsync(description, filter).ConfigureAwait(false)
+                            : await _namespaceManager.CreateSubscriptionAsync(description).ConfigureAwait(false);
 
                     created = true;
                 }

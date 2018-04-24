@@ -30,6 +30,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
 
         public bool? EnableDeadLetteringOnFilterEvaluationExceptions { private get; set; }
 
+        public Filter Filter { get; set; }
+        public RuleDescription Rule { get; set; }
+
         public string ForwardTo { private get; set; }
 
         public string TopicPath { get; }
@@ -46,6 +49,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
 
             if (AutoDeleteOnIdle.HasValue && AutoDeleteOnIdle != TimeSpan.Zero && AutoDeleteOnIdle < TimeSpan.FromMinutes(5))
                 yield return this.Failure("AutoDeleteOnIdle", "must be zero, or >= 5:00");
+
+            if (Rule != null && Filter != null)
+                yield return this.Failure("Rule/Filter", "only a rule or a filter may be specified");
         }
 
         public SubscriptionDescription GetSubscriptionDescription()

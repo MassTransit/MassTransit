@@ -25,13 +25,13 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
         readonly TopicEntity _source;
         readonly SubscriptionEntity _subscription;
 
-        public TopicSubscriptionEntity(long id, long subscriptionId, TopicEntity source, TopicEntity destination,
-            SubscriptionDescription subscriptionDescription)
+        public TopicSubscriptionEntity(long id, long subscriptionId, TopicEntity source, TopicEntity destination, SubscriptionDescription subscriptionDescription,
+            RuleDescription rule = null, Filter filter = null)
         {
             Id = id;
             _source = source;
             _destination = destination;
-            _subscription = new SubscriptionEntity(subscriptionId, source, subscriptionDescription);
+            _subscription = new SubscriptionEntity(subscriptionId, source, subscriptionDescription, rule, filter);
         }
 
         public static IEqualityComparer<TopicSubscriptionEntity> EntityComparer { get; } = new TopicSubscriptionEntityEqualityComparer();
@@ -62,12 +62,16 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
             {
                 if (ReferenceEquals(x, y))
                     return true;
+
                 if (ReferenceEquals(x, null))
                     return false;
+
                 if (ReferenceEquals(y, null))
                     return false;
+
                 if (x.GetType() != y.GetType())
                     return false;
+
                 return TopicEntity.EntityComparer.Equals(x._source, y._source)
                     && TopicEntity.EntityComparer.Equals(x._destination, y._destination)
                     && SubscriptionEntity.EntityComparer.Equals(x._subscription, y._subscription);
@@ -86,6 +90,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
             }
         }
 
+
         sealed class NameEqualityComparer :
             IEqualityComparer<TopicSubscriptionEntity>
         {
@@ -93,12 +98,16 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
             {
                 if (ReferenceEquals(x, y))
                     return true;
+
                 if (ReferenceEquals(x, null))
                     return false;
+
                 if (ReferenceEquals(y, null))
                     return false;
+
                 if (x.GetType() != y.GetType())
                     return false;
+
                 return string.Equals(x.Subscription.SubscriptionDescription.Name, y.Subscription.SubscriptionDescription.Name)
                     && string.Equals(x.Subscription.SubscriptionDescription.TopicPath, y.Subscription.SubscriptionDescription.TopicPath)
                     && string.Equals(x.Destination.TopicDescription.Path, y.Destination.TopicDescription.Path);
@@ -113,6 +122,5 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
                 return hashCode;
             }
         }
-
     }
 }

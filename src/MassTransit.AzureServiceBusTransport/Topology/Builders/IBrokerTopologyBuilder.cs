@@ -30,8 +30,10 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
         /// </summary>
         /// <param name="topic">The source exchange</param>
         /// <param name="subscriptionDescription"></param>
+        /// <param name="rule"></param>
+        /// <param name="filter"></param>
         /// <returns>An entity handle used to reference the binding in subsequent calls</returns>
-        SubscriptionHandle CreateSubscription(TopicHandle topic, SubscriptionDescription subscriptionDescription);
+        SubscriptionHandle CreateSubscription(TopicHandle topic, SubscriptionDescription subscriptionDescription, RuleDescription rule, Filter filter);
 
         /// <summary>
         /// Creates a subscription which forwards to a different topic
@@ -55,7 +57,10 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
         /// <param name="exchange"></param>
         /// <param name="queue"></param>
         /// <param name="subscriptionDescription"></param>
+        /// <param name="rule"></param>
+        /// <param name="filter"></param>
         /// <returns></returns>
-        QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, SubscriptionDescription subscriptionDescription);
+        QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, SubscriptionDescription subscriptionDescription, RuleDescription rule,
+            Filter filter);
     }
 }

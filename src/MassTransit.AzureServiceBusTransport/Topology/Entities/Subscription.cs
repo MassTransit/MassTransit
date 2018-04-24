@@ -23,5 +23,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
         SubscriptionDescription SubscriptionDescription { get; }
 
         TopicHandle Topic { get; }
+        
+        RuleDescription Rule { get; }
+        
+        Filter Filter { get; }
     }
 }

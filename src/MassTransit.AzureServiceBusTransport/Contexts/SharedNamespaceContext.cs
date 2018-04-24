@@ -44,9 +44,9 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             return _context.CreateTopic(topicDescription);
         }
 
-        Task<SubscriptionDescription> NamespaceContext.CreateTopicSubscription(SubscriptionDescription subscriptionDescription)
+        Task<SubscriptionDescription> NamespaceContext.CreateTopicSubscription(SubscriptionDescription subscriptionDescription, RuleDescription rule, Filter filter)
         {
-            return _context.CreateTopicSubscription(subscriptionDescription);
+            return _context.CreateTopicSubscription(subscriptionDescription, rule, filter);
         }
 
         Task NamespaceContext.DeleteTopicSubscription(SubscriptionDescription description)

@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
+    using Microsoft.ServiceBus.Messaging;
+
+
     /// <summary>
     /// Configure an Azure Service Bus receive endpoint
     /// </summary>
@@ -23,5 +26,15 @@ namespace MassTransit.AzureServiceBusTransport
         /// The host on which the endpoint is being configured
         /// </summary>
         IServiceBusHost Host { get; }
+
+        /// <summary>
+        /// Specify the filter for the subscription
+        /// </summary>
+        Filter Filter { set; }
+
+        /// <summary>
+        /// Specify a rule for the subscription
+        /// </summary>
+        RuleDescription Rule { set; }
     }
 }

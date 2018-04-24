@@ -23,19 +23,26 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
     {
         readonly TopicEntity _topic;
 
-        public SubscriptionEntity(long id, TopicEntity topic, SubscriptionDescription subscriptionDescription)
+        public SubscriptionEntity(long id, TopicEntity topic, SubscriptionDescription subscriptionDescription, RuleDescription rule = null, Filter filter = null)
         {
             Id = id;
 
             _topic = topic;
 
             SubscriptionDescription = subscriptionDescription;
+
+            Rule = rule;
+            Filter = filter;
         }
 
         public static IEqualityComparer<SubscriptionEntity> NameComparer { get; } = new NameEqualityComparer();
         public static IEqualityComparer<SubscriptionEntity> EntityComparer { get; } = new SubscriptionEntityEqualityComparer();
 
         public TopicHandle Topic => _topic;
+
+        public RuleDescription Rule { get; }
+        public Filter Filter { get; }
+
         public SubscriptionDescription SubscriptionDescription { get; }
         public long Id { get; }
         public Subscription Subscription => this;
@@ -57,12 +64,16 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
             {
                 if (ReferenceEquals(x, y))
                     return true;
+
                 if (ReferenceEquals(x, null))
                     return false;
+
                 if (ReferenceEquals(y, null))
                     return false;
+
                 if (x.GetType() != y.GetType())
                     return false;
+
                 return string.Equals(x.SubscriptionDescription.Name, y.SubscriptionDescription.Name)
                     && string.Equals(x.SubscriptionDescription.TopicPath, y.SubscriptionDescription.TopicPath)
                     && x.SubscriptionDescription.AutoDeleteOnIdle == y.SubscriptionDescription.AutoDeleteOnIdle
@@ -70,7 +81,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
                     && x.SubscriptionDescription.EnableBatchedOperations == y.SubscriptionDescription.EnableBatchedOperations
                     && x.SubscriptionDescription.EnableDeadLetteringOnMessageExpiration == y.SubscriptionDescription.EnableDeadLetteringOnMessageExpiration
                     && x.SubscriptionDescription.EnableDeadLetteringOnFilterEvaluationExceptions
-                        == y.SubscriptionDescription.EnableDeadLetteringOnFilterEvaluationExceptions
+                    == y.SubscriptionDescription.EnableDeadLetteringOnFilterEvaluationExceptions
                     && string.Equals(x.SubscriptionDescription.ForwardDeadLetteredMessagesTo, y.SubscriptionDescription.ForwardDeadLetteredMessagesTo)
                     && string.Equals(x.SubscriptionDescription.ForwardTo, y.SubscriptionDescription.ForwardTo)
                     && x.SubscriptionDescription.LockDuration == y.SubscriptionDescription.LockDuration
@@ -92,8 +103,10 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
                     hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.EnableDeadLetteringOnFilterEvaluationExceptions.GetHashCode();
                     if (!string.IsNullOrWhiteSpace(obj.SubscriptionDescription.ForwardDeadLetteredMessagesTo))
                         hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.ForwardDeadLetteredMessagesTo.GetHashCode();
+
                     if (!string.IsNullOrWhiteSpace(obj.SubscriptionDescription.ForwardTo))
                         hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.ForwardTo.GetHashCode();
+
                     hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.LockDuration.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.MaxDeliveryCount.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.RequiresSession.GetHashCode();
@@ -113,12 +126,16 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
             {
                 if (ReferenceEquals(x, y))
                     return true;
+
                 if (ReferenceEquals(x, null))
                     return false;
+
                 if (ReferenceEquals(y, null))
                     return false;
+
                 if (x.GetType() != y.GetType())
                     return false;
+
                 return string.Equals(x.SubscriptionDescription.Name, y.SubscriptionDescription.Name)
                     && string.Equals(x.SubscriptionDescription.TopicPath, y.SubscriptionDescription.TopicPath);
             }

@@ -61,6 +61,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         {
             if (string.IsNullOrWhiteSpace(topicName))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(topicName));
+
             if (string.IsNullOrWhiteSpace(subscriptionName))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(subscriptionName));
 
@@ -70,7 +71,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
             callback?.Invoke(subscriptionConfigurator);
 
-            var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription());
+            var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription(), subscriptionConfigurator.Rule,
+                subscriptionConfigurator.Filter);
 
             _specifications.Add(specification);
         }

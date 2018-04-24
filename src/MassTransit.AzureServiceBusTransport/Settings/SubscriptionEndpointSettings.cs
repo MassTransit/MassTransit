@@ -62,6 +62,9 @@ namespace MassTransit.AzureServiceBusTransport.Settings
         TopicDescription SubscriptionSettings.TopicDescription => _topicDescription;
         SubscriptionDescription SubscriptionSettings.SubscriptionDescription => _subscriptionConfigurator.GetSubscriptionDescription();
 
+        public RuleDescription Rule { get; set; }
+        public Filter Filter { get; set; }
+
         public override TimeSpan LockDuration => _subscriptionConfigurator.LockDuration ?? Defaults.LockDuration;
 
         public override string Path { get; }

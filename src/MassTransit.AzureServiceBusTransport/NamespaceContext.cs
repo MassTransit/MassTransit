@@ -47,8 +47,10 @@ namespace MassTransit.AzureServiceBusTransport
         /// Create a topic subscription
         /// </summary>
         /// <param name="subscriptionDescription"></param>
+        /// <param name="rule"></param>
+        /// <param name="filter"></param>
         /// <returns></returns>
-        Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription subscriptionDescription);
+        Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription subscriptionDescription, RuleDescription rule, Filter filter);
 
         /// <summary>
         /// Delete a subscription from the topic

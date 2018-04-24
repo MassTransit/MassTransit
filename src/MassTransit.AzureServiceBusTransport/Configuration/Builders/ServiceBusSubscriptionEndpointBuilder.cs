@@ -45,7 +45,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
 
             topologyBuilder.Topic = topologyBuilder.CreateTopic(settings.TopicDescription);
 
-            topologyBuilder.CreateSubscription(topologyBuilder.Topic, settings.SubscriptionDescription);
+            topologyBuilder.CreateSubscription(topologyBuilder.Topic, settings.SubscriptionDescription, settings.Rule, settings.Filter);
 
             return topologyBuilder.BuildBrokerTopology();
         }

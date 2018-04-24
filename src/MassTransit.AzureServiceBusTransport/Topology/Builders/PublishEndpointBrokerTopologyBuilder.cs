@@ -51,6 +51,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
             return this;
         }
 
+
         class ImplementedBuilder :
             IPublishEndpointBrokerTopologyBuilder
         {
@@ -97,9 +98,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
                 return _builder.CreateTopic(topicDescription);
             }
 
-            public SubscriptionHandle CreateSubscription(TopicHandle topic, SubscriptionDescription subscriptionDescription)
+            public SubscriptionHandle CreateSubscription(TopicHandle topic, SubscriptionDescription subscriptionDescription, RuleDescription rule, Filter filter)
             {
-                return _builder.CreateSubscription(topic, subscriptionDescription);
+                return _builder.CreateSubscription(topic, subscriptionDescription, rule, filter);
             }
 
             public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination, SubscriptionDescription subscriptionDescription)
@@ -112,9 +113,10 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
                 return _builder.CreateQueue(queueDescription);
             }
 
-            public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, SubscriptionDescription subscriptionDescription)
+            public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, SubscriptionDescription subscriptionDescription, RuleDescription rule,
+                Filter filter)
             {
-                return _builder.CreateQueueSubscription(exchange, queue, subscriptionDescription);
+                return _builder.CreateQueueSubscription(exchange, queue, subscriptionDescription, rule, filter);
             }
         }
     }

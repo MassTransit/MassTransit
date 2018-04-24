@@ -9,6 +9,7 @@
     using GreenPipes;
     using GreenPipes.Agents;
     using MassTransit.Pipeline;
+    using Microsoft.ServiceBus.Messaging;
     using Pipeline;
     using Settings;
     using Transport;
@@ -73,6 +74,16 @@
         public override Uri InputAddress { get; }
 
         public IServiceBusHost Host => _hostConfiguration.Host;
+
+        public Filter Filter
+        {
+            set => _settings.Filter = value;
+        }
+
+        public RuleDescription Rule
+        {
+            set => _settings.Rule = value;
+        }
 
         public SubscriptionSettings Settings => _settings;
 

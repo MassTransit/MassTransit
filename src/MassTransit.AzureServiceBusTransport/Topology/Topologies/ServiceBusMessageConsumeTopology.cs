@@ -69,7 +69,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
             configure?.Invoke(subscriptionConfigurator);
 
-            var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription());
+            var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription(), subscriptionConfigurator.Rule,
+                subscriptionConfigurator.Filter);
 
             _specifications.Add(specification);
         }

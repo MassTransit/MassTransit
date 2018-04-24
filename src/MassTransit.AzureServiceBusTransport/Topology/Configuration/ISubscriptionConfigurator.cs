@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
 {
-    using System;
     using GreenPipes;
     using Microsoft.ServiceBus.Messaging;
 
@@ -41,38 +40,16 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration
         /// </summary>
         bool? EnableDeadLetteringOnFilterEvaluationExceptions { set; }
 
+        /// <summary>
+        /// Specify the filter for the subscription
+        /// </summary>
+        Filter Filter { set; }
+
+        /// <summary>
+        /// Specify a rule for the subscription
+        /// </summary>
+        RuleDescription Rule { set; }
+
         SubscriptionDescription GetSubscriptionDescription();
-    }
-
-
-    public interface IConsumeEntityConfigurator
-    {
-        /// <summary>
-        /// Sets a value that indicates whether server-side batched operations are enabled
-        /// </summary>
-        bool EnableBatchedOperations { set; }
-
-        /// <summary>
-        /// Move messages to the dead letter queue on expiration (time to live exceeded)
-        /// </summary>
-        bool EnableDeadLetteringOnMessageExpiration { set; }
-
-        /// <summary>
-        /// Sets the path to the recipient to which the dead lettered message is forwarded.
-        /// </summary>
-        string ForwardDeadLetteredMessagesTo { set; }
-
-        /// <summary>
-        /// Specify the lock duration for messages read from the queue
-        /// </summary>
-        /// <value></value>
-        TimeSpan LockDuration { set; }
-
-        int MaxDeliveryCount { set; }
-
-        /// <summary>
-        /// Sets the queue in session mode, requiring a session for inbound messages
-        /// </summary>
-        bool RequiresSession { set; }
     }
 }

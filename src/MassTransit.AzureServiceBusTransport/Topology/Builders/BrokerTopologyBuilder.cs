@@ -30,8 +30,10 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
 
             Subscriptions = new NamedEntityCollection<SubscriptionEntity, SubscriptionHandle>(SubscriptionEntity.EntityComparer,
                 SubscriptionEntity.NameComparer);
+
             QueueSubscriptions = new NamedEntityCollection<QueueSubscriptionEntity, QueueSubscriptionHandle>(QueueSubscriptionEntity.EntityComparer,
                 QueueSubscriptionEntity.NameComparer);
+
             TopicSubscriptions = new NamedEntityCollection<TopicSubscriptionEntity, TopicSubscriptionHandle>(TopicSubscriptionEntity.EntityComparer,
                 TopicSubscriptionEntity.NameComparer);
         }
@@ -49,7 +51,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
             return Topics.GetOrAdd(exchange);
         }
 
-        public SubscriptionHandle CreateSubscription(TopicHandle topic, SubscriptionDescription subscriptionDescription)
+        public SubscriptionHandle CreateSubscription(TopicHandle topic, SubscriptionDescription subscriptionDescription, RuleDescription rule, Filter filter)
         {
             var topicEntity = Topics.Get(topic);
 
@@ -65,7 +67,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
             return Queues.GetOrAdd(queue);
         }
 
-        public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, SubscriptionDescription subscriptionDescription)
+        public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, SubscriptionDescription subscriptionDescription, RuleDescription rule,
+            Filter filter)
         {
             var topicEntity = Topics.Get(exchange);
 
@@ -74,7 +77,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Builders
             if (topicEntity.TopicDescription.EnablePartitioning)
                 queueEntity.QueueDescription.EnablePartitioning = true;
 
-            var binding = new QueueSubscriptionEntity(GetNextId(), GetNextId(), topicEntity, queueEntity, subscriptionDescription);
+            var binding = new QueueSubscriptionEntity(GetNextId(), GetNextId(), topicEntity, queueEntity, subscriptionDescription, rule, filter);
 
             return QueueSubscriptions.GetOrAdd(binding);
         }

@@ -17,7 +17,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
-    using MassTransit.Pipeline;
     using Topology;
     using Topology.Entities;
 
@@ -104,12 +103,12 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         Task Create(NamespaceContext context, Subscription subscription)
         {
-            return context.CreateTopicSubscription(subscription.SubscriptionDescription);
+            return context.CreateTopicSubscription(subscription.SubscriptionDescription, subscription.Rule, subscription.Filter);
         }
 
         Task Create(NamespaceContext context, QueueSubscription subscription)
         {
-            return context.CreateTopicSubscription(subscription.Subscription.SubscriptionDescription);
+            return context.CreateTopicSubscription(subscription.Subscription.SubscriptionDescription, subscription.Subscription.Rule, subscription.Subscription.Filter);
         }
 
         Task Delete(NamespaceContext context, QueueSubscription subscription)
@@ -119,7 +118,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         Task Create(NamespaceContext context, TopicSubscription subscription)
         {
-            return context.CreateTopicSubscription(subscription.Subscription.SubscriptionDescription);
+            return context.CreateTopicSubscription(subscription.Subscription.SubscriptionDescription, subscription.Subscription.Rule, subscription.Subscription.Filter);
         }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -29,13 +29,17 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Specificat
         IServiceBusConsumeTopologySpecification
     {
         static readonly INewIdFormatter _formatter = new ZBase32Formatter();
+        readonly Filter _filter;
+        readonly RuleDescription _rule;
         readonly SubscriptionDescription _subscriptionDescription;
         readonly TopicDescription _topicDescription;
 
-        public SubscriptionConsumeTopologySpecification(TopicDescription topicDescription, SubscriptionDescription subscriptionDescription)
+        public SubscriptionConsumeTopologySpecification(TopicDescription topicDescription, SubscriptionDescription subscriptionDescription, RuleDescription rule, Filter filter)
         {
             _topicDescription = topicDescription;
             _subscriptionDescription = subscriptionDescription;
+            _rule = rule;
+            _filter = filter;
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -52,7 +56,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Specificat
             subscriptionDescription.ForwardTo = builder.Queue.Queue.QueueDescription.Path;
             subscriptionDescription.Name = GetSubscriptionName(subscriptionDescription.Name, builder.Queue.Queue.QueueDescription.Path.Split('/').Last());
 
-            var queueSubscription = builder.CreateQueueSubscription(topic, builder.Queue, subscriptionDescription);
+            var queueSubscription = builder.CreateQueueSubscription(topic, builder.Queue, subscriptionDescription, _rule, _filter);
         }
 
         static string GetSubscriptionName(string subscriptionName, string queuePath)
