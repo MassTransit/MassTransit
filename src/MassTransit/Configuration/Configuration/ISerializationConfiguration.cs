@@ -13,7 +13,6 @@
 namespace MassTransit.Configuration
 {
     using System.Net.Mime;
-    using Builders;
 
 
     public interface ISerializationConfiguration

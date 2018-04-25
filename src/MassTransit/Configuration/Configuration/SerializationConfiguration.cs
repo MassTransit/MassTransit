@@ -16,7 +16,6 @@ namespace MassTransit.Configuration
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Mime;
-    using Builders;
     using Serialization;
 
 
@@ -47,7 +46,11 @@ namespace MassTransit.Configuration
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
             _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
 
-            _deserializerFactories = source._deserializerFactories;
+            _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
+            foreach (KeyValuePair<string, DeserializerFactory> deserializerFactory in source._deserializerFactories)
+            {
+                _deserializerFactories.Add(deserializerFactory);
+            }
         }
 
         public IMessageSerializer Serializer => _serializer.Value;
