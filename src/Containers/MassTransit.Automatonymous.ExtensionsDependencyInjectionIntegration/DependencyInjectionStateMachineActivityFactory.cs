@@ -16,24 +16,31 @@ namespace MassTransit.AutomatonymousExtensionsDependencyInjectionIntegration
     using Automatonymous;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
+    using Util;
 
 
     public class DependencyInjectionStateMachineActivityFactory :
         IStateMachineActivityFactory
     {
-        public Activity<TInstance, TData> GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
-            where TActivity : Activity<TInstance, TData>
+        Activity<TInstance, TData> IStateMachineActivityFactory.GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
         {
-            var serviceProvider = context.GetPayload<IServiceProvider>();
-
-            return serviceProvider.GetRequiredService<TActivity>();
+            return GetActivity<TActivity>(context);
         }
 
-        public Activity<TInstance> GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context) where TActivity : Activity<TInstance>
+        Activity<TInstance> IStateMachineActivityFactory.GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context)
         {
-            var serviceProvider = context.GetPayload<IServiceProvider>();
+            return GetActivity<TActivity>(context);
+        }
 
-            return serviceProvider.GetRequiredService<TActivity>();
+        static TActivity GetActivity<TActivity>(PipeContext context)
+        {
+            if (context.TryGetPayload(out IServiceProvider serviceProvider))
+                return serviceProvider.GetRequiredService<TActivity>();
+
+            if (context.TryGetPayload(out IServiceScope serviceScope))
+                return serviceScope.ServiceProvider.GetRequiredService<TActivity>();
+
+            throw new PayloadNotFoundException($"IServiceProvider or IServiceScope was not found to create activity: {TypeMetadataCache<TActivity>.ShortName}");
         }
     }
 }

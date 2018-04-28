@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -31,12 +31,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
             _serviceProvider = serviceProvider;
         }
 
-        public void Probe(ProbeContext context)
+        void IProbeSite.Probe(ProbeContext context)
         {
             context.Add("provider", "dependencyInjection");
         }
 
-        public IConsumerScopeContext GetScope(ConsumeContext context)
+        IConsumerScopeContext IConsumerScopeProvider.GetScope(ConsumeContext context)
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
                 return new ExistingConsumerScopeContext(context);
@@ -50,6 +50,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
 
                 var scope = serviceScope;
                 proxy.GetOrAddPayload(() => scope);
+                proxy.GetOrAddPayload(() => scope.ServiceProvider);
 
                 return new CreatedConsumerScopeContext<IServiceScope>(scope, proxy);
             }
@@ -61,7 +62,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
             }
         }
 
-        public IConsumerScopeContext<TConsumer, T> GetScope<TConsumer, T>(ConsumeContext<T> context) where TConsumer : class where T : class
+        IConsumerScopeContext<TConsumer, T> IConsumerScopeProvider.GetScope<TConsumer, T>(ConsumeContext<T> context)
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
@@ -79,13 +80,16 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
             var serviceScope = scopeFactory.CreateScope();
             try
             {
-                var consumer = serviceScope.ServiceProvider.GetService<TConsumer>();
+                var scope = serviceScope;
+                
+                var consumer = scope.ServiceProvider.GetService<TConsumer>();
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, serviceScope);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, scope);
+                consumerContext.GetOrAddPayload(() => scope.ServiceProvider);
 
-                return new CreatedConsumerScopeContext<IServiceScope, TConsumer, T>(serviceScope, consumerContext);
+                return new CreatedConsumerScopeContext<IServiceScope, TConsumer, T>(scope, consumerContext);
             }
             catch
             {
