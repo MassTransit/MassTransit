@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology
 {
+    using System;
     using MassTransit.Topology;
 
 
@@ -21,6 +22,27 @@ namespace MassTransit.RabbitMqTransport.Topology
         IRabbitMqMessagePublishTopologyConfigurator
         where TMessage : class
     {
+        /// <summary>
+        /// Specifies the alternate exchange for the published message exchange, which is where messages are sent if no
+        /// queues receive the message.
+        /// </summary>
+        string AlternateExchange { set; }
+
+        /// <summary>
+        /// Bind an exchange to a queue
+        /// </summary>
+        /// <param name="exchangeName"></param>
+        /// <param name="queueName"></param>
+        /// <param name="configure"></param>
+        void BindQueue(string exchangeName, string queueName, Action<IQueueBindingConfigurator> configure = null);
+
+        /// <summary>
+        /// Bind an alternate exchange/queue for the published message type
+        /// </summary>
+        /// <param name="exchangeName"></param>
+        /// <param name="queueName"></param>
+        /// <param name="configure"></param>
+        void BindAlterateExchangeQueue(string exchangeName, string queueName = null, Action<IQueueBindingConfigurator> configure = null);
     }
 
 

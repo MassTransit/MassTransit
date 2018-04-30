@@ -17,7 +17,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
     using System.Linq;
     using System.Text;
     using Builders;
-    using Configurators;
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;

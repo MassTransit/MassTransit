@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Settings;
+    using Specifications;
     using Util;
 
 
@@ -31,6 +32,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         readonly ExchangeConfigurator _exchange;
         readonly IList<IRabbitMqMessagePublishTopology> _implementedMessageTypes;
         readonly IMessageTopology<TMessage> _messageTopology;
+        readonly IList<IRabbitMqPublishTopologySpecification> _specifications;
 
         public RabbitMqMessagePublishTopology(IMessageTopology<TMessage> messageTopology, IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector)
         {
@@ -48,6 +50,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             _exchange = new ExchangeConfigurator(exchangeName, exchangeType, durable, autoDelete);
 
             _implementedMessageTypes = new List<IRabbitMqMessagePublishTopology>();
+            _specifications = new List<IRabbitMqPublishTopologySpecification>();
         }
 
         IMessageExchangeTypeSelector<TMessage> ExchangeTypeSelector { get; }
@@ -61,6 +64,9 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
                 builder.ExchangeBind(builder.Exchange, exchangeHandle, "", new Dictionary<string, object>());
             else
                 builder.Exchange = exchangeHandle;
+
+            for (int i = 0; i < _specifications.Count; i++)
+                _specifications[i].Apply(builder);
 
             foreach (IRabbitMqMessagePublishTopology configurator in _implementedMessageTypes)
                 configurator.Apply(builder);
@@ -111,6 +117,32 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         void IExchangeConfigurator.SetExchangeArgument(string key, TimeSpan value)
         {
             _exchange.SetExchangeArgument(key, value);
+        }
+
+        public string AlternateExchange
+        {
+            set => _exchange.SetExchangeArgument("alternate-exchange", value);
+        }
+
+        public void BindQueue(string exchangeName, string queueName, Action<IQueueBindingConfigurator> configure = null)
+        {
+            if (string.IsNullOrWhiteSpace(exchangeName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(exchangeName));
+
+            var exchangeType = ExchangeTypeSelector.DefaultExchangeType;
+
+            var specification = new ExchangeToQueueBindingPublishTopologySpecification(exchangeName, exchangeType, queueName);
+
+            configure?.Invoke(specification);
+
+            _specifications.Add(specification);
+        }
+
+        public void BindAlterateExchangeQueue(string exchangeName, string queueName = null, Action<IQueueBindingConfigurator> configure = null)
+        {
+            BindQueue(exchangeName, queueName, configure);
+
+            AlternateExchange = exchangeName;
         }
 
         public void AddImplementedMessageConfigurator<T>(IRabbitMqMessagePublishTopologyConfigurator<T> configurator, bool direct)
