@@ -255,6 +255,13 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _endpointConfiguration.Topology.Consume.GetMessageTopology<T>().Bind(callback);
         }
 
+        public void BindDeadLetterQueue(string exchangeName, string queueName, Action<IQueueBindingConfigurator> configure)
+        {
+            _endpointConfiguration.Topology.Consume.BindQueue(exchangeName, queueName, configure);
+
+            DeadLetterExchange = exchangeName;
+        }
+
         public void ConfigureModel(Action<IPipeConfigurator<ModelContext>> configure)
         {
             configure?.Invoke(_modelConfigurator);

@@ -86,6 +86,20 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             _specifications.Add(specification);
         }
 
+        public void BindQueue(string exchangeName, string queueName, Action<IQueueBindingConfigurator> configure = null)
+        {
+            if (string.IsNullOrWhiteSpace(exchangeName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(exchangeName));
+
+            var exchangeType = ExchangeTypeSelector.DefaultExchangeType;
+
+            var specification = new ExchangeToQueueBindingConsumeTopologySpecification(exchangeName, exchangeType, queueName);
+
+            configure?.Invoke(specification);
+
+            _specifications.Add(specification);
+        }
+
         public string CreateTemporaryQueueName(string prefix)
         {
             var sb = new StringBuilder(prefix);

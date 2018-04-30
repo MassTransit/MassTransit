@@ -59,6 +59,14 @@ namespace MassTransit.RabbitMqTransport
             where T : class;
 
         /// <summary>
+        /// Bind a dead letter exchange and queue to the receive endpoint so that expired messages are moved automatically.
+        /// </summary>
+        /// <param name="exchangeName"></param>
+        /// <param name="queueName"></param>
+        /// <param name="configure"></param>
+        void BindDeadLetterQueue(string exchangeName, string queueName = null, Action<IQueueBindingConfigurator> configure = null);
+
+        /// <summary>
         /// Add middleware to the model pipe
         /// </summary>
         /// <param name="configure"></param>

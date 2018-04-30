@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Tests
         using NUnit.Framework;
         using RabbitMQ.Client;
         using Saga;
-        using TestFramework;
 
 
         public class ConsumerBindingTestFixture :
