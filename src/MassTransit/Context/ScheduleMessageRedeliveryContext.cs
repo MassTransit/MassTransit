@@ -34,7 +34,7 @@ namespace MassTransit.Context
             _context = context;
         }
 
-        Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext> callback = null)
+        Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext> callback)
         {
             Action<ConsumeContext, SendContext> combinedAction = AddMessageHeaderAction + callback;
             return _scheduler.ScheduleSend(delay, _context.Message, _context.CreateCopyContextPipe(combinedAction));

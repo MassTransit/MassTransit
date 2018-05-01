@@ -17,8 +17,10 @@ namespace MassTransit.Tests.Saga
 	using Messages;
 
 	public class RegisterUserController :
+	#pragma warning disable 618
 		Consumes<UserRegistrationPending>.All,
 		Consumes<UserRegistrationComplete>.All
+    #pragma warning restore 618
 	{
 		readonly IBus _bus;
 		readonly ManualResetEvent _registrationComplete = new ManualResetEvent(false);

@@ -37,7 +37,7 @@ namespace MassTransit.NHibernateIntegration.Tests
 
         public void Dispose() => _inner.Dispose();
 
-        public ISession OpenSession(DbConnection conn) => _inner.OpenSession(_liveConnection);
+        public ISession OpenSession(DbConnection conn) => _inner.WithOptions().Connection(_liveConnection).OpenSession();
 
         public Task CloseAsync(CancellationToken cancellationToken = new CancellationToken()) => 
             _inner.CloseAsync(cancellationToken);
@@ -69,12 +69,12 @@ namespace MassTransit.NHibernateIntegration.Tests
         public ISessionBuilder WithOptions() => _inner.WithOptions();
 
         public ISession OpenSession(IInterceptor sessionLocalInterceptor) => 
-            _inner.OpenSession(_liveConnection, sessionLocalInterceptor);
+            _inner.WithOptions().Connection(_liveConnection).Interceptor(sessionLocalInterceptor).OpenSession();
 
         public ISession OpenSession(DbConnection conn, IInterceptor sessionLocalInterceptor) => 
-            _inner.OpenSession(_liveConnection, sessionLocalInterceptor);
+            _inner.WithOptions().Connection(_liveConnection).Interceptor(sessionLocalInterceptor).OpenSession();
 
-        public ISession OpenSession() => _inner.OpenSession(_liveConnection);
+        public ISession OpenSession() => _inner.WithOptions().Connection(_liveConnection).OpenSession();
 
         public IStatelessSessionBuilder WithStatelessOptions()
         {

@@ -61,13 +61,17 @@
 
                 Interlocked.Exchange(ref _getMethod, method);
             }
+            #if NETCORE
+            catch (Exception)
+            {
+            }
+            #else
             catch (Exception ex)
             {
-            #if !NETCORE
                 if (Trace.Listeners.Count > 0)
                     Trace.WriteLine(ex.Message);
-            #endif
             }
+            #endif
         }
 
         static Func<T, TProperty> CompileGetMethod(Type implementationType, MethodInfo getMethod)

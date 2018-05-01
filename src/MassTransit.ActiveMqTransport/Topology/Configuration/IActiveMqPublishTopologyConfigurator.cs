@@ -19,11 +19,6 @@ namespace MassTransit.ActiveMqTransport.Topology
         IPublishTopologyConfigurator,
         IActiveMqPublishTopology
     {
-        /// <summary>
-        /// Determines how type hierarchy is configured on the broker
-        /// </summary>
-        new PublishBrokerTopologyOptions BrokerTopologyOptions { set; }
-
         new IActiveMqMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
     }

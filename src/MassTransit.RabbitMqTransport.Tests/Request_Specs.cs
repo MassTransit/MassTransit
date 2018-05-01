@@ -384,7 +384,6 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.That(async () => await _response, Throws.TypeOf<RequestTimeoutException>());
         }
 
-        Task<ConsumeContext<PingMessage>> _ping;
         Task<PongMessage> _response;
         IRequestClient<PingMessage, PongMessage> _requestClient;
 

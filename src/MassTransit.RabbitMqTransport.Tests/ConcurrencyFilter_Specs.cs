@@ -29,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             for (var i = 0; i < _messageCount; i++)
             {
-                Bus.Publish(new A());
+                var task = Bus.Publish(new A());
             }
 
             await _complete.Task;

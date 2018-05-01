@@ -29,8 +29,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
             _messageTopology = messageTopology;
         }
 
-        public PublishBrokerTopologyOptions BrokerTopologyOptions { get; set; }
-
         IActiveMqMessagePublishTopology<T> IActiveMqPublishTopology.GetMessageTopology<T>()
         {
             return GetMessageTopology<T>() as IActiveMqMessagePublishTopology<T>;

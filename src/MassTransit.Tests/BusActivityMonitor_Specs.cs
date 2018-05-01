@@ -73,7 +73,9 @@ namespace MassTransit.Tests
         {
             _retryEnumerator.MoveNext();
             var retryPolicy = _retryEnumerator.Current;
+        #pragma warning disable 618
             configurator.UseRetry(retryPolicy);
+        #pragma warning restore 618
             configurator.Consumer<TConsumer>(
                 x =>
                 {

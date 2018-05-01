@@ -32,7 +32,6 @@ namespace MassTransit.TestFramework
         ConsumeContext<TMessage>
         where TMessage : class
     {
-        Task _completeTask;
         ReceiveContext _receiveContext;
 
         public TestConsumeContext(TMessage message)

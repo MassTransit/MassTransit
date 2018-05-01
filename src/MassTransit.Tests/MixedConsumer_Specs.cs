@@ -35,7 +35,9 @@ namespace MassTransit.Tests
 
 
         class MixedConsumer :
+        #pragma warning disable 618
             Consumes<A>.All,
+        #pragma warning restore 618
             IConsumer<B>
         {
             TaskCompletionSource<A> _receivedA;

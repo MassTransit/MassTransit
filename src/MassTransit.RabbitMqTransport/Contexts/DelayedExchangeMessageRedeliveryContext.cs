@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _scheduler = scheduler;
         }
 
-        Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext> callback = null)
+        Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext> callback)
         {
             Action<ConsumeContext, SendContext> combinedCallback = UpdateDeliveryContext + callback;
 

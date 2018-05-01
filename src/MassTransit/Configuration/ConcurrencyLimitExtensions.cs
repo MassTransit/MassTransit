@@ -23,7 +23,6 @@ namespace GreenPipes
         /// Specify a concurrency limit for tasks executing through the filter. No more than the specified
         /// number of tasks will be allowed to execute concurrently.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
         /// <param name="concurrencyLimit">The concurrency limit for the subsequent filters in the pipeline</param>
         /// <param name="managementEndpointConfigurator">A management endpoint configurator to support runtime adjustment</param>

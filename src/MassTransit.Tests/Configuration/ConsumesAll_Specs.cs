@@ -80,10 +80,12 @@ namespace MassTransit.Tests.Configuration
 
 
         class Consumer :
+        #pragma warning disable 618
             Consumes<A>.All,
             Consumes<B>.All,
             Consumes<IC>.All,
             Consumes<D<A>>.All
+        #pragma warning restore 618
         {
             public void Consume(A message)
             {

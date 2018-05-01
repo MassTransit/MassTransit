@@ -91,7 +91,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             BuildSchema(Configuration, _openConnection);
 
             _innerSessionFactory = base.GetSessionFactory();
-            _innerSessionFactory.OpenSession(_openConnection);
+            _innerSessionFactory.WithOptions().Connection(_openConnection).OpenSession();
 
             _sessionFactory = new SingleConnectionSessionFactory(_innerSessionFactory, _openConnection);
 

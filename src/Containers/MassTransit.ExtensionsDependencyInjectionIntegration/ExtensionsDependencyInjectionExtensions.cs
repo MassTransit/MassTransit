@@ -134,7 +134,6 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="serviceProvider"></param>
-        /// <param name="name">The name of the lifetime scope</param>
         public static void UseServiceScope(this IPipeConfigurator<ConsumeContext> configurator, IServiceProvider serviceProvider)
         {
             var scopeProvider = new DependencyInjectionConsumerScopeProvider(serviceProvider);
