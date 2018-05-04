@@ -133,7 +133,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             using (var delivery = _tracker.BeginDelivery())
             {
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Receiving {0}:{1}({3})", delivery.Id, message.MessageId, _context.EntityPath);
+                    _log.DebugFormat("Receiving {0}:{1}({2})", delivery.Id, message.MessageId, _context.EntityPath);
 
                 await _messageReceiver.Handle(message, AddReceiveContextPayloads).ConfigureAwait(false);
             }
