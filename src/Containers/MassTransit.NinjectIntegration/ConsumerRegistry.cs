@@ -36,7 +36,8 @@ namespace MassTransit.NinjectIntegration
 
         public ICachedConfigurator Add(Type consumerType)
         {
-            return _configurators.GetOrAdd(consumerType, _ => (ICachedConfigurator)Activator.CreateInstance(typeof(ICachedConfigurator).MakeGenericType(consumerType)));
+            return _configurators.GetOrAdd(consumerType,
+                _ => (ICachedConfigurator)Activator.CreateInstance(typeof(ConsumerCachedConfigurator<>).MakeGenericType(consumerType)));
         }
     }
 }

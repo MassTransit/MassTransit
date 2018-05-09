@@ -32,7 +32,8 @@ namespace MassTransit.NinjectIntegration
 
         public ICachedConfigurator Add(Type sagaType)
         {
-            return _configurators.GetOrAdd(sagaType, _ => (ICachedConfigurator)Activator.CreateInstance(typeof(SagaCachedConfigurator<>).MakeGenericType(sagaType)));
+            return _configurators.GetOrAdd(sagaType,
+                _ => (ICachedConfigurator)Activator.CreateInstance(typeof(SagaCachedConfigurator<>).MakeGenericType(sagaType)));
         }
 
         public IEnumerable<ICachedConfigurator> GetConfigurators()
