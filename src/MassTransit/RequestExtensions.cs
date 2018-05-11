@@ -40,11 +40,13 @@ namespace MassTransit
         {
             var requestClient = bus.CreateRequestClient<TRequest>(destinationAddress, timeout);
 
-            var requestHandle = requestClient.Create(message, cancellationToken);
-            if (callback != null)
-                requestHandle.UseExecute(callback);
+            using (var requestHandle = requestClient.Create(message, cancellationToken))
+            {
+                if (callback != null)
+                    requestHandle.UseExecute(callback);
 
-            return requestHandle.GetResponse<TResponse>();
+                return requestHandle.GetResponse<TResponse>();
+            }
         }
 
         /// <summary>
@@ -87,11 +89,13 @@ namespace MassTransit
         {
             var requestClient = bus.CreateRequestClient<TRequest>(timeout);
 
-            var requestHandle = requestClient.Create(message, cancellationToken);
-            if (callback != null)
-                requestHandle.UseExecute(callback);
+            using (var requestHandle = requestClient.Create(message, cancellationToken))
+            {
+                if (callback != null)
+                    requestHandle.UseExecute(callback);
 
-            return requestHandle.GetResponse<TResponse>();
+                return requestHandle.GetResponse<TResponse>();
+            }
         }
 
         /// <summary>
@@ -135,11 +139,13 @@ namespace MassTransit
         {
             var requestClient = consumeContext.CreateRequestClient<TRequest>(bus, destinationAddress, timeout);
 
-            var requestHandle = requestClient.Create(message, cancellationToken);
-            if (callback != null)
-                requestHandle.UseExecute(callback);
+            using (var requestHandle = requestClient.Create(message, cancellationToken))
+            {
+                if (callback != null)
+                    requestHandle.UseExecute(callback);
 
-            return requestHandle.GetResponse<TResponse>();
+                return requestHandle.GetResponse<TResponse>();
+            }
         }
 
         /// <summary>
@@ -184,11 +190,13 @@ namespace MassTransit
         {
             var requestClient = consumeContext.CreateRequestClient<TRequest>(bus, timeout);
 
-            var requestHandle = requestClient.Create(message, cancellationToken);
-            if (callback != null)
-                requestHandle.UseExecute(callback);
+            using (var requestHandle = requestClient.Create(message, cancellationToken))
+            {
+                if (callback != null)
+                    requestHandle.UseExecute(callback);
 
-            return requestHandle.GetResponse<TResponse>();
+                return requestHandle.GetResponse<TResponse>();
+            }
         }
 
         /// <summary>

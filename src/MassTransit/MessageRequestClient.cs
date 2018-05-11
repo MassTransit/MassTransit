@@ -68,17 +68,18 @@ namespace MassTransit
 
         public async Task<TResponse> Request(TRequest request, CancellationToken cancellationToken = default)
         {
-            var requestHandle = _client.Create(request, cancellationToken);
+            using (var requestHandle = _client.Create(request, cancellationToken))
+            {
+                if (_timeToLive.HasValue)
+                    requestHandle.TimeToLive = _timeToLive.Value;
 
-            if (_timeToLive.HasValue)
-                requestHandle.TimeToLive = _timeToLive.Value;
+                if (_callback != null)
+                    requestHandle.UseExecute(_callback);
 
-            if (_callback != null)
-                requestHandle.UseExecute(_callback);
-
-            var response = await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
-
-            return response.Message;
+                Response<TResponse> response = await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
+                
+                return response.Message;
+            }
         }
     }
 }
