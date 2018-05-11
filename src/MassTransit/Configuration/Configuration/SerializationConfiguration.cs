@@ -25,6 +25,7 @@ namespace MassTransit.Configuration
         readonly Lazy<IMessageDeserializer> _deserializer;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
         readonly Lazy<IMessageSerializer> _serializer;
+        readonly IDictionary<string, DeserializerFactory> _sourceDeserializerFactories;
         SerializerFactory _serializerFactory;
 
         public SerializationConfiguration()
@@ -46,11 +47,8 @@ namespace MassTransit.Configuration
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
             _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
 
+            _sourceDeserializerFactories = source._deserializerFactories;
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
-            foreach (KeyValuePair<string, DeserializerFactory> deserializerFactory in source._deserializerFactories)
-            {
-                _deserializerFactories.Add(deserializerFactory);
-            }
         }
 
         public IMessageSerializer Serializer => _serializer.Value;
@@ -90,6 +88,15 @@ namespace MassTransit.Configuration
 
         IMessageDeserializer CreateDeserializer()
         {
+            if (_sourceDeserializerFactories != null)
+            {
+                foreach (KeyValuePair<string, DeserializerFactory> deserializerFactory in _sourceDeserializerFactories)
+                {
+                    if (!_deserializerFactories.ContainsKey(deserializerFactory.Key))
+                        _deserializerFactories.Add(deserializerFactory);
+                }
+            }
+
             IMessageDeserializer[] deserializers = _deserializerFactories.Values.Select(x => x()).ToArray();
 
             return new SupportedMessageDeserializers(deserializers);

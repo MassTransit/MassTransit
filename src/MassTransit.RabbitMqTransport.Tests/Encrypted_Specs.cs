@@ -43,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_succeed()
         {
-            await Bus.Publish(new PingMessage(), context => context.Headers.Set(EncryptedMessageSerializer.EncryptionKeyHeader, "secure"));
+            await Bus.Publish(new PingMessage(), context => context.SetEncryptionKeyId("secure"));
 
             ConsumeContext<PingMessage> received = await _handler;
 
