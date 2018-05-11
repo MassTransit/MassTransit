@@ -1,4 +1,4 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,13 +13,9 @@
 namespace MassTransit.Pipeline.Pipes
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
-    using Context;
     using Context.Converters;
     using GreenPipes;
-    using GreenPipes.Internals.Extensions;
-    using Util;
 
 
     public class ConsumeObserverAdapter :
@@ -34,33 +30,17 @@ namespace MassTransit.Pipeline.Pipes
 
         Task IFilterObserver.PreSend<T>(T context)
         {
-            if (typeof(T).ClosesType(typeof(ConsumeContext<>)))
-            {
-                return ConsumeObserverConverterCache.PreConsume(typeof(T).GetClosingArguments(typeof(ConsumeContext<>)).Single(), _observer, context);
-            }
-
-            return TaskUtil.Completed;
+            return ConsumeObserverConverterCache.PreConsume(typeof(T), _observer, context);
         }
 
         Task IFilterObserver.PostSend<T>(T context)
         {
-            if (typeof(T).ClosesType(typeof(ConsumeContext<>)))
-            {
-                return ConsumeObserverConverterCache.PostConsume(typeof(T).GetClosingArguments(typeof(ConsumeContext<>)).Single(), _observer, context);
-            }
-
-            return TaskUtil.Completed;
+            return ConsumeObserverConverterCache.PostConsume(typeof(T), _observer, context);
         }
 
         Task IFilterObserver.SendFault<T>(T context, Exception exception)
         {
-            if (typeof(T).ClosesType(typeof(ConsumeContext<>)))
-            {
-                return ConsumeObserverConverterCache.ConsumeFault(typeof(T).GetClosingArguments(typeof(ConsumeContext<>)).Single(), _observer, context,
-                    exception);
-            }
-
-            return TaskUtil.Completed;
+            return ConsumeObserverConverterCache.ConsumeFault(typeof(T), _observer, context, exception);
         }
     }
 

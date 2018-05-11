@@ -14,8 +14,11 @@ namespace MassTransit.Context.Converters
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals.Extensions;
+    using Util;
 
 
     /// <summary>
@@ -24,8 +27,7 @@ namespace MassTransit.Context.Converters
     /// </summary>
     public class ConsumeObserverConverterCache
     {
-        readonly ConcurrentDictionary<Type, Lazy<IConsumeObserverConverter>> _types =
-            new ConcurrentDictionary<Type, Lazy<IConsumeObserverConverter>>();
+        readonly ConcurrentDictionary<Type, Lazy<IConsumeObserverConverter>> _types = new ConcurrentDictionary<Type, Lazy<IConsumeObserverConverter>>();
 
         IConsumeObserverConverter this[Type type] => _types.GetOrAdd(type, CreateTypeConverter).Value;
 
@@ -51,9 +53,16 @@ namespace MassTransit.Context.Converters
 
         static IConsumeObserverConverter CreateConverter(Type type)
         {
-            var converterType = typeof(ConsumeObserverConverter<>).MakeGenericType(type);
+            if (type.ClosesType(typeof(ConsumeContext<>)))
+            {
+                var messageType = type.GetClosingArguments(typeof(ConsumeContext<>)).Single();
 
-            return (IConsumeObserverConverter)Activator.CreateInstance(converterType);
+                var converterType = typeof(ConsumeObserverConverter<>).MakeGenericType(messageType);
+
+                return (IConsumeObserverConverter)Activator.CreateInstance(converterType);
+            }
+
+            throw new ArgumentException($"The context was not a ConsumeContext: {TypeMetadataCache.GetShortName(type)}", nameof(type));
         }
 
 
