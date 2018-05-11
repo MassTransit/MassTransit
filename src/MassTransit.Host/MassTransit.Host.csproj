@@ -12,8 +12,8 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Host.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.6.1" />
-    <PackageReference Include="GreenPipes" Version="2.0.0" />
+    <PackageReference Include="Autofac" Version="4.8.1" />
+    <PackageReference Include="GreenPipes" Version="2.1.0" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Topshelf" Version="4.0.4" />

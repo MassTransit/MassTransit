@@ -40,7 +40,7 @@ namespace MassTransit
             var retrySpecification = new RedeliveryRetryPipeSpecification<T>();
 
             retrySpecification.SetRetryPolicy(exceptionFilter =>
-                new ConsumeContextRetryPolicy<ConsumeContext<T>, RetryConsumeContext<T>>(retryPolicy, x => new RetryConsumeContext<T>(x)));
+                new ConsumeContextRetryPolicy<ConsumeContext<T>, RetryConsumeContext<T>>(retryPolicy, (x, r) => new RetryConsumeContext<T>(x, r)));
 
             configurator.AddPipeSpecification(retrySpecification);
         }

@@ -48,6 +48,11 @@ namespace MassTransit.Pipeline.Filters
         {
             return Task.WhenAll(_context.NotifyPendingFaults(), _policyContext.RetryFaulted(exception));
         }
+
+        public void Dispose()
+        {
+            _policyContext.Dispose();
+        }
     }
 
 
@@ -82,6 +87,11 @@ namespace MassTransit.Pipeline.Filters
         public Task RetryFaulted(Exception exception)
         {
             return Task.WhenAll(_context.NotifyPendingFaults(), _policyContext.RetryFaulted(exception));
+        }
+
+        public void Dispose()
+        {
+            _policyContext.Dispose();
         }
     }
 }

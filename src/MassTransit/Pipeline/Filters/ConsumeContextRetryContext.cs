@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
@@ -31,6 +32,8 @@ namespace MassTransit.Pipeline.Filters
 
             _context.RetryAttempt = retryContext.RetryCount;
         }
+
+        public CancellationToken CancellationToken => _retryContext.CancellationToken;
 
         public ConsumeContext Context => _context;
 
@@ -82,6 +85,8 @@ namespace MassTransit.Pipeline.Filters
 
             _context.RetryAttempt = retryContext.RetryCount;
         }
+
+        public CancellationToken CancellationToken => _retryContext.CancellationToken;
 
         public TFilter Context => _context;
 

@@ -13,6 +13,7 @@
 namespace MassTransit.Context
 {
     using System;
+    using GreenPipes;
     using Util;
 
 
@@ -23,8 +24,8 @@ namespace MassTransit.Context
     {
         readonly ConsumerConsumeContext<TConsumer> _context;
 
-        public RetryConsumerConsumeContext(ConsumerConsumeContext<TConsumer> context)
-            : base(context)
+        public RetryConsumerConsumeContext(ConsumerConsumeContext<TConsumer> context, IRetryPolicy retryPolicy)
+            : base(context, retryPolicy)
         {
             _context = context;
         }
@@ -38,7 +39,7 @@ namespace MassTransit.Context
 
         public override TContext CreateNext<TContext>()
         {
-            return new RetryConsumerConsumeContext<TConsumer>(_context) as TContext
+            return new RetryConsumerConsumeContext<TConsumer>(_context, RetryPolicy) as TContext
                 ?? throw new ArgumentException($"The context type is not valid: {TypeMetadataCache<TContext>.ShortName}");
         }
     }

@@ -35,7 +35,8 @@ namespace MassTransit.PipeConfigurators
         public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
             where TMessage : class
         {
-            var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<TMessage>, RetryConsumeContext<TMessage>>(x => new RetryConsumeContext<TMessage>(x));
+            var specification =
+                new ConsumeContextRetryPipeSpecification<ConsumeContext<TMessage>, RetryConsumeContext<TMessage>>((x, r) => new RetryConsumeContext<TMessage>(x, r));
 
             _configure?.Invoke(specification);
 

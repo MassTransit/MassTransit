@@ -70,11 +70,11 @@ namespace MassTransit.PipeConfigurators
         where TFilter : class, ConsumeContext
         where TContext : RetryConsumeContext, TFilter
     {
-        readonly Func<TFilter, TContext> _contextFactory;
+        readonly Func<TFilter, IRetryPolicy, TContext> _contextFactory;
         readonly RetryObservable _observers;
         RetryPolicyFactory _policyFactory;
 
-        public ConsumeContextRetryPipeSpecification(Func<TFilter, TContext> contextFactory)
+        public ConsumeContextRetryPipeSpecification(Func<TFilter, IRetryPolicy, TContext> contextFactory)
         {
             _contextFactory = contextFactory;
 

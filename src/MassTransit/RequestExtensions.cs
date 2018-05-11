@@ -33,7 +33,7 @@ namespace MassTransit
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <returns></returns>
-        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, Uri destinationAddress, TRequest message,
+        public static async Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, Uri destinationAddress, TRequest message,
             CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
@@ -45,7 +45,7 @@ namespace MassTransit
                 if (callback != null)
                     requestHandle.UseExecute(callback);
 
-                return requestHandle.GetResponse<TResponse>();
+                return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
             }
         }
 
@@ -82,7 +82,7 @@ namespace MassTransit
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <returns></returns>
-        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, TRequest message, CancellationToken cancellationToken = default,
+        public static async Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, TRequest message, CancellationToken cancellationToken = default,
             RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
@@ -94,7 +94,7 @@ namespace MassTransit
                 if (callback != null)
                     requestHandle.UseExecute(callback);
 
-                return requestHandle.GetResponse<TResponse>();
+                return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
             }
         }
 
@@ -132,7 +132,7 @@ namespace MassTransit
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <returns></returns>
-        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, Uri destinationAddress,
+        public static async Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, Uri destinationAddress,
             TRequest message, CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
@@ -144,7 +144,7 @@ namespace MassTransit
                 if (callback != null)
                     requestHandle.UseExecute(callback);
 
-                return requestHandle.GetResponse<TResponse>();
+                return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
             }
         }
 
@@ -183,7 +183,7 @@ namespace MassTransit
         /// <typeparam name="TRequest">The request type</typeparam>
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <returns></returns>
-        public static Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, TRequest message,
+        public static async Task<Response<TResponse>> Request<TRequest, TResponse>(this ConsumeContext consumeContext, IBus bus, TRequest message,
             CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
@@ -195,7 +195,7 @@ namespace MassTransit
                 if (callback != null)
                     requestHandle.UseExecute(callback);
 
-                return requestHandle.GetResponse<TResponse>();
+                return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
             }
         }
 

@@ -284,7 +284,7 @@ namespace MassTransit.Tests
 
             _attempts.ShouldBe(4);
 
-            _lastAttempt.ShouldBe(3);
+            _lastAttempt.ShouldBe(2);
         }
 
         [Test, Explicit]

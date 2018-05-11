@@ -24,8 +24,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Baseline" Version="1.3.0" />
-    <PackageReference Include="GreenPipes" Version="2.0.0" />
-    <PackageReference Include="Marten" Version="2.7.1" />
+    <PackageReference Include="GreenPipes" Version="2.1.0" />
+    <PackageReference Include="Marten" Version="2.8.0" />
     <PackageReference Include="Microsoft.Win32.Primitives" Version="4.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Npgsql" Version="3.2.5" />

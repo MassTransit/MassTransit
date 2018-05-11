@@ -54,7 +54,7 @@ namespace GreenPipes
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<T>, RetryConsumeContext<T>>(x => new RetryConsumeContext<T>(x));
+            var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<T>, RetryConsumeContext<T>>((x, r) => new RetryConsumeContext<T>(x, r));
 
             specification.SetRetryPolicy(x => retryPolicy);
 
@@ -67,7 +67,7 @@ namespace GreenPipes
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<T>, RetryConsumeContext<T>>(x => new RetryConsumeContext<T>(x));
+            var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<T>, RetryConsumeContext<T>>((x, r) => new RetryConsumeContext<T>(x, r));
 
             configure?.Invoke(specification);
 
@@ -83,7 +83,7 @@ namespace GreenPipes
 
             var specification =
                 new ConsumeContextRetryPipeSpecification<ConsumerConsumeContext<TConsumer>, RetryConsumerConsumeContext<TConsumer>>(
-                    x => new RetryConsumerConsumeContext<TConsumer>(x));
+                    (x, r) => new RetryConsumerConsumeContext<TConsumer>(x, r));
 
             specification.SetRetryPolicy(x => retryPolicy);
 
@@ -98,7 +98,7 @@ namespace GreenPipes
 
             var specification =
                 new ConsumeContextRetryPipeSpecification<ConsumerConsumeContext<TConsumer>, RetryConsumerConsumeContext<TConsumer>>(
-                    x => new RetryConsumerConsumeContext<TConsumer>(x));
+                    (x, r) => new RetryConsumerConsumeContext<TConsumer>(x, r));
 
             configure?.Invoke(specification);
 
@@ -113,7 +113,7 @@ namespace GreenPipes
                 throw new ArgumentNullException(nameof(configurator));
 
             var specification =
-                new ConsumeContextRetryPipeSpecification<SagaConsumeContext<TSaga>, RetrySagaConsumeContext<TSaga>>(x => new RetrySagaConsumeContext<TSaga>(x));
+                new ConsumeContextRetryPipeSpecification<SagaConsumeContext<TSaga>, RetrySagaConsumeContext<TSaga>>((x, r) => new RetrySagaConsumeContext<TSaga>(x, r));
 
             specification.SetRetryPolicy(x => retryPolicy);
 
@@ -127,7 +127,7 @@ namespace GreenPipes
                 throw new ArgumentNullException(nameof(configurator));
 
             var specification =
-                new ConsumeContextRetryPipeSpecification<SagaConsumeContext<TSaga>, RetrySagaConsumeContext<TSaga>>(x => new RetrySagaConsumeContext<TSaga>(x));
+                new ConsumeContextRetryPipeSpecification<SagaConsumeContext<TSaga>, RetrySagaConsumeContext<TSaga>>((x, r) => new RetrySagaConsumeContext<TSaga>(x, r));
 
             configure?.Invoke(specification);
 

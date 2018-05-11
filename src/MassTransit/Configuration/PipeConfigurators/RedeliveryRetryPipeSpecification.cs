@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.PipeConfigurators
 {
-    using System;
     using System.Collections.Generic;
     using Context;
     using GreenPipes;
@@ -20,7 +19,6 @@ namespace MassTransit.PipeConfigurators
     using GreenPipes.Observers;
     using GreenPipes.Specifications;
     using Pipeline.Filters;
-    using Util;
 
 
     public class RedeliveryRetryPipeSpecification<TMessage> :
@@ -42,7 +40,7 @@ namespace MassTransit.PipeConfigurators
             var retryPolicy = _policyFactory(Filter);
 
             var policy = new ConsumeContextRetryPolicy<ConsumeContext<TMessage>, RetryConsumeContext<TMessage>>(retryPolicy,
-                x => x as RetryConsumeContext<TMessage> ?? new RedeliveryRetryConsumeContext<TMessage>(x));
+                (x, r) => x as RetryConsumeContext<TMessage> ?? new RedeliveryRetryConsumeContext<TMessage>(x, r));
 
             builder.AddFilter(new RedeliveryRetryFilter<TMessage>(policy, _observers));
         }
@@ -61,23 +59,6 @@ namespace MassTransit.PipeConfigurators
         ConnectHandle IRetryObserverConnector.ConnectRetryObserver(IRetryObserver observer)
         {
             return _observers.Connect(observer);
-        }
-    }
-
-
-    public class RedeliveryRetryConsumeContext<T> :
-        RetryConsumeContext<T>
-        where T : class
-    {
-        public RedeliveryRetryConsumeContext(ConsumeContext<T> context)
-            : base(context)
-        {
-        }
-
-        public override TContext CreateNext<TContext>()
-        {
-            return this as TContext
-                ?? throw new ArgumentException($"The context type is not valid: {TypeMetadataCache<T>.ShortName}");
         }
     }
 }

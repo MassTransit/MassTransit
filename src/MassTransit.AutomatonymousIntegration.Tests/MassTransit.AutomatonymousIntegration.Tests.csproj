@@ -4,16 +4,16 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Automatonymous" Version="4.0.1" />
+    <PackageReference Include="Automatonymous" Version="4.1.0" />
     <PackageReference Include="EntityFramework" Version="6.2.0" />
-    <PackageReference Include="GreenPipes" Version="2.0.0" />
+    <PackageReference Include="GreenPipes" Version="2.1.0" />
     <PackageReference Include="Iesi.Collections" Version="4.0.4" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.Azure.DocumentDB" Version="1.19.1" />
-    <PackageReference Include="microsoft.net.test.sdk" Version="15.7.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="NHibernate" Version="5.1.1" />
+    <PackageReference Include="NHibernate" Version="5.1.2" />
     <PackageReference Include="NUnit" Version="3.10.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
     <PackageReference Include="Quartz" Version="3.0.4" />

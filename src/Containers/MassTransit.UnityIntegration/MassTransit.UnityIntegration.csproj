@@ -14,9 +14,9 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.UnityIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.0.0" />
+    <PackageReference Include="GreenPipes" Version="2.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="Unity" Version="5.8.5" />
+    <PackageReference Include="Unity" Version="5.8.6" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

@@ -40,7 +40,7 @@ namespace MassTransit.Pipeline.Filters
             {
                 RetryPolicyContext<ConsumeContext> retryPolicyContext = _retryPolicy.CreatePolicyContext(consumeContext);
 
-                var retryConsumeContext = new RetryConsumeContext(consumeContext);
+                var retryConsumeContext = new RetryConsumeContext(consumeContext, _retryPolicy);
 
                 return new ConsumeContextRetryPolicyContext(retryPolicyContext, retryConsumeContext) as RetryPolicyContext<T>;
             }
@@ -60,10 +60,10 @@ namespace MassTransit.Pipeline.Filters
         where TFilter : class, ConsumeContext
         where TContext : RetryConsumeContext, TFilter
     {
-        readonly Func<TFilter, TContext> _contextFactory;
+        readonly Func<TFilter, IRetryPolicy, TContext> _contextFactory;
         readonly IRetryPolicy _retryPolicy;
 
-        public ConsumeContextRetryPolicy(IRetryPolicy retryPolicy, Func<TFilter, TContext> contextFactory)
+        public ConsumeContextRetryPolicy(IRetryPolicy retryPolicy, Func<TFilter, IRetryPolicy, TContext> contextFactory)
         {
             _retryPolicy = retryPolicy;
             _contextFactory = contextFactory;
@@ -84,7 +84,7 @@ namespace MassTransit.Pipeline.Filters
 
             RetryPolicyContext<TFilter> retryPolicyContext = _retryPolicy.CreatePolicyContext(filterContext);
 
-            var retryConsumeContext = _contextFactory(filterContext);
+            var retryConsumeContext = _contextFactory(filterContext, _retryPolicy);
 
             return new ConsumeContextRetryPolicyContext<TFilter, TContext>(retryPolicyContext, retryConsumeContext) as RetryPolicyContext<T>;
         }
