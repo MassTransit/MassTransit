@@ -44,9 +44,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
             Description = description;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
-
-            connection.ConnectionInterruptedListener += OnConnectionInterrupted;
-            connection.ConnectionResumedListener += OnConnectionResumed;
         }
 
         public IActiveMqHostTopology Topology { get; }
@@ -63,26 +60,25 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
         Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
         {
-            _connection.ConnectionInterruptedListener -= OnConnectionInterrupted;
-            _connection.ConnectionResumedListener -= OnConnectionResumed;
-
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Disconnecting: {0}", Description);
 
-            _connection.Close();
+            try
+            {
+                _connection.Close();
+
+                _connection.Dispose();
+            }
+            catch (Exception exception)
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Error($"Close Connection Faulted: {Description}", exception);
+            }
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Disconnected: {0}", Description);
 
             return TaskUtil.Completed;
-        }
-
-        void OnConnectionInterrupted()
-        {
-        }
-
-        void OnConnectionResumed()
-        {
         }
     }
 }

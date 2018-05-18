@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Pipeline
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
@@ -45,12 +46,22 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             var session = await context.CreateSession().ConfigureAwait(false);
 
             var sessionContext = new ActiveMqSessionContext(context, session, _host, context.CancellationToken);
+
+            void HandleException(Exception exception)
+            {
+                var disposeAsync = sessionContext.DisposeAsync(CancellationToken.None);
+            }
+
+            context.Connection.ExceptionListener += HandleException;
+
             try
             {
                 await _pipe.Send(sessionContext).ConfigureAwait(false);
             }
             finally
             {
+                context.Connection.ExceptionListener -= HandleException;
+
                 await sessionContext.DisposeAsync(CancellationToken.None).ConfigureAwait(false);
             }
 
