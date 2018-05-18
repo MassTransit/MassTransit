@@ -15,7 +15,7 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.NLogIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.0" />
+    <PackageReference Include="GreenPipes" Version="2.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NLog" Version="4.5.4" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />

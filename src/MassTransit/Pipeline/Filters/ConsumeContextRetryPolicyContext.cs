@@ -31,6 +31,11 @@ namespace MassTransit.Pipeline.Filters
             _context = context;
         }
 
+        public void Cancel()
+        {
+            _policyContext.Cancel();
+        }
+
         public ConsumeContext Context => _context;
 
         public bool CanRetry(Exception exception, out RetryContext<ConsumeContext> retryContext)
@@ -68,6 +73,11 @@ namespace MassTransit.Pipeline.Filters
         {
             _policyContext = policyContext;
             _context = context;
+        }
+
+        public void Cancel()
+        {
+            _policyContext.Cancel();
         }
 
         public TFilter Context => _context;

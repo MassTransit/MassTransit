@@ -5,18 +5,18 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.8.1" />
-    <PackageReference Include="Automatonymous" Version="4.1.0" />
+    <PackageReference Include="Automatonymous" Version="4.1.1" />
     <PackageReference Include="Castle.Core" Version="4.2.0" />
     <PackageReference Include="Castle.Windsor" Version="4.1.0" />
-    <PackageReference Include="GreenPipes" Version="2.1.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
+    <PackageReference Include="GreenPipes" Version="2.1.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NUnit" Version="3.10.1" />
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
     <PackageReference Include="Shouldly" Version="3.0.0" />
-    <PackageReference Include="SimpleInjector" Version="4.2.2" />
+    <PackageReference Include="SimpleInjector" Version="4.3.0" />
     <PackageReference Include="StructureMap" Version="4.6.1" />
     <PackageReference Include="Unity" Version="5.8.6" />
     <ProjectReference Include="..\..\Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj" />
