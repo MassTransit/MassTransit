@@ -209,12 +209,21 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var harness = new ActiveMqTestHarness();
             var handler = harness.Handler<PingMessage>();
+            var handler2 = harness.Handler<PongMessage>();
 
             await harness.Start();
 
             await harness.Bus.Publish(new PingMessage());
 
             Assert.That(handler.Consumed.Select().Any(), Is.True);
+
+//            await Task.Delay(20000);
+
+            await harness.Bus.Publish(new PongMessage());
+
+            Assert.That(handler2.Consumed.Select().Any(), Is.True);
+
+            await harness.Stop().UntilCompletedOrTimeout(5000);
 
             await harness.Stop();
         }

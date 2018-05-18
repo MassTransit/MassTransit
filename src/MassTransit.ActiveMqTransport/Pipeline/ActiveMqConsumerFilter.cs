@@ -66,15 +66,18 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             consumers.Add(CreateConsumer(context, inputAddress, receiveSettings.EntityName, receiveSettings.Selector));
 
-            consumers.AddRange(_context.BrokerTopology.Consumers.Select(x => CreateConsumer(context, inputAddress, x.Destination.EntityName, x.Selector)));
+            consumers.AddRange(_context.BrokerTopology.Consumers.Select(x =>
+                CreateConsumer(context, inputAddress, x.Destination.EntityName, x.Selector)));
 
             var actualConsumers = await Task.WhenAll(consumers).ConfigureAwait(false);
+
+            var supervisor = CreateConsumerSupervisor(context, actualConsumers);
 
             await _transportObserver.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 
             try
             {
-                await Task.WhenAll(actualConsumers.Select(x => x.Completed)).ConfigureAwait(false);
+                await supervisor.Completed.ConfigureAwait(false);
             }
             finally
             {
@@ -90,6 +93,31 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             }
         }
 
+        Supervisor CreateConsumerSupervisor(SessionContext context, ActiveMqBasicConsumer[] actualConsumers)
+        {
+            Supervisor supervisor = new Supervisor();
+
+            foreach (var consumer in actualConsumers)
+            {
+                supervisor.Add(consumer);
+            }
+
+            Add(supervisor);
+
+            void HandleException(Exception exception)
+            {
+                supervisor.Stop(exception.Message);
+            }
+
+            context.ConnectionContext.Connection.ExceptionListener += HandleException;
+
+            supervisor.SetReady();
+
+            supervisor.Completed.ContinueWith(task => context.ConnectionContext.Connection.ExceptionListener -= HandleException);
+
+            return supervisor;
+        }
+
         async Task<ActiveMqBasicConsumer> CreateConsumer(SessionContext context, Uri inputAddress, string entityName, string selector)
         {
             var queue = await context.GetQueue(entityName).ConfigureAwait(false);
@@ -100,8 +128,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 _errorTransport);
 
             await consumer.Ready.ConfigureAwait(false);
-
-            Add(consumer);
 
             return consumer;
         }

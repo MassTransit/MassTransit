@@ -101,6 +101,16 @@ namespace MassTransit.ActiveMqTransport.Contexts
             return _context.CreateMessageConsumer(destination, selector, noLocal);
         }
 
+        Task SessionContext.DeleteTopic(string topicName)
+        {
+            return _context.DeleteTopic(topicName);
+        }
+
+        Task SessionContext.DeleteQueue(string queueName)
+        {
+            return _context.DeleteQueue(queueName);
+        }
+
         CancellationToken PipeContext.CancellationToken => _cancellationToken;
     }
 }

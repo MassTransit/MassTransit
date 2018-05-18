@@ -107,16 +107,14 @@ namespace MassTransit.ActiveMqTransport.Transport
                     }
                     catch (NMSConnectionException ex)
                     {
-                        await NotifyFaulted(ex).ConfigureAwait(false);
-                        throw;
+                        throw await ConvertToActiveMqConnectionException(ex, "NMSConnectionException").ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
                     }
                     catch (Exception ex)
                     {
-                        await ConvertToActiveMqConnectionException(ex, "ReceiveTranport Faulted, Restarting").ConfigureAwait(false);
-                        throw;
+                        throw await ConvertToActiveMqConnectionException(ex, "ReceiveTranport Faulted, Restarting").ConfigureAwait(false);
                     }
                 }, Stopping);
             }

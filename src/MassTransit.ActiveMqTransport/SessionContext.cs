@@ -42,5 +42,9 @@ namespace MassTransit.ActiveMqTransport
         Task<IMessageProducer> CreateMessageProducer(IDestination destination);
 
         Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal);
+
+        Task DeleteTopic(string topicName);
+
+        Task DeleteQueue(string queueName);
     }
 }

@@ -16,10 +16,6 @@ namespace MassTransit.ActiveMqTransport.Transport
     using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
-    using Apache.NMS.ActiveMQ;
-    using Apache.NMS.ActiveMQ.Transport;
-    using Apache.NMS.ActiveMQ.Transport.Tcp;
-    using Apache.NMS.ActiveMQ.Util;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -45,12 +41,25 @@ namespace MassTransit.ActiveMqTransport.Transport
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
-            var context = Task.Factory.StartNew(() => CreateConnection(supervisor), supervisor.Stopping, TaskCreationOptions.None, TaskScheduler.Default)
+            IAsyncPipeContextAgent<ConnectionContext> asyncContext = supervisor.AddAsyncContext<ConnectionContext>();
+
+            var context = Task.Factory.StartNew(() => CreateConnection(asyncContext, supervisor), supervisor.Stopping, TaskCreationOptions.None,
+                    TaskScheduler.Default)
                 .Unwrap();
 
-            IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
+            void HandleConnectionException(Exception exception)
+            {
+                asyncContext.Stop($"Connection Exception: {exception}");
+            }
 
-            return contextHandle;
+            context.ContinueWith(task =>
+            {
+                task.Result.Connection.ExceptionListener += HandleConnectionException;
+
+                asyncContext.Completed.ContinueWith(_ => task.Result.Connection.ExceptionListener -= HandleConnectionException);
+            }, TaskContinuationOptions.OnlyOnRanToCompletion);
+
+            return asyncContext;
         }
 
         IActivePipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
@@ -68,7 +77,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             return sharedConnection;
         }
 
-        async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
+        async Task<ConnectionContext> CreateConnection(IAsyncPipeContextAgent<ConnectionContext> asyncContext, IAgent supervisor)
         {
             IConnection connection = null;
             try
@@ -89,12 +98,21 @@ namespace MassTransit.ActiveMqTransport.Transport
                 var connectionContext = new ActiveMqConnectionContext(connection, _settings, _topology, _description, supervisor.Stopped);
                 connectionContext.GetOrAddPayload(() => _settings);
 
+                await asyncContext.Created(connectionContext).ConfigureAwait(false);
+
                 return connectionContext;
+            }
+            catch (OperationCanceledException)
+            {
+                await asyncContext.CreateCanceled().ConfigureAwait(false);
+                throw;
             }
             catch (NMSConnectionException ex)
             {
                 if (_log.IsDebugEnabled)
                     _log.Debug("ActiveMQ Connect failed:", ex);
+
+                await asyncContext.CreateFaulted(ex).ConfigureAwait(false);
 
                 connection?.Dispose();
 

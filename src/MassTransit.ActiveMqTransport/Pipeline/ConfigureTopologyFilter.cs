@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Pipeline
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -48,6 +49,8 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             }).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
+
+            await DeleteAutoDelete(context).ConfigureAwait(false);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -59,9 +62,16 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
         async Task ConfigureTopology(SessionContext context)
         {
-            await Task.WhenAll(_brokerTopology.Topics.Select(exchange => Declare(context, exchange))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.Topics.Select(topic => Declare(context, topic))).ConfigureAwait(false);
 
             await Task.WhenAll(_brokerTopology.Queues.Select(queue => Declare(context, queue))).ConfigureAwait(false);
+        }
+
+        async Task DeleteAutoDelete(SessionContext context)
+        {
+            await Task.WhenAll(_brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic))).ConfigureAwait(false);
+
+            await Task.WhenAll(_brokerTopology.Queues.Where(x => x.AutoDelete).Select(queue => Delete(context, queue))).ConfigureAwait(false);
         }
 
         Task Declare(SessionContext context, Topic topic)
@@ -78,6 +88,22 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 _log.DebugFormat("Declare queue ({0})", queue);
 
             return context.GetQueue(queue.EntityName);
+        }
+
+        Task Delete(SessionContext context, Topic topic)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Delete topic ({0})", topic);
+
+            return context.DeleteTopic(topic.EntityName);
+        }
+
+        Task Delete(SessionContext context, Queue queue)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Delete queue ({0})", queue);
+
+            return context.DeleteQueue(queue.EntityName);
         }
     }
 }

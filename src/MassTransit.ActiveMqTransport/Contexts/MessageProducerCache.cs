@@ -53,6 +53,11 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
         protected override Task StopAgent(StopContext context)
         {
+            foreach (var producer in _cache.GetAll())
+            {
+                producer.Dispose();
+            }
+
             _cache.Clear();
 
             return TaskUtil.Completed;

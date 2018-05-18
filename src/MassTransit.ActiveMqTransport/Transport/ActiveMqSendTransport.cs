@@ -23,7 +23,6 @@ namespace MassTransit.ActiveMqTransport.Transport
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Internals.Extensions;
     using MassTransit.Pipeline.Observables;
     using Transports;
 

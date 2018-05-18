@@ -69,6 +69,18 @@ namespace MassTransit.ActiveMqTransport.Transport
 
                     var sessionContext = new ActiveMqSessionContext(connectionContext, session, _host, cancellationToken);
 
+                    void HandleException(Exception exception)
+                    {
+                        var disposeAsync = sessionContext.DisposeAsync(CancellationToken.None);
+                    }
+
+                    connectionContext.Connection.ExceptionListener += HandleException;
+
+                    asyncContext.Completed.ContinueWith(task =>
+                    {
+                        connectionContext.Connection.ExceptionListener -= HandleException;
+                    });
+
                     await asyncContext.Created(sessionContext).ConfigureAwait(false);
 
                     await asyncContext.Completed.ConfigureAwait(false);

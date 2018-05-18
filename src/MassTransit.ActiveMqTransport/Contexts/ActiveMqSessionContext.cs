@@ -104,5 +104,15 @@ namespace MassTransit.ActiveMqTransport.Contexts
             return Task.Factory.StartNew(() => _session.CreateConsumer(destination, selector, noLocal), CancellationToken, TaskCreationOptions.None,
                 _taskScheduler);
         }
+
+        public Task DeleteTopic(string topicName)
+        {
+            return Task.Factory.StartNew(() => SessionUtil.DeleteTopic(_session, topicName), CancellationToken, TaskCreationOptions.None, _taskScheduler);
+        }
+
+        public Task DeleteQueue(string queueName)
+        {
+            return Task.Factory.StartNew(() => SessionUtil.DeleteQueue(_session, queueName), CancellationToken, TaskCreationOptions.None, _taskScheduler);
+        }
     }
 }
