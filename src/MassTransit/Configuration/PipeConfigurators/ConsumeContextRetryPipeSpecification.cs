@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,6 +14,7 @@ namespace MassTransit.PipeConfigurators
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using Context;
     using GreenPipes;
     using GreenPipes.Configurators;
@@ -28,19 +29,22 @@ namespace MassTransit.PipeConfigurators
         IRetryConfigurator,
         IPipeSpecification<ConsumeContext>
     {
+        readonly CancellationToken _cancellationToken;
         readonly RetryObservable _observers;
         RetryPolicyFactory _policyFactory;
 
-        public ConsumeContextRetryPipeSpecification()
+        public ConsumeContextRetryPipeSpecification(CancellationToken cancellationToken = default)
         {
             _observers = new RetryObservable();
+
+            _cancellationToken = cancellationToken;
         }
 
         public void Apply(IPipeBuilder<ConsumeContext> builder)
         {
             var retryPolicy = _policyFactory(Filter);
 
-            var contextRetryPolicy = new ConsumeContextRetryPolicy(retryPolicy);
+            var contextRetryPolicy = new ConsumeContextRetryPolicy(retryPolicy, _cancellationToken);
 
             builder.AddFilter(new RetryFilter<ConsumeContext>(contextRetryPolicy, _observers));
         }
@@ -70,22 +74,24 @@ namespace MassTransit.PipeConfigurators
         where TFilter : class, ConsumeContext
         where TContext : RetryConsumeContext, TFilter
     {
+        readonly CancellationToken _cancellationToken;
         readonly Func<TFilter, IRetryPolicy, TContext> _contextFactory;
         readonly RetryObservable _observers;
         RetryPolicyFactory _policyFactory;
 
-        public ConsumeContextRetryPipeSpecification(Func<TFilter, IRetryPolicy, TContext> contextFactory)
+        public ConsumeContextRetryPipeSpecification(Func<TFilter, IRetryPolicy, TContext> contextFactory, CancellationToken cancellationToken = default)
         {
             _contextFactory = contextFactory;
 
             _observers = new RetryObservable();
+            _cancellationToken = cancellationToken;
         }
 
         public void Apply(IPipeBuilder<TFilter> builder)
         {
             var retryPolicy = _policyFactory(Filter);
 
-            var contextRetryPolicy = new ConsumeContextRetryPolicy<TFilter, TContext>(retryPolicy, _contextFactory);
+            var contextRetryPolicy = new ConsumeContextRetryPolicy<TFilter, TContext>(retryPolicy, _cancellationToken, _contextFactory);
 
             builder.AddFilter(new RetryFilter<TFilter>(contextRetryPolicy, _observers));
         }

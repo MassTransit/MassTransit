@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Threading;
     using Context;
     using GreenPipes;
 
@@ -20,11 +21,13 @@ namespace MassTransit.Pipeline.Filters
     public class ConsumeContextRetryPolicy :
         IRetryPolicy
     {
+        readonly CancellationToken _cancellationToken;
         readonly IRetryPolicy _retryPolicy;
 
-        public ConsumeContextRetryPolicy(IRetryPolicy retryPolicy)
+        public ConsumeContextRetryPolicy(IRetryPolicy retryPolicy, CancellationToken cancellationToken)
         {
             _retryPolicy = retryPolicy;
+            _cancellationToken = cancellationToken;
         }
 
         public void Probe(ProbeContext context)
@@ -42,7 +45,7 @@ namespace MassTransit.Pipeline.Filters
 
                 var retryConsumeContext = new RetryConsumeContext(consumeContext, _retryPolicy);
 
-                return new ConsumeContextRetryPolicyContext(retryPolicyContext, retryConsumeContext) as RetryPolicyContext<T>;
+                return new ConsumeContextRetryPolicyContext(retryPolicyContext, retryConsumeContext, _cancellationToken) as RetryPolicyContext<T>;
             }
 
             throw new ArgumentException("The argument must be a ConsumeContext", nameof(context));
@@ -60,12 +63,14 @@ namespace MassTransit.Pipeline.Filters
         where TFilter : class, ConsumeContext
         where TContext : RetryConsumeContext, TFilter
     {
+        readonly CancellationToken _cancellationToken;
         readonly Func<TFilter, IRetryPolicy, TContext> _contextFactory;
         readonly IRetryPolicy _retryPolicy;
 
-        public ConsumeContextRetryPolicy(IRetryPolicy retryPolicy, Func<TFilter, IRetryPolicy, TContext> contextFactory)
+        public ConsumeContextRetryPolicy(IRetryPolicy retryPolicy, CancellationToken cancellationToken, Func<TFilter, IRetryPolicy, TContext> contextFactory)
         {
             _retryPolicy = retryPolicy;
+            _cancellationToken = cancellationToken;
             _contextFactory = contextFactory;
         }
 
@@ -86,7 +91,7 @@ namespace MassTransit.Pipeline.Filters
 
             var retryConsumeContext = _contextFactory(filterContext, _retryPolicy);
 
-            return new ConsumeContextRetryPolicyContext<TFilter, TContext>(retryPolicyContext, retryConsumeContext) as RetryPolicyContext<T>;
+            return new ConsumeContextRetryPolicyContext<TFilter, TContext>(retryPolicyContext, retryConsumeContext, _cancellationToken) as RetryPolicyContext<T>;
         }
 
         public bool IsHandled(Exception exception)

@@ -13,6 +13,7 @@
 namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
+    using System.Threading;
     using Context;
     using GreenPipes;
     using GreenPipes.Configurators;
@@ -39,10 +40,14 @@ namespace MassTransit.PipeConfigurators
         {
             var retryPolicy = _policyFactory(Filter);
 
-            var policy = new ConsumeContextRetryPolicy<ConsumeContext<TMessage>, RetryConsumeContext<TMessage>>(retryPolicy,
-                (x, r) => x as RetryConsumeContext<TMessage> ?? new RedeliveryRetryConsumeContext<TMessage>(x, r));
+            var policy = new ConsumeContextRetryPolicy<ConsumeContext<TMessage>, RetryConsumeContext<TMessage>>(retryPolicy, CancellationToken.None, Factory);
 
             builder.AddFilter(new RedeliveryRetryFilter<TMessage>(policy, _observers));
+        }
+
+        static RetryConsumeContext<TMessage> Factory(ConsumeContext<TMessage> context, IRetryPolicy retryPolicy)
+        {
+            return context as RetryConsumeContext<TMessage> ?? new RedeliveryRetryConsumeContext<TMessage>(context, retryPolicy);
         }
 
         public IEnumerable<ValidationResult> Validate()

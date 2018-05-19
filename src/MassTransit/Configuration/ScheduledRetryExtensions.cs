@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading;
     using Context;
     using GreenPipes;
     using GreenPipes.Configurators;
@@ -40,9 +41,15 @@ namespace MassTransit
             var retrySpecification = new RedeliveryRetryPipeSpecification<T>();
 
             retrySpecification.SetRetryPolicy(exceptionFilter =>
-                new ConsumeContextRetryPolicy<ConsumeContext<T>, RetryConsumeContext<T>>(retryPolicy, (x, r) => new RetryConsumeContext<T>(x, r)));
+                new ConsumeContextRetryPolicy<ConsumeContext<T>, RetryConsumeContext<T>>(retryPolicy, CancellationToken.None, Factory));
 
             configurator.AddPipeSpecification(retrySpecification);
+        }
+
+        static RetryConsumeContext<T> Factory<T>(ConsumeContext<T> context, IRetryPolicy retryPolicy)
+            where T : class
+        {
+            return new RetryConsumeContext<T>(context, retryPolicy);
         }
 
         /// <summary>

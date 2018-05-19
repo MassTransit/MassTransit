@@ -13,8 +13,10 @@
 namespace MassTransit.PipeConfigurators
 {
     using System;
+    using System.Threading;
     using ConsumeConfigurators;
     using Context;
+    using GreenPipes;
     using GreenPipes.Configurators;
 
 
@@ -22,11 +24,13 @@ namespace MassTransit.PipeConfigurators
         ConfigurationObserver,
         IMessageConfigurationObserver
     {
+        readonly CancellationToken _cancellationToken;
         readonly Action<IRetryConfigurator> _configure;
 
-        public RetryConfigurationObserver(IConsumePipeConfigurator receiveEndpointConfigurator, Action<IRetryConfigurator> configure)
+        public RetryConfigurationObserver(IConsumePipeConfigurator receiveEndpointConfigurator, CancellationToken cancellationToken, Action<IRetryConfigurator> configure)
             : base(receiveEndpointConfigurator)
         {
+            _cancellationToken = cancellationToken;
             _configure = configure;
 
             Connect(this);
@@ -35,12 +39,17 @@ namespace MassTransit.PipeConfigurators
         public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
             where TMessage : class
         {
-            var specification =
-                new ConsumeContextRetryPipeSpecification<ConsumeContext<TMessage>, RetryConsumeContext<TMessage>>((x, r) => new RetryConsumeContext<TMessage>(x, r));
+            var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<TMessage>, RetryConsumeContext<TMessage>>(Factory, _cancellationToken);
 
             _configure?.Invoke(specification);
 
             configurator.AddPipeSpecification(specification);
+        }
+
+        static RetryConsumeContext<TMessage> Factory<TMessage>(ConsumeContext<TMessage> context, IRetryPolicy retryPolicy)
+            where TMessage : class
+        {
+            return new RetryConsumeContext<TMessage>(context, retryPolicy);
         }
     }
 }
