@@ -17,6 +17,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
+    using Topology;
     using Topology.Builders;
     using Topology.Entities;
 
@@ -49,8 +50,9 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             }).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
-
-            await DeleteAutoDelete(context).ConfigureAwait(false);
+            
+            if (_settings is ReceiveSettings)
+                await DeleteAutoDelete(context).ConfigureAwait(false);
         }
 
         void IProbeSite.Probe(ProbeContext context)

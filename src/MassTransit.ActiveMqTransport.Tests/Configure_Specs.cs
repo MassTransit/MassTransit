@@ -119,7 +119,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         public async Task Should_succeed_and_connect_when_properly_configured()
         {
             TaskCompletionSource<bool> received = new TaskCompletionSource<bool>();
-            
+
             Uri sendAddress = null;
 
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
@@ -141,7 +141,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
                     sendAddress = x.InputAddress;
                 });
-                
+
                 cfg.ReceiveEndpoint(host, "input-queue-too", x =>
                 {
                     x.Handler<PongMessage>(async context =>
@@ -160,6 +160,39 @@ namespace MassTransit.ActiveMqTransport.Tests
             await received.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
 
             await busControl.StopAsync();
+        }
+
+        [Test]
+        public async Task Should_do_a_bunch_of_requests_and_responses()
+        {
+            var bus = Bus.Factory.CreateUsingActiveMq(sbc =>
+            {
+                var host = sbc.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", 61617, h =>
+                {
+                    h.Username("masstransit-build");
+                    h.Password("build-Br0k3r");
+
+                    h.UseSsl();
+                });
+
+                sbc.ReceiveEndpoint(host, "test", e =>
+                {
+                    e.Handler<PingMessage>(async context => await context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
+                });
+            });
+
+            await bus.StartAsync();
+            try
+            {
+                for (var i = 0; i < 100; i = i + 1)
+                {
+                    var result = await bus.Request<PingMessage, PongMessage>(new PingMessage());
+                }
+            }
+            finally
+            {
+                await bus.StopAsync();
+            }
         }
 
         [Test]
@@ -217,7 +250,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             Assert.That(handler.Consumed.Select().Any(), Is.True);
 
-//            await Task.Delay(20000);
+            //            await Task.Delay(20000);
 
             await harness.Bus.Publish(new PongMessage());
 
