@@ -26,3 +26,4 @@ pull requests are always welcome. Using an existing container it should be strai
 * [StructureMap](structuremap.md)
 * [Unity](unity.md)
 * [Castle Windsor](castlewindsor.md)
+* [Microsoft Dependency Injection](msdi.md)
