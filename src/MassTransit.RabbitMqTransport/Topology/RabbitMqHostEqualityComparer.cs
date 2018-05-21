@@ -25,11 +25,27 @@ namespace MassTransit.RabbitMqTransport.Topology
         {
             if (ReferenceEquals(x, y))
                 return true;
+
             if (ReferenceEquals(x, null))
                 return false;
+
             if (ReferenceEquals(y, null))
                 return false;
-            return string.Equals(x.Host, y.Host, StringComparison.OrdinalIgnoreCase) && x.Port == y.Port && string.Equals(x.VirtualHost, y.VirtualHost);
+
+            if (!string.Equals(x.Host, y.Host, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            if (!string.Equals(x.VirtualHost, y.VirtualHost))
+                return false;
+
+            if (x.Port == y.Port)
+                return true;
+
+            // handle SSL mismatch betweeen clients
+            if ((x.Port == 5671 || x.Port == 5672) && (y.Port == 5671 || y.Port == 5672))
+                return true;
+
+            return false;
         }
 
         public int GetHashCode(RabbitMqHostSettings obj)
