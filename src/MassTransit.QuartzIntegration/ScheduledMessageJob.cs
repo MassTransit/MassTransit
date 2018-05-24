@@ -19,7 +19,6 @@ namespace MassTransit.QuartzIntegration
     using Logging;
     using Quartz;
     using Serialization;
-    using Util;
 
 
     public class ScheduledMessageJob :

@@ -206,7 +206,7 @@ namespace MassTransit.QuartzIntegration
 
                 envelope.Add(payloadType.Select(x => new XElement("messageType", x.Value)));
 
-                return document.ToString();
+                return document.ToString(SaveOptions.DisableFormatting);
             }
         }
     }

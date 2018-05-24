@@ -60,6 +60,7 @@ namespace MassTransit.Serialization
             {
                 headers[payloadHeader.Key] = payloadHeader.Value;
             }
+
             envelope["headers"] = JToken.FromObject(headers);
 
             _body = JsonConvert.SerializeObject(envelope, Formatting.Indented);
@@ -86,7 +87,7 @@ namespace MassTransit.Serialization
                     headers.Add(new XElement(payloadHeader.Key, payloadHeader.Value));
                 }
 
-                _body = document.ToString();
+                _body = document.ToString(SaveOptions.DisableFormatting);
             }
         }
     }
