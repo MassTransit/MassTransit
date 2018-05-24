@@ -1,4 +1,4 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,7 +15,9 @@ namespace MassTransit.Serialization.JsonConverters
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
 
 
     public static class ListConverterCache
@@ -26,21 +28,32 @@ namespace MassTransit.Serialization.JsonConverters
                 (ListConverter)Activator.CreateInstance(typeof(CachedConverter<>).MakeGenericType(type)));
         }
 
-        public static object GetList(Type elementType, JsonReader reader, JsonSerializer serializer, bool toArray)
+        public static object GetList(JsonContract contract, JsonReader reader, JsonSerializer serializer)
         {
-            return GetOrAdd(elementType).GetList(reader, serializer, toArray);
+            if (!(contract is JsonArrayContract arrayContract))
+                throw new JsonSerializationException("Object is not an array contract");
+
+            return GetOrAdd(arrayContract.CollectionItemType).GetList(arrayContract, reader, serializer);
+        }
+
+
+        interface ListConverter
+        {
+            object GetList(JsonArrayContract contract, JsonReader reader, JsonSerializer serializer);
         }
 
 
         class CachedConverter<T> :
             ListConverter
         {
-            public object GetList(JsonReader reader, JsonSerializer serializer, bool toArray)
+            public object GetList(JsonArrayContract contract, JsonReader reader, JsonSerializer serializer)
             {
                 if (reader.TokenType == JsonToken.Null)
                     return null;
 
-                var list = new List<T>();
+                IList<T> list = contract.DefaultCreator != null
+                    ? contract.DefaultCreator() as IList<T>
+                    : new List<T>();
 
                 if (reader.TokenType == JsonToken.StartArray)
                     serializer.Populate(reader, list);
@@ -50,7 +63,7 @@ namespace MassTransit.Serialization.JsonConverters
                     list.Add(item);
                 }
 
-                if (toArray)
+                if (contract.CreatedType.IsArray)
                     return list.ToArray();
 
                 return list;
@@ -60,14 +73,7 @@ namespace MassTransit.Serialization.JsonConverters
 
         static class InstanceCache
         {
-            internal static readonly ConcurrentDictionary<Type, ListConverter> Cached =
-                new ConcurrentDictionary<Type, ListConverter>();
-        }
-
-
-        interface ListConverter
-        {
-            object GetList(JsonReader reader, JsonSerializer serializer, bool toArray);
+            internal static readonly ConcurrentDictionary<Type, ListConverter> Cached = new ConcurrentDictionary<Type, ListConverter>();
         }
     }
 }

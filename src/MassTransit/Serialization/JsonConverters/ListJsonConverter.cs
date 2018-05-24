@@ -15,6 +15,7 @@ namespace MassTransit.Serialization.JsonConverters
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using Internals.Extensions;
     using Newtonsoft.Json;
@@ -31,17 +32,9 @@ namespace MassTransit.Serialization.JsonConverters
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
             JsonSerializer serializer)
         {
-            if (objectType.IsArray)
-            {
-                Type elementType = objectType.GetElementType();
+            var contract = serializer.ContractResolver.ResolveContract(objectType);
 
-                return ListConverterCache.GetList(elementType, reader, serializer, true);
-            }
-            else
-            {
-                Type elementType = objectType.GetGenericArguments()[0];
-                return ListConverterCache.GetList(elementType, reader, serializer, false);
-            }
+            return ListConverterCache.GetList(contract, reader, serializer);
         }
 
         public override bool CanConvert(Type objectType)
@@ -49,8 +42,16 @@ namespace MassTransit.Serialization.JsonConverters
             var typeInfo = objectType.GetTypeInfo();
             if (typeInfo.IsArray)
             {
-                if (typeInfo.HasElementType && typeInfo.GetElementType() == typeof(byte))
-                    return false;
+                var elementType = typeInfo.GetElementType();
+
+                if (typeInfo.HasElementType)
+                {
+                    if (elementType == typeof(byte))
+                        return false;
+
+                    if (elementType.IsAbstract)
+                        return false;
+                }
 
                 return objectType.HasInterface<IEnumerable>();
             }
@@ -59,7 +60,13 @@ namespace MassTransit.Serialization.JsonConverters
             {
                 Type definition = typeInfo.GetGenericTypeDefinition();
                 if (definition == typeof(IList<>) || definition == typeof(List<>) || definition == typeof(IEnumerable<>))
+                {
+                    var elementType = typeInfo.GetGenericArguments().First();
+                    if (elementType.IsAbstract)
+                        return false;
+
                     return true;
+                }
             }
 
             return false;
