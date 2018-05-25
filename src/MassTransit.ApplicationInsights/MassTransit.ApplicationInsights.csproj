@@ -15,10 +15,10 @@
     <Title>MassTransit.ApplicationInsights</Title>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.6.4" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
+    <PackageReference Include="GreenPipes" Version="2.1.1" />
+    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.6.4" />
   </ItemGroup>
 </Project>
