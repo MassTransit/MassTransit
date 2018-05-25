@@ -46,7 +46,7 @@ namespace MassTransit.ApplicationInsights
                     operation.Telemetry.Properties["ConversationId"] = consumeContext.ConversationId.ToString();
                     operation.Telemetry.Properties["CorrelationId"] = consumeContext.CorrelationId.ToString();
 
-                    await next.Send(context);
+                    await next.Send(context).ConfigureAwait(false);
 
                     _telemetryClient.StopOperation(operation);
                 }
