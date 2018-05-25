@@ -13,6 +13,7 @@
 namespace MassTransit.ApplicationInsights
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -24,14 +25,19 @@ namespace MassTransit.ApplicationInsights
     public class ApplicationInsightsFilter<T> : IFilter<T>
         where T : class, PipeContext
     {
+        const string MessageId = nameof(MessageId);
+        const string ConversationId = nameof(ConversationId);
+        const string CorrelationId = nameof(CorrelationId);
+
         const string StepName = "MassTransit:Consumer";
+
         readonly TelemetryClient _telemetryClient;
 
         public ApplicationInsightsFilter(TelemetryClient telemetryClient)
             => _telemetryClient = telemetryClient;
 
         public void Probe(ProbeContext context)
-            => context.CreateFilterScope("CorrelationFilter");
+            => context.CreateFilterScope("ApplicationInsightsFilter");
 
         public async Task Send(T context, IPipe<T> next)
         {
@@ -42,9 +48,9 @@ namespace MassTransit.ApplicationInsights
             {
                 try
                 {
-                    operation.Telemetry.Properties["MessageId"] = consumeContext.MessageId.ToString();
-                    operation.Telemetry.Properties["ConversationId"] = consumeContext.ConversationId.ToString();
-                    operation.Telemetry.Properties["CorrelationId"] = consumeContext.CorrelationId.ToString();
+                    operation.Telemetry.Properties.Add(MessageId, consumeContext.MessageId.ToString());
+                    operation.Telemetry.Properties.Add(ConversationId, consumeContext.ConversationId.ToString());
+                    operation.Telemetry.Properties.Add(CorrelationId, consumeContext.CorrelationId.ToString());
 
                     await next.Send(context).ConfigureAwait(false);
 
@@ -52,7 +58,15 @@ namespace MassTransit.ApplicationInsights
                 }
                 catch (Exception ex)
                 {
-                    _telemetryClient.TrackException(ex);
+                    var properties = new Dictionary<string, string>
+                    {
+                        {MessageId, consumeContext.MessageId.ToString()},
+                        {ConversationId, consumeContext.ConversationId.ToString()},
+                        {CorrelationId, consumeContext.CorrelationId.ToString()}
+                    };
+
+                    _telemetryClient.TrackException(ex, properties);
+
                     operation.Telemetry.Success = false;
                     throw;
                 }
