@@ -18,7 +18,16 @@ namespace MassTransit.ApplicationInsights
 
     public static class ApplicationInsightsMiddlewareConfiguratorExtensions
     {
-        public static void UseApplicationInsights<T>(this IPipeConfigurator<T> configurator, TelemetryClient telemetryClient) where T : class, PipeContext
-            => configurator.AddPipeSpecification(new ApplicationInsightsSpecification<T>(telemetryClient));
+        /// <summary>
+        /// Add support for ApplicationInsights to the pipeline, which will be used to track all consumer message reception
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="telemetryClient"></param>
+        /// <typeparam name="T"></typeparam>
+        public static void UseApplicationInsights<T>(this IPipeConfigurator<T> configurator, TelemetryClient telemetryClient)
+            where T : class, ConsumeContext
+        {
+            configurator.AddPipeSpecification(new ApplicationInsightsSpecification<T>(telemetryClient));
+        }
     }
 }

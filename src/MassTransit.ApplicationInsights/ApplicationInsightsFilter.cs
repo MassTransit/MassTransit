@@ -13,61 +13,67 @@
 namespace MassTransit.ApplicationInsights
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
+    using Microsoft.ApplicationInsights.Extensibility;
 
 
-    public class ApplicationInsightsFilter<T> : IFilter<T>
-        where T : class, PipeContext
+    public class ApplicationInsightsFilter<T> :
+        IFilter<T>
+        where T : class, ConsumeContext
     {
         const string MessageId = nameof(MessageId);
         const string ConversationId = nameof(ConversationId);
         const string CorrelationId = nameof(CorrelationId);
+        const string RequestId = nameof(RequestId);
 
         const string StepName = "MassTransit:Consumer";
 
         readonly TelemetryClient _telemetryClient;
 
         public ApplicationInsightsFilter(TelemetryClient telemetryClient)
-            => _telemetryClient = telemetryClient;
+        {
+            _telemetryClient = telemetryClient;
+        }
 
         public void Probe(ProbeContext context)
-            => context.CreateFilterScope("ApplicationInsightsFilter");
+        {
+            context.CreateFilterScope("ApplicationInsightsFilter");
+        }
 
         public async Task Send(T context, IPipe<T> next)
         {
-            var consumeContext = context.GetPayload<ConsumeContext>();
-            var messageType = consumeContext.SupportedMessageTypes.FirstOrDefault() ?? "Unknown";
+            var messageType = context.SupportedMessageTypes.FirstOrDefault() ?? "Unknown";
 
-            using (var operation = _telemetryClient.StartOperation<RequestTelemetry>($"{StepName} {messageType}"))
+            using (IOperationHolder<RequestTelemetry> operation = _telemetryClient.StartOperation<RequestTelemetry>($"{StepName} {messageType}"))
             {
+                if (context.MessageId.HasValue)
+                    operation.Telemetry.Properties.Add(MessageId, context.MessageId.Value.ToString());
+
+                if (context.ConversationId.HasValue)
+                    operation.Telemetry.Properties.Add(ConversationId, context.ConversationId.Value.ToString());
+
+                if (context.CorrelationId.HasValue)
+                    operation.Telemetry.Properties.Add(CorrelationId, context.CorrelationId.Value.ToString());
+
+                if (context.RequestId.HasValue)
+                    operation.Telemetry.Properties.Add(RequestId, context.RequestId.Value.ToString());
+
                 try
                 {
-                    operation.Telemetry.Properties.Add(MessageId, consumeContext.MessageId.ToString());
-                    operation.Telemetry.Properties.Add(ConversationId, consumeContext.ConversationId.ToString());
-                    operation.Telemetry.Properties.Add(CorrelationId, consumeContext.CorrelationId.ToString());
-
                     await next.Send(context).ConfigureAwait(false);
 
                     _telemetryClient.StopOperation(operation);
                 }
                 catch (Exception ex)
                 {
-                    var properties = new Dictionary<string, string>
-                    {
-                        {MessageId, consumeContext.MessageId.ToString()},
-                        {ConversationId, consumeContext.ConversationId.ToString()},
-                        {CorrelationId, consumeContext.CorrelationId.ToString()}
-                    };
-
-                    _telemetryClient.TrackException(ex, properties);
+                    _telemetryClient.TrackException(ex, operation.Telemetry.Properties);
 
                     operation.Telemetry.Success = false;
+
                     throw;
                 }
             }

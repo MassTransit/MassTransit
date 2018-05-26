@@ -18,18 +18,25 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights;
 
 
-    public class ApplicationInsightsSpecification<T> : IPipeSpecification<T>
-        where T : class, PipeContext
+    public class ApplicationInsightsSpecification<T> :
+        IPipeSpecification<T>
+        where T : class, ConsumeContext
     {
         readonly TelemetryClient _telemetryClient;
 
         public ApplicationInsightsSpecification(TelemetryClient telemetryClient)
-            => _telemetryClient = telemetryClient;
+        {
+            _telemetryClient = telemetryClient;
+        }
 
         public IEnumerable<ValidationResult> Validate()
-            => Enumerable.Empty<ValidationResult>();
+        {
+            return Enumerable.Empty<ValidationResult>();
+        }
 
         public void Apply(IPipeBuilder<T> builder)
-            => builder.AddFilter(new ApplicationInsightsFilter<T>(_telemetryClient));
+        {
+            builder.AddFilter(new ApplicationInsightsFilter<T>(_telemetryClient));
+        }
     }
 }
