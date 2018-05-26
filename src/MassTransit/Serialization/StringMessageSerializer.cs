@@ -81,7 +81,6 @@ namespace MassTransit.Serialization
                     envelope.Add(headers);
                 }
 
-
                 foreach (KeyValuePair<string, object> payloadHeader in values)
                 {
                     headers.Add(new XElement(payloadHeader.Key, payloadHeader.Value));
