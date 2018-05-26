@@ -57,6 +57,8 @@
     * [Redelivering messages](usage/scheduling/redeliver.md)
   * [Observe messages](usage/observers.md)
   * [Observe lifecycle](usage/lifecycle-observers.md)
+  * Monitoring
+    * [AppInsights](usage/monitoring/applications-insights.md)
   * [Connect endpoints](usage/connect-endpoint.md)
   * [Logging](usage/logging.md)
   * [Testing](usage/testing/README.md)

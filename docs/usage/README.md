@@ -25,6 +25,8 @@ In order to use and understand MassTransit, a set of recipe-based usage examples
   * [Azure Service Bus](scheduling/azure-sb-scheduler.md)
 * [Observe messages](observers.md)
 * [Observe lifecycle](lifecycle-observers.md)
+* Monitoring
+  * [AppInsights](monitoring/applications-insights.md)
 * [Connect endpoints](connect-endpoint.md)
 * [Logging](logging.md)
 * [Testing](testing/README.md)
