@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistence", "Persistence", "{56F516D7-BC3C-49E1-A639-83C5F14953F8}"
 EndProject
@@ -129,15 +129,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.WebJobs.Service
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.AzureFunctions.ServiceBus", "Samples\Sample.AzureFunctions.ServiceBus\Sample.AzureFunctions.ServiceBus.csproj", "{D4D62013-2127-43A9-9C40-273DEBD509BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ActiveMqTransport", "MassTransit.ActiveMqTransport\MassTransit.ActiveMqTransport.csproj", "{24C4952B-22B6-49C0-B98C-D51DDF82A3AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.ActiveMqTransport", "MassTransit.ActiveMqTransport\MassTransit.ActiveMqTransport.csproj", "{24C4952B-22B6-49C0-B98C-D51DDF82A3AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ActiveMqTransport.Tests", "MassTransit.ActiveMqTransport.Tests\MassTransit.ActiveMqTransport.Tests.csproj", "{E3E4AE8B-7120-4363-ABE8-8301B62244AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.ActiveMqTransport.Tests", "MassTransit.ActiveMqTransport.Tests\MassTransit.ActiveMqTransport.Tests.csproj", "{E3E4AE8B-7120-4363-ABE8-8301B62244AD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Monitoring", "Monitoring", "{B26821D3-FA1E-49DE-8436-F41235B222CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ApplicationInsights", "MassTransit.ApplicationInsights\MassTransit.ApplicationInsights.csproj", "{C810F1B6-06A7-409D-9B91-268EB194EC71}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.ApplicationInsights", "MassTransit.ApplicationInsights\MassTransit.ApplicationInsights.csproj", "{C810F1B6-06A7-409D-9B91-268EB194EC71}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ApplicationInsights.Tests", "MassTransit.ApplicationInsights.Tests\MassTransit.ApplicationInsights.Tests.csproj", "{2315DD05-5736-4BFF-B13E-EA01D6072CD3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.ApplicationInsights.Tests", "MassTransit.ApplicationInsights.Tests\MassTransit.ApplicationInsights.Tests.csproj", "{2315DD05-5736-4BFF-B13E-EA01D6072CD3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.DapperIntegration", "Persistence\MassTransit.DapperIntegration\MassTransit.DapperIntegration.csproj", "{6F0BD4CD-BA32-438E-980C-73242DA96DCF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.DapperIntegration.Tests", "Persistence\MassTransit.DapperIntegration.Tests\MassTransit.DapperIntegration.Tests.csproj", "{F84D81B1-C33D-420C-849F-EA422D87807F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -710,6 +714,30 @@ Global
 		{2315DD05-5736-4BFF-B13E-EA01D6072CD3}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
 		{2315DD05-5736-4BFF-B13E-EA01D6072CD3}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
 		{2315DD05-5736-4BFF-B13E-EA01D6072CD3}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.Debug|x86.Build.0 = Debug|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.Release|x86.ActiveCfg = Release|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.Release|x86.Build.0 = Release|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.Debug|x86.Build.0 = Debug|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.Release|x86.ActiveCfg = Release|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.Release|x86.Build.0 = Release|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{F84D81B1-C33D-420C-849F-EA422D87807F}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -763,9 +791,11 @@ Global
 		{E3E4AE8B-7120-4363-ABE8-8301B62244AD} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{C810F1B6-06A7-409D-9B91-268EB194EC71} = {B26821D3-FA1E-49DE-8436-F41235B222CE}
 		{2315DD05-5736-4BFF-B13E-EA01D6072CD3} = {B26821D3-FA1E-49DE-8436-F41235B222CE}
+		{6F0BD4CD-BA32-438E-980C-73242DA96DCF} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{F84D81B1-C33D-420C-849F-EA422D87807F} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
+		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}
 	EndGlobalSection
 EndGlobal
