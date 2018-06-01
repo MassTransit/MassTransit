@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj" />
+    <ProjectReference Include="..\MassTransit.DapperIntegration\MassTransit.DapperIntegration.csproj" />
+  </ItemGroup>
+
+</Project>
