@@ -19,7 +19,9 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
     using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.Documents;
+    using Newtonsoft.Json;
     using Util;
+
 
     public class DocumentDbSagaConsumeContext<TSaga, TMessage> :
         ConsumeContextProxyScope<TMessage>,
@@ -32,8 +34,24 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
         readonly bool _existing;
         readonly string _databaseName;
         readonly string _collectionName;
+        static readonly RequestOptions _requestOptions;
 
-        public DocumentDbSagaConsumeContext(IDocumentClient client, string databaseName, string collectionName, ConsumeContext<TMessage> context, TSaga instance, bool existing = true)
+        static DocumentDbSagaConsumeContext()
+        {
+            var resolver = new PropertyRenameSerializerContractResolver();
+            resolver.RenameProperty(typeof(TSaga), "CorrelationId", "id");
+
+            _requestOptions = new RequestOptions
+            {
+                JsonSerializerSettings = new JsonSerializerSettings
+                {
+                    ContractResolver = resolver
+                }
+            };
+        }
+
+        public DocumentDbSagaConsumeContext(IDocumentClient client, string databaseName, string collectionName, ConsumeContext<TMessage> context,
+            TSaga instance, bool existing = true)
             : base(context)
         {
             Saga = instance;
@@ -45,11 +63,12 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;
 
-        public SagaConsumeContext<TSaga, T> PopContext<T>() where T : class
+        public SagaConsumeContext<TSaga, T> PopContext<T>()
+            where T : class
         {
-            var context = this as SagaConsumeContext<TSaga, T>;
-            if (context == null)
-                throw new ContextException($"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
+            if (!(this is SagaConsumeContext<TSaga, T> context))
+                throw new ContextException(
+                    $"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
 
             return context;
         }
@@ -60,7 +79,8 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
 
             if (_existing)
             {
-                await _client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, Saga.CorrelationId.ToString())).ConfigureAwait(false);
+                await _client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, Saga.CorrelationId.ToString()), _requestOptions)
+                    .ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName, Saga.CorrelationId);

@@ -4,6 +4,7 @@
     using DocumentDbIntegration.Saga.Pipeline;
     using GreenPipes;
     using Microsoft.Azure.Documents;
+    using Microsoft.Azure.Documents.Client;
     using Moq;
     using NUnit.Framework;
 
@@ -35,7 +36,7 @@
             _nextPipe = new Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>>();
 
             _pipe = new MissingPipe<SimpleSaga, InitiateSimpleSaga>(Mock.Of<IDocumentClient>(), SagaRepository.DatabaseName, SagaRepository.CollectionName, _nextPipe.Object,
-                Mock.Of<IDocumentDbSagaConsumeContextFactory>());
+                Mock.Of<IDocumentDbSagaConsumeContextFactory>(), new RequestOptions());
         }
     }
 }

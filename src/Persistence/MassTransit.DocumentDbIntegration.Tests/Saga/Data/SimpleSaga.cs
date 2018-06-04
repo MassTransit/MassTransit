@@ -29,7 +29,6 @@
             return Task.FromResult(0);
         }
 
-        [JsonProperty("id")]
         public Guid CorrelationId { get; set; }
 
         public Task Consume(ConsumeContext<ObservableSagaMessage> message)

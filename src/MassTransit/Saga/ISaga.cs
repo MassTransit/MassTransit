@@ -27,7 +27,6 @@ namespace MassTransit.Saga
         /// for the instance. While the setter is not typically called, it is there
         /// to support persistence consistently across implementations.
         /// </summary>
-        [JsonProperty("id")]
         Guid CorrelationId { get; set; }
     }
 }
