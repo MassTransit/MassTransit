@@ -18,6 +18,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
     using DocumentDbIntegration.Saga.Context;
     using DocumentDbIntegration.Saga.Pipeline;
     using Microsoft.Azure.Documents;
+    using Microsoft.Azure.Documents.Client;
     using Moq;
     using NUnit.Framework;
     using Pipeline;
@@ -57,7 +58,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
             _context = new Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>();
             _consumeContextFactory.Setup(m => m.Create(_mockDocumentClient.Object, "","", _context.Object, _context.Object.Saga, false)).Returns(_proxy.Object);
 
-            _pipe = new MissingPipe<SimpleSaga, InitiateSimpleSaga>(_mockDocumentClient.Object, "","", _nextPipe.Object, _consumeContextFactory.Object);
+            _pipe = new MissingPipe<SimpleSaga, InitiateSimpleSaga>(_mockDocumentClient.Object, "","", _nextPipe.Object, _consumeContextFactory.Object, new RequestOptions());
 
             TaskUtil.Await(() => _pipe.Send(_context.Object));
         }

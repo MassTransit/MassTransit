@@ -32,10 +32,10 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
         [OneTimeSetUp]
         public void GivenADocumentDbSagaConsumeContext_WhenPoppingContext()
         {
-            var mongoDbSagaConsumeContext = new DocumentDbSagaConsumeContext<SimpleSaga, InitiateSimpleSaga>(It.IsAny<IDocumentClient>(),It.IsAny<string>(), It.IsAny<string>(),
+            var documentDbSagaConsumeContext = new DocumentDbSagaConsumeContext<SimpleSaga, InitiateSimpleSaga>(It.IsAny<IDocumentClient>(),It.IsAny<string>(), It.IsAny<string>(),
                 Mock.Of<ConsumeContext<InitiateSimpleSaga>>(), Mock.Of<SimpleSaga>());
 
-            _context = mongoDbSagaConsumeContext.PopContext<InitiateSimpleSaga>();
+            _context = documentDbSagaConsumeContext.PopContext<InitiateSimpleSaga>();
         }
     }
 }

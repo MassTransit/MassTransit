@@ -21,6 +21,7 @@ namespace MassTransit.DocumentDbIntegration.Saga.Pipeline
     using Microsoft.Azure.Documents;
     using Util;
 
+
     public class MissingPipe<TSaga, TMessage> :
         IPipe<SagaConsumeContext<TSaga, TMessage>>
         where TSaga : class, ISaga
@@ -31,16 +32,18 @@ namespace MassTransit.DocumentDbIntegration.Saga.Pipeline
         readonly string _collectionName;
         readonly IDocumentClient _client;
         readonly IDocumentDbSagaConsumeContextFactory _documentDbSagaConsumeContextFactory;
+        readonly RequestOptions _requestOptions;
         readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _next;
 
         public MissingPipe(IDocumentClient client, string databaseName, string collectionName, IPipe<SagaConsumeContext<TSaga, TMessage>> next,
-            IDocumentDbSagaConsumeContextFactory documentDbSagaConsumeContextFactory)
+            IDocumentDbSagaConsumeContextFactory documentDbSagaConsumeContextFactory, RequestOptions requestOptions)
         {
             _client = client;
             _databaseName = databaseName;
             _collectionName = collectionName;
             _next = next;
             _documentDbSagaConsumeContextFactory = documentDbSagaConsumeContextFactory;
+            _requestOptions = requestOptions;
         }
 
         public void Probe(ProbeContext context)
@@ -54,12 +57,14 @@ namespace MassTransit.DocumentDbIntegration.Saga.Pipeline
                 _log.DebugFormat("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName, context.Saga.CorrelationId,
                     TypeMetadataCache<TMessage>.ShortName);
 
-            SagaConsumeContext<TSaga, TMessage> proxy = _documentDbSagaConsumeContextFactory.Create(_client, _databaseName, _collectionName, context, context.Saga, false);
+            SagaConsumeContext<TSaga, TMessage> proxy =
+                _documentDbSagaConsumeContextFactory.Create(_client, _databaseName, _collectionName, context, context.Saga, false);
 
             await _next.Send(proxy).ConfigureAwait(false);
 
             if (!proxy.IsCompleted)
-                await _client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), context.Saga, disableAutomaticIdGeneration: true).ConfigureAwait(false);
+                await _client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), context.Saga,
+                    disableAutomaticIdGeneration: true, options: _requestOptions).ConfigureAwait(false);
         }
     }
 }
