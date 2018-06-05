@@ -360,24 +360,38 @@ the saga repository will trow an exception and force the message to be retried, 
 
 #### Redis client initialization
 
-The Redis saga repository requires `ServiceStack.Redis.IRedisClientsManager` as constructor parameter. 
+Redis saga repository is based on the popular `StackExchange.Redis` package and therefore requires `StackExchange.Redis.IDatabase` factory function as constructor parameter. 
 For containerless initialization the code would look like:
 
 ```csharp
 var redisConnectionString = "redis://localhost:6379";
-var repository = new RedisSagaRepository<SagaInstance>(
-    new RedisManagerPool(redisConnectionString));
+var redis = ConnectionMultiplexer.Connect(redisConnectionString);
+
+var repository = new RedisSagaRepository<SagaInstance>(() => redis.GetDatabase());
 ```
 
 If you use a container, you can use the code like this (example for Autofac):
 
 ```csharp
 var redisConnectionString = "redis://localhost:6379";
-builder.Register<IRedisClientsManager>(c => 
-    new RedisManagerPool(redisConnectionString)).SingleInstance();
+builder.RegisterInstance(ConnectionMultiplexer.Connect(redisConnectionString))
+    .As<IConnectionMultiplexer>();
+builder.Register<IDatabase>(c => c.Resolve<IConnectionMultiplexer>.GetDatabase());
 builder.RegisterGeneric(typeof(RedisSagaRepository<>))
     .As(typeof(ISagaRepository<>)).SingleInstance();
 ```
+
+Redis persistence supports optimistic and pessimistic concurrency.
+
+Optimistic concurrency requires saga instance classes to implement `IVersionedSaga` interface.
+Before writing to Redis, repository will check the version of an existing element and if the existing
+version is newer - it will thrown a concurrency exception, porentially triggering a retry policy and
+processing the message again. This mode is the default.
+
+Pessimistic concurrency can be triggered by specifying `optimistic: false` parameter in the repository
+constructor. It will instruct the repository to use Redis lock mechanism. During the message processing,
+saga instance in Redis will be locked and any concurrent attempts to execute any processing on the same
+instance will fail.
 
 ### Marten
 
