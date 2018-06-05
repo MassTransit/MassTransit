@@ -13,6 +13,7 @@ of subsequent events would be meaningless.
     - [NHibernate](#nhibernate)
     - [Redis](#redis)
     - [Marten](#marten)
+    - [DocumentDb](#documentdb)
     - [Azure Service Bus](#azure-service-bus)
 
 ## Specifying saga persistence
@@ -118,6 +119,7 @@ Each of these are setup in a similar way, but examples are shown below for each 
 * [MondoDB](#mongodb)
 * [Redis](#redis)
 * [Marten](#marten)
+* [DocumentDb](#documentdb)
 * [Azure Service Bus](#azure-service-bus)
 
 ### Optimistic vs pessimistic concurrency
@@ -394,8 +396,7 @@ public class SampleSaga : ISaga
 }
 ```
 
-Then you need to initialize the document store and the repository. Repository needs the store as its constructor
-parameter.
+Then you need to initialize the document store and the repository. Repository needs the store as its constructor parameter.
 
 ```csharp
 var connectionString =
@@ -445,6 +446,32 @@ public class SampleSaga : ISaga
      _.Schema.For<SampleSaga>().UseOptimisticConcurrency(true);
  });
  ```
+
+### DocumentDb
+
+DocumentDb is the precessor of Azure CosmosDb and the DocumentDb API is still one of the main APIs for the NoSQL document-oriented persistence of CosmosDb. MassTransit supports saga persistence in CosmosDb by using both MongoDb API (using `MassTransit.MongoDb` package) and using DocumentDb API (using `MassTransit.DocumentDb` package).
+
+DocumentDb requires that any document stored there has a property called `id`, to be used as the document identity. Saga instances have `CorrelationId` for the same purpose, so the DocumentDb saga repository applies JSON serialization options to change the property name for `CorrelationId` to `id` when the document is serialized and deserialized. You must be aware of this when using saga instance documents outside of the saga repository, otherwise you will get documents with empty `CorrelationId` property.
+
+`DocumentDbSagaRepository` reguires `IDocumentClient` and database name as parameters. `IDocumentClient` must be a singleton, as advised by Microsoft.
+
+Instantiation of the DocumentDb saga repository could be done like this:
+
+```csharp
+var documentDbClient =  new DocumentClient(endpointUri, authKeyString);
+var repository = new DocumentDbSagaRepository<SampleSaga>(documentDbClient, "sagaDatabase");
+```
+
+If you use a container, you can use the code like this (example for Autofac):
+
+```csharp
+builder.RegisterInstance(new DocumentClient(endpointUri, authKeyString))
+    .As<IDocumentClient>();
+builder.Register(c => 
+        new DocumentDbSagaRepository(c.Resolve<IDocumentClient>(), "sagaDatabase"))
+    .As<ISagaRepository<SampleSaga>>()
+    .SingleInstance();
+```
 
 ### Azure Service Bus
 
