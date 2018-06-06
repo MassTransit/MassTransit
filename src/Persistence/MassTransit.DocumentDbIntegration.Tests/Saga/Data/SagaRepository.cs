@@ -11,9 +11,11 @@
     {
         static readonly SagaRepository _instance = new SagaRepository();
 
-        private SagaRepository() { }
+        SagaRepository()
+        {
+        }
 
-        public static SagaRepository Instance = _instance;
+        public static readonly SagaRepository Instance = _instance;
 
         public static string DatabaseName = "sagaTest";
         public static string CollectionName = "sagas";
@@ -22,11 +24,13 @@
         {
             // Should all be part of the singleton initializer, because msft says it can take time the first connect...
             await _documentClient.OpenAsync();
-            await _documentClient.CreateDatabaseIfNotExistsAsync(new Database { Id = DatabaseName }).ConfigureAwait(false);
-            await _documentClient.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(DatabaseName), new DocumentCollection { Id = CollectionName }).ConfigureAwait(false);
+            await _documentClient.CreateDatabaseIfNotExistsAsync(new Database {Id = DatabaseName}).ConfigureAwait(false);
+            await _documentClient
+                .CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(DatabaseName), new DocumentCollection {Id = CollectionName})
+                .ConfigureAwait(false);
         }
 
-        private readonly DocumentClient _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
+        readonly DocumentClient _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
         public IDocumentClient Client => _documentClient;
 
         public async Task InsertSaga(SimpleSaga saga)
@@ -50,7 +54,9 @@
         {
             try
             {
-                var document = await Client.ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseName, CollectionName, correlationId.ToString()));
+                ResourceResponse<Document> document =
+                    await Client.ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseName, CollectionName, correlationId.ToString()));
+
                 return JsonConvert.DeserializeObject<SimpleSaga>(document.Resource.ToString());
             }
             catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -63,7 +69,9 @@
         {
             try
             {
-                var document = await Client.ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseName, CollectionName, correlationId.ToString()));
+                ResourceResponse<Document> document =
+                    await Client.ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseName, CollectionName, correlationId.ToString()));
+
                 return document.Resource;
             }
             catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)

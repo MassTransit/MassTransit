@@ -29,8 +29,8 @@ namespace MassTransit.RedisIntegration
         static readonly ILog _log = Logger.Get<RedisSagaRepository<TSaga>>();
         readonly Func<IDatabase> _redisDbFactory;
         readonly bool _optimistic;
-        TimeSpan _lockTimeout;
-        TimeSpan _lockRetryTimeout;
+        readonly TimeSpan _lockTimeout;
+        readonly TimeSpan _lockRetryTimeout;
 
         public RedisSagaRepository(Func<IDatabase> redisDbFactory, bool optimistic = true, TimeSpan? lockTimeout = null, TimeSpan? lockRetryTimeout = null)
         {

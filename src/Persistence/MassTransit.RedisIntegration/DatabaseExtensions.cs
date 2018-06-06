@@ -22,7 +22,7 @@ namespace MassTransit.RedisIntegration
 
     public static class DatabaseExtensions
     {
-        public const string SagaLockSuffix = "_lock";
+        const string SagaLockSuffix = "_lock";
 
         static readonly Random _random = new Random();
 
@@ -32,16 +32,8 @@ namespace MassTransit.RedisIntegration
             return new TypedDatabase<T>(db);
         }
 
-        public static Task<IAsyncDisposable> AcquireLockAsync(this IDatabase db, Guid sagaId, TimeSpan? expiry = null, TimeSpan? retryTimeout = null)
-        {
-            if (db == null)
-                throw new ArgumentNullException(nameof(db));
-
-            if (sagaId == null)
-                throw new ArgumentNullException(nameof(sagaId));
-
-            return DataCacheLock.AcquireAsync(db, sagaId, expiry, retryTimeout);
-        }
+        internal static Task<IAsyncDisposable> AcquireLockAsync(this IDatabase db, Guid sagaId, TimeSpan? expiry, TimeSpan? retryTimeout) => 
+            DataCacheLock.AcquireAsync(db, sagaId, expiry, retryTimeout);
 
         static async Task<T> RetryUntilTrueAsync<T>(Func<Task<T>> task, TimeSpan? retryTimeout)
         {
