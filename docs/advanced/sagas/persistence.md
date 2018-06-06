@@ -121,6 +121,7 @@ Each of these are setup in a similar way, but examples are shown below for each 
 * [Marten](#marten)
 * [DocumentDb](#documentdb)
 * [Azure Service Bus](#azure-service-bus)
+* [Dapper](#dapper)
 
 ### Optimistic vs pessimistic concurrency
 
@@ -504,7 +505,52 @@ This means that this type of saga persistence only support correlation by id. So
 saga persistence, you cannot use `CorrelateBy` to specify how to find the saga instance, but only
 `CorrelateById`.
 
+### Dapper
 
+Provides persistence for MSSQL using [Dapper][3].
+
+Dapper.Contrib is used for inserts and updates. The methods are virtual, so if you'd rather write the SQL
+yourself it is supported.
+
+If you do not write your own sql, the model requires you use the `ExplicitKey` attribute for the CorrelationId. And if you have properties
+that are not available as columns, you can use the `Computed` attribute to not include them in the 
+generated SQL.
+
+```csharp
+public class SampleSaga : ISaga
+{
+    [ExplicitKey]
+    public Guid CorrelationId { get; set; }
+    public string Name { get; set; }
+    public string State { get; set; }
+
+    [Computed]
+    public Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> CorrelationExpression
+    {
+        get { return (saga, message) => saga.Name == message.Name; }
+    }
+}
+```
+
+#### Limitations
+The tablename can only be the pluralized form of the class name. So `SampleSaga` would translate to table SampleSaga**s**.
+This applies even if you write your own SQL for updates and inserts.
+
+The expressions you can use for correlation is somewhat limited. These types of expressions are handled:
+```csharp
+    x => x.CorrelationId == someGuid;
+    x => x.IsDone;
+    x => x.CorrelationId == someGuid && x.IsDone;
+```
+You can use multiple `&&` in the expression.
+
+What you can not use is `||` and negations. So a bool used like this `x.IsDone` can only be handled as true and nothing else.
+
+Dapper does not yet support strong naming, though it is being [worked][4] on.
+
+Also this does not support dotnetcore yet.
 
 [1]: https://www.postgresql.org/docs/9.5/static/functions-json.html
 [2]: http://jasperfx.github.io/marten/
+[3]: https://github.com/StackExchange/Dapper
+[4]: https://github.com/StackExchange/Dapper/issues/889
