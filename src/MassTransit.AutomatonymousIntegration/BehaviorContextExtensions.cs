@@ -18,7 +18,7 @@ namespace Automatonymous
     using MassTransit;
 
 
-    public static class BehaviorContextExtensions
+    public static partial class BehaviorContextExtensions
     {
         public static Task Publish<TInstance, TData, T>(this BehaviorContext<TInstance, TData> context, T message)
             where T : class
