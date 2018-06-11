@@ -18,7 +18,7 @@ namespace Automatonymous
     using MassTransit;
 
 
-    public static class BehaviorContextExtensions
+    public static partial class BehaviorContextExtensions
     {
         public static Task Publish<TInstance, TData, T>(this BehaviorContext<TInstance, TData> context, T message)
             where T : class
@@ -147,8 +147,7 @@ namespace Automatonymous
 
         static ConsumeContext GetConsumeContext<TInstance>(BehaviorContext<TInstance> context)
         {
-            ConsumeContext consumeContext;
-            if (context.TryGetPayload(out consumeContext))
+            if (context.TryGetPayload(out ConsumeContext consumeContext))
                 return consumeContext;
 
             throw new ArgumentException("The ConsumeContext was not present", nameof(context));
