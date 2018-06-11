@@ -147,8 +147,7 @@ namespace Automatonymous
 
         static ConsumeContext GetConsumeContext<TInstance>(BehaviorContext<TInstance> context)
         {
-            ConsumeContext consumeContext;
-            if (context.TryGetPayload(out consumeContext))
+            if (context.TryGetPayload(out ConsumeContext consumeContext))
                 return consumeContext;
 
             throw new ArgumentException("The ConsumeContext was not present", nameof(context));
