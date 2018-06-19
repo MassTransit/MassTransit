@@ -56,6 +56,21 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Start a bus, throwing an exception if the bus does not start in the specified timeout
+        /// </summary>
+        /// <param name="bus">The bus handle</param>
+        /// <param name="startTimeout">The wait time before throwing an exception</param>
+        public static void Start(this IBusControl bus, TimeSpan startTimeout)
+        {
+            using (var cancellationTokenSource = new CancellationTokenSource(startTimeout))
+            {
+                var cancellationToken = cancellationTokenSource.Token;
+
+                TaskUtil.Await(() => bus.StartAsync(cancellationToken), cancellationToken);
+            }
+        }
+
+        /// <summary>
         /// Stop a bus, throwing an exception if the bus does not stop in the specified timeout
         /// </summary>
         /// <param name="bus">The bus handle</param>
