@@ -53,7 +53,7 @@ namespace MassTransit.Containers.Tests
 
                 x.For<TestStateMachineSaga>(new SingletonLifecycle())
                     .Use<TestStateMachineSaga>();
-
+                
                 x.Forward<SagaStateMachine<TestInstance>, TestStateMachineSaga>();
             });
 

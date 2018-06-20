@@ -29,7 +29,7 @@ namespace MassTransit.AutomatonymousStructureMapIntegration
 
         SagaStateMachine<T> ISagaStateMachineFactory.CreateStateMachine<T>()
         {
-            return _container.GetInstance<SagaStateMachine<T>>();
+            return _container.GetInstance<SagaStateMachine<T>>();            
         }
     }
 }

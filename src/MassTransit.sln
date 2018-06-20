@@ -139,9 +139,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.ApplicationInsi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.ApplicationInsights.Tests", "MassTransit.ApplicationInsights.Tests\MassTransit.ApplicationInsights.Tests.csproj", "{2315DD05-5736-4BFF-B13E-EA01D6072CD3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.DapperIntegration", "Persistence\MassTransit.DapperIntegration\MassTransit.DapperIntegration.csproj", "{6F0BD4CD-BA32-438E-980C-73242DA96DCF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.DapperIntegration", "Persistence\MassTransit.DapperIntegration\MassTransit.DapperIntegration.csproj", "{6F0BD4CD-BA32-438E-980C-73242DA96DCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.DapperIntegration.Tests", "Persistence\MassTransit.DapperIntegration.Tests\MassTransit.DapperIntegration.Tests.csproj", "{F84D81B1-C33D-420C-849F-EA422D87807F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.DapperIntegration.Tests", "Persistence\MassTransit.DapperIntegration.Tests\MassTransit.DapperIntegration.Tests.csproj", "{F84D81B1-C33D-420C-849F-EA422D87807F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.LamarIntegration", "Containers\MassTransit.LamarIntegration\MassTransit.LamarIntegration.csproj", "{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Automatonymous.LamarIntegration", "Containers\MassTransit.Automatonymous.LamarIntegration\MassTransit.Automatonymous.LamarIntegration.csproj", "{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -738,6 +742,30 @@ Global
 		{F84D81B1-C33D-420C-849F-EA422D87807F}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 		{F84D81B1-C33D-420C-849F-EA422D87807F}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{F84D81B1-C33D-420C-849F-EA422D87807F}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.Debug|x86.Build.0 = Debug|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.Release|x86.ActiveCfg = Release|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.Release|x86.Build.0 = Release|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.Debug|x86.Build.0 = Debug|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.Release|x86.ActiveCfg = Release|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.Release|x86.Build.0 = Release|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -793,9 +821,11 @@ Global
 		{2315DD05-5736-4BFF-B13E-EA01D6072CD3} = {B26821D3-FA1E-49DE-8436-F41235B222CE}
 		{6F0BD4CD-BA32-438E-980C-73242DA96DCF} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{F84D81B1-C33D-420C-849F-EA422D87807F} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{9D99091D-B80D-4D71-A0A7-F2D3FDD9E804} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
+		{A6E00184-CBEC-4450-A98D-8EF7FE124BE6} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
 		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}
+		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
 	EndGlobalSection
 EndGlobal

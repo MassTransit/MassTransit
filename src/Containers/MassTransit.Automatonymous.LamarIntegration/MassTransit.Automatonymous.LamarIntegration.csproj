@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MassTransit.AutomatonymousLamarIntegration</RootNamespace>
+    <AssemblyName>MassTransit.Automatonymous.LamarIntegration</AssemblyName>
+    <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
+    
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.Automatonymous.Lamar</PackageId>
+    <Title>MassTransit.Automatonymous.Lamar</Title>
+    <Description>MassTransit Lamar container support for Automatonymous; $(Description)</Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Automatonymous.LamarIntegration.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Automatonymous" Version="4.1.1" />
+    <PackageReference Include="GreenPipes" Version="2.1.1" />
+    <PackageReference Include="NewId" Version="3.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Lamar" Version="1.0.2" />
+    <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\MassTransit.LamarIntegration\MassTransit.LamarIntegration.csproj" />
+  </ItemGroup>
+
+</Project>
