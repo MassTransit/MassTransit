@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MassTransit.AutomatonymousLamarIntegration</RootNamespace>
+    <AssemblyName>MassTransit.Automatonymous.LamarIntegration</AssemblyName>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.Automatonymous.Lamar</PackageId>
+    <Title>MassTransit.Automatonymous.Lamar</Title>
+    <Description>MassTransit Lamar container support for Automatonymous; $(Description)</Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Automatonymous.LamarIntegration.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lamar" Version="1.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\MassTransit.LamarIntegration\MassTransit.LamarIntegration.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -9,6 +9,7 @@
     <PackageReference Include="Castle.Core" Version="4.2.0" />
     <PackageReference Include="Castle.Windsor" Version="4.1.0" />
     <PackageReference Include="GreenPipes" Version="2.1.1" />
+    <PackageReference Include="Lamar" Version="1.0.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NUnit" Version="3.10.1" />
@@ -25,7 +26,9 @@
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
     <ProjectReference Include="..\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.Automatonymous.AutofacIntegration\MassTransit.Automatonymous.AutofacIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.Automatonymous.LamarIntegration\MassTransit.Automatonymous.LamarIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.Automatonymous.StructureMapIntegration\MassTransit.Automatonymous.StructureMapIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.LamarIntegration\MassTransit.LamarIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.SimpleInjectorIntegration\MassTransit.SimpleInjectorIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.UnityIntegration\MassTransit.UnityIntegration.csproj" />
