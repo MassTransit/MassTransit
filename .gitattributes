@@ -1,4 +1,7 @@
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto
 
-README.md text eol=lf
+*.sln text eol=crlf
+*.csproj text eol=crlf
+*.cs text eol=crlf
+*.md text eol=lf
