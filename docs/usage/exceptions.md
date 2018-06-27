@@ -86,7 +86,7 @@ There are a variety of retry policies available, which are detailed in the [refe
 
 <div class="alert alert-info">
 <b>Note:</b>
-    In this example, the <i>UseRetry</div> is at the receive endpoint level. Additional retry filters can be
+    In this example, the <i>UseRetry</i> is at the receive endpoint level. Additional retry filters can be
     added at the bus and consumer level, providing flexibility in how different consumers, messages, etc. are
     retried.
 </div>
