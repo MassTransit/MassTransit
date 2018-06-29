@@ -57,7 +57,7 @@ namespace MassTransit.ActiveMqTransport.Transport
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("transport");
-            scope.Add("type", "RabbitMQ");
+            scope.Add("type", "ActiveMQ");
             scope.Set(_settings);
             var topologyScope = scope.CreateScope("topology");
             _context.BrokerTopology.Probe(topologyScope);

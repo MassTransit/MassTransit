@@ -28,7 +28,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
 
     /// <summary>
-    /// Receives messages from RabbitMQ, pushing them to the InboundPipe of the service endpoint.
+    /// Receives messages from ActiveMQ, pushing them to the InboundPipe of the service endpoint.
     /// </summary>
     public sealed class ActiveMqBasicConsumer :
         Supervisor,

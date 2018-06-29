@@ -19,7 +19,7 @@ namespace MassTransit.ActiveMqTransport
     public static class ActiveMqHostConfigurationExtensions
     {
         /// <summary>
-        ///     Configure a RabbitMQ host using the configuration API
+        ///     Configure a ActiveMQ host using the configuration API
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="hostAddress">The URI host address of the RabbitMQ host (rabbitmq://host:port/vhost)</param>
@@ -37,7 +37,7 @@ namespace MassTransit.ActiveMqTransport
         }
 
         /// <summary>
-        /// Configure a RabbitMQ host with a host name and virtual host
+        /// Configure a ActiveMQ host with a host name and virtual host
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="hostName">The host name of the broker</param>
@@ -48,7 +48,7 @@ namespace MassTransit.ActiveMqTransport
         }
 
         /// <summary>
-        /// Configure a RabbitMQ host with a host name and virtual host
+        /// Configure a ActiveMQ host with a host name and virtual host
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="hostName">The host name of the broker</param>

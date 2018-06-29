@@ -18,7 +18,7 @@ namespace MassTransit.ActiveMqTransport
     public static class BusFactoryConfiguratorExtensions
     {
         /// <summary>
-        /// Select RabbitMQ as the transport for the service bus
+        /// Select ActiveMQ as the transport for the service bus
         /// </summary>
         public static IBusControl CreateUsingActiveMq(this IBusFactorySelector selector, Action<IActiveMqBusFactoryConfigurator> configure)
         {

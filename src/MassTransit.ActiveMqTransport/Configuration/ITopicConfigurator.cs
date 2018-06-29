@@ -13,7 +13,7 @@
 namespace MassTransit.ActiveMqTransport
 {
     /// <summary>
-    /// Configures an exchange for RabbitMQ
+    /// Configures an exchange for ActiveMQ
     /// </summary>
     public interface ITopicConfigurator
     {

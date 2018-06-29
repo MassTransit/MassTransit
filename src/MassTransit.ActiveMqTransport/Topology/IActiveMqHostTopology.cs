@@ -44,7 +44,7 @@ namespace MassTransit.ActiveMqTransport.Topology
         /// off the query string to properly configure the settings, including exchange and queue
         /// durability, etc.
         /// </summary>
-        /// <param name="address">The RabbitMQ endpoint address</param>
+        /// <param name="address">The ActiveMQ endpoint address</param>
         /// <returns>The send settings for the address</returns>
         SendSettings GetSendSettings(Uri address);
 

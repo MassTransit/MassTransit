@@ -70,7 +70,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             var scope = context.CreateScope("host");
             scope.Set(new
             {
-                Type = "RabbitMQ",
+                Type = "ActiveMQ",
                 _settings.Host,
                 _settings.Port,
                 _settings.Username,

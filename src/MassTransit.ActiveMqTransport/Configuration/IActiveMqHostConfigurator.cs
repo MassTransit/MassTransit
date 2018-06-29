@@ -15,13 +15,13 @@ namespace MassTransit.ActiveMqTransport
     public interface IActiveMqHostConfigurator
     {
         /// <summary>
-        /// Sets the username for the connection to RabbitMQ
+        /// Sets the username for the connection to ActiveMQ
         /// </summary>
         /// <param name="username"></param>
         void Username(string username);
 
         /// <summary>
-        /// Sets the password for the connection to RabbitMQ
+        /// Sets the password for the connection to ActiveMQ
         /// </summary>
         /// <param name="password"></param>
         void Password(string password);

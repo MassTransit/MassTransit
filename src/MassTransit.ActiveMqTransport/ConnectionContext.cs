@@ -23,7 +23,7 @@ namespace MassTransit.ActiveMqTransport
         PipeContext
     {
         /// <summary>
-        /// The RabbitMQ Connection
+        /// The ActiveMQ Connection
         /// </summary>
         IConnection Connection { get; }
 
