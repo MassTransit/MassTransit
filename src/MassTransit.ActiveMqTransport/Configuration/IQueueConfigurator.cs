@@ -13,7 +13,7 @@
 namespace MassTransit.ActiveMqTransport
 {
     /// <summary>
-    /// Configures a queue/exchange pair in RabbitMQ
+    /// Configures a queue/exchange pair in ActiveMQ
     /// </summary>
     public interface IQueueConfigurator
     {

@@ -17,7 +17,7 @@ namespace MassTransit.ActiveMqTransport
 
 
     /// <summary>
-    /// Configure a receiving RabbitMQ endpoint
+    /// Configure a receiving ActiveMQ endpoint
     /// </summary>
     public interface IActiveMqReceiveEndpointConfigurator :
         IReceiveEndpointConfigurator,

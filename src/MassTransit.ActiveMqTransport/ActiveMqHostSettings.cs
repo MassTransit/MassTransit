@@ -17,17 +17,17 @@ namespace MassTransit.ActiveMqTransport
 
 
     /// <summary>
-    /// Settings to configure a RabbitMQ host explicitly without requiring the fluent interface
+    /// Settings to configure a ActiveMQ host explicitly without requiring the fluent interface
     /// </summary>
     public interface ActiveMqHostSettings
     {
         /// <summary>
-        ///     The RabbitMQ host to connect to (should be a valid hostname)
+        ///     The ActiveMQ host to connect to (should be a valid hostname)
         /// </summary>
         string Host { get; }
 
         /// <summary>
-        ///     The RabbitMQ port to connect
+        ///     The ActiveMQ port to connect
         /// </summary>
         int Port { get; }
 

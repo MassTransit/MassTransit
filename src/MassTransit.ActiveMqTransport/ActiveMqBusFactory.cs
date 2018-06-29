@@ -26,7 +26,7 @@ namespace MassTransit.ActiveMqTransport
         public static IMessageTopologyConfigurator MessageTopology => Cached.MessageTopologyValue.Value;
 
         /// <summary>
-        /// Configure and create a bus for RabbitMQ
+        /// Configure and create a bus for ActiveMQ
         /// </summary>
         /// <param name="configure">The configuration callback to configure the bus</param>
         /// <returns></returns>

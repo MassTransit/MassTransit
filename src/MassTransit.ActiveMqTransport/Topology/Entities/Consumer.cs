@@ -13,7 +13,7 @@
 namespace MassTransit.ActiveMqTransport.Topology.Entities
 {
     /// <summary>
-    /// The exchange to queue binding details to declare the binding to RabbitMQ
+    /// The exchange to queue binding details to declare the binding to ActiveMQ
     /// </summary>
     public interface Consumer
     {

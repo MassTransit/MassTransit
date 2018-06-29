@@ -13,7 +13,7 @@
 namespace MassTransit.ActiveMqTransport.Topology.Entities
 {
     /// <summary>
-    /// The queue details used to declare the queue to RabbitMQ
+    /// The queue details used to declare the queue to ActiveMQ
     /// </summary>
     public interface Queue
     {

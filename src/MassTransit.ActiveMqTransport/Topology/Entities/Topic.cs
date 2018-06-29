@@ -13,7 +13,7 @@
 namespace MassTransit.ActiveMqTransport.Topology.Entities
 {
     /// <summary>
-    /// The exchange details used to declare the exchange to RabbitMQ
+    /// The exchange details used to declare the exchange to ActiveMQ
     /// </summary>
     public interface Topic
     {
