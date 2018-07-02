@@ -99,24 +99,31 @@ namespace MassTransit.ActiveMqTransport.Transport
         {
             while (!IsStopping)
             {
-                await _host.ConnectionRetryPolicy.Retry(async () =>
+                try
                 {
-                    try
+                    await _host.ConnectionRetryPolicy.Retry(async () =>
                     {
-                        await _host.ConnectionCache.Send(_connectionPipe, Stopped).ConfigureAwait(false);
-                    }
-                    catch (NMSConnectionException ex)
-                    {
-                        throw await ConvertToActiveMqConnectionException(ex, "NMSConnectionException").ConfigureAwait(false);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception ex)
-                    {
-                        throw await ConvertToActiveMqConnectionException(ex, "ReceiveTranport Faulted, Restarting").ConfigureAwait(false);
-                    }
-                }, Stopping);
+                        try
+                        {
+                            await _host.ConnectionCache.Send(_connectionPipe, Stopped).ConfigureAwait(false);
+                        }
+                        catch (NMSConnectionException ex)
+                        {
+                            throw await ConvertToActiveMqConnectionException(ex, "NMSConnectionException").ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                        }
+                        catch (Exception ex)
+                        {
+                            throw await ConvertToActiveMqConnectionException(ex, "ReceiveTranport Faulted, Restarting").ConfigureAwait(false);
+                        }
+                    }, Stopping);
+                }
+                catch
+                {
+                    // seriously, nothing to see here
+                }
             }
         }
 

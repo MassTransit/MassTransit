@@ -107,28 +107,35 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
             while (!IsStopping)
             {
-                await _host.RetryPolicy.Retry(async () =>
+                try
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Connecting receive transport: {0}", inputAddress);
-
-                    try
+                    await _host.RetryPolicy.Retry(async () =>
                     {
-                        await _clientCache.Send(_clientPipe, Stopped).ConfigureAwait(false);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception ex)
-                    {
-                        if (_log.IsErrorEnabled)
-                            _log.Error($"ReceiveTransport Faulted: {inputAddress}", ex);
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Connecting receive transport: {0}", inputAddress);
 
-                        await _transportObservers.Faulted(new ReceiveTransportFaultedEvent(inputAddress, ex)).ConfigureAwait(false);
+                        try
+                        {
+                            await _clientCache.Send(_clientPipe, Stopped).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                        }
+                        catch (Exception ex)
+                        {
+                            if (_log.IsErrorEnabled)
+                                _log.Error($"ReceiveTransport Faulted: {inputAddress}", ex);
 
-                        throw;
-                    }
-                }, Stopping);
+                            await _transportObservers.Faulted(new ReceiveTransportFaultedEvent(inputAddress, ex)).ConfigureAwait(false);
+
+                            throw;
+                        }
+                    }, Stopping);
+                }
+                catch
+                {
+                    // i said, nothing to see here
+                }
             }
         }
 

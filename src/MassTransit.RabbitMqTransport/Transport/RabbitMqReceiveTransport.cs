@@ -99,39 +99,46 @@ namespace MassTransit.RabbitMqTransport.Transport
         {
             while (!IsStopping)
             {
-                await _host.ConnectionRetryPolicy.Retry(async () =>
+                try
                 {
-                    if (IsStopping)
-                        return;
+                    await _host.ConnectionRetryPolicy.Retry(async () =>
+                    {
+                        if (IsStopping)
+                            return;
 
-                    try
-                    {
-                        await _host.ConnectionCache.Send(_connectionPipe, Stopped).ConfigureAwait(false);
-                    }
-                    catch (RabbitMqConnectionException ex)
-                    {
-                        await NotifyFaulted(ex).ConfigureAwait(false);
-                        throw;
-                    }
-                    catch (BrokerUnreachableException ex)
-                    {
-                        await ConvertToRabbitMqConnectionException(ex, "RabbitMQ Unreachable").ConfigureAwait(false);
-                        throw;
-                    }
-                    catch (OperationInterruptedException ex)
-                    {
-                        await ConvertToRabbitMqConnectionException(ex, "Operation interrupted").ConfigureAwait(false);
-                        throw;
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception ex)
-                    {
-                        await ConvertToRabbitMqConnectionException(ex, "ReceiveTranport Faulted, Restarting").ConfigureAwait(false);
-                        throw;
-                    }
-                }, Stopping);
+                        try
+                        {
+                            await _host.ConnectionCache.Send(_connectionPipe, Stopped).ConfigureAwait(false);
+                        }
+                        catch (RabbitMqConnectionException ex)
+                        {
+                            await NotifyFaulted(ex).ConfigureAwait(false);
+                            throw;
+                        }
+                        catch (BrokerUnreachableException ex)
+                        {
+                            await ConvertToRabbitMqConnectionException(ex, "RabbitMQ Unreachable").ConfigureAwait(false);
+                            throw;
+                        }
+                        catch (OperationInterruptedException ex)
+                        {
+                            await ConvertToRabbitMqConnectionException(ex, "Operation interrupted").ConfigureAwait(false);
+                            throw;
+                        }
+                        catch (OperationCanceledException)
+                        {
+                        }
+                        catch (Exception ex)
+                        {
+                            await ConvertToRabbitMqConnectionException(ex, "ReceiveTranport Faulted, Restarting").ConfigureAwait(false);
+                            throw;
+                        }
+                    }, Stopping);
+                }
+                catch
+                {
+                    // nothing to see here
+                }
             }
         }
 
