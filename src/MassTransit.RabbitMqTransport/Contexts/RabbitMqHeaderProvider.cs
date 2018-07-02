@@ -34,6 +34,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
             yield return new KeyValuePair<string, object>(RabbitMqHeaders.RoutingKey, _context.RoutingKey);
             yield return new KeyValuePair<string, object>(RabbitMqHeaders.DeliveryTag, _context.DeliveryTag);
             yield return new KeyValuePair<string, object>(RabbitMqHeaders.ConsumerTag, _context.ConsumerTag);
+            yield return new KeyValuePair<string, object>(nameof(_context.Properties.MessageId), _context.Properties.MessageId);
+            yield return new KeyValuePair<string, object>(nameof(_context.Properties.CorrelationId), _context.Properties.CorrelationId);
 
             if (_context.Properties.IsHeadersPresent())
             {
@@ -81,6 +83,18 @@ namespace MassTransit.RabbitMqTransport.Contexts
             if (RabbitMqHeaders.ConsumerTag.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.ConsumerTag;
+                return true;
+            }
+
+            if (nameof(_context.Properties.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
+            {
+                value = _context.Properties.MessageId;
+                return true;
+            }
+
+            if (nameof(_context.Properties.CorrelationId).Equals(key, StringComparison.OrdinalIgnoreCase))
+            {
+                value = _context.Properties.CorrelationId;
                 return true;
             }
 

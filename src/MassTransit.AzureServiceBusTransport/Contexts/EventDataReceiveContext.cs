@@ -16,7 +16,6 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using System.Collections.Generic;
     using System.IO;
     using Context;
-    using MassTransit.Topology;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
 

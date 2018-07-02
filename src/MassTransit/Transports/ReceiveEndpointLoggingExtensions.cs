@@ -58,7 +58,7 @@ namespace MassTransit.Transports
         {
             if (_messages.IsDebugEnabled)
                 _messages.Debug(
-                    $"RECEIVE {context.ReceiveContext.InputAddress} {GetMessageId(context.ReceiveContext)} {TypeMetadataCache<T>.ShortName} {consumerType}({duration})");
+                    $"RECEIVE {context.ReceiveContext.InputAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName} {consumerType}({duration})");
         }
 
         public static void LogFaulted<T>(this ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
@@ -69,7 +69,7 @@ namespace MassTransit.Transports
                 var faultMessage = GetFaultMessage(exception);
 
                 _messages.Error(
-                    $"R-FAULT {context.ReceiveContext.InputAddress} {GetMessageId(context.ReceiveContext)} {TypeMetadataCache<T>.ShortName} {consumerType}({duration}) {faultMessage}",
+                    $"R-FAULT {context.ReceiveContext.InputAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName} {consumerType}({duration}) {faultMessage}",
                     exception);
             }
         }
@@ -80,7 +80,7 @@ namespace MassTransit.Transports
             {
                 var faultMessage = GetFaultMessage(exception);
 
-                _messages.Warn($"R-RETRY {context.ReceiveContext.InputAddress} {GetMessageId(context.ReceiveContext)} {faultMessage}", exception);
+                _messages.Warn($"R-RETRY {context.ReceiveContext.InputAddress} {context.MessageId} {faultMessage}", exception);
             }
         }
 

@@ -17,7 +17,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
     using System.Text;
     using Apache.NMS;
     using Context;
-    using Topology;
     using Util;
 
 
@@ -35,9 +34,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
             _context = context;
         }
 
-        protected override IHeaderProvider HeaderProvider => new ActiveMqHeaderProvider(_transportMessage.Properties);
-
-        public string Destination => _transportMessage.NMSDestination.ToString();
+        protected override IHeaderProvider HeaderProvider => new ActiveMqHeaderProvider(_transportMessage);
 
         public IMessage TransportMessage => _transportMessage;
 

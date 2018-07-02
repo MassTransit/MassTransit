@@ -282,6 +282,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                 ConsumeContext<GotA> consumeContext = await _receivedGotA;
 
                 consumeContext.SourceAddress.ShouldBe(new Uri("rabbitmq://localhost/test/input_queue"));
+
+                Assert.That(consumeContext.ReceiveContext.TransportHeaders.Get("MessageId", "N/A"), Is.EqualTo(consumeContext.MessageId.ToString()));
             }
 
             Task<ConsumeContext<A>> _receivedA;

@@ -18,7 +18,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Internals.Extensions;
     using Logging;
     using Microsoft.ServiceBus.Messaging;
     using Transports;

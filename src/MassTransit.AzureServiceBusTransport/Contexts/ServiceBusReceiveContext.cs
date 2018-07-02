@@ -18,9 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
     using System.Net.Mime;
     using System.Threading.Tasks;
     using Context;
-    using MassTransit.Topology;
     using Microsoft.ServiceBus.Messaging;
-    using Transports;
 
 
     public sealed class ServiceBusReceiveContext :
@@ -38,7 +36,7 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             GetOrAddPayload<BrokeredMessageContext>(() => this);
         }
 
-        protected override IHeaderProvider HeaderProvider => new DictionaryHeaderProvider(_message.Properties);
+        protected override IHeaderProvider HeaderProvider => new ServiceBusHeaderProvider(this);
 
         public string MessageId => _message.MessageId;
 
