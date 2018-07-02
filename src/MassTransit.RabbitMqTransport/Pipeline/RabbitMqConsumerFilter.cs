@@ -60,7 +60,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, _receiveEndpointContext, _deadLetterTransport, _errorTransport);
 
-            await context.BasicConsume(receiveSettings.QueueName, false, consumer).ConfigureAwait(false);
+            await context.BasicConsume(receiveSettings.QueueName, false, receiveSettings.ConsumeArguments, consumer).ConfigureAwait(false);
 
             await consumer.Ready.ConfigureAwait(false);
 

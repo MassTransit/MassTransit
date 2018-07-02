@@ -305,6 +305,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                 configurator.ReceiveEndpoint(host, "ack_queue", x =>
                 {
                     _receivedGotA = Handled<GotA>(x);
+
+                    x.ConsumerPriority = 10;
                 });
             }
         }

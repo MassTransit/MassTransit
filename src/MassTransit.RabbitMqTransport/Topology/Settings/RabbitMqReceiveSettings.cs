@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Topology.Settings
 {
     using System;
+    using System.Collections.Generic;
     using Configurators;
 
 
@@ -24,10 +25,19 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
             : base(name, type, durable, autoDelete)
         {
             PrefetchCount = (ushort)Math.Min(Environment.ProcessorCount * 2, 16);
+
+            ConsumeArguments = new Dictionary<string, object>();
         }
 
         public ushort PrefetchCount { get; set; }
         public bool PurgeOnStartup { get; set; }
+
+        public int ConsumerPriority
+        {
+            set => ConsumeArguments["x-priority"] = value;
+        }
+
+        public IDictionary<string, object> ConsumeArguments { get; }
 
         public Uri GetInputAddress(Uri hostAddress)
         {

@@ -53,6 +53,11 @@ namespace MassTransit.RabbitMqTransport.Topology
         bool PurgeOnStartup { get; }
 
         /// <summary>
+        /// Arguments passed to the basicConsume
+        /// </summary>
+        IDictionary<string, object> ConsumeArguments { get; }
+
+        /// <summary>
         /// Get the input address for the transport on the specified host
         /// </summary>
         Uri GetInputAddress(Uri hostAddress);

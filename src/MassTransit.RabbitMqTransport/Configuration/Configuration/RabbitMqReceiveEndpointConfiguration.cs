@@ -44,6 +44,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly IManagementPipe _managementPipe;
         readonly IBuildPipeConfigurator<ModelContext> _modelConfigurator;
         readonly RabbitMqReceiveSettings _settings;
+        int _consumerPriority;
 
         public RabbitMqReceiveEndpointConfiguration(IRabbitMqHostConfiguration hostConfiguration, string queueName,
             IRabbitMqEndpointConfiguration endpointConfiguration)
@@ -193,6 +194,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public bool PurgeOnStartup
         {
             set => _settings.PurgeOnStartup = value;
+        }
+
+        public int ConsumerPriority
+        {
+            set => _settings.ConsumerPriority = value;
         }
 
         public ushort PrefetchCount

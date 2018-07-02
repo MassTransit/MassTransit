@@ -26,5 +26,10 @@ namespace MassTransit.RabbitMqTransport
         /// the queue will not be purged again, only when the service is restarted).
         /// </summary>
         bool PurgeOnStartup { set; }
+
+        /// <summary>
+        /// Sets the priority of the consumer (optional, no default value specified)
+        /// </summary>
+        int ConsumerPriority { set; }
     }
 }

@@ -96,6 +96,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
             set => _settings.PurgeOnStartup = value;
         }
 
+        public int ConsumerPriority
+        {
+            set => _settings.ConsumerPriority = value;
+        }
+
         public bool Lazy
         {
             set => _settings.Lazy = value;
