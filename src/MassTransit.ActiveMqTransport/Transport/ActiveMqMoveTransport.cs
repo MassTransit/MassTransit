@@ -42,7 +42,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             var producer = await sessionContext.CreateMessageProducer(queue).ConfigureAwait(false);
             byte[] body = context.GetBody();
 
-            var message = producer.CreateBytesMessage(body);
+            var message = producer.CreateBytesMessage();
 
             if (context.TryGetPayload(out ActiveMqMessageContext messageContext))
                 foreach (string key in messageContext.Properties.Keys)
@@ -53,6 +53,8 @@ namespace MassTransit.ActiveMqTransport.Transport
             headers.SetHostHeaders();
 
             preSend(message, headers);
+
+            message.Content = body;
 
             var task = Task.Run(() => producer.Send(message));
             var closeTask = task.ContinueWith(_ =>

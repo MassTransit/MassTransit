@@ -14,7 +14,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
 {
     using System;
     using System.Collections.Generic;
-    using System.Text;
     using Apache.NMS;
     using Util;
 
@@ -57,9 +56,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
             if (found)
             {
                 value = _properties[key];
-
-                if (value is byte[])
-                    value = Encoding.UTF8.GetString((byte[])value);
+                return true;
             }
 
             value = null;

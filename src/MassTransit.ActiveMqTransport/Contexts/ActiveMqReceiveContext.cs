@@ -26,6 +26,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
     {
         readonly ActiveMqReceiveEndpointContext _context;
         readonly IMessage _transportMessage;
+        byte[] _body;
 
         public ActiveMqReceiveContext(Uri inputAddress, IMessage transportMessage, IReceiveObserver observer, ActiveMqReceiveEndpointContext context)
             : base(inputAddress, transportMessage.NMSRedelivered, observer, context)
@@ -52,24 +53,21 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
         public override byte[] GetBody()
         {
+            if (_body != null)
+                return _body;
+
             if (_transportMessage is ITextMessage textMessage)
-                return Encoding.UTF8.GetBytes(textMessage.Text);
+                return _body = Encoding.UTF8.GetBytes(textMessage.Text);
 
             if (_transportMessage is IBytesMessage bytesMessage)
-                return bytesMessage.Content;
+                return _body = bytesMessage.Content;
 
             throw new ActiveMqTransportException($"The message type is not supported: {TypeMetadataCache.GetShortName(_transportMessage.GetType())}");
         }
 
         public override Stream GetBodyStream()
         {
-            if (_transportMessage is ITextMessage textMessage)
-                return new MemoryStream(Encoding.UTF8.GetBytes(textMessage.Text));
-
-            if (_transportMessage is IBytesMessage bytesMessage)
-                return new MemoryStream(bytesMessage.Content);
-
-            throw new ActiveMqTransportException($"The message type is not supported: {TypeMetadataCache.GetShortName(_transportMessage.GetType())}");
+            return new MemoryStream(GetBody());
         }
     }
 }
