@@ -80,7 +80,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
                 _deliveryComplete.TrySetResult(true);
 
-                SetCompleted(TaskUtil.Completed);
+                SetCompleted(TaskUtil.Faulted<bool>(args.Exception));
             }
         }
 

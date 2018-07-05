@@ -28,9 +28,8 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         readonly ClientSettings _settings;
 
-        public ClientContextFactory(IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache,
-            IPipe<MessagingFactoryContext> messagingFactoryPipe, IPipe<NamespaceContext> namespacePipe,
-            ClientSettings settings)
+        protected ClientContextFactory(IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache, IPipe<MessagingFactoryContext> messagingFactoryPipe,
+            IPipe<NamespaceContext> namespacePipe, ClientSettings settings)
             : base(namespaceCache, namespacePipe, messagingFactoryCache, messagingFactoryPipe)
         {
             _settings = settings;

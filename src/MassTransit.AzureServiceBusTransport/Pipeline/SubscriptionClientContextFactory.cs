@@ -21,14 +21,12 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     public class SubscriptionClientContextFactory :
         ClientContextFactory
     {
-        readonly IPipe<NamespaceContext> _namespacePipe;
         readonly SubscriptionSettings _settings;
 
         public SubscriptionClientContextFactory(IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache, IPipe<MessagingFactoryContext> messagingFactoryPipe,
             IPipe<NamespaceContext> namespacePipe, SubscriptionSettings settings)
             : base(messagingFactoryCache, namespaceCache, messagingFactoryPipe, namespacePipe, settings)
         {
-            _namespacePipe = namespacePipe;
             _settings = settings;
         }
 

@@ -50,21 +50,6 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             _client.OnMessageAsync(callback, _settings.GetOnMessageOptions(exceptionHandler));
         }
 
-        public Task Send(BrokeredMessage message)
-        {
-            return _client.SendAsync(message);
-        }
-
-        public Task<long> ScheduleSend(BrokeredMessage message, DateTime scheduleEnqueueTimeUtc)
-        {
-            return _client.ScheduleMessageAsync(message, scheduleEnqueueTimeUtc);
-        }
-
-        public Task CancelScheduledSend(long sequenceNumber)
-        {
-            return _client.CancelScheduledMessageAsync(sequenceNumber);
-        }
-
         async Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
         {
             if (_log.IsDebugEnabled)

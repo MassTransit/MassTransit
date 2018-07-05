@@ -48,6 +48,38 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             await _handler;
         }
     }
+    
+    [TestFixture, Explicit]
+    public class A_fault_on_the_receive_endpoint :
+        AzureServiceBusTestFixture
+    {
+        Task<ConsumeContext<PingMessage>> _handler;
+
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+            _handler = Handled<PingMessage>(configurator);
+        }
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            await Task.Delay(30000);
+            
+            await InputQueueSendEndpoint.Send(new PingMessage());
+        }
+
+        [Test]
+        public async Task Should_properly_reconnect_and_reconfigure_the_broker()
+        {
+            var context = await _handler;
+        }
+
+        [Test]
+        public async Task Should_succeed()
+        {
+            await _handler;
+        }
+    }
 
 
     [TestFixture]

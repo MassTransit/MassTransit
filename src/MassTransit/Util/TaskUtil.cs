@@ -26,6 +26,14 @@ namespace MassTransit.Util
         public static Task<bool> False => Cached.FalseTask;
         public static Task<bool> True => Cached.TrueTask;
 
+        public static Task<T> Faulted<T>(Exception exception)
+        {
+            var source = new TaskCompletionSource<T>();
+            source.TrySetException(exception);
+
+            return source.Task;
+        }
+
         public static Task<T> Cancelled<T>()
         {
             return Cached<T>.CanceledTask;
@@ -153,6 +161,7 @@ namespace MassTransit.Util
         {
             Task.Run(() => source.TrySetException(exception));
         }
+
 
         static class Cached
         {
