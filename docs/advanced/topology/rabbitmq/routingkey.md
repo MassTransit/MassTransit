@@ -22,6 +22,13 @@ Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
         // multiple conventions can be set, in this case also CorrelationId
         x.UseCorrelationId(context => context.Message.TransactionId);
     });
+    //Keeping in mind that the default exchange config for your published type will be the full typename of your message
+    //we explicitly specify which exchange the message will be published to. So it lines up with the exchange we are binding our
+    //consumers too.
+    cfg.Message<SubmitOrder>(x => x.SetEntityName("submitorder"));
+    //Also if your publishing your message: because publishing a message will, by default, send it to a fanout queue. 
+    //We specify that we are sending it to a direct queue instead. In order for the routingkeys to take effect.
+    cfg.Publish<SubmitOrder>(x => x.ExchangeType = ExchangeType.Direct);
 });
 ```
 
