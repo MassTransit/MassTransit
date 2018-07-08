@@ -72,10 +72,12 @@ namespace MassTransit.Serialization
 
         byte[] GenerateIv()
         {
-            var aes = CreateAes();
-            aes.GenerateIV();
+            using (var aes = CreateAes())
+            {
+                aes.GenerateIV();
 
-            return aes.IV;
+                return aes.IV;
+            }
         }
 
         ICryptoTransform CreateEncryptor(byte[] key, byte[] iv)
