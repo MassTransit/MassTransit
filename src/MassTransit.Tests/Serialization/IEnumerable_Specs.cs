@@ -20,8 +20,11 @@ namespace MassTransit.Tests.Serialization
     using Shouldly;
 
 
-    [TestFixture(typeof(JsonMessageSerializer)), TestFixture(typeof(BsonMessageSerializer)), TestFixture(typeof(XmlMessageSerializer)),
-     TestFixture(typeof(EncryptedMessageSerializer))]
+    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(BsonMessageSerializer))]
+    [TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializerV2))]
     public class Deserializing_an_enumerable_property :
         SerializationTest
     {

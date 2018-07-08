@@ -94,6 +94,80 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Serialize messages using the BSON message serializer with AES Encryption
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="symmetricKey">Cryptographic key for both encryption of plaintext message and decryption of ciphertext message</param>
+        public static void UseEncryption(this IBusFactoryConfigurator configurator, byte[] symmetricKey)
+        {
+            var keyProvider = new ConstantSecureKeyProvider(symmetricKey);
+            var streamProvider = new AesCryptoStreamProviderV2(keyProvider);
+
+            configurator.UseEncryptedSerializerV2(streamProvider);
+        }
+
+        /// <summary>
+        /// Serialize messages using the BSON message serializer with AES Encryption
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="symmetricKey">Cryptographic key for both encryption of plaintext message and decryption of ciphertext message</param>
+        public static void UseEncryption(this IReceiveEndpointConfigurator configurator, byte[] symmetricKey)
+        {
+            var keyProvider = new ConstantSecureKeyProvider(symmetricKey);
+            var streamProvider = new AesCryptoStreamProviderV2(keyProvider);
+
+            configurator.UseEncryptedSerializerV2(streamProvider);
+        }
+
+        /// <summary>
+        /// Serialize messages using the BSON message serializer with AES Encryption
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="keyProvider">The custom key provider to provide the symmetric key for encryption of plaintext message and decryption of ciphertext message</param>
+        public static void UseEncryption(this IBusFactoryConfigurator configurator, ISecureKeyProvider keyProvider)
+        {
+            var streamProvider = new AesCryptoStreamProviderV2(keyProvider);
+
+            configurator.UseEncryptedSerializerV2(streamProvider);
+        }
+
+        /// <summary>
+        /// Serialize messages using the BSON message serializer with AES Encryption
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="keyProvider">The custom key provider to provide the symmetric key for encryption of plaintext message and decryption of ciphertext message</param>
+        public static void UseEncryption(this IReceiveEndpointConfigurator configurator, ISecureKeyProvider keyProvider)
+        {
+            var streamProvider = new AesCryptoStreamProviderV2(keyProvider);
+
+            configurator.UseEncryptedSerializerV2(streamProvider);
+        }
+
+        /// <summary>
+        /// Serialize messages using the BSON message serializer with AES Encryption
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseEncryptedSerializerV2(this IBusFactoryConfigurator configurator, ICryptoStreamProviderV2 streamProvider)
+        {
+            configurator.SetMessageSerializer(() => new EncryptedMessageSerializerV2(streamProvider));
+
+            configurator.AddMessageDeserializer(EncryptedMessageSerializerV2.EncryptedContentType,
+                () => new EncryptedMessageDeserializerV2(BsonMessageSerializer.Deserializer, streamProvider));
+        }
+
+        /// <summary>
+        /// Serialize messages using the BSON message serializer with AES Encryption
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseEncryptedSerializerV2(this IReceiveEndpointConfigurator configurator, ICryptoStreamProviderV2 streamProvider)
+        {
+            configurator.SetMessageSerializer(() => new EncryptedMessageSerializerV2(streamProvider));
+
+            configurator.AddMessageDeserializer(EncryptedMessageSerializerV2.EncryptedContentType,
+                () => new EncryptedMessageDeserializerV2(BsonMessageSerializer.Deserializer, streamProvider));
+        }
+
+        /// <summary>
         /// Serialize messages using the XML message serializer
         /// </summary>
         /// <param name="configurator"></param>
@@ -110,6 +184,7 @@ namespace MassTransit
         {
             configurator.SetMessageSerializer(() => new XmlMessageSerializer());
         }
+        
 
     #if !NETCORE
         /// <summary>

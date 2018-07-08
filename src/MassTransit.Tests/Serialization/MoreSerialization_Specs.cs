@@ -23,6 +23,7 @@ namespace MassTransit.Tests.Serialization
     [TestFixture(typeof(JsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializerV2))]
     public class MoreSerialization_Specs :
         SerializationTest
     {

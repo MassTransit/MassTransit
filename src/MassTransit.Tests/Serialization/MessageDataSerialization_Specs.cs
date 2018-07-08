@@ -12,6 +12,7 @@
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(XmlMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializerV2))]
     public class Serialization_a_message_data_property :
         SerializationTest
     {

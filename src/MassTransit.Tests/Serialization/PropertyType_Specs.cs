@@ -22,6 +22,7 @@ namespace MassTransit.Tests.Serialization
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(XmlMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializerV2))]
     public class Serializing_a_property_of_type_char :
         SerializationTest
     {
@@ -88,6 +89,7 @@ namespace MassTransit.Tests.Serialization
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(XmlMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializerV2))]
     public class Serializing_a_string_with_an_escaped_character :
         SerializationTest
     {
