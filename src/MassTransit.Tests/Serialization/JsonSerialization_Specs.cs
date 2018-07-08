@@ -327,7 +327,9 @@ namespace MassTransit.Tests.Serialization
     }
 
 
-    [TestFixture(typeof(JsonMessageSerializer)), TestFixture(typeof(BsonMessageSerializer)), TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(BsonMessageSerializer))]
+    [TestFixture(typeof(XmlMessageSerializer))]
     public class Using_JsonConverterAttribute_on_a_class :
         SerializationTest
     {
@@ -426,7 +428,9 @@ namespace MassTransit.Tests.Serialization
     }
 
 
-    [TestFixture(typeof(JsonMessageSerializer)), TestFixture(typeof(BsonMessageSerializer)), TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(BsonMessageSerializer))]
+    [TestFixture(typeof(XmlMessageSerializer))]
     public class Using_JsonConverterAttribute_on_a_property :
         SerializationTest
     {

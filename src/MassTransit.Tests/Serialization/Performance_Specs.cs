@@ -31,6 +31,7 @@ namespace MassTransit.Tests.Serialization
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(XmlMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializerV2))]
     [Explicit]
     public class Serializer_performance :
         SerializationTest

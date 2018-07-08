@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Serialization {
     [TestFixture(typeof(JsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializerV2))]
 #if !NETCORE
     [TestFixture(typeof(BinaryMessageSerializer))]
 #endif
