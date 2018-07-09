@@ -74,7 +74,7 @@ namespace Automatonymous
         IEventCorrelationConfigurator<TInstance, TData> SelectId(Func<ConsumeContext<TData>, Guid> selector);
 
         /// <summary>
-        /// Speicyf the correlation expression for the event
+        /// Specify the correlation expression for the event
         /// </summary>
         /// <param name="correlationExpression"></param>
         /// <returns></returns>
