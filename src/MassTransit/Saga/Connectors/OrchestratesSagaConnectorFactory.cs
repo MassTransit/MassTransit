@@ -10,10 +10,10 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Saga.SagaConnectors
+namespace MassTransit.Saga.Connectors
 {
     using System;
-    using Connectors;
+    using GreenPipes;
     using Pipeline.Filters;
     using Policies;
 
@@ -27,7 +27,10 @@ namespace MassTransit.Saga.SagaConnectors
 
         public OrchestratesSagaConnectorFactory()
         {
-            var policy = new AnyExistingSagaPolicy<TSaga, TMessage>();
+            var missingPipe = Pipe.Execute<ConsumeContext<TMessage>>(context =>
+                throw new SagaException("An existing saga instance was not found", typeof(TSaga), typeof(TMessage), context.CorrelationId ?? Guid.Empty));
+
+            var policy = new AnyExistingSagaPolicy<TSaga, TMessage>(missingPipe);
 
             var consumeFilter = new OrchestratesSagaMessageFilter<TSaga, TMessage>();
 

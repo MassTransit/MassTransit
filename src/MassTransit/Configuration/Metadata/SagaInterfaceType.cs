@@ -15,7 +15,6 @@ namespace MassTransit.Metadata
     using System;
     using Saga;
     using Saga.Connectors;
-    using Saga.SagaConnectors;
 
 
     public class SagaInterfaceType
