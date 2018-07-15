@@ -22,7 +22,8 @@ namespace MassTransit.Configuration
 
         void AddDeserializer(ContentType contentType, DeserializerFactory deserializerFactory);
         void SetSerializer(SerializerFactory serializerFactory);
-
+        void ClearDeserializers();
+        
         ISerializationConfiguration CreateSerializationConfiguration();
     }
 }

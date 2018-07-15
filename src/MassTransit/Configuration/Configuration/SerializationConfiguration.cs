@@ -76,6 +76,11 @@ namespace MassTransit.Configuration
             _serializerFactory = serializerFactory;
         }
 
+        public void ClearDeserializers()
+        {
+            _deserializerFactories.Clear();
+        }
+
         public ISerializationConfiguration CreateSerializationConfiguration()
         {
             return new SerializationConfiguration(this);

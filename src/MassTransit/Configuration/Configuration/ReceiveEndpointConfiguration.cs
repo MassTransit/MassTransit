@@ -180,6 +180,11 @@ namespace MassTransit.Configuration
             _configuration.Serialization.AddDeserializer(contentType, deserializerFactory);
         }
 
+        public void ClearMessageDeserializers()
+        {
+            _configuration.Serialization.ClearDeserializers();
+        }
+
         protected void ApplySpecifications(IReceiveEndpointBuilder builder)
         {
             for (var i = 0; i < _specifications.Count; i++)
