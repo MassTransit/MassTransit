@@ -74,6 +74,18 @@ namespace MassTransit.Transports
             }
         }
 
+        public static void LogFaulted(this ReceiveContext context, Exception exception)
+        {
+            if (_messages.IsErrorEnabled)
+            {
+                var faultMessage = GetFaultMessage(exception);
+                
+                _messages.Error(
+                    $"R-FAULT {faultMessage}",
+                    exception);
+            }
+        }
+
         public static void LogRetry(this ConsumeContext context, Exception exception)
         {
             if (_messages.IsWarnEnabled)
