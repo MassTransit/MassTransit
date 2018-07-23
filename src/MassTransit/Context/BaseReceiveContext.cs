@@ -150,6 +150,8 @@ namespace MassTransit.Context
         {
             IsFaulted = true;
 
+            this.LogFaulted(exception);
+
             return _receiveObserver.ReceiveFault(this, exception);
         }
 
