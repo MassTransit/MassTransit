@@ -117,21 +117,18 @@ namespace MassTransit.RabbitMqTransport.Transport
                         }
                         catch (BrokerUnreachableException ex)
                         {
-                            await ConvertToRabbitMqConnectionException(ex, "RabbitMQ Unreachable").ConfigureAwait(false);
-                            throw;
+                            throw await ConvertToRabbitMqConnectionException(ex, "RabbitMQ Unreachable").ConfigureAwait(false);
                         }
                         catch (OperationInterruptedException ex)
                         {
-                            await ConvertToRabbitMqConnectionException(ex, "Operation interrupted").ConfigureAwait(false);
-                            throw;
+                            throw await ConvertToRabbitMqConnectionException(ex, "Operation interrupted").ConfigureAwait(false);
                         }
                         catch (OperationCanceledException)
                         {
                         }
                         catch (Exception ex)
                         {
-                            await ConvertToRabbitMqConnectionException(ex, "ReceiveTranport Faulted, Restarting").ConfigureAwait(false);
-                            throw;
+                            throw await ConvertToRabbitMqConnectionException(ex, "ReceiveTranport Faulted, Restarting").ConfigureAwait(false);
                         }
                     }, Stopping);
                 }
