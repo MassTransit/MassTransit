@@ -30,7 +30,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
 
         public static IEqualityComparer<TopicEntity> NameComparer { get; } = new NameEqualityComparer();
 
-        public static IEqualityComparer<TopicEntity> EntityComparer { get; } = new ExchangeEntityEqualityComparer();
+        public static IEqualityComparer<TopicEntity> EntityComparer { get; } = new TopicEntityEqualityComparer();
 
         public string EntityName { get; }
         public bool Durable { get; }
@@ -75,7 +75,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         }
 
 
-        sealed class ExchangeEntityEqualityComparer :
+        sealed class TopicEntityEqualityComparer :
             IEqualityComparer<TopicEntity>
         {
             public bool Equals(TopicEntity x, TopicEntity y)

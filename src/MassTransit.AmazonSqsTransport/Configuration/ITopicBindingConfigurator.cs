@@ -18,9 +18,5 @@ namespace MassTransit.AmazonSqsTransport.Configuration
     public interface ITopicBindingConfigurator :
         ITopicConfigurator
     {
-        /// <summary>
-        /// A routing key for the exchange binding
-        /// </summary>
-        string Selector { set; }
     }
 }

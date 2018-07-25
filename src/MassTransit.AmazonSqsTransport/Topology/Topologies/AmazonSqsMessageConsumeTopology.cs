@@ -35,14 +35,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         readonly IMessageTopology<TMessage> _messageTopology;
         readonly IAmazonSqsMessagePublishTopology<TMessage> _publishTopology;
         readonly IList<IAmazonSqsConsumeTopologySpecification> _specifications;
-        readonly string _consumerName;
 
         public AmazonSqsMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IAmazonSqsMessagePublishTopology<TMessage> publishTopology)
         {
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;
-
-            _consumerName = $"TopicSubscription.{messageTopology.EntityName}";
 
             _specifications = new List<IAmazonSqsConsumeTopologySpecification>();
         }

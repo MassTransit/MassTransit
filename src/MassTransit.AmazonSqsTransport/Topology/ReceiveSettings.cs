@@ -24,14 +24,9 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// <summary>
         /// The number of unacknowledged messages to allow to be processed concurrently
         /// </summary>
-        ushort PrefetchCount { get; }
+        int PrefetchCount { get; }
 
-        /// <summary>
-        /// True if the queue receive should be exclusive and not shared
-        /// </summary>
-        bool Exclusive { get; }
-
-        string Selector { get; }
+        int WaitTimeSeconds { get; }
 
         /// <summary>
         /// If True, and a queue name is specified, if the queue exists and has messages, they are purged at startup

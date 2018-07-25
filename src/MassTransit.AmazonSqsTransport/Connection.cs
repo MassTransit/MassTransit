@@ -12,59 +12,41 @@ namespace MassTransit.AmazonSqsTransport
 
         string SecretKey { get; }
 
-        RegionEndpoint Region { get; }
+        AmazonSQSConfig AmazonSqsConfig { get; }
 
-        IAmazonSQS CreateAmazonSqs();
+        AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; }
 
-        IAmazonSimpleNotificationService CreateAmazonSns();
+        IAmazonSQS CreateAmazonSqsClient();
+
+        IAmazonSimpleNotificationService CreateAmazonSnsClient();
     }
     public class Connection :
         IConnection
     {
-        public Connection(string accessKey, string secretKey, RegionEndpoint region, string serviceUrl = null)
+        public Connection(string accessKey, string secretKey, RegionEndpoint regionEndpoint = null, AmazonSQSConfig amazonSqsConfig = null, AmazonSimpleNotificationServiceConfig amazonSnsConfig = null)
         {
             AccessKey = accessKey;
             SecretKey = secretKey;
-            Region = region;
-            ServiceUrl = serviceUrl;
+            AmazonSqsConfig = amazonSqsConfig ?? new AmazonSQSConfig { RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1 };
+            AmazonSnsConfig = amazonSnsConfig ?? new AmazonSimpleNotificationServiceConfig { RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1 };
         }
 
         public string AccessKey { get; }
 
         public string SecretKey { get; }
 
-        public RegionEndpoint Region { get; }
+        public AmazonSQSConfig AmazonSqsConfig { get; }
 
-        public string ServiceUrl { get; }
+        public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get;  }
 
-        public IAmazonSQS CreateAmazonSqs()
+        public IAmazonSQS CreateAmazonSqsClient()
         {
-            var config = new AmazonSQSConfig
-            {
-                RegionEndpoint = Region ?? RegionEndpoint.USEast1
-            };
-
-            if (ServiceUrl != null)
-            {
-                config.ServiceURL = ServiceUrl;
-            }
-
-            return new AmazonSQSClient(AccessKey, SecretKey, config);
+            return new AmazonSQSClient(AccessKey, SecretKey, AmazonSqsConfig);
         }
 
-        public IAmazonSimpleNotificationService CreateAmazonSns()
+        public IAmazonSimpleNotificationService CreateAmazonSnsClient()
         {
-            var config = new AmazonSimpleNotificationServiceConfig
-            {
-                RegionEndpoint = Region ?? RegionEndpoint.USEast1
-            };
-
-            if (ServiceUrl != null)
-            {
-                config.ServiceURL = ServiceUrl;
-            }
-
-            return new AmazonSimpleNotificationServiceClient(AccessKey, SecretKey, config);
+            return new AmazonSimpleNotificationServiceClient(AccessKey, SecretKey, AmazonSnsConfig);
         }
 
         public void Dispose()

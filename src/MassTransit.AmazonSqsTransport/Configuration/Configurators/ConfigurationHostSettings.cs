@@ -14,12 +14,15 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 {
     using System;
     using Amazon;
+    using Amazon.SimpleNotificationService;
+    using Amazon.SQS;
+
 
     public class ConfigurationHostSettings :
         AmazonSqsHostSettings
     {
         readonly Lazy<Uri> _hostAddress;
-
+        
         public ConfigurationHostSettings()
         {
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
@@ -29,11 +32,15 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public string AccessKey { get; set; }
         public string SecretKey { get; set; }
 
+        public AmazonSQSConfig AmazonSqsConfig { get; set; }
+
+        public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; set; }
+
         public Uri HostAddress => _hostAddress.Value;
 
         public IConnection CreateConnection()
         {
-            return new Connection(AccessKey, SecretKey, Region);
+            return new Connection(AccessKey, SecretKey, Region, AmazonSqsConfig, AmazonSnsConfig);
         }
 
         Uri FormatHostAddress()

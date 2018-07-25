@@ -14,6 +14,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 {
     using System;
     using Amazon;
+    using Amazon.SimpleNotificationService;
+    using Amazon.SQS;
     using Exceptions;
 
 
@@ -27,11 +29,15 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             if (string.Compare("amazonsqs", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
                 throw new AmazonSqsTransportConfigurationException($"The address scheme was invalid: {address.Scheme}");
 
+            var regionEndpoint = RegionEndpoint.GetBySystemName(address.Host);
+
             _settings = new ConfigurationHostSettings
             {
-                Region = RegionEndpoint.GetBySystemName(address.Host),
+                Region = regionEndpoint,
                 AccessKey = "",
                 SecretKey = "",
+                AmazonSqsConfig = new AmazonSQSConfig { RegionEndpoint = regionEndpoint },
+                AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig { RegionEndpoint = regionEndpoint },
             };
 
             if (!string.IsNullOrEmpty(address.UserInfo))
@@ -54,6 +60,16 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public void SecretKey(string secretKey)
         {
             _settings.SecretKey = secretKey;
+        }
+
+        public void Config(AmazonSQSConfig config)
+        {
+            _settings.AmazonSqsConfig = config;
+        }
+
+        public void Config(AmazonSimpleNotificationServiceConfig config)
+        {
+            _settings.AmazonSnsConfig = config;
         }
     }
 }

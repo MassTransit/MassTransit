@@ -23,7 +23,5 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
             : base(queueName, durable, autoDelete)
         {
         }
-
-        public string Selector { get; set; }
     }
 }

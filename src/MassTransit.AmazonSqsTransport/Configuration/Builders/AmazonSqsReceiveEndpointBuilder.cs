@@ -18,6 +18,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Builders
     using MassTransit.Builders;
     using Topology;
     using Topology.Builders;
+    using Topology.Entities;
 
 
     public class AmazonSqsReceiveEndpointBuilder :
@@ -56,6 +57,10 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Builders
             var topologyBuilder = new ReceiveEndpointBrokerTopologyBuilder();
 
             topologyBuilder.Queue = topologyBuilder.CreateQueue(settings.EntityName, settings.Durable, settings.AutoDelete);
+
+            topologyBuilder.Topic = topologyBuilder.CreateTopic(settings.EntityName, settings.Durable, settings.AutoDelete);
+
+            topologyBuilder.CreateTopicSubscription(topologyBuilder.Topic, topologyBuilder.Queue);
 
             _configuration.Topology.Consume.Apply(topologyBuilder);
 

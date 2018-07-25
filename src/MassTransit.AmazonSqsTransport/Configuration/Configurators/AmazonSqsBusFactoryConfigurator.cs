@@ -63,6 +63,16 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
                 yield return this.Failure("Bus", "The bus queue name must not be null or empty");
         }
 
+        public ushort PrefetchCount
+        {
+            set => _settings.PrefetchCount = value;
+        }
+
+        public ushort WaitTimeSeconds
+        {
+            set => _settings.WaitTimeSeconds = value;
+        }
+
         public bool Durable
         {
             set => _settings.Durable = value;

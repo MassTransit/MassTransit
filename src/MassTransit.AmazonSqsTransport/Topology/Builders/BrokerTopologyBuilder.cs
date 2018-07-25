@@ -40,21 +40,21 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
         {
             var id = GetNextId();
 
-            var exchange = new TopicEntity(id, name, durable, autoDelete);
+            var topicEntity = new TopicEntity(id, name, durable, autoDelete);
 
-            return Topics.GetOrAdd(exchange);
+            return Topics.GetOrAdd(topicEntity);
         }
 
         public QueueHandle CreateQueue(string name, bool durable, bool autoDelete)
         {
             var id = GetNextId();
 
-            var queue = new QueueEntity(id, name, durable, autoDelete);
+            var queueEntity = new QueueEntity(id, name, durable, autoDelete);
 
-            return Queues.GetOrAdd(queue);
+            return Queues.GetOrAdd(queueEntity);
         }
 
-        public TopicSubscriptionHandle BindQueue(TopicHandle topic, QueueHandle queue, string selector)
+        public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle topic, QueueHandle queue)
         {
             var id = GetNextId();
 
@@ -62,7 +62,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
 
             var queueEntity = Queues.Get(queue);
 
-            var binding = new TopicSubscriptionEntity(id, topicEntity, queueEntity, selector);
+            var binding = new TopicSubscriptionEntity(id, topicEntity, queueEntity);
 
             return TopicSubscriptions.GetOrAdd(binding);
         }

@@ -21,10 +21,10 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Specifications
 
 
     /// <summary>
-    /// Used to by a TopicSubscription virtual destination to the receive endpoint, via an additional message consumer
+    /// Used to by a TopicSubscription destination to the receive endpoint, via an additional message consumer
     /// </summary>
     public class ConsumerConsumeTopologySpecification :
-        TopicBindingConfigurator,
+        TopicSubscriptionConfigurator,
         IAmazonSqsConsumeTopologySpecification
     {
         public ConsumerConsumeTopologySpecification(string topicName, bool durable = true, bool autoDelete = false)
@@ -46,9 +46,10 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Specifications
         {
             var topicHandle = builder.CreateTopic(EntityName, Durable, AutoDelete);
 
-            var queueHandle = builder.CreateQueue(builder.Queue.Queue.EntityName, Durable, AutoDelete);
+            var builderQueue = builder.Queue.Queue;
+            var queueHandle = builder.CreateQueue(builderQueue.EntityName, builderQueue.Durable, builderQueue.AutoDelete);
 
-            var topicSubscriptionHandle = builder.BindQueue(topicHandle, queueHandle, Selector);
+            var topicSubscriptionHandle = builder.CreateTopicSubscription(topicHandle, queueHandle);
         }
     }
 }

@@ -23,10 +23,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         readonly QueueEntity _queue;
         readonly TopicEntity _topic;
 
-        public TopicSubscriptionEntity(long id, TopicEntity topic, QueueEntity queue, string selector)
+        public TopicSubscriptionEntity(long id, TopicEntity topic, QueueEntity queue)
         {
             Id = id;
-            Selector = selector;
             _topic = topic;
             _queue = queue;
         }
@@ -36,7 +35,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
 
         public Topic Source => _topic.Topic;
         public Queue Destination => _queue.Queue;
-        public string Selector { get; }
 
         public long Id { get; }
         public TopicSubscription TopicSubscription => this;
@@ -46,8 +44,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
             return string.Join(", ", new[]
             {
                 $"source: {Source.EntityName}",
-                $"destination: {Destination.EntityName}",
-                string.IsNullOrWhiteSpace(Selector) ? "" : $"selector: {Selector}"
+                $"destination: {Destination.EntityName}"
             }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 
@@ -68,7 +65,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
                 if (x.GetType() != y.GetType())
                     return false;
 
-                return x._topic.Equals(y._topic) && x._queue.Equals(y._queue) && string.Equals(x.Selector, y.Selector);
+                return x._topic.Equals(y._topic) && x._queue.Equals(y._queue);
             }
 
             public int GetHashCode(TopicSubscriptionEntity obj)
@@ -77,8 +74,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
                 {
                     var hashCode = obj._topic.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj._queue.GetHashCode();
-                    if (obj.Selector != null)
-                        hashCode = (hashCode * 397) ^ obj.Selector.GetHashCode();
 
                     return hashCode;
                 }
@@ -102,12 +97,12 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
                 if (x.GetType() != y.GetType())
                     return false;
 
-                return string.Equals(x._queue.EntityName, y._queue.EntityName);
+                return string.Equals(x._topic.EntityName, y._topic.EntityName);
             }
 
             public int GetHashCode(TopicSubscriptionEntity obj)
             {
-                return obj._queue.EntityName.GetHashCode();
+                return obj._topic.EntityName.GetHashCode();
             }
         }
     }

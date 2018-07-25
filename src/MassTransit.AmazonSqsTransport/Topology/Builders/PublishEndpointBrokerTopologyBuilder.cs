@@ -77,9 +77,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
                 return _builder.CreateQueue(name, durable, autoDelete);
             }
 
-            public TopicSubscriptionHandle BindQueue(TopicHandle topic, QueueHandle queue, string selector)
+            public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle topic, QueueHandle queue)
             {
-                return _builder.BindQueue(topic, queue, selector);
+                return _builder.CreateTopicSubscription(topic, queue);
             }
         }
     }

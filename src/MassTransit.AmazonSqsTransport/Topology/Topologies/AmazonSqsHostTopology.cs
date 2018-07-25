@@ -90,14 +90,14 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             foreach (var c in host.MachineName)
                 if (char.IsLetterOrDigit(c))
                     sb.Append(c);
-                else if (c == '.' || c == '_' || c == '-' || c == ':')
+                else if (c == '_' || c == '-')
                     sb.Append(c);
 
             sb.Append('-');
             foreach (var c in host.ProcessName)
                 if (char.IsLetterOrDigit(c))
                     sb.Append(c);
-                else if (c == '.' || c == '_' || c == '-' || c == ':')
+                else if (c == '_' || c == '-')
                     sb.Append(c);
 
             sb.Append('-');

@@ -31,10 +31,5 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         /// True if the queue should be deleted when the connection is closed
         /// </summary>
         bool AutoDelete { get; }
-
-        /// <summary>
-        /// True if the queue should limit broker memory usage
-        /// </summary>
-        bool Lazy { get; }
     }
 }

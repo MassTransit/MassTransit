@@ -100,9 +100,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return _context.DeleteQueue(queueName);
         }
 
-        Task ModelContext.BasicConsume(string queueUrl, int prefetchCount, AmazonSqsBasicConsumer consumer)
+        Task ModelContext.BasicConsume(string queueUrl, ReceiveSettings receiveSettings, IBasicConsumer consumer)
         {
-            return _context.BasicConsume(queueUrl, prefetchCount, consumer);
+            return _context.BasicConsume(queueUrl, receiveSettings, consumer);
         }
 
         PublishRequest ModelContext.CreateTransportMessage(string topicArn, byte[] body)
@@ -110,9 +110,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return _context.CreateTransportMessage(topicArn, body);
         }
 
-        Task ModelContext.Publish(PublishRequest publishRequest, CancellationToken cancellationToken)
+        Task ModelContext.Publish(PublishRequest request, CancellationToken cancellationToken)
         {
-            return _context.Publish(publishRequest, cancellationToken);
+            return _context.Publish(request, cancellationToken);
         }
 
         Task ModelContext.DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken)

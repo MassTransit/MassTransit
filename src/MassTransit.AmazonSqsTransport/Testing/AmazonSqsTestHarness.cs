@@ -28,12 +28,15 @@ namespace MassTransit.AmazonSqsTransport.Testing
 
         public AmazonSqsTestHarness(string inputQueueName = null)
         {
-            Username = "admin";
-            Password = "admin";
+            AccessKey = "admin";
+            SecretKey = "admin";
+
+            AmazonSqsConfig = new AmazonSQSConfig { ServiceURL = "http://docker.localhost:4576" };
+            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://docker.localhost:4575" };
 
             InputQueueName = inputQueueName ?? "input_queue";
 
-            HostAddress = new Uri("amazonsqs://localhost/");
+            HostAddress = new Uri("amazonsqs://docker.localhost:4576");
         }
 
         public Uri HostAddress
@@ -46,8 +49,10 @@ namespace MassTransit.AmazonSqsTransport.Testing
             }
         }
 
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string AccessKey { get; private set; }
+        public string SecretKey { get; private set; }
+        public AmazonSQSConfig AmazonSqsConfig { get; private set; }
+        public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; private set; }
         public string InputQueueName { get; }
         public IAmazonSqsHost Host { get; private set; }
 
@@ -88,8 +93,10 @@ namespace MassTransit.AmazonSqsTransport.Testing
         {
             return configurator.Host(HostAddress, h =>
             {
-                h.AccessKey(Username);
-                h.SecretKey(Password);
+                h.AccessKey(AccessKey);
+                h.SecretKey(SecretKey);
+                h.Config(AmazonSqsConfig);
+                h.Config(AmazonSnsConfig);
 
                 ConfigureAmazonSqsHost(h);
             });
@@ -111,6 +118,9 @@ namespace MassTransit.AmazonSqsTransport.Testing
 
                 x.ReceiveEndpoint(Host, InputQueueName, e =>
                 {
+                    e.PrefetchCount = 1;
+                    e.WaitTimeSeconds = 0;
+
                     ConfigureReceiveEndpoint(e);
 
                     ConfigureAmazonSqsReceiveEndpoint(e);
@@ -126,8 +136,8 @@ namespace MassTransit.AmazonSqsTransport.Testing
             {
                 using (var connection = host.Settings.CreateConnection())
                 {
-                    var amazonSqs = connection.CreateAmazonSqs();
-                    var amazonSns = connection.CreateAmazonSns();
+                    var amazonSqs = connection.CreateAmazonSqsClient();
+                    var amazonSns = connection.CreateAmazonSnsClient();
 
                     CleanUpQueue(amazonSqs, amazonSns, "input_queue");
 

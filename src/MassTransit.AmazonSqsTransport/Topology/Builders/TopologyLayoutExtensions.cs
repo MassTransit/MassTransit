@@ -28,8 +28,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
 
             foreach (var consumer in layout.TopicSubscriptions)
             {
-                _log.InfoFormat("TopicSubscription: source {0}, destination: {1}, selector: {2}", consumer.Source.EntityName, consumer.Destination.EntityName,
-                    consumer.Selector);
+                _log.InfoFormat("TopicSubscription: source {0}, destination: {1}", consumer.Source.EntityName, consumer.Destination.EntityName);
             }
         }
     }
