@@ -332,15 +332,45 @@ public class MyController : ApiController
 
 With the latest version of ASP.NET the WebAPI functionality was merged into ASP.NET removing the previous dichotomy. As in the previous example we'll build on top of Autofac. There is a built-in container in ASP.NET Core but it lacks some advanced capabilities which are a nice to have. 
 
-In the startup.cs we'll need to edit two functions. The first is the `ConfigureServices` method which is used to register services in the dependency injection framework. 
+In our ASP.NET Core project we'll need to do two things. The first is to create a service class that implements `IHostedService` that takes `IBusControl` as a parameter. The `IBusControl` will be handed to our service class via the dependency injection framework.
+
+```csharp
+ public class MassTransitHostedService : Microsoft.Extensions.Hosting.IHostedService
+    {
+        private readonly IBusControl busControl;
+
+        public MassTransitHostedService(IBusControl busControl)
+        {
+            this.busControl = busControl;
+        }
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            //start the bus
+            await busControl.StartAsync(cancellationToken);
+        }
+
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            //stop the bus
+            await busControl.StopAsync(TimeSpan.FromSeconds(10));
+        }
+    }
+```
+This service class will be automatically handled by ASP.NET runtime to start and stop our bus.
+
+The second is in the startup.cs in the `ConfigureServices` method which is used to register services in the dependency injection framework. 
 
 ```csharp
 public IServiceProvider ConfigureServices(IServiceCollection services)
 {
     // Add framework services.
     services.AddMvc();
+    // Add the service class so that the runtime can automatically handle the start and stop of our bus.
+    services.AddScoped<IHostedService, MassTransitHostedService>();
     
-    var builder = new ContainerBuilder();
+    var builder = new ContainerBuilder(); 
+    
     builder.Register(c =>
     {
         return Bus.Factory.CreateUsingRabbitMq(sbc => 
@@ -361,22 +391,4 @@ public IServiceProvider ConfigureServices(IServiceCollection services)
     return new AutofacServiceProvider(container);
 }
 ```
-
-This registers the bus with the container and set up the container as the default for resolution.  The next step is to actually start the bus, this may be done in the Configure method. 
-
-```csharp
-public void Configure(IApplicationBuilder app, 
-            IHostingEnvironment env, 
-            ILoggerFactory loggerFactory, 
-            IApplicationLifetime lifetime)
-{
-    ...
-    //resolve the bus from the container
-    var bus = container.Resolve<IBusControl>();
-    //start the bus
-    var busHandle = TaskUtil.Await(() => bus.StartAsync());
-
-    //register an action to call when the application is shutting down
-    lifetime.ApplicationStopping.Register(() => busHandle.Stop());
-}
-```
+This registers the bus and the service class with the container and set up the container as the default for resolution.
