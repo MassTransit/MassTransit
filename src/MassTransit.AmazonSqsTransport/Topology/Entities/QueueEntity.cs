@@ -20,13 +20,12 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         Queue,
         QueueHandle
     {
-        public QueueEntity(long id, string name, bool durable, bool autoDelete, bool lazy = false)
+        public QueueEntity(long id, string name, bool durable, bool autoDelete)
         {
             Id = id;
             EntityName = name;
             Durable = durable;
             AutoDelete = autoDelete;
-            Lazy = lazy;
         }
 
         public static IEqualityComparer<QueueEntity> NameComparer { get; } = new NameEqualityComparer();
@@ -36,7 +35,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         public string EntityName { get; }
         public bool Durable { get; }
         public bool AutoDelete { get; }
-        public bool Lazy { get; }
         public long Id { get; }
         public Queue Queue => this;
 

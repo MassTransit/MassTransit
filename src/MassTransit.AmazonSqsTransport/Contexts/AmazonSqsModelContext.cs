@@ -69,12 +69,20 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         public async Task<string> GetTopic(string topicName)
         {
-            return (await _amazonSns.CreateTopicAsync(topicName, CancellationToken).ConfigureAwait(false)).TopicArn;
+            var response = await _amazonSns.CreateTopicAsync(topicName).ConfigureAwait(false);
+
+            await Task.Delay(500).ConfigureAwait(false);
+
+            return response.TopicArn;
         }
 
         public async Task<string> GetQueue(string queueName)
         {
-            return (await _amazonSqs.CreateQueueAsync(queueName, CancellationToken).ConfigureAwait(false)).QueueUrl;
+            var response = await _amazonSqs.CreateQueueAsync(queueName).ConfigureAwait(false);
+
+            await Task.Delay(500).ConfigureAwait(false);
+
+            return response.QueueUrl;
         }
 
         public async Task GetTopicSubscription(string topicName, string queueName)
@@ -83,23 +91,23 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             var queueUrl = await GetQueue(queueName).ConfigureAwait(false);
 
             await _amazonSns.SubscribeQueueAsync(topicArn, _amazonSqs, queueUrl).ConfigureAwait(false);
+
+            await Task.Delay(200).ConfigureAwait(false);
         }
 
         public async Task DeleteTopic(string topicName)
         {
             var topicArn = await GetTopic(topicName).ConfigureAwait(false);
-
-            await _amazonSns.DeleteTopicAsync(topicArn, CancellationToken).ConfigureAwait(false);
+            await _amazonSns.DeleteTopicAsync(topicArn).ConfigureAwait(false);
         }
 
         public async Task DeleteQueue(string queueName)
         {
             var queueUrl = await GetQueue(queueName).ConfigureAwait(false);
-
-            await _amazonSqs.DeleteQueueAsync(queueUrl, CancellationToken).ConfigureAwait(false);
+            await _amazonSqs.DeleteQueueAsync(queueUrl).ConfigureAwait(false);
         }
 
-        public Task BasicConsume(string queueUrl, int prefetchCount, AmazonSqsBasicConsumer consumer)
+        public Task BasicConsume(string queueUrl, ReceiveSettings receiveSettings, IBasicConsumer consumer)
         {
             return Task.Factory.StartNew(async () =>
             {
@@ -107,8 +115,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 {
                     var request = new ReceiveMessageRequest(queueUrl)
                     {
-                        MaxNumberOfMessages = prefetchCount,
-                        //WaitTimeSeconds = 1,
+                        MaxNumberOfMessages = receiveSettings.PrefetchCount,
+                        WaitTimeSeconds = receiveSettings.WaitTimeSeconds,
                         AttributeNames = new List<string> {"All"},
                         MessageAttributeNames = new List<string> {"All"}
                     };
@@ -130,9 +138,14 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return new PublishRequest(topicArn, message);
         }
 
-        public Task Publish(PublishRequest publishRequest, CancellationToken cancellationToken)
+        public Task Publish(PublishRequest request, CancellationToken cancellationToken)
         {
-            return _amazonSns.PublishAsync(publishRequest, cancellationToken);
+            return _amazonSns.PublishAsync(request, cancellationToken);
+        }
+
+        public Task Send(SendMessageRequest request, CancellationToken cancellationToken)
+        {
+            return _amazonSqs.SendMessageAsync(request, cancellationToken);
         }
 
         public Task DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken = default(CancellationToken))

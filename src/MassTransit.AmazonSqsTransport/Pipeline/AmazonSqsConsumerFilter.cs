@@ -66,7 +66,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             var consumer = new AmazonSqsBasicConsumer(context, queueUrl, inputAddress, _receivePipe, _receiveObserver, _context, _deadLetterTransport, _errorTransport);
 
-            await context.BasicConsume(queueUrl, receiveSettings.PrefetchCount, consumer).ConfigureAwait(false);
+            await context.BasicConsume(queueUrl, receiveSettings, consumer).ConfigureAwait(false);
 
             await consumer.Ready.ConfigureAwait(false);
 

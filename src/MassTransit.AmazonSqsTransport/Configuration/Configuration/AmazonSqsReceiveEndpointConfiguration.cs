@@ -154,6 +154,24 @@
             }
         }
 
+        public ushort PrefetchCount
+        {
+            set
+            {
+                _settings.PrefetchCount = value;
+                Changed("PrefetchCount");
+            }
+        }
+
+        public ushort WaitTimeSeconds
+        {
+            set
+            {
+                _settings.WaitTimeSeconds = value;
+                Changed("WaitTimeSeconds");
+            }
+        }
+
         public bool Lazy
         {
             set => _settings.Lazy = value;

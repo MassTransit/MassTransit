@@ -38,7 +38,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         {
             _messageTopology = messageTopology;
 
-            var topicName = messageTopology.EntityName;
+            var topicName = _messageTopology.EntityName;
 
             var temporary = TypeMetadataCache<TMessage>.IsTemporaryMessageType;
 

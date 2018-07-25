@@ -16,22 +16,18 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
     using Entities;
 
 
-    public class TopicBindingConfigurator :
+    public class TopicSubscriptionConfigurator :
         TopicConfigurator,
         ITopicBindingConfigurator
     {
-        public TopicBindingConfigurator(string topicName, bool durable = true, bool autoDelete = false, string selector = null)
+        public TopicSubscriptionConfigurator(string topicName, bool durable = true, bool autoDelete = false)
             : base(topicName, durable, autoDelete)
         {
-            Selector = selector;
         }
 
-        public TopicBindingConfigurator(Topic topic, string selector = null)
+        public TopicSubscriptionConfigurator(Topic topic)
             : base(topic)
         {
-            Selector = selector;
         }
-
-        public string Selector { get; set; }
     }
 }

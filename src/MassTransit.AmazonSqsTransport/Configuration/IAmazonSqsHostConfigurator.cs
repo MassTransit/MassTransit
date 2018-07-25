@@ -12,6 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Configuration
 {
+    using Amazon.SimpleNotificationService;
+    using Amazon.SQS;
+
+
     public interface IAmazonSqsHostConfigurator
     {
         /// <summary>
@@ -25,5 +29,17 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// </summary>
         /// <param name="secretKey"></param>
         void SecretKey(string secretKey);
+
+        /// <summary>
+        /// Sets the default config for the connection to AmazonSQS
+        /// </summary>
+        /// <param name="config"></param>
+        void Config(AmazonSQSConfig config);
+
+        /// <summary>
+        /// Sets the default config for the connection to AmazonSNS
+        /// </summary>
+        /// <param name="config"></param>
+        void Config(AmazonSimpleNotificationServiceConfig config);
     }
 }

@@ -13,23 +13,18 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Entities
 {
     /// <summary>
-    /// The exchange to queue binding details to declare the binding to AmazonSQS
+    /// The topic to queue binding details to declare the binding to AmazonSQS
     /// </summary>
     public interface TopicSubscription
     {
         /// <summary>
-        /// The virtual topic
+        /// The topic
         /// </summary>
         Topic Source { get; }
 
         /// <summary>
-        /// The virtual topic consumer
+        /// The queue
         /// </summary>
         Queue Destination { get; }
-
-        /// <summary>
-        /// A routing key for the exchange binding
-        /// </summary>
-        string Selector { get; }
     }
 }

@@ -16,6 +16,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Amazon.SimpleNotificationService;
+    using Amazon.SQS;
     using Configuration;
     using GreenPipes.Internals.Extensions;
     using MassTransit.Testing;
@@ -116,22 +118,25 @@ namespace MassTransit.AmazonSqsTransport.Tests
     [TestFixture]
     public class Configuring_AmazonSQS
     {
+        const string AwsAccessKey = "{YOUR AWS ACCESS KEY}";
+        const string AwsSecretKey = "{YOUR AWS SECRET KEY}";
+
         [Test]
         public async Task Should_succeed_and_connect_when_properly_configured()
         {
             TaskCompletionSource<bool> received = new TaskCompletionSource<bool>();
 
-            IAmazonSqsHost _host = null;
+            IAmazonSqsHost host = null;
 
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
-                _host = cfg.Host("ap-southeast-2", h =>
+                host = cfg.Host("ap-southeast-2", h =>
                 {
-                    h.AccessKey("{AWS-ACCESS-KEY}");
-                    h.SecretKey("{AWS-SECRET-ACCESS-KEY}");
+                    h.AccessKey(AwsAccessKey);
+                    h.SecretKey(AwsSecretKey);
                 });
 
-                cfg.ReceiveEndpoint(_host, "input-queue", x =>
+                cfg.ReceiveEndpoint(host, "input-queue", x =>
                 {
                     x.Handler<PingMessage>(async context =>
                     {
@@ -139,24 +144,26 @@ namespace MassTransit.AmazonSqsTransport.Tests
                     });
                 });
 
-                cfg.ReceiveEndpoint(_host, "input-queue-too", x =>
+                cfg.ReceiveEndpoint(host, "input-queue-too", x =>
                 {
                     x.Handler<PongMessage>(async context =>
                     {
                         received.TrySetResult(true);
+
+                        await Util.TaskUtil.Completed;
                     });
                 });
             });
 
             await busControl.StartAsync();
 
-            var sendAddress = _host.Topology.GetDestinationAddress(typeof(PingMessage));
+            var sendAddress = host.Topology.GetDestinationAddress(typeof(PingMessage));
 
             var sendEndpoint = await busControl.GetSendEndpoint(sendAddress);
 
             await sendEndpoint.Send(new PingMessage());
 
-            await received.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(30));
+            await received.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(120));
 
             await busControl.StopAsync();
         }
@@ -168,8 +175,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
             {
                 var host = sbc.Host("ap-southeast-2", h =>
                 {
-                    h.AccessKey("{AWS-ACCESS-KEY}");
-                    h.SecretKey("{AWS-SECRET-ACCESS-KEY}");
+                    h.AccessKey(AwsAccessKey);
+                    h.SecretKey(AwsSecretKey);
                 });
 
                 sbc.ReceiveEndpoint(host, "test", e =>
@@ -200,10 +207,12 @@ namespace MassTransit.AmazonSqsTransport.Tests
         {
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
-                cfg.Host("localhost", h =>
+                cfg.Host(new Uri("amazonsqs://docker.localhost:4576"), h =>
                 {
                     h.AccessKey("admin");
                     h.SecretKey("admin");
+                    h.Config(new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://docker.localhost:4575" });
+                    h.Config(new AmazonSQSConfig { ServiceURL = "http://docker.localhost:4576" });
                 });
             });
 
@@ -280,8 +289,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
             {
                 cfg.Host("ap-southeast-2", h =>
                 {
-                    h.AccessKey("{AWS-ACCESS-KEY}");
-                    h.SecretKey("{AWS-SECRET-ACCESS-KEY}");
+                    h.AccessKey(AwsAccessKey);
+                    h.SecretKey(AwsSecretKey);
                 });
             });
         }

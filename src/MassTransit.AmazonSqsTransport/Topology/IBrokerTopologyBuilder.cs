@@ -40,8 +40,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// </summary>
         /// <param name="topic"></param>
         /// <param name="queue"></param>
-        /// <param name="selector"></param>
         /// <returns></returns>
-        TopicSubscriptionHandle BindQueue(TopicHandle topic, QueueHandle queue, string selector);
+        TopicSubscriptionHandle CreateTopicSubscription(TopicHandle topic, QueueHandle queue);
     }
 }

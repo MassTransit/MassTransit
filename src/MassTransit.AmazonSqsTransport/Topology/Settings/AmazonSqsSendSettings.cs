@@ -55,7 +55,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
             {
                 var queue = builder.CreateQueue(_queueName, Durable, AutoDelete);
 
-                builder.BindQueue(builder.Topic, queue, "");
+                builder.CreateTopicSubscription(builder.Topic, queue);
             }
 
             return builder.BuildBrokerTopology();

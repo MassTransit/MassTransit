@@ -54,12 +54,12 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         public Task<IAmazonSQS> CreateAmazonSqs()
         {
-            return Task.Factory.StartNew(() => Connection.CreateAmazonSqs(), CancellationToken, TaskCreationOptions.None, _taskScheduler);
+            return Task.Factory.StartNew(() => Connection.CreateAmazonSqsClient(), CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         public Task<IAmazonSimpleNotificationService> CreateAmazonSns()
         {
-            return Task.Factory.StartNew(() => Connection.CreateAmazonSns(), CancellationToken, TaskCreationOptions.None, _taskScheduler);
+            return Task.Factory.StartNew(() => Connection.CreateAmazonSnsClient(), CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
         Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)

@@ -23,12 +23,13 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         public AmazonSqsReceiveSettings(string queueName, bool durable, bool autoDelete)
             : base(queueName, durable, autoDelete)
         {
-            PrefetchCount = (ushort)Math.Min(Environment.ProcessorCount * 2, 10);
+            PrefetchCount = Math.Min(Environment.ProcessorCount * 2, 10);
+            WaitTimeSeconds = 0;
         }
 
-        public ushort PrefetchCount { get; set; }
+        public int PrefetchCount { get; set; }
 
-        public bool Exclusive { get; set; }
+        public int WaitTimeSeconds { get; set; }
 
         public bool PurgeOnStartup { get; set; }
 

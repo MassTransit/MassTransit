@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Pipeline
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -19,7 +20,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using Topology;
     using Topology.Builders;
     using Topology.Entities;
-
 
     /// <summary>
     /// Configures the broker with the supplied topology once the model is created, to ensure
@@ -63,18 +63,22 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
         async Task ConfigureTopology(ModelContext context)
         {
-            await Task.WhenAll(_brokerTopology.Topics.Select(topic => Declare(context, topic))).ConfigureAwait(false);
+            var topics = _brokerTopology.Topics.Select(topic => Declare(context, topic));
 
-            await Task.WhenAll(_brokerTopology.Queues.Select(queue => Declare(context, queue))).ConfigureAwait(false);
+            var queues = _brokerTopology.Queues.Select(queue => Declare(context, queue));
 
-            await Task.WhenAll(_brokerTopology.TopicSubscriptions.Select(queue => Declare(context, queue))).ConfigureAwait(false);
+            var subscriptions = _brokerTopology.TopicSubscriptions.Select(queue => Declare(context, queue));
+
+            await Task.WhenAll(topics.Concat(queues).Concat(subscriptions)).ConfigureAwait(false);
         }
 
         async Task DeleteAutoDelete(ModelContext context)
         {
-            await Task.WhenAll(_brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic))).ConfigureAwait(false);
+            var topics = _brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic));
 
-            await Task.WhenAll(_brokerTopology.Queues.Where(x => x.AutoDelete).Select(queue => Delete(context, queue))).ConfigureAwait(false);
+            var queues = _brokerTopology.Queues.Where(x => x.AutoDelete).Select(queue => Delete(context, queue));
+
+            await Task.WhenAll(topics.Concat(queues)).ConfigureAwait(false);
         }
 
         Task Declare(ModelContext context, Topic topic)

@@ -47,8 +47,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
 
             foreach (var queue in Queues)
             {
-                var exchangeScope = context.CreateScope("queue");
-                exchangeScope.Set(new
+                var queueScope = context.CreateScope("queue");
+                queueScope.Set(new
                 {
                     Name = queue.EntityName,
                     queue.Durable,
@@ -56,14 +56,13 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
                 });
             }
 
-            foreach (var binding in TopicSubscriptions)
+            foreach (var subscription in TopicSubscriptions)
             {
-                var exchangeScope = context.CreateScope("topicSubscription");
-                exchangeScope.Set(new
+                var subscriptionScope = context.CreateScope("topicSubscription");
+                subscriptionScope.Set(new
                 {
-                    Source = binding.Source.EntityName,
-                    Destination = binding.Destination.EntityName,
-                    RoutingKey = binding.Selector
+                    Source = subscription.Source.EntityName,
+                    Destination = subscription.Destination.EntityName
                 });
             }
         }

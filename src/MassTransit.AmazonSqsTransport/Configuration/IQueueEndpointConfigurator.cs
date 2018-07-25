@@ -15,5 +15,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration
     public interface IQueueEndpointConfigurator :
         IQueueConfigurator
     {
+        ushort PrefetchCount { set; }
+
+        ushort WaitTimeSeconds { set; }
     }
 }
