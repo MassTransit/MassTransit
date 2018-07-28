@@ -13,6 +13,7 @@
 namespace MassTransit.AmazonSqsTransport.Contexts
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -123,10 +124,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
                     var response = await _amazonSqs.ReceiveMessageAsync(request, CancellationToken).ConfigureAwait(false);
 
-                    foreach (var message in response.Messages)
-                    {
-                        await consumer.HandleMessage(message).ConfigureAwait(false);
-                    }
+                    await Task.WhenAll(response.Messages.Select(consumer.HandleMessage)).ConfigureAwait(false);
                 }
             }, CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
