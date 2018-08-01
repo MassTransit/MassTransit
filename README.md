@@ -3,7 +3,7 @@ MassTransit
 
 MassTransit is a _free, open-source_ distributed application framework for .NET. MassTransit makes it easy to create applications and services that leverage message-based, loosely-coupled asynchronous communication for higher availability, reliability, and scalability.
 
-![Mass Transit](https://raw.githubusercontent.com/MassTransit/MassTransit/develop/doc/source/mt-logo.png "Mass Transit")
+![Mass Transit](https://avatars2.githubusercontent.com/u/317796?s=200&v=4 "Mass Transit")
 
 MassTransit is Apache 2.0 licensed.
 
