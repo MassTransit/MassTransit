@@ -14,6 +14,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 {
     using System;
     using Automatonymous;
+    using DocumentDbIntegration;
     using Newtonsoft.Json;
 
 
@@ -38,7 +39,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     }
 
 
-    public class ShoppingChore :
+    public class ShoppingChore : IVersionedSaga,
         SagaStateMachineInstance
     {
         protected ShoppingChore()
@@ -54,8 +55,11 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         public int Everything { get; set; }
         public bool Screwed { get; set; }
 
-        [JsonProperty(PropertyName = "id")]
+        [JsonProperty("id")]
         public Guid CorrelationId { get; set; }
+
+        [JsonProperty("_etag")]
+        public string ETag { get; set; }
     }
 
 

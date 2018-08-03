@@ -31,52 +31,45 @@ namespace MassTransit.DocumentDbIntegration.Saga
     public class DocumentDbSagaRepository<TSaga> :
         ISagaRepository<TSaga>,
         IQuerySagaRepository<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, IVersionedSaga
     {
         public const string DefaultCollectionName = "sagas";
-        static readonly ILog _log = Logger.Get<DocumentDbSagaRepository<TSaga>>();
+        private static readonly ILog _log = Logger.Get<DocumentDbSagaRepository<TSaga>>();
 
-        static readonly RequestOptions _requestOptions;
-        static readonly FeedOptions _feedOptions;
-        static readonly JsonSerializerSettings _jsonSerializerSettings;
-
-        static DocumentDbSagaRepository()
-        {
-            var resolver = new PropertyRenameSerializerContractResolver();
-            resolver.RenameProperty(typeof(TSaga), "CorrelationId", "id");
-
-            _jsonSerializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = resolver
-            };
-
-            _requestOptions = new RequestOptions {JsonSerializerSettings = _jsonSerializerSettings};
-
-            _feedOptions = new FeedOptions {JsonSerializerSettings = _jsonSerializerSettings};
-        }
-
-        readonly IDocumentClient _client;
-        readonly string _databaseName;
-        readonly string _collectionName;
-        readonly IDocumentDbSagaConsumeContextFactory _documentDbSagaConsumeContextFactory;
+        private readonly IDocumentClient _client;
+        private readonly string _databaseName;
+        private readonly string _collectionName;
+        private readonly IDocumentDbSagaConsumeContextFactory _documentDbSagaConsumeContextFactory;
+        private readonly JsonSerializerSettings _jsonSerializerSettings;
+        private readonly FeedOptions _feedOptions;
+        private readonly RequestOptions _requestOptions;
 
         public DocumentDbSagaRepository(IDocumentClient client, string databaseName, string collectionName)
-            : this(client, databaseName, collectionName, new DocumentDbSagaConsumeContextFactory())
+            : this(client, databaseName, collectionName, new DocumentDbSagaConsumeContextFactory(), null)
         {
         }
 
         public DocumentDbSagaRepository(IDocumentClient client, string databaseName, IDocumentDbSagaConsumeContextFactory documentDbSagaConsumeContextFactory)
-            : this(client, databaseName, DefaultCollectionName, documentDbSagaConsumeContextFactory)
+            : this(client, databaseName, DefaultCollectionName, documentDbSagaConsumeContextFactory, null)
         {
         }
 
         public DocumentDbSagaRepository(IDocumentClient client, string databaseName)
-            : this(client, databaseName, DefaultCollectionName, new DocumentDbSagaConsumeContextFactory())
+            : this(client, databaseName, DefaultCollectionName, new DocumentDbSagaConsumeContextFactory(), null)
         {
         }
 
-        public DocumentDbSagaRepository(IDocumentClient client, string databaseName, string collectionName,
-            IDocumentDbSagaConsumeContextFactory documentDbSagaConsumeContextFactory)
+        public DocumentDbSagaRepository(IDocumentClient client, string databaseName, JsonSerializerSettings jsonSerializerSettings)
+            : this(client, databaseName, DefaultCollectionName, new DocumentDbSagaConsumeContextFactory(), jsonSerializerSettings)
+        {
+        }
+
+        public DocumentDbSagaRepository(
+            IDocumentClient client,
+            string databaseName,
+            string collectionName,
+            IDocumentDbSagaConsumeContextFactory documentDbSagaConsumeContextFactory,
+            JsonSerializerSettings jsonSerializerSettings)
         {
             if (string.IsNullOrWhiteSpace(collectionName))
                 throw new ArgumentNullException(nameof(collectionName));
@@ -88,7 +81,14 @@ namespace MassTransit.DocumentDbIntegration.Saga
 
             _databaseName = databaseName;
             _collectionName = collectionName;
-            _documentDbSagaConsumeContextFactory = documentDbSagaConsumeContextFactory;
+            _documentDbSagaConsumeContextFactory = documentDbSagaConsumeContextFactory ?? throw new ArgumentNullException(nameof(documentDbSagaConsumeContextFactory));
+
+            _jsonSerializerSettings = jsonSerializerSettings;
+            if (_jsonSerializerSettings != null)
+            {
+                _feedOptions = new FeedOptions { JsonSerializerSettings = _jsonSerializerSettings };
+                _requestOptions = new RequestOptions { JsonSerializerSettings = _jsonSerializerSettings };
+            }
         }
 
         public void Probe(ProbeContext context)
@@ -109,11 +109,11 @@ namespace MassTransit.DocumentDbIntegration.Saga
             if (!context.CorrelationId.HasValue)
                 throw new SagaException("The CorrelationId was not specified", typeof(TSaga), typeof(T));
 
-            Document document = null;
+            TSaga instance = null;
 
-            if (policy.PreInsertInstance(context, out var instance))
+            if (policy.PreInsertInstance(context, out instance))
             {
-                document = await PreInsertSagaInstance(context, instance).ConfigureAwait(false);
+                instance = await PreInsertSagaInstance(context, instance).ConfigureAwait(false);
             }
 
             if (instance == null)
@@ -124,29 +124,24 @@ namespace MassTransit.DocumentDbIntegration.Saga
                         .ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, context.CorrelationId.ToString()), _requestOptions)
                         .ConfigureAwait(false);
 
-                    document = response.Resource;
+                    instance = JsonConvert.DeserializeObject<TSaga>(response.Resource.ToString(), _jsonSerializerSettings);
                 }
                 catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     // Couldn't find the document, swallowing exception
-                }
-
-                if (document != null)
-                {
-                    instance = JsonConvert.DeserializeObject<TSaga>(document.ToString());
                 }
             }
 
             if (instance == null)
             {
                 var missingSagaPipe =
-                    new MissingPipe<TSaga, T>(_client, _databaseName, _collectionName, next, _documentDbSagaConsumeContextFactory, _requestOptions);
+                    new MissingPipe<TSaga, T>(_client, _databaseName, _collectionName, next, _documentDbSagaConsumeContextFactory, _jsonSerializerSettings);
 
                 await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
             }
             else
             {
-                await SendToInstance(context, policy, next, instance, document).ConfigureAwait(false);
+                await SendToInstance(context, policy, next, instance).ConfigureAwait(false);
             }
         }
 
@@ -155,13 +150,13 @@ namespace MassTransit.DocumentDbIntegration.Saga
         {
             try
             {
-                List<TSaga> sagaInstances = (await _client
+                var sagaInstances = (await _client
                     .CreateDocumentQuery<TSaga>(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), _feedOptions)
                     .Where(context.Query.FilterExpression).QueryAsync().ConfigureAwait(false)).ToList();
 
                 if (!sagaInstances.Any())
                 {
-                    var missingPipe = new MissingPipe<TSaga, T>(_client, _databaseName, _collectionName, next, _documentDbSagaConsumeContextFactory, _requestOptions);
+                    var missingPipe = new MissingPipe<TSaga, T>(_client, _databaseName, _collectionName, next, _documentDbSagaConsumeContextFactory, _jsonSerializerSettings);
 
                     await policy.Missing(context, missingPipe).ConfigureAwait(false);
                 }
@@ -169,13 +164,7 @@ namespace MassTransit.DocumentDbIntegration.Saga
                 {
                     foreach (var instance in sagaInstances)
                     {
-                        // To support optimistic concurrency, we need the Document ETag
-                        // So we will re-query to get the document, this should be fast because we are querying by Id
-                        var response = await _client
-                            .ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, instance.CorrelationId.ToString()), _requestOptions)
-                            .ConfigureAwait(false);
-
-                        await SendToInstance(context, policy, next, instance, response.Resource).ConfigureAwait(false);
+                        await SendToInstance(context, policy, next, instance).ConfigureAwait(false);
                     }
                 }
             }
@@ -195,18 +184,17 @@ namespace MassTransit.DocumentDbIntegration.Saga
             }
         }
 
-        async Task<Document> PreInsertSagaInstance<T>(ConsumeContext<T> context, TSaga instance)
+        async Task<TSaga> PreInsertSagaInstance<T>(ConsumeContext<T> context, TSaga instance)
             where T : class
         {
             try
             {
                 ResourceResponse<Document> response =
-                    await _client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), instance,
-                        disableAutomaticIdGeneration: true, options: _requestOptions).ConfigureAwait(false);
+                    await _client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), instance, _requestOptions, true).ConfigureAwait(false);
 
                 _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
 
-                return response.Resource;
+                return JsonConvert.DeserializeObject<TSaga>(response.Resource.ToString(), _jsonSerializerSettings);
             }
             catch (Exception ex)
             {
@@ -218,8 +206,7 @@ namespace MassTransit.DocumentDbIntegration.Saga
             return null;
         }
 
-        async Task SendToInstance<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next, TSaga instance,
-            Document document)
+        async Task SendToInstance<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next, TSaga instance)
             where T : class
         {
             try
@@ -233,7 +220,7 @@ namespace MassTransit.DocumentDbIntegration.Saga
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
                 if (!sagaConsumeContext.IsCompleted)
-                    await UpdateDocumentDbSaga(context, instance, document).ConfigureAwait(false);
+                    await UpdateDocumentDbSaga(context, instance).ConfigureAwait(false);
             }
             catch (SagaException)
             {
@@ -245,18 +232,14 @@ namespace MassTransit.DocumentDbIntegration.Saga
             }
         }
 
-        async Task UpdateDocumentDbSaga(PipeContext context, TSaga instance, Document document)
+        async Task UpdateDocumentDbSaga(PipeContext context, TSaga instance)
         {
-            if (document == null)
-                throw new DocumentDbConcurrencyException("Document didn't pre-exist, shouldn't have reached here.");
-
             // DocumentDb Optimistic Concurrency https://codeopinion.com/documentdb-optimistic-concurrency/
-
-            var ac = new AccessCondition {Condition = document.ETag, Type = AccessConditionType.IfMatch};
+            var ac = new AccessCondition {Condition = instance.ETag, Type = AccessConditionType.IfMatch};
 
             try
             {
-                await _client.ReplaceDocumentAsync(document.SelfLink, instance,
+                await _client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, instance.CorrelationId.ToString()), instance,
                     new RequestOptions {AccessCondition = ac, JsonSerializerSettings = _jsonSerializerSettings }).ConfigureAwait(false);
             }
             catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.PreconditionFailed)
@@ -267,6 +250,7 @@ namespace MassTransit.DocumentDbIntegration.Saga
 
         public async Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {
+            // This will not work for Document Db because the .Where needs to look for [JsonProperty("id")], and if you pass in CorrelationId property, the ISaga doesn't have that property.
             IEnumerable<TSaga> sagas = await _client.CreateDocumentQuery<TSaga>(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), _feedOptions)
                 .Where(query.FilterExpression)
                 .QueryAsync()

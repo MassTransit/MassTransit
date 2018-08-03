@@ -56,9 +56,9 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
             _consumeContextFactory = new Mock<IDocumentDbSagaConsumeContextFactory>();
             _mockDocumentClient = new Mock<IDocumentClient>();
             _context = new Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>();
-            _consumeContextFactory.Setup(m => m.Create(_mockDocumentClient.Object, "","", _context.Object, _context.Object.Saga, false)).Returns(_proxy.Object);
+            _consumeContextFactory.Setup(m => m.Create(_mockDocumentClient.Object, "","", _context.Object, It.IsAny<SimpleSaga>(), false, null)).Returns(_proxy.Object);
 
-            _pipe = new MissingPipe<SimpleSaga, InitiateSimpleSaga>(_mockDocumentClient.Object, "","", _nextPipe.Object, _consumeContextFactory.Object, new RequestOptions());
+            _pipe = new MissingPipe<SimpleSaga, InitiateSimpleSaga>(_mockDocumentClient.Object, "","", _nextPipe.Object, _consumeContextFactory.Object, null);
 
             TaskUtil.Await(() => _pipe.Send(_context.Object));
         }

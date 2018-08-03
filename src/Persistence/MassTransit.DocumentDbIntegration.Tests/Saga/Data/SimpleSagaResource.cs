@@ -8,7 +8,7 @@
     using Microsoft.Azure.Documents;
     using Newtonsoft.Json;
 
-    public class SimpleSaga :
+    public class SimpleSagaResource : Resource,
         InitiatedBy<InitiateSimpleSaga>,
         Orchestrates<CompleteSimpleSaga>,
         Observes<ObservableSagaMessage, SimpleSaga>,
@@ -30,11 +30,8 @@
             return Task.FromResult(0);
         }
 
+        [JsonProperty("id")]
         public Guid CorrelationId { get; set; }
-
-        public string ETag { get; set; }
-
-        public string Username { get; set; }
 
         public Task Consume(ConsumeContext<ObservableSagaMessage> message)
         {

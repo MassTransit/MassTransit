@@ -31,7 +31,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
         [Test]
         public async Task ThenSagaDoesNotExistInRepository()
         {
-            var saga = await SagaRepository.Instance.GetSaga(_saga.CorrelationId);
+            var saga = await SagaRepository.Instance.GetSaga<SimpleSaga>(_saga.CorrelationId, true);
 
             Assert.That(saga, Is.Null);
         }
@@ -44,7 +44,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
         {
             _saga = new SimpleSaga {CorrelationId = Guid.NewGuid()};
 
-            await SagaRepository.Instance.InsertSaga(_saga);
+            await SagaRepository.Instance.InsertSaga(_saga, true);
 
             _documentDbSagaConsumeContext =
                 new DocumentDbSagaConsumeContext<SimpleSaga, InitiateSimpleSaga>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName,

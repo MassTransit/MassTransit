@@ -34,7 +34,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
             Assert.That(actual.ETag, Is.EqualTo(_simpleSagaDocument.ETag));
         }
 
-        SimpleSaga _simpleSaga;
+        SimpleSagaResource _simpleSaga;
         Document _simpleSagaDocument;
         CancellationToken _cancellationToken;
         Guid _correlationId;
@@ -49,22 +49,22 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
             context.Setup(x => x.CorrelationId).Returns(_correlationId);
             context.Setup(m => m.CancellationToken).Returns(_cancellationToken);
 
-            _simpleSaga = new SimpleSaga
+            _simpleSaga = new SimpleSagaResource
             {
                 CorrelationId = _correlationId
             };
             await _simpleSaga.Consume(It.IsAny<ConsumeContext<CompleteSimpleSaga>>());
-            await SagaRepository.Instance.InsertSaga(_simpleSaga);
+            await SagaRepository.Instance.InsertSaga(_simpleSaga, true);
             _simpleSagaDocument = await SagaRepository.Instance.GetSagaDocument(_simpleSaga.CorrelationId);
 
-            var sagaConsumeContext = new Mock<SagaConsumeContext<SimpleSaga, CompleteSimpleSaga>>();
+            var sagaConsumeContext = new Mock<SagaConsumeContext<SimpleSagaResource, CompleteSimpleSaga>>();
             sagaConsumeContext.SetupGet(x => x.IsCompleted).Returns(true);
             var documentDbSagaConsumeContextFactory = new Mock<IDocumentDbSagaConsumeContextFactory>();
-            documentDbSagaConsumeContextFactory.Setup(x => x.Create(It.IsAny<IDocumentClient>(), It.IsAny<string>(), It.IsAny<string>(), context.Object, It.IsAny<SimpleSaga>(), true))
+            documentDbSagaConsumeContextFactory.Setup(x => x.Create(It.IsAny<IDocumentClient>(), It.IsAny<string>(), It.IsAny<string>(), context.Object, It.IsAny<SimpleSagaResource>(), true, null))
                 .Returns(sagaConsumeContext.Object);
-            var repository = new DocumentDbSagaRepository<SimpleSaga>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, documentDbSagaConsumeContextFactory.Object);
+            var repository = new DocumentDbSagaRepository<SimpleSagaResource>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, documentDbSagaConsumeContextFactory.Object, null);
 
-            await repository.Send(context.Object, Mock.Of<ISagaPolicy<SimpleSaga, CompleteSimpleSaga>>(), null);
+            await repository.Send(context.Object, Mock.Of<ISagaPolicy<SimpleSagaResource, CompleteSimpleSaga>>(), null);
         }
 
         [OneTimeTearDown]

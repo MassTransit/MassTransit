@@ -13,20 +13,18 @@
 
 namespace MassTransit.DocumentDbIntegration.Saga.Context
 {
-    using MassTransit.Saga;
     using Microsoft.Azure.Documents;
-    using Microsoft.Azure.Documents.Client;
-
+    using Newtonsoft.Json;
 
     public class DocumentDbSagaConsumeContextFactory :
         IDocumentDbSagaConsumeContextFactory
     {
         public SagaConsumeContext<TSaga, TMessage> Create<TSaga, TMessage>(IDocumentClient client, string databaseName, string collectionName,
-            ConsumeContext<TMessage> message, TSaga instance, bool existing = true)
-            where TSaga : class, ISaga
+            ConsumeContext<TMessage> message, TSaga instance, bool existing = true, JsonSerializerSettings jsonSerializerSettings = null)
+            where TSaga : class, IVersionedSaga
             where TMessage : class
         {
-            return new DocumentDbSagaConsumeContext<TSaga, TMessage>(client, databaseName, collectionName, message, instance, existing);
+            return new DocumentDbSagaConsumeContext<TSaga, TMessage>(client, databaseName, collectionName, message, instance, existing, jsonSerializerSettings);
         }
     }
 }

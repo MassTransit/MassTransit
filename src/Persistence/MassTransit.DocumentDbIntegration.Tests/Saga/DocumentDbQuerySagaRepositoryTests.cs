@@ -6,38 +6,72 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using System.Threading.Tasks;
 
     [TestFixture]
     public class DocumentDbQuerySagaRepositoryTests
     {
+        private List<Guid> _ids = new List<Guid>();
+
         [Test]
-        public void ThenCorrelationIdsReturned()
+        public async Task Query_Fails_With_Json_Resolver_Rename()
         {
-            Assert.That(_result.Single(), Is.EqualTo(_correlationId));
+            // Arrange
+            var correlationId = Guid.NewGuid();
+            _ids.Add(correlationId);
+            SagaRepository.Instance.InsertSaga(new SimpleSaga { CorrelationId = correlationId }, true).GetAwaiter().GetResult();
+            ISagaQuery<SimpleSaga> query = new SagaQuery<SimpleSaga>(x => x.CorrelationId == correlationId);
+
+            // Act
+            var repository = new DocumentDbSagaRepository<SimpleSaga>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, JsonSerializerSettingsExtensions.GetSagaRenameSettings<SimpleSaga>());
+            var result = repository.Find(query).GetAwaiter().GetResult();
+
+            // Assert
+            Assert.That(result.Any(), Is.False);
         }
 
-        Guid _correlationId;
-        IEnumerable<Guid> _result;
-
-        [OneTimeSetUp]
-        public void GivenADocumentDbQuerySagaRepository_WhenFindingSaga()
+        [Test]
+        public async Task Query_Other_Property_Passes_With_Json_Resolver_Rename()
         {
-            _correlationId = Guid.NewGuid();
+            // Arrange
+            var correlationId = Guid.NewGuid();
+            _ids.Add(correlationId);
+            var username = Guid.NewGuid().ToString(); // wouldn't actually be a guid, but used this for uniqueness
+            SagaRepository.Instance.InsertSaga(new SimpleSaga { CorrelationId = correlationId, Username = username }, true).GetAwaiter().GetResult();
+            ISagaQuery<SimpleSaga> query = new SagaQuery<SimpleSaga>(x => x.Username == username);
 
-            SagaRepository.Instance.InsertSaga(new SimpleSaga { CorrelationId = _correlationId }).GetAwaiter().GetResult();
+            // Act
+            var repository = new DocumentDbSagaRepository<SimpleSaga>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, JsonSerializerSettingsExtensions.GetSagaRenameSettings<SimpleSaga>());
+            var result = repository.Find(query).GetAwaiter().GetResult();
 
-            var repository = new DocumentDbSagaRepository<SimpleSaga>(SagaRepository.Instance.Client, SagaRepository.DatabaseName);
+            // Assert
+            Assert.That(result.Single(), Is.EqualTo(correlationId)); // So it does find it
+        }
 
-            ISagaQuery<SimpleSaga> query = new SagaQuery<SimpleSaga>(x => x.CorrelationId == _correlationId);
+        [Test]
+        public async Task Query_Passes_With_Json_Property_Attribute()
+        {
+            // Arrange
+            var correlationId = Guid.NewGuid();
+            _ids.Add(correlationId);
+            SagaRepository.Instance.InsertSaga(new SimpleSagaResource { CorrelationId = correlationId }, false).GetAwaiter().GetResult();
+            ISagaQuery<SimpleSagaResource> query = new SagaQuery<SimpleSagaResource>(x => x.CorrelationId == correlationId);
 
-            _result = repository.Find(query).GetAwaiter().GetResult();
+            // Act
+            var repository = new DocumentDbSagaRepository<SimpleSagaResource>(SagaRepository.Instance.Client, SagaRepository.DatabaseName);
+            var result = repository.Find(query).GetAwaiter().GetResult();
+
+            // Assert
+            Assert.That(result.Single(), Is.EqualTo(correlationId));
         }
 
         [OneTimeTearDown]
         public void Kill()
         {
-            SagaRepository.Instance.DeleteSaga(_correlationId).GetAwaiter().GetResult();
+            foreach (var id in _ids)
+            {
+                SagaRepository.Instance.DeleteSaga(id).GetAwaiter().GetResult();
+            }
         }
     }
 }
