@@ -15,6 +15,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using Automatonymous;
     using DocumentDbIntegration.Saga;
     using DocumentDbIntegration.Tests;
+    using global::MassTransit.DocumentDbIntegration;
     using GreenPipes;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
@@ -28,7 +29,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using Testing;
 
 
-    [TestFixture, Explicit]
+    [TestFixture]
     public class When_using_DocumentDB :
         InMemoryTestFixture
     {
@@ -56,7 +57,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _collectionName = "sagas";
             _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
 
-            _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => new DocumentDbSagaRepository<ShoppingChore>(_documentClient, _databaseName, _collectionName));
+            _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => new DocumentDbSagaRepository<ShoppingChore>(_documentClient, _databaseName, JsonSerializerSettingsExtensions.GetSagaRenameSettings<ShoppingChore>()));
         }
 
         [OneTimeSetUp]
@@ -87,6 +88,55 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
+        async Task<ShoppingChore> GetNoSagaRetry(Guid id, TimeSpan timeout)
+        {
+            DateTime giveUpAt = DateTime.Now + timeout;
+            ShoppingChore saga = null;
+
+            while (DateTime.Now < giveUpAt)
+            {
+                try
+                {
+                    var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
+                    saga = JsonConvert.DeserializeObject<ShoppingChore>(document.Resource.ToString());
+
+                    await Task.Delay(10).ConfigureAwait(false);
+                }
+                catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    saga = null;
+                    break;
+                }
+            }
+
+            return saga;
+        }
+
+        async Task<ShoppingChore> GetSagaRetry(Guid id, TimeSpan timeout, Func<ShoppingChore, bool> filterExpression = null)
+        {
+            DateTime giveUpAt = DateTime.Now + timeout;
+
+            while (DateTime.Now < giveUpAt)
+            {
+                try
+                {
+                    var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
+                    var saga = JsonConvert.DeserializeObject<ShoppingChore>(document.Resource.ToString());
+
+                    if (filterExpression?.Invoke(saga) == false) continue;
+                    return saga;
+                }
+                catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    await Task.Delay(10).ConfigureAwait(false);
+
+                    continue;
+                }
+            }
+
+            return null;
+        }
+
         [Test]
         public async Task Should_have_removed_the_state_machine()
         {
@@ -97,16 +147,16 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 CorrelationId = correlationId
             });
 
-            Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
-            Assert.IsTrue(sagaId.HasValue);
+            var saga = await GetSagaRetry(correlationId, TestTimeout);
+            Assert.IsNotNull(saga);
 
             await InputQueueSendEndpoint.Send(new SodOff
             {
                 CorrelationId = correlationId
             });
 
-            sagaId = await _repository.Value.ShouldNotContainSaga(correlationId, TestTimeout);
-            Assert.IsFalse(sagaId.HasValue);
+            saga = await GetNoSagaRetry(correlationId, TestTimeout);
+            Assert.IsNull(saga);
         }
 
         [Test]
@@ -119,19 +169,19 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 CorrelationId = correlationId
             });
 
-            Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
+            var saga = await GetSagaRetry(correlationId, TestTimeout);
 
-            Assert.IsTrue(sagaId.HasValue);
+            Assert.IsNotNull(saga);
 
             await InputQueueSendEndpoint.Send(new GotHitByACar
             {
                 CorrelationId = correlationId
             });
 
-            sagaId = await _repository.Value.ShouldContainSaga(x => x.CorrelationId == correlationId
-                && x.CurrentState == _machine.Dead.Name, TestTimeout);
+            saga = await GetSagaRetry(correlationId, TestTimeout, x=>x.CurrentState == _machine.Dead.Name);
 
-            Assert.IsTrue(sagaId.HasValue);
+            Assert.IsNotNull(saga);
+            Assert.IsTrue(saga.CurrentState == _machine.Dead.Name);
 
             ShoppingChore instance = await GetSaga(correlationId);
 

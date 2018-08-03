@@ -14,8 +14,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 {
     using System;
     using Automatonymous;
-    using Saga;
-    using Newtonsoft.Json;
+    using DocumentDbIntegration;
 
     public class RehersalBegins
     {
@@ -47,7 +46,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     }
 
     public class ChoirState :
-        SagaStateMachineInstance
+        SagaStateMachineInstance, IVersionedSaga
     {
         protected ChoirState()
         {
@@ -60,8 +59,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
         public string CurrentState { get; set; }
         public int Harmony { get; set; }
-        [JsonProperty("id")]
         public Guid CorrelationId { get; set; }
+        public string ETag { get; set; }
         public byte[] RowVersion { get; set; }
         public string BassName { get; set; }
         public string BaritoneName { get; set; }

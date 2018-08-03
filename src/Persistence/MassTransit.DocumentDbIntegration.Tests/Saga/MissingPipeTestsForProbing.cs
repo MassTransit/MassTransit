@@ -36,7 +36,7 @@
             _nextPipe = new Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>>();
 
             _pipe = new MissingPipe<SimpleSaga, InitiateSimpleSaga>(Mock.Of<IDocumentClient>(), SagaRepository.DatabaseName, SagaRepository.CollectionName, _nextPipe.Object,
-                Mock.Of<IDocumentDbSagaConsumeContextFactory>(), new RequestOptions());
+                Mock.Of<IDocumentDbSagaConsumeContextFactory>(), null);
         }
     }
 }

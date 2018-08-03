@@ -10,15 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
-
 namespace MassTransit.DocumentDbIntegration
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
+
     public class PropertyRenameSerializerContractResolver : DefaultContractResolver
     {
         readonly Dictionary<Type, Dictionary<string, string>> _renames;

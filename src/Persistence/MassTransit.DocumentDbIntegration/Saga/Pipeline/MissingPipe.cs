@@ -15,35 +15,36 @@ namespace MassTransit.DocumentDbIntegration.Saga.Pipeline
     using Context;
     using GreenPipes;
     using Logging;
-    using MassTransit.Saga;
-    using Microsoft.Azure.Documents.Client;
-    using System.Threading.Tasks;
     using Microsoft.Azure.Documents;
+    using Microsoft.Azure.Documents.Client;
+    using Newtonsoft.Json;
+    using System.Threading.Tasks;
     using Util;
-
 
     public class MissingPipe<TSaga, TMessage> :
         IPipe<SagaConsumeContext<TSaga, TMessage>>
-        where TSaga : class, ISaga
+        where TSaga : class, IVersionedSaga
         where TMessage : class
     {
         static readonly ILog _log = Logger.Get<DocumentDbSagaRepository<TSaga>>();
-        readonly string _databaseName;
-        readonly string _collectionName;
-        readonly IDocumentClient _client;
-        readonly IDocumentDbSagaConsumeContextFactory _documentDbSagaConsumeContextFactory;
-        readonly RequestOptions _requestOptions;
-        readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _next;
+        private readonly string _databaseName;
+        private readonly string _collectionName;
+        private readonly IDocumentClient _client;
+        private readonly IDocumentDbSagaConsumeContextFactory _documentDbSagaConsumeContextFactory;
+        private readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _next;
+        private readonly JsonSerializerSettings _jsonSerializerSettings;
+        private readonly RequestOptions _requestOptions;
 
         public MissingPipe(IDocumentClient client, string databaseName, string collectionName, IPipe<SagaConsumeContext<TSaga, TMessage>> next,
-            IDocumentDbSagaConsumeContextFactory documentDbSagaConsumeContextFactory, RequestOptions requestOptions)
+            IDocumentDbSagaConsumeContextFactory documentDbSagaConsumeContextFactory, JsonSerializerSettings jsonSerializerSettings)
         {
             _client = client;
             _databaseName = databaseName;
             _collectionName = collectionName;
             _next = next;
             _documentDbSagaConsumeContextFactory = documentDbSagaConsumeContextFactory;
-            _requestOptions = requestOptions;
+            _jsonSerializerSettings = jsonSerializerSettings;
+            if (_jsonSerializerSettings != null) _requestOptions = new RequestOptions { JsonSerializerSettings = jsonSerializerSettings };
         }
 
         public void Probe(ProbeContext context)
@@ -58,13 +59,12 @@ namespace MassTransit.DocumentDbIntegration.Saga.Pipeline
                     TypeMetadataCache<TMessage>.ShortName);
 
             SagaConsumeContext<TSaga, TMessage> proxy =
-                _documentDbSagaConsumeContextFactory.Create(_client, _databaseName, _collectionName, context, context.Saga, false);
+                _documentDbSagaConsumeContextFactory.Create(_client, _databaseName, _collectionName, context, context.Saga, false, _jsonSerializerSettings);
 
             await _next.Send(proxy).ConfigureAwait(false);
 
             if (!proxy.IsCompleted)
-                await _client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), context.Saga,
-                    disableAutomaticIdGeneration: true, options: _requestOptions).ConfigureAwait(false);
+                await _client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), context.Saga, _requestOptions, true).ConfigureAwait(false);
         }
     }
 }

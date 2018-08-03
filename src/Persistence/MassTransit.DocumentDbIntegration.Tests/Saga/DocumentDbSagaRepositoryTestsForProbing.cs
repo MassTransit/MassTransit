@@ -44,7 +44,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
             _probeContext = new Mock<ProbeContext>();
             _probeContext.Setup(m => m.CreateScope("sagaRepository")).Returns(_scope.Object);
 
-            var repository = new DocumentDbSagaRepository<SimpleSaga>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, null);
+            var repository = new DocumentDbSagaRepository<SimpleSagaResource>(SagaRepository.Instance.Client, SagaRepository.DatabaseName);
 
             repository.Probe(_probeContext.Object);
         }

@@ -12,17 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.DocumentDbIntegration.Tests.Saga
 {
-    using System;
-    using System.Threading.Tasks;
-    using GreenPipes;
-    using DocumentDbIntegration.Saga;
     using DocumentDbIntegration.Saga.Context;
     using DocumentDbIntegration.Saga.Pipeline;
-    using Microsoft.Azure.Documents.Client;
+    using GreenPipes;
     using Moq;
     using NUnit.Framework;
-    using Pipeline;
-    using Util;
+    using System;
+    using System.Threading.Tasks;
 
 
     [TestFixture]
@@ -31,37 +27,37 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
         [Test]
         public void ThenNextPipeCalled()
         {
-            _nextPipe.Verify(m => m.Send(It.IsAny<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>()), Times.Once);
+            _nextPipe.Verify(m => m.Send(It.IsAny<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>>()), Times.Once);
         }
 
         [Test]
         public async Task ThenSagaInsertedIntoDocument()
         {
-            var saga = await SagaRepository.Instance.GetSaga(_saga.CorrelationId);
+            var saga = await SagaRepository.Instance.GetSaga<SimpleSagaResource>(_saga.CorrelationId, true);
 
             Assert.That(saga, Is.Not.Null);
         }
 
-        Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>> _nextPipe;
-        MissingPipe<SimpleSaga, InitiateSimpleSaga> _pipe;
-        Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>> _context;
+        Mock<IPipe<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>>> _nextPipe;
+        MissingPipe<SimpleSagaResource, InitiateSimpleSaga> _pipe;
+        Mock<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>> _context;
         Mock<IDocumentDbSagaConsumeContextFactory> _consumeContextFactory;
-        Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>> _proxy;
-        SimpleSaga _saga;
+        Mock<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>> _proxy;
+        SimpleSagaResource _saga;
 
         [OneTimeSetUp]
         public async Task GivenAMissingPipe_WhenSendingAndProxyIncomplete()
         {
-            _nextPipe = new Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>>();
-            _proxy = new Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>();
+            _nextPipe = new Mock<IPipe<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>>>();
+            _proxy = new Mock<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>>();
             _proxy.SetupGet(m => m.IsCompleted).Returns(false);
             _consumeContextFactory = new Mock<IDocumentDbSagaConsumeContextFactory>();
-            _saga = new SimpleSaga { CorrelationId = Guid.NewGuid() };
-            _context = new Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>();
+            _saga = new SimpleSagaResource { CorrelationId = Guid.NewGuid() };
+            _context = new Mock<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>>();
             _context.SetupGet(m => m.Saga).Returns(_saga);
-            _consumeContextFactory.Setup(m => m.Create(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, _context.Object, _context.Object.Saga, false)).Returns(_proxy.Object);
+            _consumeContextFactory.Setup(m => m.Create(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, _context.Object, It.IsAny<SimpleSagaResource>(), false, null)).Returns(_proxy.Object);
 
-            _pipe = new MissingPipe<SimpleSaga, InitiateSimpleSaga>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, _nextPipe.Object, _consumeContextFactory.Object, new RequestOptions());
+            _pipe = new MissingPipe<SimpleSagaResource, InitiateSimpleSaga>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, _nextPipe.Object, _consumeContextFactory.Object, null);
 
             await _pipe.Send(_context.Object);
         }

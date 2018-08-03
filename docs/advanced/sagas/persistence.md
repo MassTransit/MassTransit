@@ -452,9 +452,59 @@ public class SampleSaga : ISaga
 
 DocumentDb is the precessor of Azure CosmosDb and the DocumentDb API is still one of the main APIs for the NoSQL document-oriented persistence of CosmosDb. MassTransit supports saga persistence in CosmosDb by using both MongoDb API (using `MassTransit.MongoDb` package) and using DocumentDb API (using `MassTransit.DocumentDb` package).
 
-DocumentDb requires that any document stored there has a property called `id`, to be used as the document identity. Saga instances have `CorrelationId` for the same purpose, so the DocumentDb saga repository applies JSON serialization options to change the property name for `CorrelationId` to `id` when the document is serialized and deserialized. You must be aware of this when using saga instance documents outside of the saga repository, otherwise you will get documents with empty `CorrelationId` property.
+DocumentDb requires that any document stored there has a property called `id`, to be used as the document identity. Saga instances have `CorrelationId` for the same purpose, so there are two ways to create your DocumentDb saga class, which can have different implications depending on your usage. ETag must also be present, which is used for optimistic concurrency. Please never set this property yourself, it managed 100% by document db.
 
-`DocumentDbSagaRepository` reguires `IDocumentClient` and database name as parameters. `IDocumentClient` must be a singleton, as advised by Microsoft.
+#### First, the simple (out of box) functionality. Create your saga class:
+
+```csharp
+public class SampleSaga : IVersionedSaga
+{
+    public Guid CorrelationId { get; set; }
+    public string ETag { get; set; }
+    public string State { get; set; }
+    public string SomeProperty { get; set; }
+}
+
+// And in your bus/saga configuration, you explicitly pass in the settings
+var repository = new DocumentDbSagaRepository<SampleSaga>(documentDbClient, "sagaDatabase", JsonSerializerSettingsExtensions.GetSagaRenameSettings<SimpleSaga>());
+```
+
+The only restriction with this method is you might run into trouble if you are using Correlation Expressions that use the CorrelationId property. This is because when passing these expressions into DocumentDb's Create Query, it must have the `[JsonProperty("id")]` attribute instead of using the `JsonSerializerSettingsExtensions.GetSagaRenameSettings<...>()` rename.
+
+#### So the second option for your saga class declaration is:
+
+```csharp
+public class SampleSaga : IVersionedSaga
+{
+    [JsonProperty("id")]
+    public Guid CorrelationId { get; set; }
+    [JsonProperty("_etag")]
+    public string ETag { get; set; }
+    public string State { get; set; }
+    public string SomeProperty { get; set; }
+}
+
+// And in your bus/saga configuration, just follow the example below, no need to use the GetSagaRenameSettings<>()
+```
+
+And optionally, you can make your Saga inherit from the Azure DocumentDb class `Resource`, because.. well why not? It's saving to that store, so you might as well have all the properties there anyways.
+
+#### Third option for saga class declaration:
+
+```csharp
+public class SampleSaga : IVersionedSaga, Resource
+{
+    [JsonProperty("id")] // This overrides the Resource [JsonProperty("id")], which exists on the Resource classes Id property. This means Id will be a null guid, so just always use CorrelationId instead
+    public Guid CorrelationId { get; set; }
+    // The Resource class has the [JsonProperty("_etag")] public string ETag {get;set;}, so we don't need to declare it here
+    public string State { get; set; }
+    public string SomeProperty { get; set; }
+}
+
+// And in your bus/saga configuration, just follow the example below, no need to use the GetSagaRenameSettings<>()
+```
+
+So my preference is option 3, or option 2. Option 1 is there to offer an option as backwards compatibility to existing functionality.
 
 Instantiation of the DocumentDb saga repository could be done like this:
 

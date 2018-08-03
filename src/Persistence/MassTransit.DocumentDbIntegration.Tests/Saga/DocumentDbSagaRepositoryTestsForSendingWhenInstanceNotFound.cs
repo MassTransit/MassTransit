@@ -29,13 +29,13 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
         [Test]
         public void ThenMissingPipeInvokedOnPolicy()
         {
-            _policy.Verify(m => m.Missing(_context.Object, It.IsAny<MissingPipe<SimpleSaga, InitiateSimpleSaga>>()));
+            _policy.Verify(m => m.Missing(_context.Object, It.IsAny<MissingPipe<SimpleSagaResource, InitiateSimpleSaga>>()));
         }
 
-        Mock<ISagaPolicy<SimpleSaga, InitiateSimpleSaga>> _policy;
+        Mock<ISagaPolicy<SimpleSagaResource, InitiateSimpleSaga>> _policy;
         Mock<ConsumeContext<InitiateSimpleSaga>> _context;
-        SimpleSaga _nullSimpleSaga;
-        Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>> _nextPipe;
+        SimpleSagaResource _nullSimpleSaga;
+        Mock<IPipe<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>>> _nextPipe;
 
         [OneTimeSetUp]
         public async Task GivenADocumentDbSagaRepository_WhenSendingAndInstanceNotFound()
@@ -46,12 +46,12 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
 
             _nullSimpleSaga = null;
 
-            _policy = new Mock<ISagaPolicy<SimpleSaga, InitiateSimpleSaga>>();
+            _policy = new Mock<ISagaPolicy<SimpleSagaResource, InitiateSimpleSaga>>();
             _policy.Setup(x => x.PreInsertInstance(_context.Object, out _nullSimpleSaga)).Returns(false);
 
-            _nextPipe = new Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>>();
+            _nextPipe = new Mock<IPipe<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>>>();
 
-            var repository = new DocumentDbSagaRepository<SimpleSaga>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, null);
+            var repository = new DocumentDbSagaRepository<SimpleSagaResource>(SagaRepository.Instance.Client, SagaRepository.DatabaseName);
 
             await repository.Send(_context.Object, _policy.Object, _nextPipe.Object);
         }

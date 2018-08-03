@@ -15,6 +15,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using Automatonymous;
     using DocumentDbIntegration.Saga;
     using DocumentDbIntegration.Tests;
+    using global::MassTransit.DocumentDbIntegration;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Newtonsoft.Json;
@@ -27,7 +28,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using Testing;
 
 
-    [TestFixture, Explicit]
+    [TestFixture]
     public class When_using_DocumentDbConcurrencyNoRetry :
         InMemoryTestFixture
     {
@@ -50,7 +51,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _collectionName = "sagas";
             _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
 
-            _repository = new Lazy<ISagaRepository<ChoirState>>(() => new DocumentDbSagaRepository<ChoirState>(_documentClient, _databaseName, _collectionName));
+            _repository = new Lazy<ISagaRepository<ChoirState>>(() => new DocumentDbSagaRepository<ChoirState>(_documentClient, _databaseName, JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirState>()));
         }
 
         [OneTimeSetUp]
@@ -81,7 +82,32 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        [Test, Explicit]
+        async Task<ChoirState> GetSagaRetry(Guid id, TimeSpan timeout, Func<ChoirState, bool> filterExpression = null)
+        {
+            DateTime giveUpAt = DateTime.Now + timeout;
+
+            while (DateTime.Now < giveUpAt)
+            {
+                try
+                {
+                    var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
+                    var saga = JsonConvert.DeserializeObject<ChoirState>(document.Resource.ToString());
+
+                    if (filterExpression?.Invoke(saga) == false) continue;
+                    return saga;
+                }
+                catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    await Task.Delay(10).ConfigureAwait(false);
+
+                    continue;
+                }
+            }
+
+            return null;
+        }
+
+        [Test]
         public async Task Some_should_not_be_in_final_state_all()
         {
             var tasks = new List<Task>();
@@ -98,8 +124,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             for (int i = 0; i < 20; i++)
             {
-                Guid? sagaId = await _repository.Value.ShouldContainSaga(sagaIds[i], TestTimeout);
-                Assert.IsTrue(sagaId.HasValue);
+                var saga = await GetSagaRetry(sagaIds[i], TestTimeout);
+                Assert.IsNotNull(saga);
             }
 
             for (int i = 0; i < 20; i++)
@@ -133,9 +159,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             await InputQueueSendEndpoint.Send(new RehersalBegins { CorrelationId = correlationId });
 
-            Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
+            var saga = await GetSagaRetry(correlationId, TestTimeout);
 
-            Assert.IsTrue(sagaId.HasValue);
+            Assert.IsNotNull(saga);
 
             await Task.WhenAll(
                 InputQueueSendEndpoint.Send(new Bass { CorrelationId = correlationId, Name = "John" }),

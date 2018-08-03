@@ -39,12 +39,12 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
             var context = new Mock<ConsumeContext<InitiateSimpleSaga>>();
             context.Setup(x => x.CorrelationId).Returns(default(Guid?));
 
-            var repository = new DocumentDbSagaRepository<SimpleSaga>(Mock.Of<IDocumentClient>(), "sagaTest", "sagas", null);
+            var repository = new DocumentDbSagaRepository<SimpleSagaResource>(Mock.Of<IDocumentClient>(), "sagaTest");
 
             try
             {
-                await repository.Send(context.Object, Mock.Of<ISagaPolicy<SimpleSaga, InitiateSimpleSaga>>(),
-                    Mock.Of<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>>());
+                await repository.Send(context.Object, Mock.Of<ISagaPolicy<SimpleSagaResource, InitiateSimpleSaga>>(),
+                    Mock.Of<IPipe<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>>>());
             }
             catch (SagaException exception)
             {

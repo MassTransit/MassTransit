@@ -14,7 +14,6 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
 {
     using Logging;
     using MassTransit.Context;
-    using MassTransit.Saga;
     using Microsoft.Azure.Documents.Client;
     using System;
     using System.Threading.Tasks;
@@ -27,31 +26,17 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
         ConsumeContextProxyScope<TMessage>,
         SagaConsumeContext<TSaga, TMessage>
         where TMessage : class
-        where TSaga : class, ISaga
+        where TSaga : class, IVersionedSaga
     {
         static readonly ILog _log = Logger.Get<DocumentDbSagaRepository<TSaga>>();
-        readonly IDocumentClient _client;
-        readonly bool _existing;
-        readonly string _databaseName;
-        readonly string _collectionName;
-        static readonly RequestOptions _requestOptions;
-
-        static DocumentDbSagaConsumeContext()
-        {
-            var resolver = new PropertyRenameSerializerContractResolver();
-            resolver.RenameProperty(typeof(TSaga), "CorrelationId", "id");
-
-            _requestOptions = new RequestOptions
-            {
-                JsonSerializerSettings = new JsonSerializerSettings
-                {
-                    ContractResolver = resolver
-                }
-            };
-        }
+        private readonly IDocumentClient _client;
+        private readonly bool _existing;
+        private readonly string _databaseName;
+        private readonly string _collectionName;
+        private readonly RequestOptions _requestOptions;
 
         public DocumentDbSagaConsumeContext(IDocumentClient client, string databaseName, string collectionName, ConsumeContext<TMessage> context,
-            TSaga instance, bool existing = true)
+            TSaga instance, bool existing = true, JsonSerializerSettings jsonSerializerSettings = null)
             : base(context)
         {
             Saga = instance;
@@ -59,6 +44,7 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
             _existing = existing;
             _databaseName = databaseName;
             _collectionName = collectionName;
+            if (jsonSerializerSettings != null) _requestOptions = new RequestOptions { JsonSerializerSettings = jsonSerializerSettings };
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;

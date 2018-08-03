@@ -43,7 +43,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
         [Test]
         public async Task ThenSagaInstanceStored()
         {
-            Assert.That(await SagaRepository.Instance.GetSaga(_correlationId), Is.Not.Null);
+            Assert.That(await SagaRepository.Instance.GetSaga<SimpleSagaResource>(_correlationId, true), Is.Not.Null);
         }
 
         [Test]
@@ -55,14 +55,14 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
             Assert.That(etagGuid != Guid.Empty, Is.True);
         }
 
-        Mock<ISagaPolicy<SimpleSaga, InitiateSimpleSaga>> _policy;
+        Mock<ISagaPolicy<SimpleSagaResource, InitiateSimpleSaga>> _policy;
         Mock<ConsumeContext<InitiateSimpleSaga>> _context;
-        SimpleSaga _simpleSaga;
+        SimpleSagaResource _simpleSaga;
         Guid _correlationId;
         CancellationToken _cancellationToken;
-        Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>> _nextPipe;
+        Mock<IPipe<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>>> _nextPipe;
         Mock<IDocumentDbSagaConsumeContextFactory> _sagaConsumeContextFactory;
-        Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>> _sagaConsumeContext;
+        Mock<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>> _sagaConsumeContext;
 
         [OneTimeSetUp]
         public async Task GivenADocumentDbSagaRepository_WhenSendingAndPolicyReturnsInstance()
@@ -74,22 +74,22 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
             _context.Setup(x => x.CorrelationId).Returns(_correlationId);
             _context.Setup(m => m.CancellationToken).Returns(_cancellationToken);
 
-            _simpleSaga = new SimpleSaga { CorrelationId = _correlationId };
+            _simpleSaga = new SimpleSagaResource { CorrelationId = _correlationId };
 
-            _policy = new Mock<ISagaPolicy<SimpleSaga, InitiateSimpleSaga>>();
+            _policy = new Mock<ISagaPolicy<SimpleSagaResource, InitiateSimpleSaga>>();
             _policy.Setup(x => x.PreInsertInstance(_context.Object, out _simpleSaga)).Returns(true);
 
-            _nextPipe = new Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>>();
+            _nextPipe = new Mock<IPipe<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>>>();
 
-            _sagaConsumeContext = new Mock<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>();
+            _sagaConsumeContext = new Mock<SagaConsumeContext<SimpleSagaResource, InitiateSimpleSaga>>();
             _sagaConsumeContext.Setup(x => x.CorrelationId).Returns(_correlationId);
 
             _sagaConsumeContextFactory = new Mock<IDocumentDbSagaConsumeContextFactory>();
-            _sagaConsumeContextFactory.Setup(m => m.Create(It.IsAny<IDocumentClient>(), It.IsAny<string>(), It.IsAny<string>(), _context.Object, _simpleSaga, true)).Returns(
+            _sagaConsumeContextFactory.Setup(m => m.Create(It.IsAny<IDocumentClient>(), It.IsAny<string>(), It.IsAny<string>(), _context.Object, It.IsAny<SimpleSagaResource>(), It.IsAny<bool>(), null)).Returns(
                 _sagaConsumeContext.Object);
 
 
-            var repository = new DocumentDbSagaRepository<SimpleSaga>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, _sagaConsumeContextFactory.Object);
+            var repository = new DocumentDbSagaRepository<SimpleSagaResource>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, _sagaConsumeContextFactory.Object, null);
 
             await repository.Send(_context.Object, _policy.Object, _nextPipe.Object);
         }
