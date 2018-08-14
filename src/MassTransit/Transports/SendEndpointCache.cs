@@ -14,7 +14,7 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Threading.Tasks;
-    using Util.Caching;
+    using GreenPipes.Caching;
 
 
     /// <summary>
@@ -27,7 +27,9 @@ namespace MassTransit.Transports
 
         public SendEndpointCache()
         {
-            var cache = new GreenCache<CachedSendEndpoint<TKey>>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
+            var cacheSettings = new CacheSettings(1000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24));
+
+            var cache = new GreenCache<CachedSendEndpoint<TKey>>(cacheSettings);
             _index = cache.AddIndex("key", x => x.Key);
         }
 

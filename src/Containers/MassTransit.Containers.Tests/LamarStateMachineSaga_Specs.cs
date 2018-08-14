@@ -4,6 +4,7 @@
     using Automatonymous;
     using Lamar;
     using AutomatonymousLamarIntegration;
+    using LamarIntegration;
     using NUnit.Framework;
     using Saga;
     using Scenarios.StateMachines;
@@ -35,6 +36,10 @@
             _container = new Container(x =>
             {
                 x.For(typeof(ISagaRepository<>)).Use(typeof(InMemorySagaRepository<>)).Singleton();
+
+                x.AddMassTransit();
+                
+                x.ForConcreteType<PublishTestStartedActivity>();
 
                 x.For<TestStateMachineSaga>().Use<TestStateMachineSaga>().Singleton();
                 x.For(typeof(SagaStateMachine<TestInstance>)).Use(typeof(TestStateMachineSaga)).Singleton();

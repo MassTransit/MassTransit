@@ -21,7 +21,7 @@
 
         public ICompensateActivityScopeContext<TActivity, TLog> GetScope(CompensateContext<TLog> context)
         {
-            if (context.TryGetPayload<IContainer>(out var existingContainer))
+            if (context.TryGetPayload<INestedContainer>(out var existingContainer))
             {
                 var activityFactory = existingContainer.GetInstance<LamarActivityFactory>();
                 var activity = activityFactory.Get<TActivity, TLog>(context.Log);
@@ -41,7 +41,7 @@
                 var scope = scopeContainer;
                 activityContext.GetOrAddPayload(() => scope);
 
-                return new CreatedCompensateActivityScopeContext<IContainer, TActivity, TLog>(scope, activityContext);
+                return new CreatedCompensateActivityScopeContext<INestedContainer, TActivity, TLog>(scope, activityContext);
             }
             catch
             {

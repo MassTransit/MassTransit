@@ -12,7 +12,7 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.SimpleInjectorIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.1" />
+    <PackageReference Include="GreenPipes" Version="2.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="SimpleInjector" Version="4.3.0" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />

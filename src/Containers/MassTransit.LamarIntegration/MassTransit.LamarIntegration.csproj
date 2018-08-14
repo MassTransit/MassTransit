@@ -1,23 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <DebugType>portable</DebugType>
   </PropertyGroup>
-
   <PropertyGroup>
     <PackageId>MassTransit.Lamar</PackageId>
     <Title>MassTransit.Lamar</Title>
     <Description>MassTransit Lamar container support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.LamarIntegration.xml</DocumentationFile>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Lamar" Version="1.0.2" />
+    <PackageReference Include="Lamar" Version="1.1.1" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
-
 </Project>

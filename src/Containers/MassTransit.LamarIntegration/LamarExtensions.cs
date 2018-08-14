@@ -5,10 +5,8 @@
     using System.Linq;
     using ConsumeConfigurators;
     using Courier;
-    using Courier.Factories;
     using Internals.Extensions;
     using Lamar;
-    using Microsoft.Extensions.DependencyInjection;
     using PipeConfigurators;
     using Saga;
     using Scoping;
@@ -115,7 +113,7 @@
             serviceRegistry.Injectable<ConsumeContext>();
         }
 
-        internal static IContainer GetNestedContainer(this IContainer container, ConsumeContext context)
+        internal static INestedContainer GetNestedContainer(this IContainer container, ConsumeContext context)
         {
             var nestedContainer = container.GetNestedContainer();
             nestedContainer.Inject(LamarActivityFactory.Instance);
@@ -124,17 +122,12 @@
             return nestedContainer;
         }
 
-        internal static IContainer GetNestedContainer<T>(this IContainer container, ConsumeContext<T> context)
+        internal static INestedContainer GetNestedContainer<T>(this IContainer container, ConsumeContext<T> context)
             where T : class
         {
             var nestedContainer = container.GetNestedContainer();
             nestedContainer.Inject(LamarActivityFactory.Instance);
-
-            nestedContainer.Configure(cfg =>
-            {
-                cfg.AddScoped(typeof(ConsumeContext), provider => context);
-                cfg.AddScoped(typeof(ConsumeContext<T>), provider => context);
-            });
+            nestedContainer.Inject<ConsumeContext>(context);
 
             return nestedContainer;
         }

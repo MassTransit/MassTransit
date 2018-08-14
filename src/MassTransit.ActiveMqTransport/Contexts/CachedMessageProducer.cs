@@ -2,7 +2,7 @@
 {
     using System;
     using Apache.NMS;
-    using Util.Caching;
+    using GreenPipes.Caching;
 
 
     public class CachedMessageProducer :

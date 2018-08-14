@@ -16,7 +16,7 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Util.Caching;
+    using GreenPipes.Caching;
 
 
     public class CachedSendEndpoint<TKey> :

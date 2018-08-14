@@ -11,17 +11,17 @@
         public Activity<TInstance, TData> GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
             where TActivity : Activity<TInstance, TData>
         {
-            var lifetimeScope = context.GetPayload<IContainer>();
+            var nestedContainer = context.GetPayload<INestedContainer>();
 
-            return lifetimeScope.GetInstance<TActivity>();
+            return nestedContainer.GetInstance<TActivity>();
         }
 
         public Activity<TInstance> GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context)
             where TActivity : Activity<TInstance>
         {
-            var lifetimeScope = context.GetPayload<IContainer>();
+            var nestedContainer = context.GetPayload<INestedContainer>();
 
-            return lifetimeScope.GetInstance<TActivity>();
+            return nestedContainer.GetInstance<TActivity>();
         }
     }
 }

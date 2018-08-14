@@ -16,8 +16,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
     using System.Threading.Tasks;
     using Apache.NMS;
     using GreenPipes.Agents;
+    using GreenPipes.Caching;
     using Util;
-    using Util.Caching;
 
 
     public class MessageProducerCache :
@@ -31,7 +31,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
         public MessageProducerCache()
         {
-            _cache = new GreenCache<CachedMessageProducer>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
+            var cacheSettings = new CacheSettings(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24));
+            _cache = new GreenCache<CachedMessageProducer>(cacheSettings);
             _cache.Connect(new CloseAndDisposeOnRemoveObserver());
 
             _index = _cache.AddIndex("destination", x => x.Destination);

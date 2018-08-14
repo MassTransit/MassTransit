@@ -52,7 +52,7 @@ namespace MassTransit.Audit.Tests
         {
             var expected = _harness.Sent.Select<A>().Any();
             var expectedB = _harness.Sent.Select<B>().Any();
-            _store.Count(x => x.Metadata.ContextType == "Send").ShouldBe(3);
+            _store.Count(x => x.Result.Metadata.ContextType == "Send").ShouldBe(3);
         }
 
         [Test]
@@ -60,7 +60,7 @@ namespace MassTransit.Audit.Tests
         {
             bool expected = _harness.Consumed.Select<A>().Any();
             bool expectedB = _harness.Consumed.Select<B>().Any();
-            _store.Count(x => x.Metadata.ContextType == "Consume").ShouldBe(2);
+            _store.Count(x => x.Result.Metadata.ContextType == "Consume").ShouldBe(2);
         }
 
 

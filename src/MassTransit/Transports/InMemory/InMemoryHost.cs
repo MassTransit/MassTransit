@@ -22,11 +22,11 @@ namespace MassTransit.Transports.InMemory
     using Fabric;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Caching;
     using Logging;
     using MassTransit.Topology;
     using Pipeline;
     using Topology.Builders;
-    using Util.Caching;
 
 
     /// <summary>
@@ -52,8 +52,10 @@ namespace MassTransit.Transports.InMemory
             _messageFabric = new MessageFabric(concurrencyLimit);
 
             _receiveEndpoints = new ReceiveEndpointCollection();
+            
+            var cacheSettings = new CacheSettings(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24));
 
-            var cache = new GreenCache<InMemorySendTransport>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24), () => DateTime.UtcNow);
+            var cache = new GreenCache<InMemorySendTransport>(cacheSettings);
             _index = cache.AddIndex("exchangeName", x => x.ExchangeName);
 
             _receiveEndpointFactory = new InMemoryReceiveEndpointFactory(busConfiguration);

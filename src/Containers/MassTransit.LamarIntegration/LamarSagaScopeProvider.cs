@@ -31,7 +31,7 @@
         public ISagaScopeContext<T> GetScope<T>(ConsumeContext<T> context)
             where T : class
         {
-            if (context.TryGetPayload<IContainer>(out _))
+            if (context.TryGetPayload<INestedContainer>(out _))
                 return new ExistingSagaScopeContext<T>(context);
 
             var container = _container.GetNestedContainer(context);
@@ -46,7 +46,7 @@
                     scopeAction(proxy);
                 }
 
-                return new CreatedSagaScopeContext<IContainer, T>(consumerContainer, proxy);
+                return new CreatedSagaScopeContext<INestedContainer, T>(consumerContainer, proxy);
             }
             catch
             {
@@ -58,7 +58,7 @@
         public ISagaQueryScopeContext<TSaga, T> GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
             where T : class
         {
-            if (context.TryGetPayload<IContainer>(out _))
+            if (context.TryGetPayload<INestedContainer>(out _))
                 return new ExistingSagaQueryScopeContext<TSaga, T>(context);
 
             var container = _container.GetNestedContainer(context);
@@ -73,7 +73,7 @@
                     scopeAction(proxy);
                 }
 
-                return new CreatedSagaQueryScopeContext<IContainer, TSaga, T>(consumerContainer, proxy);
+                return new CreatedSagaQueryScopeContext<INestedContainer, TSaga, T>(consumerContainer, proxy);
             }
             catch
             {

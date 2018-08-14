@@ -4,8 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using GreenPipes.Caching;
     using Util;
-    using Util.Caching;
 
 
     public class SmartEndpointMessageBuffer :
@@ -16,7 +16,9 @@
 
         public SmartEndpointMessageBuffer()
         {
-            _events = new GreenCache<IMessageEvent>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(60), () => DateTime.UtcNow);
+            var cacheSettings = new CacheSettings(1000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(1));
+
+            _events = new GreenCache<IMessageEvent>(cacheSettings);
             _messageId = _events.AddIndex("messageId", x => x.MessageId.Value);
         }
 
@@ -27,10 +29,6 @@
             return TaskUtil.Completed;
         }
 
-        IEnumerable<IMessageEvent> GetEvents()
-        {
-            return _events.GetAll();
-        }
     }
 
 

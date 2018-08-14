@@ -24,7 +24,7 @@
 
         public IConsumerScopeContext GetScope(ConsumeContext context)
         {
-            if (context.TryGetPayload<IContainer>(out _))
+            if (context.TryGetPayload<INestedContainer>(out _))
                 return new ExistingConsumerScopeContext(context);
 
             var container = _container.GetNestedContainer(context);
@@ -35,7 +35,7 @@
 
                 proxy.GetOrAddPayload(() => consumerContainer);
 
-                return new CreatedConsumerScopeContext<IContainer>(consumerContainer, proxy);
+                return new CreatedConsumerScopeContext<INestedContainer>(consumerContainer, proxy);
             }
             catch
             {
@@ -48,7 +48,7 @@
             where TConsumer : class
             where T : class
         {
-            if (context.TryGetPayload<IContainer>(out var existingConsumer))
+            if (context.TryGetPayload<INestedContainer>(out var existingConsumer))
             {
                 var consumer = existingConsumer.GetInstance<TConsumer>();
                 if (consumer == null)
@@ -68,7 +68,7 @@
 
                 var consumerContext = context.PushConsumerScope(consumer, container);
 
-                return new CreatedConsumerScopeContext<IContainer, TConsumer, T>(container, consumerContext);
+                return new CreatedConsumerScopeContext<INestedContainer, TConsumer, T>(container, consumerContext);
             }
             catch
             {

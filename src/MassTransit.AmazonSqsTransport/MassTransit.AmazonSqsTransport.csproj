@@ -14,9 +14,9 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AmazonSqsTransport.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.1.3" />
-    <PackageReference Include="AWSSDK.SQS" Version="3.3.3.11" />
-    <PackageReference Include="GreenPipes" Version="2.1.1" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.1.6" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.3.3.14" />
+    <PackageReference Include="GreenPipes" Version="2.1.2" />
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>

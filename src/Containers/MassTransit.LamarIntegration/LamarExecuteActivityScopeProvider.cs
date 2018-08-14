@@ -22,7 +22,7 @@
 
         public IExecuteActivityScopeContext<TActivity, TArguments> GetScope(ExecuteContext<TArguments> context)
         {
-            if (context.TryGetPayload<IContainer>(out var existingContainer))
+            if (context.TryGetPayload<INestedContainer>(out var existingContainer))
             {
                 var activityFactory = existingContainer.GetInstance<LamarActivityFactory>();
                 var activity = activityFactory.Get<TActivity, TArguments>(context.Arguments);
@@ -43,7 +43,7 @@
                 var scope = scopeContainer;
                 activityContext.GetOrAddPayload(() => scope);
 
-                return new CreatedExecuteActivityScopeContext<IContainer, TActivity, TArguments>(scope, activityContext);
+                return new CreatedExecuteActivityScopeContext<INestedContainer, TActivity, TArguments>(scope, activityContext);
             }
             catch
             {

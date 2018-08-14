@@ -16,21 +16,23 @@ namespace MassTransit.Tests.Audit
     using System.Collections;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using GreenPipes.Caching;
     using MassTransit.Audit;
     using Util;
-    using Util.Caching;
 
 
     public class InMemoryAuditStore :
         IMessageAuditStore,
-        IEnumerable<InMemoryAuditStore.AuditRecord>
+        IEnumerable<Task<InMemoryAuditStore.AuditRecord>>
     {
         readonly ICache<AuditRecord> _audits;
         readonly IIndex<Guid, AuditRecord> _messageId;
 
         public InMemoryAuditStore()
         {
-            _audits = new GreenCache<AuditRecord>(10000, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(60), () => DateTime.UtcNow);
+            var cacheSettings = new CacheSettings(10000, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(60));
+
+            _audits = new GreenCache<AuditRecord>(cacheSettings);
             _messageId = _audits.AddIndex("messageId", x => x.Metadata.MessageId.Value);
         }
 
@@ -66,7 +68,7 @@ namespace MassTransit.Tests.Audit
         }
 
 
-        public IEnumerator<AuditRecord> GetEnumerator()
+        public IEnumerator<Task<AuditRecord>> GetEnumerator()
         {
             return _audits.GetAll().GetEnumerator();
         }

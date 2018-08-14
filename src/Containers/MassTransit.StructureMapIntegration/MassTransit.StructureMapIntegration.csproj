@@ -10,9 +10,9 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.StructureMapIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.1"/>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
-    <PackageReference Include="StructureMap" Version="4.6.1"/>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+    <PackageReference Include="GreenPipes" Version="2.1.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="StructureMap" Version="4.7.0" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

@@ -4,6 +4,7 @@
     using Saga;
     using Scoping;
 
+
     public class LamarSagaRepositoryFactory : ISagaRepositoryFactory
     {
         readonly IContainer _container;
