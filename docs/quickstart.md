@@ -26,7 +26,7 @@ public class Program
             });
         });
 
-        bus.Start();
+        bus.Start(); // This is important!
 
         bus.Publish(new YourMessage{Text = "Hi"});
         
@@ -75,6 +75,8 @@ console the text of the message.
 And now we have a bus instance that is fully configured and can start processing
 messages. We can grab the `busControl` that we created and call `Start` on it
 to get everything rolling. We again `await` on the result and now we can go.
+
+> **Important** you need to start the bus, otherwise you will get issues with sending and receiving messages. There is no "send-only" bus with MassTransit.
 
 We can call the `Publish` method on the `busControl` and we should see our
 console write out the output.

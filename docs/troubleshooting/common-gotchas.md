@@ -15,9 +15,9 @@ get all the mail.
 
 ## Send only bus
 
-If you need to only send or publish messages, don't create any receive endpoints. The bus will
-automatically create a temporary queue for the bus which can be used to publish events, as well as
-send commands and do request/response conversations.
+If you need to only send or publish messages, don't create any receive endpoints. The bus will automatically create a temporary queue for the bus which can be used to publish events, as well as send commands and do request/response conversations.
+
+However, this does not mean that if you need a send-only bus, you don't need to call `IBusControl.StartAsync()` (or `Start()`). The temporary queue only gets created when you start the bus.
 
 ## How do I load balance consumers across machines?
 
@@ -49,6 +49,10 @@ for the less urgent things. This helps with monitoring queue depths,
 error rates, etc. By placing each IServiceBus in its own Topshelf host
 / process you further enhance each bus's ability to process messages, and
 isolate issues / downtime.
+
+### Request client throws a timeout exception
+
+MassTransit uses a temporary non-durable queue and has a consumer to handle responses. This temporary queue only get configured and created when you _start the bus_. If you forget to start the bus in your application code, the request client will fail with a timeout, waiting for a response.
 
 ### Reading
 
