@@ -110,6 +110,8 @@ var result = await _client.Request<CheckOrderStatus>(new {OrderId = id});
 The syntax is significantly cleaner than dealing with message object, consumer contexts, responses,
 etc. And since async/await and messaging are both about asynchronous programming, it's a natural fit.
 
+> **Important:** MassTransit uses a temporary non-durable queue and has a consumer to handle responses. This temporary queue only get configured and created when you _start the bus_. If you forget to start the bus in your application code, the request client will fail with a timeout, waiting for a response.
+
 ## Using the request client in ASP.NET MVC
 
 The request client instance can be registered with the dependency resolver using the `IRequestClient`

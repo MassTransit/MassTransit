@@ -24,6 +24,8 @@ namespace EventPublisher
         public static void Main()
         {
             var busControl = ConfigureBus();
+
+            // Important! The bus must be started before using it!
             busControl.Start();
 
             do
@@ -60,9 +62,9 @@ namespace EventPublisher
 }
 ```
 
-In the example, the bus is configured and started, after which a publishing loop
-allows values to be entered and published. When the loop exits, the ``busControl``
-variable is disposed, which stops the bus.
+In the example, the bus is configured and started, after which a publishing loop allows values to be entered and published. When the loop exits, the ``busControl`` variable is disposed, which stops the bus.
+
+Always start the bus before starting to use it. Of course, you can only start a configured bus.
 
 ## MassTransit in a Windows service
 
