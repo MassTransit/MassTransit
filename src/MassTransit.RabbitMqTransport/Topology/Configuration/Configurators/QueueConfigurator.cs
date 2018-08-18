@@ -68,6 +68,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
 
         public string QueueName { get; set; }
         public bool Exclusive { get; set; }
+        public TimeSpan? QueueExpiration { get; set; }
 
         public IDictionary<string, object> QueueArguments { get; }
 

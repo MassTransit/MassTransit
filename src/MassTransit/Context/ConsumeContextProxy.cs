@@ -14,9 +14,7 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using GreenPipes.Payloads;
 
 
@@ -25,8 +23,7 @@ namespace MassTransit.Context
     /// of the context is only added at the scope level and below.
     /// </summary>
     public abstract class ConsumeContextProxy :
-        BasePipeContext,
-        ConsumeContext
+        BaseConsumeContext
     {
         readonly ConsumeContext _context;
 
@@ -37,140 +34,37 @@ namespace MassTransit.Context
         }
 
         protected ConsumeContextProxy(ConsumeContext context, IPayloadCache payloadCache)
-            : base(payloadCache)
+            : base(context, payloadCache)
         {
             _context = context;
         }
 
-        public virtual Task RespondAsync(object message, Type messageType, IPipe<SendContext> sendPipe)
-        {
-            return _context.RespondAsync(message, messageType, sendPipe);
-        }
+        public override Guid? MessageId => _context.MessageId;
+        public override Guid? RequestId => _context.RequestId;
+        public override Guid? CorrelationId => _context.CorrelationId;
+        public override Guid? ConversationId => _context.ConversationId;
+        public override Guid? InitiatorId => _context.InitiatorId;
+        public override DateTime? ExpirationTime => _context.ExpirationTime;
+        public override Uri SourceAddress => _context.SourceAddress;
+        public override Uri DestinationAddress => _context.DestinationAddress;
+        public override Uri ResponseAddress => _context.ResponseAddress;
+        public override Uri FaultAddress => _context.FaultAddress;
+        public override DateTime? SentTime => _context.SentTime;
 
-        public virtual Task RespondAsync<T>(object values) where T : class
-        {
-            return _context.RespondAsync<T>(values);
-        }
+        public override Headers Headers => _context.Headers;
+        public override HostInfo Host => _context.Host;
 
-        public virtual Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe) where T : class
-        {
-            return _context.RespondAsync(values, sendPipe);
-        }
+        public override Task ConsumeCompleted => _context.ConsumeCompleted;
+        public override IEnumerable<string> SupportedMessageTypes => _context.SupportedMessageTypes;
 
-        public virtual Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe) where T : class
-        {
-            return _context.RespondAsync<T>(values, sendPipe);
-        }
-
-        public virtual Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
-            where T : class
-        {
-            return _context.RespondAsync(message, sendPipe);
-        }
-
-        public virtual Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe) where T : class
-        {
-            return _context.RespondAsync(message, sendPipe);
-        }
-
-        public virtual Task RespondAsync(object message)
-        {
-            return _context.RespondAsync(message);
-        }
-
-        public virtual Task RespondAsync(object message, Type messageType)
-        {
-            return _context.RespondAsync(message, messageType);
-        }
-
-        public virtual Task RespondAsync(object message, IPipe<SendContext> sendPipe)
-        {
-            return _context.RespondAsync(message, sendPipe);
-        }
-
-        public virtual Guid? MessageId => _context.MessageId;
-        public virtual Guid? RequestId => _context.RequestId;
-        public virtual Guid? CorrelationId => _context.CorrelationId;
-        public virtual Guid? ConversationId => _context.ConversationId;
-        public virtual Guid? InitiatorId => _context.InitiatorId;
-        public virtual DateTime? ExpirationTime => _context.ExpirationTime;
-        public virtual Uri SourceAddress => _context.SourceAddress;
-        public virtual Uri DestinationAddress => _context.DestinationAddress;
-        public virtual Uri ResponseAddress => _context.ResponseAddress;
-        public virtual Uri FaultAddress => _context.FaultAddress;
-        public virtual DateTime? SentTime => _context.SentTime;
-
-        public virtual Headers Headers => _context.Headers;
-        public HostInfo Host => _context.Host;
-
-        public virtual Task Publish<T>(T message, CancellationToken cancellationToken) where T : class
-        {
-            return _context.Publish(message, cancellationToken);
-        }
-
-        public virtual Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe,
-            CancellationToken cancellationToken) where T : class
-        {
-            return _context.Publish(message, publishPipe, cancellationToken);
-        }
-
-        public virtual Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken) where T : class
-        {
-            return _context.Publish(message, publishPipe, cancellationToken);
-        }
-
-        public virtual Task Publish(object message, CancellationToken cancellationToken)
-        {
-            return _context.Publish(message, cancellationToken);
-        }
-
-        public virtual Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _context.Publish(message, publishPipe, cancellationToken);
-        }
-
-        public virtual Task Publish(object message, Type messageType, CancellationToken cancellationToken)
-        {
-            return _context.Publish(message, messageType, cancellationToken);
-        }
-
-        public virtual Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken)
-        {
-            return _context.Publish(message, messageType, publishPipe, cancellationToken);
-        }
-
-        public virtual Task Publish<T>(object values, CancellationToken cancellationToken) where T : class
-        {
-            return _context.Publish<T>(values, cancellationToken);
-        }
-
-        public virtual Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe,
-            CancellationToken cancellationToken) where T : class
-        {
-            return _context.Publish(values, publishPipe, cancellationToken);
-        }
-
-        public virtual Task Publish<T>(object values, IPipe<PublishContext> publishPipe,
-            CancellationToken cancellationToken) where T : class
-        {
-            return _context.Publish<T>(values, publishPipe, cancellationToken);
-        }
-
-        public ReceiveContext ReceiveContext => _context.ReceiveContext;
-        public Task CompleteTask => _context.CompleteTask;
-        public virtual IEnumerable<string> SupportedMessageTypes => _context.SupportedMessageTypes;
-
-        public virtual bool HasMessageType(Type messageType)
+        public override bool HasMessageType(Type messageType)
         {
             return _context.HasMessageType(messageType);
         }
 
-        public virtual bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
-            where T : class
+        public override bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
         {
-            ConsumeContext<T> messageContext;
-            if (_context.TryGetMessage(out messageContext))
+            if (_context.TryGetMessage(out ConsumeContext<T> messageContext))
             {
                 consumeContext = new MessageConsumeContext<T>(this, messageContext.Message);
                 return true;
@@ -180,39 +74,29 @@ namespace MassTransit.Context
             return false;
         }
 
-        public virtual Task RespondAsync<T>(T message) where T : class
-        {
-            return _context.RespondAsync(message);
-        }
-
-        public virtual void Respond<T>(T message) where T : class
-        {
-            _context.Respond(message);
-        }
-
-        public virtual Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        public override Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);
         }
 
-        public virtual Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
+        public override Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
             return _context.NotifyConsumed(context, duration, consumerType);
         }
 
-        public virtual Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception) where T : class
+        public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
             return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
-        public virtual ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        public override void AddConsumeTask(Task task)
         {
-            return _context.ConnectPublishObserver(observer);
+            _context.AddConsumeTask(task);
         }
 
-        public virtual ConnectHandle ConnectSendObserver(ISendObserver observer)
+        protected override IPublishEndpoint CreatePublishEndpoint()
         {
-            return _context.ConnectSendObserver(observer);
+            return _context;
         }
     }
 

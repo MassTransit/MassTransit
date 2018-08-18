@@ -20,8 +20,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Observables;
-    using MassTransit.Topology;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
     using Util;
@@ -34,16 +32,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         IEventDataReceiver
     {
         readonly Uri _inputAddress;
-        readonly ReceiveObservable _receiveObservers;
         readonly IReceivePipe _receivePipe;
-        readonly ReceiveEndpointContext _receiveTopology;
+        readonly ReceiveEndpointContext _receiveEndpointContext;
 
-        public EventDataReceiver(Uri inputAddress, IReceivePipe receivePipe, ILog log, ReceiveEndpointContext receiveTopology)
+        public EventDataReceiver(Uri inputAddress, IReceivePipe receivePipe, ILog log, ReceiveEndpointContext receiveEndpointContext)
         {
             _inputAddress = inputAddress;
             _receivePipe = receivePipe;
-            _receiveTopology = receiveTopology;
-            _receiveObservers = new ReceiveObservable();
+            _receiveEndpointContext = receiveEndpointContext;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -54,39 +50,39 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveObservers.Connect(observer);
+            return _receiveEndpointContext.ReceiveObservers.Connect(observer);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveTopology.PublishEndpointProvider.ConnectPublishObserver(observer);
+            return _receiveEndpointContext.PublishEndpointProvider.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            var sendHandle = _receiveTopology.ConnectSendObserver(observer);
-            var publishHandle = _receiveTopology.ConnectSendObserver(observer);
+            var sendHandle = _receiveEndpointContext.ConnectSendObserver(observer);
+            var publishHandle = _receiveEndpointContext.ConnectSendObserver(observer);
 
             return new MultipleConnectHandle(sendHandle, publishHandle);
         }
 
         async Task IEventDataReceiver.Handle(EventData message, Action<ReceiveContext> contextCallback)
         {
-            var context = new EventDataReceiveContext(_inputAddress, message, _receiveObservers, _receiveTopology);
+            var context = new EventDataReceiveContext(_inputAddress, message, _receiveEndpointContext);
             contextCallback?.Invoke(context);
 
             try
             {
-                await _receiveObservers.PreReceive(context).ConfigureAwait(false);
+                await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
                 await _receivePipe.Send(context).ConfigureAwait(false);
 
-                await context.CompleteTask.ConfigureAwait(false);
+                await context.ReceiveCompleted.ConfigureAwait(false);
 
-                await _receiveObservers.PostReceive(context).ConfigureAwait(false);
+                await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _receiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             finally
             {

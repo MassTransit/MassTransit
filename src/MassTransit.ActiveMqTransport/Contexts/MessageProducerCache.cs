@@ -12,12 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Contexts
 {
-    using System;
     using System.Threading.Tasks;
     using Apache.NMS;
     using GreenPipes.Agents;
     using GreenPipes.Caching;
     using Util;
+    using Transports;
 
 
     public class MessageProducerCache :
@@ -31,7 +31,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
         public MessageProducerCache()
         {
-            var cacheSettings = new CacheSettings(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24));
+            var cacheSettings = new CacheSettings(SendEndpointCacheDefaults.Capacity, SendEndpointCacheDefaults.MinAge, SendEndpointCacheDefaults.MaxAge);
             _cache = new GreenCache<CachedMessageProducer>(cacheSettings);
             _cache.Connect(new CloseAndDisposeOnRemoveObserver());
 

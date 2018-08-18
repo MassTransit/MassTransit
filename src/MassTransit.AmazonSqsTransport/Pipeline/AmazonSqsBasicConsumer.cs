@@ -100,7 +100,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             using (var delivery = _tracker.BeginDelivery())
             {
                 var redelivered = message.Attributes.ContainsKey("ApproximateReceiveCount") && (int.TryParse(message.Attributes["ApproximateReceiveCount"], out var approximateReceiveCount) && approximateReceiveCount > 1);
-                var context = new AmazonSqsReceiveContext(_inputAddress, message, redelivered, _receiveObserver, _context);
+                var context = new AmazonSqsReceiveContext(_inputAddress, message, redelivered, _context);
 
                 context.GetOrAddPayload(() => _errorTransport);
                 context.GetOrAddPayload(() => _deadLetterTransport);
@@ -119,7 +119,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
                     await _receivePipe.Send(context).ConfigureAwait(false);
 
-                    await context.CompleteTask.ConfigureAwait(false);
+                    await context.ReceiveCompleted.ConfigureAwait(false);
 
                     // Acknowledge
                     await _model.DeleteMessage(_queueUrl, message.ReceiptHandle);

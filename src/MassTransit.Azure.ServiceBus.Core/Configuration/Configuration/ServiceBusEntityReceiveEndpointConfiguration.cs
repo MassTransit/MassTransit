@@ -33,7 +33,7 @@
 
         protected ServiceBusEntityReceiveEndpointConfiguration(IServiceBusHostConfiguration hostConfiguration, IServiceBusEndpointConfiguration configuration,
             BaseClientSettings settings)
-            : base(configuration)
+            : base(hostConfiguration, configuration)
         {
             _hostConfiguration = hostConfiguration;
             _settings = settings;
@@ -169,7 +169,7 @@
 
             transport.Add(consumerAgent);
 
-            return CreateReceiveEndpoint(_settings.Name, transport, receivePipe, context);
+            return CreateReceiveEndpoint(_settings.Name, transport, context);
         }
 
         protected abstract IErrorTransport CreateErrorTransport(ServiceBusHost host);

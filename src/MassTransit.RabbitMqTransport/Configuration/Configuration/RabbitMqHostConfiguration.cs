@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using MassTransit.Configuration;
+    using Topology.Settings;
     using Transport;
     using Transports;
 
@@ -34,7 +35,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
         {
-            return new RabbitMqReceiveEndpointConfiguration(this, queueName, _busConfiguration.CreateEndpointConfiguration());
+            var settings = new RabbitMqReceiveSettings(queueName, _busConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false);
+
+            return new RabbitMqReceiveEndpointConfiguration(this, settings, _busConfiguration.CreateEndpointConfiguration());
         }
 
         IBusHostControl IHostConfiguration.Host => _host;

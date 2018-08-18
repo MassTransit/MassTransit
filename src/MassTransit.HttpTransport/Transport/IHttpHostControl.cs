@@ -19,6 +19,5 @@ namespace MassTransit.HttpTransport.Transport
         IHttpHost,
         IBusHostControl
     {
-        void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint);
     }
 }

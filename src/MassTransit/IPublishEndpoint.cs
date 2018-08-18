@@ -36,7 +36,7 @@ namespace MassTransit
         /// <typeparam name = "T">The type of the message</typeparam>
         /// <param name = "message">The messages to be published</param>
         /// <param name="cancellationToken"></param>
-        Task Publish<T>(T message, CancellationToken cancellationToken = default(CancellationToken))
+        Task Publish<T>(T message, CancellationToken cancellationToken = default)
             where T : class;
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace MassTransit
         /// <param name = "message">The messages to be published</param>
         /// <param name="publishPipe"></param>
         /// <param name="cancellationToken"></param>
-        Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = default)
             where T : class;
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace MassTransit
         /// <param name = "message">The messages to be published</param>
         /// <param name="publishPipe"></param>
         /// <param name="cancellationToken"></param>
-        Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
             where T : class;
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="message">The message object</param>
         /// <param name="cancellationToken"></param>
-        Task Publish(object message, CancellationToken cancellationToken = default(CancellationToken));
+        Task Publish(object message, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Publishes an object as a message, using the message type specified. If the object cannot be cast
@@ -86,7 +86,7 @@ namespace MassTransit
         /// <param name="message">The message object</param>
         /// <param name="publishPipe"></param>
         /// <param name="cancellationToken"></param>
-        Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default(CancellationToken));
+        Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Publishes an object as a message, using the message type specified. If the object cannot be cast
@@ -95,7 +95,7 @@ namespace MassTransit
         /// <param name="message">The message object</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name="cancellationToken"></param>
-        Task Publish(object message, Type messageType, CancellationToken cancellationToken = default(CancellationToken));
+        Task Publish(object message, Type messageType, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Publishes an object as a message, using the message type specified. If the object cannot be cast
@@ -105,7 +105,7 @@ namespace MassTransit
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
         /// <param name="publishPipe"></param>
         /// <param name="cancellationToken"></param>
-        Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default(CancellationToken));
+        Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// <see cref="IPublishEndpoint.Publish{T}(T,CancellationToken)"/>: this is a "dynamically"
@@ -120,7 +120,7 @@ namespace MassTransit
         /// <param name="values">The dictionary of values to place in the
         /// object instance to implement the interface.</param>
         /// <param name="cancellationToken"></param>
-        Task Publish<T>(object values, CancellationToken cancellationToken = default(CancellationToken))
+        Task Publish<T>(object values, CancellationToken cancellationToken = default)
             where T : class;
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace MassTransit
         /// published under the type of the interface.</param>
         /// <param name="publishPipe"></param>
         /// <param name="cancellationToken"></param>
-        Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = default)
             where T : class;
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace MassTransit
         /// published under the type of the interface.</param>
         /// <param name="publishPipe"></param>
         /// <param name="cancellationToken"></param>
-        Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default(CancellationToken))
+        Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
             where T : class;
     }
 }

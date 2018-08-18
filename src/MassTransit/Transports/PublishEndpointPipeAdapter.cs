@@ -20,7 +20,7 @@ namespace MassTransit.Transports
     using Pipeline;
 
 
-    public class PublishPipeContextAdapter<T> :
+    public class PublishEndpointPipeAdapter<T> :
         IPipe<SendContext<T>>
         where T : class
     {
@@ -32,7 +32,7 @@ namespace MassTransit.Transports
         readonly ConsumeContext _consumeContext;
         PublishContext<T> _context;
 
-        public PublishPipeContextAdapter(IPipe<PublishContext<T>> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
+        public PublishEndpointPipeAdapter(IPipe<PublishContext<T>> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
             ConsumeContext consumeContext, T message)
         {
             _pipe = pipe;
@@ -43,7 +43,7 @@ namespace MassTransit.Transports
             _message = message;
         }
 
-        public PublishPipeContextAdapter(IPipe<PublishContext> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
+        public PublishEndpointPipeAdapter(IPipe<PublishContext> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
             ConsumeContext consumeContext, T message)
         {
             _pipe = pipe;
@@ -54,7 +54,7 @@ namespace MassTransit.Transports
             _message = message;
         }
 
-        public PublishPipeContextAdapter(IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, ConsumeContext consumeContext, T message)
+        public PublishEndpointPipeAdapter(IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, ConsumeContext consumeContext, T message)
         {
             _pipe = Pipe.Empty<PublishContext<T>>();
             _publishPipe = publishPipe;
@@ -71,17 +71,18 @@ namespace MassTransit.Transports
 
         public async Task Send(SendContext<T> context)
         {
+            context.SourceAddress = _sourceAddress;
+
             if (_consumeContext != null)
                 context.TransferConsumeContextHeaders(_consumeContext);
-
-            context.SourceAddress = _sourceAddress;
 
             var publishContext = new PublishContextProxy<T>(context, context.Message);
             var firstTime = Interlocked.CompareExchange(ref _context, publishContext, null) == null;
 
             await _publishPipe.Send(publishContext).ConfigureAwait(false);
 
-            await _pipe.Send(publishContext).ConfigureAwait(false);
+            if (_pipe.IsNotEmpty())
+                await _pipe.Send(publishContext).ConfigureAwait(false);
 
             if (firstTime)
                 await _observer.PrePublish(publishContext).ConfigureAwait(false);
@@ -101,9 +102,9 @@ namespace MassTransit.Transports
         {
             return new FaultedPublishContext<T>(_message, CancellationToken.None)
             {
-                SourceAddress = _sourceAddress,
+                SourceAddress = _consumeContext?.ReceiveContext?.InputAddress ?? _sourceAddress,
                 ConversationId = _consumeContext?.ConversationId,
-                InitiatorId = _consumeContext?.CorrelationId,
+                InitiatorId = _consumeContext?.CorrelationId ?? _consumeContext?.RequestId,
                 Mandatory = _context?.Mandatory ?? false
             };
         }

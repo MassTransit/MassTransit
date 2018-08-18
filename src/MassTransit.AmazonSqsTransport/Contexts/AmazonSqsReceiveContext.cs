@@ -32,8 +32,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         readonly Message _transportMessage;
         byte[] _body;
 
-        public AmazonSqsReceiveContext(Uri inputAddress, Message transportMessage, bool redelivered, IReceiveObserver observer, AmazonSqsReceiveEndpointContext context)
-            : base(inputAddress, redelivered, observer, context)
+        public AmazonSqsReceiveContext(Uri inputAddress, Message transportMessage, bool redelivered, AmazonSqsReceiveEndpointContext context)
+            : base(inputAddress, redelivered, context)
         {
             _transportMessage = transportMessage;
             _context = context;

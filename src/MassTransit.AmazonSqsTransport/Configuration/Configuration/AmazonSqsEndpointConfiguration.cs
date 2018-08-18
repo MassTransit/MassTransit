@@ -13,7 +13,6 @@
 namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 {
     using MassTransit.Configuration;
-    using MassTransit.Pipeline;
 
 
     public class AmazonSqsEndpointConfiguration :
@@ -22,15 +21,14 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
     {
         readonly IAmazonSqsTopologyConfiguration _topologyConfiguration;
 
-        public AmazonSqsEndpointConfiguration(IAmazonSqsTopologyConfiguration topologyConfiguration, IConsumePipe consumePipe = null)
-            : base(topologyConfiguration, consumePipe)
+        public AmazonSqsEndpointConfiguration(IAmazonSqsTopologyConfiguration topologyConfiguration)
+            : base(topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }
 
-        AmazonSqsEndpointConfiguration(IEndpointConfiguration parentConfiguration, IAmazonSqsTopologyConfiguration topologyConfiguration,
-            IConsumePipe consumePipe = null)
-            : base(parentConfiguration, topologyConfiguration, consumePipe)
+        AmazonSqsEndpointConfiguration(IEndpointConfiguration parentConfiguration, IAmazonSqsTopologyConfiguration topologyConfiguration)
+            : base(parentConfiguration, topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }

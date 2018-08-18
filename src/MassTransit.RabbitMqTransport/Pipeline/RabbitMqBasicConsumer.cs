@@ -24,7 +24,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using Topology;
-    using Transports;
     using Transports.Metrics;
     using Util;
 
@@ -37,15 +36,11 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IBasicConsumer,
         RabbitMqDeliveryMetrics
     {
-        readonly IDeadLetterTransport _deadLetterTransport;
         readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly IErrorTransport _errorTransport;
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<RabbitMqBasicConsumer>();
         readonly ModelContext _model;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
-        readonly IReceiveObserver _receiveObserver;
-        readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
         readonly IDeliveryTracker _tracker;
@@ -57,21 +52,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// </summary>
         /// <param name="model">The model context for the consumer</param>
         /// <param name="inputAddress">The input address for messages received by the consumer</param>
-        /// <param name="receivePipe">The receive pipe to dispatch messages</param>
-        /// <param name="receiveObserver">The observer for receive events</param>
         /// <param name="receiveEndpointContext">The topology</param>
-        /// <param name="deadLetterTransport"></param>
-        /// <param name="errorTransport"></param>
-        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver,
-            RabbitMqReceiveEndpointContext receiveEndpointContext, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, RabbitMqReceiveEndpointContext receiveEndpointContext)
         {
             _model = model;
             _inputAddress = inputAddress;
-            _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
             _receiveEndpointContext = receiveEndpointContext;
-            _deadLetterTransport = deadLetterTransport;
-            _errorTransport = errorTransport;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
@@ -153,10 +139,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             using (var delivery = _tracker.BeginDelivery())
             {
                 var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
-                    _receiveObserver, _receiveEndpointContext);
-
-                context.GetOrAddPayload(() => _errorTransport);
-                context.GetOrAddPayload(() => _deadLetterTransport);
+                    _receiveEndpointContext);
 
                 context.GetOrAddPayload(() => _receiveSettings);
                 context.GetOrAddPayload(() => _model);
@@ -168,19 +151,19 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                         if (_log.IsErrorEnabled)
                             _log.ErrorFormat("Duplicate BasicDeliver: {0}", deliveryTag);
 
-                    await _receiveObserver.PreReceive(context).ConfigureAwait(false);
+                    await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
-                    await _receivePipe.Send(context).ConfigureAwait(false);
+                    await _receiveEndpointContext.ReceivePipe.Send(context).ConfigureAwait(false);
 
-                    await context.CompleteTask.ConfigureAwait(false);
+                    await context.ReceiveCompleted.ConfigureAwait(false);
 
                     _model.BasicAck(deliveryTag, false);
 
-                    await _receiveObserver.PostReceive(context).ConfigureAwait(false);
+                    await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
+                    await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
                     try
                     {
                         _model.BasicNack(deliveryTag, false, true);

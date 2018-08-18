@@ -19,7 +19,6 @@ namespace MassTransit.HttpTransport.Configuration
     using GreenPipes.Configurators;
     using MassTransit.Configuration;
     using MassTransit.Context;
-    using MassTransit.Pipeline;
     using Transport;
     using Transports;
 
@@ -34,9 +33,8 @@ namespace MassTransit.HttpTransport.Configuration
         readonly IBuildPipeConfigurator<HttpHostContext> _httpHostPipeConfigurator;
         readonly string _pathMatch;
 
-        public HttpReceiveEndpointConfiguration(IHttpHostConfiguration hostConfiguration, string pathMatch,
-            IHttpEndpointConfiguration endpointConfiguration)
-            : base(endpointConfiguration)
+        public HttpReceiveEndpointConfiguration(IHttpHostConfiguration hostConfiguration, string pathMatch, IHttpEndpointConfiguration endpointConfiguration)
+            : base(hostConfiguration, endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
             _pathMatch = pathMatch;
@@ -46,16 +44,6 @@ namespace MassTransit.HttpTransport.Configuration
             InputAddress = new Uri(hostConfiguration.Host.Address, $"{pathMatch}");
 
             _httpHostPipeConfigurator = new PipeConfigurator<HttpHostContext>();
-        }
-
-        public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            ReceiveEndpointContext receiveEndpointContext)
-        {
-            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, receiveEndpointContext);
-
-            _hostConfiguration.Host.AddReceiveEndpoint(endpointName, receiveEndpoint);
-
-            return receiveEndpoint;
         }
 
         IHttpReceiveEndpointConfigurator IHttpReceiveEndpointConfiguration.Configurator => this;
@@ -86,7 +74,7 @@ namespace MassTransit.HttpTransport.Configuration
             var transport = new HttpReceiveTransport(_hostConfiguration.Host, receiveEndpointContext, builder.ReceiveObservers, builder.TransportObservers,
                 _httpHostPipeConfigurator.Build());
 
-            return CreateReceiveEndpoint(string.IsNullOrWhiteSpace(_pathMatch) ? NewId.Next().ToString() : _pathMatch, transport, receivePipe, receiveEndpointContext);
+            return CreateReceiveEndpoint(string.IsNullOrWhiteSpace(_pathMatch) ? NewId.Next().ToString() : _pathMatch, transport, receiveEndpointContext);
         }
 
 

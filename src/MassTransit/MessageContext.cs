@@ -73,7 +73,7 @@ namespace MassTransit
         Uri ResponseAddress { get; }
 
         /// <summary>
-        /// The fault addres to which fault events should be sent if the message consumer faults
+        /// The fault address to which fault events should be sent if the message consumer faults
         /// </summary>
         Uri FaultAddress { get; }
 

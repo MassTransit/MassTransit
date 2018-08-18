@@ -73,7 +73,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         async Task IBrokeredMessageReceiver.Handle(BrokeredMessage message, Action<ReceiveContext> contextCallback)
         {
-            var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveObservers, _receiveTopology);
+            var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveTopology);
             contextCallback?.Invoke(context);
 
             try
@@ -88,7 +88,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
                 await _receivePipe.Send(context).ConfigureAwait(false);
 
-                await context.CompleteTask.ConfigureAwait(false);
+                await context.ReceiveCompleted.ConfigureAwait(false);
 
                 await message.CompleteAsync().ConfigureAwait(false);
 

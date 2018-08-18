@@ -9,7 +9,6 @@
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using MassTransit.Configuration;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
     using Pipeline;
     using Topology;
@@ -47,7 +46,7 @@
         }
 
         AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, IAmazonSqsEndpointConfiguration endpointConfiguration)
-            : base(endpointConfiguration)
+            : base(hostConfiguration, endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
@@ -73,16 +72,6 @@
         public override Uri HostAddress { get; }
 
         public override Uri InputAddress => _inputAddress.Value;
-
-        public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            ReceiveEndpointContext receiveEndpointContext)
-        {
-            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, receiveEndpointContext);
-
-            _hostConfiguration.Host.AddReceiveEndpoint(endpointName, receiveEndpoint);
-
-            return receiveEndpoint;
-        }
 
         IAmazonSqsTopologyConfiguration IAmazonSqsEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
@@ -129,7 +118,7 @@
 
             transport.Add(consumerAgent);
 
-            return CreateReceiveEndpoint(_settings.EntityName ?? NewId.Next().ToString(), transport, receivePipe, receiveEndpointContext);
+            return CreateReceiveEndpoint(_settings.EntityName ?? NewId.Next().ToString(), transport, receiveEndpointContext);
         }
 
         IAmazonSqsHost IAmazonSqsReceiveEndpointConfigurator.Host => Host;

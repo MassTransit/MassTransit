@@ -74,7 +74,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         async Task IBrokeredMessageReceiver.Handle(Message message, Action<ReceiveContext> contextCallback)
         {
-            var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveObservers, _receiveTopology);
+            var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveTopology);
             contextCallback?.Invoke(context);
 
             var messageReceiver = context.GetPayload<Microsoft.Azure.ServiceBus.Core.IMessageReceiver>();
@@ -96,7 +96,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
                 await _receivePipe.Send(context).ConfigureAwait(false);
 
-                await context.CompleteTask.ConfigureAwait(false);
+                await context.ReceiveCompleted.ConfigureAwait(false);
 
                 await messageReceiver.CompleteAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
 

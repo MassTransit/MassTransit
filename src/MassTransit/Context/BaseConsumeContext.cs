@@ -19,6 +19,7 @@ namespace MassTransit.Context
     using Converters;
     using Events;
     using GreenPipes;
+    using GreenPipes.Payloads;
     using Pipeline.Pipes;
     using Serialization;
     using Util;
@@ -28,7 +29,6 @@ namespace MassTransit.Context
         BasePipeContext,
         ConsumeContext
     {
-        readonly List<Task> _consumeTasks;
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
         readonly ReceiveContext _receiveContext;
 
@@ -37,20 +37,28 @@ namespace MassTransit.Context
         {
             _receiveContext = receiveContext;
 
-            _consumeTasks = new List<Task>();
-            _publishEndpoint = new Lazy<IPublishEndpoint>(() => receiveContext.PublishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, this));
+            _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
+        }
+
+        protected BaseConsumeContext(ConsumeContext consumeContext)
+            : base(consumeContext)
+        {
+            _receiveContext = consumeContext.ReceiveContext;
+
+            _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
+        }
+
+        protected BaseConsumeContext(ConsumeContext consumeContext, IPayloadCache payloadCache)
+            : base(payloadCache, consumeContext.CancellationToken)
+        {
+            _receiveContext = consumeContext.ReceiveContext;
+
+            _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
         }
 
         public ReceiveContext ReceiveContext => _receiveContext;
 
-        public Task CompleteTask
-        {
-            get
-            {
-                lock (_consumeTasks)
-                    return Task.WhenAll(_consumeTasks.ToArray());
-            }
-        }
+        public abstract Task ConsumeCompleted { get; }
 
         public abstract Guid? MessageId { get; }
         public abstract Guid? RequestId { get; }
@@ -71,7 +79,7 @@ namespace MassTransit.Context
         public abstract bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
             where T : class;
 
-        public async Task RespondAsync<T>(T message)
+        public virtual async Task RespondAsync<T>(T message)
             where T : class
         {
             if (message == null)
@@ -87,7 +95,7 @@ namespace MassTransit.Context
                 await Publish(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
         }
 
-        public async Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
+        public virtual async Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
             where T : class
         {
             if (message == null)
@@ -106,7 +114,7 @@ namespace MassTransit.Context
                 await Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
         }
 
-        public async Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe)
+        public virtual async Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe)
             where T : class
         {
             if (message == null)
@@ -125,7 +133,7 @@ namespace MassTransit.Context
                 await Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
         }
 
-        public Task RespondAsync(object message)
+        public virtual Task RespondAsync(object message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -135,7 +143,7 @@ namespace MassTransit.Context
             return RespondAsync(message, messageType);
         }
 
-        public async Task RespondAsync(object message, Type messageType)
+        public virtual async Task RespondAsync(object message, Type messageType)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -153,7 +161,7 @@ namespace MassTransit.Context
                 await Publish(message, messageType, new ResponsePipe(this), CancellationToken).ConfigureAwait(false);
         }
 
-        public Task RespondAsync(object message, IPipe<SendContext> sendPipe)
+        public virtual Task RespondAsync(object message, IPipe<SendContext> sendPipe)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -166,7 +174,7 @@ namespace MassTransit.Context
             return RespondAsync(message, messageType, sendPipe);
         }
 
-        public async Task RespondAsync(object message, Type messageType, IPipe<SendContext> sendPipe)
+        public virtual async Task RespondAsync(object message, Type messageType, IPipe<SendContext> sendPipe)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -181,13 +189,14 @@ namespace MassTransit.Context
             {
                 var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await SendEndpointConverterCache.Send(endpoint, message, messageType, new ResponsePipe(this, sendPipe), CancellationToken).ConfigureAwait(false);
+                await SendEndpointConverterCache.Send(endpoint, message, messageType, new ResponsePipe(this, sendPipe), CancellationToken)
+                    .ConfigureAwait(false);
             }
             else
                 await Publish(message, messageType, new ResponsePipe(this, sendPipe), CancellationToken).ConfigureAwait(false);
         }
 
-        public Task RespondAsync<T>(object values)
+        public virtual Task RespondAsync<T>(object values)
             where T : class
         {
             if (values == null)
@@ -198,7 +207,7 @@ namespace MassTransit.Context
             return RespondAsync(message);
         }
 
-        public Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe)
+        public virtual Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe)
             where T : class
         {
             if (values == null)
@@ -209,7 +218,7 @@ namespace MassTransit.Context
             return RespondAsync(message, sendPipe);
         }
 
-        public Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe)
+        public virtual Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe)
             where T : class
         {
             if (values == null)
@@ -220,26 +229,26 @@ namespace MassTransit.Context
             return RespondAsync(message, sendPipe);
         }
 
-        public void Respond<T>(T message)
+        public virtual void Respond<T>(T message)
             where T : class
         {
             AddConsumeTask(RespondAsync(message));
         }
 
-        public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        public virtual async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             var sendEndpoint = await _receiveContext.SendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
 
             return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask);
         }
 
-        public Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        public virtual Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class
         {
             return _receiveContext.NotifyConsumed(context, duration, consumerType);
         }
 
-        public Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        public virtual Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
             AddConsumeTask(GenerateFault(context, exception));
@@ -247,57 +256,57 @@ namespace MassTransit.Context
             return _receiveContext.NotifyFaulted(context, duration, consumerType, exception);
         }
 
-        public Task Publish<T>(T message, CancellationToken cancellationToken)
+        public virtual Task Publish<T>(T message, CancellationToken cancellationToken)
             where T : class
         {
             return ConsumeTask(_publishEndpoint.Value.Publish(message, cancellationToken));
         }
 
-        public Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+        public virtual Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
             where T : class
         {
             return ConsumeTask(_publishEndpoint.Value.Publish(message, publishPipe, cancellationToken));
         }
 
-        public Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        public virtual Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
             where T : class
         {
             return ConsumeTask(_publishEndpoint.Value.Publish(message, publishPipe, cancellationToken));
         }
 
-        public Task Publish(object message, CancellationToken cancellationToken)
+        public virtual Task Publish(object message, CancellationToken cancellationToken)
         {
             return ConsumeTask(_publishEndpoint.Value.Publish(message, cancellationToken));
         }
 
-        public Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        public virtual Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return ConsumeTask(_publishEndpoint.Value.Publish(message, publishPipe, cancellationToken));
         }
 
-        public Task Publish(object message, Type messageType, CancellationToken cancellationToken)
+        public virtual Task Publish(object message, Type messageType, CancellationToken cancellationToken)
         {
             return ConsumeTask(_publishEndpoint.Value.Publish(message, messageType, cancellationToken));
         }
 
-        public Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        public virtual Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return ConsumeTask(_publishEndpoint.Value.Publish(message, messageType, publishPipe, cancellationToken));
         }
 
-        public Task Publish<T>(object values, CancellationToken cancellationToken)
+        public virtual Task Publish<T>(object values, CancellationToken cancellationToken)
             where T : class
         {
             return ConsumeTask(_publishEndpoint.Value.Publish<T>(values, cancellationToken));
         }
 
-        public Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+        public virtual Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
             where T : class
         {
             return ConsumeTask(_publishEndpoint.Value.Publish(values, publishPipe, cancellationToken));
         }
 
-        public Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        public virtual Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
             where T : class
         {
             return ConsumeTask(_publishEndpoint.Value.Publish<T>(values, publishPipe, cancellationToken));
@@ -313,16 +322,16 @@ namespace MassTransit.Context
             return _receiveContext.SendEndpointProvider.ConnectSendObserver(observer);
         }
 
-        void AddConsumeTask(Task task)
+        public abstract void AddConsumeTask(Task task);
+
+        protected virtual IPublishEndpoint CreatePublishEndpoint()
         {
-            lock (_consumeTasks)
-                _consumeTasks.Add(task);
+            return _receiveContext.PublishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, this);
         }
 
-        Task ConsumeTask(Task task)
+        protected Task ConsumeTask(Task task)
         {
-            lock (_consumeTasks)
-                _consumeTasks.Add(task);
+            AddConsumeTask(task);
 
             return task;
         }
@@ -334,23 +343,17 @@ namespace MassTransit.Context
 
             IPipe<SendContext<Fault<T>>> faultPipe = Pipe.Execute<SendContext<Fault<T>>>(x =>
             {
-                x.SourceAddress = ReceiveContext.InputAddress;
-                x.CorrelationId = CorrelationId;
-                x.RequestId = RequestId;
+                x.TransferConsumeContextHeaders(context);
 
-                foreach (KeyValuePair<string, object> header in Headers.GetAll())
-                    x.Headers.Set(header.Key, header.Value);
+                x.CorrelationId = context.CorrelationId;
+                x.RequestId = RequestId;
             });
 
-            if (FaultAddress != null)
-            {
-                var endpoint = await GetSendEndpoint(FaultAddress).ConfigureAwait(false);
+            var destinationAddress = FaultAddress ?? ResponseAddress;
 
-                await endpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
-            }
-            else if (ResponseAddress != null)
+            if (destinationAddress != null)
             {
-                var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
+                var endpoint = await GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
                 await endpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
             }

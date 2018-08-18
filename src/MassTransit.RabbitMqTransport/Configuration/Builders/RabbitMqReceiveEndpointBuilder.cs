@@ -12,12 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Builders
 {
+    using System.Collections.Generic;
     using Configuration;
     using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
+    using Pipeline;
     using Topology;
     using Topology.Builders;
+    using Transport;
+    using Transports;
 
 
     public class RabbitMqReceiveEndpointBuilder :
@@ -48,19 +52,51 @@ namespace MassTransit.RabbitMqTransport.Builders
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            return new RabbitMqQueueReceiveEndpointContext(_configuration, brokerTopology, ReceiveObservers, TransportObservers, EndpointObservers);
+            IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport();
+            IErrorTransport errorTransport = CreateErrorTransport();
+
+            var receiveEndpointContext = new RabbitMqQueueReceiveEndpointContext(_configuration, brokerTopology, ReceiveObservers, TransportObservers,
+                EndpointObservers);
+
+            receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
+            receiveEndpointContext.GetOrAddPayload(() => errorTransport);
+
+            return receiveEndpointContext;
+        }
+
+        IErrorTransport CreateErrorTransport()
+        {
+            var errorSettings = _configuration.Topology.Send.GetErrorSettings(_configuration.Settings);
+            var filter = new ConfigureTopologyFilter<ErrorSettings>(errorSettings, errorSettings.GetBrokerTopology());
+
+            return new RabbitMqErrorTransport(errorSettings.ExchangeName, filter);
+        }
+
+        IDeadLetterTransport CreateDeadLetterTransport()
+        {
+            var deadLetterSettings = _configuration.Topology.Send.GetDeadLetterSettings(_configuration.Settings);
+            var filter = new ConfigureTopologyFilter<DeadLetterSettings>(deadLetterSettings, deadLetterSettings.GetBrokerTopology());
+
+            return new RabbitMqDeadLetterTransport(deadLetterSettings.ExchangeName, filter);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)
         {
             var topologyBuilder = new ReceiveEndpointBrokerTopologyBuilder();
 
-            topologyBuilder.Queue =
-                topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, settings.AutoDelete, settings.Exclusive, settings.QueueArguments);
+            var queueArguments = new Dictionary<string, object>(settings.QueueArguments);
+
+            bool queueAutoDelete = settings.AutoDelete;
+            if (settings.QueueExpiration.HasValue)
+            {
+                queueArguments["x-expires"] = (long)settings.QueueExpiration.Value.TotalMilliseconds;
+                queueAutoDelete = false;
+            }
+
+            topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, queueAutoDelete, settings.Exclusive, queueArguments);
 
             topologyBuilder.Exchange = topologyBuilder.ExchangeDeclare(settings.ExchangeName ?? settings.QueueName, settings.ExchangeType, settings.Durable,
-                settings.AutoDelete,
-                settings.ExchangeArguments);
+                settings.AutoDelete, settings.ExchangeArguments);
 
             topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
 

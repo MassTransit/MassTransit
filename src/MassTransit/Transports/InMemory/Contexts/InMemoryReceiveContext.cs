@@ -16,7 +16,6 @@ namespace MassTransit.Transports.InMemory.Contexts
     using System.IO;
     using Context;
     using Fabric;
-    using MassTransit.Topology;
 
 
     public sealed class InMemoryReceiveContext :
@@ -25,8 +24,8 @@ namespace MassTransit.Transports.InMemory.Contexts
         readonly byte[] _body;
         readonly InMemoryTransportMessage _message;
 
-        public InMemoryReceiveContext(Uri inputAddress, InMemoryTransportMessage message, IReceiveObserver observer, ReceiveEndpointContext receiveEndpointContext)
-            : base(inputAddress, message.DeliveryCount > 0, observer, receiveEndpointContext)
+        public InMemoryReceiveContext(Uri inputAddress, InMemoryTransportMessage message, ReceiveEndpointContext receiveEndpointContext)
+            : base(inputAddress, message.DeliveryCount > 0, receiveEndpointContext)
         {
             _body = message.Body;
             _message = message;

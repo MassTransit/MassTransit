@@ -33,6 +33,11 @@ namespace MassTransit.RabbitMqTransport
         bool Lazy { set; }
 
         /// <summary>
+        /// Set the queue to expire after the specified time
+        /// </summary>
+        TimeSpan? QueueExpiration { set; }
+
+        /// <summary>
         /// Set a queue argument passed to the broker on queue declaration
         /// </summary>
         /// <param name="key">The argument key</param>

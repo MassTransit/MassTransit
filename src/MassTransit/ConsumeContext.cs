@@ -32,7 +32,7 @@ namespace MassTransit
         /// <summary>
         /// An awaitable task that is completed once the consume context is completed
         /// </summary>
-        Task CompleteTask { get; }
+        Task ConsumeCompleted { get; }
 
         /// <summary>
         /// Returns the supported message types from the message
@@ -54,6 +54,12 @@ namespace MassTransit
         /// <returns></returns>
         bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
             where T : class;
+
+        /// <summary>
+        /// Add a task that must complete before the consume is completed
+        /// </summary>
+        /// <param name="task"></param>
+        void AddConsumeTask(Task task);
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the

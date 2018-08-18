@@ -63,8 +63,8 @@ namespace MassTransit.ActiveMqTransport.Transport
                 producer.Dispose();
             });
 
-            context.AddPendingTask(task);
-            context.AddPendingTask(closeTask);
+            context.AddReceiveTask(task);
+            context.AddReceiveTask(closeTask);
         }
     }
 }

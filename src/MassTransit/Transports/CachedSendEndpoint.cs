@@ -1,4 +1,4 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -21,7 +21,8 @@ namespace MassTransit.Transports
 
     public class CachedSendEndpoint<TKey> :
         ISendEndpoint,
-        INotifyValueUsed
+        INotifyValueUsed,
+        IAsyncDisposable
     {
         readonly ISendEndpoint _endpoint;
 
@@ -33,6 +34,20 @@ namespace MassTransit.Transports
 
         public TKey Key { get; }
 
+        async Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        {
+            switch (_endpoint)
+            {
+                case IAsyncDisposable disposable:
+                    await disposable.DisposeAsync(cancellationToken).ConfigureAwait(false);
+                    break;
+
+                case IDisposable disposable:
+                    disposable.Dispose();
+                    break;
+            }
+        }
+
         public event Action Used;
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -41,19 +56,22 @@ namespace MassTransit.Transports
             return _endpoint.ConnectSendObserver(observer);
         }
 
-        public Task Send<T>(T message, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task Send<T>(T message, CancellationToken cancellationToken = new CancellationToken())
+            where T : class
         {
             Used?.Invoke();
             return _endpoint.Send(message, cancellationToken);
         }
 
-        public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = new CancellationToken())
+            where T : class
         {
             Used?.Invoke();
             return _endpoint.Send(message, pipe, cancellationToken);
         }
 
-        public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken())
+            where T : class
         {
             Used?.Invoke();
             return _endpoint.Send(message, pipe, cancellationToken);
@@ -83,19 +101,22 @@ namespace MassTransit.Transports
             return _endpoint.Send(message, messageType, pipe, cancellationToken);
         }
 
-        public Task Send<T>(object values, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task Send<T>(object values, CancellationToken cancellationToken = new CancellationToken())
+            where T : class
         {
             Used?.Invoke();
             return _endpoint.Send<T>(values, cancellationToken);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = new CancellationToken())
+            where T : class
         {
             Used?.Invoke();
             return _endpoint.Send(values, pipe, cancellationToken);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = new CancellationToken())
+            where T : class
         {
             Used?.Invoke();
             return _endpoint.Send<T>(values, pipe, cancellationToken);

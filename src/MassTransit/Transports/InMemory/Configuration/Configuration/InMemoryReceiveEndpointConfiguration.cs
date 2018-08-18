@@ -14,9 +14,7 @@ namespace MassTransit.Transports.InMemory.Configuration
 {
     using System;
     using Builders;
-    using Context;
     using MassTransit.Configuration;
-    using Pipeline;
 
 
     public class InMemoryReceiveEndpointConfiguration :
@@ -30,7 +28,7 @@ namespace MassTransit.Transports.InMemory.Configuration
 
         public InMemoryReceiveEndpointConfiguration(IInMemoryHostConfiguration hostConfiguration, string queueName,
             IInMemoryEndpointConfiguration endpointConfiguration)
-            : base(endpointConfiguration)
+            : base(hostConfiguration, endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
             _queueName = queueName;
@@ -38,16 +36,6 @@ namespace MassTransit.Transports.InMemory.Configuration
 
             HostAddress = hostConfiguration.Host.Address;
             InputAddress = new Uri(hostConfiguration.Host.Address, $"{queueName}");
-        }
-
-        public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            ReceiveEndpointContext receiveEndpointContext)
-        {
-            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, receiveEndpointContext);
-
-            _hostConfiguration.Host.AddReceiveEndpoint(endpointName, receiveEndpoint);
-
-            return receiveEndpoint;
         }
 
         IInMemoryReceiveEndpointConfigurator IInMemoryReceiveEndpointConfiguration.Configurator => this;
@@ -64,13 +52,11 @@ namespace MassTransit.Transports.InMemory.Configuration
 
             ApplySpecifications(builder);
 
-            var receivePipe = CreateReceivePipe();
-
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
-            var transport = _hostConfiguration.Host.GetReceiveTransport(_queueName, receivePipe, receiveEndpointContext);
+            var transport = _hostConfiguration.Host.GetReceiveTransport(_queueName, receiveEndpointContext);
 
-            return CreateReceiveEndpoint(_queueName, transport, receivePipe, receiveEndpointContext);
+            return CreateReceiveEndpoint(_queueName, transport, receiveEndpointContext);
         }
     }
 }

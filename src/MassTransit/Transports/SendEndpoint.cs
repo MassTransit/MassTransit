@@ -15,7 +15,6 @@ namespace MassTransit.Transports
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using Context.Converters;
     using GreenPipes;
     using Pipeline;
@@ -48,11 +47,20 @@ namespace MassTransit.Transports
 
         Uri SourceAddress { get; }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public async Task DisposeAsync(CancellationToken cancellationToken)
         {
             _observerHandle?.Disconnect();
-            
-            return TaskUtil.Completed;
+
+            switch (_transport)
+            {
+                case IAsyncDisposable disposable:
+                    await disposable.DisposeAsync(cancellationToken).ConfigureAwait(false);
+                    break;
+
+                case IDisposable disposable:
+                    disposable.Dispose();
+                    break;
+            }
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -76,6 +84,7 @@ namespace MassTransit.Transports
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -98,6 +107,7 @@ namespace MassTransit.Transports
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
@@ -120,6 +130,7 @@ namespace MassTransit.Transports
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -132,6 +143,7 @@ namespace MassTransit.Transports
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -144,8 +156,10 @@ namespace MassTransit.Transports
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
+
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -168,6 +182,7 @@ namespace MassTransit.Transports
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
+
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -218,10 +233,10 @@ namespace MassTransit.Transports
 
                 if (_endpoint._sendPipe != null)
                     await _endpoint._sendPipe.Send(context).ConfigureAwait(false);
-                
+
                 if (_pipe.IsNotEmpty())
                     await _pipe.Send(context).ConfigureAwait(false);
-               
+
                 if (_sendPipe.IsNotEmpty())
                     await _sendPipe.Send(context).ConfigureAwait(false);
 

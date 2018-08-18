@@ -21,9 +21,7 @@ namespace MassTransit.Transports.InMemory
     using Fabric;
     using GreenPipes;
     using GreenPipes.Agents;
-    using MassTransit.Topology;
     using Metrics;
-    using Pipeline.Observables;
     using Util;
 
 
@@ -38,27 +36,14 @@ namespace MassTransit.Transports.InMemory
     {
         readonly Uri _inputAddress;
         readonly IInMemoryQueue _queue;
-        readonly ReceiveObservable _receiveObservable;
-        readonly ReceiveEndpointContext _topology;
+        readonly ReceiveEndpointContext _receiveEndpointContext;
         readonly IDeliveryTracker _tracker;
-        readonly ReceiveTransportObservable _transportObservable;
-        readonly IPipe<ReceiveContext> _receivePipe;
-        readonly IErrorTransport _errorTransport;
-        readonly IDeadLetterTransport _deadLetterTransport;
 
-        public InMemoryReceiveTransport(Uri inputAddress, IInMemoryQueue queue, IPipe<ReceiveContext> receivePipe, IInMemoryExchange errorExchange,
-            IInMemoryExchange deadLetterExchange, ReceiveEndpointContext topology)
+        public InMemoryReceiveTransport(Uri inputAddress, IInMemoryQueue queue, ReceiveEndpointContext receiveEndpointContext)
         {
             _inputAddress = inputAddress;
             _queue = queue;
-            _topology = topology;
-            _receivePipe = receivePipe;
-
-            _errorTransport = new InMemoryMessageErrorTransport(errorExchange);
-            _deadLetterTransport = new InMemoryMessageDeadLetterTransport(deadLetterExchange);
-
-            _receiveObservable = new ReceiveObservable();
-            _transportObservable = new ReceiveTransportObservable();
+            _receiveEndpointContext = receiveEndpointContext;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
         }
@@ -68,29 +53,24 @@ namespace MassTransit.Transports.InMemory
             await Ready.ConfigureAwait(false);
             if (IsStopped)
                 return;
-            
-            if (_receivePipe == null)
-                throw new ArgumentException("ReceivePipe not configured");
 
-            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveObservable, _topology);
-            context.GetOrAddPayload(() => _errorTransport);
-            context.GetOrAddPayload(() => _deadLetterTransport);
+            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveEndpointContext);
 
             using (_tracker.BeginDelivery())
             {
                 try
                 {
-                    await _receiveObservable.PreReceive(context).ConfigureAwait(false);
+                    await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
-                    await _receivePipe.Send(context).ConfigureAwait(false);
+                    await _receiveEndpointContext.ReceivePipe.Send(context).ConfigureAwait(false);
 
-                    await context.CompleteTask.ConfigureAwait(false);
+                    await context.ReceiveCompleted.ConfigureAwait(false);
 
-                    await _receiveObservable.PostReceive(context).ConfigureAwait(false);
+                    await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await _receiveObservable.ReceiveFault(context, ex).ConfigureAwait(false);
+                    await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
                     message.DeliveryCount++;
                 }
@@ -116,7 +96,7 @@ namespace MassTransit.Transports.InMemory
             {
                 _queue.ConnectConsumer(this);
 
-                TaskUtil.Await(() => _transportObservable.Ready(new ReceiveTransportReadyEvent(_inputAddress)));
+                TaskUtil.Await(() => _receiveEndpointContext.TransportObservers.Ready(new ReceiveTransportReadyEvent(_inputAddress)));
 
                 SetReady();
 
@@ -131,22 +111,22 @@ namespace MassTransit.Transports.InMemory
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveObservable.Connect(observer);
+            return _receiveEndpointContext.ReceiveObservers.Connect(observer);
         }
 
         public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _transportObservable.Connect(observer);
+            return _receiveEndpointContext.TransportObservers.Connect(observer);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _topology.ConnectPublishObserver(observer);
+            return _receiveEndpointContext.ConnectPublishObserver(observer);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _topology.ConnectSendObserver(observer);
+            return _receiveEndpointContext.ConnectSendObserver(observer);
         }
 
         void HandleDeliveryComplete()
@@ -167,9 +147,10 @@ namespace MassTransit.Transports.InMemory
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
                 await _transport.Stop("Stop", cancellationToken).ConfigureAwait(false);
-                
-                await _transport._transportObservable.Completed(new ReceiveTransportCompletedEvent(_transport._inputAddress,
-                    _transport._tracker.GetDeliveryMetrics())).ConfigureAwait(false);
+
+                var completed = new ReceiveTransportCompletedEvent(_transport._inputAddress, _transport._tracker.GetDeliveryMetrics());
+
+                await _transport._receiveEndpointContext.TransportObservers.Completed(completed).ConfigureAwait(false);
             }
         }
     }

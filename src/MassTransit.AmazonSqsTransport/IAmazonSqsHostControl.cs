@@ -21,6 +21,5 @@ namespace MassTransit.AmazonSqsTransport
         IAmazonSqsHost,
         ISupervisor
     {
-        void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint);
     }
 }

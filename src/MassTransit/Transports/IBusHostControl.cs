@@ -31,5 +31,7 @@ namespace MassTransit.Transports
         /// <param name="address"></param>
         /// <returns></returns>
         bool Matches(Uri address);
+
+        void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint);
     }
 }

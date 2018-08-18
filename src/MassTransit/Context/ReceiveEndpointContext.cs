@@ -13,6 +13,8 @@
 namespace MassTransit.Context
 {
     using System;
+    using GreenPipes;
+    using Pipeline;
     using Pipeline.Observables;
     using Topology;
 
@@ -21,6 +23,7 @@ namespace MassTransit.Context
     /// The context of a receive endpoint
     /// </summary>
     public interface ReceiveEndpointContext :
+        PipeContext,
         ISendObserverConnector,
         IPublishObserverConnector
     {
@@ -35,9 +38,9 @@ namespace MassTransit.Context
 
         ReceiveEndpointObservable EndpointObservers { get; }
 
-        ISendTopology Send { get; }
-
         IPublishTopology Publish { get; }
+
+        IReceivePipe ReceivePipe { get; }
 
         ISendEndpointProvider SendEndpointProvider { get; }
 

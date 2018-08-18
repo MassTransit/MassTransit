@@ -28,8 +28,8 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         readonly BrokeredMessage _message;
         byte[] _body;
 
-        public ServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message, IReceiveObserver observer, ReceiveEndpointContext receiveEndpointContext)
-            : base(inputAddress, message.DeliveryCount > 1, observer, receiveEndpointContext)
+        public ServiceBusReceiveContext(Uri inputAddress, BrokeredMessage message, ReceiveEndpointContext receiveEndpointContext)
+            : base(inputAddress, message.DeliveryCount > 1, receiveEndpointContext)
         {
             _message = message;
 

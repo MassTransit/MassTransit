@@ -15,21 +15,18 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System;
     using System.Collections.Generic;
     using Builders;
-    using Context;
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using Management;
     using MassTransit.Configuration;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Pipes;
     using Pipeline;
     using Topology;
     using Topology.Settings;
     using Transport;
-    using Transports;
 
 
     public class RabbitMqReceiveEndpointConfiguration :
@@ -45,27 +42,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly IBuildPipeConfigurator<ModelContext> _modelConfigurator;
         readonly RabbitMqReceiveSettings _settings;
 
-        public RabbitMqReceiveEndpointConfiguration(IRabbitMqHostConfiguration hostConfiguration, string queueName,
-            IRabbitMqEndpointConfiguration endpointConfiguration)
-            : this(hostConfiguration, endpointConfiguration)
-        {
-            BindMessageExchanges = true;
-
-            _settings = new RabbitMqReceiveSettings(queueName, endpointConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false);
-        }
-
         public RabbitMqReceiveEndpointConfiguration(IRabbitMqHostConfiguration hostConfiguration, RabbitMqReceiveSettings settings,
             IRabbitMqEndpointConfiguration endpointConfiguration)
-            : this(hostConfiguration, endpointConfiguration)
+            : base(hostConfiguration, endpointConfiguration)
         {
             _settings = settings;
-        }
 
-        RabbitMqReceiveEndpointConfiguration(IRabbitMqHostConfiguration hostConfiguration, IRabbitMqEndpointConfiguration endpointConfiguration)
-            : base(endpointConfiguration)
-        {
             _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
+
+            BindMessageExchanges = true;
 
             _managementPipe = new ManagementPipe();
             _connectionConfigurator = new PipeConfigurator<ConnectionContext>();
@@ -90,16 +76,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public override Uri InputAddress => _inputAddress.Value;
 
-        public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            ReceiveEndpointContext receiveEndpointContext)
-        {
-            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, receiveEndpointContext);
-
-            _hostConfiguration.Host.AddReceiveEndpoint(endpointName, receiveEndpoint);
-
-            return receiveEndpoint;
-        }
-
         IRabbitMqTopologyConfiguration IRabbitMqEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
         public override IReceiveEndpoint Build()
@@ -107,8 +83,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             var builder = new RabbitMqReceiveEndpointBuilder(this);
 
             ApplySpecifications(builder);
-
-            var receivePipe = CreateReceivePipe();
 
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
@@ -129,12 +103,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
                 _modelConfigurator.UseFilter(new PrefetchCountFilter(_managementPipe, _settings.PrefetchCount));
 
-                var deadLetterTransport = CreateDeadLetterTransport();
-
-                var errorTransport = CreateErrorTransport();
-
-                var consumerFilter = new RabbitMqConsumerFilter(receivePipe, builder.ReceiveObservers, builder.TransportObservers, receiveEndpointContext,
-                    deadLetterTransport, errorTransport);
+                var consumerFilter = new RabbitMqConsumerFilter(receiveEndpointContext);
 
                 _modelConfigurator.UseFilter(consumerFilter);
 
@@ -145,12 +114,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             _connectionConfigurator.UseFilter(modelFilter);
 
-            var transport = new RabbitMqReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext,
-                builder.ReceiveObservers, builder.TransportObservers);
+            var transport = new RabbitMqReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
 
             transport.Add(consumerAgent);
 
-            return CreateReceiveEndpoint(_settings.QueueName ?? NewId.Next().ToString(), transport, receivePipe, receiveEndpointContext);
+            return CreateReceiveEndpoint(_settings.QueueName ?? NewId.Next().ToString(), transport, receiveEndpointContext);
         }
 
         IRabbitMqHost IRabbitMqReceiveEndpointConfigurator.Host => Host;
@@ -213,6 +181,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public bool Lazy
         {
             set => _settings.Lazy = value;
+        }
+
+        public TimeSpan? QueueExpiration
+        {
+            set => _settings.QueueExpiration = value;
         }
 
         public string DeadLetterExchange
@@ -285,22 +258,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         Uri FormatInputAddress()
         {
             return _settings.GetInputAddress(_hostConfiguration.Host.Settings.HostAddress);
-        }
-
-        IErrorTransport CreateErrorTransport()
-        {
-            var errorSettings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings);
-            var filter = new ConfigureTopologyFilter<ErrorSettings>(errorSettings, errorSettings.GetBrokerTopology());
-
-            return new RabbitMqErrorTransport(errorSettings.ExchangeName, filter);
-        }
-
-        IDeadLetterTransport CreateDeadLetterTransport()
-        {
-            var deadLetterSettings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings);
-            var filter = new ConfigureTopologyFilter<DeadLetterSettings>(deadLetterSettings, deadLetterSettings.GetBrokerTopology());
-
-            return new RabbitMqDeadLetterTransport(deadLetterSettings.ExchangeName, filter);
         }
 
         protected override bool IsAlreadyConfigured()

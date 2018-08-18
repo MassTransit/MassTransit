@@ -18,18 +18,18 @@ namespace MassTransit.Events
     public class ReceiveEndpointCompletedEvent :
         ReceiveEndpointCompleted
     {
-        public ReceiveEndpointCompletedEvent(Uri inputAddress, long deliveryCount, long concurrentDeliveryCount, IReceiveEndpoint receiveEndpoint)
+        readonly ReceiveTransportCompleted _completed;
+
+        public ReceiveEndpointCompletedEvent(ReceiveTransportCompleted completed, IReceiveEndpoint receiveEndpoint)
         {
-            InputAddress = inputAddress;
-            DeliveryCount = deliveryCount;
-            ConcurrentDeliveryCount = concurrentDeliveryCount;
+            _completed = completed;
             ReceiveEndpoint = receiveEndpoint;
         }
 
-        public Uri InputAddress { get; }
-        public IReceiveEndpoint ReceiveEndpoint { get; }
+        public Uri InputAddress => _completed.InputAddress;
+        public long DeliveryCount => _completed.DeliveryCount;
+        public long ConcurrentDeliveryCount => _completed.ConcurrentDeliveryCount;
 
-        public long DeliveryCount { get; }
-        public long ConcurrentDeliveryCount { get; }
+        public IReceiveEndpoint ReceiveEndpoint { get; }
     }
 }

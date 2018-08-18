@@ -114,7 +114,7 @@ namespace MassTransit.HttpTransport.Transport
 
                                 if (responseStream.Length > 0)
                                 {
-                                    var receiveContext = new HttpClientReceiveContext(response, responseStream, false, _receiveObserver, _topology);
+                                    var receiveContext = new HttpClientReceiveContext(response, responseStream, false, _topology);
 
                                     await clientContext.ReceiveResponse(receiveContext).ConfigureAwait(false);
                                 }

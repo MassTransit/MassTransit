@@ -75,7 +75,7 @@ namespace MassTransit.HttpTransport.Transport
             {
                 var responseEndpointTopology = _context.CreateResponseEndpointContext(httpContext);
 
-                var context = new HttpReceiveContext(httpContext, false, _receiveObserver, responseEndpointTopology);
+                var context = new HttpReceiveContext(httpContext, false, responseEndpointTopology);
 
                 try
                 {
@@ -83,7 +83,7 @@ namespace MassTransit.HttpTransport.Transport
 
                     await _receivePipe.Send(context).ConfigureAwait(false);
 
-                    await context.CompleteTask.ConfigureAwait(false);
+                    await context.ReceiveCompleted.ConfigureAwait(false);
 
                     //TODO: Push into Pipe! -- can't be on the receive pipe because it doesn't have the content
                     if (!httpContext.Response.ContentLength.HasValue)

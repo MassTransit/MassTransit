@@ -25,11 +25,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IRabbitMqBusConfiguration
     {
         readonly IHostCollection<IRabbitMqHostConfiguration> _hosts;
+        readonly FanoutExchangeTypeSelector _exchangeTypeSelector;
+        readonly RabbitMqMessageNameFormatter _messageNameFormatter;
 
         public RabbitMqBusConfiguration(IRabbitMqTopologyConfiguration topology)
             : base(topology)
         {
             _hosts = new HostCollection<IRabbitMqHostConfiguration>();
+
+            _exchangeTypeSelector = new FanoutExchangeTypeSelector();
+            _messageNameFormatter = new RabbitMqMessageNameFormatter();
         }
 
         public bool DeployTopologyOnly { get; set; }
@@ -44,13 +49,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
             return _hosts.TryGetHost(host, out hostConfiguration);
         }
 
-        public IRabbitMqHostTopology CreateHostTopology(Uri hostAddress)
+        public IRabbitMqHostConfiguration CreateHostConfiguration(RabbitMqHostSettings hostSettings)
         {
-            return new RabbitMqHostTopology(new FanoutExchangeTypeSelector(), new RabbitMqMessageNameFormatter(), hostAddress, Topology);
-        }
+            var hostTopology = new RabbitMqHostTopology(_exchangeTypeSelector, _messageNameFormatter, hostSettings.HostAddress, Topology);
 
-        public IRabbitMqHostConfiguration CreateHostConfiguration(IRabbitMqHostControl host)
-        {
+            var host = new RabbitMqHost(this, hostSettings, hostTopology);
+
             var hostConfiguration = new RabbitMqHostConfiguration(this, host);
 
             _hosts.Add(hostConfiguration);
@@ -58,24 +62,13 @@ namespace MassTransit.RabbitMqTransport.Configuration
             return hostConfiguration;
         }
 
-        public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, IRabbitMqEndpointConfiguration endpointConfiguration)
+        public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(RabbitMqReceiveSettings settings,
+            IRabbitMqEndpointConfiguration endpointConfiguration)
         {
             if (_hosts.Count == 0)
                 throw new ConfigurationException("At least one host must be configured");
 
-            var configuration = new RabbitMqReceiveEndpointConfiguration(_hosts[0], queueName, endpointConfiguration);
-
-            return configuration;
-        }
-
-        public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(RabbitMqReceiveSettings settings, IRabbitMqEndpointConfiguration endpointConfiguration)
-        {
-            if (_hosts.Count == 0)
-                throw new ConfigurationException("At least one host must be configured");
-
-            var configuration = new RabbitMqReceiveEndpointConfiguration(_hosts[0], settings, endpointConfiguration);
-
-            return configuration;
+            return new RabbitMqReceiveEndpointConfiguration(_hosts[0], settings, endpointConfiguration);
         }
 
         public IReadOnlyHostCollection Hosts => _hosts;

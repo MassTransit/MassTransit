@@ -76,8 +76,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
         IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(ReceiveEndpointSettings settings,
             IServiceBusEndpointConfiguration endpointConfiguration);
 
-        IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(Uri hostAddress, Uri inputAddress);
-
         /// <summary>
         /// Create a subscription endpoint configuration for the default host
         /// </summary>

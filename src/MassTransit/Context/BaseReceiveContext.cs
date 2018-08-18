@@ -16,7 +16,6 @@ namespace MassTransit.Context
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
-    using System.Linq;
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
@@ -37,34 +36,32 @@ namespace MassTransit.Context
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly Lazy<ContentType> _contentType;
         readonly Lazy<Headers> _headers;
-        readonly List<Task> _pendingTasks;
+        readonly List<Task> _receiveTasks;
         readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
-        readonly IReceiveObserver _receiveObserver;
         readonly Stopwatch _receiveTimer;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
-        readonly ReceiveEndpointContext _topology;
+        readonly ReceiveEndpointContext _receiveEndpointContext;
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, ReceiveEndpointContext receiveEndpointContext)
-            : this(inputAddress, redelivered, receiveObserver, new CancellationTokenSource(), receiveEndpointContext)
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, ReceiveEndpointContext receiveEndpointContext)
+            : this(inputAddress, redelivered, new CancellationTokenSource(), receiveEndpointContext)
         {
         }
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, IReceiveObserver receiveObserver, CancellationTokenSource source, ReceiveEndpointContext topology)
-            : base(new PayloadCache(), source.Token)
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, CancellationTokenSource source, ReceiveEndpointContext receiveEndpointContext)
+            : base(new PayloadCacheScope(receiveEndpointContext), source.Token)
         {
             _receiveTimer = Stopwatch.StartNew();
 
             _cancellationTokenSource = source;
-            _topology = topology;
-            _receiveObserver = receiveObserver;
-            
+            _receiveEndpointContext = receiveEndpointContext;
+
             InputAddress = inputAddress;
             Redelivered = redelivered;
 
             _headers = new Lazy<Headers>(() => new JsonHeaders(ObjectTypeDeserializer.Instance, HeaderProvider));
 
             _contentType = new Lazy<ContentType>(GetContentType);
-            _pendingTasks = new List<Task>(4);
+            _receiveTasks = new List<Task>(4);
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(GetSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(GetPublishEndpointProvider);
@@ -81,46 +78,21 @@ namespace MassTransit.Context
         public bool IsFaulted { get; private set; }
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
-        public IPublishTopology PublishTopology => _topology.Publish;
+        public IPublishTopology PublishTopology => _receiveEndpointContext.Publish;
 
-        public Task CompleteTask
+        public Task ReceiveCompleted
         {
             get
             {
-                Task[] tasks;
-                lock (_pendingTasks)
-                {
-                    tasks = _pendingTasks
-                        .Where(x => x.Status != TaskStatus.RanToCompletion)
-                        .ToArray();
-                }
-
-                var completeTask = Task.WhenAll(tasks);
-                completeTask.ContinueWith(result =>
-                {
-                    lock (_pendingTasks)
-                    {
-                        for (var i = 0; i < _pendingTasks.Count;)
-                        {
-                            if (_pendingTasks[i].Status == TaskStatus.RanToCompletion)
-                                _pendingTasks.RemoveAt(i);
-                            else
-                                i++;
-                        }
-                    }
-                }, TaskContinuationOptions.OnlyOnRanToCompletion);
-
-
-                return completeTask;
+                lock (_receiveTasks)
+                    return Task.WhenAll(_receiveTasks.ToArray());
             }
         }
 
-        public void AddPendingTask(Task task)
+        public void AddReceiveTask(Task task)
         {
-            lock (_pendingTasks)
-            {
-                _pendingTasks.Add(task);
-            }
+            lock (_receiveTasks)
+                _receiveTasks.Add(task);
         }
 
         public bool Redelivered { get; }
@@ -133,7 +105,7 @@ namespace MassTransit.Context
 
             context.LogConsumed(duration, consumerType);
 
-            return _receiveObserver.PostConsume(context, duration, consumerType);
+            return _receiveEndpointContext.ReceiveObservers.PostConsume(context, duration, consumerType);
         }
 
         public virtual Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
@@ -143,7 +115,7 @@ namespace MassTransit.Context
 
             context.LogFaulted(duration, consumerType, exception);
 
-            return _receiveObserver.ConsumeFault(context, duration, consumerType, exception);
+            return _receiveEndpointContext.ReceiveObservers.ConsumeFault(context, duration, consumerType, exception);
         }
 
         public virtual Task NotifyFaulted(Exception exception)
@@ -152,7 +124,7 @@ namespace MassTransit.Context
 
             this.LogFaulted(exception);
 
-            return _receiveObserver.ReceiveFault(this, exception);
+            return _receiveEndpointContext.ReceiveObservers.ReceiveFault(this, exception);
         }
 
         public abstract byte[] GetBody();
@@ -164,12 +136,12 @@ namespace MassTransit.Context
 
         protected virtual ISendEndpointProvider GetSendEndpointProvider()
         {
-            return _topology.SendEndpointProvider;
+            return _receiveEndpointContext.SendEndpointProvider;
         }
 
         protected virtual IPublishEndpointProvider GetPublishEndpointProvider()
         {
-            return _topology.PublishEndpointProvider;
+            return _receiveEndpointContext.PublishEndpointProvider;
         }
 
         protected virtual ContentType GetContentType()

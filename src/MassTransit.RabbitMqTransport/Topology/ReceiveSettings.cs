@@ -63,6 +63,11 @@ namespace MassTransit.RabbitMqTransport.Topology
         bool ExclusiveConsumer { get; }
 
         /// <summary>
+        /// When the queue should expire
+        /// </summary>
+        TimeSpan? QueueExpiration { get; }
+
+        /// <summary>
         /// Get the input address for the transport on the specified host
         /// </summary>
         Uri GetInputAddress(Uri hostAddress);

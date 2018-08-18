@@ -28,8 +28,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         readonly EventData _message;
         byte[] _body;
 
-        public EventDataReceiveContext(Uri inputAddress, EventData message, IReceiveObserver observer, ReceiveEndpointContext receiveEndpointContext)
-            : base(inputAddress, false, observer, receiveEndpointContext)
+        public EventDataReceiveContext(Uri inputAddress, EventData message, ReceiveEndpointContext receiveEndpointContext)
+            : base(inputAddress, false, receiveEndpointContext)
         {
             _message = message;
 

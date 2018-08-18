@@ -93,17 +93,20 @@ namespace MassTransit.Transports.InMemory
             _receiveEndpoints.Probe(scope);
         }
 
-        public IReceiveTransport GetReceiveTransport(string queueName, IReceivePipe receivePipe, ReceiveEndpointContext topology)
+        public IReceiveTransport GetReceiveTransport(string queueName, ReceiveEndpointContext receiveEndpointContext)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating receive transport for queue: {0}", queueName);
 
             var queue = _messageFabric.GetQueue(queueName);
 
-            var skippedExchange = _messageFabric.GetExchange($"{queueName}_skipped");
-            var errorExchange = _messageFabric.GetExchange($"{queueName}_error");
+            IDeadLetterTransport deadLetterTransport = new InMemoryMessageDeadLetterTransport(_messageFabric.GetExchange($"{queueName}_skipped"));
+            receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
 
-            var transport = new InMemoryReceiveTransport(new Uri(_baseUri, queueName), queue, receivePipe, errorExchange, skippedExchange, topology);
+            IErrorTransport errorTransport = new InMemoryMessageErrorTransport(_messageFabric.GetExchange($"{queueName}_error"));
+            receiveEndpointContext.GetOrAddPayload(() => errorTransport);
+
+            var transport = new InMemoryReceiveTransport(new Uri(_baseUri, queueName), queue, receiveEndpointContext);
             Add(transport);
 
             return transport;

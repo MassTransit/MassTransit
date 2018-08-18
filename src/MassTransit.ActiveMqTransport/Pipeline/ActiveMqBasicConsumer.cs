@@ -95,7 +95,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             using (var delivery = _tracker.BeginDelivery())
             {
-                var context = new ActiveMqReceiveContext(_inputAddress, message, _receiveObserver, _context);
+                var context = new ActiveMqReceiveContext(_inputAddress, message, _context);
 
                 context.GetOrAddPayload(() => _errorTransport);
                 context.GetOrAddPayload(() => _deadLetterTransport);
@@ -114,7 +114,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
                     await _receivePipe.Send(context).ConfigureAwait(false);
 
-                    await context.CompleteTask.ConfigureAwait(false);
+                    await context.ReceiveCompleted.ConfigureAwait(false);
 
                     message.Acknowledge();
 

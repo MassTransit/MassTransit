@@ -128,7 +128,7 @@ namespace MassTransit.Tests.Pipeline
                         Assert.IsNotNull(Transaction.Current);
                         Console.WriteLine("Isolation Level: {0}", Transaction.Current.IsolationLevel);
 
-                        Thread.Sleep(2000);
+                        Thread.Sleep(5000);
 
                         scope.Complete();
                     }

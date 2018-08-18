@@ -18,16 +18,17 @@ namespace MassTransit.Events
     public class ReceiveEndpointFaultedEvent :
         ReceiveEndpointFaulted
     {
-        public ReceiveEndpointFaultedEvent(Uri inputAddress, Exception exception, IReceiveEndpoint receiveEndpoint)
+        readonly ReceiveTransportFaulted _faulted;
+
+        public ReceiveEndpointFaultedEvent(ReceiveTransportFaulted faulted, IReceiveEndpoint receiveEndpoint)
         {
-            InputAddress = inputAddress;
-            Exception = exception;
+            _faulted = faulted;
             ReceiveEndpoint = receiveEndpoint;
         }
 
-        public Uri InputAddress { get; }
-        public IReceiveEndpoint ReceiveEndpoint { get; }
+        public Uri InputAddress => _faulted.InputAddress;
+        public Exception Exception => _faulted.Exception;
 
-        public Exception Exception { get; }
+        public IReceiveEndpoint ReceiveEndpoint { get; }
     }
 }

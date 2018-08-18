@@ -45,12 +45,12 @@ namespace MassTransit.PipeConfigurators
 
         public TimeSpan Timeout
         {
-            set { _timeout = value; }
+            set => _timeout = value;
         }
 
         public IsolationLevel IsolationLevel
         {
-            set { _isolationLevel = value; }
+            set => _isolationLevel = value;
         }
     }
 }

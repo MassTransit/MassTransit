@@ -14,6 +14,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
 {
     using System;
     using System.Linq;
+    using Configurators;
     using MassTransit.Configuration;
     using Settings;
     using Topology;
@@ -67,11 +68,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
             _hosts.Add(hostConfiguration);
 
             return hostConfiguration;
-        }
-
-        public IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(Uri hostAddress, Uri inputAddress)
-        {
-            return new BrokeredMessageReceiverServiceBusEndpointConfiguration(CreateEndpointConfiguration(), hostAddress, inputAddress);
         }
 
         public IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,

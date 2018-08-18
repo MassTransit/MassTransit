@@ -19,7 +19,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using GreenPipes.Agents;
     using Logging;
     using Topology;
-    using Transports;
 
 
     /// <summary>
@@ -30,22 +29,11 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IFilter<ModelContext>
     {
         static readonly ILog _log = Logger.Get<RabbitMqConsumerFilter>();
-        readonly IDeadLetterTransport _deadLetterTransport;
-        readonly IErrorTransport _errorTransport;
-        readonly IReceiveObserver _receiveObserver;
-        readonly IPipe<ReceiveContext> _receivePipe;
         readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
-        readonly IReceiveTransportObserver _transportObserver;
 
-        public RabbitMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver,
-            RabbitMqReceiveEndpointContext receiveEndpointContext, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+        public RabbitMqConsumerFilter(RabbitMqReceiveEndpointContext receiveEndpointContext)
         {
-            _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
-            _transportObserver = transportObserver;
             _receiveEndpointContext = receiveEndpointContext;
-            _deadLetterTransport = deadLetterTransport;
-            _errorTransport = errorTransport;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -58,15 +46,16 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostSettings.HostAddress);
 
-            var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receivePipe, _receiveObserver, _receiveEndpointContext, _deadLetterTransport, _errorTransport);
+            var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receiveEndpointContext);
 
-            await context.BasicConsume(receiveSettings.QueueName, false, _receiveEndpointContext.ExclusiveConsumer, receiveSettings.ConsumeArguments, consumer).ConfigureAwait(false);
+            await context.BasicConsume(receiveSettings.QueueName, false, _receiveEndpointContext.ExclusiveConsumer, receiveSettings.ConsumeArguments, consumer)
+                .ConfigureAwait(false);
 
             await consumer.Ready.ConfigureAwait(false);
 
             Add(consumer);
 
-            await _transportObserver.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
+            await _receiveEndpointContext.TransportObservers.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 
             try
             {
@@ -75,7 +64,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             finally
             {
                 RabbitMqDeliveryMetrics metrics = consumer;
-                await _transportObserver.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
+                await _receiveEndpointContext.TransportObservers.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Consumer completed {0}: {1} received, {2} concurrent", metrics.ConsumerTag, metrics.DeliveryCount,

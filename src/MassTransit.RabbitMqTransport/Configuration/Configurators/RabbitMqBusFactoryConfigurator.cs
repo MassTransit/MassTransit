@@ -21,7 +21,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
     using MassTransit.Builders;
     using Topology;
     using Topology.Settings;
-    using Transport;
 
 
     public class RabbitMqBusFactoryConfigurator :
@@ -42,8 +41,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
             var queueName = busEndpointConfiguration.Topology.Consume.CreateTemporaryQueueName("bus-");
 
             _settings = new RabbitMqReceiveSettings(queueName, busEndpointConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, false, true);
-            _settings.SetQueueArgument("x-expires", TimeSpan.FromMinutes(1));
-            _settings.SetExchangeArgument("x-expires", TimeSpan.FromMinutes(1));
+            _settings.AutoDeleteAfter(TimeSpan.FromMinutes(1));
         }
 
         public IBusControl CreateBus()
@@ -111,6 +109,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
             set => _settings.Lazy = value;
         }
 
+        public TimeSpan? QueueExpiration
+        {
+            set => _settings.QueueExpiration = value;
+        }
+
         public void SetQueueArgument(string key, object value)
         {
             _settings.SetQueueArgument(key, value);
@@ -138,13 +141,9 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public IRabbitMqHost Host(RabbitMqHostSettings settings)
         {
-            var hostTopology = _configuration.CreateHostTopology(settings.HostAddress);
+            var hostConfiguration = _configuration.CreateHostConfiguration(settings);
 
-            var host = new RabbitMqHost(_configuration, settings, hostTopology);
-
-            _configuration.CreateHostConfiguration(host);
-
-            return host;
+            return hostConfiguration.Host;
         }
 
         void IRabbitMqBusFactoryConfigurator.Send<T>(Action<IRabbitMqMessageSendTopologyConfigurator<T>> configureTopology)
@@ -177,7 +176,9 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            var configuration = _configuration.CreateReceiveEndpointConfiguration(queueName, _configuration.CreateEndpointConfiguration());
+            var settings = new RabbitMqReceiveSettings(queueName, _configuration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false);
+
+            var configuration = _configuration.CreateReceiveEndpointConfiguration(settings, _configuration.CreateEndpointConfiguration());
 
             ConfigureReceiveEndpoint(configuration, configureEndpoint);
         }

@@ -21,12 +21,13 @@ namespace MassTransit.Context
 
 
     public abstract class BaseReceiveEndpointContext :
+        BasePipeContext,
         ReceiveEndpointContext
     {
         readonly IPublishTopologyConfigurator _publish;
         readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
         readonly Lazy<IPublishPipe> _publishPipe;
-        readonly ISendTopologyConfigurator _send;
+        readonly Lazy<IReceivePipe> _receivePipe;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<ISendPipe> _sendPipe;
         readonly Lazy<IMessageSerializer> _serializer;
@@ -39,7 +40,6 @@ namespace MassTransit.Context
             InputAddress = configuration.InputAddress;
             HostAddress = configuration.HostAddress;
 
-            _send = configuration.Topology.Send;
             _publish = configuration.Topology.Publish;
 
             SendObservers = new SendObservable();
@@ -51,6 +51,7 @@ namespace MassTransit.Context
 
             _sendPipe = new Lazy<ISendPipe>(() => configuration.Send.CreatePipe());
             _publishPipe = new Lazy<IPublishPipe>(() => configuration.Publish.CreatePipe());
+            _receivePipe = new Lazy<IReceivePipe>(configuration.CreateReceivePipe);
 
             _serializer = new Lazy<IMessageSerializer>(() => configuration.Serialization.Serializer);
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
@@ -79,8 +80,9 @@ namespace MassTransit.Context
 
         public Uri InputAddress { get; }
 
-        ISendTopology ReceiveEndpointContext.Send => _send;
         IPublishTopology ReceiveEndpointContext.Publish => _publish;
+
+        public IReceivePipe ReceivePipe => _receivePipe.Value;
 
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;

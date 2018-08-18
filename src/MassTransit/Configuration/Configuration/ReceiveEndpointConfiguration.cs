@@ -30,11 +30,13 @@ namespace MassTransit.Configuration
     {
         readonly IEndpointConfiguration _configuration;
         readonly Lazy<IConsumePipe> _consumePipe;
+        readonly IHostConfiguration _hostConfiguration;
         readonly IList<string> _lateConfigurationKeys;
         readonly IList<IReceiveEndpointSpecification> _specifications;
 
-        protected ReceiveEndpointConfiguration(IEndpointConfiguration configuration)
+        protected ReceiveEndpointConfiguration(IHostConfiguration hostConfiguration, IEndpointConfiguration configuration)
         {
+            _hostConfiguration = hostConfiguration;
             _configuration = configuration;
 
             _consumePipe = new Lazy<IConsumePipe>(() => _configuration.Consume.CreatePipe());
@@ -156,10 +158,17 @@ namespace MassTransit.Configuration
             return _configuration.Receive.CreatePipe(ConsumePipe, _configuration.Serialization.Deserializer);
         }
 
-        public abstract IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            ReceiveEndpointContext receiveEndpointContext);
-
         public abstract IReceiveEndpoint Build();
+
+        protected virtual IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport,
+            ReceiveEndpointContext receiveEndpointContext)
+        {
+            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receiveEndpointContext);
+
+            _hostConfiguration.Host.AddReceiveEndpoint(endpointName, receiveEndpoint);
+
+            return receiveEndpoint;
+        }
 
         public void SetMessageSerializer(SerializerFactory serializerFactory)
         {

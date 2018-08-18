@@ -34,6 +34,6 @@ namespace MassTransit
         /// </summary>
         /// <param name="cancellationToken">Cancel the stop operation in progress</param>
         /// <returns>An awaitable task that is completed once everything is stopped</returns>
-        Task StopAsync(CancellationToken cancellationToken = default(CancellationToken));
+        Task StopAsync(CancellationToken cancellationToken = default);
     }
 }

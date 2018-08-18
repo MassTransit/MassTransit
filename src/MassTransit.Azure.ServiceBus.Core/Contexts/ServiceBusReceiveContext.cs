@@ -29,9 +29,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     {
         readonly Message _message;
 
-        public ServiceBusReceiveContext(Uri inputAddress, Message message, IReceiveObserver observer,
-            ReceiveEndpointContext receiveEndpointContext)
-            : base(inputAddress, message.SystemProperties.DeliveryCount > 1, observer, receiveEndpointContext)
+        public ServiceBusReceiveContext(Uri inputAddress, Message message, ReceiveEndpointContext receiveEndpointContext)
+            : base(inputAddress, message.SystemProperties.DeliveryCount > 1, receiveEndpointContext)
         {
             _message = message;
 
@@ -41,7 +40,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         protected override IHeaderProvider HeaderProvider => new ServiceBusHeaderProvider(this);
 
         public string MessageId => _message.MessageId;
-        
+
         public string CorrelationId => _message.CorrelationId;
 
         public TimeSpan TimeToLive => _message.TimeToLive;
