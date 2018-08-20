@@ -33,7 +33,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
+                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", Configuration.ServiceNamespace,
                     "MassTransit.AzureServiceBusTransport.Tests");
 
                 var completed = new TaskCompletionSource<A>();
@@ -83,7 +83,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
+                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", Configuration.ServiceNamespace,
                     "MassTransit.AzureServiceBusTransport.Tests");
 
                 var completed = new TaskCompletionSource<A>();
@@ -141,7 +141,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
+                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", Configuration.ServiceNamespace,
                     "Test.Namespace");
 
                // serviceUri = new Uri(serviceUri.ToString().Trim('/'));

@@ -40,6 +40,7 @@ src/SolutionVersion.cs
 tests
 doc/build/*
 *.[lm]df
+*.runsettings
 
 # osx noise
 .DS_Store
