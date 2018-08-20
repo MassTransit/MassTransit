@@ -32,7 +32,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
         public AzureServiceBusTestFixture(string inputQueueName = null, Uri serviceUri = null, ServiceBusTokenProviderSettings settings = null)
             : this(new AzureServiceBusTestHarness(
-                serviceUri ?? ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", "MassTransit.AzureServiceBusTransport.Tests"),
+                serviceUri ?? ServiceBusEnvironment.CreateServiceUri("sb", Configuration.ServiceNamespace, "MassTransit.AzureServiceBusTransport.Tests"),
                 settings?.KeyName ?? ((ServiceBusTokenProviderSettings)new TestAzureServiceBusAccountSettings()).KeyName,
                 settings?.SharedAccessKey ?? ((ServiceBusTokenProviderSettings)new TestAzureServiceBusAccountSettings()).SharedAccessKey,
                 inputQueueName))

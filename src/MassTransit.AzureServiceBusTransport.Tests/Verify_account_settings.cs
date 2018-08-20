@@ -38,7 +38,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 TokenProvider tokenProvider = provider.GetTokenProvider();
 
-                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
+                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", Configuration.ServiceNamespace,
                     "MassTransit.AzureServiceBusTransport.Tests");
                 var namespaceManager = new NamespaceManager(serviceUri, tokenProvider);
                 CreateQueue(namespaceManager, serviceUri, "TestClient");
@@ -59,7 +59,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
                 MessagingFactory factory =
                     MessagingFactory.Create(
-                        ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build", Environment.MachineName), mfs);
+                        ServiceBusEnvironment.CreateServiceUri("sb", Configuration.ServiceNamespace, Environment.MachineName), mfs);
 
                 MessageReceiver receiver = await factory.CreateMessageReceiverAsync("Control");
                 receiver.PrefetchCount = 100;
@@ -119,7 +119,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
             void CreateHostQueue(TokenProvider tokenProvider)
             {
-                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", "masstransit-build",
+                Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", Configuration.ServiceNamespace,
                     Environment.MachineName);
                 var namespaceManager = new NamespaceManager(serviceUri, tokenProvider);
                 CreateQueue(namespaceManager, serviceUri, "Control");
