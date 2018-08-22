@@ -113,7 +113,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             return null;
         }
 
-        [Test]
+        [Test, Explicit]
         public async Task Should_capture_all_events_many_sagas()
         {
             var tasks = new List<Task>();
