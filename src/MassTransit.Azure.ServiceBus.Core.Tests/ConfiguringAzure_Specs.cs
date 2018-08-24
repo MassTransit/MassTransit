@@ -32,11 +32,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             public async Task Should_support_the_new_syntax()
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
-                var serviceBusNamespace = "masstransit-build";
+                var serviceBusNamespace = Configuration.ServiceNamespace;
 
                 Uri serviceUri = AzureServiceBusEndpointUriCreator.Create(
                     serviceBusNamespace, 
-                    "MassTransit.AzureServiceBusTransport.Tests"
+                    "MassTransit.Azure.ServiceBus.Core.Tests"
                 );
 
                 var completed = new TaskCompletionSource<A>();
@@ -94,7 +94,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                var serviceBusNamespace = "masstransit-build";
+                var serviceBusNamespace = Configuration.ServiceNamespace;
 
                 Uri serviceUri = new Uri($"sb://{serviceBusNamespace}.servicebus.windows.net/Test.Namespace");
 

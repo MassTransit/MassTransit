@@ -42,7 +42,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         }
 
         public Sending_a_message_to_a_basic_endpoint()
-            : base("input_queue", AzureServiceBusEndpointUriCreator.Create("masstransit-basic", "MassTransit.AzureServiceBusTransport.Tests"),
+            : base("input_queue", AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace, "MassTransit.Azure.ServiceBus.Core.Tests"),
                 new BasicAzureServiceBusAccountSettings())
         {
         }
