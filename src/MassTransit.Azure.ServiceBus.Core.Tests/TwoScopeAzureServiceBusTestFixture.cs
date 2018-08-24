@@ -28,7 +28,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         public TwoScopeAzureServiceBusTestFixture()
         {
-            _secondServiceUri = AzureServiceBusEndpointUriCreator.Create("masstransit-build", "MassTransit.Tests.SecondService");
+            _secondServiceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace, "MassTransit.Tests.SecondService");
         }
 
         Uri _secondInputQueueAddress;

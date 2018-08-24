@@ -46,8 +46,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                 };
 
                 var serviceUri = AzureServiceBusEndpointUriCreator.Create(
-                    "masstransit-build",
-                    "MassTransit.AzureServiceBusTransport.Tests"
+                    Configuration.ServiceNamespace,
+                    "MassTransit.Azure.ServiceBus.Core.Tests"
                 );
 
                 var namespaceManager = new NamespaceManager(serviceUri, namespaceSettings);
@@ -119,7 +119,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             Task CreateHostQueue(ITokenProvider tokenProvider)
             {
                 var serviceUri = AzureServiceBusEndpointUriCreator.Create(
-                    "masstransit-build",
+                    Configuration.ServiceNamespace,
                     Environment.MachineName
                 );
 

@@ -15,11 +15,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System;
     using Microsoft.Azure.ServiceBus.Primitives;
 
-    public class BasicAzureServiceBusAccountSettings : 
+    public class BasicAzureServiceBusAccountSettings :
         ServiceBusTokenProviderSettings
     {
-        const string KeyName = "MassTransitBuild";
-        const string SharedAccessKey = "AVoxltiFrIsOQsdlCgtbLtVGjcEpXH/9ZM1q/55xjoM=";
+        static readonly string KeyName = Configuration.KeyName;
+        static readonly string SharedAccessKey = Configuration.SharedAccessKey;
         readonly TokenScope _tokenScope;
         readonly TimeSpan _tokenTimeToLive;
 
