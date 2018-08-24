@@ -72,10 +72,6 @@ namespace MassTransit.AzureServiceBusTransport
             MessagingFactoryCache = new MessagingFactoryCache(settings.ServiceUri, CreateMessagingFactorySettings(settings), serviceBusRetryPolicy);
             NamespaceCache = new NamespaceCache(settings.ServiceUri, CreateNamespaceManagerSettings(settings, serviceBusRetryPolicy));
 
-            NetMessagingFactoryCache = settings.TransportType == TransportType.NetMessaging
-                ? MessagingFactoryCache
-                : new MessagingFactoryCache(settings.ServiceUri, CreateMessagingFactorySettings(settings, true), serviceBusRetryPolicy);
-
             _receiveEndpointFactory = new ServiceBusReceiveEndpointFactory(busConfiguration1, this);
             _subscriptionEndpointFactory = new ServiceBusSubscriptionEndpointFactory(busConfiguration1, this);
         }
@@ -213,23 +209,25 @@ namespace MassTransit.AzureServiceBusTransport
             return new RetryExponential(settings.RetryMinBackoff, settings.RetryMaxBackoff, settings.RetryLimit);
         }
 
-        static MessagingFactorySettings CreateMessagingFactorySettings(ServiceBusHostSettings settings, bool useNetMessaging = false)
+        static MessagingFactorySettings CreateMessagingFactorySettings(ServiceBusHostSettings settings)
         {
             var mfs = new MessagingFactorySettings
             {
                 TokenProvider = settings.TokenProvider,
-                OperationTimeout = settings.OperationTimeout
+                OperationTimeout = settings.OperationTimeout,
+                TransportType = settings.TransportType
             };
 
-            if (settings.TransportType == TransportType.NetMessaging || useNetMessaging)
+            switch (settings.TransportType)
             {
-                mfs.TransportType = TransportType.NetMessaging;
-                mfs.NetMessagingTransportSettings = settings.NetMessagingTransportSettings;
-            }
-            else
-            {
-                mfs.TransportType = TransportType.Amqp;
-                mfs.AmqpTransportSettings = settings.AmqpTransportSettings;
+                case TransportType.NetMessaging:
+                    mfs.NetMessagingTransportSettings = settings.NetMessagingTransportSettings;
+                    break;
+                case TransportType.Amqp:
+                    mfs.AmqpTransportSettings = settings.AmqpTransportSettings;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(settings.TransportType), "Unknown TransportType");
             }
 
             return mfs;

@@ -42,11 +42,6 @@ namespace MassTransit.AzureServiceBusTransport
         IMessagingFactoryCache MessagingFactoryCache { get; }
 
         /// <summary>
-        /// The messaging factory cache for NET-TCP (may be the same as above, depending upon configuration)
-        /// </summary>
-        IMessagingFactoryCache NetMessagingFactoryCache { get; }
-
-        /// <summary>
         /// The namespace cache for operating on the service bus namespace (management)
         /// </summary>
         INamespaceCache NamespaceCache { get; }
