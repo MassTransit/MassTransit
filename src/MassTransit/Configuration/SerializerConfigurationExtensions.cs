@@ -147,6 +147,7 @@ namespace MassTransit
         /// Serialize messages using the BSON message serializer with AES Encryption
         /// </summary>
         /// <param name="configurator"></param>
+        /// <param name="streamProvider"></param>
         public static void UseEncryptedSerializerV2(this IBusFactoryConfigurator configurator, ICryptoStreamProviderV2 streamProvider)
         {
             configurator.SetMessageSerializer(() => new EncryptedMessageSerializerV2(streamProvider));
@@ -159,6 +160,7 @@ namespace MassTransit
         /// Serialize messages using the BSON message serializer with AES Encryption
         /// </summary>
         /// <param name="configurator"></param>
+        /// <param name="streamProvider"></param>
         public static void UseEncryptedSerializerV2(this IReceiveEndpointConfigurator configurator, ICryptoStreamProviderV2 streamProvider)
         {
             configurator.SetMessageSerializer(() => new EncryptedMessageSerializerV2(streamProvider));

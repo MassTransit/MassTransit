@@ -34,7 +34,12 @@
 
     public class MessageBundler
     {
-        ISendEndpoint _sendEndpoint;
+        readonly ISendEndpoint _sendEndpoint;
+
+        public MessageBundler(ISendEndpoint sendEndpoint)
+        {
+            _sendEndpoint = sendEndpoint;
+        }
 
         public void Bundle(IEnumerable<IMessageEvent> messageEvents)
         {

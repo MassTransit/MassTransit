@@ -44,7 +44,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly IManagementPipe _managementPipe;
         readonly IBuildPipeConfigurator<ModelContext> _modelConfigurator;
         readonly RabbitMqReceiveSettings _settings;
-        int _consumerPriority;
 
         public RabbitMqReceiveEndpointConfiguration(IRabbitMqHostConfiguration hostConfiguration, string queueName,
             IRabbitMqEndpointConfiguration endpointConfiguration)
