@@ -1,5 +1,12 @@
 # Message contract
+<!-- TOC -->
 
+- [Specifying message names](#specifying-message-names)
+    - [Commands](#commands)
+    - [Events](#events)
+- [Message correlation](#message-correlation)
+
+<!-- /TOC -->
 In MassTransit, a message contract is defined using the .NET type system. Messages can be defined using both 
 classes and interfaces, however, it is suggested that types use read-only properties and no behavior.
 

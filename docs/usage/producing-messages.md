@@ -1,5 +1,13 @@
 # Producing messages
+<!-- TOC -->
 
+- [Sending commands](#sending-commands)
+    - [Using endpoint conventions](#using-endpoint-conventions)
+    - [Sending via interfaces](#sending-via-interfaces)
+    - [Setting message headers](#setting-message-headers)
+- [Publishing events](#publishing-events)
+
+<!-- /TOC -->
 An application or service can produce messages using two different methods. A message can be sent using `Send` or a 
 message can be published using `Publish`. The behavior of each method is very different, but it easy to understand
 by looking at the type of messages involved with each particular method.

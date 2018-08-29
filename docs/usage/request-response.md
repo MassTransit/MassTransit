@@ -1,5 +1,13 @@
 # Crafting a request/response conversation
+<!-- TOC -->
 
+- [Creating the message contracts](#creating-the-message-contracts)
+- [Handling requests](#handling-requests)
+- [Creating the message request client](#creating-the-message-request-client)
+- [Using the request client in ASP.NET MVC](#using-the-request-client-in-aspnet-mvc)
+- [Composing multiple requests](#composing-multiple-requests)
+
+<!-- /TOC -->
 Request/response is a common pattern in application development, where a component sends a request to a service and
 continues once the response is received. In a distributed system, this can increase the latency of an application
 since the service may be hosted in another process, on another machine, or may even be a remote service in another

@@ -1,5 +1,14 @@
 # Creating a message consumer
+<!-- TOC -->
 
+- [Connecting a message consumer](#connecting-a-message-consumer)
+    - [Connecting to an existing bus](#connecting-to-an-existing-bus)
+- [Connecting an existing consumer instance](#connecting-an-existing-consumer-instance)
+    - [Handling undeliverable messages](#handling-undeliverable-messages)
+- [Handling messages without a consumer](#handling-messages-without-a-consumer)
+- [Observing messages via IObserver](#observing-messages-via-iobserver)
+
+<!-- /TOC -->
 A message consumer is a class that consumes one or more message types, specified by the
 `IConsumer<T>` interface, where `T` is the message type.
 
