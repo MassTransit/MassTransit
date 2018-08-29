@@ -1,5 +1,14 @@
 # Configuring MassTransit
+<!-- TOC -->
 
+- [MassTransit in a console application](#masstransit-in-a-console-application)
+- [MassTransit in a Windows service](#masstransit-in-a-windows-service)
+- [MassTransit in a web application](#masstransit-in-a-web-application)
+    - [ASP.NET (MVC/WebApi2)](#aspnet-mvcwebapi2)
+    - [OWIN Pipeline (WebApi2)](#owin-pipeline-webapi2)
+    - [ASP.NET Core](#aspnet-core)
+
+<!-- /TOC -->
 To configure MassTransit in your application, it depends upon the application type.
 There are several application types, which are covered below. In these examples, the
 use of a dependency injection framework is not included. Using a container (such as
