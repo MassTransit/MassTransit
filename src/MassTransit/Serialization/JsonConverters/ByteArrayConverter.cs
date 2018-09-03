@@ -46,6 +46,8 @@ namespace MassTransit.Serialization.JsonConverters
                 numArray = ReadByteArray(reader);
             else if (reader.TokenType == JsonToken.String)
                 numArray = Convert.FromBase64String(reader.Value.ToString());
+            else if (reader.TokenType == JsonToken.Bytes)
+                numArray = reader.Value as byte[];
             else
                 throw new Exception($"Unexpected token parsing binary. Expected String or StartArray, got {reader.TokenType}.");
 

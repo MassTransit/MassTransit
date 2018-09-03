@@ -17,7 +17,9 @@ namespace MassTransit.Tests.Serialization
     using MassTransit.Serialization;
     using Messages;
     using NUnit.Framework;
+    using Shouldly;
     using TestFramework.Messages;
+    using Util;
 
 
     [TestFixture(typeof(JsonMessageSerializer))]
@@ -36,6 +38,12 @@ namespace MassTransit.Tests.Serialization
         }
 
 
+        public interface ByteArrayMessage
+        {
+            byte[] Contents { get; set; }
+        }
+
+
         class C : IEquatable<C>
         {
             public byte[] Contents { get; set; }
@@ -44,8 +52,10 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, other))
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
+
                 return Contents.SequenceEqual(other.Contents);
             }
 
@@ -53,10 +63,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != GetType())
                     return false;
+
                 return Equals((C)obj);
             }
 
@@ -76,8 +89,10 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, other))
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
+
                 return Local.Equals(other.Local) && Universal.Equals(other.Universal);
             }
 
@@ -85,10 +100,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != GetType())
                     return false;
+
                 return Equals((B)obj);
             }
 
@@ -117,8 +135,10 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, other))
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
+
                 return string.Equals(Name, other.Name) && string.Equals(Value, other.Value);
             }
 
@@ -126,10 +146,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != GetType())
                     return false;
+
                 return Equals((A)obj);
             }
 
@@ -150,6 +173,19 @@ namespace MassTransit.Tests.Serialization
             {
                 Contents = new byte[] {0x56, 0x34, 0xf3}
             });
+        }
+
+        [Test]
+        public void Byte_interface_array()
+        {
+            var msg = TypeMetadataCache<ByteArrayMessage>.InitializeFromObject(new
+            {
+                Contents = new byte[] {0x56, 0x34, 0xf3}
+            });
+
+            var result = SerializeAndReturn(msg);
+
+            result.Contents.SequenceEqual(msg.Contents).ShouldBeTrue();
         }
 
         [Test]
@@ -194,7 +230,7 @@ namespace MassTransit.Tests.Serialization
         {
             const decimal smallNumber = 0.000001M;
 
-            TestSerialization(new SmallNumberMessage(){SmallNumber = smallNumber});
+            TestSerialization(new SmallNumberMessage() {SmallNumber = smallNumber});
         }
 
 
@@ -206,8 +242,10 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, other))
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
+
                 return SmallNumber == other.SmallNumber;
             }
 
@@ -215,10 +253,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != this.GetType())
                     return false;
+
                 return Equals((SmallNumberMessage)obj);
             }
 
@@ -227,7 +268,7 @@ namespace MassTransit.Tests.Serialization
                 return SmallNumber.GetHashCode();
             }
         }
-        
+
 
         [Test]
         public void Serialize_simple()
