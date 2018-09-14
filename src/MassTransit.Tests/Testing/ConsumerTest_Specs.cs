@@ -18,6 +18,7 @@ namespace MassTransit.Tests.Testing
     using MassTransit.Testing;
     using Shouldly;
 
+
     [TestFixture]
     public class When_a_consumer_is_being_tested
     {
@@ -40,7 +41,6 @@ namespace MassTransit.Tests.Testing
         {
             await _harness.Stop();
         }
-
 
         [Test]
         public void Should_send_the_initial_message_to_the_consumer()
@@ -66,6 +66,7 @@ namespace MassTransit.Tests.Testing
             _consumer.Consumed.Select<A>().Any().ShouldBe(true);
         }
 
+
         class Testsumer :
             IConsumer<A>
         {
@@ -75,14 +76,100 @@ namespace MassTransit.Tests.Testing
             }
         }
 
+
         class A
         {
         }
+
 
         class B
         {
         }
     }
+
+
+    [TestFixture]
+    public class When_a_consumer_of_interfaces_is_being_tested
+    {
+        InMemoryTestHarness _harness;
+        ConsumerTestHarness<TestInterfaceConsumer> _consumer;
+
+        [OneTimeSetUp]
+        public async Task A_consumer_is_being_tested()
+        {
+            _harness = new InMemoryTestHarness();
+            _consumer = _harness.Consumer<TestInterfaceConsumer>();
+
+            await _harness.Start();
+
+            await _harness.InputQueueSendEndpoint.Send(new A());
+        }
+
+        [OneTimeTearDown]
+        public async Task Teardown()
+        {
+            await _harness.Stop();
+        }
+
+        [Test]
+        public void Should_send_the_initial_message_to_the_consumer()
+        {
+            _harness.Sent.Select<A>().Any().ShouldBe(true);
+            _harness.Sent.Select<IA>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_have_sent_the_response_from_the_consumer()
+        {
+            _harness.Published.Select<B>().Any().ShouldBe(true);
+            _harness.Published.Select<IB>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_receive_the_message_type_a()
+        {
+            _harness.Consumed.Select<IA>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_have_called_the_consumer_method()
+        {
+            _consumer.Consumed.Select<IA>().Any().ShouldBe(true);
+        }
+
+
+        class TestInterfaceConsumer :
+            IConsumer<IA>
+        {
+            public async Task Consume(ConsumeContext<IA> context)
+            {
+                await context.RespondAsync(new B());
+            }
+        }
+
+
+        public interface IA
+        {
+        }
+
+
+        class A :
+            IA
+        {
+        }
+
+
+        public interface IB
+        {
+        }
+
+
+        class B :
+            IB
+        {
+        }
+    }
+
 
     public class When_a_context_consumer_is_being_tested
     {
@@ -130,6 +217,7 @@ namespace MassTransit.Tests.Testing
             _consumer.Consumed.Select<A>().Any().ShouldBe(true);
         }
 
+
         class Testsumer :
             IConsumer<A>
         {
@@ -139,9 +227,11 @@ namespace MassTransit.Tests.Testing
             }
         }
 
+
         class A
         {
         }
+
 
         class B
         {
