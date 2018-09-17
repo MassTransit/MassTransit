@@ -47,6 +47,21 @@ namespace Automatonymous.Activities
             _sendPipe = Pipe.Empty<SendContext<TMessage>>();
         }
 
+        public FaultedSendActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback)
+        {
+            _messageFactory = messageFactory;
+
+            _sendPipe = Pipe.Execute(contextCallback);
+        }
+
+        public FaultedSendActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory)
+        {
+            _messageFactory = messageFactory;
+
+            _sendPipe = Pipe.Empty<SendContext<TMessage>>();
+        }
+
         void Visitable.Accept(StateMachineVisitor inspector)
         {
             inspector.Visit(this);
@@ -71,9 +86,16 @@ namespace Automatonymous.Activities
             {
                 var message = _messageFactory(exceptionContext);
 
-                var endpoint = await exceptionContext.GetSendEndpoint(_destionationAddress).ConfigureAwait(false);
+                if (_destionationAddress != null)
+                {
+                    var endpoint = await exceptionContext.GetSendEndpoint(_destionationAddress).ConfigureAwait(false);
 
-                await endpoint.Send(message, _sendPipe).ConfigureAwait(false);
+                    await endpoint.Send(message, _sendPipe).ConfigureAwait(false);
+                }
+                else
+                {
+                    await exceptionContext.Send(message, _sendPipe).ConfigureAwait(false);
+                }
             }
 
             await next.Faulted(context).ConfigureAwait(false);

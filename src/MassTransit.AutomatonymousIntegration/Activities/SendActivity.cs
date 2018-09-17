@@ -60,6 +60,20 @@ namespace Automatonymous.Activities
             _sendPipe = Pipe.Execute(contextCallback);
         }
 
+        public SendActivity(EventMessageFactory<TInstance, TMessage> messageFactory)
+        {
+            _messageFactory = messageFactory;
+
+            _sendPipe = Pipe.Empty<SendContext<TMessage>>();
+        }
+
+        public SendActivity(EventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
+        {
+            _messageFactory = messageFactory;
+
+            _sendPipe = Pipe.Execute(contextCallback);
+        }
+
         public void Accept(StateMachineVisitor inspector)
         {
             inspector.Visit(this);
@@ -101,11 +115,18 @@ namespace Automatonymous.Activities
 
             var message = _messageFactory(consumeContext);
 
-            var destinationAddress = _destinationAddressProvider(consumeContext.Instance);
+            if (_destinationAddressProvider != null)
+            {
+                var destinationAddress = _destinationAddressProvider(consumeContext.Instance);
 
-            var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+                var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, _sendPipe).ConfigureAwait(false);
+                await endpoint.Send(message, _sendPipe).ConfigureAwait(false);
+            }
+            else
+            {
+                await consumeContext.Send(message, _sendPipe).ConfigureAwait(false);
+            }
         }
     }
 
@@ -156,6 +177,21 @@ namespace Automatonymous.Activities
             _sendPipe = Pipe.Empty<SendContext<TMessage>>();
         }
 
+        public SendActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback)
+        {
+            _messageFactory = messageFactory;
+
+            _sendPipe = Pipe.Execute(contextCallback);
+        }
+
+        public SendActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory)
+        {
+            _messageFactory = messageFactory;
+
+            _sendPipe = Pipe.Empty<SendContext<TMessage>>();
+        }
+
         void Visitable.Accept(StateMachineVisitor inspector)
         {
             inspector.Visit(this);
@@ -173,11 +209,18 @@ namespace Automatonymous.Activities
 
             var message = _messageFactory(consumeContext);
 
-            var destinationAddress = _destinationAddressProvider(consumeContext.Instance, context.Data);
+            if (_destinationAddressProvider != null)
+            {
+                var destinationAddress = _destinationAddressProvider(consumeContext.Instance, context.Data);
 
-            var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+                var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send(message, _sendPipe).ConfigureAwait(false);
+                await endpoint.Send(message, _sendPipe).ConfigureAwait(false);
+            }
+            else
+            {
+                await consumeContext.Send(message, _sendPipe).ConfigureAwait(false);
+            }
 
             await next.Execute(context).ConfigureAwait(false);
         }
