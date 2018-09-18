@@ -37,7 +37,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
         [Test]
         public void ThenSagaNotInsertedIntoCollection()
         {
-            _mockDocumentClient.Verify(m => m.CreateDocumentAsync(It.IsAny<Uri>(), It.IsAny<SimpleSaga>(), null, false), Times.Never);
+            _mockDocumentClient.Verify(m => m.CreateDocumentAsync(It.IsAny<Uri>(), It.IsAny<SimpleSaga>(), null, false, CancellationToken.None), Times.Never);
         }
 
         Mock<IPipe<SagaConsumeContext<SimpleSaga, InitiateSimpleSaga>>> _nextPipe;

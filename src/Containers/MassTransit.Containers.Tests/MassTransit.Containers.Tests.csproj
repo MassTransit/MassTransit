@@ -9,7 +9,7 @@
     <PackageReference Include="Castle.Core" Version="4.2.0" />
     <PackageReference Include="Castle.Windsor" Version="4.1.0" />
     <PackageReference Include="GreenPipes" Version="2.1.2" />
-    <PackageReference Include="Lamar" Version="1.1.1" />
+    <PackageReference Include="Lamar" Version="1.1.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NUnit" Version="3.10.1" />
@@ -19,7 +19,7 @@
     <PackageReference Include="Shouldly" Version="3.0.0" />
     <PackageReference Include="SimpleInjector" Version="4.3.0" />
     <PackageReference Include="StructureMap" Version="4.7.0" />
-    <PackageReference Include="Unity.Container" Version="5.8.7" />
+    <PackageReference Include="Unity.Container" Version="5.8.11" />
     <ProjectReference Include="..\..\Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
