@@ -58,6 +58,11 @@ namespace MassTransit.RabbitMqTransport.Topology
         IDictionary<string, object> ConsumeArguments { get; }
 
         /// <summary>
+        /// Should the consumer have exclusive access to the queue
+        /// </summary>
+        bool ExclusiveConsumer { get; }
+
+        /// <summary>
         /// Get the input address for the transport on the specified host
         /// </summary>
         Uri GetInputAddress(Uri hostAddress);

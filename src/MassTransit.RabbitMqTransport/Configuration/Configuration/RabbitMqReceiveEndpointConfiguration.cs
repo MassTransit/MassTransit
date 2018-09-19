@@ -200,6 +200,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set => _settings.ConsumerPriority = value;
         }
 
+        public bool ExclusiveConsumer
+        {
+            set => _settings.ExclusiveConsumer = value;
+        }
+
         public ushort PrefetchCount
         {
             set => _settings.PrefetchCount = value;

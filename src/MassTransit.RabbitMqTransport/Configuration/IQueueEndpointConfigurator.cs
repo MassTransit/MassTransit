@@ -31,5 +31,10 @@ namespace MassTransit.RabbitMqTransport
         /// Sets the priority of the consumer (optional, no default value specified)
         /// </summary>
         int ConsumerPriority { set; }
+
+        /// <summary>
+        /// Should the consumer have exclusive access to the queue
+        /// </summary>
+        bool ExclusiveConsumer { set; }
     }
 }

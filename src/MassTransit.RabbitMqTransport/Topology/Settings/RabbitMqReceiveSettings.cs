@@ -31,6 +31,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
 
         public ushort PrefetchCount { get; set; }
         public bool PurgeOnStartup { get; set; }
+        public bool ExclusiveConsumer { get; set; }
 
         public int ConsumerPriority
         {

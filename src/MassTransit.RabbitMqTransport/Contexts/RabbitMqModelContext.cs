@@ -173,9 +173,9 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _model.BasicNack(deliveryTag, multiple, requeue);
         }
 
-        Task<string> ModelContext.BasicConsume(string queue, bool noAck, IDictionary<string, object> arguments, IBasicConsumer consumer)
+        Task<string> ModelContext.BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer)
         {
-            return Task.Factory.StartNew(() => _model.BasicConsume(queue, noAck, "", arguments, consumer),
+            return Task.Factory.StartNew(() => _model.BasicConsume(consumer, queue, noAck, "", false, exclusive, arguments),
                 CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 

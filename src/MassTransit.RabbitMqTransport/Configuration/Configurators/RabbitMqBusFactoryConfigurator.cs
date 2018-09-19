@@ -101,6 +101,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
             set => _settings.ConsumerPriority = value;
         }
 
+        public bool ExclusiveConsumer
+        {
+            set => _settings.ExclusiveConsumer = value;
+        }
+
         public bool Lazy
         {
             set => _settings.Lazy = value;
