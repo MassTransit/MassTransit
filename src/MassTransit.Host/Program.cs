@@ -14,6 +14,7 @@ namespace MassTransit.Host
 {
     using System;
     using System.IO;
+    using log4net;
     using log4net.Config;
     using Log4NetIntegration.Logging;
     using Topshelf;
@@ -36,6 +37,7 @@ namespace MassTransit.Host
                     DisplayName = "MassTransit Host",
                     ServiceName = "MassTransitHost"
                 };
+
                 configurator.Configure(x);
             });
         }
@@ -44,7 +46,14 @@ namespace MassTransit.Host
         {
             var configFile = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MassTransit.Host.log4net.config"));
             if (configFile.Exists)
-                XmlConfigurator.ConfigureAndWatch(configFile);
+            {
+            #if NETCORE
+                var logRepository = LogManager.GetRepository(System.Reflection.Assembly.GetEntryAssembly());
+                XmlConfigurator.Configure(logRepository, configFile);
+            #else
+                XmlConfigurator.Configure(configFile);
+            #endif
+            }
 
             Log4NetLogWriterFactory.Use();
             Log4NetLogger.Use();

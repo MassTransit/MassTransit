@@ -14,7 +14,9 @@ namespace MassTransit.Host
 {
     using System;
     using System.Diagnostics;
+#if !NETCORE
     using Monitoring.Performance.Windows;
+#endif
     using Topshelf;
     using Topshelf.HostConfigurators;
     using Topshelf.Runtime;
@@ -50,22 +52,23 @@ namespace MassTransit.Host
             {
                 VerifyEventLogSourceExists(ServiceName);
 
+            #if !NETCORE
                 // this will force the performance counters to register during service installation
                 // making them created - of course using the InstallUtil stuff completely skips
                 // this part of the install :(
                 new WindowsPerformanceCounterInstaller().Install();
+            #endif
             });
 
             configurator.Service(settings =>
-            {
-                _bootstrapper = BootstrapperFactory(settings);
+                {
+                    _bootstrapper = BootstrapperFactory(settings);
 
-                return _bootstrapper.GetService();
-            },
+                    return _bootstrapper.GetService();
+                },
                 s => s.AfterStoppingService(() =>
                 {
-                    if (_bootstrapper != default(T))
-                        _bootstrapper.Dispose();
+                    _bootstrapper?.Dispose();
                 }));
         }
 
