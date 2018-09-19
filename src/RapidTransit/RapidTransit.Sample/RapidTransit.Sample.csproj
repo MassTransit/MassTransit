@@ -4,7 +4,6 @@
     <AssemblyName>RapidTransitSample</AssemblyName>
     <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <OutputType>Exe</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
