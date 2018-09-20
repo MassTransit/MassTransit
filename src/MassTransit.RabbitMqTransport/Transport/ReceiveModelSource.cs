@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             _receiveContext = receiveContext;
         }
 
-        public Task Send(IPipe<ModelContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        public Task Send(IPipe<ModelContext> pipe, CancellationToken cancellationToken = default)
         {
             ModelContext modelContext = new SharedModelContext(_context, new PayloadCacheScope(_context), cancellationToken);
             

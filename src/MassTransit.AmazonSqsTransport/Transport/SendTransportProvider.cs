@@ -24,11 +24,11 @@ namespace MassTransit.AmazonSqsTransport.Transport
     public class SendTransportProvider :
         ISendTransportProvider
     {
-        readonly IAmazonSqsBusConfiguration _busConfiguration;
+        readonly IAmazonSqsReceiveEndpointConfiguration _configuration;
 
-        public SendTransportProvider(IAmazonSqsBusConfiguration busConfiguration)
+        public SendTransportProvider(IAmazonSqsReceiveEndpointConfiguration configuration)
         {
-            _busConfiguration = busConfiguration;
+            _configuration = configuration;
         }
 
         Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
@@ -38,8 +38,14 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
         ISendTransport GetSendTransport(Uri address)
         {
-            if (!_busConfiguration.TryGetHost(address, out var hostConfiguration))
-                throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
+            if (!_configuration.BusConfiguration.TryGetHost(address, out var hostConfiguration))
+            {
+                var hostAddress = _configuration.Host.Address;
+                var builder = new UriBuilder(address) {Host = hostAddress.Host, Port = hostAddress.Port};
+
+                if (!_configuration.BusConfiguration.TryGetHost(builder.Uri, out hostConfiguration))
+                    throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
+            }
 
             var host = hostConfiguration.Host;
 

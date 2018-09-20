@@ -60,6 +60,51 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
     }
 
+    [TestFixture]
+    public class Sending_a_request_with_a_different_host_name :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_receive_the_response()
+        {
+            var message = await _response;
+
+            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+        }
+
+        public Sending_a_request_with_a_different_host_name()
+        {
+            RabbitMqTestHarness.OnConfigureRabbitMqHost += ConfigureHost;
+        }
+
+        void ConfigureHost(IRabbitMqHostConfigurator configurator)
+        {
+            configurator.PublisherConfirmation = false;
+        }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        Task<PongMessage> _response;
+        IRequestClient<PingMessage, PongMessage> _requestClient;
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8),
+                TimeSpan.FromSeconds(8), context =>
+                {
+                    context.SetAwaitAck(false);
+                    context.ResponseAddress = new UriBuilder(Bus.Address) {Host = "totally-bogus-host"}.Uri;
+                });
+
+            _response = _requestClient.Request(new PingMessage());
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
+        }
+    }
+
 
     [TestFixture]
     public class Sending_a_request_with_the_broker_down_using_the_request_client :

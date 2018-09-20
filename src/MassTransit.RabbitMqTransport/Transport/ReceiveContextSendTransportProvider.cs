@@ -13,7 +13,6 @@
 namespace MassTransit.RabbitMqTransport.Transport
 {
     using Configuration;
-    using EndpointSpecifications;
     using GreenPipes;
     using GreenPipes.Agents;
 
@@ -24,8 +23,8 @@ namespace MassTransit.RabbitMqTransport.Transport
         readonly ModelContext _modelContext;
         readonly ReceiveContext _receiveContext;
 
-        public ReceiveContextSendTransportProvider(IRabbitMqBusConfiguration busConfiguration, ReceiveContext receiveContext)
-            : base(busConfiguration)
+        public ReceiveContextSendTransportProvider(IRabbitMqReceiveEndpointConfiguration configuration, ReceiveContext receiveContext)
+            : base(configuration)
         {
             _receiveContext = receiveContext;
 

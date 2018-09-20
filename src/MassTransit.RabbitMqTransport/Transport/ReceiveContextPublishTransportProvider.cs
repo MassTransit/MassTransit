@@ -23,7 +23,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         readonly ModelContext _modelContext;
         readonly ReceiveContext _receiveContext;
 
-        public ReceiveContextPublishTransportProvider(ReceiveContext receiveContext, RabbitMqHost host, IRabbitMqPublishTopology publishTopology)
+        public ReceiveContextPublishTransportProvider(ReceiveContext receiveContext, IRabbitMqHostControl host, IRabbitMqPublishTopology publishTopology)
             : base(host, publishTopology)
         {
             _receiveContext = receiveContext;

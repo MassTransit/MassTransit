@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendTransportProvider(_configuration.BusConfiguration);
+            return new SendTransportProvider(_configuration);
         }
 
         IPublishTransportProvider CreatePublishTransportProvider()
