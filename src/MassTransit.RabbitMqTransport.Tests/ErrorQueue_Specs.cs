@@ -19,6 +19,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading.Tasks;
     using GreenPipes;
     using NUnit.Framework;
+    using NUnit.Framework.Internal;
     using RabbitMQ.Client;
     using Shouldly;
     using TestFramework.Messages;
@@ -197,6 +198,76 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
     [TestFixture]
+    public class An_empty_message_body :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_have_the_host_machine_name()
+        {
+            var header = Encoding.UTF8.GetString((byte[])_basicGetResult.BasicProperties.Headers["MT-Host-MachineName"]);
+            header.ShouldBe(HostMetadataCache.Host.MachineName);
+        }
+
+        [Test]
+        public void Should_have_the_invalid_body()
+        {
+            _body.ShouldBe("");
+        }
+
+        [Test]
+        public async Task Should_have_the_reason()
+        {
+            var header = Encoding.UTF8.GetString((byte[])_basicGetResult.BasicProperties.Headers["MT-Reason"]);
+
+            header.ShouldBe("fault");
+        }
+
+        IRabbitMqHost _host;
+        string _body;
+        BasicGetResult _basicGetResult;
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            var connectionFactory = _host.Settings.GetConnectionFactory();
+            using (var connection = connectionFactory.CreateConnection())
+            using (var model = connection.CreateModel())
+            {
+                var log = Logging.Logger.Get("UnitTest");
+
+                log.Debug("Sending empty message");
+
+                model.BasicPublish("input_queue", "", model.CreateBasicProperties(), null);
+
+                await Task.Delay(5000).ConfigureAwait(false);
+
+                log.Debug("Reading error message");
+
+                _basicGetResult = model.BasicGet("input_queue_error", true);
+
+                _body = Encoding.UTF8.GetString(_basicGetResult.Body);
+
+                model.Close(200, "Cleanup complete");
+                connection.Close(200, "Cleanup complete");
+            }
+        }
+
+        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        {
+            _host = host;
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            configurator.PrefetchCount = 1;
+            configurator.UseConcurrencyLimit(1);
+
+            Handled<PingMessage>(configurator);
+        }
+    }
+
+
+    [TestFixture]
     public class A_request_client_exception :
         RabbitMqTestFixture
     {
@@ -297,6 +368,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
     }
+
+
     [TestFixture]
     public class An_aggregate_exception :
         RabbitMqTestFixture
