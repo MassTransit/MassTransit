@@ -56,7 +56,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
         {
             var topicEntity = Topics.Get(topic);
 
-            var subscriptionEntity = new SubscriptionEntity(GetNextId(), topicEntity, subscriptionDescription);
+            var subscriptionEntity = new SubscriptionEntity(GetNextId(), topicEntity, subscriptionDescription, rule, filter);
 
             return Subscriptions.GetOrAdd(subscriptionEntity);
         }
