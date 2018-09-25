@@ -22,6 +22,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
     using NUnit.Framework;
     using Util;
     using Microsoft.Azure.Documents;
+    using Microsoft.Azure.Documents.Client;
 
     [TestFixture]
     public class DocumentDbSagaRepositoryTestsForSendingWhenPolicyReturnsCompletedInstance
@@ -60,7 +61,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
             var sagaConsumeContext = new Mock<SagaConsumeContext<SimpleSagaResource, CompleteSimpleSaga>>();
             sagaConsumeContext.SetupGet(x => x.IsCompleted).Returns(true);
             var documentDbSagaConsumeContextFactory = new Mock<IDocumentDbSagaConsumeContextFactory>();
-            documentDbSagaConsumeContextFactory.Setup(x => x.Create(It.IsAny<IDocumentClient>(), It.IsAny<string>(), It.IsAny<string>(), context.Object, It.IsAny<SimpleSagaResource>(), true, null))
+            documentDbSagaConsumeContextFactory.Setup(x => x.Create(It.IsAny<IDocumentClient>(), It.IsAny<string>(), It.IsAny<string>(), context.Object, It.IsAny<SimpleSagaResource>(), true, It.IsAny<RequestOptions>()))
                 .Returns(sagaConsumeContext.Object);
             var repository = new DocumentDbSagaRepository<SimpleSagaResource>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, documentDbSagaConsumeContextFactory.Object, null);
 
