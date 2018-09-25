@@ -24,6 +24,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
     using Pipeline;
     using Newtonsoft.Json;
     using Microsoft.Azure.Documents;
+    using Microsoft.Azure.Documents.Client;
 
     [TestFixture]
     public class DocumentDbSagaRepositoryTestsForSendQuery
@@ -76,7 +77,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
             _sagaConsumeContextFactory.Setup(
                 m =>
                     m.Create(It.IsAny<IDocumentClient>(), It.IsAny<string>(), It.IsAny<string>(), _sagaQueryConsumeContext.Object,
-                        It.Is<SimpleSagaResource>(x => x.CorrelationId == _correlationId), true, null)).Returns(_sagaConsumeContext.Object);
+                        It.Is<SimpleSagaResource>(x => x.CorrelationId == _correlationId), true, It.IsAny<RequestOptions>())).Returns(_sagaConsumeContext.Object);
 
             var repository = new DocumentDbSagaRepository<SimpleSagaResource>(SagaRepository.Instance.Client, SagaRepository.DatabaseName, SagaRepository.CollectionName, _sagaConsumeContextFactory.Object, null);
 

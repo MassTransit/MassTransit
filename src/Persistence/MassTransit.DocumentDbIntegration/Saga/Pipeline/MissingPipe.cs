@@ -59,7 +59,7 @@ namespace MassTransit.DocumentDbIntegration.Saga.Pipeline
                     TypeMetadataCache<TMessage>.ShortName);
 
             SagaConsumeContext<TSaga, TMessage> proxy =
-                _documentDbSagaConsumeContextFactory.Create(_client, _databaseName, _collectionName, context, context.Saga, false, _jsonSerializerSettings);
+                _documentDbSagaConsumeContextFactory.Create(_client, _databaseName, _collectionName, context, context.Saga, false, _requestOptions);
 
             await _next.Send(proxy).ConfigureAwait(false);
 

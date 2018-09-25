@@ -18,7 +18,6 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
     using System;
     using System.Threading.Tasks;
     using Microsoft.Azure.Documents;
-    using Newtonsoft.Json;
     using Util;
 
 
@@ -36,7 +35,7 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
         private readonly RequestOptions _requestOptions;
 
         public DocumentDbSagaConsumeContext(IDocumentClient client, string databaseName, string collectionName, ConsumeContext<TMessage> context,
-            TSaga instance, bool existing = true, JsonSerializerSettings jsonSerializerSettings = null)
+            TSaga instance, bool existing = true, RequestOptions requestOptions = null)
             : base(context)
         {
             Saga = instance;
@@ -44,7 +43,7 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
             _existing = existing;
             _databaseName = databaseName;
             _collectionName = collectionName;
-            if (jsonSerializerSettings != null) _requestOptions = new RequestOptions { JsonSerializerSettings = jsonSerializerSettings };
+            _requestOptions = requestOptions ?? new RequestOptions();
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;

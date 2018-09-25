@@ -24,6 +24,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
     using Pipeline;
     using Microsoft.Azure.Documents;
     using Newtonsoft.Json;
+    using Microsoft.Azure.Documents.Client;
 
     [TestFixture]
     public class DocumentDbSagaRepositoryTestsForSendingWhenPolicyReturnsInstance
@@ -85,7 +86,7 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
             _sagaConsumeContext.Setup(x => x.CorrelationId).Returns(_correlationId);
 
             _sagaConsumeContextFactory = new Mock<IDocumentDbSagaConsumeContextFactory>();
-            _sagaConsumeContextFactory.Setup(m => m.Create(It.IsAny<IDocumentClient>(), It.IsAny<string>(), It.IsAny<string>(), _context.Object, It.IsAny<SimpleSagaResource>(), It.IsAny<bool>(), null)).Returns(
+            _sagaConsumeContextFactory.Setup(m => m.Create(It.IsAny<IDocumentClient>(), It.IsAny<string>(), It.IsAny<string>(), _context.Object, It.IsAny<SimpleSagaResource>(), It.IsAny<bool>(), It.IsAny<RequestOptions>())).Returns(
                 _sagaConsumeContext.Object);
 
 
