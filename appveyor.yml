@@ -17,11 +17,14 @@ nuget:
   project_feed: true
   disable_publish_on_pr: true
 install:
-  # Install DocumentDB Emulator
-  - ps: Start-FileDownload 'https://aka.ms/cosmosdb-emulator' -FileName 'C:\CosmosDB.Emulator.msi'
-  - cmd: cmd /c start /wait msiexec.exe /i C:\CosmosDB.Emulator.msi /quiet /qn /norestart /log install.log
-  - ps: >-
-      & "${env:ProgramFiles}\Azure Cosmos DB Emulator\CosmosDB.Emulator.exe" /NoExplorer /NoUI /NoFirewall
+  # Appveyor images now have cosmosdb installed (https://help.appveyor.com/discussions/problems/7950-unable-to-laucnh-cosmosdb-emulator), but
+  # because it's an old version, we have to uninstall it, and install the latest
+  - ps: |
+      Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
+      Uninstall-CosmosDbEmulator -RemoveData
+  # this nice little snippit is from here: https://medium.com/@nick.chapsas/testing-your-cosmosdb-c-code-and-automating-it-with-appveyor-7df2da50a4b4
+  - ps: "Start-Sleep -s 30"
+  - ps: "Invoke-WebRequest -Uri 'https://aka.ms/cosmosdb-emulator' -OutFile 'cosmos-db.msi'\ncmd /c start /wait msiexec /i cosmos-db.msi /qn /quiet /norestart /log install.log  \nSet-Content -Value '\"C:\\Program Files\\Azure Cosmos DB Emulator\\CosmosDB.Emulator.exe\" /NoUI /NoExplorer /NoFirewall' -Path .\\startCosmosDb.cmd\nStart-Process -FilePath .\\startCosmosDb.cmd\n\n$attempt = 0\n$max = 8\nwhile(!$client.Connected -and $attempt -lt $max) {\n  try {    \n    $client = New-Object System.Net.Sockets.TcpClient([System.Net.Sockets.AddressFamily]::InterNetwork)\n    $attempt++; $client.Connect(\"127.0.0.1\", 8081); write-host \"CosmosDB started\"\n  }\n  catch {    \n    if($attempt -eq $max) {\n      write-host \"CosmosDB was not started\"; $client.Close(); return\n      }  \n    [int]$sleepTime = 5*$attempt\n    write-host \"CosmosDB is not started. Retry after $sleepTime seconds...\"\n    sleep $sleepTime;\n    $client.Close()        \n  }  \n}"
 build_script:
 - cmd: >-
     @echo off
@@ -51,7 +54,7 @@ test:
   - src/Persistence/MassTransit.MongoDbIntegration.Tests/bin/Release/net452/MassTransit.MongoDbIntegration.Tests.dll
   - src/Persistence/MassTransit.MartenIntegration.Tests/bin/Release/net452/MassTransit.MartenIntegration.Tests.dll
   - src/Persistence/MassTransit.NHibernateIntegration.Tests/bin/Release/net461/MassTransit.NHibernateIntegration.Tests.dll
-  - src/Persistence/MassTransit.DocumentDbIntegration.Tests/bin/Release/MassTransit.DocumentDbIntegration.Tests.dll
+  - src/Persistence/MassTransit.DocumentDbIntegration.Tests/bin/Release/net452/MassTransit.DocumentDbIntegration.Tests.dll
   - src/MassTransit.HttpTransport.Tests/bin/Release/net452/MassTransit.HttpTransport.Tests.dll
   categories:
     except:
