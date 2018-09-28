@@ -74,6 +74,7 @@ namespace MassTransit.DocumentDbIntegration.Saga
         {
             if(jsonSerializerSettings != null)
             {
+                _jsonSerializerSettings = jsonSerializerSettings;
                 _requestOptions.JsonSerializerSettings = jsonSerializerSettings;
                 _feedOptions.JsonSerializerSettings = jsonSerializerSettings;
             }

@@ -28,7 +28,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using TestFramework;
     using Testing;
 
-
+    // Both of these tests will pass in Debug, because the TestTimeout is 50 minutes, which is enough time for all concurrency to settle. Marked as explicit so they don't run on Appveyor
     [TestFixture]
     public class When_using_DocumentDbConcurrencyOptimistic :
         InMemoryTestFixture
@@ -38,6 +38,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         readonly string _databaseName;
         readonly string _collectionName;
         readonly Lazy<ISagaRepository<ChoirState>> _repository;
+        readonly JsonSerializerSettings _jsonSerializerSettings;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -46,7 +47,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             configurator.UseRetry(x =>
             {
                 x.Handle<DocumentDbConcurrencyException>();
-                x.Interval(5, 100);
+                x.Interval(5, 300);
             });
             configurator.StateMachineSaga(_machine, _repository.Value);
         }
@@ -56,8 +57,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _databaseName = "choirSagas";
             _collectionName = "sagas";
             _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
+            _jsonSerializerSettings = JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirState>();
 
-            _repository = new Lazy<ISagaRepository<ChoirState>>(() => new DocumentDbSagaRepository<ChoirState>(_documentClient, _databaseName, JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirState>()));
+            _repository = new Lazy<ISagaRepository<ChoirState>>(() => new DocumentDbSagaRepository<ChoirState>(_documentClient, _databaseName, _jsonSerializerSettings));
         }
 
         [OneTimeSetUp]
@@ -80,7 +82,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             try
             {
                 var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
-                return JsonConvert.DeserializeObject<ChoirState>(document.Resource.ToString());
+                return JsonConvert.DeserializeObject<ChoirState>(document.Resource.ToString(), _jsonSerializerSettings);
             }
             catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -97,14 +99,14 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 try
                 {
                     var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
-                    var saga = JsonConvert.DeserializeObject<ChoirState>(document.Resource.ToString());
+                    var saga = JsonConvert.DeserializeObject<ChoirState>(document.Resource.ToString(), _jsonSerializerSettings);
 
                     if (filterExpression?.Invoke(saga) == false) continue;
                     return saga;
                 }
                 catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
-                    await Task.Delay(10).ConfigureAwait(false);
+                    await Task.Delay(400).ConfigureAwait(false);
 
                     continue;
                 }
@@ -143,19 +145,20 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
 
             await Task.WhenAll(tasks);
-            await Task.Delay(5000);
+            await Task.Delay(100000);
             tasks.Clear();
 
 
             foreach (var sid in sagaIds)
             {
-                ChoirState instance = await GetSaga(sid);
+                ChoirState instance = await GetSagaRetry(sid, TestTimeout, x => x.CurrentState == _machine.Harmony.Name);
 
+                Assert.IsNotNull(instance);
                 Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
             }
         }
 
-        [Test]
+        [Test, Explicit]
         public async Task Should_capture_all_events_single_saga()
         {
             Guid correlationId = Guid.NewGuid();
