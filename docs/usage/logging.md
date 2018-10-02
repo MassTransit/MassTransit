@@ -71,3 +71,26 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
     cfg.UseSerilog(logger);
 });
 ```
+
+## Microsoft Extensions Logger
+
+To use Microsoft Extensions Logger for MassTransit logging, install the `MassTransit.Extensions.Logging`
+package.
+
+Then add logging to your service bus initialization:
+
+```csharp
+
+//configure ILoggerFactory
+
+services.AddSingleton(sp => Bus.Factory.CreateUsingRabbitMq(cfg =>
+{
+    /* usual stuff */
+
+    // to use custom logger, use this:
+    cfg.UseExtensionsLogging(new LoggerFactory());
+
+    // To use configured logger, use this:
+    cfg.UseExtensionsLogging(sp.GetRequiredService<ILoggerFactory>());
+}));
+```
