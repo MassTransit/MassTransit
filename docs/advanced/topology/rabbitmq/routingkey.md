@@ -50,7 +50,7 @@ And then connected to a receive endpoint:
 ```csharp
 Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
 {
-    cfg.ReceiveEndpoint(host, "priority-orders", x)
+    cfg.ReceiveEndpoint(host, "priority-orders", x =>
     {
         x.BindMessageExchanges = false;
 
@@ -63,7 +63,7 @@ Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
         });
     });
 
-    cfg.ReceiveEndpoint(host, "regular-orders", x)
+    cfg.ReceiveEndpoint(host, "regular-orders", x =>
     {
         x.BindMessageExchanges = false;
 
