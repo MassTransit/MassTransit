@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration
 {
+    using System;
     using System.Threading.Tasks;
     using Autofac;
     using Courier;
@@ -31,11 +32,11 @@ namespace MassTransit.AutofacIntegration
     {
         readonly CompensateActivityFactory<TActivity, TLog> _factory;
 
-        public AutofacCompensateActivityFactory(ILifetimeScope lifetimeScope, string name)
+        public AutofacCompensateActivityFactory(ILifetimeScope lifetimeScope, string name, Action<ContainerBuilder, CompensateContext<TLog>> configurator)
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
 
-            var compensateActivityScopeProvider = new AutofacCompensateActivityScopeProvider<TActivity, TLog>(lifetimeScopeProvider, name);
+            var compensateActivityScopeProvider = new AutofacCompensateActivityScopeProvider<TActivity, TLog>(lifetimeScopeProvider, name, configurator);
 
             _factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
         }

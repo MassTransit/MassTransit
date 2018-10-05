@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration
 {
+    using System;
     using Autofac;
     using Context;
     using GreenPipes;
@@ -23,22 +24,28 @@ namespace MassTransit.AutofacIntegration
         IConsumerScopeProvider
     {
         readonly string _name;
+        readonly Action<ContainerBuilder, ConsumeContext> _configurator;
         readonly ILifetimeScopeProvider _scopeProvider;
 
-        public AutofacConsumerScopeProvider(ILifetimeScopeProvider scopeProvider, string name)
+        public AutofacConsumerScopeProvider(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configurator)
         {
             _scopeProvider = scopeProvider;
             _name = name;
+            _configurator = configurator;
         }
 
         IConsumerScopeContext IConsumerScopeProvider.GetScope(ConsumeContext context)
         {
-            if (context.TryGetPayload<ILifetimeScope>(out var existingLifetimeScope))
+            if (context.TryGetPayload<ILifetimeScope>(out _))
                 return new ExistingConsumerScopeContext(context);
 
             var parentLifetimeScope = _scopeProvider.GetLifetimeScope(context);
 
-            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context));
+            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
+            {
+                builder.ConfigureScope(context);
+                _configurator?.Invoke(builder, context);
+            });
             try
             {
                 var proxy = new ConsumeContextProxyScope(context);
@@ -55,7 +62,7 @@ namespace MassTransit.AutofacIntegration
                 throw;
             }
         }
-
+        
         IConsumerScopeContext<TConsumer, T> IConsumerScopeProvider.GetScope<TConsumer, T>(ConsumeContext<T> context)
         {
             if (context.TryGetPayload<ILifetimeScope>(out var existingLifetimeScope))
@@ -67,7 +74,11 @@ namespace MassTransit.AutofacIntegration
 
             var parentLifetimeScope = _scopeProvider.GetLifetimeScope(context);
 
-            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context));
+            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
+            {
+                builder.ConfigureScope(context);
+                _configurator?.Invoke(builder, context);
+            });
             try
             {
                 ConsumerConsumeContext<TConsumer, T> consumerContext = lifetimeScope.GetConsumerScope<TConsumer, T>(context);

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration
 {
+    using System;
     using System.Threading.Tasks;
     using Autofac;
     using GreenPipes;
@@ -24,9 +25,9 @@ namespace MassTransit.AutofacIntegration
     {
         readonly IConsumerFactory<TConsumer> _factory;
 
-        public AutofacConsumerFactory(ILifetimeScope scope, string name)
+        public AutofacConsumerFactory(ILifetimeScope scope, string name, Action<ContainerBuilder, ConsumeContext> configurator)
         {
-            IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new SingleLifetimeScopeProvider(scope), name);
+            IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new SingleLifetimeScopeProvider(scope), name, configurator);
 
             _factory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
         }

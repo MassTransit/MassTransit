@@ -36,12 +36,15 @@ namespace MassTransit
         /// <param name="stateMachine">The state machine</param>
         /// <param name="scope">The StructureMap Container to resolve the repository</param>
         /// <param name="configure">Optionally configure the saga</param>
+        /// <param name="scopeConfigurator">Configuration for scope container</param>
         /// <returns></returns>
         public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
-            ILifetimeScope scope, Action<ISagaConfigurator<TInstance>> configure = null)
+            ILifetimeScope scope,
+            Action<ISagaConfigurator<TInstance>> configure = null,
+            Action<ContainerBuilder, ConsumeContext> scopeConfigurator = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            ISagaRepositoryFactory repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(new SingleLifetimeScopeProvider(scope), "message");
+            ISagaRepositoryFactory repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(new SingleLifetimeScopeProvider(scope), "message", scopeConfigurator);
 
             var sagaRepository = repositoryFactory.CreateSagaRepository<TInstance>();
 
@@ -59,15 +62,17 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="scope">The StructureMap Container to resolve the repository</param>
         /// <param name="configure">Optionally configure the saga</param>
+        /// <param name="scopeConfigurator">Configuration for scope container</param>
         /// <returns></returns>
-        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope, Action<ISagaConfigurator<TInstance>> configure = null)
+        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope, Action<ISagaConfigurator<TInstance>> configure = null,
+            Action<ContainerBuilder, ConsumeContext> scopeConfigurator = null)
             where TInstance : class, SagaStateMachineInstance
         {
             ISagaStateMachineFactory stateMachineFactory = new AutofacSagaStateMachineFactory(scope);
 
             var stateMachine = stateMachineFactory.CreateStateMachine<TInstance>();
 
-            ISagaRepositoryFactory repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(new SingleLifetimeScopeProvider(scope), "message");
+            ISagaRepositoryFactory repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(new SingleLifetimeScopeProvider(scope), "message", scopeConfigurator);
 
             var sagaRepository = repositoryFactory.CreateSagaRepository<TInstance>();
 
@@ -78,12 +83,13 @@ namespace MassTransit
             configurator.AddEndpointSpecification(stateMachineConfigurator);
         }
 
-        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector bus, SagaStateMachine<TInstance> stateMachine, ILifetimeScope scope)
+        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector bus, SagaStateMachine<TInstance> stateMachine, ILifetimeScope scope,
+            Action<ContainerBuilder, ConsumeContext> scopeConfigurator = null)
             where TInstance : class, SagaStateMachineInstance
         {
             var connector = new StateMachineConnector<TInstance>(stateMachine);
 
-            ISagaRepositoryFactory repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(new SingleLifetimeScopeProvider(scope), "message");
+            ISagaRepositoryFactory repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(new SingleLifetimeScopeProvider(scope), "message", scopeConfigurator);
 
             var sagaRepository = repositoryFactory.CreateSagaRepository<TInstance>();
 

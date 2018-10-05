@@ -1,5 +1,6 @@
 namespace MassTransit.AutofacIntegration
 {
+    using System;
     using Autofac;
     using Courier;
     using Courier.Hosts;
@@ -14,12 +15,14 @@ namespace MassTransit.AutofacIntegration
         where TLog : class
     {
         readonly string _name;
+        readonly Action<ContainerBuilder, CompensateContext<TLog>> _configurator;
         readonly ILifetimeScopeProvider _scopeProvider;
 
-        public AutofacCompensateActivityScopeProvider(ILifetimeScopeProvider scopeProvider, string name)
+        public AutofacCompensateActivityScopeProvider(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, CompensateContext<TLog>> configurator)
         {
             _scopeProvider = scopeProvider;
             _name = name;
+            _configurator = configurator;
         }
 
         public ICompensateActivityScopeContext<TActivity, TLog> GetScope(CompensateContext<TLog> context)
@@ -35,7 +38,11 @@ namespace MassTransit.AutofacIntegration
 
             var parentLifetimeScope = _scopeProvider.GetLifetimeScope(context.ConsumeContext);
 
-            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context.ConsumeContext));
+            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
+            {
+                builder.ConfigureScope(context.ConsumeContext);
+                _configurator?.Invoke(builder, context);
+            });
             try
             {
                 var activity = lifetimeScope.Resolve<TActivity>(TypedParameter.From(context.Log));

@@ -32,7 +32,7 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_fail_on_bad_validation()
         {
-            var result = _harness.Bus.Request<A, B>(_harness.InputQueueAddress, new A {PostalCode = "74011"}, TestCancellationToken, TestTimeout);
+            var result = _harness.Bus.Request<A, B>(_harness.InputQueueAddress, new A { PostalCode = "74011" }, TestCancellationToken, TestTimeout);
 
             Assert.That(async () => await result, Throws.TypeOf<RequestFaultException>());
         }
@@ -40,7 +40,7 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_pass_a_good_validation()
         {
-            var result = _harness.Bus.Request<A, B>(_harness.InputQueueAddress, new A {PostalCode = "90210"}, TestCancellationToken, TestTimeout);
+            var result = _harness.Bus.Request<A, B>(_harness.InputQueueAddress, new A { PostalCode = "90210" }, TestCancellationToken, TestTimeout);
 
             var b = await result;
 
@@ -72,7 +72,7 @@ namespace MassTransit.Containers.Tests
 
             _harness = new InMemoryTestHarness();
             _harness.OnConfigureBus += ConfigureBus;
-            _consumer = _harness.Consumer(new AutofacConsumerFactory<MyConsumer>(_container, "message"));
+            _consumer = _harness.Consumer(new AutofacConsumerFactory<MyConsumer>(_container, "message", (b, ct) => { }));
 
             await _harness.Start();
         }
@@ -141,7 +141,7 @@ namespace MassTransit.Containers.Tests
         {
             public async Task Consume(ConsumeContext<A> context)
             {
-                await context.RespondAsync(new B {Success = true});
+                await context.RespondAsync(new B { Success = true });
             }
 
             public Task Consume(ConsumeContext<C> context)

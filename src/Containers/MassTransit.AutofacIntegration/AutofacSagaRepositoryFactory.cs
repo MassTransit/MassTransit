@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration
 {
+    using System;
     using Autofac;
     using Saga;
     using Scoping;
@@ -21,19 +22,21 @@ namespace MassTransit.AutofacIntegration
         ISagaRepositoryFactory
     {
         readonly string _name;
+        readonly Action<ContainerBuilder, ConsumeContext> _configurator;
         readonly ILifetimeScopeProvider _scopeProvider;
 
-        public AutofacSagaRepositoryFactory(ILifetimeScopeProvider scopeProvider, string name)
+        public AutofacSagaRepositoryFactory(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configurator)
         {
             _scopeProvider = scopeProvider;
             _name = name;
+            _configurator = configurator;
         }
 
         ISagaRepository<T> ISagaRepositoryFactory.CreateSagaRepository<T>()
         {
             var repository = _scopeProvider.LifetimeScope.Resolve<ISagaRepository<T>>();
 
-            var scopeProvider = new AutofacSagaScopeProvider<T>(_scopeProvider, _name);
+            var scopeProvider = new AutofacSagaScopeProvider<T>(_scopeProvider, _name, _configurator);
 
             return new ScopeSagaRepository<T>(repository, scopeProvider);
         }

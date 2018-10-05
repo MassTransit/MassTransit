@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.AutomatonymousAutofacIntegration
 {
+    using System;
     using Autofac;
     using AutofacIntegration;
     using Automatonymous;
@@ -12,18 +13,20 @@
     {
         readonly ILifetimeScopeProvider _scopeProvider;
         readonly string _name;
+        readonly Action<ContainerBuilder, ConsumeContext> _configurator;
 
-        public AutofacStateMachineSagaRepositoryFactory(ILifetimeScopeProvider scopeProvider, string name)
+        public AutofacStateMachineSagaRepositoryFactory(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configurator)
         {
             _scopeProvider = scopeProvider;
             _name = name;
+            _configurator = configurator;
         }
 
         ISagaRepository<T> ISagaRepositoryFactory.CreateSagaRepository<T>()
         {
             var repository = _scopeProvider.LifetimeScope.Resolve<ISagaRepository<T>>();
 
-            var scopeProvider = new AutofacSagaScopeProvider<T>(_scopeProvider, _name);
+            var scopeProvider = new AutofacSagaScopeProvider<T>(_scopeProvider, _name, _configurator);
 
             scopeProvider.AddScopeAction(x => x.GetOrAddPayload<IStateMachineActivityFactory>(() => new AutofacStateMachineActivityFactory()));
 
