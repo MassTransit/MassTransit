@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration
 {
+    using System;
     using System.Threading.Tasks;
     using Autofac;
     using GreenPipes;
@@ -28,12 +29,14 @@ namespace MassTransit.AutofacIntegration
         where TConsumer : class
     {
         readonly string _name;
+        readonly Action<ContainerBuilder, ConsumeContext> _configureScope;
         readonly ILifetimeScopeRegistry<TId> _registry;
 
-        public AutofacScopeConsumerFactory(ILifetimeScopeRegistry<TId> registry, string name)
+        public AutofacScopeConsumerFactory(ILifetimeScopeRegistry<TId> registry, string name, Action<ContainerBuilder, ConsumeContext> configureScope)
         {
             _registry = registry;
             _name = name;
+            _configureScope = configureScope;
         }
 
         public Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
@@ -60,7 +63,11 @@ namespace MassTransit.AutofacIntegration
         {
             var scope = _registry.GetLifetimeScope(context);
 
-            using (var consumerScope = scope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context)))
+            using (var consumerScope = scope.BeginLifetimeScope(_name, builder =>
+            {
+                builder.ConfigureScope(context);
+                _configureScope?.Invoke(builder, context);
+            }))
             {
                 ConsumerConsumeContext<TConsumer, TMessage> consumerContext = consumerScope.GetConsumerScope<TConsumer, TMessage>(context);
 

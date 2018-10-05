@@ -28,24 +28,30 @@ namespace MassTransit.AutofacIntegration
         where TSaga : class, ISaga
     {
         readonly string _name;
+        readonly Action<ContainerBuilder, ConsumeContext> _configureScope;
         readonly ILifetimeScopeProvider _scopeProvider;
         readonly IList<Action<ConsumeContext>> _scopeActions;
 
-        public AutofacSagaScopeProvider(ILifetimeScopeProvider scopeProvider, string name)
+        public AutofacSagaScopeProvider(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configureScope)
         {
             _scopeProvider = scopeProvider;
             _name = name;
+            _configureScope = configureScope;
             _scopeActions = new List<Action<ConsumeContext>>();
         }
 
         ISagaScopeContext<T> ISagaScopeProvider<TSaga>.GetScope<T>(ConsumeContext<T> context)
         {
-            if (context.TryGetPayload<ILifetimeScope>(out var existingLifetimeScope))
+            if (context.TryGetPayload<ILifetimeScope>(out _))
                 return new ExistingSagaScopeContext<T>(context);
 
             var parentLifetimeScope = _scopeProvider.GetLifetimeScope(context);
 
-            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context));
+            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
+            {
+                builder.ConfigureScope(context);
+                _configureScope?.Invoke(builder, context);
+            });
             try
             {
                 var proxy = new ConsumeContextProxy<T>(context, new PayloadCacheScope(context));
@@ -67,12 +73,16 @@ namespace MassTransit.AutofacIntegration
 
         ISagaQueryScopeContext<TSaga, T> ISagaScopeProvider<TSaga>.GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
         {
-            if (context.TryGetPayload<ILifetimeScope>(out var existingLifetimeScope))
+            if (context.TryGetPayload<ILifetimeScope>(out _))
                 return new ExistingSagaQueryScopeContext<TSaga, T>(context);
 
             var parentLifetimeScope = _scopeProvider.GetLifetimeScope(context);
 
-            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context));
+            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
+            {
+                builder.ConfigureScope(context);
+                _configureScope?.Invoke(builder, context);
+            });
             try
             {
                 var proxy = new SagaQueryConsumeContextProxy<TSaga, T>(context, new PayloadCacheScope(context), context.Query);

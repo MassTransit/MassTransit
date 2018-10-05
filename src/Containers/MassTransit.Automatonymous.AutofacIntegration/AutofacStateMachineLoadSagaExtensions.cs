@@ -33,7 +33,9 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="context"></param>
         /// <param name="name"></param>
-        public static void LoadStateMachineSagas(this IReceiveEndpointConfigurator configurator, IComponentContext context, string name = "message")
+        /// <param name="configureScope">Configuration for scope container</param>
+        public static void LoadStateMachineSagas(this IReceiveEndpointConfigurator configurator, IComponentContext context, string name = "message",
+            Action<ContainerBuilder, ConsumeContext> configureScope = null)
         {
             var scope = context.Resolve<ILifetimeScope>();
 
@@ -42,7 +44,7 @@ namespace MassTransit
             var stateMachineFactory = new AutofacSagaStateMachineFactory(scope);
 
             var scopeProvider = new SingleLifetimeScopeProvider(scope);
-            var repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(scopeProvider, name);
+            var repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(scopeProvider, name, configureScope);
 
             foreach (var sagaType in sagaTypes)
             {
@@ -53,7 +55,7 @@ namespace MassTransit
         static IEnumerable<Type> FindStateMachineSagaTypes(IComponentContext context)
         {
             return context.ComponentRegistry.Registrations
-                .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})
+                .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new { r, s })
                 .Where(rs => rs.s.ServiceType.HasInterface(typeof(SagaStateMachine<>)))
                 .Select(rs => rs.s.ServiceType.GetClosingArguments(typeof(SagaStateMachine<>)).Single())
                 .Distinct()
