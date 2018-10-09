@@ -5,7 +5,6 @@
     <TargetFrameworks>net452</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-    <DebugType>portable</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="log4net.config">

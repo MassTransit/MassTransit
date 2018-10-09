@@ -5,7 +5,6 @@
     <IsPackable>false</IsPackable>
     <TargetFrameworks>net452</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="2.1.3" />

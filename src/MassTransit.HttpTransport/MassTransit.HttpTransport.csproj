@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>MassTransit.Http</PackageId>

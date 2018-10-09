@@ -3,7 +3,6 @@
     <RootNamespace>MassTransit.AutomatonymousStructureMapIntegration</RootNamespace>
     <AssemblyName>MassTransit.Automatonymous.StructureMapIntegration</AssemblyName>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>MassTransit.Automatonymous.StructureMap</PackageId>
