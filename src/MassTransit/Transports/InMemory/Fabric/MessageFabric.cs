@@ -14,6 +14,7 @@ namespace MassTransit.Transports.InMemory.Fabric
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using GraphValidation;
     using GreenPipes;
@@ -92,9 +93,11 @@ namespace MassTransit.Transports.InMemory.Fabric
             try
             {
                 var graph = new DependencyGraph<IMessageSink<InMemoryTransportMessage>>(_exchanges.Count + 1);
-                foreach (var exchange in _exchanges.Values)
+                var exchanges = new List<IInMemoryExchange>(_exchanges.Values);
+                foreach (var exchange in exchanges)
                 {
-                    foreach (IMessageSink<InMemoryTransportMessage> sink in exchange.Sinks)
+                    var sinks = new List<IMessageSink<InMemoryTransportMessage>>(exchange.Sinks);
+                    foreach (IMessageSink<InMemoryTransportMessage> sink in sinks)
                     {
                         graph.Add(sink, exchange);
                     }
@@ -104,7 +107,7 @@ namespace MassTransit.Transports.InMemory.Fabric
 
                 graph.EnsureGraphIsAcyclic();
             }
-            catch (Exception exception)
+            catch (CyclicGraphException exception)
             {
                 throw new InvalidOperationException($"The exchange binding would create a cycle in the messaging fabric.", exception);
             }
