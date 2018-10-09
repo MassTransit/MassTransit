@@ -56,7 +56,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
             ReceiveEndpointLoggingExtensions.SetLog(Log);
         }
 
-        protected virtual ReceiveEndpointContext CreateReceiveTopology()
+        protected virtual ReceiveEndpointContext CreateReceiveEndpointContext()
         {
             return new WebJobMessageReceiverEndpointContext(_endpointConfiguration, Log, _binder, _cancellationToken, new ReceiveObservable(),
                 new ReceiveTransportObservable(), new ReceiveEndpointObservable());
@@ -68,7 +68,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 
             try
             {
-                return new BrokeredMessageReceiver(InputAddress, CreateReceivePipe(), Log, CreateReceiveTopology());
+                return new BrokeredMessageReceiver(InputAddress, Log, CreateReceiveEndpointContext());
             }
             catch (Exception ex)
             {

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Configuration
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using GreenPipes;
@@ -53,7 +54,11 @@ namespace MassTransit.Configuration
 
             _errorPipeConfigurator.UseFilter(new GenerateFaultFilter());
             _errorPipeConfigurator.UseFilter(new ErrorTransportFilter());
-            _configurator.UseRescue(_errorPipeConfigurator.Build());
+
+            _configurator.UseRescue(_errorPipeConfigurator.Build(), x =>
+            {
+                x.Ignore<OperationCanceledException>();
+            });
 
             _configurator.UseFilter(new DeserializeFilter(messageDeserializer, consumePipe));
 

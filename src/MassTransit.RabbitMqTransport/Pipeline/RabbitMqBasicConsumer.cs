@@ -157,9 +157,16 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                     await context.ReceiveCompleted.ConfigureAwait(false);
 
-                    _model.BasicAck(deliveryTag, false);
+                    if (context.IsFaulted)
+                    {
+                        _model.BasicNack(deliveryTag, false, true);
+                    }
+                    else
+                    {
+                        _model.BasicAck(deliveryTag, false);
 
-                    await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                        await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -225,6 +232,18 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 _log.DebugFormat("Stopping consumer: {0}", _receiveEndpointContext.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
+
+            try
+            {
+                await Completed.UntilCompletedOrTimeout(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            }
+            catch (TimeoutException)
+            {
+                foreach (var pendingContext in _pending.Values)
+                {
+                    pendingContext.Cancel();
+                }
+            }
 
             await Completed.ConfigureAwait(false);
         }

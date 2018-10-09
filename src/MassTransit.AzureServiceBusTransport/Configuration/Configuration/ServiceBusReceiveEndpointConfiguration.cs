@@ -153,14 +153,12 @@
 
             ApplySpecifications(builder);
 
-            var receivePipe = CreateReceivePipe();
-
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
             NamespacePipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology,
                 _settings.RemoveSubscriptions));
 
-            return CreateReceiveEndpoint(builder, receivePipe, receiveEndpointContext);
+            return CreateReceiveEndpoint(builder, receiveEndpointContext);
         }
 
         protected override IErrorTransport CreateErrorTransport(ServiceBusHost host)

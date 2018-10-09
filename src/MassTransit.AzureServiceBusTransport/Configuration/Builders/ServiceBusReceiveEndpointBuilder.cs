@@ -14,10 +14,13 @@ namespace MassTransit.AzureServiceBusTransport.Builders
 {
     using System;
     using System.Linq;
+    using System.Security.Cryptography;
+    using System.Text;
     using Configuration;
     using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
+    using NewIdFormatters;
     using Topology;
     using Topology.Builders;
     using Transport;
@@ -27,6 +30,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
         ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
+        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly IServiceBusReceiveEndpointConfiguration _configuration;
 
         public ServiceBusReceiveEndpointBuilder(IServiceBusReceiveEndpointConfiguration configuration)
@@ -58,13 +62,29 @@ namespace MassTransit.AzureServiceBusTransport.Builders
 
         string GenerateSubscriptionName()
         {
-            var subscriptionName = "{queuePath}";
+            var subscriptionName = _configuration.Settings.Name;
 
             var suffix = _configuration.HostAddress.AbsolutePath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
             if (!string.IsNullOrWhiteSpace(suffix))
                 subscriptionName += $"-{suffix}";
 
-            return subscriptionName;
+            string name;
+            if (subscriptionName.Length > 50)
+            {
+                string hashed;
+                using (var hasher = new SHA1Managed())
+                {
+                    byte[] buffer = Encoding.UTF8.GetBytes(subscriptionName);
+                    byte[] hash = hasher.ComputeHash(buffer);
+                    hashed = _formatter.Format(hash).Substring(0, 6);
+                }
+
+                name = $"{subscriptionName.Substring(0, 43)}-{hashed}";
+            }
+            else
+                name = subscriptionName;
+
+            return name;
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)
