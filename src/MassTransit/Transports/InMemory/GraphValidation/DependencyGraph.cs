@@ -58,7 +58,7 @@ namespace MassTransit.Transports.InMemory.GraphValidation
                 message.Append(")");
             }
 
-            throw new InvalidOperationException("The dependency graph contains cycles: " + message);
+            throw new CyclicGraphException("The dependency graph contains cycles: " + message);
         }
     }
 }
