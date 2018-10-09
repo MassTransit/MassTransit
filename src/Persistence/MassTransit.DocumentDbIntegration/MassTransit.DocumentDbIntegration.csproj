@@ -27,10 +27,10 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.1.0"/>
+    <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.1.2"/>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
-    <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.1.2" />
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
   </ItemGroup>
 </Project>
