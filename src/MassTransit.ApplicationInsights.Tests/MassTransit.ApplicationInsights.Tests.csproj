@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <DebugType>portable</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.ApplicationInsights\MassTransit.ApplicationInsights.csproj" />

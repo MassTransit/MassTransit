@@ -4,7 +4,6 @@
     <AssemblyName>MassTransit.Futures.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
     <TargetFrameworks>net452</TargetFrameworks>
-    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="2.1.3" />

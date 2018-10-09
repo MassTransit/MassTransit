@@ -3,7 +3,6 @@
     <RootNamespace>MassTransit.AutomatonymousLamarIntegration</RootNamespace>
     <AssemblyName>MassTransit.Automatonymous.LamarIntegration</AssemblyName>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-    <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>MassTransit.Automatonymous.Lamar</PackageId>

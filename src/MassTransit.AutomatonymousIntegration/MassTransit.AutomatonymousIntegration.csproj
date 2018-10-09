@@ -3,10 +3,8 @@
     <RootNamespace>Automatonymous</RootNamespace>
     <AssemblyName>MassTransit.AutomatonymousIntegration</AssemblyName>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <DebugType>portable</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>MassTransit.Automatonymous</PackageId>
