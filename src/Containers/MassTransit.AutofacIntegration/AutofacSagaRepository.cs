@@ -26,9 +26,9 @@ namespace MassTransit.AutofacIntegration
     {
         readonly ISagaRepository<TSaga> _repository;
 
-        public AutofacSagaRepository(ISagaRepository<TSaga> repository, ILifetimeScope scope, Action<ContainerBuilder, ConsumeContext> configurator, string name = "message")
+        public AutofacSagaRepository(ISagaRepository<TSaga> repository, ILifetimeScope scope, Action<ContainerBuilder, ConsumeContext> configureScope, string name = "message")
         {
-            ISagaScopeProvider<TSaga> scopeProvider = new AutofacSagaScopeProvider<TSaga>(new SingleLifetimeScopeProvider(scope), name, configurator);
+            ISagaScopeProvider<TSaga> scopeProvider = new AutofacSagaScopeProvider<TSaga>(new SingleLifetimeScopeProvider(scope), name, configureScope);
             _repository = new ScopeSagaRepository<TSaga>(repository, scopeProvider);
         }
 

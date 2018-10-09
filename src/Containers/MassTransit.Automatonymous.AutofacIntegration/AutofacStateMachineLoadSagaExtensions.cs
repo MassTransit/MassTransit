@@ -33,9 +33,9 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="context"></param>
         /// <param name="name"></param>
-        /// <param name="scopeConfigurator">Configuration for scope container</param>
+        /// <param name="configureScope">Configuration for scope container</param>
         public static void LoadStateMachineSagas(this IReceiveEndpointConfigurator configurator, IComponentContext context, string name = "message",
-            Action<ContainerBuilder, ConsumeContext> scopeConfigurator = null)
+            Action<ContainerBuilder, ConsumeContext> configureScope = null)
         {
             var scope = context.Resolve<ILifetimeScope>();
 
@@ -44,7 +44,7 @@ namespace MassTransit
             var stateMachineFactory = new AutofacSagaStateMachineFactory(scope);
 
             var scopeProvider = new SingleLifetimeScopeProvider(scope);
-            var repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(scopeProvider, name, scopeConfigurator);
+            var repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(scopeProvider, name, configureScope);
 
             foreach (var sagaType in sagaTypes)
             {

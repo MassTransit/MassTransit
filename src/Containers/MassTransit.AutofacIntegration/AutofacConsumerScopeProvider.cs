@@ -24,14 +24,14 @@ namespace MassTransit.AutofacIntegration
         IConsumerScopeProvider
     {
         readonly string _name;
-        readonly Action<ContainerBuilder, ConsumeContext> _configurator;
+        readonly Action<ContainerBuilder, ConsumeContext> _configureScope;
         readonly ILifetimeScopeProvider _scopeProvider;
 
-        public AutofacConsumerScopeProvider(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configurator)
+        public AutofacConsumerScopeProvider(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configureScope)
         {
             _scopeProvider = scopeProvider;
             _name = name;
-            _configurator = configurator;
+            _configureScope = configureScope;
         }
 
         IConsumerScopeContext IConsumerScopeProvider.GetScope(ConsumeContext context)
@@ -44,7 +44,7 @@ namespace MassTransit.AutofacIntegration
             var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
             {
                 builder.ConfigureScope(context);
-                _configurator?.Invoke(builder, context);
+                _configureScope?.Invoke(builder, context);
             });
             try
             {
@@ -77,7 +77,7 @@ namespace MassTransit.AutofacIntegration
             var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
             {
                 builder.ConfigureScope(context);
-                _configurator?.Invoke(builder, context);
+                _configureScope?.Invoke(builder, context);
             });
             try
             {

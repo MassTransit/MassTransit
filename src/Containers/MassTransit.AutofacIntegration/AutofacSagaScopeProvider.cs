@@ -28,15 +28,15 @@ namespace MassTransit.AutofacIntegration
         where TSaga : class, ISaga
     {
         readonly string _name;
-        readonly Action<ContainerBuilder, ConsumeContext> _configurator;
+        readonly Action<ContainerBuilder, ConsumeContext> _configureScope;
         readonly ILifetimeScopeProvider _scopeProvider;
         readonly IList<Action<ConsumeContext>> _scopeActions;
 
-        public AutofacSagaScopeProvider(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configurator)
+        public AutofacSagaScopeProvider(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configureScope)
         {
             _scopeProvider = scopeProvider;
             _name = name;
-            _configurator = configurator;
+            _configureScope = configureScope;
             _scopeActions = new List<Action<ConsumeContext>>();
         }
 
@@ -50,7 +50,7 @@ namespace MassTransit.AutofacIntegration
             var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
             {
                 builder.ConfigureScope(context);
-                _configurator?.Invoke(builder, context);
+                _configureScope?.Invoke(builder, context);
             });
             try
             {
@@ -81,7 +81,7 @@ namespace MassTransit.AutofacIntegration
             var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
             {
                 builder.ConfigureScope(context);
-                _configurator?.Invoke(builder, context);
+                _configureScope?.Invoke(builder, context);
             });
             try
             {

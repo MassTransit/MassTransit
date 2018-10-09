@@ -13,20 +13,20 @@
     {
         readonly ILifetimeScopeProvider _scopeProvider;
         readonly string _name;
-        readonly Action<ContainerBuilder, ConsumeContext> _configurator;
+        readonly Action<ContainerBuilder, ConsumeContext> _configureScope;
 
-        public AutofacStateMachineSagaRepositoryFactory(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configurator)
+        public AutofacStateMachineSagaRepositoryFactory(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configureScope)
         {
             _scopeProvider = scopeProvider;
             _name = name;
-            _configurator = configurator;
+            _configureScope = configureScope;
         }
 
         ISagaRepository<T> ISagaRepositoryFactory.CreateSagaRepository<T>()
         {
             var repository = _scopeProvider.LifetimeScope.Resolve<ISagaRepository<T>>();
 
-            var scopeProvider = new AutofacSagaScopeProvider<T>(_scopeProvider, _name, _configurator);
+            var scopeProvider = new AutofacSagaScopeProvider<T>(_scopeProvider, _name, _configureScope);
 
             scopeProvider.AddScopeAction(x => x.GetOrAddPayload<IStateMachineActivityFactory>(() => new AutofacStateMachineActivityFactory()));
 

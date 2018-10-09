@@ -25,9 +25,9 @@ namespace MassTransit.AutofacIntegration
     {
         readonly IConsumerFactory<TConsumer> _factory;
 
-        public AutofacConsumerFactory(ILifetimeScope scope, string name, Action<ContainerBuilder, ConsumeContext> configurator)
+        public AutofacConsumerFactory(ILifetimeScope scope, string name, Action<ContainerBuilder, ConsumeContext> configureScope)
         {
-            IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new SingleLifetimeScopeProvider(scope), name, configurator);
+            IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new SingleLifetimeScopeProvider(scope), name, configureScope);
 
             _factory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
         }

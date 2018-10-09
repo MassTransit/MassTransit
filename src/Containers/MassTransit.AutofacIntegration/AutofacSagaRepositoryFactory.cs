@@ -22,21 +22,21 @@ namespace MassTransit.AutofacIntegration
         ISagaRepositoryFactory
     {
         readonly string _name;
-        readonly Action<ContainerBuilder, ConsumeContext> _configurator;
+        readonly Action<ContainerBuilder, ConsumeContext> _configureScope;
         readonly ILifetimeScopeProvider _scopeProvider;
 
-        public AutofacSagaRepositoryFactory(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configurator)
+        public AutofacSagaRepositoryFactory(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configureScope)
         {
             _scopeProvider = scopeProvider;
             _name = name;
-            _configurator = configurator;
+            _configureScope = configureScope;
         }
 
         ISagaRepository<T> ISagaRepositoryFactory.CreateSagaRepository<T>()
         {
             var repository = _scopeProvider.LifetimeScope.Resolve<ISagaRepository<T>>();
 
-            var scopeProvider = new AutofacSagaScopeProvider<T>(_scopeProvider, _name, _configurator);
+            var scopeProvider = new AutofacSagaScopeProvider<T>(_scopeProvider, _name, _configureScope);
 
             return new ScopeSagaRepository<T>(repository, scopeProvider);
         }

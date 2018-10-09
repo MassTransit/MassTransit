@@ -32,11 +32,11 @@ namespace MassTransit.AutofacIntegration
     {
         readonly CompensateActivityFactory<TActivity, TLog> _factory;
 
-        public AutofacCompensateActivityFactory(ILifetimeScope lifetimeScope, string name, Action<ContainerBuilder, CompensateContext<TLog>> configurator)
+        public AutofacCompensateActivityFactory(ILifetimeScope lifetimeScope, string name, Action<ContainerBuilder, CompensateContext<TLog>> configureScope)
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
 
-            var compensateActivityScopeProvider = new AutofacCompensateActivityScopeProvider<TActivity, TLog>(lifetimeScopeProvider, name, configurator);
+            var compensateActivityScopeProvider = new AutofacCompensateActivityScopeProvider<TActivity, TLog>(lifetimeScopeProvider, name, configureScope);
 
             _factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
         }
