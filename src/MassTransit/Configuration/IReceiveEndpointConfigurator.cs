@@ -45,5 +45,10 @@ namespace MassTransit
         /// <param name="contentType">The content type of the deserializer</param>
         /// <param name="deserializerFactory">The factory to create the deserializer</param>
         void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory);
+
+        /// <summary>
+        /// Clears all message deserializers
+        /// </summary>
+        void ClearMessageDeserializers();
     }
 }

@@ -134,6 +134,10 @@ namespace MassTransit.EndpointSpecifications
             Configuration.Serialization.AddDeserializer(contentType, deserializerFactory);
         }
 
+        public void ClearMessageDeserializers()
+        {
+            Configuration.Serialization.ClearDeserializers();
+        }
 
         public virtual IEnumerable<ValidationResult> Validate()
         {

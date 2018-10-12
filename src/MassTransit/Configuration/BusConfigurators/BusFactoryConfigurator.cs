@@ -157,6 +157,11 @@ namespace MassTransit.BusConfigurators
             _configuration.Serialization.AddDeserializer(contentType, deserializerFactory);
         }
 
+        public void ClearMessageDeserializers()
+        {
+            _configuration.Serialization.ClearDeserializers();
+        }
+
         public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
             where TConsumer : class
         {
