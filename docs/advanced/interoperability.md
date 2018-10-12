@@ -15,6 +15,7 @@ To support custom message types, MassTransit uses a transport-level header to sp
 If you enable encryption:
 
 - aes  (application/vnd.masstransit+aes)
+- aes  (application/vnd.masstransit.v2+aes)
 
 If you configure the binary serializer:
 
@@ -94,7 +95,3 @@ This is a minimal message:
     ]
 }
 ```
-
-## Encrypted Messages
-
-If you use the encrypted message serializer, it uses BSON under the hood. The encryption format is AES-256. Assuming the same Key/IV pair, an encrypted message should be compatible across the wire.
