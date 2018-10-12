@@ -17,3 +17,5 @@
   * [Custom](middleware/custom.md)
 * [Topology](topology/README.md)
 * [Transactions](transactions.md)
+* [Interoperability](interoperability.md)
+  * [Encrypted Messages](interoperability/encrypted-messages.md)
