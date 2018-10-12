@@ -69,6 +69,11 @@ namespace MassTransit
             _configurator.AddMessageDeserializer(contentType, deserializerFactory);
         }
 
+        public void ClearMessageDeserializers()
+        {
+            _configurator.ClearMessageDeserializers();
+        }
+
         Uri IReceiveEndpointConfigurator.InputAddress => _configurator.InputAddress;
 
         void ISendPipelineConfigurator.ConfigureSend(Action<ISendPipeConfigurator> callback)

@@ -79,6 +79,11 @@ namespace MassTransit
         void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory);
 
         /// <summary>
+        /// Clears all message deserializers
+        /// </summary>
+        void ClearMessageDeserializers();
+
+        /// <summary>
         /// Specify a receive endpoint for the bus, with the specified queue name
         /// </summary>
         /// <param name="queueName">The queue name for the receiving endpoint</param>
