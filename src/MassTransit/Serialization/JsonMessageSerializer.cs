@@ -74,6 +74,7 @@ namespace MassTransit.Serialization
             {
                 new ByteArrayConverter(),
                 new MessageDataJsonConverter(),
+                new StringDecimalConverter()
             }),
         };
 
