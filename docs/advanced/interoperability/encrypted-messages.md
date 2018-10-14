@@ -16,6 +16,34 @@ MassTransit uses a default built in `ConstantSecureKeyProvider` allowing you to 
 
 However, if required you can implement your own `ISecureKeyProvider`, this is useful when you want to use a 3rd party key provider like AWS KMS or Azure Key Vault. Using a 3rd party like AWS KMS allows you to move the complexities of managing and rotating keys to someone else.
 
+### Generate a Key
+
+The best way to generate a key is via C# Interactive. Start by dropping in to the _Developer Command Prompt for VS_, this can be achieved via the Start Menu or by executing the following from the Run Dialog (`[Windows]`+`[R]`).
+
+```bash
+cmd.exe /k "C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\Tools\VsDevCmd.bat"
+```
+
+Once in command prompt, run the C# Interactive (csi.exe) then run the following statements to generate a key.
+
+```csharp
+> using System.Security.Cryptography;
+> var aes = new AesCryptoServiceProvider();
+> aes.GenerateKey()
+> aes.Key
+byte[32] { 115, 171, 121, 43, 89, 24, 199, 205, 23, 221, 178, 104, 163, 32, 45, 84, 171, 86, 93, 13, 198, 132, 38, 65, 130, 192, 6, 159, 227, 104, 245, 222 }
+```
+
+If you want a text representation of the key, you can Base64 encode the key which can then be store in your `App.Config` or `appsettings.json`.
+
+```csharp
+> var base64Key = Convert.ToBase64String(aes.Key);
+> base64Key
+"c6t5K1kYx80X3bJooyAtVKtWXQ3GhCZBgsAGn+No9d4="
+```
+
+> Note that once you've generated the keys to keep them private!
+
 ## Configuration
 
 The encrypted message serializer needs to be configured on the publisher and the consumer so that both sides can understand the message, this is simply done when configuring the bus.
