@@ -4,11 +4,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
-    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
-    using MassTransit.Pipeline;
     using Pipeline;
     using Settings;
     using Topology.Configuration;
@@ -46,16 +44,6 @@
             InputAddress = new Uri(hostConfiguration.Host.Address, $"{settings.Name}");
 
             SubscribeMessageTopics = true;
-        }
-
-        public override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport, IReceivePipe receivePipe,
-            ReceiveEndpointContext topology)
-        {
-            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receivePipe, topology);
-
-            _hostConfiguration.Host.AddReceiveEndpoint(endpointName, receiveEndpoint);
-
-            return receiveEndpoint;
         }
 
         public IServiceBusBusConfiguration BusConfiguration => _hostConfiguration.BusConfiguration;
@@ -165,14 +153,12 @@
 
             ApplySpecifications(builder);
 
-            var receivePipe = CreateReceivePipe();
-
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
             NamespacePipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology,
                 _settings.RemoveSubscriptions));
 
-            return CreateReceiveEndpoint(builder, receivePipe, receiveEndpointContext);
+            return CreateReceiveEndpoint(builder, receiveEndpointContext);
         }
 
         protected override IErrorTransport CreateErrorTransport(ServiceBusHost host)

@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>MassTransit.MongoDb</PackageId>
@@ -14,7 +13,7 @@
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.2" />
+    <PackageReference Include="GreenPipes" Version="2.1.3" />
     <PackageReference Include="MongoDB.Driver" Version="2.7.0" />
     <PackageReference Include="MongoDB.Driver.GridFS" Version="2.7.0" />
     <PackageReference Include="NewId" Version="3.0.1" />

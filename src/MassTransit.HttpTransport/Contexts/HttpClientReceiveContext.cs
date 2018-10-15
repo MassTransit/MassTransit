@@ -15,7 +15,7 @@ namespace MassTransit.HttpTransport.Contexts
     using System.IO;
     using System.Net.Http;
     using Hosting;
-    using MassTransit.Context;
+    using Context;
 
 
     public class HttpClientReceiveContext :
@@ -25,9 +25,8 @@ namespace MassTransit.HttpTransport.Contexts
         readonly Stream _responseStream;
         byte[] _body;
 
-        public HttpClientReceiveContext(HttpResponseMessage responseMessage, Stream responseStream, bool redelivered, IReceiveObserver receiveObserver,
-            ReceiveEndpointContext topology)
-            : base(responseMessage.RequestMessage.RequestUri, redelivered, receiveObserver, topology)
+        public HttpClientReceiveContext(HttpResponseMessage responseMessage, Stream responseStream, bool redelivered, ReceiveEndpointContext topology)
+            : base(responseMessage.RequestMessage.RequestUri, redelivered, topology)
         {
             _responseMessage = responseMessage;
             _responseStream = responseStream;

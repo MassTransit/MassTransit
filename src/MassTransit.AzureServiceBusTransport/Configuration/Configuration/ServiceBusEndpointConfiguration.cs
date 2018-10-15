@@ -13,7 +13,6 @@
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using MassTransit.Configuration;
-    using MassTransit.Pipeline;
 
 
     public class ServiceBusEndpointConfiguration :
@@ -22,15 +21,14 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     {
         readonly IServiceBusTopologyConfiguration _topologyConfiguration;
 
-        public ServiceBusEndpointConfiguration(IServiceBusTopologyConfiguration topologyConfiguration, IConsumePipe consumePipe = null)
-            : base(topologyConfiguration, consumePipe)
+        public ServiceBusEndpointConfiguration(IServiceBusTopologyConfiguration topologyConfiguration)
+            : base(topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }
 
-        ServiceBusEndpointConfiguration(IServiceBusEndpointConfiguration parentConfiguration, IServiceBusTopologyConfiguration topologyConfiguration,
-            IConsumePipe consumePipe = null)
-            : base(parentConfiguration, topologyConfiguration, consumePipe)
+        ServiceBusEndpointConfiguration(IServiceBusEndpointConfiguration parentConfiguration, IServiceBusTopologyConfiguration topologyConfiguration)
+            : base(parentConfiguration, topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }

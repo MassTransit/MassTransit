@@ -21,6 +21,5 @@ namespace MassTransit.ActiveMqTransport
         IActiveMqHost,
         ISupervisor
     {
-        void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint);
     }
 }

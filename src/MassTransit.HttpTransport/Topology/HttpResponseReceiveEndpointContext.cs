@@ -23,6 +23,7 @@ namespace MassTransit.HttpTransport.Topology
 
 
     public class HttpResponseReceiveEndpointContext :
+        BasePipeContext,
         ReceiveEndpointContext
     {
         readonly HttpContext _httpContext;
@@ -47,8 +48,8 @@ namespace MassTransit.HttpTransport.Topology
         ReceiveTransportObservable ReceiveEndpointContext.TransportObservers => _receiveEndpointContext.TransportObservers;
         public ReceiveEndpointObservable EndpointObservers => _receiveEndpointContext.EndpointObservers;
 
-        ISendTopology ReceiveEndpointContext.Send => _receiveEndpointContext.Send;
         IPublishTopology ReceiveEndpointContext.Publish => _receiveEndpointContext.Publish;
+        public IReceivePipe ReceivePipe { get; }
 
         ISendEndpointProvider ReceiveEndpointContext.SendEndpointProvider => _sendEndpointProvider.Value;
         IPublishEndpointProvider ReceiveEndpointContext.PublishEndpointProvider => _receiveEndpointContext.PublishEndpointProvider;

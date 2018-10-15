@@ -15,7 +15,7 @@ namespace MassTransit.HttpTransport.Contexts
     using System;
     using System.IO;
     using Hosting;
-    using MassTransit.Context;
+    using Context;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Extensions;
 
@@ -26,8 +26,8 @@ namespace MassTransit.HttpTransport.Contexts
         readonly HttpContext _httpContext;
         byte[] _body;
 
-        public HttpReceiveContext(HttpContext httpContext, bool redelivered, IReceiveObserver receiveObserver, ReceiveEndpointContext topology)
-            : base(new Uri(httpContext.Request.GetDisplayUrl()), redelivered, receiveObserver, topology)
+        public HttpReceiveContext(HttpContext httpContext, bool redelivered, ReceiveEndpointContext topology)
+            : base(new Uri(httpContext.Request.GetDisplayUrl()), redelivered, topology)
         {
             _httpContext = httpContext;
 

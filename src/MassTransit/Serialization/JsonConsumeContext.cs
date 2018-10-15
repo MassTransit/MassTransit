@@ -16,7 +16,7 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using System.Runtime.Serialization;
+    using System.Threading.Tasks;
     using Context;
     using GreenPipes.Internals.Extensions;
     using Newtonsoft.Json;
@@ -30,9 +30,11 @@ namespace MassTransit.Serialization
         readonly JsonSerializer _deserializer;
         readonly MessageEnvelope _envelope;
         readonly JToken _messageToken;
-        readonly IDictionary<Type, object> _messageTypes;
+        readonly IDictionary<Type, ConsumeContext> _messageTypes;
         readonly IObjectTypeDeserializer _objectTypeDeserializer;
         readonly string[] _supportedTypes;
+        readonly List<Task> _consumeTasks;
+
         Guid? _conversationId;
         Guid? _correlationId;
         Uri _destinationAddress;
@@ -56,7 +58,17 @@ namespace MassTransit.Serialization
             _objectTypeDeserializer = objectTypeDeserializer;
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
-            _messageTypes = new Dictionary<Type, object>();
+            _messageTypes = new Dictionary<Type, ConsumeContext>();
+            _consumeTasks = new List<Task>();
+        }
+
+        public override Task ConsumeCompleted
+        {
+            get
+            {
+                lock (_consumeTasks)
+                    return Task.WhenAll(_consumeTasks.ToArray());
+            }
         }
 
         public override Guid? MessageId => _messageId ?? (_messageId = ConvertIdToGuid(_envelope.MessageId));
@@ -78,8 +90,7 @@ namespace MassTransit.Serialization
         {
             lock (_messageTypes)
             {
-                object existing;
-                if (_messageTypes.TryGetValue(messageType, out existing))
+                if (_messageTypes.TryGetValue(messageType, out var existing))
                     return existing != null;
             }
 
@@ -92,8 +103,7 @@ namespace MassTransit.Serialization
         {
             lock (_messageTypes)
             {
-                object existing;
-                if (_messageTypes.TryGetValue(typeof(T), out existing))
+                if (_messageTypes.TryGetValue(typeof(T), out var existing))
                 {
                     message = existing as ConsumeContext<T>;
                     return message != null;
@@ -128,6 +138,12 @@ namespace MassTransit.Serialization
             }
         }
 
+        public override void AddConsumeTask(Task task)
+        {
+            lock (_consumeTasks)
+                _consumeTasks.Add(task);
+        }
+
         static JToken GetMessageToken(object message)
         {
             var messageToken = message as JToken;
@@ -149,10 +165,9 @@ namespace MassTransit.Serialization
         static Guid? ConvertIdToGuid(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
-                return default(Guid?);
+                return default;
 
-            Guid messageId;
-            if (Guid.TryParse(id, out messageId))
+            if (Guid.TryParse(id, out var messageId))
                 return messageId;
 
             throw new FormatException("The Id was not a Guid: " + id);

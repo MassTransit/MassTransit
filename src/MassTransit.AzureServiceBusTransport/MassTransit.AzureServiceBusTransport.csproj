@@ -2,8 +2,6 @@
   <PropertyGroup>
     <TargetFrameworks>net452</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>portable</DebugType>
-    <LangVersion>7.1</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -14,7 +12,7 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AzureServiceBusTransport.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.2" />
+    <PackageReference Include="GreenPipes" Version="2.1.3" />
     <PackageReference Include="Microsoft.WindowsAzure.ConfigurationManager" Version="3.2.3" />
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />

@@ -50,7 +50,7 @@ namespace MassTransit.Pipeline.Filters
 
             await next.Send(context).ConfigureAwait(false);
 
-            await consumeContext.CompleteTask.ConfigureAwait(false);
+            await consumeContext.ConsumeCompleted.ConfigureAwait(false);
         }
     }
 }

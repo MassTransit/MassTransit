@@ -30,13 +30,14 @@ namespace MassTransit.RabbitMqTransport.Transport
 
     public class RabbitMqSendTransport :
         Supervisor,
-        ISendTransport
+        ISendTransport,
+        IAsyncDisposable
     {
         static readonly ILog _log = Logger.Get<RabbitMqSendTransport>();
 
         readonly string _exchange;
         readonly IFilter<ModelContext> _filter;
-        readonly IPipeContextSource<ModelContext> _modelSource;
+        readonly IAgent<ModelContext> _modelSource;
         readonly SendObservable _observers;
 
         public RabbitMqSendTransport(IAgent<ModelContext> modelSource, IFilter<ModelContext> preSendFilter, string exchange)
@@ -48,6 +49,11 @@ namespace MassTransit.RabbitMqTransport.Transport
             _observers = new SendObservable();
 
             Add(modelSource);
+        }
+
+        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        {
+            return this.Stop("Disposed", cancellationToken);
         }
 
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -68,7 +74,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                     {
                         await pipe.Send(context).ConfigureAwait(false);
 
-                        var body = context.Body;
+                        byte[] body = context.Body;
 
                         if (context.TryGetPayload(out PublishContext publishContext))
                             context.Mandatory = context.Mandatory || publishContext.Mandatory;

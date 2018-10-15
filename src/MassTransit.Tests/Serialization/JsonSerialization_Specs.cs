@@ -508,4 +508,31 @@ namespace MassTransit.Tests.Serialization
         {
         }
     }
+
+
+    public class When_serializing_decimals
+    {
+        [Test]
+        public void Should_deserialize_correctly()
+        {
+            // arrange
+            var message = new MessageA
+            {
+                Decimal = decimal.MaxValue
+            };
+
+            // act, assert
+            var serializedMessage = JsonConvert.SerializeObject(message, MassTransit.Serialization.JsonMessageSerializer.SerializerSettings);
+            serializedMessage.ShouldNotBeNull();
+
+            var deserializedMessage = JsonConvert.DeserializeObject<MessageA>(serializedMessage, MassTransit.Serialization.JsonMessageSerializer.DeserializerSettings);
+            deserializedMessage.ShouldNotBeNull();
+            deserializedMessage.Decimal.ShouldBe(message.Decimal);
+        }
+
+        class MessageA
+        {
+            public decimal Decimal { get; set; }
+        }
+    }
 }

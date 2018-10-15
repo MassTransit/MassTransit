@@ -35,7 +35,8 @@ namespace MassTransit.Transports
         readonly Uri _sourceAddress;
         readonly IPublishTransportProvider _transportProvider;
 
-        public PublishEndpointProvider(IPublishTransportProvider transportProvider, Uri hostAddress, PublishObservable publishObservers, SendObservable sendObservers,
+        public PublishEndpointProvider(IPublishTransportProvider transportProvider, Uri hostAddress, PublishObservable publishObservers,
+            SendObservable sendObservers,
             IMessageSerializer serializer, Uri sourceAddress, IPublishPipe publishPipe, IPublishTopology publishTopology)
         {
             _transportProvider = transportProvider;
@@ -59,12 +60,7 @@ namespace MassTransit.Transports
         public Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
             where T : class
         {
-            IMessagePublishTopology<T> messageTopology = _publishTopology.GetMessageTopology<T>();
-
-            if (!messageTopology.TryGetPublishAddress(_hostAddress, out var publishAddress))
-                throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
-
-            return _cache.GetSendEndpoint(typeof(T), type => CreateSendEndpoint<T>(publishAddress));
+            return _cache.GetSendEndpoint(typeof(T), type => CreateSendEndpoint<T>());
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
@@ -77,9 +73,14 @@ namespace MassTransit.Transports
             return _sendObservers.Connect(observer);
         }
 
-        async Task<ISendEndpoint> CreateSendEndpoint<T>(Uri publishAddress)
+        async Task<ISendEndpoint> CreateSendEndpoint<T>()
             where T : class
         {
+            IMessagePublishTopology<T> messageTopology = _publishTopology.GetMessageTopology<T>();
+
+            if (!messageTopology.TryGetPublishAddress(_hostAddress, out var publishAddress))
+                throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
+
             var sendTransport = await _transportProvider.GetPublishTransport<T>(publishAddress);
 
             var observerHandle = sendTransport.ConnectSendObserver(_sendObservers);

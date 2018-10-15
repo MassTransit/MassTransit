@@ -36,7 +36,7 @@ namespace MassTransit.Testing
                 await Task.Delay(10).ConfigureAwait(false);
             }
 
-            return default(Guid?);
+            return default;
         }
 
         public static async Task<Guid?> ShouldNotContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
@@ -44,12 +44,12 @@ namespace MassTransit.Testing
         {
             DateTime giveUpAt = DateTime.Now + timeout;
 
-            Guid? saga = default(Guid?);
+            Guid? saga = default;
             while (DateTime.Now < giveUpAt)
             {
                 saga = (await (repository as IQuerySagaRepository<TSaga>).Where(x => x.CorrelationId == sagaId).ConfigureAwait(false)).FirstOrDefault();
                 if (saga == Guid.Empty)
-                    return default(Guid?);
+                    return default;
 
                 await Task.Delay(10).ConfigureAwait(false);
             }
@@ -57,8 +57,7 @@ namespace MassTransit.Testing
             return saga;
         }
 
-        public static async Task<Guid?> ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository,
-            Expression<Func<TSaga, bool>> filter,
+        public static async Task<Guid?> ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter,
             TimeSpan timeout)
             where TSaga : class, ISaga
         {
@@ -75,7 +74,7 @@ namespace MassTransit.Testing
                 await Task.Delay(10).ConfigureAwait(false);
             }
 
-            return default(Guid?);
+            return default;
         }
     }
 }

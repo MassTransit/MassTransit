@@ -431,7 +431,7 @@ namespace MassTransit
             return SchedulePublish<T>(context, scheduledTime, values, pipe, cancellationToken);
         }
 
-        static Uri GetDestinationAddress<T>(ConsumeContext context, T message)
+        static Uri GetDestinationAddress<T>(ConsumeContext context)
             where T : class
         {
             var namespaceContext = context.ReceiveContext.GetPayload<NamespaceContext>();
@@ -450,7 +450,7 @@ namespace MassTransit
         {
             await context.Publish(message, pipe, cancellationToken).ConfigureAwait(false);
 
-            var destinationAddress = GetDestinationAddress(context, message);
+            var destinationAddress = GetDestinationAddress<T>(context);
 
             return new ScheduledMessageHandle<T>(pipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress, message);
         }
@@ -458,10 +458,10 @@ namespace MassTransit
         static async Task<ScheduledMessage> Schedule(ConsumeContext context, DateTime scheduledTime, object message, Type messageType,
             ServiceBusScheduleMessagePipe pipe, CancellationToken cancellationToken)
         {
-            await context.Publish(message, pipe, cancellationToken).ConfigureAwait(false);
+            await context.Publish(message, messageType, pipe, cancellationToken).ConfigureAwait(false);
 
             // TODO this is fucked for now
-            var destinationAddress = GetDestinationAddress(context, message);
+            var destinationAddress = GetDestinationAddress<object>(context);
 
             return new ScheduledMessageHandle(pipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress);
         }

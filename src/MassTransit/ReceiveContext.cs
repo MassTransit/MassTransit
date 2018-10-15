@@ -53,7 +53,7 @@ namespace MassTransit
         /// <summary>
         /// The task that is completed once all pending tasks are completed
         /// </summary>
-        Task CompleteTask { get; }
+        Task ReceiveCompleted { get; }
 
         /// <summary>
         /// Returns true if the message was successfully consumed by at least one consumer
@@ -91,7 +91,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="context">The consume context of the message</param>
         /// <param name="duration">The time spent by the consumer</param>
-        /// <param name="consumerType">The messsage consumer type that faulted</param>
+        /// <param name="consumerType">The message consumer type that faulted</param>
         /// <param name="exception">The exception that occurred</param>
         Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class;
@@ -109,7 +109,7 @@ namespace MassTransit
         /// Adds a pending Task to the completion of the message receiver
         /// </summary>
         /// <param name="task"></param>
-        void AddPendingTask(Task task);
+        void AddReceiveTask(Task task);
 
         /// <summary>
         /// The send endpoint provider from the transport

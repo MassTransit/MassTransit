@@ -16,6 +16,7 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.Remoting.Messaging;
+    using System.Threading.Tasks;
     using Context;
 
 
@@ -27,8 +28,9 @@ namespace MassTransit.Serialization
     {
         readonly Header[] _binaryHeaders;
         readonly object _message;
-        readonly IDictionary<Type, object> _messageTypes;
+        readonly IDictionary<Type, ConsumeContext> _messageTypes;
         readonly string[] _supportedTypes;
+        readonly List<Task> _consumeTasks;
         Guid? _conversationId;
         Guid? _correlationId;
         Uri _destinationAddress;
@@ -45,10 +47,20 @@ namespace MassTransit.Serialization
         public StaticConsumeContext(ReceiveContext receiveContext, object message, Header[] headers)
             : base(receiveContext)
         {
-            _messageTypes = new Dictionary<Type, object>();
             _message = message;
             _binaryHeaders = headers;
             _supportedTypes = GetSupportedMessageTypes().ToArray();
+            _messageTypes = new Dictionary<Type, ConsumeContext>();
+            _consumeTasks = new List<Task>();
+        }
+
+        public override Task ConsumeCompleted
+        {
+            get
+            {
+                lock (_consumeTasks)
+                    return Task.WhenAll(_consumeTasks.ToArray());
+            }
         }
 
         public override Guid? MessageId => _messageId ?? (_messageId = GetHeaderGuid(BinaryMessageSerializer.MessageIdKey));
@@ -84,8 +96,7 @@ namespace MassTransit.Serialization
         {
             lock (_messageTypes)
             {
-                object existing;
-                if (_messageTypes.TryGetValue(messageType, out existing))
+                if (_messageTypes.TryGetValue(messageType, out var existing))
                     return existing != null;
             }
 
@@ -98,8 +109,7 @@ namespace MassTransit.Serialization
         {
             lock (_messageTypes)
             {
-                object existing;
-                if (_messageTypes.TryGetValue(typeof(T), out existing))
+                if (_messageTypes.TryGetValue(typeof(T), out var existing))
                 {
                     message = existing as ConsumeContext<T>;
                     return message != null;
@@ -109,9 +119,9 @@ namespace MassTransit.Serialization
 
                 if (_supportedTypes.Any(typeUrn.Equals))
                 {
-                    if (_message is T)
+                    if (_message is T variable)
                     {
-                        _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, (T)_message);
+                        _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, variable);
                         return true;
                     }
 
@@ -122,6 +132,12 @@ namespace MassTransit.Serialization
                 _messageTypes[typeof(T)] = message = null;
                 return false;
             }
+        }
+
+        public override void AddConsumeTask(Task task)
+        {
+            lock (_consumeTasks)
+                _consumeTasks.Add(task);
         }
 
         string GetHeaderString(string headerName)
@@ -180,10 +196,10 @@ namespace MassTransit.Serialization
             {
                 var header = GetHeader(headerName);
                 if (header == null)
-                    return default(Guid?);
+                    return default;
 
-                if (header is Guid)
-                    return (Guid)header;
+                if (header is Guid guid)
+                    return guid;
 
                 var s = header as string;
                 if (s != null)
@@ -193,7 +209,7 @@ namespace MassTransit.Serialization
             {
             }
 
-            return default(Guid?);
+            return default;
         }
 
         DateTime? GetHeaderDateTime(string headerName)
@@ -202,10 +218,10 @@ namespace MassTransit.Serialization
             {
                 var header = GetHeader(headerName);
                 if (header == null)
-                    return default(DateTime?);
+                    return default;
 
-                if (header is DateTime)
-                    return (DateTime)header;
+                if (header is DateTime time)
+                    return time;
 
                 var s = header as string;
                 if (s != null)
@@ -215,7 +231,7 @@ namespace MassTransit.Serialization
             {
             }
 
-            return default(DateTime?);
+            return default;
         }
 
         object GetHeader(string headerName)

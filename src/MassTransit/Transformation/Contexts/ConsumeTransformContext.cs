@@ -30,7 +30,7 @@ namespace MassTransit.Transformation.Contexts
         readonly ConsumeContext<TMessage> _context;
 
         public ConsumeTransformContext(ConsumeContext<TMessage> context)
-            : base(new PayloadCacheScope(context))
+            : base(new PayloadCacheScope(context), context.CancellationToken)
         {
             _context = context;
         }

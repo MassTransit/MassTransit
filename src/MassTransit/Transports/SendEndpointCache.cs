@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
     using System.Threading.Tasks;
     using GreenPipes.Caching;
 
@@ -27,7 +26,7 @@ namespace MassTransit.Transports
 
         public SendEndpointCache()
         {
-            var cacheSettings = new CacheSettings(1000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24));
+            var cacheSettings = new CacheSettings(SendEndpointCacheDefaults.Capacity, SendEndpointCacheDefaults.MinAge, SendEndpointCacheDefaults.MaxAge);
 
             var cache = new GreenCache<CachedSendEndpoint<TKey>>(cacheSettings);
             _index = cache.AddIndex("key", x => x.Key);

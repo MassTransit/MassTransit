@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Transport
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
-    using MassTransit.Pipeline.Observables;
     using Policies;
     using RabbitMQ.Client.Exceptions;
     using Topology;
@@ -35,21 +34,16 @@ namespace MassTransit.RabbitMqTransport.Transport
         readonly IPipe<ConnectionContext> _connectionPipe;
         readonly IRabbitMqHost _host;
         readonly Uri _inputAddress;
-        readonly ReceiveObservable _receiveObservable;
-        readonly ReceiveTransportObservable _receiveTransportObservable;
         readonly ReceiveSettings _settings;
         readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
 
         public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IPipe<ConnectionContext> connectionPipe,
-            RabbitMqReceiveEndpointContext receiveEndpointContext, ReceiveObservable receiveObservable, ReceiveTransportObservable receiveTransportObservable)
+            RabbitMqReceiveEndpointContext receiveEndpointContext)
         {
             _host = host;
             _settings = settings;
             _receiveEndpointContext = receiveEndpointContext;
             _connectionPipe = connectionPipe;
-
-            _receiveObservable = receiveObservable;
-            _receiveTransportObservable = receiveTransportObservable;
 
             _inputAddress = receiveEndpointContext.InputAddress;
         }
@@ -77,12 +71,12 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveObservable.Connect(observer);
+            return _receiveEndpointContext.ReceiveObservers.Connect(observer);
         }
 
         public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _receiveTransportObservable.Connect(observer);
+            return _receiveEndpointContext.TransportObservers.Connect(observer);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
@@ -128,7 +122,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                         }
                         catch (Exception ex)
                         {
-                            throw await ConvertToRabbitMqConnectionException(ex, "ReceiveTranport Faulted, Restarting").ConfigureAwait(false);
+                            throw await ConvertToRabbitMqConnectionException(ex, "ReceiveTransport Faulted, Restarting").ConfigureAwait(false);
                         }
                     }, Stopping);
                 }
@@ -156,7 +150,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             if (_log.IsErrorEnabled)
                 _log.ErrorFormat("RabbitMQ Connect Failed: {0}", exception.Message);
 
-            return _receiveTransportObservable.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, exception));
+            return _receiveEndpointContext.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, exception));
         }
 
 

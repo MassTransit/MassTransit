@@ -42,14 +42,13 @@ namespace MassTransit.Tests.MessageData
 
                 await InputQueueSendEndpoint.Send(message);
 
-                ConsumeContext<MessageWithBigData> received = await _received;
+                await _received;
 
-                string value = await received.Message.Body.Value;
-                value.ShouldBe(data);
+                _receivedBody.ShouldBe(data);
             }
 
             [Test]
-            public async Task Should_be_able_to_write_bytes_too ()
+            public async Task Should_be_able_to_write_bytes_too()
             {
                 byte[] data = NewId.NextGuid().ToByteArray();
 
@@ -60,20 +59,21 @@ namespace MassTransit.Tests.MessageData
 
                 await InputQueueSendEndpoint.Send(message);
 
-                ConsumeContext<MessageWithByteArray> received = await _receivedBytes;
+                await _receivedBytes;
 
-                byte[] value = await received.Message.Bytes.Value;
-                value.ShouldBe(data);
+                _receivedBytesArray.ShouldBe(data);
             }
 
             IMessageDataRepository _repository;
             Task<ConsumeContext<MessageWithBigData>> _received;
             Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
+            string _receivedBody;
+            byte[] _receivedBytesArray;
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                
+
                 string messageDataPath = Path.Combine(baseDirectory, "MessageData");
 
                 var dataDirectory = new DirectoryInfo(messageDataPath);
@@ -82,13 +82,20 @@ namespace MassTransit.Tests.MessageData
 
                 configurator.UseMessageData<MessageWithBigData>(_repository);
 
-                _received = Handled<MessageWithBigData>(configurator);
+                _received = Handler<MessageWithBigData>(configurator, async context =>
+                {
+                    _receivedBody = await context.Message.Body.Value;
+                });
 
                 configurator.UseMessageData<MessageWithByteArray>(_repository);
 
-                _receivedBytes = Handled<MessageWithByteArray>(configurator);
+                _receivedBytes = Handler<MessageWithByteArray>(configurator, async context =>
+                {
+                    _receivedBytesArray = await context.Message.Bytes.Value;
+                });
             }
         }
+
 
         [TestFixture]
         public class Sending_a_large_message_through_the_file_system_encrypted :
@@ -106,14 +113,13 @@ namespace MassTransit.Tests.MessageData
 
                 await InputQueueSendEndpoint.Send(message);
 
-                ConsumeContext<MessageWithBigData> received = await _received;
+                await _received;
 
-                string value = await received.Message.Body.Value;
-                value.ShouldBe(data);
+                _receivedBody.ShouldBe(data);
             }
 
             [Test]
-            public async Task Should_be_able_to_write_bytes_too ()
+            public async Task Should_be_able_to_write_bytes_too()
             {
                 byte[] data = NewId.NextGuid().ToByteArray();
 
@@ -124,15 +130,16 @@ namespace MassTransit.Tests.MessageData
 
                 await InputQueueSendEndpoint.Send(message);
 
-                ConsumeContext<MessageWithByteArray> received = await _receivedBytes;
+                await _receivedBytes;
 
-                byte[] value = await received.Message.Bytes.Value;
-                value.ShouldBe(data);
+                _receivedBytesArray.ShouldBe(data);
             }
 
             IMessageDataRepository _repository;
             Task<ConsumeContext<MessageWithBigData>> _received;
             Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
+            string _receivedBody;
+            byte[] _receivedBytesArray;
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
@@ -150,11 +157,17 @@ namespace MassTransit.Tests.MessageData
 
                 configurator.UseMessageData<MessageWithBigData>(_repository);
 
-                _received = Handled<MessageWithBigData>(configurator);
+                _received = Handler<MessageWithBigData>(configurator, async context =>
+                {
+                    _receivedBody = await context.Message.Body.Value;
+                });
 
                 configurator.UseMessageData<MessageWithByteArray>(_repository);
 
-                _receivedBytes = Handled<MessageWithByteArray>(configurator);
+                _receivedBytes = Handler<MessageWithByteArray>(configurator, async context =>
+                {
+                    _receivedBytesArray = await context.Message.Bytes.Value;
+                });
             }
         }
 
@@ -177,17 +190,15 @@ namespace MassTransit.Tests.MessageData
 
                 await InputQueueSendEndpoint.Send(message);
 
-                ConsumeContext<MessageWithBigData> received = await _received;
+                await _received;
 
-                string value = await received.Message.Body.Value;
-                value.ShouldBe(data);
-
-                Console.WriteLine(value);
+                _receivedBody.ShouldBe(data);
             }
 
             IMessageDataRepository _messageDataRepository;
 
             Task<ConsumeContext<MessageWithBigData>> _received;
+            string _receivedBody;
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
@@ -195,7 +206,10 @@ namespace MassTransit.Tests.MessageData
 
                 configurator.UseMessageData<MessageWithBigData>(_messageDataRepository);
 
-                _received = Handled<MessageWithBigData>(configurator);
+                _received = Handler<MessageWithBigData>(configurator, async context =>
+                {
+                    _receivedBody = await context.Message.Body.Value;
+                });
             }
         }
 
@@ -219,18 +233,16 @@ namespace MassTransit.Tests.MessageData
 
                 await InputQueueSendEndpoint.Send(message);
 
-                ConsumeContext<MessageWithByteArray> received = await _received;
+                await _received;
 
-                byte[] value = await received.Message.Bytes.Value;
-                var newId = new NewId(value);
+                var newId = new NewId(_receivedBytesArray);
                 newId.ToString().ShouldBe(data);
-
-                Console.WriteLine(value);
             }
 
             IMessageDataRepository _messageDataRepository;
 
             Task<ConsumeContext<MessageWithByteArray>> _received;
+            byte[] _receivedBytesArray;
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
@@ -238,7 +250,10 @@ namespace MassTransit.Tests.MessageData
 
                 configurator.UseMessageData<MessageWithByteArray>(_messageDataRepository);
 
-                _received = Handled<MessageWithByteArray>(configurator);
+                _received = Handler<MessageWithByteArray>(configurator, async context =>
+                {
+                    _receivedBytesArray = await context.Message.Bytes.Value;
+                });
             }
         }
 

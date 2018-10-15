@@ -19,17 +19,15 @@ namespace MassTransit.Configuration
     public class ConsumePipeConfiguration :
         IConsumePipeConfiguration
     {
-        readonly IConsumePipe _consumePipe;
         readonly ConsumePipeSpecification _specification;
 
-        public ConsumePipeConfiguration(IConsumePipe consumePipe = null)
+        public ConsumePipeConfiguration()
         {
-            _consumePipe = consumePipe;
             _specification = new ConsumePipeSpecification();
         }
 
-        public ConsumePipeConfiguration(IConsumePipeSpecification parentSpecification, IConsumePipe consumePipe = null)
-            : this(consumePipe)
+        public ConsumePipeConfiguration(IConsumePipeSpecification parentSpecification)
+            : this()
         {
             _specification.Connect(new ParentConsumePipeSpecificationObserver(parentSpecification));
         }
@@ -39,7 +37,7 @@ namespace MassTransit.Configuration
 
         public IConsumePipe CreatePipe()
         {
-            return _consumePipe ?? _specification.BuildConsumePipe();
+            return _specification.BuildConsumePipe();
         }
     }
 }

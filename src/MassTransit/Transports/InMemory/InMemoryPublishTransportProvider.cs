@@ -34,17 +34,19 @@ namespace MassTransit.Transports.InMemory
         public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
             where T : class
         {
-            ApplyTopologyToMessageFabric<T>();
+            var publishTopology = _publishTopology.GetMessageTopology<T>();
+
+            ApplyTopologyToMessageFabric(publishTopology);
 
             return _transportProvider.GetSendTransport(publishAddress);
         }
 
-        void ApplyTopologyToMessageFabric<T>()
+        void ApplyTopologyToMessageFabric<T>(IInMemoryMessagePublishTopology<T> publishTopology)
             where T : class
         {
             var builder = _host.CreatePublishTopologyBuilder();
 
-            _publishTopology.GetMessageTopology<T>().Apply(builder);
+            publishTopology.Apply(builder);
         }
     }
 }

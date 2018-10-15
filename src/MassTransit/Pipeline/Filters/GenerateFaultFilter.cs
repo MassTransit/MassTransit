@@ -34,7 +34,11 @@ namespace MassTransit.Pipeline.Filters
         async Task IFilter<ExceptionReceiveContext>.Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)
         {
             if (!context.IsFaulted)
+            {
                 GenerateFault(context);
+
+                await context.NotifyFaulted(context.Exception).ConfigureAwait(false);
+            }
 
             await next.Send(context).ConfigureAwait(false);
         }
@@ -62,9 +66,7 @@ namespace MassTransit.Pipeline.Filters
 
             var publishTask = publishEndpoint.Publish(fault, contextPipe, context.CancellationToken);
 
-            context.AddPendingTask(publishTask);
-
-            context.AddPendingTask(context.NotifyFaulted(context.Exception));
+            context.AddReceiveTask(publishTask);
         }
     }
 }

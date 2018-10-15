@@ -13,7 +13,6 @@
 namespace MassTransit.ActiveMqTransport.Configuration
 {
     using MassTransit.Configuration;
-    using MassTransit.Pipeline;
 
 
     public class ActiveMqEndpointConfiguration :
@@ -22,15 +21,14 @@ namespace MassTransit.ActiveMqTransport.Configuration
     {
         readonly IActiveMqTopologyConfiguration _topologyConfiguration;
 
-        public ActiveMqEndpointConfiguration(IActiveMqTopologyConfiguration topologyConfiguration, IConsumePipe consumePipe = null)
-            : base(topologyConfiguration, consumePipe)
+        public ActiveMqEndpointConfiguration(IActiveMqTopologyConfiguration topologyConfiguration)
+            : base(topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }
 
-        ActiveMqEndpointConfiguration(IEndpointConfiguration parentConfiguration, IActiveMqTopologyConfiguration topologyConfiguration,
-            IConsumePipe consumePipe = null)
-            : base(parentConfiguration, topologyConfiguration, consumePipe)
+        ActiveMqEndpointConfiguration(IEndpointConfiguration parentConfiguration, IActiveMqTopologyConfiguration topologyConfiguration)
+            : base(parentConfiguration, topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }

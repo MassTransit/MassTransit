@@ -25,32 +25,36 @@ and then:
 // Message Definition
 class MyMessage
 {
-    public string Value { get; set; }
+	public string Value { get; set; }
 }
 
-// Code Snippet for Console Application 
-var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
+// Code Snippet for Console Application
+async Task Main()
 {
-    var host = sbc.Host(new Uri("rabbitmq://localhost/"), h =>
-    {
-        h.Username("guest");
-        h.Password("guest");
-    });
+	var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
+	{
+		var host = sbc.Host(new Uri("rabbitmq://localhost:/"), h =>
+		{
+			h.Username("guest");
+			h.Password("guest");
+		});
 
-    sbc.ReceiveEndpoint(host, "my_queue", endpoint =>
-    {
-        endpoint.Handler<MyMessage>(async context =>
-        {
-            await Console.Out.WriteLineAsync($"Received: {context.Message.Value}");
-        });
-    });
-});
+		sbc.ReceiveEndpoint(host, "my_queue", endpoint =>
+		{
+			endpoint.Handler<MyMessage>(async context =>
+			{
+				await Console.Out.WriteLineAsync($"Received: {context.Message.Value}");
+			});
+		});
+	});
 
-using(bus.Start())
-{
-    bus.Publish(new MyMessage{Value = "Hello, World."});
+	await bus.StartAsync();
 
-    Console.ReadLine();
+	await bus.Publish(new MyMessage { Value = "Hello, World." });
+
+	Console.ReadLine();
+
+	await bus.StopAsync();
 }
 ```
 

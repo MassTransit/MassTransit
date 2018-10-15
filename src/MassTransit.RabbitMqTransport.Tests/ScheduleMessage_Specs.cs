@@ -46,7 +46,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 await context.ScheduleSend(DateTime.Now, new SecondMessage());
 
-                await context.ReceiveContext.CompleteTask;
+                await context.ReceiveContext.ReceiveCompleted;
             });
 
             _second = Handled<SecondMessage>(configurator);
@@ -92,7 +92,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 await context.ScheduleSend(TimeSpan.FromSeconds(3), new SecondMessage());
 
-                await context.ReceiveContext.CompleteTask;
+                await context.ReceiveContext.ReceiveCompleted;
             });
 
             _second = Handled<SecondMessage>(configurator);

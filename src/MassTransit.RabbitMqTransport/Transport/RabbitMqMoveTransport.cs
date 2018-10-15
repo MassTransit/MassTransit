@@ -63,7 +63,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             preSend(properties, headers);
 
             var task = modelContext.BasicPublishAsync(_exchange, routingKey, true, properties, body, true);
-            context.AddPendingTask(task);
+            context.AddReceiveTask(task);
         }
     }
 }

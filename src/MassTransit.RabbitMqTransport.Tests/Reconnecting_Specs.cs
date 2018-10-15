@@ -17,12 +17,20 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using NUnit.Framework;
+    using TestFramework.Messages;
+    using Transports;
 
 
     [TestFixture]
     public class Reconnecting_Specs :
         RabbitMqTestFixture
     {
+        public Reconnecting_Specs()
+        {
+            SendEndpointCacheDefaults.MinAge = TimeSpan.FromSeconds(2);
+            SendEndpointCacheDefaults.Capacity = 5;
+        }
+
         ReconnectConsumer _consumer;
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -32,6 +40,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             _consumer = new ReconnectConsumer(TestTimeout);
 
             _consumer.Configure(configurator);
+
+            configurator.Handler<PingMessage>(context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
         }
 
 
@@ -67,6 +77,14 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await Task.Delay(1000);
 
                 Console.Write($"{i}. ");
+
+                IClientFactory clientFactory = await Host.CreateClientFactory(TestTimeout);
+
+                RequestHandle<PingMessage> request = clientFactory.CreateRequest(new PingMessage());
+
+                Response<PongMessage> response = await request.GetResponse<PongMessage>();
+
+                await clientFactory.DisposeAsync();
             }
 
             Console.WriteLine("");

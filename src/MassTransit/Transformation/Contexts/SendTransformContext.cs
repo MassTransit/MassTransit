@@ -31,7 +31,7 @@ namespace MassTransit.Transformation.Contexts
         readonly SendContext<TMessage> _context;
 
         public SendTransformContext(SendContext<TMessage> context)
-            : base(new PayloadCacheScope(context))
+            : base(new PayloadCacheScope(context), context.CancellationToken)
         {
             _context = context;
         }

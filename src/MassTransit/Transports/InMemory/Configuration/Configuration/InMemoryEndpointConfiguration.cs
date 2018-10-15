@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.InMemory.Configuration
 {
     using MassTransit.Configuration;
-    using Pipeline;
 
 
     public class InMemoryEndpointConfiguration :
@@ -22,15 +21,14 @@ namespace MassTransit.Transports.InMemory.Configuration
     {
         readonly IInMemoryTopologyConfiguration _topologyConfiguration;
 
-        public InMemoryEndpointConfiguration(IInMemoryTopologyConfiguration topologyConfiguration, IConsumePipe consumePipe = null)
-            : base(topologyConfiguration, consumePipe)
+        public InMemoryEndpointConfiguration(IInMemoryTopologyConfiguration topologyConfiguration)
+            : base(topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }
 
-        InMemoryEndpointConfiguration(IInMemoryEndpointConfiguration parentConfiguration, IInMemoryTopologyConfiguration topologyConfiguration,
-            IConsumePipe consumePipe = null)
-            : base(parentConfiguration, topologyConfiguration, consumePipe)
+        InMemoryEndpointConfiguration(IInMemoryEndpointConfiguration parentConfiguration, IInMemoryTopologyConfiguration topologyConfiguration)
+            : base(parentConfiguration, topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }

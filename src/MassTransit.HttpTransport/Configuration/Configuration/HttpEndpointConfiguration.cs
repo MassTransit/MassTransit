@@ -13,7 +13,6 @@
 namespace MassTransit.HttpTransport.Configuration
 {
     using MassTransit.Configuration;
-    using MassTransit.Pipeline;
 
 
     public class HttpEndpointConfiguration :
@@ -22,15 +21,14 @@ namespace MassTransit.HttpTransport.Configuration
     {
         readonly IHttpTopologyConfiguration _topologyConfiguration;
 
-        public HttpEndpointConfiguration(IHttpTopologyConfiguration topologyConfiguration, IConsumePipe consumePipe = null)
-            : base(topologyConfiguration, consumePipe)
+        public HttpEndpointConfiguration(IHttpTopologyConfiguration topologyConfiguration)
+            : base(topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }
 
-        HttpEndpointConfiguration(IHttpEndpointConfiguration parentConfiguration, IHttpTopologyConfiguration topologyConfiguration,
-            IConsumePipe consumePipe = null)
-            : base(parentConfiguration, topologyConfiguration, consumePipe)
+        HttpEndpointConfiguration(IHttpEndpointConfiguration parentConfiguration, IHttpTopologyConfiguration topologyConfiguration)
+            : base(parentConfiguration, topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }

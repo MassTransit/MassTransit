@@ -17,7 +17,6 @@ namespace MassTransit.Configuration
     using System.Linq;
     using ConsumeConfigurators;
     using GreenPipes;
-    using Pipeline;
     using Saga;
     using SagaConfigurators;
 
@@ -25,11 +24,11 @@ namespace MassTransit.Configuration
     public class EndpointConfiguration :
         IEndpointConfiguration
     {
-        protected EndpointConfiguration(ITopologyConfiguration topology, IConsumePipe consumePipe = null)
+        protected EndpointConfiguration(ITopologyConfiguration topology)
         {
             Topology = topology;
 
-            Consume = new ConsumePipeConfiguration(consumePipe);
+            Consume = new ConsumePipeConfiguration();
             Send = new SendPipeConfiguration(topology.Send);
             Publish = new PublishPipeConfiguration(topology.Publish);
             Receive = new ReceivePipeConfiguration();
@@ -37,11 +36,11 @@ namespace MassTransit.Configuration
             Serialization = new SerializationConfiguration();
         }
 
-        protected EndpointConfiguration(IBusConfiguration busConfiguration, ITopologyConfiguration topology, IConsumePipe consumePipe = null)
+        protected EndpointConfiguration(IBusConfiguration busConfiguration, ITopologyConfiguration topology)
         {
             Topology = topology;
 
-            Consume = new ConsumePipeConfiguration(consumePipe);
+            Consume = new ConsumePipeConfiguration();
             Send = new SendPipeConfiguration(busConfiguration.Send.Specification);
             Publish = new PublishPipeConfiguration(busConfiguration.Publish.Specification);
             Receive = new ReceivePipeConfiguration();
@@ -49,11 +48,11 @@ namespace MassTransit.Configuration
             Serialization = busConfiguration.Serialization.CreateSerializationConfiguration();
         }
 
-        protected EndpointConfiguration(IEndpointConfiguration parentConfiguration, ITopologyConfiguration topology, IConsumePipe consumePipe = null)
+        protected EndpointConfiguration(IEndpointConfiguration parentConfiguration, ITopologyConfiguration topology)
         {
             Topology = topology;
 
-            Consume = new ConsumePipeConfiguration(parentConfiguration.Consume.Specification, consumePipe);
+            Consume = new ConsumePipeConfiguration(parentConfiguration.Consume.Specification);
             Send = new SendPipeConfiguration(parentConfiguration.Send.Specification);
             Publish = new PublishPipeConfiguration(parentConfiguration.Publish.Specification);
             Receive = new ReceivePipeConfiguration();

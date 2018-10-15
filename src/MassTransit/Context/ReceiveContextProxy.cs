@@ -70,7 +70,7 @@ namespace MassTransit.Context
         public ContentType ContentType => _context.ContentType;
         public bool Redelivered => _context.Redelivered;
         public Headers TransportHeaders => _context.TransportHeaders;
-        public Task CompleteTask => _context.CompleteTask;
+        public Task ReceiveCompleted => _context.ReceiveCompleted;
         public bool IsDelivered => _context.IsDelivered;
         public bool IsFaulted => _context.IsFaulted;
 
@@ -91,9 +91,9 @@ namespace MassTransit.Context
             return _context.NotifyFaulted(exception);
         }
 
-        public virtual void AddPendingTask(Task task)
+        public virtual void AddReceiveTask(Task task)
         {
-            _context.AddPendingTask(task);
+            _context.AddReceiveTask(task);
         }
 
         ISendEndpointProvider ReceiveContext.SendEndpointProvider => _context.SendEndpointProvider;

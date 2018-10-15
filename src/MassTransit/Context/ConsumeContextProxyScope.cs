@@ -12,10 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using GreenPipes;
     using GreenPipes.Payloads;
 
 
@@ -33,62 +29,9 @@ namespace MassTransit.Context
         ConsumeContextProxy<TMessage>
         where TMessage : class
     {
-        readonly IPublishEndpoint _publishEndpoint;
-
         protected ConsumeContextProxyScope(ConsumeContext<TMessage> context)
             : base(context, new PayloadCacheScope(context))
         {
-            _publishEndpoint = new ConsumeContextScopePublishEndpoint(this, context);
-        }
-
-        public override Task Publish<T>(T message, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, cancellationToken);
-        }
-
-        public override Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
-        }
-
-        public override Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
-        }
-
-        public override Task Publish(object message, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, cancellationToken);
-        }
-
-        public override Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
-        }
-
-        public override Task Publish(object message, Type messageType, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, messageType, cancellationToken);
-        }
-
-        public override Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, messageType, publishPipe, cancellationToken);
-        }
-
-        public override Task Publish<T>(object values, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish<T>(values, cancellationToken);
-        }
-
-        public override Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(values, publishPipe, cancellationToken);
-        }
-
-        public override Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
         }
     }
 }

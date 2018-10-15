@@ -51,8 +51,6 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            var endpointConfiguration = new ServiceBusEndpointConfiguration(new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology));
-
             var topologyConfiguration = new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology);
             var busConfiguration = new ServiceBusBusConfiguration(topologyConfiguration);
             var busEndpointConfiguration = busConfiguration.CreateReceiveEndpointConfiguration(new Uri("sb://localhost/"), new Uri("sb://localhost/"));

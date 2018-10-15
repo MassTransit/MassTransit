@@ -26,10 +26,9 @@ namespace MassTransit.Pipeline.Filters
     {
         readonly TransactionOptions _options;
 
-        public TransactionFilter(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
-            TimeSpan timeout = default(TimeSpan))
+        public TransactionFilter(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, TimeSpan timeout = default)
         {
-            if (timeout == default(TimeSpan))
+            if (timeout == default)
                 timeout = TimeSpan.FromSeconds(30);
 
             _options = new TransactionOptions

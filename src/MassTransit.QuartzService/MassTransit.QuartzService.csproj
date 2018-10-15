@@ -5,7 +5,6 @@
     <TargetFrameworks>net452</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-    <DebugType>portable</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="log4net.config">
@@ -16,10 +15,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.2" />
+    <PackageReference Include="GreenPipes" Version="2.1.3" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="Quartz" Version="3.0.6" />
+    <PackageReference Include="Quartz" Version="3.0.7" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.104.0" />
     <PackageReference Include="Topshelf" Version="4.1.0" />
     <PackageReference Include="Topshelf.Log4Net" Version="4.1.0" />

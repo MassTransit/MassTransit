@@ -21,6 +21,5 @@ namespace MassTransit.RabbitMqTransport.Transport
         IRabbitMqHost,
         IBusHostControl
     {
-        void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint);
     }
 }

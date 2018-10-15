@@ -29,16 +29,14 @@ namespace MassTransit.Transports
     public class ReceiveEndpoint :
         IReceiveEndpointControl
     {
-        readonly IReceivePipe _receivePipe;
         readonly IReceiveTransport _receiveTransport;
         ConnectHandle _handle;
         readonly ReceiveEndpointContext _context;
 
-        public ReceiveEndpoint(IReceiveTransport receiveTransport, IReceivePipe receivePipe, ReceiveEndpointContext context)
+        public ReceiveEndpoint(IReceiveTransport receiveTransport, ReceiveEndpointContext context)
         {
             _context = context;
             _receiveTransport = receiveTransport;
-            _receivePipe = receivePipe;
 
             _handle = receiveTransport.ConnectReceiveTransportObserver(new Observer(this, context.EndpointObservers));
         }
@@ -56,7 +54,7 @@ namespace MassTransit.Transports
         {
             _receiveTransport.Probe(context);
 
-            _receivePipe.Probe(context);
+            _context.ReceivePipe.Probe(context);
         }
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
@@ -71,22 +69,22 @@ namespace MassTransit.Transports
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
-            return _receivePipe.ConnectConsumeObserver(observer);
+            return _context.ReceivePipe.ConnectConsumeObserver(observer);
         }
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
-            return _receivePipe.ConnectConsumeMessageObserver(observer);
+            return _context.ReceivePipe.ConnectConsumeMessageObserver(observer);
         }
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            return _receivePipe.ConnectConsumePipe(pipe);
+            return _context.ReceivePipe.ConnectConsumePipe(pipe);
         }
 
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
-            return _receivePipe.ConnectRequestPipe(requestId, pipe);
+            return _context.ReceivePipe.ConnectRequestPipe(requestId, pipe);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
@@ -135,13 +133,12 @@ namespace MassTransit.Transports
 
             public Task Completed(ReceiveTransportCompleted completed)
             {
-                return _observer.Completed(new ReceiveEndpointCompletedEvent(completed.InputAddress, completed.DeliveryCount, completed.ConcurrentDeliveryCount,
-                    _endpoint));
+                return _observer.Completed(new ReceiveEndpointCompletedEvent(completed, _endpoint));
             }
 
             public Task Faulted(ReceiveTransportFaulted faulted)
             {
-                return _observer.Faulted(new ReceiveEndpointFaultedEvent(faulted.InputAddress, faulted.Exception, _endpoint));
+                return _observer.Faulted(new ReceiveEndpointFaultedEvent(faulted, _endpoint));
             }
         }
 

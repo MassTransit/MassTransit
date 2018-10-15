@@ -3,24 +3,41 @@
 <Project>
   <!-- These properties will be shared for all projects -->
   <PropertyGroup>
-  <Title>MassTransit</Title>
+    <Title>MassTransit</Title>
     <Product>MassTransit</Product>
     <Description>MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com</Description>
     <PackageProjectUrl>https://github.com/MassTransit/MassTransit</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/MassTransit/MassTransit/blob/master/LICENSE</PackageLicenseUrl>
-    <RepositoryUrl>https://github.com/MassTransit/MassTransit</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageTags>MassTransit</PackageTags>
     <Authors>Chris Patterson;Dru Sellers;Travis Smith</Authors>
     <Copyright>Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.</Copyright>
     <WarningLevel>4</WarningLevel>
     <NoWarn>1587,1591,1998,3008,3001</NoWarn>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <LangVersion>latest</LangVersion>
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>portable</DebugType>
+
+    <IsTestProject>$(MSBuildProjectName.Contains('Tests'))</IsTestProject>
+
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugType>full</DebugType>
     <DefineConstants>DEBUG;TRACE;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Optimize>true</Optimize>
     <DefineConstants>TRACE;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
+
+<!--
+  <ItemGroup Condition="'$(IsTestProject)' != 'true' and '$(SourceLinkEnabled)' != 'false'">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All"/>
+  </ItemGroup>
+-->
+
 </Project>

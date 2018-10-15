@@ -56,9 +56,9 @@ namespace MassTransit.Testing
             {
                 ConfigureBus(x);
 
-                ConfigureInMemoryBus(x);
-
                 _inMemoryHost = x.Host;
+
+                ConfigureInMemoryBus(x);
 
                 x.ReceiveEndpoint(InputQueueName, configurator =>
                 {

@@ -115,6 +115,11 @@ namespace MassTransit.RabbitMqTransport.Hosting
             _configurator.AddMessageDeserializer(contentType, deserializerFactory);
         }
 
+        public void ClearMessageDeserializers()
+        {
+            _configurator.ClearMessageDeserializers();
+        }
+
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             ReceiveEndpoint(queueName, _defaultConsumerLimit, configureEndpoint);

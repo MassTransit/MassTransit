@@ -210,7 +210,7 @@ namespace MassTransit.Azure.ServiceBus.Core
             {
                 TokenProvider = settings.TokenProvider,
                 OperationTimeout = settings.OperationTimeout,
-                TransportType = TransportType.Amqp
+                TransportType = settings.TransportType
             };
 
             return mfs;

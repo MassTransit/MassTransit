@@ -15,7 +15,6 @@
     using MassTransit.Pipeline.Filters;
     using Pipeline;
     using Settings;
-    using Topology;
     using Topology.Configuration;
     using Transport;
     using Transports;
@@ -33,7 +32,7 @@
 
         protected ServiceBusEntityReceiveEndpointConfiguration(IServiceBusHostConfiguration hostConfiguration, IServiceBusEndpointConfiguration configuration,
             BaseClientSettings settings)
-            : base(configuration)
+            : base(hostConfiguration, configuration)
         {
             _hostConfiguration = hostConfiguration;
             _settings = settings;
@@ -132,8 +131,7 @@
                 yield return this.Failure("MaxConcurrentCalls", "must be > 0");
         }
 
-        protected IReceiveEndpoint CreateReceiveEndpoint(ReceiveEndpointBuilder builder, IReceivePipe receivePipe,
-            ServiceBusReceiveEndpointContext context)
+        protected IReceiveEndpoint CreateReceiveEndpoint(ReceiveEndpointBuilder builder, ServiceBusReceiveEndpointContext context)
         {
             var transportObserver = builder.TransportObservers;
 
@@ -147,7 +145,7 @@
             }
             else
             {
-                var messageReceiver = new BrokeredMessageReceiver(InputAddress, receivePipe, Logger.Get<Receiver>(), context);
+                var messageReceiver = new BrokeredMessageReceiver(InputAddress, Logger.Get<Receiver>(), context);
 
                 var errorTransport = CreateErrorTransport(_hostConfiguration.Host);
                 var deadLetterTransport = CreateDeadLetterTransport(_hostConfiguration.Host);
@@ -170,7 +168,7 @@
 
             transport.Add(consumerAgent);
 
-            return CreateReceiveEndpoint(_settings.Name, transport, receivePipe, context);
+            return CreateReceiveEndpoint(_settings.Name, transport, context);
         }
 
         protected abstract IErrorTransport CreateErrorTransport(ServiceBusHost host);

@@ -28,8 +28,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
         readonly IMessage _transportMessage;
         byte[] _body;
 
-        public ActiveMqReceiveContext(Uri inputAddress, IMessage transportMessage, IReceiveObserver observer, ActiveMqReceiveEndpointContext context)
-            : base(inputAddress, transportMessage.NMSRedelivered, observer, context)
+        public ActiveMqReceiveContext(Uri inputAddress, IMessage transportMessage, ActiveMqReceiveEndpointContext context)
+            : base(inputAddress, transportMessage.NMSRedelivered, context)
         {
             _transportMessage = transportMessage;
             _context = context;

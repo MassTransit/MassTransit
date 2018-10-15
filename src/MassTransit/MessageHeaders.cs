@@ -64,6 +64,22 @@ namespace MassTransit
         /// </summary>
         public const string QuartzTriggerKey = "MT-Quartz-TriggerKey";
 
+        /// <summary>
+        /// Identifies the client from which the request is being sent
+        /// </summary>
+        public const string ClientId = "MT-Request-ClientId";
+
+        /// <summary>
+        /// Identifies the endpoint that handled the request
+        /// </summary>
+        public const string EndpointId = "MT-Request-EndpointId";
+
+
+        public static class Request
+        {
+            public const string Remaining = "MT-Request-Remaining";
+        }
+
 
         public static class Quartz
         {

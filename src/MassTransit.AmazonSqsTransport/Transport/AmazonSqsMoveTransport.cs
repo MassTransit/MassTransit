@@ -56,7 +56,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
             var task = Task.Run(() => modelContext.Publish(message));
 
-            context.AddPendingTask(task);
+            context.AddReceiveTask(task);
         }
     }
 }

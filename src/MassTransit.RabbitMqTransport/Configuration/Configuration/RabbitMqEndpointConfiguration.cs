@@ -13,7 +13,6 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using MassTransit.Configuration;
-    using MassTransit.Pipeline;
 
 
     public class RabbitMqEndpointConfiguration :
@@ -22,22 +21,20 @@ namespace MassTransit.RabbitMqTransport.Configuration
     {
         readonly IRabbitMqTopologyConfiguration _topologyConfiguration;
 
-        public RabbitMqEndpointConfiguration(IRabbitMqTopologyConfiguration topologyConfiguration, IConsumePipe consumePipe = null)
-            : base(topologyConfiguration, consumePipe)
+        public RabbitMqEndpointConfiguration(IRabbitMqTopologyConfiguration topologyConfiguration)
+            : base(topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }
 
-        public RabbitMqEndpointConfiguration(IBusConfiguration busConfiguration, IRabbitMqTopologyConfiguration topologyConfiguration,
-            IConsumePipe consumePipe = null)
-            : base(busConfiguration, topologyConfiguration, consumePipe)
+        public RabbitMqEndpointConfiguration(IBusConfiguration busConfiguration, IRabbitMqTopologyConfiguration topologyConfiguration)
+            : base(busConfiguration, topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }
 
-        RabbitMqEndpointConfiguration(IEndpointConfiguration parentConfiguration, IRabbitMqTopologyConfiguration topologyConfiguration,
-            IConsumePipe consumePipe = null)
-            : base(parentConfiguration, topologyConfiguration, consumePipe)
+        RabbitMqEndpointConfiguration(IEndpointConfiguration parentConfiguration, IRabbitMqTopologyConfiguration topologyConfiguration)
+            : base(parentConfiguration, topologyConfiguration)
         {
             _topologyConfiguration = topologyConfiguration;
         }

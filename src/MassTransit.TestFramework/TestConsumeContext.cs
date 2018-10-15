@@ -128,7 +128,7 @@ namespace MassTransit.TestFramework
             get { return _receiveContext; }
         }
 
-        public Task CompleteTask
+        public Task ConsumeCompleted
         {
             get { return Task.FromResult(true); }
         }
@@ -148,6 +148,11 @@ namespace MassTransit.TestFramework
         {
             consumeContext = this as ConsumeContext<T>;
             return consumeContext != null;
+        }
+
+        public void AddConsumeTask(Task task)
+        {
+
         }
 
         public Task RespondAsync<T>(T message) where T : class
@@ -247,7 +252,7 @@ namespace MassTransit.TestFramework
         BaseReceiveContext
     {
         public TestReceiveContext(Uri sourceAddress)
-            : base(sourceAddress, false, new ReceiveObservable(), null)
+            : base(sourceAddress, false, null)
         {
             HeaderProvider = new DictionaryHeaderProvider(new Dictionary<string, object>());
         }

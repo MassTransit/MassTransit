@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
     using MassTransit.Configuration;
-    using Topology;
     using Topology.Settings;
     using Transport;
 
@@ -45,8 +44,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// <param name="hostConfiguration"></param>
         bool TryGetHost(IRabbitMqHost host, out IRabbitMqHostConfiguration hostConfiguration);
 
-        IRabbitMqHostTopology CreateHostTopology(Uri hostAddress);
-
         /// <summary>
         /// Create an endpoint configuration on the bus, which can later be turned into a receive endpoint
         /// </summary>
@@ -56,17 +53,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// <summary>
         /// Create a host configuration, by adding a host to the bus
         /// </summary>
-        /// <param name="host"></param>
+        /// <param name="hostSettings">The settings used to create the host</param>
         /// <returns></returns>
-        IRabbitMqHostConfiguration CreateHostConfiguration(IRabbitMqHostControl host);
-
-        /// <summary>
-        /// Create a receive endpoint configuration for the default host
-        /// </summary>
-        /// <param name="queueName"></param>
-        /// <param name="endpointConfiguration"></param>
-        /// <returns></returns>
-        IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, IRabbitMqEndpointConfiguration endpointConfiguration);
+        IRabbitMqHostConfiguration CreateHostConfiguration(RabbitMqHostSettings hostSettings);
 
         /// <summary>
         /// Create a receive endpoint configuration for the default host
@@ -74,7 +63,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// <param name="settings"></param>
         /// <param name="endpointConfiguration"></param>
         /// <returns></returns>
-        IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(RabbitMqReceiveSettings settings,
-            IRabbitMqEndpointConfiguration endpointConfiguration);
+        IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(RabbitMqReceiveSettings settings,IRabbitMqEndpointConfiguration endpointConfiguration);
     }
 }

@@ -71,7 +71,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         async Task IEventDataReceiver.Handle(EventData message, Action<ReceiveContext> contextCallback)
         {
-            var context = new EventDataReceiveContext(_inputAddress, message, _receiveObservers, _receiveTopology);
+            var context = new EventDataReceiveContext(_inputAddress, message, _receiveTopology);
             contextCallback?.Invoke(context);
 
             try
@@ -79,7 +79,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 await _receiveObservers.PreReceive(context).ConfigureAwait(false);
                 await _receivePipe.Send(context).ConfigureAwait(false);
 
-                await context.CompleteTask.ConfigureAwait(false);
+                await context.ReceiveCompleted.ConfigureAwait(false);
 
                 await _receiveObservers.PostReceive(context).ConfigureAwait(false);
             }

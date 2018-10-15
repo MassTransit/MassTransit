@@ -101,6 +101,7 @@
     * [Topic Subscription](advanced/topology/servicebus/topicsub.md)
 * [Transactions](advanced/transactions.md)
 * [Interoperability](advanced/interoperability.md)
+  * [Encrypted Messages](advanced/interoperability/encrypted-messages.md)
 
 ## Troubleshooting
 

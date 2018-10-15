@@ -2,8 +2,6 @@
   <PropertyGroup>
     <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>portable</DebugType>
-    <LangVersion>7.1</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -18,7 +16,7 @@
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.2" />
+    <PackageReference Include="GreenPipes" Version="2.1.3" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.7.2" />
   </ItemGroup>
 </Project>

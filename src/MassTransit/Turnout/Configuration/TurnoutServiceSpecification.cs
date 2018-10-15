@@ -106,6 +106,11 @@ namespace MassTransit.Turnout.Configuration
             _configurator.AddMessageDeserializer(contentType, deserializerFactory);
         }
 
+        void IReceiveEndpointConfigurator.ClearMessageDeserializers()
+        {
+            _configurator.ClearMessageDeserializers();
+        }
+
         Uri IReceiveEndpointConfigurator.InputAddress => _configurator.InputAddress;
 
         public int PartitionCount { get; set; }
