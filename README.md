@@ -28,9 +28,9 @@ class MyMessage
 	public string Value { get; set; }
 }
 
+// Code Snippet for Console Application
 async Task Main()
 {
-	// Code Snippet for Console Application 
 	var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
 	{
 		var host = sbc.Host(new Uri("rabbitmq://localhost:/"), h =>
