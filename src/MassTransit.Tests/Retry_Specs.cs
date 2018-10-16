@@ -290,7 +290,8 @@ namespace MassTransit.Tests
 
             _attempts.ShouldBe(4);
 
-            _lastAttempt.ShouldBe(2);
+            _lastCount.ShouldBe(2);
+            _lastAttempt.ShouldBe(3);
         }
 
         [Test, Explicit]
@@ -303,6 +304,7 @@ namespace MassTransit.Tests
 
         int _attempts;
         int _lastAttempt;
+        int _lastCount;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -319,6 +321,7 @@ namespace MassTransit.Tests
                 Interlocked.Increment(ref _attempts);
 
                 _lastAttempt = context.GetRetryAttempt();
+                _lastCount = context.GetRetryCount();
 
                 throw new IntentionalTestException();
             });
@@ -346,10 +349,12 @@ namespace MassTransit.Tests
             _attempts.ShouldBe(1);
 
             _lastAttempt.ShouldBe(0);
+            _lastCount.ShouldBe(0);
         }
 
         int _attempts;
         int _lastAttempt;
+        int _lastCount;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -369,6 +374,7 @@ namespace MassTransit.Tests
                 Interlocked.Increment(ref _attempts);
 
                 _lastAttempt = context.GetRetryAttempt();
+                _lastCount = context.GetRetryCount();
 
                 throw new IntentionalTestException();
             });

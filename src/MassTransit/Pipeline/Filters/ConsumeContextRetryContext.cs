@@ -30,7 +30,8 @@ namespace MassTransit.Pipeline.Filters
             _retryContext = retryContext;
             _context = context;
 
-            _context.RetryAttempt = retryContext.RetryCount;
+            _context.RetryAttempt = retryContext.RetryAttempt;
+            _context.RetryCount = retryContext.RetryCount;
         }
 
         public CancellationToken CancellationToken => _retryContext.CancellationToken;
@@ -83,7 +84,8 @@ namespace MassTransit.Pipeline.Filters
             _retryContext = retryContext;
             _context = context;
 
-            _context.RetryAttempt = retryContext.RetryCount;
+            _context.RetryAttempt = retryContext.RetryAttempt;
+            _context.RetryCount = retryContext.RetryCount;
         }
 
         public CancellationToken CancellationToken => _retryContext.CancellationToken;

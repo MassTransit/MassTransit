@@ -39,6 +39,8 @@ namespace MassTransit.Context
 
         public int RetryAttempt { get; set; }
 
+        public int RetryCount { get; set; }
+
         public override bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
         {
             if (base.TryGetMessage(out ConsumeContext<T> messageContext))

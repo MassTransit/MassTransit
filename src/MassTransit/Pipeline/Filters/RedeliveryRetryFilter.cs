@@ -77,7 +77,7 @@ namespace MassTransit.Pipeline.Filters
                     throw;
                 }
 
-                int previousDeliveryCount = context.Headers.Get(MessageHeaders.RedeliveryCount, default(int?)) ?? 0;
+                int previousDeliveryCount = context.GetRedeliveryCount();
                 for (int retryIndex = 0; retryIndex < previousDeliveryCount; retryIndex++)
                 {
                     if (!retryContext.CanRetry(exception, out retryContext))

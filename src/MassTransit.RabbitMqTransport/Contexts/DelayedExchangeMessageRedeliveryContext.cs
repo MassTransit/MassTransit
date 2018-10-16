@@ -44,10 +44,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         static void UpdateDeliveryContext(ConsumeContext context, SendContext sendContext)
         {
-            int? previousDeliveryCount = context.Headers.Get(MessageHeaders.RedeliveryCount, default(int?));
-            if (!previousDeliveryCount.HasValue)
-                previousDeliveryCount = 0;
-            sendContext.Headers.Set(MessageHeaders.RedeliveryCount, previousDeliveryCount.Value + 1);
+            sendContext.Headers.Set(MessageHeaders.RedeliveryCount, context.GetRedeliveryCount() + 1);
         }
     }
 }

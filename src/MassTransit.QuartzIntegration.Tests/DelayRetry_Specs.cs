@@ -152,6 +152,7 @@ namespace MassTransit.QuartzIntegration.Tests
         }
     }
 
+
     [TestFixture]
     public class Using_a_scheduled_delay_retry_mechanism_for_consumer_without_message :
         QuartzInMemoryTestFixture
@@ -164,6 +165,8 @@ namespace MassTransit.QuartzIntegration.Tests
             ConsumeContext<PingMessage> context = await _consumer.Received;
 
             Assert.GreaterOrEqual(_consumer.ReceivedTimeSpan, TimeSpan.FromSeconds(1));
+
+            Assert.That(_consumer.RedeliveryCount, Is.EqualTo(2));
         }
 
         MyConsumer _consumer;
@@ -191,6 +194,7 @@ namespace MassTransit.QuartzIntegration.Tests
             int _count;
             TimeSpan _receivedTimeSpan;
             Stopwatch _timer;
+            int _redeliveryCount;
 
             public MyConsumer(TaskCompletionSource<ConsumeContext<PingMessage>> taskCompletionSource)
             {
@@ -200,6 +204,8 @@ namespace MassTransit.QuartzIntegration.Tests
             public Task<ConsumeContext<PingMessage>> Received => _received.Task;
 
             public IComparable ReceivedTimeSpan => _receivedTimeSpan;
+
+            public int RedeliveryCount => _redeliveryCount;
 
             public Task Consume(ConsumeContext<PingMessage> context)
             {
@@ -218,6 +224,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
                 // okay, ready.
                 _receivedTimeSpan = _timer.Elapsed;
+                _redeliveryCount = context.GetRedeliveryCount();
                 _received.TrySetResult(context);
 
                 return TaskUtil.Completed;
@@ -272,8 +279,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
                 _timer.Stop();
 
-                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow,
-                    context.Headers.Get(MessageHeaders.RedeliveryCount, default(int?)));
+                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow, context.GetRedeliveryCount());
 
                 // okay, ready.
                 _receivedTimeSpan = _timer.Elapsed;
@@ -282,9 +288,10 @@ namespace MassTransit.QuartzIntegration.Tests
         }
     }
 
+
     [TestFixture]
     public class Using_an_explicit_retry_later_via_scheduling_with_custom_callback :
-       QuartzInMemoryTestFixture
+        QuartzInMemoryTestFixture
     {
         [Test]
         public async Task callback_executed_before_defer_the_message_delivery()
@@ -326,16 +333,16 @@ namespace MassTransit.QuartzIntegration.Tests
                 {
                     Console.WriteLine("{0} now is not a good time", DateTime.UtcNow);
                     await context.Redeliver(TimeSpan.FromMilliseconds(1000), (consumeContext, sendContext) =>
-                                                                             {
-                                                                                 sendContext.Headers.Set(customHeader, 2);
-                                                                             });
+                    {
+                        sendContext.Headers.Set(customHeader, 2);
+                    });
+
                     return;
                 }
 
                 _timer.Stop();
 
-                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow,
-                    context.Headers.Get(MessageHeaders.RedeliveryCount, default(int?)));
+                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow, context.GetRedeliveryCount());
 
                 // okay, ready.
                 _receivedTimeSpan = _timer.Elapsed;

@@ -52,11 +52,7 @@ namespace MassTransit.Context
             if (inputAddress != null)
                 yield return new KeyValuePair<string, object>(MessageHeaders.DeliveredAddress, inputAddress.ToString());
 
-            int? previousDeliveryCount = context.Headers.Get(MessageHeaders.RedeliveryCount, default(int?));
-            if (!previousDeliveryCount.HasValue)
-                previousDeliveryCount = 0;
-
-            yield return new KeyValuePair<string, object>(MessageHeaders.RedeliveryCount, previousDeliveryCount.Value + 1);
+            yield return new KeyValuePair<string, object>(MessageHeaders.RedeliveryCount, context.GetRedeliveryCount() + 1);
         }
     }
 }
