@@ -37,6 +37,7 @@ namespace MassTransit.Transports.Tests
         }
 
         protected BusTestHarness Harness { get; private set; }
+        protected bool Subscribe { get; set; }
 
         [OneTimeSetUp]
         public void CreateHarness()
@@ -44,18 +45,42 @@ namespace MassTransit.Transports.Tests
             if (_harnessType == typeof(InMemoryTestHarness))
                 Harness = new InMemoryTestHarness();
             else if (_harnessType == typeof(RabbitMqTestHarness))
-                Harness = new RabbitMqTestHarness();
+            {
+                var harness = new RabbitMqTestHarness();
+
+                Harness = harness;
+
+                if (Subscribe == false)
+                    harness.OnConfigureRabbitMqReceiveEndoint += x => x.BindMessageExchanges = false;
+            }
             else if (_harnessType == typeof(ActiveMqTestHarness))
-                Harness = new ActiveMqTestHarness();
+            {
+                var harness = new ActiveMqTestHarness();
+
+                Harness = harness;
+
+                if (Subscribe == false)
+                    harness.OnConfigureActiveMqReceiveEndoint += x => x.BindMessageTopics = false;
+            }
             else if (_harnessType == typeof(AzureServiceBusTestHarness))
             {
-                var serviceUri = new Uri("sb://masstransit-build.servicebus.windows.net");
+                var serviceUri = Credentials.AzureServiceUri;
 
-                Harness = new AzureServiceBusTestHarness(serviceUri, "MassTransitBuild", "u07PCkrzic95bk6UtpDXl8YdHmV40WtJihoGz2CnMMQ=");
+                var harness = new AzureServiceBusTestHarness(serviceUri, Credentials.AzureKeyName, Credentials.AzureKeyValue);
+
+                Harness = harness;
+
+                if (Subscribe == false)
+                    harness.OnConfigureServiceBusReceiveEndpoint += x => x.SubscribeMessageTopics = false;
             }
             else if (_harnessType == typeof(AmazonSqsTestHarness))
             {
-                Harness = new AmazonSqsTestHarness("us-east-2", "AKIAJGLM67TI5XDCBVJA", "MxbNRh1ufprfT0axXmoEF52QTDAlJ0lRVyPdlyOZ");
+                var harness = new AmazonSqsTestHarness(Credentials.AmazonRegion, Credentials.AmazonAccessKey, Credentials.AmazonSecretKey);
+
+                Harness = harness;
+
+                if (Subscribe == false)
+                    harness.OnConfigureAmazonSqsReceiveEndpoint += x => x.SubscribeMessageTopics = false;
             }
             else
             {

@@ -32,7 +32,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// If true, creates message consumers for the message types in consumers, handlers, etc.
         /// With AmazonSQS, these are virtual consumers tied to the virtual topics
         /// </summary>
-        bool BindMessageTopics { set; }
+        bool SubscribeMessageTopics { set; }
 
         /// <summary>
         /// Bind an existing exchange for the message type to the receive endpoint by name

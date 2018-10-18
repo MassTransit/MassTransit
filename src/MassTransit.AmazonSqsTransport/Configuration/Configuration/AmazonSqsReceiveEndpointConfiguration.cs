@@ -30,7 +30,7 @@
         public AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, string queueName, IAmazonSqsEndpointConfiguration endpointConfiguration)
             : this(hostConfiguration, endpointConfiguration)
         {
-            BindMessageTopics = true;
+            SubscribeMessageTopics = true;
 
             _settings = new QueueReceiveSettings(queueName, true, false);
         }
@@ -62,7 +62,7 @@
 
         public IAmazonSqsHostControl Host => _hostConfiguration.Host;
 
-        public bool BindMessageTopics { get; set; }
+        public bool SubscribeMessageTopics { get; set; }
 
         public ReceiveSettings Settings => _settings;
 

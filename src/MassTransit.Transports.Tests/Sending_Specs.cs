@@ -52,6 +52,7 @@ namespace MassTransit.Transports.Tests
             public Sending_a_message_to_an_endpoint(Type harnessType)
                 : base(harnessType)
             {
+                Subscribe = false;
             }
 
             [OneTimeSetUp]

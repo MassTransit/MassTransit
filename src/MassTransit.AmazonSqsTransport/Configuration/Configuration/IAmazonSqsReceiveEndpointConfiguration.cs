@@ -26,7 +26,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 
         IAmazonSqsHostControl Host { get; }
 
-        bool BindMessageTopics { get; set; }
+        bool SubscribeMessageTopics { get; set; }
 
         ReceiveSettings Settings { get; }
     }

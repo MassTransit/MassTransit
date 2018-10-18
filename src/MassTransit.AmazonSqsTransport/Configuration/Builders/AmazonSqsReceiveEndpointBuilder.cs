@@ -19,7 +19,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Builders
     using Pipeline;
     using Topology;
     using Topology.Builders;
-    using Topology.Entities;
     using Transport;
     using Transports;
 
@@ -38,7 +37,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Builders
 
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            if (_configuration.BindMessageTopics)
+            if (_configuration.SubscribeMessageTopics)
             {
                 _configuration.Topology.Consume
                     .GetMessageTopology<T>()
