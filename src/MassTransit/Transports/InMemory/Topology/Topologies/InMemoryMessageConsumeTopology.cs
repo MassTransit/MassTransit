@@ -19,7 +19,6 @@ namespace MassTransit.Transports.InMemory.Topology.Topologies
     using InMemory.Builders;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
-    using Newtonsoft.Json.Linq;
     using Specifications;
     using Util;
 
@@ -38,8 +37,6 @@ namespace MassTransit.Transports.InMemory.Topology.Topologies
             _messageTopology = messageTopology;
             _specifications = new List<IInMemoryConsumeTopologySpecification>();
         }
-
-        bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
 
         public void Apply(IInMemoryConsumeTopologyBuilder builder)
         {

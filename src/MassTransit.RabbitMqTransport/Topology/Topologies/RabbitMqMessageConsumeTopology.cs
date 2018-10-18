@@ -19,7 +19,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
-    using Newtonsoft.Json.Linq;
     using Specifications;
     using Util;
 
@@ -45,8 +44,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         }
 
         IMessageExchangeTypeSelector<TMessage> ExchangeTypeSelector { get; }
-
-        bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {

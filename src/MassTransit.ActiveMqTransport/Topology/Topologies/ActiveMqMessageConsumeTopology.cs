@@ -19,7 +19,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
-    using Newtonsoft.Json.Linq;
     using Specifications;
     using Util;
 
@@ -33,7 +32,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         readonly IMessageTopology<TMessage> _messageTopology;
         readonly IActiveMqMessagePublishTopology<TMessage> _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
-        string _consumerName;
+        readonly string _consumerName;
 
         public ActiveMqMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IActiveMqMessagePublishTopology<TMessage> publishTopology)
         {
@@ -44,8 +43,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
 
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
         }
-
-        bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {

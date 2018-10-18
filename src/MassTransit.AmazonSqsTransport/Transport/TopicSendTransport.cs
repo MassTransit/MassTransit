@@ -38,14 +38,14 @@
             {
                 p.UseFilter(_filter);
 
-                p.UseExecuteAsync(async modelContext =>
+                p.UseExecuteAsync(async clientContext =>
                 {
                     var sendContext = new TransportAmazonSqsSendContext<T>(message, cancellationToken);
                     try
                     {
                         await pipe.Send(sendContext).ConfigureAwait(false);
 
-                        var transportMessage = modelContext.CreatePublishRequest(_entityName, sendContext.Body);
+                        var transportMessage = clientContext.CreatePublishRequest(_entityName, sendContext.Body);
 
                         transportMessage.MessageAttributes.Set(sendContext.Headers);
 
@@ -56,9 +56,7 @@
 
                         await _observers.PreSend(sendContext).ConfigureAwait(false);
 
-                        var publishTask = Task.Run(() => modelContext.Publish(transportMessage, sendContext.CancellationToken), sendContext.CancellationToken);
-
-                        await publishTask.UntilCompletedOrCanceled(sendContext.CancellationToken).ConfigureAwait(false);
+                        await clientContext.Publish(transportMessage, sendContext.CancellationToken).ConfigureAwait(false);
 
                         sendContext.LogSent();
 

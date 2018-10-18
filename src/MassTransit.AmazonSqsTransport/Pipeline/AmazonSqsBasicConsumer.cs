@@ -66,6 +66,13 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             SetReady();
         }
 
+        public static DateTime? FromUnixTime(string unixTime)
+        {
+            return long.TryParse(unixTime, out long seconds) ? Epoch.AddSeconds(seconds) : default(DateTime?);
+        }
+
+        static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
         public async Task HandleMessage(Message message)
         {
             if (IsStopping)

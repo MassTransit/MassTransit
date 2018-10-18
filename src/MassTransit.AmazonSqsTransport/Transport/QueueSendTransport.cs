@@ -50,14 +50,14 @@ namespace MassTransit.AmazonSqsTransport.Transport
             {
                 p.UseFilter(_filter);
 
-                p.UseExecuteAsync(async modelContext =>
+                p.UseExecuteAsync(async clientContext =>
                 {
                     var sendContext = new TransportAmazonSqsSendContext<T>(message, cancellationToken);
                     try
                     {
                         await pipe.Send(sendContext).ConfigureAwait(false);
 
-                        var transportMessage = modelContext.CreateSendRequest(_entityName, sendContext.Body);
+                        var transportMessage = clientContext.CreateSendRequest(_entityName, sendContext.Body);
 
                         transportMessage.MessageAttributes.Set(sendContext.Headers);
 
@@ -68,9 +68,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
                         await _observers.PreSend(sendContext).ConfigureAwait(false);
 
-                        var publishTask = Task.Run(() => modelContext.SendMessage(transportMessage, sendContext.CancellationToken), sendContext.CancellationToken);
-
-                        await publishTask.UntilCompletedOrCanceled(sendContext.CancellationToken).ConfigureAwait(false);
+                        await clientContext.SendMessage(transportMessage, sendContext.CancellationToken).ConfigureAwait(false);
 
                         sendContext.LogSent();
 

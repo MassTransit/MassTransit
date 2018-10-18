@@ -22,7 +22,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
-    using Newtonsoft.Json.Linq;
     using Util;
 
 
@@ -44,15 +43,13 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             _specifications = new List<IAmazonSqsConsumeTopologySpecification>();
         }
 
-        bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
-
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
                 specification.Apply(builder);
         }
 
-        public void Bind(Action<ITopicSubscriptionConfigurator> configure = null)
+        public void Subscribe(Action<ITopicSubscriptionConfigurator> configure = null)
         {
             if (!IsBindableMessageType)
             {

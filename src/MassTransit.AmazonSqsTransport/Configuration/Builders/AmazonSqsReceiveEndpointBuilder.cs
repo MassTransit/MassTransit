@@ -41,7 +41,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Builders
             {
                 _configuration.Topology.Consume
                     .GetMessageTopology<T>()
-                    .Bind();
+                    .Subscribe();
             }
 
             return base.ConnectConsumePipe(pipe);

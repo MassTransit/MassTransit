@@ -22,7 +22,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
-    using Newtonsoft.Json.Linq;
     using Util;
 
 
@@ -43,8 +42,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 
             _specifications = new List<IServiceBusConsumeTopologySpecification>();
         }
-
-        static bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {

@@ -166,7 +166,7 @@
         public void Subscribe<T>(Action<ITopicSubscriptionConfigurator> configure = null)
             where T : class
         {
-            _endpointConfiguration.Topology.Consume.GetMessageTopology<T>().Bind(configure);
+            _endpointConfiguration.Topology.Consume.GetMessageTopology<T>().Subscribe(configure);
         }
 
         public void ConfigureClient(Action<IPipeConfigurator<ClientContext>> configure)

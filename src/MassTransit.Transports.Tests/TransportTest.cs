@@ -34,10 +34,16 @@ namespace MassTransit.Transports.Tests
         public TransportTest(Type harnessType)
         {
             _harnessType = harnessType;
+
+            Subscribe = true;
         }
 
         protected BusTestHarness Harness { get; private set; }
-        protected bool Subscribe { get; set; }
+
+        /// <summary>
+        /// Set to False if the receive endpoint should not subscribe to message topics/exchanges
+        /// </summary>
+        protected bool Subscribe { private get; set; }
 
         [OneTimeSetUp]
         public void CreateHarness()
@@ -50,8 +56,7 @@ namespace MassTransit.Transports.Tests
 
                 Harness = harness;
 
-                if (Subscribe == false)
-                    harness.OnConfigureRabbitMqReceiveEndoint += x => x.BindMessageExchanges = false;
+                harness.OnConfigureRabbitMqReceiveEndoint += x => x.BindMessageExchanges = Subscribe;
             }
             else if (_harnessType == typeof(ActiveMqTestHarness))
             {
@@ -59,8 +64,7 @@ namespace MassTransit.Transports.Tests
 
                 Harness = harness;
 
-                if (Subscribe == false)
-                    harness.OnConfigureActiveMqReceiveEndoint += x => x.BindMessageTopics = false;
+                harness.OnConfigureActiveMqReceiveEndoint += x => x.BindMessageTopics = Subscribe;
             }
             else if (_harnessType == typeof(AzureServiceBusTestHarness))
             {
@@ -70,8 +74,7 @@ namespace MassTransit.Transports.Tests
 
                 Harness = harness;
 
-                if (Subscribe == false)
-                    harness.OnConfigureServiceBusReceiveEndpoint += x => x.SubscribeMessageTopics = false;
+                harness.OnConfigureServiceBusReceiveEndpoint += x => x.SubscribeMessageTopics = Subscribe;
             }
             else if (_harnessType == typeof(AmazonSqsTestHarness))
             {
@@ -79,8 +82,7 @@ namespace MassTransit.Transports.Tests
 
                 Harness = harness;
 
-                if (Subscribe == false)
-                    harness.OnConfigureAmazonSqsReceiveEndpoint += x => x.SubscribeMessageTopics = false;
+                harness.OnConfigureAmazonSqsReceiveEndpoint += x => x.SubscribeMessageTopics = Subscribe;
             }
             else
             {

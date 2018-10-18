@@ -16,6 +16,7 @@ namespace MassTransit.Topology.Topologies
     using System.Collections.Generic;
     using System.Linq;
     using GreenPipes;
+    using Newtonsoft.Json.Linq;
 
 
     public class MessageConsumeTopology<TMessage> :
@@ -101,5 +102,7 @@ namespace MassTransit.Topology.Topologies
         {
             return Enumerable.Empty<ValidationResult>();
         }
+
+        protected bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
     }
 }
