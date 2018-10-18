@@ -36,14 +36,12 @@ namespace MassTransit.HttpTransport.Transport
 
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<HttpConsumer>();
-        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly HttpReceiveEndpointContext _context;
         readonly IDeliveryTracker _tracker;
 
-        public HttpConsumer(IReceiveObserver receiveObserver, HttpHostSettings settings, IPipe<ReceiveContext> receivePipe, HttpReceiveEndpointContext context)
+        public HttpConsumer(HttpHostSettings settings, IPipe<ReceiveContext> receivePipe, HttpReceiveEndpointContext context)
         {
-            _receiveObserver = receiveObserver;
             _receivePipe = receivePipe;
             _context = context;
 
@@ -79,7 +77,7 @@ namespace MassTransit.HttpTransport.Transport
 
                 try
                 {
-                    await _receiveObserver.PreReceive(context).ConfigureAwait(false);
+                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
                     await _receivePipe.Send(context).ConfigureAwait(false);
 
@@ -91,11 +89,11 @@ namespace MassTransit.HttpTransport.Transport
                         httpContext.Response.StatusCode = (int)HttpStatusCode.Accepted;
                     }
 
-                    await _receiveObserver.PostReceive(context).ConfigureAwait(false);
+                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
                     //TODO: ensure the Fault is written to the response pipe
                     httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

@@ -15,15 +15,13 @@ namespace MassTransit.AmazonSqsTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService.Model;
-    using Amazon.SQS;
     using Amazon.SQS.Model;
     using GreenPipes;
     using Pipeline;
     using Topology;
-    using Topology.Settings;
 
 
-    public interface ModelContext :
+    public interface ClientContext :
         PipeContext
     {
         /// <summary>
@@ -33,22 +31,26 @@ namespace MassTransit.AmazonSqsTransport
 
         IAmazonSqsPublishTopology PublishTopology { get; }
 
-        Task<string> GetTopic(string topicName);
+        Task<string> CreateTopic(string topicName);
 
-        Task<string> GetQueue(string queueName);
+        Task<string> CreateQueue(string queueName);
 
-        Task GetTopicSubscription(string topicName, string queueName);
+        Task CreateQueueSubscription(string topicName, string queueName);
 
         Task DeleteTopic(string topicName);
 
         Task DeleteQueue(string queueName);
 
-        Task BasicConsume(string queueUrl, ReceiveSettings receiveSettings, IBasicConsumer consumer);
+        Task BasicConsume(ReceiveSettings receiveSettings, IBasicConsumer consumer);
 
-        PublishRequest CreateTransportMessage(string topicArn, byte[] body);
+        PublishRequest CreatePublishRequest(string topicName, byte[] body);
 
-        Task Publish(PublishRequest request, CancellationToken cancellationToken = default(CancellationToken));
+        Task Publish(PublishRequest request, CancellationToken cancellationToken = default);
 
-        Task DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken = default(CancellationToken));
+        SendMessageRequest CreateSendRequest(string queueName, byte[] body);
+
+        Task SendMessage(SendMessageRequest request, CancellationToken cancellationToken);
+
+        Task DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken = default);
     }
 }

@@ -46,10 +46,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Specifications
         {
             var topicHandle = builder.CreateTopic(EntityName, Durable, AutoDelete);
 
-            var builderQueue = builder.Queue.Queue;
-            var queueHandle = builder.CreateQueue(builderQueue.EntityName, builderQueue.Durable, builderQueue.AutoDelete);
-
-            var topicSubscriptionHandle = builder.CreateTopicSubscription(topicHandle, queueHandle);
+            var topicSubscriptionHandle = builder.CreateQueueSubscription(topicHandle, builder.Queue);
         }
     }
 }

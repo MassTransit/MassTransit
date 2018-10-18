@@ -46,19 +46,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public bool TryGetHeader(string key, out object value)
         {
-            if (!_context.Properties.IsHeadersPresent())
-            {
-                value = null;
-                return false;
-            }
-
-            if (_context.Properties.Headers.TryGetValue(key, out value))
+            if (_context.Properties.IsHeadersPresent() && _context.Properties.Headers.TryGetValue(key, out value))
             {
                 if (value is byte[])
                 {
                     value = Encoding.UTF8.GetString((byte[])value);
                     return !string.IsNullOrWhiteSpace((string)value);
                 }
+
                 return true;
             }
 
@@ -98,6 +93,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 return true;
             }
 
+            value = default;
             return false;
         }
     }

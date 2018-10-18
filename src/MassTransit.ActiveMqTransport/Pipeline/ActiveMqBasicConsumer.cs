@@ -42,8 +42,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         readonly SessionContext _session;
         readonly IMessageConsumer _messageConsumer;
         readonly ConcurrentDictionary<string, ActiveMqReceiveContext> _pending;
-        readonly IReceiveObserver _receiveObserver;
-        readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         readonly ActiveMqReceiveEndpointContext _context;
         readonly IDeliveryTracker _tracker;
@@ -54,20 +52,15 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         /// <param name="session">The model context for the consumer</param>
         /// <param name="messageConsumer"></param>
         /// <param name="inputAddress">The input address for messages received by the consumer</param>
-        /// <param name="receivePipe">The receive pipe to dispatch messages</param>
-        /// <param name="receiveObserver">The observer for receive events</param>
         /// <param name="context">The topology</param>
         /// <param name="deadLetterTransport"></param>
         /// <param name="errorTransport"></param>
-        public ActiveMqBasicConsumer(SessionContext session, IMessageConsumer messageConsumer, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
-            IReceiveObserver receiveObserver, ActiveMqReceiveEndpointContext context,
+        public ActiveMqBasicConsumer(SessionContext session, IMessageConsumer messageConsumer, Uri inputAddress, ActiveMqReceiveEndpointContext context,
             IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
         {
             _session = session;
             _messageConsumer = messageConsumer;
             _inputAddress = inputAddress;
-            _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
             _context = context;
             _deadLetterTransport = deadLetterTransport;
             _errorTransport = errorTransport;
@@ -110,22 +103,22 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                         if (_log.IsErrorEnabled)
                             _log.ErrorFormat("Duplicate BasicDeliver: {0}", message.NMSMessageId);
 
-                    await _receiveObserver.PreReceive(context).ConfigureAwait(false);
+                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
-                    await _receivePipe.Send(context).ConfigureAwait(false);
+                    await _context.ReceivePipe.Send(context).ConfigureAwait(false);
 
                     await context.ReceiveCompleted.ConfigureAwait(false);
 
                     message.Acknowledge();
 
-                    await _receiveObserver.PostReceive(context).ConfigureAwait(false);
+                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
                     try
                     {
-//                        _session.BasicNack(deliveryTag, false, true);
+                        //                        _session.BasicNack(deliveryTag, false, true);
                     }
                     catch (Exception ackEx)
                     {

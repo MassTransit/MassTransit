@@ -139,7 +139,7 @@
             NamespacePipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology,
                 _settings.RemoveSubscriptions));
 
-            return CreateReceiveEndpoint(builder, receiveEndpointContext);
+            return CreateReceiveEndpoint(receiveEndpointContext);
         }
 
         protected override IErrorTransport CreateErrorTransport(ServiceBusHost host)

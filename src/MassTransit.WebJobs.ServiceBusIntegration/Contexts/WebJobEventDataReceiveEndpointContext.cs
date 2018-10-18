@@ -12,15 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WebJobs.ServiceBusIntegration.Contexts
 {
-    using System;
     using System.Threading;
     using Context;
     using Logging;
     using MassTransit.Configuration;
     using Microsoft.Azure.WebJobs;
-    using Pipeline.Observables;
-    using Topology;
-    using Transports;
 
 
     public class WebJobEventDataReceiveEndpointContext :
@@ -29,39 +25,25 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Contexts
         readonly IBinder _binder;
         readonly CancellationToken _cancellationToken;
         readonly ILog _log;
-        readonly IPublishTopology _publishTopology;
-        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
 
         public WebJobEventDataReceiveEndpointContext(IReceiveEndpointConfiguration configuration, ILog log, IBinder binder,
-            CancellationToken cancellationToken, ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers,
-            ReceiveEndpointObservable endpointObservers)
-            : base(configuration, receiveObservers, transportObservers, endpointObservers)
+            CancellationToken cancellationToken)
+            : base(configuration)
         {
             _binder = binder;
             _cancellationToken = cancellationToken;
             _log = log;
 
-            _publishTopology = configuration.Topology.Publish;
-
-            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
         }
 
-        protected override ISendEndpointProvider CreateSendEndpointProvider()
-        {
-            return new SendEndpointProvider(_sendTransportProvider.Value, SendObservers, Serializer, InputAddress, SendPipe);
-        }
-
-        ISendTransportProvider CreateSendTransportProvider()
+        protected override ISendTransportProvider CreateSendTransportProvider()
         {
             return new EventHubAttributeSendTransportProvider(_binder, _log, _cancellationToken);
         }
 
-        protected override IPublishEndpointProvider CreatePublishEndpointProvider()
+        protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            var publishTransportProvider = new EventHubAttributePublishTransportProvider(_sendTransportProvider.Value);
-
-            return new PublishEndpointProvider(publishTransportProvider, HostAddress, PublishObservers, SendObservers, Serializer, InputAddress, PublishPipe,
-                _publishTopology);
+            return new EventHubAttributePublishTransportProvider(SendTransportProvider);
         }
     }
 }

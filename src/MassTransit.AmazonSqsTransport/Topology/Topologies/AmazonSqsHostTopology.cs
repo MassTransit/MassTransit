@@ -58,7 +58,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public Uri GetDestinationAddress(string topicName, Action<ITopicConfigurator> configure = null)
         {
-            var sendSettings = new AmazonSqsSendSettings(topicName, true, false);
+            var sendSettings = new TopicPublishSettings(topicName, true, false);
 
             configure?.Invoke(sendSettings);
 
@@ -74,7 +74,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
             var name = _messageNameFormatter.GetMessageName(messageType).ToString();
 
-            var settings = new AmazonSqsSendSettings(name, durable, autoDelete);
+            var settings = new TopicPublishSettings(name, durable, autoDelete);
 
             configure?.Invoke(settings);
 

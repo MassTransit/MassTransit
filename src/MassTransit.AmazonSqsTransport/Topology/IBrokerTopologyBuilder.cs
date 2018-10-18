@@ -36,11 +36,19 @@ namespace MassTransit.AmazonSqsTransport.Topology
         QueueHandle CreateQueue(string name, bool durable, bool autoDelete);
 
         /// <summary>
-        /// Binds an exchange to a queue, with the specified routing key and arguments
+        /// Create a subscription on a topic to a queue
         /// </summary>
         /// <param name="topic"></param>
         /// <param name="queue"></param>
         /// <returns></returns>
-        TopicSubscriptionHandle CreateTopicSubscription(TopicHandle topic, QueueHandle queue);
+        QueueSubscriptionHandle CreateQueueSubscription(TopicHandle topic, QueueHandle queue);
+
+        /// <summary>
+        /// Create a subscription on a topic to another topic
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
+        /// <returns></returns>
+        TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination);
     }
 }

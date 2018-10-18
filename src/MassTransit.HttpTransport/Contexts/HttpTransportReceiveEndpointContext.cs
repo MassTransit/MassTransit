@@ -12,18 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Contexts
 {
-    using System;
     using Configuration;
     using Context;
-    using GreenPipes;
-    using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Filters;
-    using MassTransit.Pipeline.Observables;
-    using MassTransit.Pipeline.Pipes;
     using Microsoft.AspNetCore.Http;
     using Topology;
     using Transport;
-    using Transports;
 
 
     public class HttpTransportReceiveEndpointContext :
@@ -31,18 +24,11 @@ namespace MassTransit.HttpTransport.Contexts
         HttpReceiveEndpointContext
     {
         readonly IHttpReceiveEndpointConfiguration _configuration;
-        readonly IConsumePipe _consumePipe;
-        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
 
-        public HttpTransportReceiveEndpointContext(IHttpReceiveEndpointConfiguration configuration, ReceiveObservable receiveObservers,
-            ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
-            : base(configuration, receiveObservers, transportObservers, endpointObservers)
+        public HttpTransportReceiveEndpointContext(IHttpReceiveEndpointConfiguration configuration)
+            : base(configuration)
         {
             _configuration = configuration;
-
-            _consumePipe = configuration.Consume.CreatePipe();
-
-            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
         }
 
         public ReceiveEndpointContext CreateResponseEndpointContext(HttpContext httpContext)
@@ -50,26 +36,14 @@ namespace MassTransit.HttpTransport.Contexts
             return new HttpResponseReceiveEndpointContext(this, httpContext, SendPipe, Serializer);
         }
 
-        protected override ISendEndpointProvider CreateSendEndpointProvider()
+        protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendEndpointProvider(_sendTransportProvider.Value, SendObservers, Serializer, InputAddress, SendPipe);
+            return new HttpSendTransportProvider(_configuration.BusConfiguration, _configuration.CreateReceivePipe(), this);
         }
 
-        protected override IPublishEndpointProvider CreatePublishEndpointProvider()
+        protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new HttpPublishEndpointProvider(_configuration.HostAddress, Serializer, _sendTransportProvider.Value, PublishPipe);
-        }
-
-        ISendTransportProvider CreateSendTransportProvider()
-        {
-            IPipe<ReceiveContext> pipe = Pipe.New<ReceiveContext>(x =>
-            {
-                x.UseFilter(new DeserializeFilter(_configuration.Serialization.Deserializer, _consumePipe));
-            });
-
-            var receivePipe = new ReceivePipe(pipe, _consumePipe);
-
-            return new HttpSendTransportProvider(_configuration.BusConfiguration, receivePipe, new ReceiveObservable(), this);
+            return new PublishTransportProvider(SendTransportProvider);
         }
     }
 }

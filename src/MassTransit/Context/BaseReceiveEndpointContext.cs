@@ -18,36 +18,41 @@ namespace MassTransit.Context
     using Pipeline;
     using Pipeline.Observables;
     using Topology;
+    using Transports;
 
 
     public abstract class BaseReceiveEndpointContext :
         BasePipeContext,
         ReceiveEndpointContext
     {
-        readonly IPublishTopologyConfigurator _publish;
+        readonly IPublishTopologyConfigurator _publishTopology;
         readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
         readonly Lazy<IPublishPipe> _publishPipe;
         readonly Lazy<IReceivePipe> _receivePipe;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<ISendPipe> _sendPipe;
         readonly Lazy<IMessageSerializer> _serializer;
+        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
+        readonly Lazy<IPublishTransportProvider> _publishTransportProvider;
         protected readonly PublishObservable PublishObservers;
         protected readonly SendObservable SendObservers;
+        readonly ReceiveObservable _receiveObservers;
+        readonly ReceiveTransportObservable _transportObservers;
+        readonly ReceiveEndpointObservable _endpointObservers;
 
-        protected BaseReceiveEndpointContext(IReceiveEndpointConfiguration configuration, ReceiveObservable receiveObservers,
-            ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
+        protected BaseReceiveEndpointContext(IReceiveEndpointConfiguration configuration)
         {
             InputAddress = configuration.InputAddress;
             HostAddress = configuration.HostAddress;
 
-            _publish = configuration.Topology.Publish;
+            _publishTopology = configuration.Topology.Publish;
 
             SendObservers = new SendObservable();
             PublishObservers = new PublishObservable();
-            EndpointObservers = endpointObservers;
 
-            ReceiveObservers = receiveObservers;
-            TransportObservers = transportObservers;
+            _endpointObservers = configuration.EndpointObservers;
+            _receiveObservers = configuration.ReceiveObservers;
+            _transportObservers = configuration.TransportObservers;
 
             _sendPipe = new Lazy<ISendPipe>(() => configuration.Send.CreatePipe());
             _publishPipe = new Lazy<IPublishPipe>(() => configuration.Publish.CreatePipe());
@@ -56,6 +61,8 @@ namespace MassTransit.Context
             _serializer = new Lazy<IMessageSerializer>(() => configuration.Serialization.Serializer);
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
+            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
+            _publishTransportProvider = new Lazy<IPublishTransportProvider>(CreatePublishTransportProvider);
         }
 
         protected IPublishPipe PublishPipe => _publishPipe.Value;
@@ -64,9 +71,11 @@ namespace MassTransit.Context
 
         protected Uri HostAddress { get; }
 
-        public ReceiveObservable ReceiveObservers { get; }
-        public ReceiveTransportObservable TransportObservers { get; }
-        public ReceiveEndpointObservable EndpointObservers { get; }
+        IReceiveObserver ReceiveEndpointContext.ReceiveObservers => _receiveObservers;
+
+        IReceiveTransportObserver ReceiveEndpointContext.TransportObservers => _transportObservers;
+
+        IReceiveEndpointObserver ReceiveEndpointContext.EndpointObservers => _endpointObservers;
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
@@ -78,16 +87,44 @@ namespace MassTransit.Context
             return PublishObservers.Connect(observer);
         }
 
+        ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
+        {
+            return _transportObservers.Connect(observer);
+        }
+
+        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return _receiveObservers.Connect(observer);
+        }
+
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _endpointObservers.Connect(observer);
+        }
+
         public Uri InputAddress { get; }
 
-        IPublishTopology ReceiveEndpointContext.Publish => _publish;
+        IPublishTopology ReceiveEndpointContext.Publish => _publishTopology;
 
         public IReceivePipe ReceivePipe => _receivePipe.Value;
 
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
 
-        protected abstract ISendEndpointProvider CreateSendEndpointProvider();
-        protected abstract IPublishEndpointProvider CreatePublishEndpointProvider();
+        protected virtual ISendEndpointProvider CreateSendEndpointProvider()
+        {
+            return new SendEndpointProvider(_sendTransportProvider.Value, SendObservers, Serializer, InputAddress, SendPipe);
+        }
+
+        protected virtual IPublishEndpointProvider CreatePublishEndpointProvider()
+        {
+            return new PublishEndpointProvider(_publishTransportProvider.Value, HostAddress, PublishObservers, Serializer, InputAddress, PublishPipe,
+                _publishTopology);
+        }
+
+        protected abstract ISendTransportProvider CreateSendTransportProvider();
+        protected abstract IPublishTransportProvider CreatePublishTransportProvider();
+
+        protected ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
     }
 }

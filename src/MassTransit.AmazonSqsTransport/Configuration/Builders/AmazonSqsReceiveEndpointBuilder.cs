@@ -16,9 +16,12 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Builders
     using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
+    using Pipeline;
     using Topology;
     using Topology.Builders;
     using Topology.Entities;
+    using Transport;
+    using Transports;
 
 
     public class AmazonSqsReceiveEndpointBuilder :
@@ -45,26 +48,46 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Builders
             return base.ConnectConsumePipe(pipe);
         }
 
-        public AmazonSqsReceiveEndpointContext CreateReceiveEndpointContext()
+        public SqsReceiveEndpointContext CreateReceiveEndpointContext()
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            return new AmazonSqsConsumerReceiveEndpointContext(_configuration, brokerTopology, ReceiveObservers, TransportObservers, EndpointObservers);
+            IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport();
+            IErrorTransport errorTransport = CreateErrorTransport();
+
+            var receiveEndpointContext = new SqsQueueReceiveEndpointContext(_configuration, brokerTopology);
+
+            receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
+            receiveEndpointContext.GetOrAddPayload(() => errorTransport);
+
+            return receiveEndpointContext;
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)
         {
-            var topologyBuilder = new ReceiveEndpointBrokerTopologyBuilder();
+            var builder = new ReceiveEndpointBrokerTopologyBuilder();
 
-            topologyBuilder.Queue = topologyBuilder.CreateQueue(settings.EntityName, settings.Durable, settings.AutoDelete);
+            builder.Queue = builder.CreateQueue(settings.EntityName, settings.Durable, settings.AutoDelete);
 
-            topologyBuilder.Topic = topologyBuilder.CreateTopic(settings.EntityName, settings.Durable, settings.AutoDelete);
+            _configuration.Topology.Consume.Apply(builder);
 
-            topologyBuilder.CreateTopicSubscription(topologyBuilder.Topic, topologyBuilder.Queue);
+            return builder.BuildTopologyLayout();
+        }
 
-            _configuration.Topology.Consume.Apply(topologyBuilder);
+        IErrorTransport CreateErrorTransport()
+        {
+            var errorSettings = _configuration.Topology.Send.GetErrorSettings(_configuration.Settings);
+            var filter = new ConfigureTopologyFilter<ErrorSettings>(errorSettings, errorSettings.GetBrokerTopology());
 
-            return topologyBuilder.BuildTopologyLayout();
+            return new SqsErrorTransport(errorSettings.EntityName, filter);
+        }
+
+        IDeadLetterTransport CreateDeadLetterTransport()
+        {
+            var deadLetterSettings = _configuration.Topology.Send.GetDeadLetterSettings(_configuration.Settings);
+            var filter = new ConfigureTopologyFilter<DeadLetterSettings>(deadLetterSettings, deadLetterSettings.GetBrokerTopology());
+
+            return new SqsDeadLetterTransport(deadLetterSettings.EntityName, filter);
         }
     }
 }

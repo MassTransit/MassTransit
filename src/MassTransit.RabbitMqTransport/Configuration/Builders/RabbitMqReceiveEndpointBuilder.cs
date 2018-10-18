@@ -55,8 +55,7 @@ namespace MassTransit.RabbitMqTransport.Builders
             IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport();
             IErrorTransport errorTransport = CreateErrorTransport();
 
-            var receiveEndpointContext = new RabbitMqQueueReceiveEndpointContext(_configuration, brokerTopology, ReceiveObservers, TransportObservers,
-                EndpointObservers);
+            var receiveEndpointContext = new RabbitMqQueueReceiveEndpointContext(_configuration, brokerTopology);
 
             receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
             receiveEndpointContext.GetOrAddPayload(() => errorTransport);

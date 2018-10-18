@@ -194,12 +194,9 @@ namespace MassTransit.Transports.InMemory
         class Handle :
             BaseHostHandle
         {
-            readonly InMemoryHost _host;
-
             public Handle(InMemoryHost host, HostReceiveEndpointHandle[] handles)
                 : base(host, handles)
             {
-                _host = host;
             }
 
             public override async Task Stop(CancellationToken cancellationToken)

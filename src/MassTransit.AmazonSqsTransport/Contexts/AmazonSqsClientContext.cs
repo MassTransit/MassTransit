@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Contexts
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
@@ -29,20 +30,25 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using Util;
 
 
-    public class AmazonSqsModelContext :
+    public class AmazonSqsClientContext :
         BasePipeContext,
-        ModelContext,
+        ClientContext,
         IAsyncDisposable
     {
-        static readonly ILog _log = Logger.Get<AmazonSqsModelContext>();
+        static readonly ILog _log = Logger.Get<AmazonSqsClientContext>();
 
         readonly ConnectionContext _connectionContext;
         readonly IAmazonSqsHost _host;
         readonly IAmazonSQS _amazonSqs;
         readonly IAmazonSimpleNotificationService _amazonSns;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
+        readonly object _lock = new object();
+        readonly IDictionary<string, string> _queueUrls;
+        readonly IDictionary<string, string> _topicArns;
 
-        public AmazonSqsModelContext(ConnectionContext connectionContext, IAmazonSQS amazonSqs, IAmazonSimpleNotificationService amazonSns, IAmazonSqsHost host, CancellationToken cancellationToken)
+        public AmazonSqsClientContext(ConnectionContext connectionContext, IAmazonSQS amazonSqs, IAmazonSimpleNotificationService amazonSns,
+            IAmazonSqsHost host,
+            CancellationToken cancellationToken)
             : base(new PayloadCacheScope(connectionContext), cancellationToken)
         {
             _connectionContext = connectionContext;
@@ -51,6 +57,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _host = host;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
+
+            _queueUrls = new Dictionary<string, string>();
+            _topicArns = new Dictionary<string, string>();
         }
 
         public Task DisposeAsync(CancellationToken cancellationToken)
@@ -64,52 +73,81 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return GreenPipes.Util.TaskUtil.Completed;
         }
 
-        IAmazonSqsPublishTopology ModelContext.PublishTopology => _host.Topology.PublishTopology;
+        IAmazonSqsPublishTopology ClientContext.PublishTopology => _host.Topology.PublishTopology;
 
-        ConnectionContext ModelContext.ConnectionContext => _connectionContext;
+        ConnectionContext ClientContext.ConnectionContext => _connectionContext;
 
-        public async Task<string> GetTopic(string topicName)
+        public async Task<string> CreateTopic(string topicName)
         {
+            lock (_lock)
+                if (_topicArns.TryGetValue(topicName, out var result))
+                    return result;
+
             var response = await _amazonSns.CreateTopicAsync(topicName).ConfigureAwait(false);
 
             await Task.Delay(500).ConfigureAwait(false);
 
-            return response.TopicArn;
+            var topicArn = response.TopicArn;
+
+            lock (_lock)
+                _topicArns[topicName] = topicArn;
+
+            return topicArn;
         }
 
-        public async Task<string> GetQueue(string queueName)
+        public async Task<string> CreateQueue(string queueName)
         {
+            lock (_lock)
+                if (_topicArns.TryGetValue(queueName, out var result))
+                    return result;
+
             var response = await _amazonSqs.CreateQueueAsync(queueName).ConfigureAwait(false);
 
             await Task.Delay(500).ConfigureAwait(false);
 
-            return response.QueueUrl;
+            var queueUrl = response.QueueUrl;
+
+            lock (_lock)
+                _queueUrls[queueName] = queueUrl;
+
+            return queueUrl;
         }
 
-        public async Task GetTopicSubscription(string topicName, string queueName)
+        public async Task CreateQueueSubscription(string topicName, string queueName)
         {
-            var topicArn = await GetTopic(topicName).ConfigureAwait(false);
-            var queueUrl = await GetQueue(queueName).ConfigureAwait(false);
+            var results = await Task.WhenAll(CreateTopic(topicName), CreateQueue(queueName)).ConfigureAwait(false);
 
-            await _amazonSns.SubscribeQueueAsync(topicArn, _amazonSqs, queueUrl).ConfigureAwait(false);
+            var topicArn = results[0];
+            var queueUrl = results[1];
 
-            await Task.Delay(200).ConfigureAwait(false);
+            var response = await _amazonSns.SubscribeQueueAsync(topicArn, _amazonSqs, queueUrl).ConfigureAwait(false);
+
+            await Task.Delay(500).ConfigureAwait(false);
+
+            await _amazonSns.SetSubscriptionAttributesAsync(response, "RawMessageDelivery", "true").ConfigureAwait(false);
         }
 
         public async Task DeleteTopic(string topicName)
         {
-            var topicArn = await GetTopic(topicName).ConfigureAwait(false);
+            var topicArn = await CreateTopic(topicName).ConfigureAwait(false);
             await _amazonSns.DeleteTopicAsync(topicArn).ConfigureAwait(false);
         }
 
         public async Task DeleteQueue(string queueName)
         {
-            var queueUrl = await GetQueue(queueName).ConfigureAwait(false);
+            var queueUrl = await CreateQueue(queueName).ConfigureAwait(false);
             await _amazonSqs.DeleteQueueAsync(queueUrl).ConfigureAwait(false);
         }
 
-        public Task BasicConsume(string queueUrl, ReceiveSettings receiveSettings, IBasicConsumer consumer)
+        public Task BasicConsume(ReceiveSettings receiveSettings, IBasicConsumer consumer)
         {
+            string queueUrl;
+            lock (_lock)
+            {
+                if (!_queueUrls.TryGetValue(receiveSettings.EntityName, out queueUrl))
+                    throw new ArgumentException($"The queue was unknown: {receiveSettings.EntityName}", nameof(receiveSettings));
+            }
+
             return Task.Factory.StartNew(async () =>
             {
                 while (!CancellationToken.IsCancellationRequested)
@@ -129,11 +167,26 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             }, CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
-        public PublishRequest CreateTransportMessage(string topicArn, byte[] body)
+        public PublishRequest CreatePublishRequest(string topicName, byte[] body)
         {
             var message = Encoding.UTF8.GetString(body);
 
-            return new PublishRequest(topicArn, message);
+            lock (_lock)
+                if (_topicArns.TryGetValue(topicName, out var topicArn))
+                    return new PublishRequest(topicArn, message);
+
+            throw new ArgumentException($"The topic was unknown: {topicName}", nameof(topicName));
+        }
+
+        public SendMessageRequest CreateSendRequest(string queueName, byte[] body)
+        {
+            var message = Encoding.UTF8.GetString(body);
+
+            lock (_lock)
+                if (_queueUrls.TryGetValue(queueName, out var queueUrl))
+                    return new SendMessageRequest(queueUrl, message);
+
+            throw new ArgumentException($"The queue was unknown: {queueName}", nameof(queueName));
         }
 
         public Task Publish(PublishRequest request, CancellationToken cancellationToken)
@@ -141,14 +194,19 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return _amazonSns.PublishAsync(request, cancellationToken);
         }
 
-        public Task Send(SendMessageRequest request, CancellationToken cancellationToken)
+        public Task SendMessage(SendMessageRequest request, CancellationToken cancellationToken)
         {
             return _amazonSqs.SendMessageAsync(request, cancellationToken);
         }
 
-        public Task DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken = default(CancellationToken))
+        Task ClientContext.DeleteMessage(string queueName, string receiptHandle, CancellationToken cancellationToken)
         {
-            return _amazonSqs.DeleteMessageAsync(queueUrl, receiptHandle, cancellationToken);
+            lock (_lock)
+                if (_queueUrls.TryGetValue(queueName, out var queueUrl))
+
+                    return _amazonSqs.DeleteMessageAsync(queueUrl, receiptHandle, cancellationToken);
+
+            throw new ArgumentException($"The queue was unknown: {queueName}", nameof(queueName));
         }
     }
 }

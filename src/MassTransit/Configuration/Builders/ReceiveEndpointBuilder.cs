@@ -15,48 +15,39 @@ namespace MassTransit.Builders
     using Configuration;
     using GreenPipes;
     using Pipeline;
-    using Pipeline.Observables;
 
 
     public abstract class ReceiveEndpointBuilder
     {
-        readonly IEndpointConfiguration _configuration;
-        readonly IConsumePipe _consumePipe;
-        public readonly ReceiveObservable ReceiveObservers;
-        public readonly ReceiveTransportObservable TransportObservers;
-        public readonly ReceiveEndpointObservable EndpointObservers;
+        readonly IReceiveEndpointConfiguration _configuration;
 
         protected ReceiveEndpointBuilder(IReceiveEndpointConfiguration configuration)
         {
             _configuration = configuration;
-
-            _consumePipe = configuration.ConsumePipe;
-
-            ReceiveObservers = new ReceiveObservable();
-            TransportObservers = new ReceiveTransportObservable();
-            EndpointObservers = new ReceiveEndpointObservable();
         }
 
-        public IConsumePipe ConsumePipe => _consumePipe;
-        public IMessageDeserializer MessageDeserializer => _configuration.Serialization.Deserializer;
+        public IConsumePipe ConsumePipe => Configuration.ConsumePipe;
+        public IMessageDeserializer MessageDeserializer => Configuration.Serialization.Deserializer;
+
+        protected IReceiveEndpointConfiguration Configuration => _configuration;
 
         public virtual ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
             where T : class
         {
             IPipe<ConsumeContext<T>> messagePipe = _configuration.Consume.Specification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
 
-            return _consumePipe.ConnectConsumePipe(messagePipe);
+            return _configuration.ConsumePipe.ConnectConsumePipe(messagePipe);
         }
 
         public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
             where T : class
         {
-            return _consumePipe.ConnectConsumeMessageObserver(observer);
+            return _configuration.ConsumePipe.ConnectConsumeMessageObserver(observer);
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
-            return EndpointObservers.Connect(observer);
+            return _configuration.EndpointObservers.Connect(observer);
         }
     }
 }

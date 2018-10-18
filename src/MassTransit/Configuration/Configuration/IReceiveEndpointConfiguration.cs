@@ -14,6 +14,7 @@ namespace MassTransit.Configuration
 {
     using System;
     using Pipeline;
+    using Pipeline.Observables;
 
 
     public interface IReceiveEndpointConfiguration :
@@ -24,6 +25,10 @@ namespace MassTransit.Configuration
         Uri HostAddress { get; }
 
         Uri InputAddress { get; }
+
+        ReceiveEndpointObservable EndpointObservers { get; }
+        ReceiveObservable ReceiveObservers { get; }
+        ReceiveTransportObservable TransportObservers { get; }
 
         /// <summary>
         /// Create the receive pipe, using the endpoint configuration

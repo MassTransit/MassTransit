@@ -21,7 +21,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
     {
         readonly PublishBrokerTopologyOptions _options;
 
-        public PublishEndpointBrokerTopologyBuilder(PublishBrokerTopologyOptions options = PublishBrokerTopologyOptions.FlattenHierarchy)
+        public PublishEndpointBrokerTopologyBuilder(PublishBrokerTopologyOptions options = PublishBrokerTopologyOptions.MaintainHierarchy)
         {
             _options = options;
         }
@@ -41,7 +41,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
 
         public BrokerTopology BuildBrokerTopology()
         {
-            return new AmazonSqsBrokerTopology(Topics, Queues, TopicSubscriptions);
+            return new AmazonSqsBrokerTopology(Topics, Queues, QueueSubscriptions, TopicSubscriptions);
         }
 
 
@@ -77,9 +77,14 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
                 return _builder.CreateQueue(name, durable, autoDelete);
             }
 
-            public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle topic, QueueHandle queue)
+            public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle topic, QueueHandle queue)
             {
-                return _builder.CreateTopicSubscription(topic, queue);
+                return _builder.CreateQueueSubscription(topic, queue);
+            }
+
+            public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination)
+            {
+                return _builder.CreateTopicSubscription(source, destination);
             }
         }
     }

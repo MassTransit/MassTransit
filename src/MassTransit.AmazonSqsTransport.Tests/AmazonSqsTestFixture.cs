@@ -24,8 +24,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
     public class AmazonSqsTestFixture :
         BusTestFixture
     {
-        public AmazonSqsTestFixture(string inputQueueName = null)
-            : this(new AmazonSqsTestHarness(inputQueueName))
+        public AmazonSqsTestFixture()
+            : this(new AmazonSqsTestHarness())
         {
         }
 
@@ -37,7 +37,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
             AmazonSqsTestHarness.OnConfigureAmazonSqsHost += ConfigureAmazonSqsHost;
             AmazonSqsTestHarness.OnConfigureAmazonSqsBus += ConfigureAmazonSqsBus;
             AmazonSqsTestHarness.OnConfigureAmazonSqsBusHost += ConfigureAmazonSqsBusHost;
-            AmazonSqsTestHarness.OnConfigureAmazonSqsReceiveEndoint += ConfigureAmazonSqsReceiveEndpoint;
+            AmazonSqsTestHarness.OnConfigureAmazonSqsReceiveEndpoint += ConfigureAmazonSqsReceiveEndpoint;
         }
 
         protected AmazonSqsTestHarness AmazonSqsTestHarness { get; }

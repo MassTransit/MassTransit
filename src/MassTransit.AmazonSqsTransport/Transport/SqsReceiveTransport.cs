@@ -21,37 +21,31 @@ namespace MassTransit.AmazonSqsTransport.Transport
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
-    using MassTransit.Pipeline.Observables;
     using Policies;
     using Topology;
     using Transports;
 
 
-    public class AmazonSqsReceiveTransport :
+    public class SqsReceiveTransport :
         Supervisor,
         IReceiveTransport
     {
-        static readonly ILog _log = Logger.Get<AmazonSqsReceiveTransport>();
+        static readonly ILog _log = Logger.Get<SqsReceiveTransport>();
         readonly IPipe<ConnectionContext> _connectionPipe;
         readonly IAmazonSqsHost _host;
         readonly Uri _inputAddress;
-        readonly ReceiveObservable _receiveObservable;
-        readonly ReceiveTransportObservable _receiveTransportObservable;
         readonly ReceiveSettings _settings;
-        readonly AmazonSqsReceiveEndpointContext _context;
+        readonly SqsReceiveEndpointContext _receiveEndpointContext;
 
-        public AmazonSqsReceiveTransport(IAmazonSqsHost host, ReceiveSettings settings, IPipe<ConnectionContext> connectionPipe,
-            AmazonSqsReceiveEndpointContext context, ReceiveObservable receiveObservable, ReceiveTransportObservable receiveTransportObservable)
+        public SqsReceiveTransport(IAmazonSqsHost host, ReceiveSettings settings, IPipe<ConnectionContext> connectionPipe,
+            SqsReceiveEndpointContext receiveEndpointContext)
         {
             _host = host;
             _settings = settings;
-            _context = context;
+            _receiveEndpointContext = receiveEndpointContext;
             _connectionPipe = connectionPipe;
 
-            _receiveObservable = receiveObservable;
-            _receiveTransportObservable = receiveTransportObservable;
-
-            _inputAddress = context.InputAddress;
+            _inputAddress = receiveEndpointContext.InputAddress;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -60,7 +54,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
             scope.Add("type", "AmazonSQS");
             scope.Set(_settings);
             var topologyScope = scope.CreateScope("topology");
-            _context.BrokerTopology.Probe(topologyScope);
+            _receiveEndpointContext.BrokerTopology.Probe(topologyScope);
         }
 
         /// <summary>
@@ -75,24 +69,24 @@ namespace MassTransit.AmazonSqsTransport.Transport
             return new Handle(this);
         }
 
-        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
+        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveObservable.Connect(observer);
+            return _receiveEndpointContext.ConnectReceiveObserver(observer);
         }
 
-        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
+        ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _receiveTransportObservable.Connect(observer);
+            return _receiveEndpointContext.ConnectReceiveTransportObserver(observer);
         }
 
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _context.ConnectPublishObserver(observer);
+            return _receiveEndpointContext.ConnectPublishObserver(observer);
         }
 
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            return _context.ConnectSendObserver(observer);
+            return _receiveEndpointContext.ConnectSendObserver(observer);
         }
 
         async Task Receiver()
@@ -140,7 +134,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
             if (_log.IsErrorEnabled)
                 _log.ErrorFormat("AmazonSQS Connect Failed: {0}", exception.Message);
 
-            return _receiveTransportObservable.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, exception));
+            return _receiveEndpointContext.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, exception));
         }
 
 

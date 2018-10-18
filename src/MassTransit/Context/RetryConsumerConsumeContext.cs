@@ -24,22 +24,23 @@ namespace MassTransit.Context
     {
         readonly ConsumerConsumeContext<TConsumer> _context;
 
-        public RetryConsumerConsumeContext(ConsumerConsumeContext<TConsumer> context, IRetryPolicy retryPolicy)
-            : base(context, retryPolicy)
+        public RetryConsumerConsumeContext(ConsumerConsumeContext<TConsumer> context, IRetryPolicy retryPolicy, RetryContext retryContext)
+            : base(context, retryPolicy, retryContext)
         {
             _context = context;
         }
 
-        public ConsumerConsumeContext<TConsumer, T> PopContext<T>() where T : class
+        public ConsumerConsumeContext<TConsumer, T> PopContext<T>()
+            where T : class
         {
             return _context.PopContext<T>();
         }
 
         public TConsumer Consumer => _context.Consumer;
 
-        public override TContext CreateNext<TContext>()
+        public override TContext CreateNext<TContext>(RetryContext retryContext)
         {
-            return new RetryConsumerConsumeContext<TConsumer>(_context, RetryPolicy) as TContext
+            return new RetryConsumerConsumeContext<TConsumer>(_context, RetryPolicy, retryContext) as TContext
                 ?? throw new ArgumentException($"The context type is not valid: {TypeMetadataCache<TContext>.ShortName}");
         }
     }

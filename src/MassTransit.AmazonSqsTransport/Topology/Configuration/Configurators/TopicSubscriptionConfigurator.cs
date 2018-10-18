@@ -18,7 +18,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
 
     public class TopicSubscriptionConfigurator :
         TopicConfigurator,
-        ITopicBindingConfigurator
+        ITopicSubscriptionConfigurator
     {
         public TopicSubscriptionConfigurator(string topicName, bool durable = true, bool autoDelete = false)
             : base(topicName, durable, autoDelete)

@@ -18,6 +18,7 @@ namespace MassTransit.AmazonSqsTransport
     using Amazon.SQS;
     using GreenPipes;
     using Topology;
+    using Transport;
 
 
     public interface ConnectionContext :

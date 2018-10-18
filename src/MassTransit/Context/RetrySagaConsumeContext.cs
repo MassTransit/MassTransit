@@ -26,8 +26,8 @@ namespace MassTransit.Context
     {
         readonly SagaConsumeContext<TSaga> _context;
 
-        public RetrySagaConsumeContext(SagaConsumeContext<TSaga> context, IRetryPolicy retryPolicy)
-            : base(context, retryPolicy)
+        public RetrySagaConsumeContext(SagaConsumeContext<TSaga> context, IRetryPolicy retryPolicy, RetryContext retryContext)
+            : base(context, retryPolicy, retryContext)
         {
             _context = context;
         }
@@ -46,9 +46,9 @@ namespace MassTransit.Context
 
         public bool IsCompleted => _context.IsCompleted;
 
-        public override TContext CreateNext<TContext>()
+        public override TContext CreateNext<TContext>(RetryContext retryContext)
         {
-            return new RetrySagaConsumeContext<TSaga>(_context, RetryPolicy) as TContext
+            return new RetrySagaConsumeContext<TSaga>(_context, RetryPolicy, retryContext) as TContext
                 ?? throw new ArgumentException($"The context type is not valid: {TypeMetadataCache<TContext>.ShortName}");
         }
     }

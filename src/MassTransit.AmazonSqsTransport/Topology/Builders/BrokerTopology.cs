@@ -21,6 +21,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
     {
         Topic[] Topics { get; }
         Queue[] Queues { get; }
+        QueueSubscription[] QueueSubscriptions { get; }
         TopicSubscription[] TopicSubscriptions { get; }
     }
 }

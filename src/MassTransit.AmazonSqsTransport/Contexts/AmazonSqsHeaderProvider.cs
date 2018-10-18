@@ -22,18 +22,18 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         IHeaderProvider
     {
         readonly Message _message;
-        readonly AmazonSqsHeaderAdapter _adapter;
+        readonly SendHeaders _adapter;
 
         public AmazonSqsHeaderProvider(Message message)
         {
             _message = message;
+
             _adapter = new AmazonSqsHeaderAdapter(message.MessageAttributes);
         }
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
-            yield return new KeyValuePair<string, object>("MessageId", _message.MessageId);
-            yield return new KeyValuePair<string, object>("CorrelationId", _message.MessageAttributes["CorrelationId"].StringValue);
+            yield return new KeyValuePair<string, object>(nameof(_message.MessageId), _message.MessageId);
 
             foreach (var header in _adapter.GetAll())
                 yield return header;

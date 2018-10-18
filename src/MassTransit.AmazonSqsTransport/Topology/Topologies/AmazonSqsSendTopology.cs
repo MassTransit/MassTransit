@@ -13,7 +13,6 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 {
     using System;
-    using System.Net;
     using Configuration;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
@@ -56,26 +55,17 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             var durable = address.Query.GetValueFromQueryString("durable", !isTemporary);
             var autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
 
-            var settings = new AmazonSqsSendSettings(name, durable, autoDelete);
-
-            var bindToQueue = address.Query.GetValueFromQueryString("bind", false);
-            if (bindToQueue)
-            {
-                var queueName = WebUtility.UrlDecode(address.Query.GetValueFromQueryString("queue"));
-                settings.BindToQueue(queueName);
-            }
-
-            return settings;
+            return new QueueSendSettings(name, durable, autoDelete);
         }
 
         public ErrorSettings GetErrorSettings(EntitySettings settings)
         {
-            return new AmazonSqsErrorSettings(settings, settings.EntityName + "_error");
+            return new QueueErrorSettings(settings, settings.EntityName + "_error");
         }
 
         public DeadLetterSettings GetDeadLetterSettings(EntitySettings settings)
         {
-            return new AmazonSqsDeadLetterSettings(settings, settings.EntityName + "_skipped");
+            return new QueueDeadLetterSettings(settings, settings.EntityName + "_skipped");
         }
 
         protected override IMessageSendTopologyConfigurator CreateMessageTopology<T>(Type type)

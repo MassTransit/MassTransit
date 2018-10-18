@@ -49,7 +49,8 @@ namespace GreenPipes
             configurator.AddPipeSpecification(specification);
         }
 
-        public static void UseRetry(this IPipeConfigurator<ConsumeContext> configurator, IBusFactoryConfigurator connector, Action<IRetryConfigurator> configure)
+        public static void UseRetry(this IPipeConfigurator<ConsumeContext> configurator, IBusFactoryConfigurator connector,
+            Action<IRetryConfigurator> configure)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
@@ -106,7 +107,8 @@ namespace GreenPipes
             configurator.AddPipeSpecification(specification);
         }
 
-        public static void UseRetry<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IBusFactoryConfigurator connector, Action<IRetryConfigurator> configure)
+        public static void UseRetry<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IBusFactoryConfigurator connector,
+            Action<IRetryConfigurator> configure)
             where T : class
         {
             if (configurator == null)
@@ -122,10 +124,10 @@ namespace GreenPipes
             configurator.AddPipeSpecification(specification);
         }
 
-        static RetryConsumeContext<T> Factory<T>(ConsumeContext<T> context, IRetryPolicy retryPolicy)
+        static RetryConsumeContext<T> Factory<T>(ConsumeContext<T> context, IRetryPolicy retryPolicy, RetryContext retryContext)
             where T : class
         {
-            return new RetryConsumeContext<T>(context, retryPolicy);
+            return new RetryConsumeContext<T>(context, retryPolicy, retryContext);
         }
 
         [Obsolete("Use of the lambda-based policy configurator is recommended")]
@@ -174,10 +176,11 @@ namespace GreenPipes
             configurator.AddPipeSpecification(specification);
         }
 
-        static RetryConsumerConsumeContext<TConsumer> Factory<TConsumer>(ConsumerConsumeContext<TConsumer> context, IRetryPolicy retryPolicy)
+        static RetryConsumerConsumeContext<TConsumer> Factory<TConsumer>(ConsumerConsumeContext<TConsumer> context, IRetryPolicy retryPolicy,
+            RetryContext retryContext)
             where TConsumer : class
         {
-            return new RetryConsumerConsumeContext<TConsumer>(context, retryPolicy);
+            return new RetryConsumerConsumeContext<TConsumer>(context, retryPolicy, retryContext);
         }
 
         [Obsolete("Use of the lambda-based policy configurator is recommended")]
@@ -207,7 +210,8 @@ namespace GreenPipes
             configurator.AddPipeSpecification(specification);
         }
 
-        public static void UseRetry<TSaga>(this IPipeConfigurator<SagaConsumeContext<TSaga>> configurator, IBusFactoryConfigurator connector, Action<IRetryConfigurator> configure)
+        public static void UseRetry<TSaga>(this IPipeConfigurator<SagaConsumeContext<TSaga>> configurator, IBusFactoryConfigurator connector,
+            Action<IRetryConfigurator> configure)
             where TSaga : class, ISaga
         {
             if (configurator == null)
@@ -223,10 +227,10 @@ namespace GreenPipes
             configurator.AddPipeSpecification(specification);
         }
 
-        static RetrySagaConsumeContext<TSaga> Factory<TSaga>(SagaConsumeContext<TSaga> context, IRetryPolicy retryPolicy)
+        static RetrySagaConsumeContext<TSaga> Factory<TSaga>(SagaConsumeContext<TSaga> context, IRetryPolicy retryPolicy, RetryContext retryContext)
             where TSaga : class, ISaga
         {
-            return new RetrySagaConsumeContext<TSaga>(context, retryPolicy);
+            return new RetrySagaConsumeContext<TSaga>(context, retryPolicy, retryContext);
         }
 
         /// <summary>
@@ -253,7 +257,8 @@ namespace GreenPipes
         /// <param name="configurator"></param>
         /// <param name="connector">The bus factory configurator, to connect the observer, to cancel retries if the bus is stopped</param>
         /// <param name="configureRetry"></param>
-        public static void UseMessageRetry(this IConsumePipeConfigurator configurator, IBusFactoryConfigurator connector, Action<IRetryConfigurator> configureRetry)
+        public static void UseMessageRetry(this IConsumePipeConfigurator configurator, IBusFactoryConfigurator connector,
+            Action<IRetryConfigurator> configureRetry)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));

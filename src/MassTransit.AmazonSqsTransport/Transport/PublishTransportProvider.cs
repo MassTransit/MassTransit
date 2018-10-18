@@ -37,23 +37,23 @@ namespace MassTransit.AmazonSqsTransport.Transport
         {
             IAmazonSqsMessagePublishTopology<T> publishTopology = _publishTopology.GetMessageTopology<T>();
 
-            var sendSettings = publishTopology.GetSendSettings();
+            var sendSettings = publishTopology.GetPublishSettings();
 
-            IAgent<ModelContext> modelAgent = GetModelAgent();
+            IAgent<ClientContext> clientCache = GetClientCache();
 
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(sendSettings, publishTopology.GetBrokerTopology());
+            var configureTopologyFilter = new ConfigureTopologyFilter<PublishSettings>(sendSettings, publishTopology.GetBrokerTopology());
 
-            var sendTransport = new AmazonSqsSendTransport(modelAgent, configureTopologyFilter, sendSettings.EntityName);
-            sendTransport.Add(modelAgent);
+            var sendTransport = new TopicSendTransport(clientCache, configureTopologyFilter, sendSettings.EntityName);
+            sendTransport.Add(clientCache);
 
             _host.Add(sendTransport);
 
             return Task.FromResult<ISendTransport>(sendTransport);
         }
 
-        protected virtual IAgent<ModelContext> GetModelAgent()
+        protected virtual IAgent<ClientContext> GetClientCache()
         {
-            return new AmazonSqsModelCache(_host, _host.ConnectionCache);
+            return new AmazonSqsClientCache(_host, _host.ConnectionCache);
         }
     }
 }

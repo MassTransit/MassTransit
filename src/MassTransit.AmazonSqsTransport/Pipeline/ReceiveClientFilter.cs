@@ -21,13 +21,13 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     /// <summary>
     /// Creates a receiving model context using the connection
     /// </summary>
-    public class ReceiveModelFilter :
+    public class ReceiveClientFilter :
         IFilter<ConnectionContext>
     {
         readonly IAmazonSqsHost _host;
-        readonly IPipe<ModelContext> _pipe;
+        readonly IPipe<ClientContext> _pipe;
 
-        public ReceiveModelFilter(IPipe<ModelContext> pipe, IAmazonSqsHost host)
+        public ReceiveClientFilter(IPipe<ClientContext> pipe, IAmazonSqsHost host)
         {
             _pipe = pipe;
             _host = host;
@@ -45,7 +45,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             var amazonSqs = await context.CreateAmazonSqs().ConfigureAwait(false);
             var amazonSns = await context.CreateAmazonSns().ConfigureAwait(false);
 
-            var modelContext = new AmazonSqsModelContext(context, amazonSqs, amazonSns, _host, context.CancellationToken);
+            var modelContext = new AmazonSqsClientContext(context, amazonSqs, amazonSns, _host, context.CancellationToken);
 
             try
             {

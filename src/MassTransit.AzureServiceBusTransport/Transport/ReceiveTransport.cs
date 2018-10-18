@@ -15,15 +15,14 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contexts;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
-    using MassTransit.Pipeline.Observables;
     using Pipeline;
     using Policies;
     using Transports;
-    using Util;
 
 
     public class ReceiveTransport :
@@ -33,25 +32,18 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         static readonly ILog _log = Logger.Get<ReceiveTransport>();
         readonly IClientCache _clientCache;
         readonly IPipe<ClientContext> _clientPipe;
+        readonly ServiceBusReceiveEndpointContext _receiveEndpointContext;
         readonly IServiceBusHost _host;
-        readonly ReceiveObservable _observers;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ClientSettings _settings;
-        readonly ReceiveTransportObservable _transportObservers;
 
-        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IPublishEndpointProvider publishEndpointProvider,
-            ISendEndpointProvider sendEndpointProvider, IClientCache clientCache, IPipe<ClientContext> clientPipe, ReceiveTransportObservable transportObserver)
+        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IClientCache clientCache, IPipe<ClientContext> clientPipe,
+            ServiceBusReceiveEndpointContext receiveEndpointContext)
         {
             _host = host;
             _settings = settings;
-            _publishEndpointProvider = publishEndpointProvider;
-            _sendEndpointProvider = sendEndpointProvider;
             _clientCache = clientCache;
             _clientPipe = clientPipe;
-
-            _observers = new ReceiveObservable();
-            _transportObservers = transportObserver;
+            _receiveEndpointContext = receiveEndpointContext;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -78,27 +70,24 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             return new Handle(this);
         }
 
-        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
+        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _observers.Connect(observer);
+            return _receiveEndpointContext.ConnectReceiveObserver(observer);
         }
 
-        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
+        ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _transportObservers.Connect(observer);
+            return _receiveEndpointContext.ConnectReceiveTransportObserver(observer);
         }
 
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _publishEndpointProvider.ConnectPublishObserver(observer);
+            return _receiveEndpointContext.ConnectPublishObserver(observer);
         }
 
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            var sendHandle = _sendEndpointProvider.ConnectSendObserver(observer);
-            var publishHandle = _publishEndpointProvider.ConnectSendObserver(observer);
-
-            return new MultipleConnectHandle(sendHandle, publishHandle);
+            return _receiveEndpointContext.ConnectSendObserver(observer);
         }
 
         async Task Receiver()
@@ -126,7 +115,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                             if (_log.IsErrorEnabled)
                                 _log.Error($"ReceiveTransport Faulted: {inputAddress}", ex);
 
-                            await _transportObservers.Faulted(new ReceiveTransportFaultedEvent(inputAddress, ex)).ConfigureAwait(false);
+                            await _receiveEndpointContext.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(inputAddress, ex)).ConfigureAwait(false);
 
                             throw;
                         }

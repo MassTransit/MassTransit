@@ -46,10 +46,10 @@ namespace MassTransit
             configurator.AddPipeSpecification(retrySpecification);
         }
 
-        static RetryConsumeContext<T> Factory<T>(ConsumeContext<T> context, IRetryPolicy retryPolicy)
+        static RetryConsumeContext<T> Factory<T>(ConsumeContext<T> context, IRetryPolicy retryPolicy, RetryContext retryContext)
             where T : class
         {
-            return new RetryConsumeContext<T>(context, retryPolicy);
+            return new RetryConsumeContext<T>(context, retryPolicy, retryContext);
         }
 
         /// <summary>

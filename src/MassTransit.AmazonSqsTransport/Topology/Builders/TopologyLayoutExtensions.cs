@@ -26,7 +26,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
                 _log.InfoFormat("Topic: {0}, type: {1}, durable: {2}, auto-delete: {3}", topic.EntityName, topic.Durable, topic.AutoDelete);
             }
 
-            foreach (var consumer in layout.TopicSubscriptions)
+            foreach (var consumer in layout.QueueSubscriptions)
             {
                 _log.InfoFormat("TopicSubscription: source {0}, destination: {1}", consumer.Source.EntityName, consumer.Destination.EntityName);
             }

@@ -16,26 +16,27 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using System.Threading;
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService.Model;
+    using Amazon.SQS.Model;
     using GreenPipes;
     using GreenPipes.Payloads;
     using Pipeline;
     using Topology;
 
 
-    public class SharedModelContext :
-        ModelContext
+    public class SharedClientContext :
+        ClientContext
     {
         readonly CancellationToken _cancellationToken;
-        readonly ModelContext _context;
+        readonly ClientContext _context;
         readonly IPayloadCache _payloadCache;
 
-        public SharedModelContext(ModelContext context, CancellationToken cancellationToken)
+        public SharedClientContext(ClientContext context, CancellationToken cancellationToken)
         {
             _context = context;
             _cancellationToken = cancellationToken;
         }
 
-        public SharedModelContext(ModelContext context, IPayloadCache payloadCache, CancellationToken cancellationToken)
+        public SharedClientContext(ClientContext context, IPayloadCache payloadCache, CancellationToken cancellationToken)
         {
             _context = context;
             _payloadCache = payloadCache;
@@ -71,53 +72,63 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return _context.AddOrUpdatePayload(addFactory, updateFactory);
         }
 
-        ConnectionContext ModelContext.ConnectionContext => _context.ConnectionContext;
+        ConnectionContext ClientContext.ConnectionContext => _context.ConnectionContext;
 
-        IAmazonSqsPublishTopology ModelContext.PublishTopology => _context.PublishTopology;
+        IAmazonSqsPublishTopology ClientContext.PublishTopology => _context.PublishTopology;
 
-        Task<string> ModelContext.GetTopic(string topicName)
+        Task<string> ClientContext.CreateTopic(string topicName)
         {
-            return _context.GetTopic(topicName);
+            return _context.CreateTopic(topicName);
         }
 
-        Task<string> ModelContext.GetQueue(string queueName)
+        Task<string> ClientContext.CreateQueue(string queueName)
         {
-            return _context.GetQueue(queueName);
+            return _context.CreateQueue(queueName);
         }
 
-        Task ModelContext.GetTopicSubscription(string topicName, string queueName)
+        Task ClientContext.CreateQueueSubscription(string topicName, string queueName)
         {
-            return _context.GetTopicSubscription(topicName, queueName);
+            return _context.CreateQueueSubscription(topicName, queueName);
         }
 
-        Task ModelContext.DeleteTopic(string topicName)
+        Task ClientContext.DeleteTopic(string topicName)
         {
             return _context.DeleteTopic(topicName);
         }
 
-        Task ModelContext.DeleteQueue(string queueName)
+        Task ClientContext.DeleteQueue(string queueName)
         {
             return _context.DeleteQueue(queueName);
         }
 
-        Task ModelContext.BasicConsume(string queueUrl, ReceiveSettings receiveSettings, IBasicConsumer consumer)
+        Task ClientContext.BasicConsume(ReceiveSettings receiveSettings, IBasicConsumer consumer)
         {
-            return _context.BasicConsume(queueUrl, receiveSettings, consumer);
+            return _context.BasicConsume(receiveSettings, consumer);
         }
 
-        PublishRequest ModelContext.CreateTransportMessage(string topicArn, byte[] body)
+        PublishRequest ClientContext.CreatePublishRequest(string topicName, byte[] body)
         {
-            return _context.CreateTransportMessage(topicArn, body);
+            return _context.CreatePublishRequest(topicName, body);
         }
 
-        Task ModelContext.Publish(PublishRequest request, CancellationToken cancellationToken)
+        Task ClientContext.Publish(PublishRequest request, CancellationToken cancellationToken)
         {
             return _context.Publish(request, cancellationToken);
         }
 
-        Task ModelContext.DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken)
+        Task ClientContext.DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken)
         {
             return _context.DeleteMessage(queueUrl, receiptHandle, cancellationToken);
+        }
+
+        SendMessageRequest ClientContext.CreateSendRequest(string queueName, byte[] body)
+        {
+            return _context.CreateSendRequest(queueName, body);
+        }
+
+        Task ClientContext.SendMessage(SendMessageRequest request, CancellationToken cancellationToken)
+        {
+            return _context.SendMessage(request, cancellationToken);
         }
 
         CancellationToken PipeContext.CancellationToken => _cancellationToken;

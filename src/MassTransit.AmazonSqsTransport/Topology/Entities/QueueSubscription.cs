@@ -10,18 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
+namespace MassTransit.AmazonSqsTransport.Topology.Entities
 {
-    using AmazonSqsTransport.Configuration;
-
-
-    public class QueueBindingConfigurator :
-        QueueConfigurator,
-        IQueueBindingConfigurator
+    /// <summary>
+    /// The topic to queue binding details to declare the binding to AmazonSQS
+    /// </summary>
+    public interface QueueSubscription
     {
-        public QueueBindingConfigurator(string queueName, bool durable, bool autoDelete)
-            : base(queueName, durable, autoDelete)
-        {
-        }
+        /// <summary>
+        /// The topic
+        /// </summary>
+        Topic Source { get; }
+
+        /// <summary>
+        /// The queue
+        /// </summary>
+        Queue Destination { get; }
     }
 }

@@ -19,18 +19,15 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using Amazon.SQS;
     using GreenPipes;
     using GreenPipes.Payloads;
-    using Logging;
     using Topology;
+    using Transport;
     using Util;
 
 
     public class AmazonSqsConnectionContext :
         BasePipeContext,
-        ConnectionContext,
-        IAsyncDisposable
+        ConnectionContext
     {
-        static readonly ILog _log = Logger.Get<AmazonSqsConnectionContext>();
-
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
         public AmazonSqsConnectionContext(IConnection connection, AmazonSqsHostSettings hostSettings, IAmazonSqsHostTopology topology, string description,
@@ -60,27 +57,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         public Task<IAmazonSimpleNotificationService> CreateAmazonSns()
         {
             return Task.Factory.StartNew(() => Connection.CreateAmazonSnsClient(), CancellationToken, TaskCreationOptions.None, _taskScheduler);
-        }
-
-        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
-        {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Disconnecting: {0}", Description);
-
-            try
-            {
-                Connection.Dispose();
-            }
-            catch (Exception exception)
-            {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"Close _connection Faulted: {Description}", exception);
-            }
-
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Disconnected: {0}", Description);
-
-            return TaskUtil.Completed;
         }
     }
 }

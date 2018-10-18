@@ -330,6 +330,60 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
+    public class When_the_retry_is_specified_within_the_consumer :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_have_the_proper_counts()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = SubscribeHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext<PingMessage>>(x =>
+            {
+                x.ResponseAddress = BusAddress;
+                x.FaultAddress = BusAddress;
+            }));
+
+            await fault;
+
+            Consumer.Attempts.ShouldBe(4);
+
+            Consumer.LastCount.ShouldBe(2);
+            Consumer.LastAttempt.ShouldBe(3);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.Consumer<Consumer>(cfg =>
+            {
+                cfg.UseRetry(x => x.Immediate(3));
+            });
+        }
+
+
+        class Consumer :
+            IConsumer<PingMessage>
+        {
+            public static int Attempts;
+
+            public static int LastAttempt;
+
+            public static int LastCount;
+
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                Interlocked.Increment(ref Attempts);
+
+                LastAttempt = context.GetRetryAttempt();
+                LastCount = context.GetRetryCount();
+
+                throw new IntentionalTestException();
+            }
+        }
+    }
+
+
+    [TestFixture]
     public class When_ignoring_the_exception :
         InMemoryTestFixture
     {

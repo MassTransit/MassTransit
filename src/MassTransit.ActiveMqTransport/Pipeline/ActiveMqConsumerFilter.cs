@@ -36,17 +36,10 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         static readonly ILog _log = Logger.Get<ActiveMqConsumerFilter>();
         readonly IDeadLetterTransport _deadLetterTransport;
         readonly IErrorTransport _errorTransport;
-        readonly IReceiveObserver _receiveObserver;
-        readonly IPipe<ReceiveContext> _receivePipe;
         readonly ActiveMqReceiveEndpointContext _context;
-        readonly IReceiveTransportObserver _transportObserver;
 
-        public ActiveMqConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver,
-            ActiveMqReceiveEndpointContext context, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+        public ActiveMqConsumerFilter(ActiveMqReceiveEndpointContext context, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
         {
-            _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
-            _transportObserver = transportObserver;
             _context = context;
             _deadLetterTransport = deadLetterTransport;
             _errorTransport = errorTransport;
@@ -73,7 +66,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var supervisor = CreateConsumerSupervisor(context, actualConsumers);
 
-            await _transportObserver.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
+            await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 
             try
             {
@@ -86,7 +79,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 DeliveryMetrics metrics =
                     new CombinedDeliveryMetrics(consumerMetrics.Sum(x => x.DeliveryCount), consumerMetrics.Max(x => x.ConcurrentDeliveryCount));
 
-                await _transportObserver.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
+                await _context.TransportObservers.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Consumer completed: {0} received, {0} concurrent", metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
@@ -124,7 +117,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var messageConsumer = await context.CreateMessageConsumer(queue, selector, false).ConfigureAwait(false);
 
-            var consumer = new ActiveMqBasicConsumer(context, messageConsumer, inputAddress, _receivePipe, _receiveObserver, _context, _deadLetterTransport,
+            var consumer = new ActiveMqBasicConsumer(context, messageConsumer, inputAddress, _context, _deadLetterTransport,
                 _errorTransport);
 
             await consumer.Ready.ConfigureAwait(false);

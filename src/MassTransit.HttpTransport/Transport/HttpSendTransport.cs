@@ -38,15 +38,13 @@ namespace MassTransit.HttpTransport.Transport
 
         readonly IClientCache _clientCache;
         readonly SendObservable _observers;
-        readonly IReceiveObserver _receiveObserver;
         readonly HttpSendSettings _sendSettings;
         readonly ReceiveEndpointContext _topology;
 
-        public HttpSendTransport(IClientCache clientCache, HttpSendSettings sendSettings, IReceiveObserver receiveObserver, ReceiveEndpointContext topology)
+        public HttpSendTransport(IClientCache clientCache, HttpSendSettings sendSettings, ReceiveEndpointContext topology)
         {
             _clientCache = clientCache;
             _sendSettings = sendSettings;
-            _receiveObserver = receiveObserver;
             _topology = topology;
             _observers = new SendObservable();
         }

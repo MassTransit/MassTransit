@@ -67,7 +67,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
             return configuration;
         }
 
-        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(AmazonSqsReceiveSettings settings, IAmazonSqsEndpointConfiguration endpointConfiguration)
+        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings, IAmazonSqsEndpointConfiguration endpointConfiguration)
         {
             if (_hosts.Count == 0)
                 throw new ConfigurationException("At least one host must be configured");

@@ -12,13 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Contexts
 {
-    using System;
     using Configuration;
     using Context;
-    using MassTransit.Pipeline.Observables;
     using Topology;
     using Transport;
-    using Transports;
 
 
     public class ServiceBusEntityReceiveEndpointContext :
@@ -26,45 +23,25 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         ServiceBusReceiveEndpointContext
     {
         readonly IServiceBusEntityEndpointConfiguration _configuration;
-        readonly IServiceBusPublishTopology _publish;
-        readonly Lazy<IPublishTransportProvider> _publishTransportProvider;
-        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
 
-        public ServiceBusEntityReceiveEndpointContext(IServiceBusEntityEndpointConfiguration configuration, BrokerTopology brokerTopology,
-            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
-            : base(configuration, receiveObservers, transportObservers, endpointObservers)
+        public ServiceBusEntityReceiveEndpointContext(IServiceBusEntityEndpointConfiguration configuration, BrokerTopology brokerTopology)
+            : base(configuration)
         {
             _configuration = configuration;
 
             BrokerTopology = brokerTopology;
-
-            _publish = configuration.Topology.Publish;
-
-            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
-            _publishTransportProvider = new Lazy<IPublishTransportProvider>(CreatePublishTransportProvider);
         }
 
         public BrokerTopology BrokerTopology { get; }
 
-        ISendTransportProvider CreateSendTransportProvider()
+        protected override ISendTransportProvider CreateSendTransportProvider()
         {
             return new SendEndpointSendTransportProvider(_configuration.BusConfiguration);
         }
 
-        IPublishTransportProvider CreatePublishTransportProvider()
+        protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
             return new PublishTransportProvider(_configuration.BusConfiguration);
-        }
-
-        protected override ISendEndpointProvider CreateSendEndpointProvider()
-        {
-            return new SendEndpointProvider(_sendTransportProvider.Value, SendObservers, Serializer, InputAddress, SendPipe);
-        }
-
-        protected override IPublishEndpointProvider CreatePublishEndpointProvider()
-        {
-            return new PublishEndpointProvider(_publishTransportProvider.Value, _configuration.HostAddress, PublishObservers, SendObservers, Serializer,
-                InputAddress, PublishPipe, _publish);
         }
     }
 }

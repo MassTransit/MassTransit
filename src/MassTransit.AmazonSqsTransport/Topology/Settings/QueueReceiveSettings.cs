@@ -16,11 +16,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
     using Configuration.Configurators;
 
 
-    public class AmazonSqsReceiveSettings :
-        QueueBindingConfigurator,
+    public class QueueReceiveSettings :
+        QueueSubscriptionConfigurator,
         ReceiveSettings
     {
-        public AmazonSqsReceiveSettings(string queueName, bool durable, bool autoDelete)
+        public QueueReceiveSettings(string queueName, bool durable, bool autoDelete)
             : base(queueName, durable, autoDelete)
         {
             PrefetchCount = Math.Min(Environment.ProcessorCount * 2, 10);

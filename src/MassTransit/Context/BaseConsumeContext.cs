@@ -329,6 +329,53 @@ namespace MassTransit.Context
             return _receiveContext.PublishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, this);
         }
 
+        public override bool HasPayloadType(Type payloadType)
+        {
+            if (payloadType.IsInstanceOfType(this))
+                return true;
+
+            return base.HasPayloadType(payloadType);
+        }
+
+        public override bool TryGetPayload<T>(out T payload)
+        {
+            if (this is T self)
+            {
+                payload = self;
+                return true;
+            }
+
+            return base.TryGetPayload(out payload);
+        }
+
+        public override T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
+        {
+            if (this is T self)
+                return self;
+
+            return base.GetOrAddPayload(payloadFactory);
+        }
+
+        public override T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            if (this is T self)
+            {
+                T Update(T existing)
+                {
+                    return updateFactory(self);
+                }
+
+                T Add()
+                {
+                    return updateFactory(self);
+                }
+
+                return base.AddOrUpdatePayload(Add, Update);
+            }
+
+            return base.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
         protected Task ConsumeTask(Task task)
         {
             AddConsumeTask(task);

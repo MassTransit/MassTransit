@@ -70,7 +70,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             ForEach<IAmazonSqsMessageConsumeTopologyConfigurator>(x => x.Apply(builder));
         }
 
-        public void Bind(string topicName, Action<ITopicBindingConfigurator> configure = null)
+        public void Bind(string topicName, Action<ITopicSubscriptionConfigurator> configure = null)
         {
             var specification = new ConsumerConsumeTopologySpecification(topicName);
 

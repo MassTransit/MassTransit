@@ -21,42 +21,42 @@ namespace MassTransit.AmazonSqsTransport.Transport
     using Logging;
 
 
-    public class ModelContextFactory :
-        IPipeContextFactory<ModelContext>
+    public class ClientContextFactory :
+        IPipeContextFactory<ClientContext>
     {
-        static readonly ILog _log = Logger.Get<ModelContextFactory>();
+        static readonly ILog _log = Logger.Get<ClientContextFactory>();
         readonly IConnectionCache _connectionCache;
         readonly IAmazonSqsHost _host;
 
-        public ModelContextFactory(IConnectionCache connectionCache, IAmazonSqsHost host)
+        public ClientContextFactory(IConnectionCache connectionCache, IAmazonSqsHost host)
         {
             _connectionCache = connectionCache;
             _host = host;
         }
 
-        IPipeContextAgent<ModelContext> IPipeContextFactory<ModelContext>.CreateContext(ISupervisor supervisor)
+        IPipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateContext(ISupervisor supervisor)
         {
-            IAsyncPipeContextAgent<ModelContext> asyncContext = supervisor.AddAsyncContext<ModelContext>();
+            IAsyncPipeContextAgent<ClientContext> asyncContext = supervisor.AddAsyncContext<ClientContext>();
 
             CreateModel(asyncContext, supervisor.Stopped);
 
             return asyncContext;
         }
 
-        IActivePipeContextAgent<ModelContext> IPipeContextFactory<ModelContext>.CreateActiveContext(ISupervisor supervisor,
-            PipeContextHandle<ModelContext> context, CancellationToken cancellationToken)
+        IActivePipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateActiveContext(ISupervisor supervisor,
+            PipeContextHandle<ClientContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedSession(context.Context, cancellationToken));
         }
 
-        async Task<ModelContext> CreateSharedSession(Task<ModelContext> context, CancellationToken cancellationToken)
+        async Task<ClientContext> CreateSharedSession(Task<ClientContext> context, CancellationToken cancellationToken)
         {
             var modelContext = await context.ConfigureAwait(false);
 
-            return new SharedModelContext(modelContext, cancellationToken);
+            return new SharedClientContext(modelContext, cancellationToken);
         }
 
-        void CreateModel(IAsyncPipeContextAgent<ModelContext> asyncContext, CancellationToken cancellationToken)
+        void CreateModel(IAsyncPipeContextAgent<ClientContext> asyncContext, CancellationToken cancellationToken)
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
@@ -68,7 +68,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
                     var amazonSqs = await connectionContext.CreateAmazonSqs().ConfigureAwait(false);
                     var amazonSns = await connectionContext.CreateAmazonSns().ConfigureAwait(false);
 
-                    var modelContext = new AmazonSqsModelContext(connectionContext, amazonSqs, amazonSns, _host, cancellationToken);
+                    var modelContext = new AmazonSqsClientContext(connectionContext, amazonSqs, amazonSns, _host, cancellationToken);
 
                     await asyncContext.Created(modelContext).ConfigureAwait(false);
 

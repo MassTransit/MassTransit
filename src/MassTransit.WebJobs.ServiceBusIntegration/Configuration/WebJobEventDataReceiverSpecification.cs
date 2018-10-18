@@ -22,7 +22,6 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
     using MassTransit.Configuration;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Host;
-    using Pipeline.Observables;
     using Transports;
 
 
@@ -58,8 +57,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 
         protected virtual ReceiveEndpointContext CreateReceiveEndpointContext()
         {
-            return new WebJobEventDataReceiveEndpointContext(_endpointConfiguration, Log, _binder, _cancellationToken, new ReceiveObservable(),
-                new ReceiveTransportObservable(), new ReceiveEndpointObservable());
+            return new WebJobEventDataReceiveEndpointContext(_endpointConfiguration, Log, _binder, _cancellationToken);
         }
 
         public IEventDataReceiver Build()

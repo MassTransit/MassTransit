@@ -16,11 +16,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
     using Configuration.Configurators;
 
 
-    public class AmazonSqsDeadLetterSettings :
-        QueueBindingConfigurator,
-        DeadLetterSettings
+    public class QueueErrorSettings :
+        QueueSubscriptionConfigurator,
+        ErrorSettings
     {
-        public AmazonSqsDeadLetterSettings(EntitySettings source, string queueName)
+        public QueueErrorSettings(EntitySettings source, string queueName)
             : base(queueName, source.Durable, source.AutoDelete)
         {
         }

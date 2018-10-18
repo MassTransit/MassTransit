@@ -9,7 +9,6 @@
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using Logging;
-    using MassTransit.Builders;
     using MassTransit.Configuration;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
@@ -131,9 +130,9 @@
                 yield return this.Failure("MaxConcurrentCalls", "must be > 0");
         }
 
-        protected IReceiveEndpoint CreateReceiveEndpoint(ReceiveEndpointBuilder builder, ServiceBusReceiveEndpointContext context)
+        protected IReceiveEndpoint CreateReceiveEndpoint(ServiceBusReceiveEndpointContext context)
         {
-            var transportObserver = builder.TransportObservers;
+            var transportObserver = context.TransportObservers;
 
             IAgent consumerAgent;
             if (_hostConfiguration.BusConfiguration.DeployTopologyOnly)
@@ -163,8 +162,7 @@
 
             var clientCache = CreateClientCache(InputAddress, _hostConfiguration.Host.MessagingFactoryCache, _hostConfiguration.Host.NamespaceCache);
 
-            var transport = new ReceiveTransport(_hostConfiguration.Host, _settings, context.PublishEndpointProvider, context.SendEndpointProvider,
-                clientCache, clientPipe, transportObserver);
+            var transport = new ReceiveTransport(_hostConfiguration.Host, _settings, clientCache, clientPipe, context);
 
             transport.Add(consumerAgent);
 

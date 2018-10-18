@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Pipeline
 {
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -26,7 +25,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     /// that the exchanges, queues, and bindings for the model are properly configured in AmazonSQS.
     /// </summary>
     public class ConfigureTopologyFilter<TSettings> :
-        IFilter<ModelContext>
+        IFilter<ClientContext>
         where TSettings : class
     {
         readonly BrokerTopology _brokerTopology;
@@ -39,7 +38,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             _brokerTopology = brokerTopology;
         }
 
-        async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
+        async Task IFilter<ClientContext>.Send(ClientContext context, IPipe<ClientContext> next)
         {
             await context.OneTimeSetup<ConfigureTopologyContext<TSettings>>(async payload =>
             {
@@ -61,18 +60,18 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             _brokerTopology.Probe(scope);
         }
 
-        async Task ConfigureTopology(ModelContext context)
+        async Task ConfigureTopology(ClientContext context)
         {
             var topics = _brokerTopology.Topics.Select(topic => Declare(context, topic));
 
             var queues = _brokerTopology.Queues.Select(queue => Declare(context, queue));
 
-            var subscriptions = _brokerTopology.TopicSubscriptions.Select(queue => Declare(context, queue));
+            var subscriptions = _brokerTopology.QueueSubscriptions.Select(queue => Declare(context, queue));
 
             await Task.WhenAll(topics.Concat(queues).Concat(subscriptions)).ConfigureAwait(false);
         }
 
-        async Task DeleteAutoDelete(ModelContext context)
+        async Task DeleteAutoDelete(ClientContext context)
         {
             var topics = _brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic));
 
@@ -81,31 +80,31 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             await Task.WhenAll(topics.Concat(queues)).ConfigureAwait(false);
         }
 
-        Task Declare(ModelContext context, Topic topic)
+        Task Declare(ClientContext context, Topic topic)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Declare topic ({0})", topic);
 
-            return context.GetTopic(topic.EntityName);
+            return context.CreateTopic(topic.EntityName);
         }
 
-        Task Declare(ModelContext context, TopicSubscription subscription)
+        Task Declare(ClientContext context, QueueSubscription subscription)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Binding topic ({0}) to queue ({1})", subscription.Source, subscription.Destination);
 
-            return context.GetTopicSubscription(subscription.Source.EntityName, subscription.Destination.EntityName);
+            return context.CreateQueueSubscription(subscription.Source.EntityName, subscription.Destination.EntityName);
         }
 
-        Task Declare(ModelContext context, Queue queue)
+        Task Declare(ClientContext context, Queue queue)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Declare queue ({0})", queue);
 
-            return context.GetQueue(queue.EntityName);
+            return context.CreateQueue(queue.EntityName);
         }
 
-        Task Delete(ModelContext context, Topic topic)
+        Task Delete(ClientContext context, Topic topic)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Delete topic ({0})", topic);
@@ -113,7 +112,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             return context.DeleteTopic(topic.EntityName);
         }
 
-        Task Delete(ModelContext context, Queue queue)
+        Task Delete(ClientContext context, Queue queue)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Delete queue ({0})", queue);

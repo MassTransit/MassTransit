@@ -28,7 +28,8 @@ namespace MassTransit.Pipeline.Filters
         CancellationToken _cancellationToken;
         CancellationTokenRegistration _registration;
 
-        public ConsumeContextRetryPolicyContext(RetryPolicyContext<ConsumeContext> policyContext, RetryConsumeContext context, CancellationToken cancellationToken)
+        public ConsumeContextRetryPolicyContext(RetryPolicyContext<ConsumeContext> policyContext, RetryConsumeContext context,
+            CancellationToken cancellationToken)
         {
             _policyContext = policyContext;
             _context = context;
@@ -51,7 +52,7 @@ namespace MassTransit.Pipeline.Filters
                 _registration = _cancellationToken.Register(Cancel);
             }
 
-            retryContext = new ConsumeContextRetryContext(policyRetryContext, canRetry ? _context.CreateNext() : _context);
+            retryContext = new ConsumeContextRetryContext(policyRetryContext, canRetry ? _context.CreateNext(policyRetryContext) : _context);
 
             return canRetry;
         }
@@ -102,7 +103,8 @@ namespace MassTransit.Pipeline.Filters
                 _registration = _cancellationToken.Register(Cancel);
             }
 
-            retryContext = new ConsumeContextRetryContext<TFilter, TContext>(policyRetryContext, canRetry ? _context.CreateNext<TContext>() : _context);
+            retryContext = new ConsumeContextRetryContext<TFilter, TContext>(policyRetryContext,
+                canRetry ? _context.CreateNext<TContext>(policyRetryContext) : _context);
 
             return canRetry;
         }

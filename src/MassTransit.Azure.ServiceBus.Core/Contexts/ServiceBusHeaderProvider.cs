@@ -31,6 +31,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         {
             yield return new KeyValuePair<string, object>(nameof(_context.MessageId), _context.MessageId);
             yield return new KeyValuePair<string, object>(nameof(_context.CorrelationId), _context.CorrelationId);
+            yield return new KeyValuePair<string, object>("Content-Type", _context.ContentType);
 
             if (_context.Properties != null)
             {
@@ -41,10 +42,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public bool TryGetHeader(string key, out object value)
         {
-            if (_context.Properties == null)
+            if (_context.Properties != null && _context.Properties.TryGetValue(key, out value))
             {
-                value = null;
-                return false;
+                return true;
             }
 
             if (nameof(_context.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
@@ -59,7 +59,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                 return true;
             }
 
-            return _context.Properties.TryGetValue(key, out value);
+            if ("Content-Type".Equals(key, StringComparison.OrdinalIgnoreCase))
+            {
+                value = _context.ContentType.MediaType;
+                return true;
+            }
+
+            value = default;
+            return false;
         }
     }
 }

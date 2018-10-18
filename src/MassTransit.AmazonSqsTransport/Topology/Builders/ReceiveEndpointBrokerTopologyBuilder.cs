@@ -19,13 +19,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
         BrokerTopologyBuilder,
         IReceiveEndpointBrokerTopologyBuilder
     {
-        public TopicHandle Topic { get; set; }
-
         public QueueHandle Queue { get; set; }
 
         public BrokerTopology BuildTopologyLayout()
         {
-            return new AmazonSqsBrokerTopology(Topics, Queues, TopicSubscriptions);
+            return new AmazonSqsBrokerTopology(Topics, Queues, QueueSubscriptions, TopicSubscriptions);
         }
     }
 }

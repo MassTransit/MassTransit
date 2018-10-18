@@ -48,7 +48,7 @@ namespace MassTransit.ActiveMqTransport.Builders
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            return new ActiveMqConsumerReceiveEndpointContext(_configuration, brokerTopology, ReceiveObservers, TransportObservers, EndpointObservers);
+            return new ActiveMqConsumerReceiveEndpointContext(_configuration, brokerTopology);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)

@@ -32,7 +32,7 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_invoke_the_exception_after_send_failure()
             {
-                var observer = new Observer();
+                var observer = new SendObserver();
                 using (InputQueueSendEndpoint.ConnectSendObserver(observer))
                 {
                     Assert.That(
@@ -46,7 +46,7 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_invoke_the_observer_after_send()
             {
-                var observer = new Observer();
+                var observer = new SendObserver();
                 using (InputQueueSendEndpoint.ConnectSendObserver(observer))
                 {
                     await InputQueueSendEndpoint.Send(new PingMessage());
@@ -58,7 +58,7 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_invoke_the_observer_prior_to_send()
             {
-                var observer = new Observer();
+                var observer = new SendObserver();
                 using (InputQueueSendEndpoint.ConnectSendObserver(observer))
                 {
                     await InputQueueSendEndpoint.Send(new PingMessage());
@@ -70,7 +70,7 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_not_invoke_post_sent_on_exception()
             {
-                var observer = new Observer();
+                var observer = new SendObserver();
                 using (InputQueueSendEndpoint.ConnectSendObserver(observer))
                 {
                     Assert.That(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
@@ -87,13 +87,13 @@ namespace MassTransit.Tests
         public class Connecting_a_send_observer_to_the_bus_A :
             InMemoryTestFixture
         {
-            Observer _observer;
+            SendObserver _observer;
 
             protected override void ConnectObservers(IBus bus)
             {
                 base.ConnectObservers(bus);
 
-                _observer = new Observer();
+                _observer = new SendObserver();
 
                 bus.ConnectSendObserver(_observer);
             }
@@ -113,13 +113,13 @@ namespace MassTransit.Tests
         public class Connecting_a_send_observer_to_the_bus_B :
             InMemoryTestFixture
         {
-            Observer _observer;
+            SendObserver _observer;
 
             protected override void ConnectObservers(IBus bus)
             {
                 base.ConnectObservers(bus);
 
-                _observer = new Observer();
+                _observer = new SendObserver();
 
                 bus.ConnectSendObserver(_observer);
             }
@@ -136,13 +136,13 @@ namespace MassTransit.Tests
         public class Connecting_a_send_observer_to_the_bus_C :
             InMemoryTestFixture
         {
-            Observer _observer;
+            SendObserver _observer;
 
             protected override void ConnectObservers(IBus bus)
             {
                 base.ConnectObservers(bus);
 
-                _observer = new Observer();
+                _observer = new SendObserver();
 
                 bus.ConnectSendObserver(_observer);
             }
@@ -162,13 +162,13 @@ namespace MassTransit.Tests
         public class Connecting_a_send_observer_to_the_bus_D :
             InMemoryTestFixture
         {
-            Observer _observer;
+            SendObserver _observer;
 
             protected override void ConnectObservers(IBus bus)
             {
                 base.ConnectObservers(bus);
 
-                _observer = new Observer();
+                _observer = new SendObserver();
 
                 bus.ConnectSendObserver(_observer);
             }
@@ -186,7 +186,7 @@ namespace MassTransit.Tests
         }
 
 
-        class Observer :
+        class SendObserver :
             ISendObserver
         {
             readonly TaskCompletionSource<SendContext> _postSend = new TaskCompletionSource<SendContext>();

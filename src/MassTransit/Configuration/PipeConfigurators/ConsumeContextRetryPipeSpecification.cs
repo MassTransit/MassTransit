@@ -75,11 +75,11 @@ namespace MassTransit.PipeConfigurators
         where TContext : RetryConsumeContext, TFilter
     {
         readonly CancellationToken _cancellationToken;
-        readonly Func<TFilter, IRetryPolicy, TContext> _contextFactory;
+        readonly Func<TFilter, IRetryPolicy, RetryContext, TContext> _contextFactory;
         readonly RetryObservable _observers;
         RetryPolicyFactory _policyFactory;
 
-        public ConsumeContextRetryPipeSpecification(Func<TFilter, IRetryPolicy, TContext> contextFactory, CancellationToken cancellationToken = default)
+        public ConsumeContextRetryPipeSpecification(Func<TFilter, IRetryPolicy, RetryContext, TContext> contextFactory, CancellationToken cancellationToken = default)
         {
             _contextFactory = contextFactory;
 

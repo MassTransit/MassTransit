@@ -10,26 +10,18 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Transport
+namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
 {
-    using GreenPipes;
-    using GreenPipes.Agents;
+    using AmazonSqsTransport.Configuration;
 
 
-    public class AmazonSqsModelCache :
-        PipeContextSupervisor<ModelContext>,
-        IModelCache
-
+    public class QueueSubscriptionConfigurator :
+        QueueConfigurator,
+        IQueueSubscriptionConfigurator
     {
-        public AmazonSqsModelCache(IAmazonSqsHost host, IConnectionCache connectionCache)
-            : base(new ModelContextFactory(connectionCache, host))
+        protected QueueSubscriptionConfigurator(string queueName, bool durable, bool autoDelete)
+            : base(queueName, durable, autoDelete)
         {
-        }
-
-        public void Probe(ProbeContext context)
-        {
-            if (HasContext)
-                context.Add("connected", true);
         }
     }
 }

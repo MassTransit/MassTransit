@@ -52,7 +52,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
                 specification.Apply(builder);
         }
 
-        public void Bind(Action<ITopicBindingConfigurator> configure = null)
+        public void Bind(Action<ITopicSubscriptionConfigurator> configure = null)
         {
             if (!IsBindableMessageType)
             {

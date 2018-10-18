@@ -38,7 +38,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// Bind an existing exchange for the message type to the receive endpoint by name
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        void Bind<T>(Action<ITopicBindingConfigurator> callback = null)
+        void Subscribe<T>(Action<ITopicSubscriptionConfigurator> callback = null)
             where T : class;
 
         /// <summary>
@@ -46,9 +46,10 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// </summary>
         /// <param name="topicName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Bind(string topicName, Action<ITopicBindingConfigurator> callback);
+        void Subscribe(string topicName, Action<ITopicSubscriptionConfigurator> callback);
 
-        void ConfigureSession(Action<IPipeConfigurator<ModelContext>> configure);
+        void ConfigureClient(Action<IPipeConfigurator<ClientContext>> configure);
+
         void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure);
     }
 }

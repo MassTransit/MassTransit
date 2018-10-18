@@ -17,8 +17,7 @@ namespace MassTransit
 
 
     public interface IPublishEndpointProvider :
-        IPublishObserverConnector,
-        ISendObserverConnector
+        IPublishObserverConnector
     {
         /// <summary>
         /// Creates a publish endpoint, using the optional <see cref="ConsumeContext"/> for the correlation identifiers

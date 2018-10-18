@@ -15,7 +15,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
     /// <summary>
     /// Used to configure the binding of an exchange (to either a queue or another exchange)
     /// </summary>
-    public interface ITopicBindingConfigurator :
+    public interface ITopicSubscriptionConfigurator :
         ITopicConfigurator
     {
     }

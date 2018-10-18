@@ -26,15 +26,25 @@ namespace MassTransit.AmazonSqsTransport.Testing
         Uri _hostAddress;
         Uri _inputQueueAddress;
 
-        public AmazonSqsTestHarness(string inputQueueName = null)
+        public AmazonSqsTestHarness(string host, string accessKey, string secretKey)
+        {
+            HostAddress = new Uri("amazonsqs://" + host);
+
+            AccessKey = accessKey;
+            SecretKey = secretKey;
+
+            InputQueueName = "input_queue";
+        }
+
+        public AmazonSqsTestHarness()
         {
             AccessKey = "admin";
             SecretKey = "admin";
 
-            AmazonSqsConfig = new AmazonSQSConfig { ServiceURL = "http://docker.localhost:4576" };
-            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://docker.localhost:4575" };
+            AmazonSqsConfig = new AmazonSQSConfig {ServiceURL = "http://docker.localhost:4576"};
+            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://docker.localhost:4575"};
 
-            InputQueueName = inputQueueName ?? "input_queue";
+            InputQueueName = "input_queue";
 
             HostAddress = new Uri("amazonsqs://docker.localhost:4576");
         }
@@ -49,8 +59,8 @@ namespace MassTransit.AmazonSqsTransport.Testing
             }
         }
 
-        public string AccessKey { get; private set; }
-        public string SecretKey { get; private set; }
+        public string AccessKey { get; }
+        public string SecretKey { get; }
         public AmazonSQSConfig AmazonSqsConfig { get; private set; }
         public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; private set; }
         public string InputQueueName { get; }
@@ -60,7 +70,7 @@ namespace MassTransit.AmazonSqsTransport.Testing
 
         public event Action<IAmazonSqsBusFactoryConfigurator> OnConfigureAmazonSqsBus;
         public event Action<IAmazonSqsBusFactoryConfigurator, IAmazonSqsHost> OnConfigureAmazonSqsBusHost;
-        public event Action<IAmazonSqsReceiveEndpointConfigurator> OnConfigureAmazonSqsReceiveEndoint;
+        public event Action<IAmazonSqsReceiveEndpointConfigurator> OnConfigureAmazonSqsReceiveEndpoint;
         public event Action<IAmazonSqsHostConfigurator> OnConfigureAmazonSqsHost;
         public event Action<IAmazonSQS, IAmazonSimpleNotificationService> OnCleanupVirtualHost;
 
@@ -76,7 +86,7 @@ namespace MassTransit.AmazonSqsTransport.Testing
 
         protected virtual void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
-            OnConfigureAmazonSqsReceiveEndoint?.Invoke(configurator);
+            OnConfigureAmazonSqsReceiveEndpoint?.Invoke(configurator);
         }
 
         protected virtual void ConfigureAmazonSqsHost(IAmazonSqsHostConfigurator configurator)
@@ -95,8 +105,12 @@ namespace MassTransit.AmazonSqsTransport.Testing
             {
                 h.AccessKey(AccessKey);
                 h.SecretKey(SecretKey);
-                h.Config(AmazonSqsConfig);
-                h.Config(AmazonSnsConfig);
+
+                if (AmazonSqsConfig != null)
+                    h.Config(AmazonSqsConfig);
+
+                if (AmazonSnsConfig != null)
+                    h.Config(AmazonSnsConfig);
 
                 ConfigureAmazonSqsHost(h);
             });
@@ -108,7 +122,7 @@ namespace MassTransit.AmazonSqsTransport.Testing
             {
                 Host = ConfigureHost(x);
 
-                CleanUpVirtualHost(Host);
+               // CleanUpVirtualHost(Host);
 
                 ConfigureBus(x);
 
@@ -134,17 +148,16 @@ namespace MassTransit.AmazonSqsTransport.Testing
         {
             try
             {
-                using (var connection = host.Settings.CreateConnection())
-                {
-                    var amazonSqs = connection.CreateAmazonSqsClient();
-                    var amazonSns = connection.CreateAmazonSnsClient();
+                var connection = host.Settings.CreateConnection();
 
-                    CleanUpQueue(amazonSqs, amazonSns, "input_queue");
+                var amazonSqs = connection.CreateAmazonSqsClient();
+                var amazonSns = connection.CreateAmazonSnsClient();
 
-                    CleanUpQueue(amazonSqs, amazonSns, InputQueueName);
+                CleanUpQueue(amazonSqs, amazonSns, "input_queue");
 
-                    CleanupVirtualHost(amazonSqs, amazonSns);
-                }
+                CleanUpQueue(amazonSqs, amazonSns, InputQueueName);
+
+                CleanupVirtualHost(amazonSqs, amazonSns);
             }
             catch (Exception exception)
             {

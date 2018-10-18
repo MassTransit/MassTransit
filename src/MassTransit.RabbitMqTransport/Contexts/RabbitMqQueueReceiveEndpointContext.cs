@@ -12,14 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Contexts
 {
-    using System;
     using Configuration;
     using Context;
-    using MassTransit.Pipeline.Observables;
     using Topology;
     using Topology.Builders;
     using Transport;
-    using Transports;
 
 
     public class RabbitMqQueueReceiveEndpointContext :
@@ -27,20 +24,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
         RabbitMqReceiveEndpointContext
     {
         readonly IRabbitMqReceiveEndpointConfiguration _configuration;
-        readonly Lazy<ISendTransportProvider> _sendTransportProvider;
-        readonly Lazy<IPublishTransportProvider> _publishTransportProvider;
         readonly IRabbitMqPublishTopology _publishTopology;
 
-        public RabbitMqQueueReceiveEndpointContext(IRabbitMqReceiveEndpointConfiguration configuration, BrokerTopology brokerTopology,
-            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
-            : base(configuration, receiveObservers, transportObservers, endpointObservers)
+        public RabbitMqQueueReceiveEndpointContext(IRabbitMqReceiveEndpointConfiguration configuration, BrokerTopology brokerTopology)
+            : base(configuration)
         {
             _configuration = configuration;
             BrokerTopology = brokerTopology;
             _publishTopology = configuration.Topology.Publish;
-
-            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
-            _publishTransportProvider = new Lazy<IPublishTransportProvider>(CreatePublishTransportProvider);
         }
 
         public BrokerTopology BrokerTopology { get; }
@@ -57,25 +48,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return PublishEndpointProvider;
         }
 
-        ISendTransportProvider CreateSendTransportProvider()
+        protected override ISendTransportProvider CreateSendTransportProvider()
         {
             return new SendTransportProvider(_configuration);
         }
 
-        IPublishTransportProvider CreatePublishTransportProvider()
+        protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
             return new PublishTransportProvider(_configuration.Host, _publishTopology);
-        }
-
-        protected override ISendEndpointProvider CreateSendEndpointProvider()
-        {
-            return new SendEndpointProvider(_sendTransportProvider.Value, SendObservers, Serializer, InputAddress, SendPipe);
-        }
-
-        protected override IPublishEndpointProvider CreatePublishEndpointProvider()
-        {
-            return new PublishEndpointProvider(_publishTransportProvider.Value, _configuration.HostAddress, PublishObservers, SendObservers, Serializer,
-                InputAddress, PublishPipe, _publishTopology);
         }
     }
 }

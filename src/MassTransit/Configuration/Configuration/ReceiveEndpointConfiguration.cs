@@ -20,6 +20,7 @@ namespace MassTransit.Configuration
     using Context;
     using GreenPipes;
     using Pipeline;
+    using Pipeline.Observables;
     using Saga;
     using SagaConfigurators;
     using Transports;
@@ -42,7 +43,15 @@ namespace MassTransit.Configuration
             _consumePipe = new Lazy<IConsumePipe>(() => _configuration.Consume.CreatePipe());
             _specifications = new List<IReceiveEndpointSpecification>();
             _lateConfigurationKeys = new List<string>();
+
+            EndpointObservers = new ReceiveEndpointObservable();
+            ReceiveObservers = new ReceiveObservable();
+            TransportObservers = new ReceiveTransportObservable();
         }
+
+        public ReceiveEndpointObservable EndpointObservers { get; }
+        public ReceiveObservable ReceiveObservers { get; }
+        public ReceiveTransportObservable TransportObservers { get; }
 
         public IConsumePipeConfiguration Consume => _configuration.Consume;
         public ISendPipeConfiguration Send => _configuration.Send;

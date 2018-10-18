@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using Builders;
-    using Context;
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Builders;
@@ -14,7 +13,6 @@
     using Topology;
     using Topology.Settings;
     using Transport;
-    using Transports;
 
 
     public class AmazonSqsReceiveEndpointConfiguration :
@@ -26,19 +24,18 @@
         readonly IAmazonSqsEndpointConfiguration _endpointConfiguration;
         readonly IAmazonSqsHostConfiguration _hostConfiguration;
         readonly Lazy<Uri> _inputAddress;
-        readonly IBuildPipeConfigurator<ModelContext> _modelConfigurator;
-        readonly AmazonSqsReceiveSettings _settings;
+        readonly IBuildPipeConfigurator<ClientContext> _clientConfigurator;
+        readonly QueueReceiveSettings _settings;
 
-        public AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, string queueName,
-            IAmazonSqsEndpointConfiguration endpointConfiguration)
+        public AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, string queueName, IAmazonSqsEndpointConfiguration endpointConfiguration)
             : this(hostConfiguration, endpointConfiguration)
         {
             BindMessageTopics = true;
 
-            _settings = new AmazonSqsReceiveSettings(queueName, true, false);
+            _settings = new QueueReceiveSettings(queueName, true, false);
         }
 
-        public AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, AmazonSqsReceiveSettings settings,
+        public AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, QueueReceiveSettings settings,
             IAmazonSqsEndpointConfiguration endpointConfiguration)
             : this(hostConfiguration, endpointConfiguration)
         {
@@ -52,7 +49,7 @@
             _endpointConfiguration = endpointConfiguration;
 
             _connectionConfigurator = new PipeConfigurator<ConnectionContext>();
-            _modelConfigurator = new PipeConfigurator<ModelContext>();
+            _clientConfigurator = new PipeConfigurator<ClientContext>();
 
             HostAddress = hostConfiguration.Host.Address;
 
@@ -81,40 +78,32 @@
 
             ApplySpecifications(builder);
 
-            var receivePipe = CreateReceivePipe();
-
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
-            _modelConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
+            _clientConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
 
             IAgent consumerAgent;
             if (_hostConfiguration.BusConfiguration.DeployTopologyOnly)
             {
-                var transportReadyFilter = new TransportReadyFilter<ModelContext>(builder.TransportObservers, InputAddress);
-                _modelConfigurator.UseFilter(transportReadyFilter);
+                var transportReadyFilter = new TransportReadyFilter<ClientContext>(receiveEndpointContext.TransportObservers, InputAddress);
+                _clientConfigurator.UseFilter(transportReadyFilter);
 
                 consumerAgent = transportReadyFilter;
             }
             else
             {
-                var deadLetterTransport = CreateDeadLetterTransport();
+                var consumerFilter = new AmazonSqsConsumerFilter(receiveEndpointContext);
 
-                var errorTransport = CreateErrorTransport();
-
-                var consumerFilter = new AmazonSqsConsumerFilter(receivePipe, builder.ReceiveObservers, builder.TransportObservers, receiveEndpointContext,
-                    deadLetterTransport, errorTransport);
-
-                _modelConfigurator.UseFilter(consumerFilter);
+                _clientConfigurator.UseFilter(consumerFilter);
 
                 consumerAgent = consumerFilter;
             }
 
-            IFilter<ConnectionContext> sessionFilter = new ReceiveModelFilter(_modelConfigurator.Build(), _hostConfiguration.Host);
+            IFilter<ConnectionContext> clientFilter = new ReceiveClientFilter(_clientConfigurator.Build(), _hostConfiguration.Host);
 
-            _connectionConfigurator.UseFilter(sessionFilter);
+            _connectionConfigurator.UseFilter(clientFilter);
 
-            var transport = new AmazonSqsReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext,
-                builder.ReceiveObservers, builder.TransportObservers);
+            var transport = new SqsReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
 
             transport.Add(consumerAgent);
 
@@ -166,7 +155,7 @@
             set => _settings.Lazy = value;
         }
 
-        public void Bind(string topicName, Action<ITopicBindingConfigurator> configure = null)
+        public void Subscribe(string topicName, Action<ITopicSubscriptionConfigurator> configure = null)
         {
             if (topicName == null)
                 throw new ArgumentNullException(nameof(topicName));
@@ -174,15 +163,15 @@
             _endpointConfiguration.Topology.Consume.Bind(topicName, configure);
         }
 
-        public void Bind<T>(Action<ITopicBindingConfigurator> configure = null)
+        public void Subscribe<T>(Action<ITopicSubscriptionConfigurator> configure = null)
             where T : class
         {
             _endpointConfiguration.Topology.Consume.GetMessageTopology<T>().Bind(configure);
         }
 
-        public void ConfigureSession(Action<IPipeConfigurator<ModelContext>> configure)
+        public void ConfigureClient(Action<IPipeConfigurator<ClientContext>> configure)
         {
-            configure?.Invoke(_modelConfigurator);
+            configure?.Invoke(_clientConfigurator);
         }
 
         public void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure)
@@ -193,22 +182,6 @@
         Uri FormatInputAddress()
         {
             return _settings.GetInputAddress(_hostConfiguration.Host.Settings.HostAddress);
-        }
-
-        IErrorTransport CreateErrorTransport()
-        {
-            var errorSettings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings);
-            var filter = new ConfigureTopologyFilter<ErrorSettings>(errorSettings, errorSettings.GetBrokerTopology());
-
-            return new AmazonSqsErrorTransport(errorSettings.EntityName, filter);
-        }
-
-        IDeadLetterTransport CreateDeadLetterTransport()
-        {
-            var deadLetterSettings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings);
-            var filter = new ConfigureTopologyFilter<DeadLetterSettings>(deadLetterSettings, deadLetterSettings.GetBrokerTopology());
-
-            return new AmazonSqsDeadLetterTransport(deadLetterSettings.EntityName, filter);
         }
 
         protected override bool IsAlreadyConfigured()

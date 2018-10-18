@@ -31,7 +31,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
     {
         readonly IAmazonSqsBusConfiguration _configuration;
         readonly IAmazonSqsEndpointConfiguration _busEndpointConfiguration;
-        readonly AmazonSqsReceiveSettings _settings;
+        readonly QueueReceiveSettings _settings;
 
         public AmazonSqsBusFactoryConfigurator(IAmazonSqsBusConfiguration configuration, IAmazonSqsEndpointConfiguration busEndpointConfiguration)
             : base(configuration, busEndpointConfiguration)
@@ -40,7 +40,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             _busEndpointConfiguration = busEndpointConfiguration;
 
             var queueName = _configuration.Topology.Consume.CreateTemporaryQueueName("bus-");
-            _settings = new AmazonSqsReceiveSettings(queueName, false, true);
+            _settings = new QueueReceiveSettings(queueName, false, true);
         }
 
         public IBusControl CreateBus()

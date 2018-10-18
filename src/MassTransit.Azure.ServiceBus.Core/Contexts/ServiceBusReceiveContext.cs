@@ -20,7 +20,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using Context;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
-    using Microsoft.Azure.ServiceBus.InteropExtensions;
 
 
     public sealed class ServiceBusReceiveContext :

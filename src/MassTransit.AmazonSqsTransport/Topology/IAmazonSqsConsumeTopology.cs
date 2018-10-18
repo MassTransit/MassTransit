@@ -35,7 +35,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// </summary>
         /// <param name="topicName"></param>
         /// <param name="configure"></param>
-        void Bind(string topicName, Action<ITopicBindingConfigurator> configure = null);
+        void Bind(string topicName, Action<ITopicSubscriptionConfigurator> configure = null);
 
         string CreateTemporaryQueueName(string prefix);
     }

@@ -27,7 +27,8 @@ namespace MassTransit.PipeConfigurators
         readonly CancellationToken _cancellationToken;
         readonly Action<IRetryConfigurator> _configure;
 
-        public RetryConfigurationObserver(IConsumePipeConfigurator receiveEndpointConfigurator, CancellationToken cancellationToken, Action<IRetryConfigurator> configure)
+        public RetryConfigurationObserver(IConsumePipeConfigurator receiveEndpointConfigurator, CancellationToken cancellationToken,
+            Action<IRetryConfigurator> configure)
             : base(receiveEndpointConfigurator)
         {
             _cancellationToken = cancellationToken;
@@ -46,10 +47,10 @@ namespace MassTransit.PipeConfigurators
             configurator.AddPipeSpecification(specification);
         }
 
-        static RetryConsumeContext<TMessage> Factory<TMessage>(ConsumeContext<TMessage> context, IRetryPolicy retryPolicy)
+        static RetryConsumeContext<TMessage> Factory<TMessage>(ConsumeContext<TMessage> context, IRetryPolicy retryPolicy, RetryContext retryContext)
             where TMessage : class
         {
-            return new RetryConsumeContext<TMessage>(context, retryPolicy);
+            return new RetryConsumeContext<TMessage>(context, retryPolicy, retryContext);
         }
     }
 }

@@ -19,6 +19,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using Amazon.SQS;
     using GreenPipes;
     using Topology;
+    using Transport;
 
 
     public class SharedConnectionContext :

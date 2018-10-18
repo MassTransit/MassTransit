@@ -31,7 +31,7 @@ namespace MassTransit.HttpTransport.Builders
 
         public HttpReceiveEndpointContext CreateReceiveEndpointContext()
         {
-            return new HttpTransportReceiveEndpointContext(_configuration, ReceiveObservers, TransportObservers, EndpointObservers);
+            return new HttpTransportReceiveEndpointContext(_configuration);
         }
     }
 }

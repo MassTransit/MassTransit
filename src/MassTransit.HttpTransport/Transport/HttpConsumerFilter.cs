@@ -29,18 +29,14 @@ namespace MassTransit.HttpTransport.Transport
     {
         static readonly ILog _log = Logger.Get<HttpConsumerFilter>();
         readonly HttpHostSettings _hostSettings;
-        readonly IReceiveObserver _receiveObserver;
         readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         readonly HttpReceiveEndpointContext _context;
-        readonly IReceiveTransportObserver _transportObserver;
 
-        public HttpConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver,
-            HttpHostSettings hostSettings, ReceiveSettings receiveSettings, HttpReceiveEndpointContext context)
+        public HttpConsumerFilter(IPipe<ReceiveContext> receivePipe, HttpHostSettings hostSettings, ReceiveSettings receiveSettings,
+            HttpReceiveEndpointContext context)
         {
             _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
-            _transportObserver = transportObserver;
             _hostSettings = hostSettings;
             _receiveSettings = receiveSettings;
             _context = context;
@@ -55,7 +51,7 @@ namespace MassTransit.HttpTransport.Transport
         {
             var inputAddress = context.HostSettings.GetInputAddress();
 
-            var consumer = new HttpConsumer(_receiveObserver, _hostSettings, _receivePipe, _context);
+            var consumer = new HttpConsumer(_hostSettings, _receivePipe, _context);
 
             context.RegisterEndpointHandler(_receiveSettings.PathMatch, consumer);
 
@@ -63,7 +59,7 @@ namespace MassTransit.HttpTransport.Transport
 
             Add(consumer);
 
-            await _transportObserver.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
+            await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 
             try
             {
@@ -72,7 +68,7 @@ namespace MassTransit.HttpTransport.Transport
             finally
             {
                 HttpConsumerMetrics metrics = consumer;
-                await _transportObserver.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
+                await _context.TransportObservers.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Consumer {0} received, {1} concurrent", metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);

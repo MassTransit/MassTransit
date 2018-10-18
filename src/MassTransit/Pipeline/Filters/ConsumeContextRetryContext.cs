@@ -29,9 +29,6 @@ namespace MassTransit.Pipeline.Filters
         {
             _retryContext = retryContext;
             _context = context;
-
-            _context.RetryAttempt = retryContext.RetryAttempt;
-            _context.RetryCount = retryContext.RetryCount;
         }
 
         public CancellationToken CancellationToken => _retryContext.CancellationToken;
@@ -64,7 +61,7 @@ namespace MassTransit.Pipeline.Filters
         {
             var canRetry = _retryContext.CanRetry(exception, out RetryContext<ConsumeContext> policyRetryContext);
 
-            retryContext = new ConsumeContextRetryContext(policyRetryContext, canRetry ? _context.CreateNext() : _context);
+            retryContext = new ConsumeContextRetryContext(policyRetryContext, canRetry ? _context.CreateNext(policyRetryContext) : _context);
 
             return canRetry;
         }
@@ -83,9 +80,6 @@ namespace MassTransit.Pipeline.Filters
         {
             _retryContext = retryContext;
             _context = context;
-
-            _context.RetryAttempt = retryContext.RetryAttempt;
-            _context.RetryCount = retryContext.RetryCount;
         }
 
         public CancellationToken CancellationToken => _retryContext.CancellationToken;
@@ -118,7 +112,8 @@ namespace MassTransit.Pipeline.Filters
         {
             var canRetry = _retryContext.CanRetry(exception, out RetryContext<TFilter> policyRetryContext);
 
-            retryContext = new ConsumeContextRetryContext<TFilter, TContext>(policyRetryContext, canRetry ? _context.CreateNext<TContext>() : _context);
+            retryContext = new ConsumeContextRetryContext<TFilter, TContext>(policyRetryContext,
+                canRetry ? _context.CreateNext<TContext>(policyRetryContext) : _context);
 
             return canRetry;
         }

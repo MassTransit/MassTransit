@@ -17,8 +17,6 @@ namespace MassTransit.HttpTransport.Transport
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
-    using MassTransit.Pipeline.Observables;
-    using Topology;
     using Transports;
 
 
@@ -28,28 +26,13 @@ namespace MassTransit.HttpTransport.Transport
     {
         readonly IHttpHost _host;
         readonly IPipe<HttpHostContext> _hostPipe;
-        readonly ReceiveObservable _receiveObservable;
-        readonly ReceiveTransportObservable _receiveTransportObservable;
-        readonly HttpReceiveEndpointContext _context;
+        readonly HttpReceiveEndpointContext _receiveEndpointContext;
 
-        public HttpReceiveTransport(IHttpHost host, HttpReceiveEndpointContext context, ReceiveObservable receiveObservable,
-            ReceiveTransportObservable receiveTransportObservable, IPipe<HttpHostContext> hostPipe)
+        public HttpReceiveTransport(IHttpHost host, HttpReceiveEndpointContext receiveEndpointContext, IPipe<HttpHostContext> hostPipe)
         {
             _host = host;
-            _context = context;
-            _receiveObservable = receiveObservable;
-            _receiveTransportObservable = receiveTransportObservable;
+            _receiveEndpointContext = receiveEndpointContext;
             _hostPipe = hostPipe;
-        }
-
-        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
-        {
-            return _receiveTransportObservable.Connect(observer);
-        }
-
-        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
-        {
-            return _receiveObservable.Connect(observer);
         }
 
         public void Probe(ProbeContext context)
@@ -66,14 +49,24 @@ namespace MassTransit.HttpTransport.Transport
             return new Handle(this);
         }
 
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _context.ConnectPublishObserver(observer);
+            return _receiveEndpointContext.ConnectReceiveObserver(observer);
         }
 
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _context.ConnectSendObserver(observer);
+            return _receiveEndpointContext.ConnectReceiveTransportObserver(observer);
+        }
+
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _receiveEndpointContext.ConnectPublishObserver(observer);
+        }
+
+        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        {
+            return _receiveEndpointContext.ConnectSendObserver(observer);
         }
 
 

@@ -20,6 +20,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
     public abstract class BrokerTopologyBuilder
     {
         long _nextId;
+        protected NamedEntityCollection<QueueSubscriptionEntity, QueueSubscriptionHandle> QueueSubscriptions;
         protected NamedEntityCollection<TopicSubscriptionEntity, TopicSubscriptionHandle> TopicSubscriptions;
         protected NamedEntityCollection<TopicEntity, TopicHandle> Topics;
         protected NamedEntityCollection<QueueEntity, QueueHandle> Queues;
@@ -28,6 +29,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
         {
             Topics = new NamedEntityCollection<TopicEntity, TopicHandle>(TopicEntity.EntityComparer, TopicEntity.NameComparer);
             Queues = new NamedEntityCollection<QueueEntity, QueueHandle>(QueueEntity.QueueComparer, QueueEntity.NameComparer);
+            QueueSubscriptions = new NamedEntityCollection<QueueSubscriptionEntity, QueueSubscriptionHandle>(QueueSubscriptionEntity.EntityComparer, QueueSubscriptionEntity.NameComparer);
             TopicSubscriptions = new NamedEntityCollection<TopicSubscriptionEntity, TopicSubscriptionHandle>(TopicSubscriptionEntity.EntityComparer, TopicSubscriptionEntity.NameComparer);
         }
 
@@ -54,7 +56,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
             return Queues.GetOrAdd(queueEntity);
         }
 
-        public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle topic, QueueHandle queue)
+        public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle topic, QueueHandle queue)
         {
             var id = GetNextId();
 
@@ -62,7 +64,20 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
 
             var queueEntity = Queues.Get(queue);
 
-            var binding = new TopicSubscriptionEntity(id, topicEntity, queueEntity);
+            var binding = new QueueSubscriptionEntity(id, topicEntity, queueEntity);
+
+            return QueueSubscriptions.GetOrAdd(binding);
+        }
+
+        public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination)
+        {
+            var id = GetNextId();
+
+            var sourceEntity = Topics.Get(source);
+
+            var destinationEntity = Topics.Get(destination);
+
+            var binding = new TopicSubscriptionEntity(id, sourceEntity, destinationEntity);
 
             return TopicSubscriptions.GetOrAdd(binding);
         }

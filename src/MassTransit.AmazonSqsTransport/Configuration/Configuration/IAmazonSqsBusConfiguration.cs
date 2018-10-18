@@ -73,7 +73,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
         /// <param name="settings"></param>
         /// <param name="endpointConfiguration"></param>
         /// <returns></returns>
-        IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(AmazonSqsReceiveSettings settings,
+        IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
             IAmazonSqsEndpointConfiguration endpointConfiguration);
     }
 }

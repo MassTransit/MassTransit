@@ -21,7 +21,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
         IQueueConfigurator,
         Queue
     {
-        public QueueConfigurator(string queueName, bool durable = true, bool autoDelete = false)
+        protected QueueConfigurator(string queueName, bool durable = true, bool autoDelete = false)
             : base(queueName, durable, autoDelete)
         {
         }

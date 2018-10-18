@@ -13,23 +13,23 @@
 namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System.Threading.Tasks;
-    using Amazon.SimpleNotificationService.Model;
+    using Amazon.SQS.Model;
     using GreenPipes;
     using Transports;
 
 
-    public class AmazonSqsDeadLetterTransport :
-        AmazonSqsMoveTransport,
+    public class SqsDeadLetterTransport :
+        SqsMoveTransport,
         IDeadLetterTransport
     {
-        public AmazonSqsDeadLetterTransport(string destination, IFilter<ModelContext> topologyFilter)
+        public SqsDeadLetterTransport(string destination, IFilter<ClientContext> topologyFilter)
             : base(destination, topologyFilter)
         {
         }
 
         public Task Send(ReceiveContext context, string reason)
         {
-            void PreSend(PublishRequest message, SendHeaders headers)
+            void PreSend(SendMessageRequest sendMessageRequest, SendHeaders headers)
             {
                 headers.Set(MessageHeaders.Reason, reason ?? "Unspecified");
             }

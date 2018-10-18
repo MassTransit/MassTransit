@@ -23,14 +23,8 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using GreenPipes.Internals.Extensions;
     using Logging;
     using Topology;
-    using Transports;
     using Transports.Metrics;
 
-
-    public interface IBasicConsumer
-    {
-        Task HandleMessage(Message message);
-    }
 
     /// <summary>
     /// Receives messages from AmazonSQS, pushing them to the InboundPipe of the service endpoint.
@@ -40,47 +34,30 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         IBasicConsumer,
         DeliveryMetrics
     {
-        readonly IDeadLetterTransport _deadLetterTransport;
         readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly IErrorTransport _errorTransport;
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<AmazonSqsBasicConsumer>();
-        readonly ModelContext _model;
-        readonly string _queueUrl;
+        readonly ClientContext _client;
         readonly ConcurrentDictionary<string, AmazonSqsReceiveContext> _pending;
-        readonly IReceiveObserver _receiveObserver;
-        readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
-        readonly AmazonSqsReceiveEndpointContext _context;
+        readonly SqsReceiveEndpointContext _context;
         readonly IDeliveryTracker _tracker;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
         /// </summary>
-        /// <param name="model">The model context for the consumer</param>
-        /// <param name="queueUrl"></param>
+        /// <param name="client">The model context for the consumer</param>
         /// <param name="inputAddress">The input address for messages received by the consumer</param>
-        /// <param name="receivePipe">The receive pipe to dispatch messages</param>
-        /// <param name="receiveObserver">The observer for receive events</param>
         /// <param name="context">The topology</param>
-        /// <param name="deadLetterTransport"></param>
-        /// <param name="errorTransport"></param>
-        public AmazonSqsBasicConsumer(ModelContext model, string queueUrl, Uri inputAddress, IPipe<ReceiveContext> receivePipe,
-            IReceiveObserver receiveObserver, AmazonSqsReceiveEndpointContext context,
-            IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+        public AmazonSqsBasicConsumer(ClientContext client, Uri inputAddress, SqsReceiveEndpointContext context)
         {
-            _model = model;
-            _queueUrl = queueUrl;
+            _client = client;
             _inputAddress = inputAddress;
-            _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
             _context = context;
-            _deadLetterTransport = deadLetterTransport;
-            _errorTransport = errorTransport;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
-            _receiveSettings = model.GetPayload<ReceiveSettings>();
+            _receiveSettings = client.GetPayload<ReceiveSettings>();
 
             _pending = new ConcurrentDictionary<string, AmazonSqsReceiveContext>();
 
@@ -93,21 +70,21 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         {
             if (IsStopping)
             {
-                await WaitAndAbandonMessage(message).ConfigureAwait(false);
+                await WaitAndAbandonMessage().ConfigureAwait(false);
                 return;
             }
 
-            using (var delivery = _tracker.BeginDelivery())
+            using (_tracker.BeginDelivery())
             {
-                var redelivered = message.Attributes.ContainsKey("ApproximateReceiveCount") && (int.TryParse(message.Attributes["ApproximateReceiveCount"], out var approximateReceiveCount) && approximateReceiveCount > 1);
+                var redelivered = message.Attributes.ContainsKey("ApproximateReceiveCount")
+                    && (int.TryParse(message.Attributes["ApproximateReceiveCount"], out var receiveCount)
+                        && receiveCount > 1);
+
                 var context = new AmazonSqsReceiveContext(_inputAddress, message, redelivered, _context);
 
-                context.GetOrAddPayload(() => _errorTransport);
-                context.GetOrAddPayload(() => _deadLetterTransport);
-
                 context.GetOrAddPayload(() => _receiveSettings);
-                context.GetOrAddPayload(() => _model);
-                context.GetOrAddPayload(() => _model.ConnectionContext);
+                context.GetOrAddPayload(() => _client);
+                context.GetOrAddPayload(() => _client.ConnectionContext);
 
                 try
                 {
@@ -115,29 +92,19 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                         if (_log.IsErrorEnabled)
                             _log.ErrorFormat("Duplicate BasicDeliver: {0}", message.MessageId);
 
-                    await _receiveObserver.PreReceive(context).ConfigureAwait(false);
+                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
-                    await _receivePipe.Send(context).ConfigureAwait(false);
+                    await _context.ReceivePipe.Send(context).ConfigureAwait(false);
 
                     await context.ReceiveCompleted.ConfigureAwait(false);
 
-                    // Acknowledge
-                    await _model.DeleteMessage(_queueUrl, message.ReceiptHandle);
+                    await _client.DeleteMessage(_receiveSettings.EntityName, message.ReceiptHandle);
 
-                    await _receiveObserver.PostReceive(context).ConfigureAwait(false);
+                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await _receiveObserver.ReceiveFault(context, ex).ConfigureAwait(false);
-                    try
-                    {
-                        //_model.BasicNack(deliveryTag, false, true);
-                    }
-                    catch (Exception ackEx)
-                    {
-                        if (_log.IsErrorEnabled)
-                            _log.ErrorFormat("An error occurred trying to NACK a message with delivery tag {0}: {1}", message.MessageId, ackEx.ToString());
-                    }
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -163,7 +130,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             }
         }
 
-        async Task WaitAndAbandonMessage(Message message)
+        async Task WaitAndAbandonMessage()
         {
             try
             {
@@ -202,17 +169,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                         _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _context.InputAddress);
                 }
             }
-
-            //try
-            //{
-            //    _messageConsumer.Close();
-            //    _messageConsumer.Dispose();
-            //}
-            //catch (OperationCanceledException)
-            //{
-            //    if (_log.IsWarnEnabled)
-            //        _log.WarnFormat("Exception canceling the consumer: {0}", _context.InputAddress);
-            //}
         }
     }
 }

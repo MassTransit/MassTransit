@@ -19,7 +19,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
     /// Creates and caches a model on the connection
     /// </summary>
     public interface IModelCache :
-        ISupervisor<ModelContext>
+        ISupervisor<ClientContext>
     {
     }
 }

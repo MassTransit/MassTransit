@@ -16,6 +16,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
     using Amazon;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
+    using Transport;
 
 
     public class ConfigurationHostSettings :

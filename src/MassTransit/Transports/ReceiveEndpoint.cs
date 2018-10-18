@@ -64,7 +64,7 @@ namespace MassTransit.Transports
 
         ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
-            return _context.EndpointObservers.Connect(observer);
+            return _context.ConnectReceiveEndpointObserver(observer);
         }
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)

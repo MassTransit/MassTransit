@@ -91,7 +91,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             IAgent consumerAgent;
             if (_hostConfiguration.BusConfiguration.DeployTopologyOnly)
             {
-                var transportReadyFilter = new TransportReadyFilter<ModelContext>(builder.TransportObservers, InputAddress);
+                var transportReadyFilter = new TransportReadyFilter<ModelContext>(receiveEndpointContext.TransportObservers, InputAddress);
                 _modelConfigurator.UseFilter(transportReadyFilter);
 
                 consumerAgent = transportReadyFilter;

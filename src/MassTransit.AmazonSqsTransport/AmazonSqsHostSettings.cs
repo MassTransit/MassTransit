@@ -14,6 +14,7 @@ namespace MassTransit.AmazonSqsTransport
 {
     using System;
     using Amazon;
+    using Transport;
 
 
     /// <summary>
@@ -41,6 +42,4 @@ namespace MassTransit.AmazonSqsTransport
 
         IConnection CreateConnection();
     }
-
-
 }

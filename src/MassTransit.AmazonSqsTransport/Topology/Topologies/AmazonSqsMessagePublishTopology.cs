@@ -64,7 +64,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
         {
-            publishAddress = GetSendSettings().GetSendAddress(baseAddress);
+            publishAddress = GetPublishSettings().GetSendAddress(baseAddress);
             return true;
         }
 
@@ -85,9 +85,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
                 configurator.Apply(builder);
         }
 
-        public SendSettings GetSendSettings()
+        public PublishSettings GetPublishSettings()
         {
-            return new AmazonSqsSendSettings(_topic.EntityName, _topic.Durable, _topic.AutoDelete);
+            return new TopicPublishSettings(_topic.EntityName, _topic.Durable, _topic.AutoDelete);
         }
 
         public BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options)

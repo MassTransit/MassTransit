@@ -14,7 +14,6 @@ namespace MassTransit.Transports.InMemory.Contexts
 {
     using Configuration;
     using Context;
-    using Pipeline.Observables;
     using Topology.Configurators;
 
 
@@ -24,27 +23,22 @@ namespace MassTransit.Transports.InMemory.Contexts
         readonly IInMemoryPublishTopologyConfigurator _publish;
         readonly ISendTransportProvider _sendTransportProvider;
 
-        public InMemoryReceiveEndpointContext(IInMemoryReceiveEndpointConfiguration configuration, ISendTransportProvider sendTransportProvider,
-            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
-            : base(configuration, receiveObservers, transportObservers, endpointObservers)
+        public InMemoryReceiveEndpointContext(IInMemoryReceiveEndpointConfiguration configuration, ISendTransportProvider sendTransportProvider)
+            : base(configuration)
         {
             _sendTransportProvider = sendTransportProvider;
 
             _publish = configuration.Topology.Publish;
         }
 
-        protected override ISendEndpointProvider CreateSendEndpointProvider()
+        protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendEndpointProvider(_sendTransportProvider, SendObservers, Serializer, InputAddress, SendPipe);
+            return _sendTransportProvider;
         }
 
-        protected override IPublishEndpointProvider CreatePublishEndpointProvider()
+        protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            var transportProvider = new InMemoryPublishTransportProvider(_sendTransportProvider, _publish);
-
-            var sendObserversAreAutomaticallyConnected = new SendObservable();
-            return new PublishEndpointProvider(transportProvider, HostAddress, PublishObservers, sendObserversAreAutomaticallyConnected, Serializer, InputAddress, PublishPipe,
-                _publish);
+            return new InMemoryPublishTransportProvider(_sendTransportProvider, _publish);
         }
     }
 }

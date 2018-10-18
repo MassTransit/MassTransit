@@ -17,7 +17,6 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Contexts
     using Logging;
     using MassTransit.Configuration;
     using Microsoft.Azure.WebJobs;
-    using Pipeline.Observables;
     using Topology;
     using Transports;
 
@@ -30,9 +29,8 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Contexts
         readonly ILog _log;
         readonly IPublishTopology _publishTopology;
 
-        public WebJobMessageReceiverEndpointContext(IReceiveEndpointConfiguration configuration, ILog log, IBinder binder, CancellationToken cancellationToken,
-            ReceiveObservable receiveObservers, ReceiveTransportObservable transportObservers, ReceiveEndpointObservable endpointObservers)
-            : base(configuration, receiveObservers, transportObservers, endpointObservers)
+        public WebJobMessageReceiverEndpointContext(IReceiveEndpointConfiguration configuration, ILog log, IBinder binder, CancellationToken cancellationToken)
+            : base(configuration)
         {
             _binder = binder;
             _cancellationToken = cancellationToken;
@@ -52,8 +50,18 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Contexts
         {
             var publishTransportProvider = new ServiceBusAttributePublishTransportProvider(_binder, _log, _cancellationToken);
 
-            return new PublishEndpointProvider(publishTransportProvider, HostAddress, PublishObservers, SendObservers, Serializer, InputAddress, PublishPipe,
+            return new PublishEndpointProvider(publishTransportProvider, HostAddress, PublishObservers, Serializer, InputAddress, PublishPipe,
                 _publishTopology);
+        }
+
+        protected override ISendTransportProvider CreateSendTransportProvider()
+        {
+            return new ServiceBusAttributeSendTransportProvider(_binder, _log, _cancellationToken);
+        }
+
+        protected override IPublishTransportProvider CreatePublishTransportProvider()
+        {
+            return new ServiceBusAttributePublishTransportProvider(_binder, _log, _cancellationToken);
         }
     }
 }

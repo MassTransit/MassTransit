@@ -30,13 +30,11 @@ namespace MassTransit.Transports
         readonly PublishObservable _publishObservers;
         readonly IPublishPipe _publishPipe;
         readonly IPublishTopology _publishTopology;
-        readonly SendObservable _sendObservers;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
         readonly IPublishTransportProvider _transportProvider;
 
         public PublishEndpointProvider(IPublishTransportProvider transportProvider, Uri hostAddress, PublishObservable publishObservers,
-            SendObservable sendObservers,
             IMessageSerializer serializer, Uri sourceAddress, IPublishPipe publishPipe, IPublishTopology publishTopology)
         {
             _transportProvider = transportProvider;
@@ -47,7 +45,6 @@ namespace MassTransit.Transports
             _publishTopology = publishTopology;
 
             _publishObservers = publishObservers;
-            _sendObservers = sendObservers;
 
             _cache = new SendEndpointCache<Type>();
         }
@@ -68,11 +65,6 @@ namespace MassTransit.Transports
             return _publishObservers.Connect(observer);
         }
 
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
-        {
-            return _sendObservers.Connect(observer);
-        }
-
         async Task<ISendEndpoint> CreateSendEndpoint<T>()
             where T : class
         {
@@ -83,9 +75,7 @@ namespace MassTransit.Transports
 
             var sendTransport = await _transportProvider.GetPublishTransport<T>(publishAddress);
 
-            var observerHandle = sendTransport.ConnectSendObserver(_sendObservers);
-
-            return new SendEndpoint(sendTransport, _serializer, publishAddress, _sourceAddress, SendPipe.Empty, observerHandle);
+            return new SendEndpoint(sendTransport, _serializer, publishAddress, _sourceAddress, SendPipe.Empty);
         }
     }
 }

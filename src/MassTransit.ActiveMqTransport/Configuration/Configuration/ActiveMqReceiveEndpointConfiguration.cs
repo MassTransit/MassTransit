@@ -81,8 +81,6 @@
 
             ApplySpecifications(builder);
 
-            var receivePipe = CreateReceivePipe();
-
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
             _sessionConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
@@ -90,7 +88,7 @@
             IAgent consumerAgent;
             if (_hostConfiguration.BusConfiguration.DeployTopologyOnly)
             {
-                var transportReadyFilter = new TransportReadyFilter<SessionContext>(builder.TransportObservers, InputAddress);
+                var transportReadyFilter = new TransportReadyFilter<SessionContext>(receiveEndpointContext.TransportObservers, InputAddress);
                 _sessionConfigurator.UseFilter(transportReadyFilter);
 
                 consumerAgent = transportReadyFilter;
@@ -101,7 +99,7 @@
 
                 var errorTransport = CreateErrorTransport();
 
-                var consumerFilter = new ActiveMqConsumerFilter(receivePipe, builder.ReceiveObservers, builder.TransportObservers, receiveEndpointContext,
+                var consumerFilter = new ActiveMqConsumerFilter(receiveEndpointContext,
                     deadLetterTransport, errorTransport);
 
                 _sessionConfigurator.UseFilter(consumerFilter);
@@ -113,8 +111,7 @@
 
             _connectionConfigurator.UseFilter(sessionFilter);
 
-            var transport = new ActiveMqReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext,
-                builder.ReceiveObservers, builder.TransportObservers);
+            var transport = new ActiveMqReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
 
             transport.Add(consumerAgent);
 

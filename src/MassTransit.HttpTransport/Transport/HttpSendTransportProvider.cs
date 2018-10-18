@@ -14,9 +14,9 @@ namespace MassTransit.HttpTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
-    using Configuration;
     using Clients;
-    using MassTransit.Context;
+    using Configuration;
+    using Context;
     using MassTransit.Pipeline;
     using Transports;
 
@@ -24,18 +24,15 @@ namespace MassTransit.HttpTransport.Transport
     public class HttpSendTransportProvider :
         ISendTransportProvider
     {
-        readonly IReceiveObserver _receiveObserver;
         readonly IHttpBusConfiguration _busConfiguration;
+        readonly ReceiveEndpointContext _receiveEndpointContext;
         readonly IReceivePipe _receivePipe;
-        readonly ReceiveEndpointContext _topology;
 
-        public HttpSendTransportProvider(IHttpBusConfiguration busConfiguration, IReceivePipe receivePipe, IReceiveObserver receiveObserver,
-            ReceiveEndpointContext topology)
+        public HttpSendTransportProvider(IHttpBusConfiguration busConfiguration, IReceivePipe receivePipe, ReceiveEndpointContext receiveEndpointContext)
         {
             _busConfiguration = busConfiguration;
             _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
-            _topology = topology;
+            _receiveEndpointContext = receiveEndpointContext;
         }
 
         public Task<ISendTransport> GetSendTransport(Uri address)
@@ -47,7 +44,7 @@ namespace MassTransit.HttpTransport.Transport
 
             var sendSettings = address.GetSendSettings();
 
-            return Task.FromResult<ISendTransport>(new HttpSendTransport(clientCache, sendSettings, _receiveObserver, _topology));
+            return Task.FromResult<ISendTransport>(new HttpSendTransport(clientCache, sendSettings, _receiveEndpointContext));
         }
     }
 }

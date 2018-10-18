@@ -29,17 +29,24 @@ namespace MassTransit.Context
         readonly ConsumeContext _context;
         readonly IList<PendingFault> _pendingFaults;
 
-        public RetryConsumeContext(ConsumeContext context, IRetryPolicy retryPolicy)
+        public RetryConsumeContext(ConsumeContext context, IRetryPolicy retryPolicy, RetryContext retryContext)
             : base(context, new PayloadCacheScope(context))
         {
             _retryPolicy = retryPolicy;
             _context = context;
+
+            if (retryContext != null)
+            {
+                RetryAttempt = retryContext.RetryAttempt;
+                RetryCount = retryContext.RetryCount;
+            }
+
             _pendingFaults = new List<PendingFault>();
         }
 
-        public int RetryAttempt { get; set; }
+        public int RetryAttempt { get; }
 
-        public int RetryCount { get; set; }
+        public int RetryCount { get; }
 
         public override bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
         {
@@ -64,14 +71,14 @@ namespace MassTransit.Context
             return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
-        public RetryConsumeContext CreateNext()
+        public RetryConsumeContext CreateNext(RetryContext retryContext)
         {
-            return new RetryConsumeContext(_context, _retryPolicy);
+            return new RetryConsumeContext(_context, _retryPolicy, retryContext);
         }
 
         protected IRetryPolicy RetryPolicy => _retryPolicy;
 
-        public virtual TContext CreateNext<TContext>()
+        public virtual TContext CreateNext<TContext>(RetryContext retryContext)
             where TContext : RetryConsumeContext
         {
             throw new InvalidOperationException("This is only supported by a derived type");
@@ -121,8 +128,8 @@ namespace MassTransit.Context
     {
         readonly ConsumeContext<T> _context;
 
-        public RetryConsumeContext(ConsumeContext<T> context, IRetryPolicy retryPolicy)
-            : base(context, retryPolicy)
+        public RetryConsumeContext(ConsumeContext<T> context, IRetryPolicy retryPolicy, RetryContext retryContext)
+            : base(context, retryPolicy, retryContext)
         {
             _context = context;
         }
@@ -139,9 +146,9 @@ namespace MassTransit.Context
             return NotifyFaulted(_context, duration, consumerType, exception);
         }
 
-        public override TContext CreateNext<TContext>()
+        public override TContext CreateNext<TContext>(RetryContext retryContext)
         {
-            return new RetryConsumeContext<T>(_context, RetryPolicy) as TContext
+            return new RetryConsumeContext<T>(_context, RetryPolicy, retryContext) as TContext
                 ?? throw new ArgumentException($"The context type is not valid: {TypeMetadataCache<T>.ShortName}");
         }
     }

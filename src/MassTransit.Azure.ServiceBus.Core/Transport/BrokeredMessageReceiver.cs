@@ -19,10 +19,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using GreenPipes;
     using Logging;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Observables;
     using Microsoft.Azure.ServiceBus;
     using Transports;
-    using Util;
 
 
     /// <summary>
@@ -33,7 +31,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     {
         readonly Uri _inputAddress;
         readonly ILog _log;
-        readonly ReceiveObservable _receiveObservers;
         readonly ReceiveEndpointContext _receiveEndpointContext;
 
         public BrokeredMessageReceiver(Uri inputAddress, ILog log, ReceiveEndpointContext receiveEndpointContext)
@@ -41,7 +38,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             _inputAddress = inputAddress;
             _log = log;
             _receiveEndpointContext = receiveEndpointContext;
-            _receiveObservers = new ReceiveObservable();
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -52,20 +48,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveObservers.Connect(observer);
+            return _receiveEndpointContext.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveEndpointContext.PublishEndpointProvider.ConnectPublishObserver(observer);
+            return _receiveEndpointContext.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            var sendHandle = _receiveEndpointContext.ConnectSendObserver(observer);
-            var publishHandle = _receiveEndpointContext.ConnectSendObserver(observer);
-
-            return new MultipleConnectHandle(sendHandle, publishHandle);
+            return _receiveEndpointContext.ConnectSendObserver(observer);
         }
 
         async Task IBrokeredMessageReceiver.Handle(Message message, Action<ReceiveContext> contextCallback)
@@ -82,7 +75,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
             try
             {
-                await _receiveObservers.PreReceive(context).ConfigureAwait(false);
+                await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
                 if (message.SystemProperties.LockedUntilUtc <= DateTime.UtcNow)
                     throw new MessageLockExpiredException(_inputAddress, $"The message lock expired: {message.MessageId}");
@@ -96,7 +89,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
                 await messageReceiver.CompleteAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
 
-                await _receiveObservers.PostReceive(context).ConfigureAwait(false);
+                await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -110,7 +103,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                         _log.Warn($"Abandon message faulted: {message.MessageId}", exception);
                 }
 
-                await _receiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             finally
             {

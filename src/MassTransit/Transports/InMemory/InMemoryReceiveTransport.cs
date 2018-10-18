@@ -109,22 +109,22 @@ namespace MassTransit.Transports.InMemory
             }
         }
 
-        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
+        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveEndpointContext.ReceiveObservers.Connect(observer);
+            return _receiveEndpointContext.ConnectReceiveObserver(observer);
         }
 
-        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
+        ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _receiveEndpointContext.TransportObservers.Connect(observer);
+            return _receiveEndpointContext.ConnectReceiveTransportObserver(observer);
         }
 
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
             return _receiveEndpointContext.ConnectPublishObserver(observer);
         }
 
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
             return _receiveEndpointContext.ConnectSendObserver(observer);
         }

@@ -19,8 +19,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using Amazon.SQS.Model;
     using Context;
     using Exceptions;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Util;
 
 
@@ -28,50 +26,31 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         BaseReceiveContext,
         AmazonSqsMessageContext
     {
-        readonly AmazonSqsReceiveEndpointContext _context;
-        readonly Message _transportMessage;
         byte[] _body;
 
-        public AmazonSqsReceiveContext(Uri inputAddress, Message transportMessage, bool redelivered, AmazonSqsReceiveEndpointContext context)
+        public AmazonSqsReceiveContext(Uri inputAddress, Message transportMessage, bool redelivered, SqsReceiveEndpointContext context)
             : base(inputAddress, redelivered, context)
         {
-            _transportMessage = transportMessage;
-            _context = context;
+            TransportMessage = transportMessage;
         }
 
-        protected override IHeaderProvider HeaderProvider => new AmazonSqsHeaderProvider(_transportMessage);
+        protected override IHeaderProvider HeaderProvider => new AmazonSqsHeaderProvider(TransportMessage);
 
-        public Message TransportMessage => _transportMessage;
+        public Message TransportMessage { get; }
 
-        public Dictionary<string, MessageAttributeValue> Attributes => _transportMessage.MessageAttributes;
-
-        protected override ISendEndpointProvider GetSendEndpointProvider()
-        {
-            return _context.CreateSendEndpointProvider(this);
-        }
-
-        protected override IPublishEndpointProvider GetPublishEndpointProvider()
-        {
-            return _context.CreatePublishEndpointProvider(this);
-        }
+        public Dictionary<string, MessageAttributeValue> Attributes => TransportMessage.MessageAttributes;
 
         public override byte[] GetBody()
         {
             if (_body != null)
                 return _body;
 
-            if (_transportMessage != null)
+            if (TransportMessage != null)
             {
-                var envelope = JsonConvert.DeserializeObject<JToken>(TransportMessage.Body);
-
-                var envelopeType = envelope["Type"].ToString();
-                if (envelopeType == "Notification")
-                    return _body = Encoding.UTF8.GetBytes(envelope["Message"].ToString());
-
-                return Encoding.UTF8.GetBytes(TransportMessage.Body);
+                return _body = Encoding.UTF8.GetBytes(TransportMessage.Body);
             }
 
-            throw new AmazonSqsTransportException($"The message type is not supported: {TypeMetadataCache.GetShortName(_transportMessage.GetType())}");
+            throw new AmazonSqsTransportException($"The message type is not supported: {TypeMetadataCache.GetShortName(TransportMessage.GetType())}");
         }
 
         public override Stream GetBodyStream()

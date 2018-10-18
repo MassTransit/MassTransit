@@ -55,7 +55,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             var found = _attributes.ContainsKey(key);
             if (found)
             {
-                value = _attributes[key];
+                value = _attributes[key].StringValue;
                 return true;
             }
 

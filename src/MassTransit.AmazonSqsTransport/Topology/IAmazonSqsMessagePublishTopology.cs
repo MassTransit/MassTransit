@@ -28,7 +28,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// Returns the send settings for a publish endpoint, which are mostly unused now with topology
         /// </summary>
         /// <returns></returns>
-        SendSettings GetSendSettings();
+        PublishSettings GetPublishSettings();
 
         BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options = PublishBrokerTopologyOptions.MaintainHierarchy);
     }

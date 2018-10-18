@@ -56,7 +56,7 @@ namespace MassTransit.Transports.InMemory.Builders
 
             _configuration.Topology.Consume.Apply(builder);
 
-            return new InMemoryReceiveEndpointContext(_configuration, _host, ReceiveObservers, TransportObservers, EndpointObservers);
+            return new InMemoryReceiveEndpointContext(_configuration, _host);
         }
     }
 }

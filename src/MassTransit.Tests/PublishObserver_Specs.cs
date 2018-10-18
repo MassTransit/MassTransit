@@ -11,110 +11,134 @@
     using TestFramework.Messages;
 
 
-    [TestFixture]
-    public class Connecting_to_the_publish_observer_bus :
-        InMemoryTestFixture
+    namespace ObserverTests
     {
-        [Test]
-        public async Task Should_invoke_the_exception_after_send_failure()
+        using GreenPipes.Internals.Extensions;
+
+
+        [TestFixture]
+        public class Connecting_to_the_publish_observer_bus :
+            InMemoryTestFixture
         {
-            var observer = new Observer();
-            using (Bus.ConnectPublishObserver(observer))
+            [Test]
+            public async Task Should_invoke_the_exception_after_send_failure()
             {
-                Assert.That(
-                    async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
-                    Throws.TypeOf<SerializationException>());
+                var observer = new Observer();
+                using (Bus.ConnectPublishObserver(observer))
+                {
+                    Assert.That(
+                        async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                        Throws.TypeOf<SerializationException>());
 
-                await observer.SendFaulted;
-            }
-        }
-
-        [Test]
-        public async Task Should_invoke_the_observer_after_send()
-        {
-            var observer = new Observer();
-            using (Bus.ConnectPublishObserver(observer))
-            {
-                await Bus.Publish(new PingMessage());
-
-                await observer.PostSent;
-            }
-        }
-
-        [Test]
-        public async Task Should_invoke_the_observer_prior_to_send()
-        {
-            var observer = new Observer();
-            using (Bus.ConnectPublishObserver(observer))
-            {
-                await Bus.Publish(new PingMessage());
-
-                await observer.PreSent;
-            }
-        }
-
-        [Test]
-        public async Task Should_not_invoke_post_sent_on_exception()
-        {
-            var observer = new Observer();
-            using (Bus.ConnectPublishObserver(observer))
-            {
-                Assert.That(
-                    async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
-                    Throws.TypeOf<SerializationException>());
-
-                await observer.SendFaulted;
-
-                observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
-            }
-        }
-
-
-        class Observer :
-            IPublishObserver
-        {
-            readonly TaskCompletionSource<PublishContext> _postSend;
-            readonly TaskCompletionSource<PublishContext> _preSend;
-            readonly TaskCompletionSource<PublishContext> _sendFaulted;
-
-            public Observer()
-            {
-                _sendFaulted = new TaskCompletionSource<PublishContext>();
-                _preSend = new TaskCompletionSource<PublishContext>();
-                _postSend = new TaskCompletionSource<PublishContext>();
+                    await observer.SendFaulted;
+                }
             }
 
-            public Task<PublishContext> PreSent
+            [Test]
+            public async Task Should_invoke_the_observer_after_send()
             {
-                get { return _preSend.Task; }
+                var observer = new Observer();
+                using (Bus.ConnectPublishObserver(observer))
+                {
+                    await Bus.Publish(new PingMessage());
+
+                    await observer.PostSent;
+                }
             }
 
-            public Task<PublishContext> PostSent
+            [Test]
+            public async Task Should_invoke_the_observer_prior_to_send()
             {
-                get { return _postSend.Task; }
+                var observer = new Observer();
+                using (Bus.ConnectPublishObserver(observer))
+                {
+                    await Bus.Publish(new PingMessage());
+
+                    await observer.PreSent;
+                }
             }
 
-            public Task<PublishContext> SendFaulted
+            [Test]
+            public async Task Should_not_invoke_the_send_observer_prior_to_send()
             {
-                get { return _sendFaulted.Task; }
+                var observer = new Observer();
+                using (Bus.ConnectPublishObserver(observer))
+                {
+                    var sendObserver = new SendObserver();
+                    using (Bus.ConnectSendObserver(sendObserver))
+                    {
+                        await Bus.Publish(new PingMessage());
+
+                        await observer.PreSent;
+
+                        Assert.That(async () => await sendObserver.PreSent.UntilCompletedOrTimeout(5000), Throws.TypeOf<TimeoutException>());
+                    }
+                }
             }
 
-            public async Task PrePublish<T>(PublishContext<T> context)
-                where T : class
+            [Test]
+            public async Task Should_not_invoke_post_sent_on_exception()
             {
-                _preSend.TrySetResult(context);
+                var observer = new Observer();
+                using (Bus.ConnectPublishObserver(observer))
+                {
+                    Assert.That(
+                        async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                        Throws.TypeOf<SerializationException>());
+
+                    await observer.SendFaulted;
+
+                    observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
+                }
             }
 
-            public async Task PostPublish<T>(PublishContext<T> context)
-                where T : class
-            {
-                _postSend.TrySetResult(context);
-            }
 
-            public async Task PublishFault<T>(PublishContext<T> context, Exception exception)
-                where T : class
+            class Observer :
+                IPublishObserver
             {
-                _sendFaulted.TrySetResult(context);
+                readonly TaskCompletionSource<PublishContext> _postSend;
+                readonly TaskCompletionSource<PublishContext> _preSend;
+                readonly TaskCompletionSource<PublishContext> _sendFaulted;
+
+                public Observer()
+                {
+                    _sendFaulted = new TaskCompletionSource<PublishContext>();
+                    _preSend = new TaskCompletionSource<PublishContext>();
+                    _postSend = new TaskCompletionSource<PublishContext>();
+                }
+
+                public Task<PublishContext> PreSent
+                {
+                    get { return _preSend.Task; }
+                }
+
+                public Task<PublishContext> PostSent
+                {
+                    get { return _postSend.Task; }
+                }
+
+                public Task<PublishContext> SendFaulted
+                {
+                    get { return _sendFaulted.Task; }
+                }
+
+                public async Task PrePublish<T>(PublishContext<T> context)
+                    where T : class
+                {
+                    _preSend.TrySetResult(context);
+                }
+
+                public async Task PostPublish<T>(PublishContext<T> context)
+                    where T : class
+                {
+                    _postSend.TrySetResult(context);
+                }
+
+                public async Task PublishFault<T>(PublishContext<T> context, Exception exception)
+                    where T : class
+                {
+                    _sendFaulted.TrySetResult(context);
+                }
             }
         }
     }

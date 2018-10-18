@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Pipeline
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Contexts;
     using Events;
@@ -22,7 +19,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using GreenPipes.Agents;
     using Logging;
     using Topology;
-    using Transports;
     using Transports.Metrics;
 
 
@@ -31,48 +27,35 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     /// </summary>
     public class AmazonSqsConsumerFilter :
         Supervisor,
-        IFilter<ModelContext>
+        IFilter<ClientContext>
     {
         static readonly ILog _log = Logger.Get<AmazonSqsConsumerFilter>();
-        readonly IDeadLetterTransport _deadLetterTransport;
-        readonly IErrorTransport _errorTransport;
-        readonly IReceiveObserver _receiveObserver;
-        readonly IPipe<ReceiveContext> _receivePipe;
-        readonly AmazonSqsReceiveEndpointContext _context;
-        readonly IReceiveTransportObserver _transportObserver;
+        readonly SqsReceiveEndpointContext _context;
 
-        public AmazonSqsConsumerFilter(IPipe<ReceiveContext> receivePipe, IReceiveObserver receiveObserver, IReceiveTransportObserver transportObserver,
-            AmazonSqsReceiveEndpointContext context, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+        public AmazonSqsConsumerFilter(SqsReceiveEndpointContext context)
         {
-            _receivePipe = receivePipe;
-            _receiveObserver = receiveObserver;
-            _transportObserver = transportObserver;
             _context = context;
-            _deadLetterTransport = deadLetterTransport;
-            _errorTransport = errorTransport;
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
         }
 
-        async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
+        async Task IFilter<ClientContext>.Send(ClientContext context, IPipe<ClientContext> next)
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
             var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostSettings.HostAddress);
 
-            var queueUrl = await context.GetQueue(receiveSettings.EntityName).ConfigureAwait(false);
+            var consumer = new AmazonSqsBasicConsumer(context, inputAddress, _context);
 
-            var consumer = new AmazonSqsBasicConsumer(context, queueUrl, inputAddress, _receivePipe, _receiveObserver, _context, _deadLetterTransport, _errorTransport);
-
-            await context.BasicConsume(queueUrl, receiveSettings, consumer).ConfigureAwait(false);
+            await context.BasicConsume(receiveSettings, consumer).ConfigureAwait(false);
 
             await consumer.Ready.ConfigureAwait(false);
 
             Add(consumer);
 
-            await _transportObserver.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
+            await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 
             try
             {
@@ -81,7 +64,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             finally
             {
                 DeliveryMetrics metrics = consumer;
-                await _transportObserver.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
+                await _context.TransportObservers.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Consumer completed: {0} received, {0} concurrent", metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);

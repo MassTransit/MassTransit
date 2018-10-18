@@ -16,10 +16,10 @@ namespace MassTransit.HttpTransport.Topology
     using Context;
     using GreenPipes;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Observables;
     using MassTransit.Topology;
     using Microsoft.AspNetCore.Http;
     using Transport;
+    using Transports;
 
 
     public class HttpResponseReceiveEndpointContext :
@@ -44,9 +44,9 @@ namespace MassTransit.HttpTransport.Topology
         }
 
         Uri ReceiveEndpointContext.InputAddress => _receiveEndpointContext.InputAddress;
-        ReceiveObservable ReceiveEndpointContext.ReceiveObservers => _receiveEndpointContext.ReceiveObservers;
-        ReceiveTransportObservable ReceiveEndpointContext.TransportObservers => _receiveEndpointContext.TransportObservers;
-        public ReceiveEndpointObservable EndpointObservers => _receiveEndpointContext.EndpointObservers;
+        IReceiveObserver ReceiveEndpointContext.ReceiveObservers => _receiveEndpointContext.ReceiveObservers;
+        IReceiveTransportObserver ReceiveEndpointContext.TransportObservers => _receiveEndpointContext.TransportObservers;
+        public IReceiveEndpointObserver EndpointObservers => _receiveEndpointContext.EndpointObservers;
 
         IPublishTopology ReceiveEndpointContext.Publish => _receiveEndpointContext.Publish;
         public IReceivePipe ReceivePipe { get; }
@@ -68,6 +68,21 @@ namespace MassTransit.HttpTransport.Topology
         {
             return new HttpResponseSendEndpointProvider(_httpContext, _receiveEndpointContext.InputAddress, _sendPipe, _serializer,
                 _receiveEndpointContext.SendEndpointProvider);
+        }
+
+        ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
+        {
+            return _receiveEndpointContext.ConnectReceiveTransportObserver(observer);
+        }
+
+        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return _receiveEndpointContext.ConnectReceiveObserver(observer);
+        }
+
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _receiveEndpointContext.ConnectReceiveEndpointObserver(observer);
         }
     }
 }

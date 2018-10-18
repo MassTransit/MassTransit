@@ -22,7 +22,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using MassTransit.Pipeline;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
-    using Util;
 
 
     /// <summary>
@@ -50,20 +49,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveEndpointContext.ReceiveObservers.Connect(observer);
+            return _receiveEndpointContext.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveEndpointContext.PublishEndpointProvider.ConnectPublishObserver(observer);
+            return _receiveEndpointContext.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            var sendHandle = _receiveEndpointContext.ConnectSendObserver(observer);
-            var publishHandle = _receiveEndpointContext.ConnectSendObserver(observer);
-
-            return new MultipleConnectHandle(sendHandle, publishHandle);
+            return _receiveEndpointContext.ConnectSendObserver(observer);
         }
 
         async Task IEventDataReceiver.Handle(EventData message, Action<ReceiveContext> contextCallback)

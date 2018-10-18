@@ -27,7 +27,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration
         /// Adds the exchange bindings for this message type
         /// </summary>
         /// <param name="configure">Configure the binding and the exchange</param>
-        void Bind(Action<ITopicBindingConfigurator> configure = null);
+        void Bind(Action<ITopicSubscriptionConfigurator> configure = null);
     }
 
 

@@ -14,22 +14,17 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
 {
     using System;
     using System.Collections.Generic;
-    using System.Net;
     using Builders;
     using Configuration.Configurators;
 
 
-    public class AmazonSqsSendSettings :
+    public class TopicPublishSettings :
         TopicConfigurator,
-        SendSettings
+        PublishSettings
     {
-        bool _bindToQueue;
-        string _queueName;
-
-        public AmazonSqsSendSettings(string topicName, bool durable, bool autoDelete)
+        public TopicPublishSettings(string topicName, bool durable, bool autoDelete)
             : base(topicName, durable, autoDelete)
         {
-
         }
 
         public Uri GetSendAddress(Uri hostAddress)
@@ -51,32 +46,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
 
             builder.Topic = builder.CreateTopic(EntityName, Durable, AutoDelete);
 
-            if (_bindToQueue)
-            {
-                var queue = builder.CreateQueue(_queueName, Durable, AutoDelete);
-
-                builder.CreateTopicSubscription(builder.Topic, queue);
-            }
-
             return builder.BuildBrokerTopology();
-        }
-
-        public void BindToQueue(string queueName)
-        {
-            _bindToQueue = true;
-            _queueName = queueName;
-        }
-
-        protected override IEnumerable<string> GetQueryStringOptions()
-        {
-            foreach (var option in base.GetQueryStringOptions())
-                yield return option;
-
-            if (_bindToQueue)
-                yield return "bind=true";
-
-            if (!string.IsNullOrWhiteSpace(_queueName))
-                yield return "queue=" + WebUtility.UrlEncode(_queueName);
         }
 
         IEnumerable<string> GetSettingStrings()

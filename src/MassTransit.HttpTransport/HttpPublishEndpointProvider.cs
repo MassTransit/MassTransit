@@ -15,10 +15,11 @@ namespace MassTransit.HttpTransport
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using GreenPipes.Util;
+    using GreenPipes.Agents;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
     using MassTransit.Pipeline.Pipes;
+    using MassTransit.Topology;
     using Transports;
 
 
@@ -60,10 +61,23 @@ namespace MassTransit.HttpTransport
 
             return new SendEndpoint(transport, _serializer, destinationAddress, _hostAddress, SendPipe.Empty);
         }
+    }
 
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+
+    public class PublishTransportProvider :
+        IPublishTransportProvider
+    {
+        readonly ISendTransportProvider _sendTransportProvider;
+
+        public PublishTransportProvider(ISendTransportProvider sendTransportProvider)
         {
-            return new EmptyConnectHandle();
+            _sendTransportProvider = sendTransportProvider;
+        }
+
+        public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
+            where T : class
+        {
+            return _sendTransportProvider.GetSendTransport(publishAddress);
         }
     }
 }

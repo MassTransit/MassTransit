@@ -45,9 +45,9 @@ namespace MassTransit.PipeConfigurators
             builder.AddFilter(new RedeliveryRetryFilter<TMessage>(policy, _observers));
         }
 
-        static RetryConsumeContext<TMessage> Factory(ConsumeContext<TMessage> context, IRetryPolicy retryPolicy)
+        static RetryConsumeContext<TMessage> Factory(ConsumeContext<TMessage> context, IRetryPolicy retryPolicy, RetryContext retryContext)
         {
-            return context as RetryConsumeContext<TMessage> ?? new RedeliveryRetryConsumeContext<TMessage>(context, retryPolicy);
+            return context as RetryConsumeContext<TMessage> ?? new RedeliveryRetryConsumeContext<TMessage>(context, retryPolicy, retryContext);
         }
 
         public IEnumerable<ValidationResult> Validate()

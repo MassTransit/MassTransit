@@ -24,7 +24,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
         /// <summary>
         /// The exchange to which the message is published
         /// </summary>
-        TopicHandle Topic { get; set; }
+        TopicHandle Topic { get; }
 
         IPublishEndpointBrokerTopologyBuilder CreateImplementedBuilder();
     }

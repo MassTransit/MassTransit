@@ -51,21 +51,21 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
             var settings = host.Topology.SendTopology.GetSendSettings(address);
 
-            IAgent<ModelContext> modelAgent = GetModelAgent(host);
+            IAgent<ClientContext> clientCache = GetClientCache(host);
 
             var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology());
 
-            var transport = new AmazonSqsSendTransport(modelAgent, configureTopologyFilter, settings.EntityName);
-            transport.Add(modelAgent);
+            var transport = new QueueSendTransport(clientCache, configureTopologyFilter, settings.EntityName);
+            transport.Add(clientCache);
 
             host.Add(transport);
 
             return transport;
         }
 
-        protected virtual IAgent<ModelContext> GetModelAgent(IAmazonSqsHost host)
+        protected virtual IAgent<ClientContext> GetClientCache(IAmazonSqsHost host)
         {
-            return new AmazonSqsModelCache(host, host.ConnectionCache);
+            return new AmazonSqsClientCache(host, host.ConnectionCache);
         }
     }
 }
