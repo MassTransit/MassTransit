@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -19,14 +19,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-
     using GreenPipes;
-
-    using MassTransit.Logging;
+    using Logging;
     using MassTransit.Saga;
-    using MassTransit.Util;
-
     using Microsoft.EntityFrameworkCore;
+    using Util;
 
 
     public class EntityFrameworkSagaRepository<TSaga> :
@@ -36,14 +33,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     {
         static readonly ILog _log = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
         readonly IsolationLevel _isolationLevel;
-        readonly Func<DbContext> _sagaDbContextFactory;
         readonly bool _optimistic;
         readonly Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
         readonly IRelationalEntityMetadataHelper _relationalEntityMetadataHelper;
+        readonly Func<DbContext> _sagaDbContextFactory;
 
         public EntityFrameworkSagaRepository(
-            Func<DbContext> sagaDbContextFactory, 
-            IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, 
+            Func<DbContext> sagaDbContextFactory,
+            IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
             bool optimistic = false,
             Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null,
             IRelationalEntityMetadataHelper relationalEntityMetadataHelper = null)
@@ -96,7 +93,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                     var tableName = _relationalEntityMetadataHelper.GetTableName<TSaga>(dbContext);
                     await dbContext.Database.ExecuteSqlCommandAsync(
                         $"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0",
-                        new object[] { sagaId },
+                        new object[] {sagaId},
                         context.CancellationToken).ConfigureAwait(false);
                 }
 
@@ -104,17 +101,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
                 TSaga instance;
                 if (policy.PreInsertInstance(context, out instance))
-                {
                     inserted = await PreInsertSagaInstance<T>(dbContext, instance, context.CancellationToken).ConfigureAwait(false);
-                }
 
                 try
                 {
                     if (instance == null)
                     {
                         instance =
-                            await QuerySagas<T>(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken).ConfigureAwait(false);
+                            await QuerySagas<T>(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken)
+                                .ConfigureAwait(false);
                     }
+
                     if (instance == null)
                     {
                         var missingSagaPipe = new MissingPipe<T>(dbContext, next);
@@ -190,13 +187,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                         if (_log.IsWarnEnabled)
                             _log.Warn("The transaction rollback failed", innerException);
                     }
+
                     throw;
                 }
             }
         }
 
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
-            IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+            IPipe<SagaConsumeContext<TSaga, T>> next)
+            where T : class
         {
             using (var dbContext = _sagaDbContextFactory())
             {
@@ -208,7 +207,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                     .ToListAsync(context.CancellationToken)
                     .ConfigureAwait(false);
 
-                using (var transaction = 
+                using (var transaction =
                     await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
                 {
                     try
@@ -229,18 +228,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                                             new object[] {correlationId}, context.CancellationToken).ConfigureAwait(false);
                                 }
 
-                                var instance = 
+                                var instance =
                                     await QuerySagas<T>(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == correlationId, context.CancellationToken)
                                         .ConfigureAwait(false);
 
                                 if (instance != null)
-                                {
                                     await SendToInstance(context, dbContext, policy, instance, next).ConfigureAwait(false);
-                                }
                                 else
-                                {
                                     missingCorrelationIds.Add(correlationId);
-                                }
                             }
                         }
 
@@ -383,6 +378,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             }
         }
 
+        IQueryable<TSaga> QuerySagas<T>(DbContext dbContext)
+        {
+            IQueryable<TSaga> query = dbContext.Set<TSaga>();
+
+            if (_queryCustomization != null)
+                query = _queryCustomization(query);
+
+            return query;
+        }
+
 
         /// <summary>
         /// Once the message pipe has processed the saga instance, add it to the saga repository
@@ -424,19 +429,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
                 await _dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
             }
-        }
-
-
-        IQueryable<TSaga> QuerySagas<T>(DbContext dbContext)
-        {
-            IQueryable<TSaga> query = dbContext.Set<TSaga>();
-            
-            if (_queryCustomization != null)
-            {
-                query = _queryCustomization(query);
-            }
-            
-            return query;
         }
     }
 }

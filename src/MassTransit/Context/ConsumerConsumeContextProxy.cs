@@ -13,7 +13,6 @@
 namespace MassTransit.Context
 {
     using GreenPipes.Payloads;
-    using Util;
 
 
     /// <summary>
@@ -37,16 +36,6 @@ namespace MassTransit.Context
             : base(context, payloadCache)
         {
             Consumer = consumer;
-        }
-
-        public ConsumerConsumeContext<TConsumer, T> PopContext<T>()
-            where T : class
-        {
-            var context = this as ConsumerConsumeContext<TConsumer, T>;
-            if (context == null)
-                throw new ContextException($"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
-
-            return context;
         }
 
         public TConsumer Consumer { get; }

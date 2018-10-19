@@ -35,11 +35,6 @@ namespace MassTransit.Context
 
         public TConsumer Consumer => _context.Consumer;
 
-        public ConsumerConsumeContext<TConsumer, T> PopContext<T>() where T : class
-        {
-            return _context.PopContext<T>();
-        }
-
         Exception ExceptionConsumerConsumeContext<TConsumer>.Exception => _exception;
 
         ExceptionInfo ExceptionConsumerConsumeContext<TConsumer>.ExceptionInfo

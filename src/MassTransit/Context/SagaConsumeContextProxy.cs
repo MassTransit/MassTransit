@@ -14,7 +14,6 @@ namespace MassTransit.Context
 {
     using System.Threading.Tasks;
     using Saga;
-    using Util;
 
 
     /// <summary>
@@ -37,16 +36,6 @@ namespace MassTransit.Context
         }
 
         public TSaga Saga => _sagaContext.Saga;
-
-        public SagaConsumeContext<TSaga, T> PopContext<T>()
-            where T : class
-        {
-            var context = this as SagaConsumeContext<TSaga, T>;
-            if (context == null)
-                throw new ContextException($"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
-
-            return context;
-        }
 
         public Task SetCompleted()
         {

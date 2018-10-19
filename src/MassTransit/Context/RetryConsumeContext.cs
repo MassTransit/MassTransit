@@ -48,18 +48,6 @@ namespace MassTransit.Context
 
         public int RetryCount { get; }
 
-        public override bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
-        {
-            if (base.TryGetMessage(out ConsumeContext<T> messageContext))
-            {
-                consumeContext = new MessageConsumeContext<T>(this, messageContext.Message);
-                return true;
-            }
-
-            consumeContext = null;
-            return false;
-        }
-
         public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
             if (_retryPolicy.IsHandled(exception))

@@ -12,17 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier
 {
-    public interface ExecuteActivityContext<TArguments> :
+    public interface ExecuteActivityContext<out TArguments> :
         ExecuteContext<TArguments>
         where TArguments : class
     {
-        /// <summary>
-        /// Return the original consumer/message combined context, reapplying the message type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        ExecuteActivityContext<T, TArguments> PopContext<T>()
-            where T : class, ExecuteActivity<TArguments>;
     }
 
 
@@ -31,7 +24,7 @@ namespace MassTransit.Courier
     /// </summary>
     /// <typeparam name="TActivity"></typeparam>
     /// <typeparam name="TArguments"></typeparam>
-    public interface ExecuteActivityContext<out TActivity, TArguments> :
+    public interface ExecuteActivityContext<out TActivity, out TArguments> :
         ExecuteActivityContext<TArguments>
         where TArguments : class
         where TActivity : class, ExecuteActivity<TArguments>

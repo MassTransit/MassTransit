@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Pipes
 {
+    using System;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
     using Util;
 
@@ -48,7 +50,13 @@ namespace MassTransit.Pipeline.Pipes
 
         public Task Send(ConsumerConsumeContext<TConsumer> context)
         {
-            return _output.Send(context.PopContext<TMessage>());
+            if (context is ConsumerConsumeContext<TConsumer, TMessage> consumerContext)
+                return _output.Send(consumerContext);
+
+            if (context.TryGetMessage(out ConsumeContext<TMessage> messageContext))
+                return _output.Send(new ConsumerConsumeContextProxy<TConsumer, TMessage>(messageContext, context.Consumer));
+
+            throw new ArgumentException($"THe message could not be retrieved: {TypeMetadataCache<TMessage>.ShortName}", nameof(context));
         }
     }
 }

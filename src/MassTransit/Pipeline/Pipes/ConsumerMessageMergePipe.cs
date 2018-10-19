@@ -54,10 +54,9 @@ namespace MassTransit.Pipeline.Pipes
             if (ReferenceEquals(context, _context))
                 return _output.Send(_context);
 
-            ConsumerConsumeContext<TConsumer, TMessage> consumerContext = context as ConsumerConsumeContext<TConsumer, TMessage>
-                ?? new ConsumerConsumeContextProxy<TConsumer, TMessage>(context, _context.Consumer);
-
-            return _output.Send(consumerContext);
+            return context is ConsumerConsumeContext<TConsumer, TMessage> consumerContext
+                ? _output.Send(consumerContext)
+                : _output.Send(new ConsumerConsumeContextProxy<TConsumer, TMessage>(context, _context.Consumer));
         }
     }
 }

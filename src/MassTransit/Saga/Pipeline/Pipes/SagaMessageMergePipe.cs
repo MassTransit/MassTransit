@@ -54,10 +54,9 @@ namespace MassTransit.Saga.Pipeline.Pipes
             if (ReferenceEquals(context, _context))
                 return _output.Send(_context);
 
-            SagaConsumeContext<TSaga, TMessage> sagaContext = context as SagaConsumeContext<TSaga, TMessage>
-                ?? new SagaConsumeContextProxy<TSaga, TMessage>(context, _context);
-
-            return _output.Send(sagaContext);
+            return context is SagaConsumeContext<TSaga, TMessage> consumerContext
+                ? _output.Send(consumerContext)
+                : _output.Send(new SagaConsumeContextProxy<TSaga, TMessage>(context, _context));
         }
     }
 }

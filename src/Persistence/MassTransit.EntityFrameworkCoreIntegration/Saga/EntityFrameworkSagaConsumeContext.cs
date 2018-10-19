@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -14,13 +14,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
     using System;
     using System.Threading.Tasks;
-
-    using MassTransit.Context;
-    using MassTransit.Logging;
+    using Context;
+    using Logging;
     using MassTransit.Saga;
-    using MassTransit.Util;
-
     using Microsoft.EntityFrameworkCore;
+    using Util;
 
 
     public class EntityFrameworkSagaConsumeContext<TSaga, TMessage> :
@@ -36,36 +34,27 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         public EntityFrameworkSagaConsumeContext(DbContext dbContext, ConsumeContext<TMessage> context, TSaga instance, bool existing = true)
             : base(context)
         {
-            this.Saga = instance;
-            this._dbContext = dbContext;
-            this._existing = existing;
+            Saga = instance;
+            _dbContext = dbContext;
+            _existing = existing;
         }
 
-        Guid? MessageContext.CorrelationId => this.Saga.CorrelationId;
-
-        SagaConsumeContext<TSaga, T> SagaConsumeContext<TSaga>.PopContext<T>()
-        {
-            var context = this as SagaConsumeContext<TSaga, T>;
-            if (context == null)
-                throw new ContextException($"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
-
-            return context;
-        }
+        Guid? MessageContext.CorrelationId => Saga.CorrelationId;
 
         public async Task SetCompleted()
         {
-            this.IsCompleted = true;
-            if (this._existing)
+            IsCompleted = true;
+            if (_existing)
             {
-                this._dbContext.Set<TSaga>().Remove(this.Saga);
+                _dbContext.Set<TSaga>().Remove(Saga);
 
                 if (_log.IsDebugEnabled)
                 {
                     _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName,
-                        this.Saga.CorrelationId);
+                        Saga.CorrelationId);
                 }
 
-                await this._dbContext.SaveChangesAsync(this.CancellationToken).ConfigureAwait(false);
+                await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
             }
         }
 

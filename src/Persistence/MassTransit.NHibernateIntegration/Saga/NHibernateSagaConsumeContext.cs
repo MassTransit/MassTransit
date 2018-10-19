@@ -39,14 +39,6 @@ namespace MassTransit.NHibernateIntegration.Saga
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;
 
-        SagaConsumeContext<TSaga, T> SagaConsumeContext<TSaga>.PopContext<T>()
-        {
-            if (!(this is SagaConsumeContext<TSaga, T> context))
-                throw new ContextException($"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
-
-            return context;
-        }
-
         async Task SagaConsumeContext<TSaga>.SetCompleted()
         {
             await _session.DeleteAsync(Saga).ConfigureAwait(false);

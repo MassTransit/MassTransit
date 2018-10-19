@@ -38,16 +38,6 @@ namespace MassTransit.Context
 
         public override Guid? CorrelationId => Saga.CorrelationId;
 
-        public SagaConsumeContext<TSaga, T> PopContext<T>()
-            where T : class
-        {
-            var context = this as SagaConsumeContext<TSaga, T>;
-            if (context == null)
-                throw new ContextException($"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
-
-            return context;
-        }
-
         public async Task SetCompleted()
         {
             await _removeSaga().ConfigureAwait(false);

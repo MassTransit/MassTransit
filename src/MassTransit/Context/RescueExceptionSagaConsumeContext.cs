@@ -36,11 +36,6 @@ namespace MassTransit.Context
 
         public TSaga Saga => _context.Saga;
 
-        public SagaConsumeContext<TSaga, T> PopContext<T>() where T : class
-        {
-            return _context.PopContext<T>();
-        }
-
         public Task SetCompleted()
         {
             return _context.SetCompleted();

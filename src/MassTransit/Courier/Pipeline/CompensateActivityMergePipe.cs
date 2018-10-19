@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier.Pipeline
 {
+    using System;
     using System.Threading.Tasks;
     using GreenPipes;
     using Util;
@@ -48,7 +49,10 @@ namespace MassTransit.Courier.Pipeline
 
         public Task Send(CompensateActivityContext<TLog> context)
         {
-            return _output.Send(context.PopContext<TActivity>());
+            if (context is CompensateActivityContext<TActivity, TLog> consumerContext)
+                return _output.Send(consumerContext);
+
+            throw new ArgumentException($"THe context could not be retrieved: {TypeMetadataCache<TActivity>.ShortName}", nameof(context));
         }
     }
 }

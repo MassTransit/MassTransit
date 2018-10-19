@@ -30,12 +30,6 @@ namespace MassTransit.Context
             _context = context;
         }
 
-        public ConsumerConsumeContext<TConsumer, T> PopContext<T>()
-            where T : class
-        {
-            return _context.PopContext<T>();
-        }
-
         public TConsumer Consumer => _context.Consumer;
 
         public override TContext CreateNext<TContext>(RetryContext retryContext)

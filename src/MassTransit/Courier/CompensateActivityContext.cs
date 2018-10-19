@@ -12,21 +12,14 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier
 {
-    public interface CompensateActivityContext<TLog> :
+    public interface CompensateActivityContext<out TLog> :
         CompensateContext<TLog>
         where TLog : class
     {
-        /// <summary>
-        /// Return the original consumer/message combined context, reapplying the message type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        CompensateActivityContext<T, TLog> PopContext<T>()
-            where T : class, CompensateActivity<TLog>;
     }
 
 
-    public interface CompensateActivityContext<out TActivity, TLog> :
+    public interface CompensateActivityContext<out TActivity, out TLog> :
         CompensateActivityContext<TLog>
         where TLog : class
         where TActivity : class, CompensateActivity<TLog>

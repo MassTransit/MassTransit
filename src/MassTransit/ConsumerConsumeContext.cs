@@ -32,14 +32,6 @@ namespace MassTransit
         where TConsumer : class
     {
         /// <summary>
-        /// Return the original consumer/message combined context, reapplying the message type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        ConsumerConsumeContext<TConsumer, T> PopContext<T>()
-            where T : class;
-
-        /// <summary>
         /// The consumer which will handle the message
         /// </summary>
         TConsumer Consumer { get; }

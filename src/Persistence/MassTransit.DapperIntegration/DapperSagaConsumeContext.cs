@@ -41,14 +41,6 @@ namespace MassTransit.DapperIntegration
             Saga = instance;
         }
 
-        SagaConsumeContext<TSaga, T> SagaConsumeContext<TSaga>.PopContext<T>()
-        {
-            if (!(this is SagaConsumeContext<TSaga, T> context))
-                throw new ContextException($"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
-
-            return context;
-        }
-
         public async Task SetCompleted()
         {
             IsCompleted = true;

@@ -38,15 +38,6 @@ namespace MassTransit.Context
         public TSaga Saga { get; }
         public override Guid? CorrelationId => ((SagaConsumeContext<TSaga>)this).Saga.CorrelationId;
 
-        SagaConsumeContext<TSaga, T> SagaConsumeContext<TSaga>.PopContext<T>()
-        {
-            var context = this as SagaConsumeContext<TSaga, T>;
-            if (context == null)
-                throw new ContextException($"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
-
-            return context;
-        }
-
         public Task SetCompleted()
         {
             IsCompleted = true;

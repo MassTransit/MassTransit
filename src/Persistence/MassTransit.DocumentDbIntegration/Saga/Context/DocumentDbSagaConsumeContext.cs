@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,12 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.DocumentDbIntegration.Saga.Context
 {
-    using Logging;
-    using MassTransit.Context;
-    using Microsoft.Azure.Documents.Client;
     using System;
     using System.Threading.Tasks;
+    using Logging;
+    using MassTransit.Context;
     using Microsoft.Azure.Documents;
+    using Microsoft.Azure.Documents.Client;
     using Util;
 
 
@@ -28,11 +28,11 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
         where TSaga : class, IVersionedSaga
     {
         static readonly ILog _log = Logger.Get<DocumentDbSagaRepository<TSaga>>();
-        private readonly IDocumentClient _client;
-        private readonly bool _existing;
-        private readonly string _databaseName;
-        private readonly string _collectionName;
-        private readonly RequestOptions _requestOptions;
+        readonly IDocumentClient _client;
+        readonly string _collectionName;
+        readonly string _databaseName;
+        readonly bool _existing;
+        readonly RequestOptions _requestOptions;
 
         public DocumentDbSagaConsumeContext(IDocumentClient client, string databaseName, string collectionName, ConsumeContext<TMessage> context,
             TSaga instance, bool existing = true, RequestOptions requestOptions = null)
@@ -47,16 +47,6 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;
-
-        public SagaConsumeContext<TSaga, T> PopContext<T>()
-            where T : class
-        {
-            if (!(this is SagaConsumeContext<TSaga, T> context))
-                throw new ContextException(
-                    $"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
-
-            return context;
-        }
 
         public async Task SetCompleted()
         {

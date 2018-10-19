@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.Pipeline.Pipes
 {
+    using System;
     using System.Threading.Tasks;
     using GreenPipes;
     using Util;
@@ -48,7 +49,10 @@ namespace MassTransit.Saga.Pipeline.Pipes
 
         public Task Send(SagaConsumeContext<TSaga> context)
         {
-            return _output.Send(context.PopContext<TMessage>());
+            if (context is SagaConsumeContext<TSaga, TMessage> consumerContext)
+                return _output.Send(consumerContext);
+
+            throw new ArgumentException($"THe message could not be retrieved: {TypeMetadataCache<TMessage>.ShortName}", nameof(context));
         }
     }
 }

@@ -21,7 +21,7 @@ namespace MassTransit
     /// </summary>
     /// <typeparam name="TSaga">The saga type</typeparam>
     /// <typeparam name="TMessage">The message type</typeparam>
-    public interface SagaConsumeContext<TSaga, out TMessage> :
+    public interface SagaConsumeContext<out TSaga, out TMessage> :
         SagaConsumeContext<TSaga>,
         ConsumeContext<TMessage>
         where TSaga : class, ISaga
@@ -35,7 +35,7 @@ namespace MassTransit
     /// this does not expose the message type, for filters that do not care about message type.
     /// </summary>
     /// <typeparam name="TSaga">The saga type</typeparam>
-    public interface SagaConsumeContext<TSaga> :
+    public interface SagaConsumeContext<out TSaga> :
         ConsumeContext
         where TSaga : class, ISaga
     {
@@ -43,9 +43,6 @@ namespace MassTransit
         /// The saga instance for the current consume operation
         /// </summary>
         TSaga Saga { get; }
-
-        SagaConsumeContext<TSaga, T> PopContext<T>()
-            where T : class;
 
         /// <summary>
         /// Mark the saga instance as completed, which may remove it from the repository or archive it, etc.

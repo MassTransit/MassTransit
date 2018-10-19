@@ -15,6 +15,7 @@ namespace MassTransit.Context
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using GreenPipes;
     using GreenPipes.Payloads;
 
 
@@ -98,6 +99,53 @@ namespace MassTransit.Context
         {
             return _context;
         }
+
+        public override bool HasPayloadType(Type payloadType)
+        {
+            if (base.HasPayloadType(payloadType))
+                return true;
+
+            return _context.HasPayloadType(payloadType);
+        }
+
+        public override bool TryGetPayload<T>(out T payload)
+        {
+            if (base.TryGetPayload(out payload))
+                return true;
+
+            return _context.TryGetPayload(out payload);
+        }
+
+        public override T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
+        {
+            if (base.TryGetPayload<T>(out var existing))
+                return existing;
+
+            if (_context.TryGetPayload(out existing))
+                return existing;
+
+            return base.GetOrAddPayload(payloadFactory);
+        }
+
+        public override T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+        {
+            if (base.TryGetPayload<T>(out var existing) || _context.TryGetPayload(out existing))
+            {
+                T Update(T _)
+                {
+                    return updateFactory(existing);
+                }
+
+                T Add()
+                {
+                    return updateFactory(existing);
+                }
+
+                return base.AddOrUpdatePayload(Add, Update);
+            }
+
+            return base.AddOrUpdatePayload(addFactory, updateFactory);
+        }
     }
 
 
@@ -113,7 +161,7 @@ namespace MassTransit.Context
     {
         readonly ConsumeContext<TMessage> _context;
 
-        public ConsumeContextProxy(ConsumeContext<TMessage> context)
+        protected ConsumeContextProxy(ConsumeContext<TMessage> context)
             : base(context)
         {
             _context = context;

@@ -39,14 +39,6 @@ namespace MassTransit.RedisIntegration
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;
 
-        SagaConsumeContext<TSaga, T> SagaConsumeContext<TSaga>.PopContext<T>()
-        {
-            if (this is SagaConsumeContext<TSaga, T> context)
-                return context;
-
-            throw new ContextException($"The ConsumeContext<{TypeMetadataCache<TMessage>.ShortName}> could not be cast to {TypeMetadataCache<T>.ShortName}");
-        }
-
         async Task SagaConsumeContext<TSaga>.SetCompleted()
         {
             await _sagas.Delete(Saga.CorrelationId).ConfigureAwait(false);
