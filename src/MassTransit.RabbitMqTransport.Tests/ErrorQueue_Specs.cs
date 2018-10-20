@@ -19,7 +19,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading.Tasks;
     using GreenPipes;
     using NUnit.Framework;
-    using NUnit.Framework.Internal;
     using RabbitMQ.Client;
     using Shouldly;
     using TestFramework.Messages;

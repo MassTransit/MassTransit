@@ -29,11 +29,11 @@ namespace MassTransit.Transports.Tests
     [TestFixture(typeof(AmazonSqsTestHarness))]
     public class TransportTest
     {
-        readonly Type _harnessType;
+        protected Type HarnessType { get; }
 
         public TransportTest(Type harnessType)
         {
-            _harnessType = harnessType;
+            HarnessType = harnessType;
 
             Subscribe = true;
         }
@@ -48,9 +48,9 @@ namespace MassTransit.Transports.Tests
         [OneTimeSetUp]
         public void CreateHarness()
         {
-            if (_harnessType == typeof(InMemoryTestHarness))
+            if (HarnessType == typeof(InMemoryTestHarness))
                 Harness = new InMemoryTestHarness();
-            else if (_harnessType == typeof(RabbitMqTestHarness))
+            else if (HarnessType == typeof(RabbitMqTestHarness))
             {
                 var harness = new RabbitMqTestHarness();
 
@@ -58,7 +58,7 @@ namespace MassTransit.Transports.Tests
 
                 harness.OnConfigureRabbitMqReceiveEndoint += x => x.BindMessageExchanges = Subscribe;
             }
-            else if (_harnessType == typeof(ActiveMqTestHarness))
+            else if (HarnessType == typeof(ActiveMqTestHarness))
             {
                 var harness = new ActiveMqTestHarness();
 
@@ -66,7 +66,7 @@ namespace MassTransit.Transports.Tests
 
                 harness.OnConfigureActiveMqReceiveEndoint += x => x.BindMessageTopics = Subscribe;
             }
-            else if (_harnessType == typeof(AzureServiceBusTestHarness))
+            else if (HarnessType == typeof(AzureServiceBusTestHarness))
             {
                 var serviceUri = Credentials.AzureServiceUri;
 
@@ -76,7 +76,7 @@ namespace MassTransit.Transports.Tests
 
                 harness.OnConfigureServiceBusReceiveEndpoint += x => x.SubscribeMessageTopics = Subscribe;
             }
-            else if (_harnessType == typeof(AmazonSqsTestHarness))
+            else if (HarnessType == typeof(AmazonSqsTestHarness))
             {
                 var harness = new AmazonSqsTestHarness(Credentials.AmazonRegion, Credentials.AmazonAccessKey, Credentials.AmazonSecretKey);
 
@@ -86,7 +86,7 @@ namespace MassTransit.Transports.Tests
             }
             else
             {
-                throw new ArgumentException($"Unknown test harness type: {TypeCache.GetShortName(_harnessType)}");
+                throw new ArgumentException($"Unknown test harness type: {TypeCache.GetShortName(HarnessType)}");
             }
         }
     }

@@ -46,7 +46,7 @@ namespace MassTransit.ActiveMqTransport.Testing
 
         public string Username { get; set; }
         public string Password { get; set; }
-        public string InputQueueName { get; }
+        public override string InputQueueName { get; }
         public IActiveMqHost Host { get; private set; }
 
         public override Uri InputQueueAddress => _inputQueueAddress;

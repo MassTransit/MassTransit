@@ -36,7 +36,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             if (value == null)
                 _attributes.Remove(key);
             else
-                _attributes[key].StringValue = value;
+                _attributes[key] = ToValue(value);
         }
 
         public void Set(string key, object value)
@@ -47,7 +47,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             if (value == null)
                 _attributes.Remove(key);
             else
-                _attributes[key].StringValue = value.ToString();
+                _attributes[key] = ToValue(value.ToString());
         }
 
         public bool TryGetHeader(string key, out object value)
@@ -61,6 +61,11 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             value = null;
             return false;
+        }
+
+        MessageAttributeValue ToValue(string value)
+        {
+            return new MessageAttributeValue {StringValue = value, DataType = "String"};
         }
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()

@@ -63,7 +63,7 @@ namespace MassTransit.AmazonSqsTransport.Testing
         public string SecretKey { get; }
         public AmazonSQSConfig AmazonSqsConfig { get; private set; }
         public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; private set; }
-        public string InputQueueName { get; }
+        public override string InputQueueName { get; }
         public IAmazonSqsHost Host { get; private set; }
 
         public override Uri InputQueueAddress => _inputQueueAddress;

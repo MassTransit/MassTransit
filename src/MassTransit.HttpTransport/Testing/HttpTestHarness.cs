@@ -30,12 +30,15 @@ namespace MassTransit.HttpTransport.Testing
             HostAddress = hostAddress ?? new Uri("http://localhost:8080");
 
             _inputQueueAddress = inputQueueAddress ?? HostAddress;
+
+            InputQueueName = _inputQueueAddress.AbsolutePath.Trim('/');
         }
 
         public Uri HostAddress { get; }
 
         public IHttpHost Host { get; private set; }
 
+        public override string InputQueueName { get; }
         public override Uri InputQueueAddress => _inputQueueAddress;
 
         public event Action<IHttpBusFactoryConfigurator> OnConfigureHttpBus;

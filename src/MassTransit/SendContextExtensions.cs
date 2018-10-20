@@ -25,14 +25,14 @@ namespace MassTransit
         /// <param name="headers"></param>
         public static void SetHostHeaders(this SendHeaders headers)
         {
-            headers.Set("MT-Host-MachineName", HostMetadataCache.Host.MachineName);
-            headers.Set("MT-Host-ProcessName", HostMetadataCache.Host.ProcessName);
-            headers.Set("MT-Host-ProcessId", HostMetadataCache.Host.ProcessId.ToString("F0"));
-            headers.Set("MT-Host-Assembly", HostMetadataCache.Host.Assembly);
-            headers.Set("MT-Host-AssemblyVersion", HostMetadataCache.Host.AssemblyVersion);
-            headers.Set("MT-Host-MassTransitVersion", HostMetadataCache.Host.MassTransitVersion);
-            headers.Set("MT-Host-FrameworkVersion", HostMetadataCache.Host.FrameworkVersion);
-            headers.Set("MT-Host-OperatingSystemVersion", HostMetadataCache.Host.OperatingSystemVersion);
+            headers.Set(MessageHeaders.Host.MachineName, HostMetadataCache.Host.MachineName);
+            headers.Set(MessageHeaders.Host.ProcessName, HostMetadataCache.Host.ProcessName);
+            headers.Set(MessageHeaders.Host.ProcessId, HostMetadataCache.Host.ProcessId.ToString("F0"));
+            headers.Set(MessageHeaders.Host.Assembly, HostMetadataCache.Host.Assembly);
+            headers.Set(MessageHeaders.Host.AssemblyVersion, HostMetadataCache.Host.AssemblyVersion);
+            headers.Set(MessageHeaders.Host.MassTransitVersion, HostMetadataCache.Host.MassTransitVersion);
+            headers.Set(MessageHeaders.Host.FrameworkVersion, HostMetadataCache.Host.FrameworkVersion);
+            headers.Set(MessageHeaders.Host.OperatingSystemVersion, HostMetadataCache.Host.OperatingSystemVersion);
         }
 
         /// <summary>

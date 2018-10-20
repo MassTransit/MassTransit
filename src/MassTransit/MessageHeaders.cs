@@ -75,6 +75,19 @@ namespace MassTransit
         public const string EndpointId = "MT-Request-EndpointId";
 
 
+        public static class Host
+        {
+            public const string MachineName = "MT-Host-MachineName";
+            public const string ProcessName = "MT-Host-ProcessName";
+            public const string ProcessId = "MT-Host-ProcessId";
+            public const string Assembly = "MT-Host-Assembly";
+            public const string AssemblyVersion = "MT-Host-AssemblyVersion";
+            public const string MassTransitVersion = "MT-Host-MassTransitVersion";
+            public const string FrameworkVersion = "MT-Host-FrameworkVersion";
+            public const string OperatingSystemVersion = "MT-Host-OperatingSystemVersion";
+        }
+
+
         public static class Request
         {
             public const string Remaining = "MT-Request-Remaining";

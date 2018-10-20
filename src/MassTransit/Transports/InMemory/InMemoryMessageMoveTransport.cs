@@ -46,8 +46,6 @@ namespace MassTransit.Transports.InMemory
 
             preSend(transportMessage, headers);
 
-            transportMessage.Headers[MessageHeaders.Reason] = "dead-letter";
-
             await _exchange.Send(transportMessage).ConfigureAwait(false);
         }
 

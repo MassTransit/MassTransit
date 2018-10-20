@@ -42,16 +42,19 @@ namespace MassTransit.AmazonSqsTransport.Transport
             if (context.TryGetPayload(out AmazonSqsMessageContext messageContext))
             {
                 foreach (var key in messageContext.Attributes.Keys)
+                {
+                    if (key.StartsWith("MT-"))
+                        continue;
+
                     message.MessageAttributes[key] = messageContext.Attributes[key];
+                }
             }
 
             SendHeaders headers = new AmazonSqsHeaderAdapter(message.MessageAttributes);
 
-            headers.SetHostHeaders();
-
             preSend(message, headers);
 
-            var task = Task.Run(() => clientContext.SendMessage(message, context.CancellationToken));
+            var task = clientContext.SendMessage(message, context.CancellationToken);
 
             context.AddReceiveTask(task);
         }

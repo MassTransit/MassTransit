@@ -20,6 +20,7 @@ namespace MassTransit.Testing
         BusTestHarness
     {
         IInMemoryHost _inMemoryHost;
+        readonly string _inputQueueName;
 
         public InMemoryTestHarness(string virtualHost = null)
         {
@@ -27,15 +28,15 @@ namespace MassTransit.Testing
             if (!string.IsNullOrWhiteSpace(virtualHost))
                 BaseAddress = new Uri(BaseAddress, virtualHost.Trim('/') + '/');
 
-            InputQueueName = "input_queue";
-            InputQueueAddress = new Uri(BaseAddress, InputQueueName);
+            _inputQueueName = "input_queue";
+            InputQueueAddress = new Uri(BaseAddress, _inputQueueName);
         }
 
-        public string InputQueueName { get; }
         public Uri BaseAddress { get; }
         public IInMemoryHost Host => _inMemoryHost;
 
         public override Uri InputQueueAddress { get; }
+        public override string InputQueueName => _inputQueueName;
 
         public event Action<IInMemoryBusFactoryConfigurator> OnConfigureInMemoryBus;
         public event Action<IInMemoryReceiveEndpointConfigurator> OnConfigureInMemoryReceiveEndpoint;

@@ -49,7 +49,7 @@ namespace MassTransit.RabbitMqTransport.Testing
 
         public string Username { get; set; }
         public string Password { get; set; }
-        public string InputQueueName { get; }
+        public override string InputQueueName { get; }
         public string NodeHostName { get; set; }
         public IRabbitMqHost Host { get; private set; }
         public IMessageNameFormatter NameFormatter { get; }

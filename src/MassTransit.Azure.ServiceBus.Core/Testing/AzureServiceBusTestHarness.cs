@@ -47,7 +47,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Testing
         public string SharedAccessKeyValue { get; }
         public TimeSpan TokenTimeToLive { get; set; }
         public TokenScope TokenScope { get; set; }
-        public string InputQueueName { get; }
+        public override string InputQueueName { get; }
         public IServiceBusHost Host { get; private set; }
         public bool ConfigureMessageScheduler { get; set; }
 

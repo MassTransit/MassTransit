@@ -48,6 +48,11 @@ namespace MassTransit.Testing
         public Uri BusAddress => _bus.Address;
 
         /// <summary>
+        /// The name of the input queue (for the default receive endpoint)
+        /// </summary>
+        public abstract string InputQueueName { get; }
+
+        /// <summary>
         /// The address of the input queue receive endpoint
         /// </summary>
         public abstract Uri InputQueueAddress { get; }
