@@ -51,9 +51,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Conventions.PartitionKey
 
             public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
             {
-                var rabbitMqSendContext = context.GetPayload<ServiceBusSendContext<T>>();
+                var serviceBusSendContext = context.GetPayload<ServiceBusSendContext<T>>();
 
-                return _filter.Send(rabbitMqSendContext, next);
+                return _filter.Send(serviceBusSendContext, next);
             }
 
             public void Probe(ProbeContext context)

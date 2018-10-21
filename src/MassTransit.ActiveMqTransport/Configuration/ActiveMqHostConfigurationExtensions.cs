@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -22,7 +22,7 @@ namespace MassTransit.ActiveMqTransport
         ///     Configure a ActiveMQ host using the configuration API
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="hostAddress">The URI host address of the RabbitMQ host (rabbitmq://host:port/vhost)</param>
+        /// <param name="hostAddress">The URI host address of the ActiveMQ host (activemq://host:port/vhost)</param>
         /// <param name="configure"></param>
         public static IActiveMqHost Host(this IActiveMqBusFactoryConfigurator configurator, Uri hostAddress, Action<IActiveMqHostConfigurator> configure)
         {

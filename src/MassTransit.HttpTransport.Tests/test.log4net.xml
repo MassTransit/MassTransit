@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <configuration>
 	<configSections>
 		<section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler,log4net" />
@@ -13,7 +13,7 @@
 <!--			<level value="DEBUG" />-->
 <!--		</logger>-->
 <!---->
-<!--		<logger name="MassTransit.RabbitMqTransport">-->
+<!--		<logger name="MassTransit.HttpTransport">-->
 <!--			<level value="DEBUG" />-->
 <!--		</logger>-->
 <!---->
