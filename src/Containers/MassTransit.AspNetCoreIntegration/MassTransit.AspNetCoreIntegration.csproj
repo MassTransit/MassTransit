@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>MassTransit.AspNetCoreIntegration</RootNamespace>
+    <AssemblyName>MassTransit.AspNetCoreIntegration</AssemblyName>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>portable</DebugType>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PackageId>MassTransit.AspNetCore</PackageId>
+    <Title>MassTransit.AspNetCore</Title>
+    <Description>MassTransit hosting for ASP.NET Core; $(Description)</Description>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AspNetCoreIntegration.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
+  </ItemGroup>
+
+</Project>

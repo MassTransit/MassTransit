@@ -155,6 +155,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Azure.ServiceBu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Azure.ServiceBus.Core.Tests", "MassTransit.Azure.ServiceBus.Core.Tests\MassTransit.Azure.ServiceBus.Core.Tests.csproj", "{1AEF94BE-7A9A-4E2C-BE6C-D31A38A139DD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AspNetCoreIntegration", "Containers\MassTransit.AspNetCoreIntegration\MassTransit.AspNetCoreIntegration.csproj", "{D7451A10-796F-497C-AC49-5C07BD6A2BCC}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Tests", "MassTransit.Transports.Tests\MassTransit.Transports.Tests.csproj", "{9C0F8E16-564A-4DA9-A8E0-12FA31B172B7}"
 EndProject
 Global
@@ -836,6 +838,18 @@ Global
 		{9C0F8E16-564A-4DA9-A8E0-12FA31B172B7}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
 		{9C0F8E16-564A-4DA9-A8E0-12FA31B172B7}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
 		{9C0F8E16-564A-4DA9-A8E0-12FA31B172B7}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.Debug|x86.Build.0 = Debug|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.Release|x86.ActiveCfg = Release|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.Release|x86.Build.0 = Release|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.ReleaseUnsigned|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -898,6 +912,7 @@ Global
 		{8B7B39F7-FE78-47F6-8A7D-DF2374175E50} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{1AEF94BE-7A9A-4E2C-BE6C-D31A38A139DD} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{9C0F8E16-564A-4DA9-A8E0-12FA31B172B7} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
+		{D7451A10-796F-497C-AC49-5C07BD6A2BCC} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}
