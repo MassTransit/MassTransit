@@ -16,7 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Entities
 
 
     /// <summary>
-    /// The exchange details used to declare the exchange to RabbitMQ
+    /// The exchange details used to declare the exchange to Azure Service Bus
     /// </summary>
     public interface Topic
     {

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -20,7 +20,7 @@ namespace MassTransit.HttpTransport
     public static class HttpBusFactory
     {
         /// <summary>
-        /// Configure and create a bus for RabbitMQ
+        /// Configure and create a bus for Http
         /// </summary>
         /// <param name="configure">The configuration callback to configure the bus</param>
         /// <returns></returns>
