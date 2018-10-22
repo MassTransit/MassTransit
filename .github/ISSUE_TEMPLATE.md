@@ -23,7 +23,7 @@
 -->
 
 
-### Can you also reproduce the problem with the lastest version?
+### Can you also reproduce the problem with the latest version?
 
 (Write your answer here.)
 
