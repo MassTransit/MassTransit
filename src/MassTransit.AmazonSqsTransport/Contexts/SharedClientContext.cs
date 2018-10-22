@@ -121,6 +121,11 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return _context.DeleteMessage(queueUrl, receiptHandle, cancellationToken);
         }
 
+        Task ClientContext.PurgeQueue(string queueName, CancellationToken cancellationToken)
+        {
+            return _context.PurgeQueue(queueName, cancellationToken);
+        }
+
         SendMessageRequest ClientContext.CreateSendRequest(string queueName, byte[] body)
         {
             return _context.CreateSendRequest(queueName, body);

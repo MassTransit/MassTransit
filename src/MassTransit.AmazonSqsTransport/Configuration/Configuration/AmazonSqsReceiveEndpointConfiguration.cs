@@ -27,7 +27,8 @@
         readonly IBuildPipeConfigurator<ClientContext> _clientConfigurator;
         readonly QueueReceiveSettings _settings;
 
-        public AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, string queueName, IAmazonSqsEndpointConfiguration endpointConfiguration)
+        public AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, string queueName,
+            IAmazonSqsEndpointConfiguration endpointConfiguration)
             : this(hostConfiguration, endpointConfiguration)
         {
             SubscribeMessageTopics = true;
@@ -92,6 +93,9 @@
             }
             else
             {
+                if (_settings.PurgeOnStartup)
+                    _clientConfigurator.UseFilter(new PurgeOnStartupFilter(_settings.EntityName));
+
                 var consumerFilter = new AmazonSqsConsumerFilter(receiveEndpointContext);
 
                 _clientConfigurator.UseFilter(consumerFilter);
@@ -134,25 +138,17 @@
 
         public ushort PrefetchCount
         {
-            set
-            {
-                _settings.PrefetchCount = value;
-                Changed("PrefetchCount");
-            }
+            set => _settings.PrefetchCount = value;
         }
 
         public ushort WaitTimeSeconds
         {
-            set
-            {
-                _settings.WaitTimeSeconds = value;
-                Changed("WaitTimeSeconds");
-            }
+            set => _settings.WaitTimeSeconds = value;
         }
 
-        public bool Lazy
+        public bool PurgeOnStartup
         {
-            set => _settings.Lazy = value;
+            set => _settings.PurgeOnStartup = value;
         }
 
         public void Subscribe(string topicName, Action<ITopicSubscriptionConfigurator> configure = null)

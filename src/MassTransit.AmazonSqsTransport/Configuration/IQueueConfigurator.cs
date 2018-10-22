@@ -27,10 +27,5 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// Specify that the queue (and the exchange of the same name) should be created as auto-delete
         /// </summary>
         bool AutoDelete { set; }
-
-        /// <summary>
-        /// Sets the queue to be lazy (using less memory)
-        /// </summary>
-        bool Lazy { set; }
     }
 }

@@ -16,6 +16,7 @@ namespace MassTransit.AmazonSqsTransport.Testing
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
+    using Amazon.SQS.Model;
     using Configuration;
     using MassTransit.Testing;
 
@@ -122,7 +123,7 @@ namespace MassTransit.AmazonSqsTransport.Testing
             {
                 Host = ConfigureHost(x);
 
-               // CleanUpVirtualHost(Host);
+                // CleanUpVirtualHost(Host);
 
                 ConfigureBus(x);
 
@@ -134,6 +135,7 @@ namespace MassTransit.AmazonSqsTransport.Testing
                 {
                     e.PrefetchCount = 1;
                     e.WaitTimeSeconds = 0;
+                   // e.PurgeOnStartup = true;
 
                     ConfigureReceiveEndpoint(e);
 
@@ -150,14 +152,15 @@ namespace MassTransit.AmazonSqsTransport.Testing
             {
                 var connection = host.Settings.CreateConnection();
 
-                var amazonSqs = connection.CreateAmazonSqsClient();
-                var amazonSns = connection.CreateAmazonSnsClient();
+                using (var amazonSqs = connection.CreateAmazonSqsClient())
+                using (var amazonSns = connection.CreateAmazonSnsClient())
+                {
+                    CleanUpQueue(amazonSqs, "input_queue");
 
-                CleanUpQueue(amazonSqs, amazonSns, "input_queue");
+                    CleanUpQueue(amazonSqs, InputQueueName);
 
-                CleanUpQueue(amazonSqs, amazonSns, InputQueueName);
-
-                CleanupVirtualHost(amazonSqs, amazonSns);
+                    CleanupVirtualHost(amazonSqs, amazonSns);
+                }
             }
             catch (Exception exception)
             {
@@ -165,15 +168,19 @@ namespace MassTransit.AmazonSqsTransport.Testing
             }
         }
 
-        static void CleanUpQueue(IAmazonSQS amazonSqs, IAmazonSimpleNotificationService amazonSns, string queueName)
+        static void CleanUpQueue(IAmazonSQS amazonSqs, string queueName)
         {
             async Task CleanUpQueue(string queue)
             {
-                var topicArn = (await amazonSns.CreateTopicAsync(queueName)).TopicArn;
-                await amazonSns.DeleteTopicAsync(topicArn);
+                try
+                {
+                    var queueUrl = (await amazonSqs.GetQueueUrlAsync(queue)).QueueUrl;
 
-                var queueUrl = (await amazonSqs.GetQueueUrlAsync(queue)).QueueUrl;
-                await amazonSqs.DeleteQueueAsync(queueUrl);
+                    await amazonSqs.PurgeQueueAsync(queueUrl);
+                }
+                catch (QueueDoesNotExistException)
+                {
+                }
             }
 
             Task.Run(async () =>

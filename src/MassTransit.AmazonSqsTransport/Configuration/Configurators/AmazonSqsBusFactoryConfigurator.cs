@@ -83,9 +83,9 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             set => _settings.AutoDelete = value;
         }
 
-        public bool Lazy
+        public bool PurgeOnStartup
         {
-            set => _settings.Lazy = value;
+            set => _settings.PurgeOnStartup = value;
         }
 
         public IAmazonSqsHost Host(AmazonSqsHostSettings settings)

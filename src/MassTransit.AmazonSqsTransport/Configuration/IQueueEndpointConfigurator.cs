@@ -18,5 +18,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         ushort PrefetchCount { set; }
 
         ushort WaitTimeSeconds { set; }
+
+        bool PurgeOnStartup { set; }
     }
 }

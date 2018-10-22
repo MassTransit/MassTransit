@@ -52,5 +52,6 @@ namespace MassTransit.AmazonSqsTransport
         Task SendMessage(SendMessageRequest request, CancellationToken cancellationToken);
 
         Task DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken = default);
+        Task PurgeQueue(string queueName, CancellationToken cancellationToken);
     }
 }

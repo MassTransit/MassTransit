@@ -113,7 +113,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return queueUrl;
         }
 
-        public async Task CreateQueueSubscription(string topicName, string queueName)
+        async Task ClientContext.CreateQueueSubscription(string topicName, string queueName)
         {
             var results = await Task.WhenAll(CreateTopic(topicName), CreateQueue(queueName)).ConfigureAwait(false);
 
@@ -127,19 +127,19 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             await _amazonSns.SetSubscriptionAttributesAsync(response, "RawMessageDelivery", "true").ConfigureAwait(false);
         }
 
-        public async Task DeleteTopic(string topicName)
+        async Task ClientContext.DeleteTopic(string topicName)
         {
             var topicArn = await CreateTopic(topicName).ConfigureAwait(false);
             await _amazonSns.DeleteTopicAsync(topicArn).ConfigureAwait(false);
         }
 
-        public async Task DeleteQueue(string queueName)
+        async Task ClientContext.DeleteQueue(string queueName)
         {
             var queueUrl = await CreateQueue(queueName).ConfigureAwait(false);
             await _amazonSqs.DeleteQueueAsync(queueUrl).ConfigureAwait(false);
         }
 
-        public Task BasicConsume(ReceiveSettings receiveSettings, IBasicConsumer consumer)
+        Task ClientContext.BasicConsume(ReceiveSettings receiveSettings, IBasicConsumer consumer)
         {
             string queueUrl;
             lock (_lock)
@@ -167,7 +167,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             }, CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
 
-        public PublishRequest CreatePublishRequest(string topicName, byte[] body)
+        PublishRequest ClientContext.CreatePublishRequest(string topicName, byte[] body)
         {
             var message = Encoding.UTF8.GetString(body);
 
@@ -178,7 +178,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             throw new ArgumentException($"The topic was unknown: {topicName}", nameof(topicName));
         }
 
-        public SendMessageRequest CreateSendRequest(string queueName, byte[] body)
+        SendMessageRequest ClientContext.CreateSendRequest(string queueName, byte[] body)
         {
             var message = Encoding.UTF8.GetString(body);
 
@@ -189,12 +189,12 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             throw new ArgumentException($"The queue was unknown: {queueName}", nameof(queueName));
         }
 
-        public Task Publish(PublishRequest request, CancellationToken cancellationToken)
+        Task ClientContext.Publish(PublishRequest request, CancellationToken cancellationToken)
         {
             return _amazonSns.PublishAsync(request, cancellationToken);
         }
 
-        public Task SendMessage(SendMessageRequest request, CancellationToken cancellationToken)
+        Task ClientContext.SendMessage(SendMessageRequest request, CancellationToken cancellationToken)
         {
             return _amazonSqs.SendMessageAsync(request, cancellationToken);
         }
@@ -203,8 +203,16 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         {
             lock (_lock)
                 if (_queueUrls.TryGetValue(queueName, out var queueUrl))
-
                     return _amazonSqs.DeleteMessageAsync(queueUrl, receiptHandle, cancellationToken);
+
+            throw new ArgumentException($"The queue was unknown: {queueName}", nameof(queueName));
+        }
+
+        Task ClientContext.PurgeQueue(string queueName, CancellationToken cancellationToken)
+        {
+            lock (_lock)
+                if (_queueUrls.TryGetValue(queueName, out var queueUrl))
+                    return _amazonSqs.PurgeQueueAsync(queueUrl, cancellationToken);
 
             throw new ArgumentException($"The queue was unknown: {queueName}", nameof(queueName));
         }

@@ -30,7 +30,5 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
             : base(source.EntityName, source.Durable, source.AutoDelete)
         {
         }
-
-        public bool Lazy { get; set; }
     }
 }
