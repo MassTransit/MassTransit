@@ -1,11 +1,11 @@
 // Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the
 // License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software distributed
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
@@ -62,13 +62,13 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
         async Task ConfigureTopology(ClientContext context)
         {
-            var topics = _brokerTopology.Topics.Select(topic => Declare(context, topic));
+            await Task.WhenAll(_brokerTopology.Topics.Select(topic => Declare(context, topic))).ConfigureAwait(false);
 
-            var queues = _brokerTopology.Queues.Select(queue => Declare(context, queue));
+            await Task.WhenAll(_brokerTopology.Queues.Select(queue => Declare(context, queue))).ConfigureAwait(false);
 
-            var subscriptions = _brokerTopology.QueueSubscriptions.Select(queue => Declare(context, queue));
+            await Task.WhenAll(_brokerTopology.QueueSubscriptions.Select(queue => Declare(context, queue))).ConfigureAwait(false);
 
-            await Task.WhenAll(topics.Concat(queues).Concat(subscriptions)).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.TopicSubscriptions.Select(topic => Declare(context, topic))).ConfigureAwait(false);
         }
 
         async Task DeleteAutoDelete(ClientContext context)
@@ -94,6 +94,14 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                 _log.DebugFormat("Binding topic ({0}) to queue ({1})", subscription.Source, subscription.Destination);
 
             return context.CreateQueueSubscription(subscription.Source.EntityName, subscription.Destination.EntityName);
+        }
+
+        Task Declare(ClientContext context, TopicSubscription subscription)
+        {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Binding topic ({0}) to topic ({1})", subscription.Source, subscription.Destination);
+
+            return context.CreateTopicSubscription(subscription.Source.EntityName, subscription.Destination.EntityName);
         }
 
         Task Declare(ClientContext context, Queue queue)

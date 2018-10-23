@@ -91,6 +91,11 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return _context.CreateQueueSubscription(topicName, queueName);
         }
 
+        public Task CreateTopicSubscription(string sourceName, string destinationName)
+        {
+            return _context.CreateTopicSubscription(sourceName, destinationName);
+        }
+
         Task ClientContext.DeleteTopic(string topicName)
         {
             return _context.DeleteTopic(topicName);

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Transport
 {
+    using Amazon.Lambda;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
 
@@ -21,5 +22,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
         IAmazonSQS CreateAmazonSqsClient();
 
         IAmazonSimpleNotificationService CreateAmazonSnsClient();
+
+        IAmazonLambda CreateAmazonLambdaClient();
     }
 }

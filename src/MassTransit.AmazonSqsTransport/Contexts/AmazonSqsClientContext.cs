@@ -14,10 +14,13 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Amazon.Lambda;
+    using Amazon.Lambda.Model;
     using Amazon.SimpleNotificationService;
     using Amazon.SimpleNotificationService.Model;
     using Amazon.SQS;
@@ -41,12 +44,17 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         readonly IAmazonSqsHost _host;
         readonly IAmazonSQS _amazonSqs;
         readonly IAmazonSimpleNotificationService _amazonSns;
+        readonly IAmazonLambda _amazonLambda;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         readonly object _lock = new object();
         readonly IDictionary<string, string> _queueUrls;
         readonly IDictionary<string, string> _topicArns;
 
-        public AmazonSqsClientContext(ConnectionContext connectionContext, IAmazonSQS amazonSqs, IAmazonSimpleNotificationService amazonSns,
+        public AmazonSqsClientContext(
+            ConnectionContext connectionContext,
+            IAmazonSQS amazonSqs,
+            IAmazonSimpleNotificationService amazonSns,
+            IAmazonLambda amazonLambda,
             IAmazonSqsHost host,
             CancellationToken cancellationToken)
             : base(new PayloadCacheScope(connectionContext), cancellationToken)
@@ -54,6 +62,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _connectionContext = connectionContext;
             _amazonSqs = amazonSqs;
             _amazonSns = amazonSns;
+            _amazonLambda = amazonLambda;
             _host = host;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
@@ -103,8 +112,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             var response = await _amazonSqs.CreateQueueAsync(queueName).ConfigureAwait(false);
 
-            await Task.Delay(500).ConfigureAwait(false);
-
             var queueUrl = response.QueueUrl;
 
             lock (_lock)
@@ -120,11 +127,38 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             var topicArn = results[0];
             var queueUrl = results[1];
 
-            var response = await _amazonSns.SubscribeQueueAsync(topicArn, _amazonSqs, queueUrl).ConfigureAwait(false);
+            var subscriptionArn = await _amazonSns.SubscribeQueueAsync(topicArn, _amazonSqs, queueUrl).ConfigureAwait(false);
 
-            await Task.Delay(500).ConfigureAwait(false);
+            await _amazonSns.SetSubscriptionAttributesAsync(subscriptionArn, "RawMessageDelivery", "true").ConfigureAwait(false);
+        }
 
-            await _amazonSns.SetSubscriptionAttributesAsync(response, "RawMessageDelivery", "true").ConfigureAwait(false);
+        async Task ClientContext.CreateTopicSubscription(string sourceName, string destinationName)
+        {
+            var results = await Task.WhenAll(CreateTopic(sourceName), CreateTopic(destinationName)).ConfigureAwait(false);
+
+            var sourceArn = results[0];
+            var destinationArn = results[1];
+
+            var request = new CreateFunctionRequest();
+            request.Code = new FunctionCode
+            {
+                S3Bucket = "masstransit-amazonsqs-transport-topicsubscription",
+                S3Key = "deploy.zip"
+            };
+            request.Runtime = Runtime.Dotnetcore21;
+            request.Handler = "MassTransit.AmazonSqsTransport.TopicSubscription::MassTransit.AmazonSqsTransport.TopicSubscription.TopicSubscription::Handler";
+            request.FunctionName = $"MassTransit-Subscription-{sourceName}-{destinationName}";
+            request.Environment.Variables.Add("PUBLISH_TOPIC_ARN", destinationArn);
+            request.Role = "ExecutionRoleARN";
+
+            var response = await _amazonLambda.CreateFunctionAsync(request).ConfigureAwait(false);
+
+            await _amazonSns.SubscribeAsync(new SubscribeRequest
+            {
+                TopicArn = sourceArn,
+                Endpoint = response.FunctionArn,
+                Protocol = "lambda"
+            }).ConfigureAwait(false);
         }
 
         async Task ClientContext.DeleteTopic(string topicName)

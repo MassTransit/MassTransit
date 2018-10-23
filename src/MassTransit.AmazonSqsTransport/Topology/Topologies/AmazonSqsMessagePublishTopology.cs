@@ -73,13 +73,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             var topicHandle = builder.CreateTopic(_topic.EntityName, _topic.Durable, _topic.AutoDelete);
 
             if (builder.Topic != null)
-            {
-                // builder.ExchangeBind(builder.Exchange, exchangeHandle, "", new Dictionary<string, object>());
-            }
+                builder.CreateTopicSubscription(builder.Topic, topicHandle);
             else
-            {
-                // builder.Exchange = exchangeHandle;
-            }
+                builder.Topic = topicHandle;
 
             foreach (IAmazonSqsMessagePublishTopology configurator in _implementedMessageTypes)
                 configurator.Apply(builder);

@@ -44,8 +44,9 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         {
             var amazonSqs = await context.CreateAmazonSqs().ConfigureAwait(false);
             var amazonSns = await context.CreateAmazonSns().ConfigureAwait(false);
+            var amazonLambda = await context.CreateAmazonLambda().ConfigureAwait(false);
 
-            var modelContext = new AmazonSqsClientContext(context, amazonSqs, amazonSns, _host, context.CancellationToken);
+            var modelContext = new AmazonSqsClientContext(context, amazonSqs, amazonSns, amazonLambda, _host, context.CancellationToken);
 
             try
             {

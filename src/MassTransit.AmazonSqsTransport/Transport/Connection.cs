@@ -13,6 +13,7 @@
 namespace MassTransit.AmazonSqsTransport.Transport
 {
     using Amazon;
+    using Amazon.Lambda;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
 
@@ -24,14 +25,19 @@ namespace MassTransit.AmazonSqsTransport.Transport
         readonly AmazonSimpleNotificationServiceConfig _amazonSnsConfig;
         readonly AmazonSQSConfig _amazonSqsConfig;
         readonly string _secretKey;
+        readonly AmazonLambdaConfig _amazonLambdaConfig;
 
-        public Connection(string accessKey, string secretKey, RegionEndpoint regionEndpoint = null, AmazonSQSConfig amazonSqsConfig = null,
-            AmazonSimpleNotificationServiceConfig amazonSnsConfig = null)
+        public Connection(string accessKey, string secretKey,
+            RegionEndpoint regionEndpoint = null,
+            AmazonSQSConfig amazonSqsConfig = null,
+            AmazonSimpleNotificationServiceConfig amazonSnsConfig = null,
+            AmazonLambdaConfig amazonLambdaConfig = null)
         {
             _accessKey = accessKey;
             _secretKey = secretKey;
             _amazonSqsConfig = amazonSqsConfig ?? new AmazonSQSConfig {RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1};
             _amazonSnsConfig = amazonSnsConfig ?? new AmazonSimpleNotificationServiceConfig {RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1};
+            _amazonLambdaConfig = amazonLambdaConfig ?? new AmazonLambdaConfig {RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1};
         }
 
         public IAmazonSQS CreateAmazonSqsClient()
@@ -42,6 +48,11 @@ namespace MassTransit.AmazonSqsTransport.Transport
         public IAmazonSimpleNotificationService CreateAmazonSnsClient()
         {
             return new AmazonSimpleNotificationServiceClient(_accessKey, _secretKey, _amazonSnsConfig);
+        }
+
+        public IAmazonLambda CreateAmazonLambdaClient()
+        {
+            return new AmazonLambdaClient(_accessKey, _secretKey, _amazonLambdaConfig);
         }
     }
 }
