@@ -50,6 +50,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
         {
             readonly IPublishEndpointBrokerTopologyBuilder _builder;
             readonly PublishBrokerTopologyOptions _options;
+            TopicHandle _topic;
 
             public ImplementedBuilder(IPublishEndpointBrokerTopologyBuilder builder, PublishBrokerTopologyOptions options)
             {
@@ -57,11 +58,22 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
                 _options = options;
             }
 
-            public TopicHandle Topic { get; set; }
+            public TopicHandle Topic
+            {
+                get => _topic;
+                set
+                {
+                    _topic = value;
+                    if (_builder.Topic != null)
+                    {
+                        _builder.CreateTopicSubscription(_builder.Topic, _topic);
+                    }
+                }
+            }
 
             public IPublishEndpointBrokerTopologyBuilder CreateImplementedBuilder()
             {
-                if (_options.HasFlag(PublishBrokerTopologyOptions.MaintainHierarchy))
+                if (_options.HasFlag(PublishBrokerTopologyOptions.FlattenHierarchy))
                     return new ImplementedBuilder(this, _options);
 
                 return this;

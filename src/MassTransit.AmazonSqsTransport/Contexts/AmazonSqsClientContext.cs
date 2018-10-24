@@ -16,7 +16,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -40,7 +39,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         IAsyncDisposable
     {
         static readonly ILog _log = Logger.Get<AmazonSqsClientContext>();
-        static readonly Stream _topicSubscriptionZipFile = Assembly.GetEntryAssembly().GetManifestResourceStream("EmbeddedResource.MassTransit.AmazonSqsTransport.TopicSubscription.zip");
 
         readonly ConnectionContext _connectionContext;
         readonly IAmazonSqsHost _host;
@@ -97,8 +95,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             var response = await _amazonSns.CreateTopicAsync(topicName).ConfigureAwait(false);
 
-            await Task.Delay(500).ConfigureAwait(false);
-
             var topicArn = response.TopicArn;
 
             lock (_lock)
@@ -142,27 +138,34 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             var sourceArn = results[0];
             var destinationArn = results[1];
 
-            using (var stream = new MemoryStream())
-            {
-                await _topicSubscriptionZipFile.CopyToAsync(stream);
+            var functionName = $"MT_{sourceName}";
 
-                var request = new CreateFunctionRequest
+            if(await FunctionExits(functionName).ConfigureAwait(false)) return;
+
+            using (var resourceStream = GetType().Assembly.GetManifestResourceStream("MassTransit.AmazonSqsTransport.TopicSubscription.zip"))
+            using (var zipFile = new MemoryStream())
+            {
+                await resourceStream.CopyToAsync(zipFile);
+
+                var response = await _amazonLambda.CreateFunctionAsync(new CreateFunctionRequest
                 {
-                    Code = new FunctionCode {ZipFile = stream},
+                    Code = new FunctionCode {ZipFile = zipFile},
                     Runtime = Runtime.Dotnetcore21,
                     Handler = "MassTransit.AmazonSqsTransport.TopicSubscription::MassTransit.AmazonSqsTransport.TopicSubscription.TopicSubscription::Handler",
-                    FunctionName = $"MassTransit-Subscription-{sourceName}-{destinationName}",
-                    Role = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+                    FunctionName = functionName,
+                    Role = "arn:aws:iam::134693456886:role/AWSLambdaSNSExecutionRole",
                     Environment = new Amazon.Lambda.Model.Environment {Variables = {{"PUBLISH_TOPIC_ARN", destinationArn}}},
-                };
-
-                var response = await _amazonLambda.CreateFunctionAsync(request).ConfigureAwait(false);
+                    Timeout = 30,
+                    MemorySize = 256
+                }).ConfigureAwait(false);
 
                 await _amazonLambda.AddPermissionAsync(new Amazon.Lambda.Model.AddPermissionRequest
                 {
-                    FunctionName = response.FunctionName,
-                    Action = "sns:Publish",
-                    SourceArn = destinationArn
+                    StatementId = "AllowExecutionFromSNS",
+                    Action = "lambda:InvokeFunction",
+                    FunctionName = functionName,
+                    Principal = "sns.amazonaws.com",
+                    SourceArn = sourceArn
                 });
 
                 await _amazonSns.SubscribeAsync(new SubscribeRequest
@@ -171,6 +174,19 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                     Endpoint = response.FunctionArn,
                     Protocol = "lambda"
                 }).ConfigureAwait(false);
+            }
+        }
+
+        async Task<bool> FunctionExits(string functionName)
+        {
+            try
+            {
+                await _amazonLambda.GetFunctionConfigurationAsync(functionName);
+                return true;
+            }
+            catch(ResourceNotFoundException)
+            {
+                return false;
             }
         }
 
