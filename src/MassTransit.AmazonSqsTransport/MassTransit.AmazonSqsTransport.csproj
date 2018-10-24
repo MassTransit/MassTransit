@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net452;netcoreapp2.1</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -25,6 +25,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="MassTransit.AmazonSqsTransport.TopicSubscription.zip" />
-    <EmbeddedResource Include="MassTransit.AmazonSqsTransport.TopicSubscription.zip"></EmbeddedResource>
+    <EmbeddedResource Include="MassTransit.AmazonSqsTransport.TopicSubscription.zip">
+      <LogicalName>MassTransit.AmazonSqsTransport.TopicSubscription.zip</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
