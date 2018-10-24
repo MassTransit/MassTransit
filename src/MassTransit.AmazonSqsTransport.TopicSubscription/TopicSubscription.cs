@@ -1,4 +1,6 @@
-﻿namespace MassTransit.AmazonSqsTransport.TopicSubscription
+﻿[assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
+
+namespace MassTransit.AmazonSqsTransport.TopicSubscription
 {
     using System;
     using System.Collections.Generic;

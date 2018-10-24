@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="Amazon.Lambda.Core" Version="1.0.0" />
+        <PackageReference Include="Amazon.Lambda.Serialization.Json" Version="1.4.0" />
         <PackageReference Include="Amazon.Lambda.SNSEvents" Version="1.0.0" />
         <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.2.1" />
     </ItemGroup>
