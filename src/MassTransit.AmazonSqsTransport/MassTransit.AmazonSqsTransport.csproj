@@ -23,4 +23,8 @@
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="MassTransit.AmazonSqsTransport.TopicSubscription.zip" />
+    <EmbeddedResource Include="MassTransit.AmazonSqsTransport.TopicSubscription.zip"></EmbeddedResource>
+  </ItemGroup>
 </Project>

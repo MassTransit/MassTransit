@@ -53,3 +53,4 @@ _book
 .vscode
 **/.idea/
 appsettings.Development.json
+/src/MassTransit.AmazonSqsTransport/*.zip
