@@ -1,6 +1,4 @@
-﻿[assembly: Amazon.Lambda.Core.LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
-
-namespace MassTransit.AmazonSqsTransport.TopicSubscription
+﻿namespace MassTransit.AmazonSqsTransport.TopicSubscription
 {
     using System;
     using System.Collections.Generic;
@@ -38,7 +36,7 @@ namespace MassTransit.AmazonSqsTransport.TopicSubscription
         }
 
         public Dictionary<string, MessageAttributeValue> Map(IDictionary<string, SNSEvent.MessageAttribute> attributes) =>
-            attributes.ToDictionary(
+            attributes?.ToDictionary(
                 x => x.Key,
                 x => new MessageAttributeValue
                 {
