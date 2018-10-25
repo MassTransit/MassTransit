@@ -1,7 +1,9 @@
 #r @"src/packages/FAKE/tools/FakeLib.dll"
 open System.IO
 open Fake
+open Fake.ArchiveHelper.Zip
 open Fake.AssemblyInfoFile
+open Fake.IO
 open Fake.Git.Information
 open Fake.SemVerHelper
 open System
@@ -57,6 +59,20 @@ Target "RestorePackages" (fun _ ->
                                        AdditionalArgs = versionArgs })
 )
 
+Target "PublishLambda" (fun _ ->
+  let publishPath = buildArtifactPath @@ "MassTransit.AmazonSqsTransport.TopicSubscription";
+  DotNetCli.Publish (fun p -> { p with Project = @"./src/MassTransit.AmazonSqsTransport.TopicSubscription/MassTransit.AmazonSqsTransport.TopicSubscription.csproj"
+                                       Configuration = "release"
+                                       Output = publishPath });
+  
+  let zipFile = buildArtifactPath @@ "MassTransit.AmazonSqsTransport.TopicSubscription.zip";
+  let baseDir = DirectoryInfo.ofPath publishPath;
+  let archiveFile = FileInfo.ofPath zipFile;
+  CompressDirWithDefaults baseDir archiveFile;
+
+  DeleteDir publishPath
+)
+
 Target "Build" (fun _ ->
   DotNetCli.Build (fun p-> { p with Project = @".\src\MassTransit.sln"
                                     Configuration= "Release"
@@ -92,6 +108,7 @@ Target "Default" (fun _ ->
 
 "Clean"
   ==> "RestorePackages"
+  ==> "PublishLambda"
   ==> "Build"
   ==> "Package"
   ==> "Default"

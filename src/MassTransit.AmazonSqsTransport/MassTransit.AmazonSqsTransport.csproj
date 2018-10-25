@@ -25,7 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="MassTransit.AmazonSqsTransport.TopicSubscription.zip" />
-    <EmbeddedResource Include="MassTransit.AmazonSqsTransport.TopicSubscription.zip">
+    <EmbeddedResource Include="../../build_artifacts/MassTransit.AmazonSqsTransport.TopicSubscription.zip">
       <LogicalName>MassTransit.AmazonSqsTransport.TopicSubscription.zip</LogicalName>
     </EmbeddedResource>
   </ItemGroup>

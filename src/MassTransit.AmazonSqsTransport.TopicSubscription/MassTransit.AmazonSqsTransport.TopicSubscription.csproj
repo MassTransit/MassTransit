@@ -4,6 +4,7 @@
         <TargetFramework>netcoreapp2.1</TargetFramework>
         <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
         <AWSProjectType>Lambda</AWSProjectType>
+        <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
