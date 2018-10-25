@@ -14,6 +14,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 {
     using System;
     using Amazon;
+    using Amazon.Lambda;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Exceptions;
@@ -36,6 +37,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
                 Region = regionEndpoint,
                 AccessKey = "",
                 SecretKey = "",
+                ExecutionRoleArn = "",
                 AmazonSqsConfig = new AmazonSQSConfig { RegionEndpoint = regionEndpoint },
                 AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig { RegionEndpoint = regionEndpoint },
             };
@@ -62,6 +64,11 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             _settings.SecretKey = secretKey;
         }
 
+        public void ExecutionRoleArn(string executionRoleArn)
+        {
+            _settings.ExecutionRoleArn = executionRoleArn;
+        }
+
         public void Config(AmazonSQSConfig config)
         {
             _settings.AmazonSqsConfig = config;
@@ -70,6 +77,11 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public void Config(AmazonSimpleNotificationServiceConfig config)
         {
             _settings.AmazonSnsConfig = config;
+        }
+
+        public void Config(AmazonLambdaConfig config)
+        {
+            _settings.AmazonLambdaConfig = config;
         }
     }
 }

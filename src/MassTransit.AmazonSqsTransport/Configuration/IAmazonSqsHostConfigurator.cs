@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the
@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Configuration
 {
+    using Amazon.Lambda;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
 
@@ -31,6 +32,12 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         void SecretKey(string secretKey);
 
         /// <summary>
+        /// Sets the exectionRoleArn for the connection to AmazonLambda
+        /// </summary>
+        /// <param name="executionRoleArn"></param>
+        void ExecutionRoleArn(string executionRoleArn);
+
+        /// <summary>
         /// Sets the default config for the connection to AmazonSQS
         /// </summary>
         /// <param name="config"></param>
@@ -41,5 +48,11 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// </summary>
         /// <param name="config"></param>
         void Config(AmazonSimpleNotificationServiceConfig config);
+
+        /// <summary>
+        /// Sets the default config for the connection to AmazonLambda
+        /// </summary>
+        /// <param name="config"></param>
+        void Config(AmazonLambdaConfig config);
     }
 }

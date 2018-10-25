@@ -16,6 +16,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Amazon.Lambda;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Configuration;
@@ -213,6 +214,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                     h.SecretKey("admin");
                     h.Config(new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://docker.localhost:4575" });
                     h.Config(new AmazonSQSConfig { ServiceURL = "http://docker.localhost:4576" });
+                    h.Config(new AmazonLambdaConfig { ServiceURL = "http://docker.localhost:4574" });
                 });
             });
 

@@ -153,7 +153,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                     Runtime = Runtime.Dotnetcore21,
                     Handler = "MassTransit.AmazonSqsTransport.TopicSubscription::MassTransit.AmazonSqsTransport.TopicSubscription.TopicSubscription::Handler",
                     FunctionName = functionName,
-                    Role = "arn:aws:iam::134693456886:role/AWSLambdaSNSExecutionRole",
+                    Role = _host.Settings.ExecutionRoleArn,
                     Environment = new Amazon.Lambda.Model.Environment {Variables = {{"PUBLISH_TOPIC_ARN", destinationArn}}},
                     Timeout = 30,
                     MemorySize = 256

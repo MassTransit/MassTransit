@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the
@@ -37,6 +37,11 @@ namespace MassTransit.AmazonSqsTransport
         ///     MAYBE this should be a SecureString instead of a regular string
         /// </summary>
         string SecretKey { get; }
+
+        /// <summary>
+        ///     The executionRoleArn for creating aws lambda function.
+        /// </summary>
+        string ExecutionRoleArn { get; }
 
         Uri HostAddress { get; }
 

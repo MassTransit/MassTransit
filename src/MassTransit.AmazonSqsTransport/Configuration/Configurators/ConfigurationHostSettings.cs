@@ -14,6 +14,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 {
     using System;
     using Amazon;
+    using Amazon.Lambda;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Transport;
@@ -23,25 +24,31 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         AmazonSqsHostSettings
     {
         readonly Lazy<Uri> _hostAddress;
-        
+
         public ConfigurationHostSettings()
         {
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
         }
 
         public RegionEndpoint Region { get; set; }
+
         public string AccessKey { get; set; }
+
         public string SecretKey { get; set; }
+
+        public string ExecutionRoleArn { get; set; }
 
         public AmazonSQSConfig AmazonSqsConfig { get; set; }
 
         public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; set; }
 
+        public AmazonLambdaConfig AmazonLambdaConfig { get; set; }
+
         public Uri HostAddress => _hostAddress.Value;
 
         public IConnection CreateConnection()
         {
-            return new Connection(AccessKey, SecretKey, Region, AmazonSqsConfig, AmazonSnsConfig);
+            return new Connection(AccessKey, SecretKey, Region, AmazonSqsConfig, AmazonSnsConfig, AmazonLambdaConfig);
         }
 
         Uri FormatHostAddress()
