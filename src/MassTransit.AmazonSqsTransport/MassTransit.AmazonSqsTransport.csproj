@@ -3,13 +3,13 @@
     <TargetFrameworks>net452;netcoreapp2.1</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>MassTransit.AmazonSQS</PackageId>
     <Title>MassTransit.AmazonSQS</Title>
-    <Description>MassTransit ActiveMQ transport support; $(Description)</Description>
+    <Description>MassTransit AmazonSQS transport support; $(Description)</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AmazonSqsTransport.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
