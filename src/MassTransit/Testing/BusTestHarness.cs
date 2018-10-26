@@ -324,6 +324,44 @@ namespace MassTransit.Testing
             return source.Task;
         }
 
+        /// <summary>
+        /// Registers a consumer on the receive endpoint that is cancelled when the test is canceled
+        /// and completed when the message is received.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configurator">The endpoint configurator</param>
+        /// <returns></returns>
+        public Task<ConsumeContext<T>> HandledByConsumer<T>(IReceiveEndpointConfigurator configurator)
+            where T : class
+        {
+            TaskCompletionSource<ConsumeContext<T>> source = GetTask<ConsumeContext<T>>();
+
+            configurator.Consumer(() => new Consumer<T>(source));
+
+            return source.Task;
+        }
+
+
+        class Consumer<T> :
+            IConsumer<T>
+            where T : class
+        {
+            readonly TaskCompletionSource<ConsumeContext<T>> _source;
+
+            public Consumer(TaskCompletionSource<ConsumeContext<T>> source)
+            {
+                _source = source;
+            }
+
+            public Task Consume(ConsumeContext<T> context)
+            {
+                _source.TrySetResult(context);
+
+                return TaskUtil.Completed;
+            }
+        }
+
+
         public void LogEndpoint(IReceiveEndpointConfigurator configurator)
         {
             configurator.UseLog(Console.Out, log =>

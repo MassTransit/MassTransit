@@ -147,9 +147,6 @@ namespace MassTransit.ConsumePipeSpecifications
         {
             var filter = new DynamicFilter<ConsumeContext, Guid>(new ConsumeContextConverterFactory(), GetRequestId);
 
-            foreach (var specification in _messageSpecifications.Values)
-                specification.Connect(filter);
-
             var builder = new PipeBuilder<ConsumeContext>();
             foreach (IPipeSpecification<ConsumeContext> specification in _consumeContextSpecifications)
                 specification.Apply(builder);

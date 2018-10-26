@@ -72,6 +72,19 @@ namespace MassTransit.TestFramework
         }
 
         /// <summary>
+        /// Registers a consumer on the receive endpoint that is cancelled when the test is canceled
+        /// and completed when the message is received.
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="configurator">The endpoint configurator</param>
+        /// <returns></returns>
+        protected Task<ConsumeContext<T>> HandledByConsumer<T>(IReceiveEndpointConfigurator configurator)
+            where T : class
+        {
+            return BusTestHarness.HandledByConsumer<T>(configurator);
+        }
+
+        /// <summary>
         /// Registers a handler on the receive endpoint that is cancelled when the test is canceled
         /// and completed when the message is received.
         /// </summary>

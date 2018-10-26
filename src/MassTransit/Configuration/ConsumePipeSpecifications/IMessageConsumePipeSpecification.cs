@@ -41,7 +41,7 @@ namespace MassTransit.ConsumePipeSpecifications
             where T : class;
 
         /// <summary>
-        /// Connect the pipe for the specfication to the specified connector
+        /// Connect the pipe for the specification to the specified connector
         /// </summary>
         /// <param name="connector"></param>
         ConnectHandle Connect(IPipeConnector connector);
