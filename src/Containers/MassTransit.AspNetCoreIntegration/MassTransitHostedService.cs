@@ -14,16 +14,20 @@ namespace MassTransit.AspNetCoreIntegration
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using Logging.Tracing;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
 
 
     public class MassTransitHostedService : IHostedService
     {
         readonly IBusControl _bus;
 
-        public MassTransitHostedService(IBusControl bus)
+        public MassTransitHostedService(IBusControl bus, ILoggerFactory loggerFactory)
         {
             _bus = bus;
+            if (loggerFactory != null && Logging.Logger.Current.GetType() == typeof(TraceLogger))
+                ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
         }
         
         public Task StartAsync(CancellationToken cancellationToken)

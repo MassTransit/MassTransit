@@ -15,9 +15,12 @@ namespace MassTransit.AspNetCoreIntegration
 {
     using System;
     using ExtensionsDependencyInjectionIntegration;
+    using Logging;
+    using Logging.Tracing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
 
 
     public static class ServiceCollectionExtensions
@@ -35,7 +38,7 @@ namespace MassTransit.AspNetCoreIntegration
             services.TryAddSingleton<IPublishEndpoint>(p => p.GetRequiredService<IBusControl>());
             services.TryAddSingleton<ISendEndpointProvider>(p => p.GetRequiredService<IBusControl>());
 
-            services.AddSingleton<IHostedService>(p => new MassTransitHostedService(p.GetRequiredService<IBusControl>()));
+            services.AddSingleton<IHostedService, MassTransitHostedService>();
 
             return services;
         }
@@ -65,9 +68,12 @@ namespace MassTransit.AspNetCoreIntegration
         /// </summary>
         /// <param name="services">Service collection</param>
         /// <param name="bus">The bus instance</param>
+        /// <param name="loggerFactory">ASP.NET Core logger factory instance</param>
         /// <returns></returns>
-        public static IServiceCollection AddMassTransit(this IServiceCollection services, IBusControl bus)
+        public static IServiceCollection AddMassTransit(this IServiceCollection services, IBusControl bus, ILoggerFactory loggerFactory = null)
         {
+            if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
+                ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
             services.TryAddSingleton(bus);
             services.TryAddSingleton<IBus>(bus);
             services.TryAddSingleton<IPublishEndpoint>(bus);
