@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
 namespace MassTransit.AspNetCoreIntegration
@@ -34,7 +34,17 @@ namespace MassTransit.AspNetCoreIntegration
         public static IServiceCollection AddMassTransit(this IServiceCollection services, Func<IServiceProvider, IBusControl> createBus)
         {
             services.TryAddSingleton(createBus);
-            services.TryAddSingleton<IBus>(p => p.GetRequiredService<IBusControl>());
+            services.TryAddSingleton<IBus>(p =>
+            {
+                var bus = p.GetRequiredService<IBusControl>();
+                var loggerFactory = p.GetService<ILoggerFactory>();
+
+                if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
+                    ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
+
+                return bus;
+            });
+
             services.TryAddSingleton<IPublishEndpoint>(p => p.GetRequiredService<IBusControl>());
             services.TryAddSingleton<ISendEndpointProvider>(p => p.GetRequiredService<IBusControl>());
 
@@ -59,7 +69,7 @@ namespace MassTransit.AspNetCoreIntegration
 
             services.AddMassTransit(configure);
             services.AddMassTransit(createBus);
-            
+
             return services;
         }
 
@@ -74,6 +84,7 @@ namespace MassTransit.AspNetCoreIntegration
         {
             if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
                 ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
+
             services.TryAddSingleton(bus);
             services.TryAddSingleton<IBus>(bus);
             services.TryAddSingleton<IPublishEndpoint>(bus);
