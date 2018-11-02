@@ -91,7 +91,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static async Task DeployAsync(IBusControl bus, CancellationToken cancellationToken = default)
+        public static async Task DeployAsync(this IBusControl bus, CancellationToken cancellationToken = default)
         {
             if (bus == null)
                 throw new ArgumentNullException(nameof(bus));
