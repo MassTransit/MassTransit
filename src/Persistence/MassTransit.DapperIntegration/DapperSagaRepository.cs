@@ -127,30 +127,48 @@ namespace MassTransit.DapperIntegration
 
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
+           var tableName = GetTableName<T>();
+            var (whereStatement, parameters) = WhereStatementHelper.GetWhereStatementAndParametersFromExpression(context.Query.FilterExpression);
+
+            List<Guid> correlationIds = null;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                correlationIds =
+                    (await connection.QueryAsync<Guid>(
+                        $"SELECT CorrelationId FROM {tableName} {whereStatement}",
+                        parameters).ConfigureAwait(false)).ToList();
+            }
+
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             using (var connection = new SqlConnection(_connectionString))
             {
                 try
                 {
-                    var tableName = GetTableName<T>();
-                    var (whereStatement, parameters) = WhereStatementHelper.GetWhereStatementAndParametersFromExpression(context.Query.FilterExpression);
+                    var missingCorrelationIds = new List<Guid>();
 
-                    List<TSaga> instances =
-                        (await connection.QueryAsync<TSaga>($"SELECT * FROM {tableName} WITH (UPDLOCK, ROWLOCK) {whereStatement}",
-                            parameters).ConfigureAwait(false)).ToList();
+                    foreach (var correlationId in correlationIds)
+                    {
+                        var instance =
+                            await connection.QuerySingleOrDefaultAsync<TSaga>(
+                                $"SELECT * FROM {tableName} WITH (UPDLOCK, ROWLOCK) where CorrelationId = @correlationId",
+                                new { correlationId }).ConfigureAwait(false);
 
-                    if (!instances.Any())
+                        if (instance != null)
+                        {
+                            await SendToInstance(context, connection, policy, instance, tableName, next).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            missingCorrelationIds.Add(correlationId);
+                        }
+                    }
+
+                    // If no sagas are found or all are missing
+                    if (correlationIds.Count == missingCorrelationIds.Count)
                     {
                         var missingSagaPipe = new MissingPipe<T>(connection, tableName, next, InsertSagaInstance);
 
                         await policy.Missing(context, missingSagaPipe);
-                    }
-                    else
-                    {
-                        foreach (var instance in instances)
-                        {
-                            await SendToInstance(context, connection, policy, instance, tableName, next).ConfigureAwait(false);
-                        }
                     }
 
                     transaction.Complete();
