@@ -27,6 +27,7 @@ namespace MassTransit
 
     public static class UnityExtensions
     {
+        [Obsolete("LoadFrom is not recommended, review the documentation and use the Consumer methods for your container instead.")]
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IUnityContainer container)
         {
             var scopeProvider = new UnityConsumerScopeProvider(container);

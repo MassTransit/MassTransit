@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.StructureMapIntegration
 {
+    using System;
     using Context;
     using GreenPipes;
     using Scoping;
@@ -24,10 +25,22 @@ namespace MassTransit.StructureMapIntegration
         IConsumerScopeProvider
     {
         readonly IContainer _container;
+        readonly IContext _context;
 
         public StructureMapConsumerScopeProvider(IContainer container)
         {
+            if (container == null)
+                throw new ArgumentNullException(nameof(container));
+
             _container = container;
+        }
+
+        public StructureMapConsumerScopeProvider(IContext context)
+        {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            _context = context;
         }
 
         public void Probe(ProbeContext context)
@@ -40,7 +53,7 @@ namespace MassTransit.StructureMapIntegration
             if (context.TryGetPayload<IContainer>(out var existingContainer))
                 return new ExistingConsumerScopeContext(context);
 
-            var container = _container.CreateNestedContainer(context);
+            var container = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
             try
             {
                 var proxy = new ConsumeContextProxyScope(context);
@@ -71,7 +84,7 @@ namespace MassTransit.StructureMapIntegration
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext);
             }
 
-            var container = _container.CreateNestedContainer(context);
+            var container = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
             try
             {
                 var consumer = container.GetInstance<TConsumer>();

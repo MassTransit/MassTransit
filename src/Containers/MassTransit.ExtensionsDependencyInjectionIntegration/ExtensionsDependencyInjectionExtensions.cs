@@ -28,6 +28,7 @@ namespace MassTransit
 
     public static class ExtensionsDependencyInjectionIntegrationExtensions
     {
+        [Obsolete("LoadFrom is not recommended, review the documentation and use the Consumer methods for your container instead.")]
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IServiceProvider serviceProvider)
         {
             var consumerCache = serviceProvider.GetService<IConsumerCacheService>();

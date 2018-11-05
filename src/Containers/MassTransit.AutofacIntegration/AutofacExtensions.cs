@@ -40,6 +40,7 @@ namespace MassTransit
         /// <param name="scope">The LifetimeScope of the container</param>
         /// <param name="name">The name to use for the scope created for each message</param>
         /// <param name="configureScope">Configuration for scope container</param>
+        [Obsolete("LoadFrom is not recommended, review the documentation and use the Consumer methods for your container instead.")]
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, ILifetimeScope scope, string name = "message",
             Action<ContainerBuilder, ConsumeContext> configureScope = null)
         {
@@ -67,6 +68,7 @@ namespace MassTransit
         /// <param name="context">The component context of the container</param>
         /// <param name="name">The name to use for the scope created for each message</param>
         /// <param name="configureScope">Configuration for scope container</param>
+        [Obsolete("This method is not recommended, since it may load multiple consumers into a single receive endpoint. Review the documentation and use the Consumer methods for your container instead.")]
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IComponentContext context, string name = "message",
             Action<ContainerBuilder, ConsumeContext> configureScope = null)
         {

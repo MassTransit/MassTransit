@@ -37,6 +37,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="kernel">The Ninject kernel.</param>
+        [Obsolete("LoadFrom is not recommended, review the documentation and use the Consumer methods for your container instead.")]
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IKernel kernel)
         {
             var consumerCache = kernel.TryGet<IConsumerRegistry>();

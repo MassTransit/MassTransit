@@ -20,7 +20,6 @@ namespace MassTransit
     using Internals.Extensions;
     using PipeConfigurators;
     using Saga;
-    using SagaConfigurators;
     using Scoping;
     using SimpleInjector;
     using SimpleInjectorIntegration;
@@ -34,6 +33,7 @@ namespace MassTransit
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="container">The SimpleInjector container.</param>
         /// <remarks>You should register your message consumers with AsyncScoped lifestyle.</remarks>
+        [Obsolete("This method is not recommended, since it may load multiple consumers into a single receive endpoint. Review the documentation and use the Consumer methods for your container instead.")]
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, Container container)
         {
             var consumerScopeProvider = new SimpleInjectorConsumerScopeProvider(container);

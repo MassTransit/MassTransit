@@ -14,6 +14,12 @@ namespace MassTransit.StructureMapIntegration
         where TArguments : class
     {
         readonly IContainer _container;
+        readonly IContext _context;
+
+        public StructureMapExecuteActivityScopeProvider(IContext context)
+        {
+            _context = context;
+        }
 
         public StructureMapExecuteActivityScopeProvider(IContainer container)
         {
@@ -33,7 +39,7 @@ namespace MassTransit.StructureMapIntegration
                 return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext);
             }
 
-            var scopeContainer = _container.CreateNestedContainer(context.ConsumeContext);
+            var scopeContainer = _container?.CreateNestedContainer(context.ConsumeContext) ?? _context?.CreateNestedContainer(context.ConsumeContext);
             try
             {
                 var activity = scopeContainer

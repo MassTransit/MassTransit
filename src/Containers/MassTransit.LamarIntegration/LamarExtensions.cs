@@ -32,6 +32,7 @@
         /// </summary>
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="container">The StructureMap container.</param>
+        [Obsolete("This method is not recommended, since it may load multiple consumers into a single receive endpoint. Review the documentation and use the Consumer methods for your container instead.")]
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IContainer container)
         {
             var scopeProvider = new LamarConsumerScopeProvider(container);
@@ -54,6 +55,7 @@
         /// </summary>
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="context"></param>
+        [Obsolete("This method is not recommended, since it may load multiple consumers into a single receive endpoint. Review the documentation and use the Consumer methods for your container instead.")]
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IServiceContext context)
         {
             var container = context.GetInstance<IContainer>();

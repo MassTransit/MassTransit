@@ -26,6 +26,12 @@ namespace MassTransit.StructureMapIntegration
         where TLog : class
     {
         readonly IContainer _container;
+        readonly IContext _context;
+
+        public StructureMapCompensateActivityScopeProvider(IContext context)
+        {
+            _context = context;
+        }
 
         public StructureMapCompensateActivityScopeProvider(IContainer container)
         {
@@ -45,7 +51,7 @@ namespace MassTransit.StructureMapIntegration
                 return new ExistingCompensateActivityScopeContext<TActivity, TLog>(activityContext);
             }
 
-            var scopeContainer = _container.CreateNestedContainer(context.ConsumeContext);
+            var scopeContainer = _container?.CreateNestedContainer(context.ConsumeContext) ?? _context?.CreateNestedContainer(context.ConsumeContext);
             try
             {
                 var activity = scopeContainer

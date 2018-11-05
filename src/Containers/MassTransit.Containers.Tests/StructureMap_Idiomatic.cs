@@ -95,7 +95,7 @@ namespace MassTransit.Containers.Tests
             public BusRegistry()
             {
                 For<IBusControl>(new SingletonLifecycle())
-                    .Use(context => Bus.Factory.CreateUsingInMemory(x => x.ReceiveEndpoint("input_queue", e => e.LoadFrom(context))));
+                    .Use(context => Bus.Factory.CreateUsingInMemory(x => x.ReceiveEndpoint("input_queue", e => e.Consumer<SimpleConsumer>(context))));
             }
         }
 

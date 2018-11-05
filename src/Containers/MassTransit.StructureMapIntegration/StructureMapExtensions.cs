@@ -32,6 +32,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="container">The StructureMap container.</param>
+        [Obsolete("LoadFrom is not recommended, review the documentation and use the Consumer methods for your container instead.")]
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IContainer container)
         {
             var scopeProvider = new StructureMapConsumerScopeProvider(container);
@@ -54,6 +55,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator">The configurator the extension method works on.</param>
         /// <param name="context"></param>
+        [Obsolete("LoadFrom is not recommended, review the documentation and use the Consumer methods for your container instead.")]
         public static void LoadFrom(this IReceiveEndpointConfigurator configurator, IContext context)
         {
             var container = context.GetInstance<IContainer>();
@@ -69,6 +71,22 @@ namespace MassTransit
             configurator.Consumer(consumerFactory, configure);
         }
 
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IContext context)
+            where T : class, IConsumer
+        {
+            var consumerFactory = new ScopeConsumerFactory<T>(new StructureMapConsumerScopeProvider(context));
+
+            configurator.Consumer(consumerFactory);
+        }
+
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IContext context, Action<IConsumerConfigurator<T>> configure)
+            where T : class, IConsumer
+        {
+            var consumerFactory = new ScopeConsumerFactory<T>(new StructureMapConsumerScopeProvider(context));
+
+            configurator.Consumer(consumerFactory, configure);
+        }
+
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
@@ -79,11 +97,46 @@ namespace MassTransit
             configurator.Saga(sagaRepository, configure);
         }
 
-        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress, IContainer container)
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContext context)
+            where T : class, ISaga
+        {
+            var repository = context.GetInstance<ISagaRepository<T>>();
+
+            var sagaRepository = new ScopeSagaRepository<T>(repository, new StructureMapSagaScopeProvider<T>(context));
+
+            configurator.Saga(sagaRepository);
+        }
+
+        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContext context, Action<ISagaConfigurator<T>> configure)
+            where T : class, ISaga
+        {
+            var repository = context.GetInstance<ISagaRepository<T>>();
+
+            var sagaRepository = new ScopeSagaRepository<T>(repository, new StructureMapSagaScopeProvider<T>(context));
+
+            configurator.Saga(sagaRepository, configure);
+        }
+
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
+            IContainer container)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
             var executeActivityScopeProvider = new StructureMapExecuteActivityScopeProvider<TActivity, TArguments>(container);
+
+            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
+
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
+            IContext context)
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var executeActivityScopeProvider = new StructureMapExecuteActivityScopeProvider<TActivity, TArguments>(context);
 
             var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
@@ -105,11 +158,37 @@ namespace MassTransit
             configurator.AddEndpointSpecification(specification);
         }
 
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, IContext context)
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var executeActivityScopeProvider = new StructureMapExecuteActivityScopeProvider<TActivity, TArguments>(context);
+
+            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
+
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
         public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IContainer container)
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class
         {
             var compensateActivityScopeProvider = new StructureMapCompensateActivityScopeProvider<TActivity, TLog>(container);
+
+            var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
+
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+
+            configurator.AddEndpointSpecification(specification);
+        }
+
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IContext context)
+            where TActivity : class, CompensateActivity<TLog>
+            where TLog : class
+        {
+            var compensateActivityScopeProvider = new StructureMapCompensateActivityScopeProvider<TActivity, TLog>(context);
 
             var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
 
@@ -142,8 +221,20 @@ namespace MassTransit
 
             return nestedContainer;
         }
-        
-        internal static IContainer CreateNestedContainer<T>(this IContainer container, ConsumeContext<T> context) 
+
+        internal static IContainer CreateNestedContainer(this IContext container, ConsumeContext context)
+        {
+            var nestedContainer = container.GetInstance<IContainer>().GetNestedContainer();
+            nestedContainer.Configure(x =>
+            {
+                x.For<ConsumeContext>()
+                    .Use(context);
+            });
+
+            return nestedContainer;
+        }
+
+        internal static IContainer CreateNestedContainer<T>(this IContainer container, ConsumeContext<T> context)
             where T : class
         {
             var nestedContainer = container.GetNestedContainer();
@@ -151,6 +242,23 @@ namespace MassTransit
             {
                 x.For<ConsumeContext>()
                     .Use(context);
+
+                x.For<ConsumeContext<T>>()
+                    .Use(context);
+            });
+
+            return nestedContainer;
+        }
+
+        internal static IContainer CreateNestedContainer<T>(this IContext container, ConsumeContext<T> context)
+            where T : class
+        {
+            var nestedContainer = container.GetInstance<IContainer>().GetNestedContainer();
+            nestedContainer.Configure(x =>
+            {
+                x.For<ConsumeContext>()
+                    .Use(context);
+
                 x.For<ConsumeContext<T>>()
                     .Use(context);
             });
