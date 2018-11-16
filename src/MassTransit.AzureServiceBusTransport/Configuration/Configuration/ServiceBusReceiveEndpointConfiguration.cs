@@ -156,7 +156,7 @@
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
             NamespacePipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology,
-                _settings.RemoveSubscriptions));
+                _settings.RemoveSubscriptions, _hostConfiguration.Host.Stopping));
 
             return CreateReceiveEndpoint(receiveEndpointContext);
         }
