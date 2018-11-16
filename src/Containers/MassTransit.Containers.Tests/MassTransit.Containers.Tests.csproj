@@ -28,6 +28,7 @@
     <ProjectReference Include="..\MassTransit.Automatonymous.AutofacIntegration\MassTransit.Automatonymous.AutofacIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.Automatonymous.LamarIntegration\MassTransit.Automatonymous.LamarIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.Automatonymous.StructureMapIntegration\MassTransit.Automatonymous.StructureMapIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.Automatonymous.WindsorIntegration\MassTransit.Automatonymous.WindsorIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.LamarIntegration\MassTransit.LamarIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.SimpleInjectorIntegration\MassTransit.SimpleInjectorIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj" />
