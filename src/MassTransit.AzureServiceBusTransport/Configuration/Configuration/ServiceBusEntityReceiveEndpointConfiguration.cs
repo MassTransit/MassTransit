@@ -181,7 +181,7 @@
         {
             var brokerTopology = settings.GetBrokerTopology();
 
-            IPipe<NamespaceContext> namespacePipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology, false).ToPipe();
+            IPipe<NamespaceContext> namespacePipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology, false, host.Stopping).ToPipe();
 
             IPipeContextFactory<SendEndpointContext> factory = CreateSendEndpointContextFactory(host, settings, namespacePipe);
 
