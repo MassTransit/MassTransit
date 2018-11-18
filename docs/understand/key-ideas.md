@@ -36,8 +36,7 @@ sagas to be declared as a regular class or as a state machine using a fluent int
 
 The key difference for sagas is that the framework manages the saga instance and correlates
 messages to the proper saga instance. This correlation is typically done using a *CorrelationId*,
-which is an interface (called *CorrelatedBy*). Messages correlated an individual saga must be
-done using a **Guid**. Sagas may also *observe* messages that are not correlated directly to
+which is an interface (called *CorrelatedBy*). Messages are correlated to an individual saga using a **Guid**. Sagas may also *observe* messages that are not correlated directly to
 the saga instance, but this should be done carefully to avoid potentially matching a message
 to hundreds of saga instances which may cause database performance issues.
 
@@ -62,13 +61,13 @@ public class MySaga :
 MassTransit is a framework, and being a framework has certain rules. The first of which is known
 as the Hollywood principle -- "Don't call us, we'll call you." Once the bus is configured and
 running, the receivers are called by the framework as messages are received. There is no need
-for the application to poll a message queue or repeated call a framework method in a loop.
+for the application to poll a message queue or repeated calls to a framework method in a loop.
 
 <div class="alert alert-info">
 <b>Note:</b>
 A way to understand this is to think of a message consumer as being similar to a controller
 in a web application. With a web application, the socket and HTTP protocol are under the
-hood, and the controller is created and action method called by the web framework. MassTransit
+hood, and the controller is created and an action method is called by the web framework. MassTransit
 is similar, in that the message reception is handled by MT, which then creates the consumer
 and calls the Consume method.
 </div>
@@ -80,7 +79,7 @@ the messaging platform (such as RabbitMQ).
 The transport is at the lowest level and is closest to the actual message broker. The transport
 communicates with the broker, responsible for sending and receiving messages. The send and receive
 sections of the transport are completely independent, keeping reads and writes separate in line with
-the Command Query Responsibility Segregation pattern.
+the Command Query Responsibility Segregation (CQRS) pattern.
 
 ### Receive endpoints
 A receive endpoint receives messages from a transport, deserializes the message body, and routes
@@ -89,7 +88,7 @@ configure and connect consumers. The rest of the work is done entirely by MassTr
 
 ### Send endpoints
 A send endpoint is used by an application to send a message to a specific address. They can be
-obtained from the `ConsumeContext` or the `IBus`, and support a variety of message types.
+obtained from the `ConsumeContext` or the `IBus` and support a variety of message types.
 
 ### Endpoint addressing
 MassTransit uses Universal Resource Identifiers (URIs) to identify endpoints. URIs are flexible
