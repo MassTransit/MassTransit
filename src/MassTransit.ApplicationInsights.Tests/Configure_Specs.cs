@@ -27,7 +27,7 @@ namespace MassTransit.ApplicationInsights.Tests
             IBusControl CreateBus() =>
                 Bus.Factory.CreateUsingInMemory(x =>
                 {
-                    x.UseApplicationInsights(telemetryClient);
+                    x.UseApplicationInsights(telemetryClient, (operation, context) => operation.Telemetry.Properties.Add("prop", "v"));
                 });
 
             Assert.DoesNotThrow(() => CreateBus());
