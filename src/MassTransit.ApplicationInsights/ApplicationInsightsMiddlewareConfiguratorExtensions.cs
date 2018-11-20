@@ -12,8 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ApplicationInsights
 {
+    using System;
     using GreenPipes;
     using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.DataContracts;
+    using Microsoft.ApplicationInsights.Extensibility;
 
 
     public static class ApplicationInsightsMiddlewareConfiguratorExtensions
@@ -22,12 +25,15 @@ namespace MassTransit.ApplicationInsights
         /// Add support for ApplicationInsights to the pipeline, which will be used to track all consumer message reception
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="telemetryClient"></param>
+        /// <param name="telemetryClient">Telemetry client</param>
+        /// <param name="configureOperation">Add additional information to operation</param>
         /// <typeparam name="T"></typeparam>
-        public static void UseApplicationInsights<T>(this IPipeConfigurator<T> configurator, TelemetryClient telemetryClient)
+        public static void UseApplicationInsights<T>(this IPipeConfigurator<T> configurator,
+            TelemetryClient telemetryClient,
+            Action<IOperationHolder<RequestTelemetry>, T> configureOperation = null)
             where T : class, ConsumeContext
         {
-            configurator.AddPipeSpecification(new ApplicationInsightsSpecification<T>(telemetryClient));
+            configurator.AddPipeSpecification(new ApplicationInsightsSpecification<T>(telemetryClient, configureOperation));
         }
     }
 }

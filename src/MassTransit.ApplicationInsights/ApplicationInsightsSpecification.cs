@@ -12,10 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ApplicationInsights
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using GreenPipes;
     using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.DataContracts;
+    using Microsoft.ApplicationInsights.Extensibility;
 
 
     public class ApplicationInsightsSpecification<T> :
@@ -23,10 +26,12 @@ namespace MassTransit.ApplicationInsights
         where T : class, ConsumeContext
     {
         readonly TelemetryClient _telemetryClient;
+        readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
 
-        public ApplicationInsightsSpecification(TelemetryClient telemetryClient)
+        public ApplicationInsightsSpecification(TelemetryClient telemetryClient, Action<IOperationHolder<RequestTelemetry>, T> configureOperation)
         {
             _telemetryClient = telemetryClient;
+            _configureOperation = configureOperation;
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -36,7 +41,7 @@ namespace MassTransit.ApplicationInsights
 
         public void Apply(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new ApplicationInsightsFilter<T>(_telemetryClient));
+            builder.AddFilter(new ApplicationInsightsFilter<T>(_telemetryClient, _configureOperation));
         }
     }
 }

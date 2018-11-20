@@ -33,10 +33,12 @@ namespace MassTransit.ApplicationInsights
         const string StepName = "MassTransit:Consumer";
 
         readonly TelemetryClient _telemetryClient;
+        readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
 
-        public ApplicationInsightsFilter(TelemetryClient telemetryClient)
+        public ApplicationInsightsFilter(TelemetryClient telemetryClient, Action<IOperationHolder<RequestTelemetry>, T> configureOperation)
         {
             _telemetryClient = telemetryClient;
+            _configureOperation = configureOperation;
         }
 
         public void Probe(ProbeContext context)
@@ -61,6 +63,8 @@ namespace MassTransit.ApplicationInsights
 
                 if (context.RequestId.HasValue)
                     operation.Telemetry.Properties.Add(RequestId, context.RequestId.Value.ToString());
+
+                _configureOperation?.Invoke(operation, context);
 
                 try
                 {
