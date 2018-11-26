@@ -76,6 +76,55 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
+    public class Sending_a_request_to_a_missing_service_that_times_out :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_timeout()
+        {
+            AppDomain.CurrentDomain.UnhandledException += (sender, eventArgs) =>
+            {
+                Console.WriteLine(eventArgs.ExceptionObject);
+            };
+
+            TaskScheduler.UnobservedTaskException += (sender, eventArgs) =>
+            {
+                try
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.Write("UnobservedTaskException: ");
+                    eventArgs.SetObserved();
+                }
+                finally
+                {
+                    Console.ResetColor();
+                }
+
+                Console.WriteLine(eventArgs.Exception);
+            };
+
+            Assert.That(async () => await _response, Throws.TypeOf<RequestTimeoutException>());
+
+            GC.Collect();
+            await Task.Delay(1000);
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+        }
+
+        Task<PongMessage> _response;
+        IRequestClient<PingMessage, PongMessage> _requestClient;
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(1));
+
+            _response = _requestClient.Request(new PingMessage());
+        }
+    }
+
+
+    [TestFixture]
     public class Sending_a_request_to_a_faulty_service :
         InMemoryTestFixture
     {

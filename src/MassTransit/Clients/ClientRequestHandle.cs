@@ -196,9 +196,16 @@ namespace MassTransit.Clients
             }
         }
 
-        void HandleFault()
+        async void HandleFault()
         {
-            Response<Fault<TRequest>>(FaultHandler);
+            try
+            {
+                var response = await Response<Fault<TRequest>>(FaultHandler).ConfigureAwait(false);
+            }
+            catch
+            {
+                // need to observe the exception, if it is faulted
+            }
         }
 
         Task FaultHandler(ConsumeContext<Fault<TRequest>> context)
