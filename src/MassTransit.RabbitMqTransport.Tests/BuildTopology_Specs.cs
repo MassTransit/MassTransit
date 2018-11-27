@@ -91,6 +91,8 @@ namespace MassTransit.RabbitMqTransport.Tests
         public async Task Should_not_consume_the_messages()
         {
             await Bus.Publish<ThirdInterface>(new { });
+
+            await Task.Delay(1000);
         }
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)

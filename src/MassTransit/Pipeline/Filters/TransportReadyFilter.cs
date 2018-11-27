@@ -17,7 +17,6 @@ namespace MassTransit.Pipeline.Filters
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Util;
 
 
     public class TransportReadyFilter<T> :
@@ -43,7 +42,7 @@ namespace MassTransit.Pipeline.Filters
 
             await next.Send(context).ConfigureAwait(false);
 
-            SetCompleted(TaskUtil.Completed);
+            await Completed.ConfigureAwait(false);
         }
 
         public void Probe(ProbeContext context)
