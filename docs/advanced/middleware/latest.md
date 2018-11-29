@@ -22,7 +22,7 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
     {
         e.Handler<Temperature>(context => Task.FromResult(true), x =>
         {
-            x.UseLatest(x => x.Created = filter => tempFilter = filter);
+            x.UseLatest(x => x.Created, filter => tempFilter = filter);
         })
     });
 ```
