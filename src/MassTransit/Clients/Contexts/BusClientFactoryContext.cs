@@ -45,6 +45,11 @@ namespace MassTransit.Clients.Contexts
             return _bus.GetSendEndpoint(address);
         }
 
+        public Task<ISendEndpoint> GetSendEndpoint(Type type)
+        {
+            return _bus.GetSendEndpoint(type);
+        }
+
         public Uri ResponseAddress => _bus.Address;
 
         public IPublishEndpoint PublishEndpoint => _bus;

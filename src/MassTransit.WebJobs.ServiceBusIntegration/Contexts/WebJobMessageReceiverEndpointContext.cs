@@ -1,17 +1,19 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WebJobs.ServiceBusIntegration.Contexts
 {
+    using System;
+    using System.Collections.Generic;
     using System.Threading;
     using Context;
     using Logging;
@@ -28,6 +30,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Contexts
         readonly CancellationToken _cancellationToken;
         readonly ILog _log;
         readonly IPublishTopology _publishTopology;
+        readonly IReadOnlyDictionary<Type, Uri> _endpointMapping;
 
         public WebJobMessageReceiverEndpointContext(IReceiveEndpointConfiguration configuration, ILog log, IBinder binder, CancellationToken cancellationToken)
             : base(configuration)
@@ -37,13 +40,14 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Contexts
             _log = log;
 
             _publishTopology = configuration.Topology.Publish;
+            _endpointMapping = configuration.Topology.Send.EndpointMapping;
         }
 
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
             ISendTransportProvider sendTransportProvider = new ServiceBusAttributeSendTransportProvider(_binder, _log, _cancellationToken);
 
-            return new SendEndpointProvider(sendTransportProvider, SendObservers, Serializer, InputAddress, SendPipe);
+            return new SendEndpointProvider(sendTransportProvider, SendObservers, Serializer, InputAddress, SendPipe, _endpointMapping);
         }
 
         protected override IPublishEndpointProvider CreatePublishEndpointProvider()

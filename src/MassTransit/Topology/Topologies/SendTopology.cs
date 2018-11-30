@@ -1,20 +1,21 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology.Topologies
 {
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using GreenPipes;
     using Observers;
@@ -28,6 +29,7 @@ namespace MassTransit.Topology.Topologies
         readonly IList<IMessageSendTopologyConvention> _conventions;
         readonly object _lock = new object();
         readonly ConcurrentDictionary<Type, IMessageSendTopologyConfigurator> _messageTypes;
+        readonly ConcurrentDictionary<Type, Uri> _endpointMapping;
         readonly SendTopologyConfigurationObservable _observers;
 
         public SendTopology()
@@ -35,6 +37,7 @@ namespace MassTransit.Topology.Topologies
             _messageTypes = new ConcurrentDictionary<Type, IMessageSendTopologyConfigurator>();
 
             _observers = new SendTopologyConfigurationObservable();
+            _endpointMapping = new ConcurrentDictionary<Type, Uri>();
 
             _conventions = new List<IMessageSendTopologyConvention>();
             _observers.Connect(this);
@@ -74,6 +77,19 @@ namespace MassTransit.Topology.Topologies
             IMessageSendTopologyConfigurator<T> messageConfiguration = GetMessageTopology<T>();
 
             messageConfiguration.Add(topology);
+        }
+
+        public IReadOnlyDictionary<Type, Uri> EndpointMapping => new ReadOnlyDictionary<Type, Uri>(_endpointMapping);
+
+        public void MapEndpoint(Type type, Uri uri)
+        {
+            if (!TypeMetadataCache.IsValidMessageType(type))
+                throw new ArgumentException($"Message was not a valid type: {TypeMetadataCache.GetShortName(type)}", nameof(type));
+
+            if (_endpointMapping.TryGetValue(type, out _))
+                throw new InvalidOperationException("The endpoint convention has already been created and can no longer be modified.");
+
+            _endpointMapping.TryAdd(type, uri);
         }
 
         public virtual IEnumerable<ValidationResult> Validate()

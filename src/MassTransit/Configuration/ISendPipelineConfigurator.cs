@@ -1,14 +1,14 @@
 // Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
@@ -22,5 +22,28 @@ namespace MassTransit
         /// </summary>
         /// <param name="callback"></param>
         void ConfigureSend(Action<ISendPipeConfigurator> callback);
+
+        /// <summary>
+        /// Map message type endpoint with uri
+        /// </summary>
+        /// <param name="type">Message type</param>
+        /// <param name="uri">Uri</param>
+        void MapEndpoint(Type type, Uri uri);
+    }
+
+
+    public static class SendPipelineConfiguratorExtensions
+    {
+        /// <summary>
+        /// Map message type endpoint with uri
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="uri">Uri</param>
+        /// <typeparam name="T">Message type</typeparam>
+        public static void MapEndpoint<T>(this ISendPipelineConfigurator configurator, Uri uri)
+            where T : class
+        {
+            configurator.MapEndpoint(typeof(T), uri);
+        }
     }
 }
