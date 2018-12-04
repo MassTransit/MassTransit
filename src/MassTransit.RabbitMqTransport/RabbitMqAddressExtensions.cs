@@ -54,7 +54,7 @@ namespace MassTransit.RabbitMqTransport
             string[] pathSegments = name.Split('/');
             if (pathSegments.Length == 2)
             {
-                connectionFactory.VirtualHost = pathSegments[0];
+                connectionFactory.VirtualHost = Uri.UnescapeDataString(pathSegments[0]);
                 name = pathSegments[1];
             }
 
@@ -219,7 +219,7 @@ namespace MassTransit.RabbitMqTransport
             string name = address.AbsolutePath.Substring(1);
 
             string[] pathSegments = name.Split('/');
-            hostSettings.VirtualHost = pathSegments.Length == 2 ? pathSegments[0] : "/";
+            hostSettings.VirtualHost = pathSegments.Length == 2 ? Uri.UnescapeDataString(pathSegments[0]) : "/";
 
             hostSettings.Heartbeat = address.Query.GetValueFromQueryString("heartbeat", (ushort)0);
 
