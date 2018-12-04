@@ -119,7 +119,7 @@ enhancements and calls for help from people who forget to check back if they get
 MassTransit is built on [AppVeyor](https://ci.appveyor.com/project/phatboyg/masstransit)
  
 # REQUIREMENTS
-* .Net 4.5.2
+* .Net 4.5.2 or .NET Standard 2.0
 
 # CREDITS
 Logo Design by [The Agile Badger](http://www.theagilebadger.com)
