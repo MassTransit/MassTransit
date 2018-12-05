@@ -23,9 +23,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     {
         readonly ReceiveSettings _settings;
 
-        public QueueClientContextFactory(IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache, IPipe<MessagingFactoryContext> messagingFactoryPipe,
+        public QueueClientContextFactory(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor, INamespaceContextSupervisor namespaceContextSupervisor, IPipe<MessagingFactoryContext> messagingFactoryPipe,
             IPipe<NamespaceContext> namespacePipe, ReceiveSettings settings)
-            : base(messagingFactoryCache, namespaceCache, messagingFactoryPipe, namespacePipe, settings)
+            : base(messagingFactoryContextSupervisor, namespaceContextSupervisor, messagingFactoryPipe, namespacePipe, settings)
         {
             _settings = settings;
         }

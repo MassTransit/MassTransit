@@ -14,7 +14,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.Messaging;
-    using Transports;
 
 
     public class SessionReceiver :
@@ -23,8 +22,8 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly ClientContext _context;
         readonly IBrokeredMessageReceiver _messageReceiver;
 
-        public SessionReceiver(ClientContext context, IBrokeredMessageReceiver messageReceiver, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
-            : base(context, messageReceiver, deadLetterTransport, errorTransport)
+        public SessionReceiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
+            : base(context, messageReceiver)
         {
             _context = context;
             _messageReceiver = messageReceiver;

@@ -21,8 +21,5 @@ namespace MassTransit
         IConsumeMessageObserverConnector,
         IReceiveEndpointObserverConnector
     {
-        IConsumePipe ConsumePipe { get; }
-
-        IMessageDeserializer MessageDeserializer { get; }
     }
 }

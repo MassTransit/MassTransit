@@ -20,7 +20,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
     using GreenPipes;
     using GreenPipes.Payloads;
     using Logging;
-    using Topology;
     using Util;
 
 
@@ -32,17 +31,15 @@ namespace MassTransit.ActiveMqTransport.Contexts
         static readonly ILog _log = Logger.Get<ActiveMqSessionContext>();
 
         readonly ConnectionContext _connectionContext;
-        readonly IActiveMqHost _host;
         readonly ISession _session;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         readonly MessageProducerCache _messageProducerCache;
 
-        public ActiveMqSessionContext(ConnectionContext connectionContext, ISession session, IActiveMqHost host, CancellationToken cancellationToken)
+        public ActiveMqSessionContext(ConnectionContext connectionContext, ISession session, CancellationToken cancellationToken)
             : base(new PayloadCacheScope(connectionContext), cancellationToken)
         {
             _connectionContext = connectionContext;
             _session = session;
-            _host = host;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
 
@@ -70,8 +67,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
                 _session.Dispose();
             }
         }
-
-        IActiveMqPublishTopology SessionContext.PublishTopology => _host.Topology.PublishTopology;
 
         ISession SessionContext.Session => _session;
 

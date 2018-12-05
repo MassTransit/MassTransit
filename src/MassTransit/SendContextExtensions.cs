@@ -19,6 +19,27 @@ namespace MassTransit
 
     public static class SendContextExtensions
     {
+        public static void SetTextHeaders<T>(this IDictionary<string, T> dictionary, SendHeaders headers, Func<string, string, T> converter)
+        {
+            foreach (var header in headers.GetAll())
+            {
+                if (header.Value == null)
+                    continue;
+
+                if (dictionary.ContainsKey(header.Key))
+                    continue;
+
+                if (header.Value is string stringValue)
+                {
+                    dictionary[header.Key] = converter(header.Key, stringValue);
+                }
+                else if (header.Value is IFormattable formatValue && formatValue.GetType().IsValueType)
+                {
+                    dictionary.Add(header.Key, converter(header.Key, formatValue.ToString()));
+                }
+            }
+        }
+
         /// <summary>
         /// Set the host headers on the SendContext (for error, dead-letter, etc.)
         /// </summary>

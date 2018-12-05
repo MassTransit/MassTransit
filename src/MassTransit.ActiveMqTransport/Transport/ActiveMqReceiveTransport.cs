@@ -99,7 +99,7 @@ namespace MassTransit.ActiveMqTransport.Transport
                     {
                         try
                         {
-                            await _host.ConnectionCache.Send(_connectionPipe, Stopped).ConfigureAwait(false);
+                            await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
                         }
                         catch (NMSConnectionException ex)
                         {
@@ -126,7 +126,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             if (_log.IsDebugEnabled)
                 _log.Debug(message, ex);
 
-            var exception = new ActiveMqConnectException(message + _host.ConnectionCache, ex);
+            var exception = new ActiveMqConnectException(message + _host.ConnectionContextSupervisor, ex);
 
             await NotifyFaulted(exception);
 

@@ -13,7 +13,6 @@
 namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 {
     using Transport;
-    using Transports;
 
 
     /// <summary>
@@ -22,15 +21,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     public class MessageSessionReceiverFilter :
         MessageReceiverFilter
     {
-        public MessageSessionReceiverFilter(IBrokeredMessageReceiver messageReceiver, IReceiveTransportObserver transportObserver, IDeadLetterTransport deadLetterTransport,
-            IErrorTransport errorTransport)
-            : base(messageReceiver, transportObserver, deadLetterTransport, errorTransport)
+        public MessageSessionReceiverFilter(IBrokeredMessageReceiver messageReceiver, IReceiveTransportObserver transportObserver)
+            : base(messageReceiver, transportObserver)
         {
         }
 
         protected override IReceiver CreateMessageReceiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
         {
-            return new SessionReceiver(context, messageReceiver, DeadLetterTransport, ErrorTransport);
+            return new SessionReceiver(context, messageReceiver);
         }
     }
 }

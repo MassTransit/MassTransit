@@ -14,11 +14,7 @@ namespace MassTransit.ActiveMqTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
-    using Apache.NMS;
     using Configuration;
-    using GreenPipes.Agents;
-    using Pipeline;
-    using Topology;
     using Transports;
 
 
@@ -34,39 +30,16 @@ namespace MassTransit.ActiveMqTransport.Transport
 
         Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
         {
-            return Task.FromResult(GetSendTransport(address));
-        }
-
-        ISendTransport GetSendTransport(Uri address)
-        {
-            if (!_configuration.BusConfiguration.TryGetHost(address, out var hostConfiguration))
+            if (!_configuration.BusConfiguration.Hosts.TryGetHost(address, out var hostConfiguration))
             {
-                var hostAddress = _configuration.Host.Address;
+                var hostAddress = _configuration.HostAddress;
                 var builder = new UriBuilder(address) {Host = hostAddress.Host, Port = hostAddress.Port};
 
-                if (!_configuration.BusConfiguration.TryGetHost(builder.Uri, out hostConfiguration))
+                if (!_configuration.BusConfiguration.Hosts.TryGetHost(builder.Uri, out hostConfiguration))
                     throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
             }
 
-            var host = hostConfiguration.Host;
-
-            var settings = host.Topology.SendTopology.GetSendSettings(address);
-
-            IAgent<SessionContext> sessionAgent = GetSessionAgent(host);
-
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology());
-
-            var transport = new ActiveMqSendTransport(sessionAgent, configureTopologyFilter, settings.EntityName, DestinationType.Queue);
-            transport.Add(sessionAgent);
-
-            host.Add(transport);
-
-            return transport;
-        }
-
-        protected virtual IAgent<SessionContext> GetSessionAgent(IActiveMqHost host)
-        {
-            return new ActiveMqSessionCache(host, host.ConnectionCache);
+            return hostConfiguration.CreateSendTransport(address);
         }
     }
 }

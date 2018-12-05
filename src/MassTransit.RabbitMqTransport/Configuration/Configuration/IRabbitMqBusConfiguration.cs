@@ -12,37 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration
 {
-    using System;
     using MassTransit.Configuration;
     using Topology.Settings;
-    using Transport;
 
 
     public interface IRabbitMqBusConfiguration :
         IBusConfiguration
     {
+        new IReadOnlyHostCollection<IRabbitMqHostConfiguration> Hosts { get; }
+
         new IRabbitMqTopologyConfiguration Topology { get; }
 
         /// <summary>
         /// If true, only the broker topology will be deployed
         /// </summary>
         bool DeployTopologyOnly { get; set; }
-
-        /// <summary>
-        /// Return the host that supports the specified address
-        /// </summary>
-        /// <param name="address">The address to match</param>
-        /// <param name="hostConfiguration">The matching host, if present</param>
-        /// <returns>True if the host was found, otherwise false</returns>
-        bool TryGetHost(Uri address, out IRabbitMqHostConfiguration hostConfiguration);
-
-        /// <summary>
-        /// Return the host if it is part of the configuration
-        /// </summary>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        /// <param name="hostConfiguration"></param>
-        bool TryGetHost(IRabbitMqHost host, out IRabbitMqHostConfiguration hostConfiguration);
 
         /// <summary>
         /// Create an endpoint configuration on the bus, which can later be turned into a receive endpoint

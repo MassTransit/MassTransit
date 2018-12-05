@@ -133,7 +133,7 @@ namespace MassTransit
         public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var queueName = host.Topology.CreateTemporaryQueueName("receiveEndpoint-");
+            var queueName = host.Topology.CreateTemporaryQueueName("endpoint-");
 
             configurator.ReceiveEndpoint(host, queueName, x =>
             {

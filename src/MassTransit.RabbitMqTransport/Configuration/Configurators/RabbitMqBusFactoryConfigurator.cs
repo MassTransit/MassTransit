@@ -185,7 +185,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void ReceiveEndpoint(IRabbitMqHost host, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            if (!_configuration.TryGetHost(host, out var hostConfiguration))
+            if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
                 throw new ArgumentException("The host was not configured on this bus", nameof(host));
 
             var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);

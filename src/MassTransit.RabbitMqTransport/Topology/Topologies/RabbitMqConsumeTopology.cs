@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
-    using NewIdFormatters;
     using Specifications;
     using Util;
 
@@ -29,7 +28,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         ConsumeTopology,
         IRabbitMqConsumeTopologyConfigurator
     {
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly IMessageTopology _messageTopology;
         readonly IRabbitMqPublishTopology _publishTopology;
         readonly IList<IRabbitMqConsumeTopologySpecification> _specifications;
@@ -117,7 +115,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
                 else if (c == '.' || c == '_' || c == '-' || c == ':')
                     sb.Append(c);
             sb.Append('-');
-            sb.Append(NewId.Next().ToString(_formatter));
+            sb.Append(NewId.Next().ToString(FormatUtil.Formatter));
 
             return sb.ToString();
         }

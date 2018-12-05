@@ -58,7 +58,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
         public string Description => _context.Description;
         public Uri HostAddress => _context.HostAddress;
         public IActiveMqHostTopology Topology => _context.Topology;
-        ActiveMqHostSettings ConnectionContext.HostSettings => _context.HostSettings;
 
         Task<ISession> ConnectionContext.CreateSession()
         {

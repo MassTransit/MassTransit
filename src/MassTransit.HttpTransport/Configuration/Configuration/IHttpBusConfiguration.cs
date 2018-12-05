@@ -12,41 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Configuration
 {
-    using System;
+    using Hosting;
     using MassTransit.Configuration;
-    using Transport;
 
 
     public interface IHttpBusConfiguration :
         IBusConfiguration
     {
-        /// <summary>
-        /// Returns all the hosts
-        /// </summary>
-        new IHttpHostConfiguration[] Hosts { get; }
-
-        /// <summary>
-        /// Return the host associated with the specified address, if present.
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        bool TryGetHost(Uri address, out IHttpHostConfiguration host);
-
-        /// <summary>
-        /// Return the host if it is part of the configuration
-        /// </summary>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        /// <param name="hostConfiguration"></param>
-        bool TryGetHost(IHttpHost host, out IHttpHostConfiguration hostConfiguration);
+        new IReadOnlyHostCollection<IHttpHostConfiguration> Hosts { get; }
 
         /// <summary>
         /// Create a host configuration, by adding a host to the bus
         /// </summary>
         /// <param name="host"></param>
+        /// <param name="settings"></param>
         /// <returns></returns>
-        IHttpHostConfiguration CreateHostConfiguration(HttpHost host);
+        IHttpHostConfiguration CreateHostConfiguration(HttpHostSettings settings);
 
         /// <summary>
         /// Create an endpoint configuration on the bus, which can later be turned into a receive endpoint

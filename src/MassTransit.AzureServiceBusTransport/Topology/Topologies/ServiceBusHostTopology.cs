@@ -23,16 +23,16 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
         HostTopology,
         IServiceBusHostTopology
     {
-        readonly IServiceBusTopologyConfiguration _topologyConfiguration;
+        readonly IServiceBusTopologyConfiguration _configuration;
 
-        public ServiceBusHostTopology(IServiceBusTopologyConfiguration topologyConfiguration)
-            : base(topologyConfiguration)
+        public ServiceBusHostTopology(IServiceBusTopologyConfiguration configuration)
+            : base(configuration)
         {
-            _topologyConfiguration = topologyConfiguration;
+            _configuration = configuration;
         }
 
-        IServiceBusPublishTopology IServiceBusHostTopology.PublishTopology => _topologyConfiguration.Publish;
-        IServiceBusSendTopology IServiceBusHostTopology.SendTopology => _topologyConfiguration.Send;
+        IServiceBusPublishTopology IServiceBusHostTopology.PublishTopology => _configuration.Publish;
+        IServiceBusSendTopology IServiceBusHostTopology.SendTopology => _configuration.Send;
 
         public override string CreateTemporaryQueueName(string prefix)
         {
@@ -59,12 +59,12 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
         IServiceBusMessagePublishTopology<T> IServiceBusHostTopology.Publish<T>()
         {
-            return _topologyConfiguration.Publish.GetMessageTopology<T>();
+            return _configuration.Publish.GetMessageTopology<T>();
         }
 
         IServiceBusMessageSendTopology<T> IServiceBusHostTopology.Send<T>()
         {
-            return _topologyConfiguration.Send.GetMessageTopology<T>();
+            return _configuration.Send.GetMessageTopology<T>();
         }
     }
 }

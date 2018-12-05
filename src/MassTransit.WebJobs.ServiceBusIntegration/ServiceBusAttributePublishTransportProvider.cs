@@ -15,11 +15,13 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using AzureServiceBusTransport.Transport;
+    using Azure.ServiceBus.Core.Transport;
+    using Contexts;
     using Logging;
+    using Microsoft.Azure.ServiceBus;
+    using Microsoft.Azure.ServiceBus.Management;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.ServiceBus;
-    using Microsoft.ServiceBus.Messaging;
     using Transports;
 
 
@@ -46,15 +48,14 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         {
             var queueOrTopicName = address.AbsolutePath.Trim('/');
 
-            var serviceBusTopic = new ServiceBusAttribute(queueOrTopicName, AccessRights.Manage);
-            serviceBusTopic.EntityType = EntityType.Topic;
+            var serviceBusTopic = new ServiceBusAttribute(queueOrTopicName, EntityType.Topic);
 
-            IAsyncCollector<BrokeredMessage> collector = await _binder.BindAsync<IAsyncCollector<BrokeredMessage>>(serviceBusTopic, _cancellationToken).ConfigureAwait(false);
+            IAsyncCollector<Message> collector = await _binder.BindAsync<IAsyncCollector<Message>>(serviceBusTopic, _cancellationToken).ConfigureAwait(false);
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating Publish Transport: {0}", queueOrTopicName);
 
-            var client = new CollectorSendEndpointContext(queueOrTopicName, _log, collector, _cancellationToken);
+            var client = new CollectorMessageSendEndpointContext(queueOrTopicName, _log, collector, _cancellationToken);
 
             var source = new CollectorSendEndpointContextSource(client);
 

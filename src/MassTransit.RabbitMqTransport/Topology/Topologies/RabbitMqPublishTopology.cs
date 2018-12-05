@@ -48,7 +48,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         {
             var exchangeTypeSelector = new MessageExchangeTypeSelector<T>(ExchangeTypeSelector);
 
-            var messageTopology = new RabbitMqMessagePublishTopology<T>(_messageTopology.GetMessageTopology<T>(), exchangeTypeSelector);
+            var messageTopology = new RabbitMqMessagePublishTopology<T>(this, _messageTopology.GetMessageTopology<T>(), exchangeTypeSelector);
 
             var connector = new ImplementedMessageTypeConnector<T>(this, messageTopology);
 

@@ -17,32 +17,30 @@ namespace MassTransit.RabbitMqTransport.Integration
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
-    using Topology;
 
 
     public class ConnectionContextFactory :
         IPipeContextFactory<ConnectionContext>
     {
         static readonly ILog _log = Logger.Get<ConnectionContextFactory>();
+        readonly IRabbitMqHostConfiguration _configuration;
         readonly Lazy<ConnectionFactory> _connectionFactory;
         readonly string _description;
-        readonly RabbitMqHostSettings _settings;
-        readonly IRabbitMqHostTopology _topology;
 
-        public ConnectionContextFactory(RabbitMqHostSettings settings, IRabbitMqHostTopology topology)
+        public ConnectionContextFactory(IRabbitMqHostConfiguration configuration)
         {
-            _settings = settings;
-            _topology = topology;
+            _configuration = configuration;
 
-            _description = settings.ToDebugString();
+            _description = configuration.Settings.ToDescription();
 
-            _connectionFactory = new Lazy<ConnectionFactory>(settings.GetConnectionFactory);
+            _connectionFactory = new Lazy<ConnectionFactory>(_configuration.Settings.GetConnectionFactory);
         }
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
@@ -51,7 +49,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 .Unwrap();
 
             IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
-            
+
             void HandleShutdown(object sender, ShutdownEventArgs args)
             {
                 if (args.Initiator != ShutdownInitiator.Application)
@@ -94,22 +92,23 @@ namespace MassTransit.RabbitMqTransport.Integration
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connecting: {0}", _description);
 
-                if (_settings.ClusterMembers?.Any() ?? false)
+                if (_configuration.Settings.ClusterMembers?.Any() ?? false)
                 {
-                    connection = _connectionFactory.Value.CreateConnection(_settings.ClusterMembers, _settings.ClientProvidedName);
+                    connection = _connectionFactory.Value.CreateConnection(_configuration.Settings.ClusterMembers, _configuration.Settings.ClientProvidedName);
                 }
                 else
                 {
-                    List<string> hostNames = Enumerable.Repeat(_settings.Host, 1).ToList();
+                    List<string> hostNames = Enumerable.Repeat(_configuration.Settings.Host, 1).ToList();
 
-                    connection = _connectionFactory.Value.CreateConnection(hostNames, _settings.ClientProvidedName);
+                    connection = _connectionFactory.Value.CreateConnection(hostNames, _configuration.Settings.ClientProvidedName);
                 }
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Connected: {0} (address: {1}, local: {2})", _description, connection.Endpoint, connection.LocalPort);
 
-                var connectionContext = new RabbitMqConnectionContext(connection, _settings, _topology, _description, supervisor.Stopped);
-                connectionContext.GetOrAddPayload(() => _settings);
+                var connectionContext = new RabbitMqConnectionContext(connection, _configuration, _description, supervisor.Stopped);
+
+                connectionContext.GetOrAddPayload(() => _configuration.Settings);
 
                 return connectionContext;
             }

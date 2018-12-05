@@ -15,27 +15,20 @@ namespace MassTransit.AmazonSqsTransport.Transport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration.Configuration;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
-    using Topology;
 
 
     public class ConnectionContextFactory :
         IPipeContextFactory<ConnectionContext>
     {
-        static readonly ILog _log = Logger.Get<ConnectionContextFactory>();
-        readonly string _description;
-        readonly AmazonSqsHostSettings _settings;
-        readonly IAmazonSqsHostTopology _topology;
+        readonly IAmazonSqsHostConfiguration _configuration;
 
-        public ConnectionContextFactory(AmazonSqsHostSettings settings, IAmazonSqsHostTopology topology)
+        public ConnectionContextFactory(IAmazonSqsHostConfiguration configuration)
         {
-            _settings = settings;
-            _topology = topology;
-
-            _description = settings.ToString();
+            _configuration = configuration;
         }
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
@@ -70,12 +63,11 @@ namespace MassTransit.AmazonSqsTransport.Transport
             try
             {
                 if (supervisor.Stopping.IsCancellationRequested)
-                    throw new OperationCanceledException($"The connection is stopping and cannot be used: {_description}");
+                    throw new OperationCanceledException($"The connection is stopping and cannot be used: {_configuration.HostAddress}");
 
-                connection = _settings.CreateConnection();
+                connection = _configuration.Settings.CreateConnection();
 
-                var connectionContext = new AmazonSqsConnectionContext(connection, _settings, _topology, _description, supervisor.Stopped);
-                connectionContext.GetOrAddPayload(() => _settings);
+                var connectionContext = new AmazonSqsConnectionContext(connection, _configuration, supervisor.Stopped);
 
                 await asyncContext.Created(connectionContext).ConfigureAwait(false);
 

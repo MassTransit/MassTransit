@@ -30,21 +30,11 @@ namespace MassTransit.AmazonSqsTransport
         IConnection Connection { get; }
 
         /// <summary>
-        /// The connection description, useful to debug output
-        /// </summary>
-        string Description { get; }
-
-        /// <summary>
         /// The Host Address for this connection
         /// </summary>
         Uri HostAddress { get; }
 
         IAmazonSqsHostTopology Topology { get; }
-
-        /// <summary>
-        /// The host settings for the connection
-        /// </summary>
-        AmazonSqsHostSettings HostSettings { get; }
 
         /// <summary>
         /// Create a model on the connection

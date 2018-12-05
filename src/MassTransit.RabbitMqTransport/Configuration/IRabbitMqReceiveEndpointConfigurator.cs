@@ -24,11 +24,6 @@ namespace MassTransit.RabbitMqTransport
         IQueueEndpointConfigurator
     {
         /// <summary>
-        /// The host on which the endpoint is being configured
-        /// </summary>
-        IRabbitMqHost Host { get; }
-
-        /// <summary>
         /// If true, binds the message type exchanges to the queue exchange
         /// </summary>
         bool BindMessageExchanges { set; }

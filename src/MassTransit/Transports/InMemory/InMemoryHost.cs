@@ -14,7 +14,6 @@ namespace MassTransit.Transports.InMemory
 {
     using System;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
     using Builders;
     using Configuration;
@@ -24,60 +23,53 @@ namespace MassTransit.Transports.InMemory
     using GreenPipes.Agents;
     using GreenPipes.Caching;
     using Logging;
+    using MassTransit.Configurators;
     using MassTransit.Topology;
     using Pipeline;
     using Topology.Builders;
 
 
     /// <summary>
-    /// Caches InMemory transport instances so that they are only created and used once
+    ///     Caches InMemory transport instances so that they are only created and used once
     /// </summary>
     public class InMemoryHost :
         Supervisor,
-        IInMemoryHostControl,
-        ISendTransportProvider
+        IInMemoryHostControl
     {
         static readonly ILog _log = Logger.Get<InMemoryHost>();
-        readonly Uri _baseUri;
+
+        readonly IInMemoryHostConfiguration _hostConfiguration;
         readonly IIndex<string, InMemorySendTransport> _index;
         readonly IMessageFabric _messageFabric;
         readonly IReceiveEndpointCollection _receiveEndpoints;
-        readonly IInMemoryReceiveEndpointFactory _receiveEndpointFactory;
 
-        public InMemoryHost(IInMemoryBusConfiguration busConfiguration, int concurrencyLimit, IHostTopology topology, Uri baseAddress = null)
+        public InMemoryHost(IInMemoryHostConfiguration hostConfiguration, int concurrencyLimit, IHostTopology topology, Uri baseAddress = null)
         {
+            _hostConfiguration = hostConfiguration;
             Topology = topology;
-            _baseUri = baseAddress ?? new Uri("loopback://localhost/");
+            Address = baseAddress ?? new Uri("loopback://localhost/");
 
             _messageFabric = new MessageFabric(concurrencyLimit);
 
             _receiveEndpoints = new ReceiveEndpointCollection();
-            
+            Add(_receiveEndpoints);
+
             var cacheSettings = new CacheSettings(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24));
 
             var cache = new GreenCache<InMemorySendTransport>(cacheSettings);
             _index = cache.AddIndex("exchangeName", x => x.ExchangeName);
-
-            _receiveEndpointFactory = new InMemoryReceiveEndpointFactory(busConfiguration);
         }
-
-        public IReceiveEndpointCollection ReceiveEndpoints => _receiveEndpoints;
 
         public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
         {
-            ReceiveEndpoints.Add(endpointName, receiveEndpoint);
+            _receiveEndpoints.Add(endpointName, receiveEndpoint);
         }
 
         public async Task<HostHandle> Start()
         {
-            HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints();
+            HostReceiveEndpointHandle[] handles = _receiveEndpoints.StartEndpoints();
 
-            return new Handle(this, handles);
-        }
-
-        public bool Matches(Uri address)
-        {
-            return address.ToString().StartsWith(_baseUri.ToString(), StringComparison.OrdinalIgnoreCase);
+            return new StartHostHandle(this, handles);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -85,7 +77,8 @@ namespace MassTransit.Transports.InMemory
             var scope = context.CreateScope("host");
             scope.Set(new
             {
-                Type = "InMemory"
+                Type = "InMemory",
+                BaseAddress = Address
             });
 
             _messageFabric.Probe(scope);
@@ -106,7 +99,7 @@ namespace MassTransit.Transports.InMemory
             IErrorTransport errorTransport = new InMemoryMessageErrorTransport(_messageFabric.GetExchange($"{queueName}_error"));
             receiveEndpointContext.GetOrAddPayload(() => errorTransport);
 
-            var transport = new InMemoryReceiveTransport(new Uri(_baseUri, queueName), queue, receiveEndpointContext);
+            var transport = new InMemoryReceiveTransport(new Uri(Address, queueName), queue, receiveEndpointContext);
             Add(transport);
 
             return transport;
@@ -114,12 +107,18 @@ namespace MassTransit.Transports.InMemory
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure = null)
         {
-            _receiveEndpointFactory.CreateReceiveEndpoint(queueName, configure);
+            var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
+
+            configure?.Invoke(configuration.Configurator);
+
+            BusConfigurationResult.CompileResults(configuration.Validate());
+
+            configuration.Build();
 
             return _receiveEndpoints.Start(queueName);
         }
 
-        public Uri Address => _baseUri;
+        public Uri Address { get; }
 
         public IHostTopology Topology { get; }
 
@@ -170,13 +169,9 @@ namespace MassTransit.Transports.InMemory
             });
         }
 
-        public IInMemoryExchange GetExchange(Uri address)
+        public int TransportConcurrencyLimit
         {
-            var queueName = address.AbsolutePath.Split('/').Last();
-
-            var exchange = _messageFabric.GetExchange(queueName);
-
-            return exchange;
+            set => _messageFabric.ConcurrencyLimit = value;
         }
 
         public IInMemoryPublishTopologyBuilder CreatePublishTopologyBuilder(
@@ -190,19 +185,13 @@ namespace MassTransit.Transports.InMemory
             return new InMemoryConsumeTopologyBuilder(_messageFabric);
         }
 
-
-        class Handle :
-            BaseHostHandle
+        public IInMemoryExchange GetExchange(Uri address)
         {
-            public Handle(InMemoryHost host, HostReceiveEndpointHandle[] handles)
-                : base(host, handles)
-            {
-            }
+            var queueName = address.AbsolutePath.Split('/').Last();
 
-            public override async Task Stop(CancellationToken cancellationToken)
-            {
-                await base.Stop(cancellationToken).ConfigureAwait(false);
-            }
+            var exchange = _messageFabric.GetExchange(queueName);
+
+            return exchange;
         }
     }
 }

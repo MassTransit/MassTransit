@@ -95,7 +95,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            var configuration = _configuration.CreateReceiveEndpointConfiguration(queueName, _configuration.CreateEndpointConfiguration());
+            var configuration = _configuration.CreateReceiveEndpointConfiguration(queueName);
 
             ConfigureReceiveEndpoint(configuration, configureEndpoint);
         }
@@ -161,19 +161,16 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
             if (settings == null)
                 throw new ArgumentNullException(nameof(settings));
 
-            var hostTopology = _configuration.CreateHostTopology();
-            var host = new ServiceBusHost(settings, hostTopology, _configuration);
+            var hostConfiguration = _configuration.CreateHostConfiguration(settings);
 
-            var hostConfiguration = _configuration.CreateHostConfiguration(host);
-
-            if (_configuration.Hosts.Length == 1)
+            if (_configuration.Hosts.Count == 1)
             {
-                var path = host.Topology.CreateTemporaryQueueName("bus");
+                var path = hostConfiguration.Topology.CreateTemporaryQueueName("bus");
                 _queueConfigurator.Path = path;
                 _settings.Name = path;
             }
 
-            return host;
+            return hostConfiguration.Host;
         }
 
         public int MaxConcurrentCalls
@@ -193,7 +190,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
         public void ReceiveEndpoint(IServiceBusHost host, string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            if (!_configuration.TryGetHost(host, out var hostConfiguration))
+            if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
                 throw new ArgumentException("The host was not configured on this bus", nameof(host));
 
             var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
@@ -204,7 +201,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         public void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
             where T : class
         {
-            if (!_configuration.TryGetHost(host, out var hostConfiguration))
+            if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
                 throw new ArgumentException("The host was not configured on this bus", nameof(host));
 
             var settings = new SubscriptionEndpointSettings(_configuration.Topology.Publish.GetMessageTopology<T>().TopicDescription, subscriptionName);
@@ -217,7 +214,7 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
         public void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicPath,
             Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
-            if (!_configuration.TryGetHost(host, out var hostConfiguration))
+            if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
                 throw new ArgumentException("The host was not configured on this bus", nameof(host));
 
             var settings = new SubscriptionEndpointSettings(topicPath, subscriptionName);

@@ -36,12 +36,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendEndpointSendTransportProvider(_configuration.BusConfiguration);
+            return new SendEndpointSendTransportProvider(_configuration.BusConfiguration, _configuration.HostAddress);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_configuration.BusConfiguration);
+            return new PublishTransportProvider(_configuration.HostConfiguration);
         }
     }
 }

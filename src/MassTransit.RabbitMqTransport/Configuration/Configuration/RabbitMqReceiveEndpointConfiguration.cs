@@ -36,7 +36,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
     {
         readonly IBuildPipeConfigurator<ConnectionContext> _connectionConfigurator;
         readonly IRabbitMqEndpointConfiguration _endpointConfiguration;
-        readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly Lazy<Uri> _inputAddress;
         readonly IManagementPipe _managementPipe;
         readonly IBuildPipeConfigurator<ModelContext> _modelConfigurator;
@@ -48,7 +47,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             _settings = settings;
 
-            _hostConfiguration = hostConfiguration;
+            HostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
 
             BindMessageExchanges = true;
@@ -57,16 +56,15 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _connectionConfigurator = new PipeConfigurator<ConnectionContext>();
             _modelConfigurator = new PipeConfigurator<ModelContext>();
 
-            HostAddress = hostConfiguration.Host.Address;
+            HostAddress = hostConfiguration.HostAddress;
 
             _inputAddress = new Lazy<Uri>(FormatInputAddress);
         }
 
         public IRabbitMqReceiveEndpointConfigurator Configurator => this;
 
-        public IRabbitMqBusConfiguration BusConfiguration => _hostConfiguration.BusConfiguration;
-
-        public IRabbitMqHostControl Host => _hostConfiguration.Host;
+        public IRabbitMqBusConfiguration BusConfiguration => HostConfiguration.BusConfiguration;
+        public IRabbitMqHostConfiguration HostConfiguration { get; }
 
         public bool BindMessageExchanges { get; set; }
 
@@ -89,9 +87,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _modelConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
 
             IAgent consumerAgent;
-            if (_hostConfiguration.BusConfiguration.DeployTopologyOnly)
+            if (HostConfiguration.BusConfiguration.DeployTopologyOnly)
             {
-                var transportReadyFilter = new TransportReadyFilter<ModelContext>(receiveEndpointContext.TransportObservers, InputAddress);
+                var transportReadyFilter = new TransportReadyFilter<ModelContext>(receiveEndpointContext);
                 _modelConfigurator.UseFilter(transportReadyFilter);
 
                 consumerAgent = transportReadyFilter;
@@ -110,18 +108,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 consumerAgent = consumerFilter;
             }
 
-            IFilter<ConnectionContext> modelFilter = new ReceiveModelFilter(_modelConfigurator.Build(), _hostConfiguration.Host);
+            IFilter<ConnectionContext> modelFilter = new ReceiveEndpointFilter(_modelConfigurator.Build());
 
             _connectionConfigurator.UseFilter(modelFilter);
 
-            var transport = new RabbitMqReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
+            var transport = new RabbitMqReceiveTransport(HostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
 
             transport.Add(consumerAgent);
 
             return CreateReceiveEndpoint(_settings.QueueName ?? NewId.Next().ToString(), transport, receiveEndpointContext);
         }
-
-        IRabbitMqHost IRabbitMqReceiveEndpointConfigurator.Host => Host;
 
         public bool Durable
         {
@@ -257,7 +253,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         Uri FormatInputAddress()
         {
-            return _settings.GetInputAddress(_hostConfiguration.Host.Settings.HostAddress);
+            return _settings.GetInputAddress(HostConfiguration.Host.Settings.HostAddress);
         }
 
         protected override bool IsAlreadyConfigured()

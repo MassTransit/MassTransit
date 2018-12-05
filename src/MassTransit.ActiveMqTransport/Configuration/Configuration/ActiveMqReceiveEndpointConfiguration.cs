@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using Builders;
-    using Context;
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Builders;
@@ -14,7 +13,6 @@
     using Topology;
     using Topology.Settings;
     using Transport;
-    using Transports;
 
 
     public class ActiveMqReceiveEndpointConfiguration :
@@ -24,7 +22,6 @@
     {
         readonly IBuildPipeConfigurator<ConnectionContext> _connectionConfigurator;
         readonly IActiveMqEndpointConfiguration _endpointConfiguration;
-        readonly IActiveMqHostConfiguration _hostConfiguration;
         readonly Lazy<Uri> _inputAddress;
         readonly IBuildPipeConfigurator<SessionContext> _sessionConfigurator;
         readonly QueueReceiveSettings _settings;
@@ -48,7 +45,7 @@
         ActiveMqReceiveEndpointConfiguration(IActiveMqHostConfiguration hostConfiguration, IActiveMqEndpointConfiguration endpointConfiguration)
             : base(hostConfiguration, endpointConfiguration)
         {
-            _hostConfiguration = hostConfiguration;
+            HostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
 
             _connectionConfigurator = new PipeConfigurator<ConnectionContext>();
@@ -61,9 +58,10 @@
 
         public IActiveMqReceiveEndpointConfigurator Configurator => this;
 
-        public IActiveMqBusConfiguration BusConfiguration => _hostConfiguration.BusConfiguration;
+        public IActiveMqBusConfiguration BusConfiguration => HostConfiguration.BusConfiguration;
+        public IActiveMqHostConfiguration HostConfiguration { get; }
 
-        public IActiveMqHostControl Host => _hostConfiguration.Host;
+        public IActiveMqHostControl Host => HostConfiguration.Host;
 
         public bool BindMessageTopics { get; set; }
 
@@ -86,36 +84,45 @@
             _sessionConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
 
             IAgent consumerAgent;
-            if (_hostConfiguration.BusConfiguration.DeployTopologyOnly)
+            if (HostConfiguration.BusConfiguration.DeployTopologyOnly)
             {
-                var transportReadyFilter = new TransportReadyFilter<SessionContext>(receiveEndpointContext.TransportObservers, InputAddress);
+                var transportReadyFilter = new TransportReadyFilter<SessionContext>(receiveEndpointContext);
                 _sessionConfigurator.UseFilter(transportReadyFilter);
 
                 consumerAgent = transportReadyFilter;
             }
             else
             {
-                var deadLetterTransport = CreateDeadLetterTransport();
-
-                var errorTransport = CreateErrorTransport();
-
-                var consumerFilter = new ActiveMqConsumerFilter(receiveEndpointContext,
-                    deadLetterTransport, errorTransport);
+                var consumerFilter = new ActiveMqConsumerFilter(receiveEndpointContext);
 
                 _sessionConfigurator.UseFilter(consumerFilter);
 
                 consumerAgent = consumerFilter;
             }
 
-            IFilter<ConnectionContext> sessionFilter = new ReceiveSessionFilter(_sessionConfigurator.Build(), _hostConfiguration.Host);
+            IFilter<ConnectionContext> sessionFilter = new ReceiveSessionFilter(_sessionConfigurator.Build(), HostConfiguration.Host);
 
             _connectionConfigurator.UseFilter(sessionFilter);
 
-            var transport = new ActiveMqReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
+            var transport = new ActiveMqReceiveTransport(HostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
 
             transport.Add(consumerAgent);
 
             return CreateReceiveEndpoint(_settings.EntityName ?? NewId.Next().ToString(), transport, receiveEndpointContext);
+        }
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            var queueName = $"{_settings.EntityName}";
+
+            if (!ActiveMqEntityNameValidator.Validator.IsValidEntityName(_settings.EntityName))
+                yield return this.Failure(queueName, "must be a valid queue name");
+
+            if (_settings.PurgeOnStartup)
+                yield return this.Warning(queueName, "Existing messages in the queue will be purged on service start");
+
+            foreach (var result in base.Validate())
+                yield return result.WithParentKey(queueName);
         }
 
         IActiveMqHost IActiveMqReceiveEndpointConfigurator.Host => Host;
@@ -171,42 +178,12 @@
 
         Uri FormatInputAddress()
         {
-            return _settings.GetInputAddress(_hostConfiguration.Host.Settings.HostAddress);
-        }
-
-        IErrorTransport CreateErrorTransport()
-        {
-            var errorSettings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings);
-            var filter = new ConfigureTopologyFilter<ErrorSettings>(errorSettings, errorSettings.GetBrokerTopology());
-
-            return new ActiveMqErrorTransport(errorSettings.EntityName, filter);
-        }
-
-        IDeadLetterTransport CreateDeadLetterTransport()
-        {
-            var deadLetterSettings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings);
-            var filter = new ConfigureTopologyFilter<DeadLetterSettings>(deadLetterSettings, deadLetterSettings.GetBrokerTopology());
-
-            return new ActiveMqDeadLetterTransport(deadLetterSettings.EntityName, filter);
+            return _settings.GetInputAddress(HostConfiguration.Host.Settings.HostAddress);
         }
 
         protected override bool IsAlreadyConfigured()
         {
             return _inputAddress.IsValueCreated || base.IsAlreadyConfigured();
-        }
-
-        public override IEnumerable<ValidationResult> Validate()
-        {
-            var queueName = $"{_settings.EntityName}";
-
-            if (!ActiveMqEntityNameValidator.Validator.IsValidEntityName(_settings.EntityName))
-                yield return this.Failure(queueName, "must be a valid queue name");
-
-            if (_settings.PurgeOnStartup)
-                yield return this.Warning(queueName, "Existing messages in the queue will be purged on service start");
-
-            foreach (var result in base.Validate())
-                yield return result.WithParentKey(queueName);
         }
     }
 }

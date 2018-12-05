@@ -12,7 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration
 {
+    using System;
+    using System.Text;
+    using System.Threading.Tasks;
+    using GreenPipes;
+    using Integration;
     using MassTransit.Configuration;
+    using MassTransit.Topology;
+    using Pipeline;
+    using Topology;
     using Topology.Settings;
     using Transport;
     using Transports;
@@ -22,13 +30,26 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IRabbitMqHostConfiguration
     {
         readonly IRabbitMqBusConfiguration _busConfiguration;
+        readonly RabbitMqHostSettings _hostSettings;
+        readonly IRabbitMqHostTopology _hostTopology;
         readonly IRabbitMqHostControl _host;
 
-        public RabbitMqHostConfiguration(IRabbitMqBusConfiguration busConfiguration, IRabbitMqHostControl host)
+        public RabbitMqHostConfiguration(IRabbitMqBusConfiguration busConfiguration, RabbitMqHostSettings hostSettings, IRabbitMqHostTopology hostTopology)
         {
-            _host = host;
             _busConfiguration = busConfiguration;
+            _hostSettings = hostSettings;
+            _hostTopology = hostTopology;
+
+            _host = new RabbitMqHost(this);
+
+            Description = FormatDescription(hostSettings);
         }
+
+        public string Description { get; }
+
+        Uri IHostConfiguration.HostAddress => _hostSettings.HostAddress;
+        IBusHostControl IHostConfiguration.Host => _host;
+        IHostTopology IHostConfiguration.Topology => _hostTopology;
 
         IRabbitMqBusConfiguration IRabbitMqHostConfiguration.BusConfiguration => _busConfiguration;
         IRabbitMqHostControl IRabbitMqHostConfiguration.Host => _host;
@@ -40,6 +61,91 @@ namespace MassTransit.RabbitMqTransport.Configuration
             return new RabbitMqReceiveEndpointConfiguration(this, settings, _busConfiguration.CreateEndpointConfiguration());
         }
 
-        IBusHostControl IHostConfiguration.Host => _host;
+        public bool Matches(Uri address)
+        {
+            if (!address.Scheme.Equals("rabbitmq", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            var settings = address.GetHostSettings();
+
+            return RabbitMqHostEqualityComparer.Default.Equals(_hostSettings, settings);
+        }
+
+        IRabbitMqHostTopology IRabbitMqHostConfiguration.Topology => _hostTopology;
+        public bool PublisherConfirmation => _hostSettings.PublisherConfirmation;
+        public RabbitMqHostSettings Settings => _hostSettings;
+
+        public IModelContextSupervisor CreateModelContextSupervisor()
+        {
+            return new ModelContextSupervisor(_host.ConnectionContextSupervisor);
+        }
+
+        public ISendTransport CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IFilter<ModelContext> modelFilter, string exchangeName)
+        {
+            var transport = new RabbitMqSendTransport(modelContextSupervisor, modelFilter, exchangeName);
+
+            _host.Add(transport);
+
+            return transport;
+        }
+
+        public Task<ISendTransport> CreateSendTransport(Uri address)
+        {
+            var settings = _hostTopology.GetSendSettings(address);
+
+            var brokerTopology = settings.GetBrokerTopology();
+
+            IModelContextSupervisor supervisor = CreateModelContextSupervisor();
+
+            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology);
+
+            var transport = CreateSendTransport(supervisor, configureTopologyFilter, settings.ExchangeName);
+
+            return Task.FromResult(transport);
+        }
+
+        public Task<ISendTransport> CreatePublishTransport<T>()
+            where T : class
+        {
+            IRabbitMqMessagePublishTopology<T> publishTopology = _hostTopology.Publish<T>();
+
+            var sendSettings = publishTopology.GetSendSettings();
+
+            var brokerTopology = publishTopology.GetBrokerTopology();
+
+            IModelContextSupervisor supervisor = CreateModelContextSupervisor();
+
+            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology);
+
+            var transport = CreateSendTransport(supervisor, configureTopologyFilter, publishTopology.Exchange.ExchangeName);
+
+            return Task.FromResult(transport);
+        }
+
+        static string FormatDescription(RabbitMqHostSettings settings)
+        {
+            var sb = new StringBuilder();
+
+            if (!string.IsNullOrWhiteSpace(settings.Username))
+                sb.Append(settings.Username).Append('@');
+
+            sb.Append(settings.Host);
+
+            var actualHost = settings.HostNameSelector?.LastHost;
+            if (!string.IsNullOrWhiteSpace(actualHost))
+                sb.Append('(').Append(actualHost).Append(')');
+
+            if (settings.Port != -1)
+                sb.Append(':').Append(settings.Port);
+
+            if (string.IsNullOrWhiteSpace(settings.VirtualHost))
+                sb.Append('/');
+            else if (settings.VirtualHost.StartsWith("/"))
+                sb.Append(settings.VirtualHost);
+            else
+                sb.Append("/").Append(settings.VirtualHost);
+
+            return sb.ToString();
+        }
     }
 }

@@ -15,10 +15,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
+    using Microsoft.Azure.ServiceBus;
 
 
     public class NamespaceContextFactory :
@@ -28,11 +30,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
         readonly Uri _serviceUri;
         readonly NamespaceManagerSettings _settings;
 
-        public NamespaceContextFactory(Uri serviceUri, NamespaceManagerSettings settings)
+        public NamespaceContextFactory(IServiceBusHostConfiguration configuration)
         {
-            _serviceUri = new UriBuilder(serviceUri) {Path = ""}.Uri;
+            _serviceUri = new UriBuilder(configuration.HostAddress) {Path = ""}.Uri;
 
-            _settings = settings;
+            _settings = CreateNamespaceManagerSettings(configuration.Settings, CreateRetryPolicy(configuration.Settings));
         }
 
         IPipeContextAgent<NamespaceContext> IPipeContextFactory<NamespaceContext>.CreateContext(ISupervisor supervisor)
@@ -49,6 +51,23 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             PipeContextHandle<NamespaceContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));
+        }
+
+        static NamespaceManagerSettings CreateNamespaceManagerSettings(ServiceBusHostSettings settings, RetryPolicy retryPolicy)
+        {
+            var nms = new NamespaceManagerSettings
+            {
+                TokenProvider = settings.TokenProvider,
+                OperationTimeout = settings.OperationTimeout,
+                RetryPolicy = retryPolicy
+            };
+
+            return nms;
+        }
+
+        static RetryPolicy CreateRetryPolicy(ServiceBusHostSettings settings)
+        {
+            return new RetryExponential(settings.RetryMinBackoff, settings.RetryMaxBackoff, settings.RetryLimit);
         }
 
         async Task<NamespaceContext> CreateSharedConnection(Task<NamespaceContext> context, CancellationToken cancellationToken)

@@ -14,14 +14,15 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 {
     using System;
     using System.Threading;
-    using AzureServiceBusTransport.Configurators;
-    using AzureServiceBusTransport.Transport;
+    using Azure.ServiceBus.Core.Configurators;
+    using Azure.ServiceBus.Core.Transport;
     using Configurators;
     using Context;
     using Contexts;
+    using ExtensionsLoggingIntegration;
     using MassTransit.Configuration;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Host;
+    using Microsoft.Extensions.Logging;
     using Transports;
 
 
@@ -35,7 +36,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
         CancellationToken _cancellationToken;
 
         public WebJobBrokeredMessageReceiverSpecification(IBinder binder, IReceiveEndpointConfiguration endpointConfiguration,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             : base(endpointConfiguration)
         {
             _binder = binder;
@@ -48,9 +49,9 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
             set => _cancellationToken = value;
         }
 
-        public void SetLog(TraceWriter traceWriter)
+        public void SetLog(ILogger logger)
         {
-            Log = new TraceWriterLog(traceWriter);
+            Log = new ExtensionsLog(logger);
 
             ReceiveEndpointLoggingExtensions.SetLog(Log);
         }

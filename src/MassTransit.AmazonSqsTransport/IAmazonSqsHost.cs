@@ -22,7 +22,7 @@ namespace MassTransit.AmazonSqsTransport
     public interface IAmazonSqsHost :
         IHost
     {
-        IConnectionCache ConnectionCache { get; }
+        IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         IRetryPolicy ConnectionRetryPolicy { get; }
 

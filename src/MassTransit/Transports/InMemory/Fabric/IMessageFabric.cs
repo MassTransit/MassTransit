@@ -27,5 +27,7 @@ namespace MassTransit.Transports.InMemory.Fabric
         void QueueBind(string source, string destination);
         IInMemoryQueue GetQueue(string name);
         IInMemoryExchange GetExchange(string name);
+
+        int ConcurrencyLimit { set; }
     }
 }

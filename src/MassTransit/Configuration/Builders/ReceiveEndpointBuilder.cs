@@ -14,7 +14,6 @@ namespace MassTransit.Builders
 {
     using Configuration;
     using GreenPipes;
-    using Pipeline;
 
 
     public abstract class ReceiveEndpointBuilder
@@ -25,11 +24,6 @@ namespace MassTransit.Builders
         {
             _configuration = configuration;
         }
-
-        public IConsumePipe ConsumePipe => Configuration.ConsumePipe;
-        public IMessageDeserializer MessageDeserializer => Configuration.Serialization.Deserializer;
-
-        protected IReceiveEndpointConfiguration Configuration => _configuration;
 
         public virtual ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
             where T : class

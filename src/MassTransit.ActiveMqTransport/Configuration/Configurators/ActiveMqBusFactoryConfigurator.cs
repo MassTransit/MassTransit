@@ -21,7 +21,6 @@ namespace MassTransit.ActiveMqTransport.Configurators
     using MassTransit.Builders;
     using Topology;
     using Topology.Settings;
-    using Transport;
 
 
     public class ActiveMqBusFactoryConfigurator :
@@ -80,13 +79,9 @@ namespace MassTransit.ActiveMqTransport.Configurators
 
         public IActiveMqHost Host(ActiveMqHostSettings settings)
         {
-            var hostTopology = _configuration.CreateHostTopology(settings.HostAddress);
+            var hostConfiguration = _configuration.CreateHostConfiguration(settings);
 
-            var host = new ActiveMqHost(_configuration, settings, hostTopology);
-
-            _configuration.CreateHostConfiguration(host);
-
-            return host;
+            return hostConfiguration.Host;
         }
 
         void IActiveMqBusFactoryConfigurator.Send<T>(Action<IActiveMqMessageSendTopologyConfigurator<T>> configureTopology)
@@ -120,7 +115,7 @@ namespace MassTransit.ActiveMqTransport.Configurators
 
         public void ReceiveEndpoint(IActiveMqHost host, string queueName, Action<IActiveMqReceiveEndpointConfigurator> configure)
         {
-            if (!_configuration.TryGetHost(host, out var hostConfiguration))
+            if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
                 throw new ArgumentException("The host was not configured on this bus", nameof(host));
 
             var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);

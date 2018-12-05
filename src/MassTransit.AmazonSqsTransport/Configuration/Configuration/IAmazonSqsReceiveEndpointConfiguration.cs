@@ -24,6 +24,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 
         IAmazonSqsBusConfiguration BusConfiguration { get; }
 
+        IAmazonSqsHostConfiguration HostConfiguration { get; }
+
         IAmazonSqsHostControl Host { get; }
 
         bool SubscribeMessageTopics { get; set; }

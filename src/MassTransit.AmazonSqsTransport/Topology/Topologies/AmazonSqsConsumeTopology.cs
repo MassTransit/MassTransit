@@ -22,16 +22,14 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
     using Configuration.Specifications;
     using GreenPipes;
     using MassTransit.Topology;
-    using MassTransit.Topology.Topologies;
-    using NewIdFormatters;
     using Util;
+    using MassTransit.Topology.Topologies;
 
 
     public class AmazonSqsConsumeTopology :
         ConsumeTopology,
         IAmazonSqsConsumeTopologyConfigurator
     {
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly IMessageTopology _messageTopology;
         readonly IAmazonSqsPublishTopology _publishTopology;
         readonly IList<IAmazonSqsConsumeTopologySpecification> _specifications;
@@ -99,7 +97,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
                     sb.Append(c);
 
             sb.Append('-');
-            sb.Append(NewId.Next().ToString(_formatter));
+            sb.Append(NewId.Next().ToString(FormatUtil.Formatter));
 
             return sb.ToString();
         }

@@ -20,7 +20,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Configuration.Specification
     using GreenPipes;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
-    using NewIdFormatters;
+    using Util;
 
 
     /// <summary>
@@ -29,7 +29,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Configuration.Specification
     public class SubscriptionConsumeTopologySpecification :
         IServiceBusConsumeTopologySpecification
     {
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly Filter _filter;
         readonly RuleDescription _rule;
         readonly SubscriptionDescription _subscriptionDescription;
@@ -57,7 +56,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Configuration.Specification
             subscriptionDescription.ForwardTo = builder.Queue.Queue.QueueDescription.Path;
             subscriptionDescription.SubscriptionName = GetSubscriptionName(subscriptionDescription.SubscriptionName, builder.Queue.Queue.QueueDescription.Path.Split('/').Last());
 
-            var queueSubscription = builder.CreateQueueSubscription(topic, builder.Queue, subscriptionDescription, _rule, _filter);
+            builder.CreateQueueSubscription(topic, builder.Queue, subscriptionDescription, _rule, _filter);
         }
 
         static string GetSubscriptionName(string subscriptionName, string queuePath)
@@ -72,7 +71,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Configuration.Specification
                 {
                     byte[] buffer = Encoding.UTF8.GetBytes(subscriptionPath);
                     byte[] hash = hasher.ComputeHash(buffer);
-                    hashed = _formatter.Format(hash).Substring(0, 6);
+                    hashed = FormatUtil.Formatter.Format(hash).Substring(0, 6);
                 }
 
                 name = $"{subscriptionPath.Substring(0, 43)}-{hashed}";

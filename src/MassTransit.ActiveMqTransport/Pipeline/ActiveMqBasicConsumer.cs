@@ -23,7 +23,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using GreenPipes.Internals.Extensions;
     using Logging;
     using Topology;
-    using Transports;
     using Transports.Metrics;
 
 
@@ -34,9 +33,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         Supervisor,
         DeliveryMetrics
     {
-        readonly IDeadLetterTransport _deadLetterTransport;
         readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly IErrorTransport _errorTransport;
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<ActiveMqBasicConsumer>();
         readonly SessionContext _session;
@@ -53,17 +50,12 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         /// <param name="messageConsumer"></param>
         /// <param name="inputAddress">The input address for messages received by the consumer</param>
         /// <param name="context">The topology</param>
-        /// <param name="deadLetterTransport"></param>
-        /// <param name="errorTransport"></param>
-        public ActiveMqBasicConsumer(SessionContext session, IMessageConsumer messageConsumer, Uri inputAddress, ActiveMqReceiveEndpointContext context,
-            IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+        public ActiveMqBasicConsumer(SessionContext session, IMessageConsumer messageConsumer, Uri inputAddress, ActiveMqReceiveEndpointContext context)
         {
             _session = session;
             _messageConsumer = messageConsumer;
             _inputAddress = inputAddress;
             _context = context;
-            _deadLetterTransport = deadLetterTransport;
-            _errorTransport = errorTransport;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
@@ -89,9 +81,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             using (var delivery = _tracker.BeginDelivery())
             {
                 var context = new ActiveMqReceiveContext(_inputAddress, message, _context);
-
-                context.GetOrAddPayload(() => _errorTransport);
-                context.GetOrAddPayload(() => _deadLetterTransport);
 
                 context.GetOrAddPayload(() => _receiveSettings);
                 context.GetOrAddPayload(() => _session);

@@ -43,21 +43,19 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
             return _hosts.TryGetHost(host, out hostConfiguration);
         }
 
-        public IAmazonSqsHostTopology CreateHostTopology(Uri hostAddress)
+        public IAmazonSqsHostConfiguration CreateHostConfiguration(AmazonSqsHostSettings settings)
         {
-            return new AmazonSqsHostTopology(new AmazonSqsMessageNameFormatter(), hostAddress, Topology);
-        }
+            var hostTopology = CreateHostTopology(settings.HostAddress);
 
-        public IAmazonSqsHostConfiguration CreateHostConfiguration(IAmazonSqsHostControl host)
-        {
-            var hostConfiguration = new AmazonSqsHostConfiguration(this, host);
+            var hostConfiguration = new AmazonSqsHostConfiguration(this, settings, hostTopology);
 
             _hosts.Add(hostConfiguration);
 
             return hostConfiguration;
         }
 
-        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, IAmazonSqsEndpointConfiguration endpointConfiguration)
+        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            IAmazonSqsEndpointConfiguration endpointConfiguration)
         {
             if (_hosts.Count == 0)
                 throw new ConfigurationException("At least one host must be configured");
@@ -67,7 +65,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
             return configuration;
         }
 
-        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings, IAmazonSqsEndpointConfiguration endpointConfiguration)
+        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
+            IAmazonSqsEndpointConfiguration endpointConfiguration)
         {
             if (_hosts.Count == 0)
                 throw new ConfigurationException("At least one host must be configured");
@@ -78,5 +77,10 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
         }
 
         public IReadOnlyHostCollection Hosts => _hosts;
+
+        IAmazonSqsHostTopology CreateHostTopology(Uri hostAddress)
+        {
+            return new AmazonSqsHostTopology(new AmazonSqsMessageNameFormatter(), hostAddress, Topology);
+        }
     }
 }

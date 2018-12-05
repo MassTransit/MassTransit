@@ -81,67 +81,49 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
                     await _observers.PreSend(context).ConfigureAwait(false);
 
-                    using (var messageBodyStream = context.GetBodyStream())
+                    var brokeredMessage = new Message(context.Body)
                     {
-                        var brokeredMessage = new Message(messageBodyStream.ReadAsBytes());
-                        brokeredMessage.ContentType = context.ContentType.MediaType;
+                        ContentType = context.ContentType.MediaType
+                    };
 
-                        KeyValuePair<string, object>[] headers = context.Headers.GetAll()
-                            .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().IsValueType))
-                            .ToArray();
+                    brokeredMessage.UserProperties.SetTextHeaders(context.Headers, (_, text) => text);
 
-                        foreach (KeyValuePair<string, object> header in headers)
-                        {
-                            if (brokeredMessage.UserProperties.ContainsKey(header.Key))
-                                continue;
+                    if (context.TimeToLive.HasValue)
+                        brokeredMessage.TimeToLive = context.TimeToLive.Value;
+                    if (context.MessageId.HasValue)
+                        brokeredMessage.MessageId = context.MessageId.Value.ToString("N");
+                    if (context.CorrelationId.HasValue)
+                        brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
+                    CopyIncomingIdentifiersIfPresent(context);
+                    if (context.PartitionKey != null)
+                        brokeredMessage.PartitionKey = context.PartitionKey;
+                    var sessionId = string.IsNullOrWhiteSpace(context.SessionId) ? context.ConversationId?.ToString("N") : context.SessionId;
+                    if (!string.IsNullOrWhiteSpace(sessionId))
+                    {
+                        brokeredMessage.SessionId = sessionId;
 
-                            brokeredMessage.UserProperties.Add(header.Key, header.Value);
-                        }
+                        if (context.ReplyToSessionId == null)
+                            brokeredMessage.ReplyToSessionId = sessionId;
+                    }
+                    if (context.ReplyToSessionId != null)
+                        brokeredMessage.ReplyToSessionId = context.ReplyToSessionId;
+                    if (context.ScheduledEnqueueTimeUtc.HasValue)
+                    {
+                        var enqueueTimeUtc = context.ScheduledEnqueueTimeUtc.Value;
 
-                        if (context.TimeToLive.HasValue)
-                            brokeredMessage.TimeToLive = context.TimeToLive.Value;
+                        sequenceNumber = await clientContext.ScheduleSend(brokeredMessage, enqueueTimeUtc).ConfigureAwait(false);
 
-                        if (context.MessageId.HasValue)
-                            brokeredMessage.MessageId = context.MessageId.Value.ToString("N");
+                        context.SetScheduledMessageId(sequenceNumber);
 
-                        if (context.CorrelationId.HasValue)
-                            brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
+                        context.LogScheduled(enqueueTimeUtc);
+                    }
+                    else
+                    {
+                        await clientContext.Send(brokeredMessage).ConfigureAwait(false);
 
-                        CopyIncomingIdentifiersIfPresent(context);
+                        context.LogSent();
 
-                        if (context.PartitionKey != null)
-                            brokeredMessage.PartitionKey = context.PartitionKey;
-
-                        var sessionId = string.IsNullOrWhiteSpace(context.SessionId) ? context.ConversationId?.ToString("N") : context.SessionId;
-                        if (!string.IsNullOrWhiteSpace(sessionId))
-                        {
-                            brokeredMessage.SessionId = sessionId;
-
-                            if (context.ReplyToSessionId == null)
-                                brokeredMessage.ReplyToSessionId = sessionId;
-                        }
-
-                        if (context.ReplyToSessionId != null)
-                            brokeredMessage.ReplyToSessionId = context.ReplyToSessionId;
-
-                        if (context.ScheduledEnqueueTimeUtc.HasValue)
-                        {
-                            var enqueueTimeUtc = context.ScheduledEnqueueTimeUtc.Value;
-
-                            sequenceNumber = await clientContext.ScheduleSend(brokeredMessage, enqueueTimeUtc).ConfigureAwait(false);
-
-                            context.SetScheduledMessageId(sequenceNumber);
-
-                            context.LogScheduled(enqueueTimeUtc);
-                        }
-                        else
-                        {
-                            await clientContext.Send(brokeredMessage).ConfigureAwait(false);
-
-                            context.LogSent();
-
-                            await _observers.PostSend(context).ConfigureAwait(false);
-                        }
+                        await _observers.PostSend(context).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)

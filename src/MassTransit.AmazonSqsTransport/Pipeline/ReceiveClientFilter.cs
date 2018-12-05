@@ -24,13 +24,11 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     public class ReceiveClientFilter :
         IFilter<ConnectionContext>
     {
-        readonly IAmazonSqsHost _host;
         readonly IPipe<ClientContext> _pipe;
 
-        public ReceiveClientFilter(IPipe<ClientContext> pipe, IAmazonSqsHost host)
+        public ReceiveClientFilter(IPipe<ClientContext> pipe)
         {
             _pipe = pipe;
-            _host = host;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -45,7 +43,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             var amazonSqs = await context.CreateAmazonSqs().ConfigureAwait(false);
             var amazonSns = await context.CreateAmazonSns().ConfigureAwait(false);
 
-            var modelContext = new AmazonSqsClientContext(context, amazonSqs, amazonSns, _host, context.CancellationToken);
+            var modelContext = new AmazonSqsClientContext(context, amazonSqs, amazonSns, context.CancellationToken);
 
             try
             {

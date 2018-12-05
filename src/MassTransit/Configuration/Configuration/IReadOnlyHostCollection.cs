@@ -77,6 +77,6 @@ namespace MassTransit.Configuration
         /// <param name="address"></param>
         /// <param name="host"></param>
         /// <returns></returns>
-        bool TryGetHost(Uri address, out IBusHostControl host);
+        bool TryGetHost(Uri address, out IHostConfiguration host);
     }
 }

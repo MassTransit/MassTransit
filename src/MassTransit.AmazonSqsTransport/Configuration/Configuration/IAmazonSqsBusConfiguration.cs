@@ -14,7 +14,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 {
     using System;
     using MassTransit.Configuration;
-    using Topology;
     using Topology.Settings;
 
 
@@ -44,8 +43,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
         /// <param name="hostConfiguration"></param>
         bool TryGetHost(IAmazonSqsHost host, out IAmazonSqsHostConfiguration hostConfiguration);
 
-        IAmazonSqsHostTopology CreateHostTopology(Uri hostAddress);
-
         /// <summary>
         /// Create an endpoint configuration on the bus, which can later be turned into a receive endpoint
         /// </summary>
@@ -55,9 +52,10 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
         /// <summary>
         /// Create a host configuration, by adding a host to the bus
         /// </summary>
-        /// <param name="host"></param>
+        /// <param name="settings"></param>
+        /// <param name="hostTopology"></param>
         /// <returns></returns>
-        IAmazonSqsHostConfiguration CreateHostConfiguration(IAmazonSqsHostControl host);
+        IAmazonSqsHostConfiguration CreateHostConfiguration(AmazonSqsHostSettings settings);
 
         /// <summary>
         /// Create a receive endpoint configuration for the default host

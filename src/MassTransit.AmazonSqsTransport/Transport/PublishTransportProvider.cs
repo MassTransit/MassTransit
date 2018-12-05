@@ -14,46 +14,24 @@ namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes.Agents;
-    using Pipeline;
-    using Topology;
+    using Configuration.Configuration;
     using Transports;
 
 
     public class PublishTransportProvider :
         IPublishTransportProvider
     {
-        readonly IAmazonSqsHostControl _host;
-        readonly IAmazonSqsPublishTopology _publishTopology;
+        readonly IAmazonSqsHostConfiguration _configuration;
 
-        public PublishTransportProvider(IAmazonSqsHostControl host, IAmazonSqsPublishTopology publishTopology)
+        public PublishTransportProvider(IAmazonSqsHostConfiguration configuration)
         {
-            _publishTopology = publishTopology;
-            _host = host;
+            _configuration = configuration;
         }
 
         public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
             where T : class
         {
-            IAmazonSqsMessagePublishTopology<T> publishTopology = _publishTopology.GetMessageTopology<T>();
-
-            var sendSettings = publishTopology.GetPublishSettings();
-
-            IAgent<ClientContext> clientCache = GetClientCache();
-
-            var configureTopologyFilter = new ConfigureTopologyFilter<PublishSettings>(sendSettings, publishTopology.GetBrokerTopology());
-
-            var sendTransport = new TopicSendTransport(clientCache, configureTopologyFilter, sendSettings.EntityName);
-            sendTransport.Add(clientCache);
-
-            _host.Add(sendTransport);
-
-            return Task.FromResult<ISendTransport>(sendTransport);
-        }
-
-        protected virtual IAgent<ClientContext> GetClientCache()
-        {
-            return new AmazonSqsClientCache(_host, _host.ConnectionCache);
+            return _configuration.CreatePublishTransport<T>();
         }
     }
 }

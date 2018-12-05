@@ -39,14 +39,14 @@ namespace MassTransit.Configuration
         {
             foreach (var hostConfiguration in _hosts)
             {
-                if (hostConfiguration.Host.Matches(address))
+                if (hostConfiguration.Matches(address))
                 {
                     host = hostConfiguration;
                     return host != null;
                 }
             }
 
-            host = default(TConfiguration);
+            host = default;
             return false;
         }
 
@@ -68,15 +68,15 @@ namespace MassTransit.Configuration
             return _hosts.Select(x => x.Host).ToArray();
         }
 
-        public bool TryGetHost(Uri address, out IBusHostControl host)
+        public bool TryGetHost(Uri address, out IHostConfiguration host)
         {
             if (TryGetHost(address, out TConfiguration hostConfiguration))
             {
-                host = hostConfiguration.Host;
+                host = hostConfiguration;
                 return true;
             }
 
-            host = default(IBusHostControl);
+            host = default;
             return false;
         }
 
@@ -91,7 +91,7 @@ namespace MassTransit.Configuration
                 }
             }
 
-            hostConfiguration = default(TConfiguration);
+            hostConfiguration = default;
             return false;
         }
 

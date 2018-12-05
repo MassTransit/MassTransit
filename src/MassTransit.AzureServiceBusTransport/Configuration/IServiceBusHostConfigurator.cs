@@ -53,7 +53,7 @@ namespace MassTransit.AzureServiceBusTransport
         /// Sets the batch flush interval to use with the messaging factory, default is 20ms. 
         /// </summary>
         /// <remarks>
-        /// Currently the Microsoft ServiceBus client defaults to 20ms. For more inforamtion
+        /// Currently the Microsoft ServiceBus client defaults to 20ms. For more information
         /// regarding batching and performance see: 
         /// https://azure.microsoft.com/en-us/blog/new-article-best-practices-for-performance-improvements-using-service-bus-brokered-messaging/
         /// </remarks>

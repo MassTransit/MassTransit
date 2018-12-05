@@ -46,8 +46,6 @@
             SubscribeMessageTopics = true;
         }
 
-        public IServiceBusBusConfiguration BusConfiguration => _hostConfiguration.BusConfiguration;
-
         IServiceBusReceiveEndpointConfigurator IServiceBusReceiveEndpointConfiguration.Configurator => this;
 
         IServiceBusTopologyConfiguration IServiceBusEndpointConfiguration.Topology => _endpointConfiguration.Topology;
@@ -161,14 +159,14 @@
             return CreateReceiveEndpoint(receiveEndpointContext);
         }
 
-        protected override IErrorTransport CreateErrorTransport(ServiceBusHost host)
+        protected override IErrorTransport CreateErrorTransport(IServiceBusHostControl host)
         {
             var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.QueueConfigurator);
 
             return new BrokeredMessageErrorTransport(CreateSendEndpointContextCache(host, settings));
         }
 
-        protected override IDeadLetterTransport CreateDeadLetterTransport(ServiceBusHost host)
+        protected override IDeadLetterTransport CreateDeadLetterTransport(IServiceBusHostControl host)
         {
             var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.QueueConfigurator);
 
@@ -178,15 +176,16 @@
         protected override IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings,
             IPipe<NamespaceContext> namespacePipe)
         {
-            return new QueueSendEndpointContextFactory(host.MessagingFactoryCache, host.NamespaceCache, Pipe.Empty<MessagingFactoryContext>(), namespacePipe,
+            return new QueueSendEndpointContextFactory(host.MessagingFactoryContextSupervisor, host.NamespaceContextSupervisor,
+                Pipe.Empty<MessagingFactoryContext>(), namespacePipe,
                 settings);
         }
 
-        protected override IClientCache CreateClientCache(Uri inputAddress, IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache)
+        protected override IClientContextSupervisor CreateClientCache(Uri inputAddress, IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor,
+            INamespaceContextSupervisor namespaceContextSupervisor)
         {
-            return new ClientCache(inputAddress,
-                new QueueClientContextFactory(messagingFactoryCache, namespaceCache, MessagingFactoryPipeConfigurator.Build(),
-                    NamespacePipeConfigurator.Build(), _settings));
+            return new ClientContextSupervisor(new QueueClientContextFactory(messagingFactoryContextSupervisor, namespaceContextSupervisor,
+                MessagingFactoryPipeConfigurator.Build(), NamespacePipeConfigurator.Build(), _settings));
         }
     }
 }

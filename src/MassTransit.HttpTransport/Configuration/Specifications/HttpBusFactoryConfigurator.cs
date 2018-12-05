@@ -20,8 +20,6 @@ namespace MassTransit.HttpTransport.Specifications
     using GreenPipes;
     using Hosting;
     using MassTransit.Builders;
-    using Topology;
-    using Transport;
 
 
     public class HttpBusFactoryConfigurator :
@@ -60,13 +58,9 @@ namespace MassTransit.HttpTransport.Specifications
 
         public IHttpHost Host(HttpHostSettings settings)
         {
-            var hostTopology = new HttpHostTopology(_busEndpointConfiguration.Topology);
+            var hostConfiguration = _configuration.CreateHostConfiguration(settings);
 
-            var host = new HttpHost(settings, hostTopology);
-
-            _configuration.CreateHostConfiguration(host);
-
-            return host;
+            return hostConfiguration.Host;
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
@@ -78,7 +72,7 @@ namespace MassTransit.HttpTransport.Specifications
 
         public void ReceiveEndpoint(IHttpHost host, string queueName, Action<IHttpReceiveEndpointConfigurator> configure)
         {
-            if (!_configuration.TryGetHost(host, out var hostConfiguration))
+            if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
                 throw new ArgumentException("The host was not configured on this bus", nameof(host));
 
             var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);

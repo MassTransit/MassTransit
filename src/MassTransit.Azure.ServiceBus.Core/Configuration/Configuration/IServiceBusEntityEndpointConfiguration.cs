@@ -20,5 +20,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
         IServiceBusEndpointConfiguration
     {
         IServiceBusBusConfiguration BusConfiguration { get; }
+
+        IServiceBusHostConfiguration HostConfiguration { get; }
     }
 }

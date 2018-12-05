@@ -12,9 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Filters
 {
-    using System;
     using System.Threading.Tasks;
-    using Events;
+    using Context;
     using GreenPipes;
     using GreenPipes.Agents;
 
@@ -23,20 +22,17 @@ namespace MassTransit.Pipeline.Filters
         Agent,
         IFilter<T>
         where T : class, PipeContext
-
     {
-        readonly Uri _inputAddress;
-        readonly IReceiveTransportObserver _transportObserver;
+        readonly ReceiveEndpointContext _context;
 
-        public TransportReadyFilter(IReceiveTransportObserver transportObserver, Uri inputAddress)
+        public TransportReadyFilter(ReceiveEndpointContext context)
         {
-            _inputAddress = inputAddress;
-            _transportObserver = transportObserver;
+            _context = context;
         }
 
         public async Task Send(T context, IPipe<T> next)
         {
-            await _transportObserver.Ready(new ReceiveTransportReadyEvent(_inputAddress)).ConfigureAwait(false);
+            await _context.TransportObservers.NotifyReady(_context.InputAddress).ConfigureAwait(false);
 
             SetReady();
 

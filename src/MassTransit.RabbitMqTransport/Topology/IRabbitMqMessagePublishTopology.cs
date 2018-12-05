@@ -27,10 +27,10 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// </summary>
         /// <returns></returns>
         SendSettings GetSendSettings();
-        
+
         Exchange Exchange { get; }
-        
-        BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options);
+
+        BrokerTopology GetBrokerTopology();
     }
 
 

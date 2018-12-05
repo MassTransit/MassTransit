@@ -20,7 +20,6 @@ namespace MassTransit.RabbitMqTransport
     using System.Security.Cryptography.X509Certificates;
     using System.Text.RegularExpressions;
     using Configurators;
-    using NewIdFormatters;
     using RabbitMQ.Client;
     using Topology;
     using Topology.Settings;
@@ -30,7 +29,6 @@ namespace MassTransit.RabbitMqTransport
 
     public static class RabbitMqAddressExtensions
     {
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
 
         public static ReceiveSettings GetReceiveSettings(this Uri address)

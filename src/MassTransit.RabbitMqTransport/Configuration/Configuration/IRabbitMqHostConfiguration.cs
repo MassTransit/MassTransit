@@ -12,14 +12,22 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration
 {
+    using System.Threading.Tasks;
+    using GreenPipes;
+    using GreenPipes.Agents;
+    using Integration;
     using MassTransit.Configuration;
+    using Topology;
     using Transport;
+    using Transports;
 
 
     public interface IRabbitMqHostConfiguration :
         IHostConfiguration
     {
         IRabbitMqBusConfiguration BusConfiguration { get; }
+
+        string Description { get; }
 
         new IRabbitMqHostControl Host { get; }
 
@@ -28,5 +36,26 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// </summary>
         /// <returns></returns>
         IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName);
+
+        new IRabbitMqHostTopology Topology { get; }
+
+        /// <summary>
+        /// True if the broker is confirming published messages
+        /// </summary>
+        bool PublisherConfirmation { get; }
+
+        RabbitMqHostSettings Settings { get; }
+
+        /// <summary>
+        /// Create a model context supervisor so that channels can be created from the broker
+        /// </summary>
+        /// <returns></returns>
+        IModelContextSupervisor CreateModelContextSupervisor();
+
+        ISendTransport CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IFilter<ModelContext> modelFilter,
+            string exchangeName);
+
+        Task<ISendTransport> CreatePublishTransport<T>()
+            where T : class;
     }
 }

@@ -16,6 +16,8 @@ namespace MassTransit.Topology
     {
         IPublishTopology PublishTopology { get; }
         
+        ISendTopology SendTopology { get; }
+
         /// <summary>
         /// Returns the publish topology for the specified message type
         /// </summary>

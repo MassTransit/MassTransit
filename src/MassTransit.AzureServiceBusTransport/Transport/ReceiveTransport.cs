@@ -30,18 +30,18 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         IReceiveTransport
     {
         static readonly ILog _log = Logger.Get<ReceiveTransport>();
-        readonly IClientCache _clientCache;
+        readonly IClientContextSupervisor _clientContextSupervisor;
         readonly IPipe<ClientContext> _clientPipe;
         readonly ServiceBusReceiveEndpointContext _receiveEndpointContext;
         readonly IServiceBusHost _host;
         readonly ClientSettings _settings;
 
-        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IClientCache clientCache, IPipe<ClientContext> clientPipe,
+        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IClientContextSupervisor clientContextSupervisor, IPipe<ClientContext> clientPipe,
             ServiceBusReceiveEndpointContext receiveEndpointContext)
         {
             _host = host;
             _settings = settings;
-            _clientCache = clientCache;
+            _clientContextSupervisor = clientContextSupervisor;
             _clientPipe = clientPipe;
             _receiveEndpointContext = receiveEndpointContext;
         }
@@ -105,7 +105,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
                         try
                         {
-                            await _clientCache.Send(_clientPipe, Stopped).ConfigureAwait(false);
+                            await _clientContextSupervisor.Send(_clientPipe, Stopped).ConfigureAwait(false);
                         }
                         catch (OperationCanceledException)
                         {

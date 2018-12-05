@@ -24,10 +24,10 @@ namespace MassTransit.Transports.InMemory.Builders
         ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
-        readonly InMemoryHost _host;
+        readonly IInMemoryHostControl _host;
         readonly IInMemoryReceiveEndpointConfiguration _configuration;
 
-        public InMemoryReceiveEndpointBuilder(InMemoryHost host, IInMemoryReceiveEndpointConfiguration configuration)
+        public InMemoryReceiveEndpointBuilder(IInMemoryHostControl host, IInMemoryReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
             _host = host;

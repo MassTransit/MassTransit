@@ -43,7 +43,6 @@ namespace MassTransit.HttpTransport
 
             return builder.Uri;
         }
-        
 
         static IEnumerable<string> GetQueryStringOptions(HttpSendSettings settings)
         {

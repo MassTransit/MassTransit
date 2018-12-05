@@ -23,7 +23,7 @@ namespace MassTransit.Transports.InMemory.Fabric
     public class MessageFabric :
         IMessageFabric
     {
-        readonly int _concurrencyLimit;
+        int _concurrencyLimit;
         readonly ConcurrentDictionary<string, IInMemoryExchange> _exchanges;
         readonly ConcurrentDictionary<string, IInMemoryQueue> _queues;
 
@@ -86,6 +86,11 @@ namespace MassTransit.Transports.InMemory.Fabric
         public IInMemoryExchange GetExchange(string name)
         {
             return _exchanges.GetOrAdd(name, x => new InMemoryExchange(x));
+        }
+
+        public int ConcurrencyLimit
+        {
+            set => _concurrencyLimit = value;
         }
 
         void ValidateBinding(IMessageSink<InMemoryTransportMessage> destination, IInMemoryExchange sourceExchange)

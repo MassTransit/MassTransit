@@ -21,7 +21,7 @@ namespace MassTransit.RabbitMqTransport
     public interface IRabbitMqHost :
         IHost
     {
-        IConnectionCache ConnectionCache { get; }
+        IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         IRetryPolicy ConnectionRetryPolicy { get; }
 

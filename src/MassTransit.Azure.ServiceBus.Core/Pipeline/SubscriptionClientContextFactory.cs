@@ -24,9 +24,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     {
         readonly SubscriptionSettings _settings;
 
-        public SubscriptionClientContextFactory(IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache, IPipe<MessagingFactoryContext> messagingFactoryPipe,
+        public SubscriptionClientContextFactory(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor, INamespaceContextSupervisor namespaceContextSupervisor, IPipe<MessagingFactoryContext> messagingFactoryPipe,
             IPipe<NamespaceContext> namespacePipe, SubscriptionSettings settings)
-            : base(messagingFactoryCache, namespaceCache, messagingFactoryPipe, namespacePipe, settings)
+            : base(messagingFactoryContextSupervisor, namespaceContextSupervisor, messagingFactoryPipe, namespacePipe, settings)
         {
             _settings = settings;
         }

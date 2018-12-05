@@ -24,7 +24,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
 
         IActiveMqBusConfiguration BusConfiguration { get; }
 
-        IActiveMqHostControl Host { get; }
+        IActiveMqHostConfiguration HostConfiguration { get; }
 
         bool BindMessageTopics { get; set; }
 

@@ -57,12 +57,18 @@ namespace MassTransit.RabbitMqTransport.Contexts
         IConnection ConnectionContext.Connection => _context.Connection;
         public string Description => _context.Description;
         public Uri HostAddress => _context.HostAddress;
+        bool ConnectionContext.PublisherConfirmation => _context.PublisherConfirmation;
+        TimeSpan ConnectionContext.StopTimeout => _context.StopTimeout;
         public IRabbitMqHostTopology Topology => _context.Topology;
-        RabbitMqHostSettings ConnectionContext.HostSettings => _context.HostSettings;
 
-        Task<IModel> ConnectionContext.CreateModel()
+        Task<IModel> ConnectionContext.CreateModel(CancellationToken cancellationToken)
         {
-            return _context.CreateModel();
+            return _context.CreateModel(cancellationToken);
+        }
+
+        Task<ModelContext> ConnectionContext.CreateModelContext(CancellationToken cancellationToken)
+        {
+            return _context.CreateModelContext(cancellationToken);
         }
     }
 }

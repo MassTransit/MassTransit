@@ -61,11 +61,6 @@ namespace MassTransit.HttpTransport.Contexts
             _context.RegisterEndpointHandler(pathMatch, handler);
         }
 
-        public Task Stop(CancellationToken cancellationToken)
-        {
-            return _context.Stop(cancellationToken);
-        }
-
         public Task Start(CancellationToken cancellationToken)
         {
             return _context.Start(cancellationToken);

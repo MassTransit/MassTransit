@@ -77,11 +77,6 @@ namespace MassTransit.RabbitMqTransport.Hosting
 
         public IPublishTopologyConfigurator PublishTopology => _configurator.PublishTopology;
 
-        public bool DeployTopologyOnly
-        {
-            set => _configurator.DeployTopologyOnly = value;
-        }
-
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
             _configurator.AddBusFactorySpecification(specification);

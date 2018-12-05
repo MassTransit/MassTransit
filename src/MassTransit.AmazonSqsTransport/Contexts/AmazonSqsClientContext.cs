@@ -38,7 +38,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         static readonly ILog _log = Logger.Get<AmazonSqsClientContext>();
 
         readonly ConnectionContext _connectionContext;
-        readonly IAmazonSqsHost _host;
         readonly IAmazonSQS _amazonSqs;
         readonly IAmazonSimpleNotificationService _amazonSns;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
@@ -47,14 +46,12 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         readonly IDictionary<string, string> _topicArns;
 
         public AmazonSqsClientContext(ConnectionContext connectionContext, IAmazonSQS amazonSqs, IAmazonSimpleNotificationService amazonSns,
-            IAmazonSqsHost host,
             CancellationToken cancellationToken)
             : base(new PayloadCacheScope(connectionContext), cancellationToken)
         {
             _connectionContext = connectionContext;
             _amazonSqs = amazonSqs;
             _amazonSns = amazonSns;
-            _host = host;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
 
@@ -65,15 +62,13 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         public Task DisposeAsync(CancellationToken cancellationToken)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Closing model: {0}", _connectionContext.Description);
+                _log.DebugFormat("Closing client context: {0}", _connectionContext.HostAddress);
 
             _amazonSqs?.Dispose();
             _amazonSns?.Dispose();
 
             return GreenPipes.Util.TaskUtil.Completed;
         }
-
-        IAmazonSqsPublishTopology ClientContext.PublishTopology => _host.Topology.PublishTopology;
 
         ConnectionContext ClientContext.ConnectionContext => _connectionContext;
 

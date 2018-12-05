@@ -70,7 +70,7 @@ namespace MassTransit.ActiveMqTransport
         public static void ReceiveEndpoint(this IActiveMqBusFactoryConfigurator configurator, IActiveMqHost host,
             Action<IActiveMqReceiveEndpointConfigurator> configure)
         {
-            var queueName = host.Topology.CreateTemporaryQueueName("receiveEndpoint-");
+            var queueName = host.Topology.CreateTemporaryQueueName("endpoint-");
 
             configurator.ReceiveEndpoint(host, queueName, x =>
             {

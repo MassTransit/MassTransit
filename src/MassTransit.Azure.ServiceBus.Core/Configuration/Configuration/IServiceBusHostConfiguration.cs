@@ -12,8 +12,11 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Configuration
 {
+    using System.Threading.Tasks;
     using MassTransit.Configuration;
     using Settings;
+    using Topology;
+    using Transports;
 
 
     public interface IServiceBusHostConfiguration :
@@ -21,7 +24,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
     {
         IServiceBusBusConfiguration BusConfiguration { get; }
 
-        new ServiceBusHost Host { get; }
+        new IServiceBusHostTopology Topology { get; }
+
+        new IServiceBusHostControl Host { get; }
+
+        ServiceBusHostSettings Settings { get; }
 
         /// <summary>
         /// Create a receive endpoint configuration using the specified host
@@ -36,5 +43,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
         /// <param name="settings"></param>
         /// <returns></returns>
         IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings);
+
+        Task<ISendTransport> CreatePublishTransport<T>()
+            where T : class;
     }
 }

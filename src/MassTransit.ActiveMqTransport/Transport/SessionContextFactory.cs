@@ -25,13 +25,11 @@ namespace MassTransit.ActiveMqTransport.Transport
         IPipeContextFactory<SessionContext>
     {
         static readonly ILog _log = Logger.Get<SessionContextFactory>();
-        readonly IConnectionCache _connectionCache;
-        readonly IActiveMqHost _host;
+        readonly IConnectionContextSupervisor _connectionContextSupervisor;
 
-        public SessionContextFactory(IConnectionCache connectionCache, IActiveMqHost host)
+        public SessionContextFactory(IConnectionContextSupervisor connectionContextSupervisor)
         {
-            _connectionCache = connectionCache;
-            _host = host;
+            _connectionContextSupervisor = connectionContextSupervisor;
         }
 
         IPipeContextAgent<SessionContext> IPipeContextFactory<SessionContext>.CreateContext(ISupervisor supervisor)
@@ -67,7 +65,7 @@ namespace MassTransit.ActiveMqTransport.Transport
                 {
                     var session = await connectionContext.CreateSession().ConfigureAwait(false);
 
-                    var sessionContext = new ActiveMqSessionContext(connectionContext, session, _host, cancellationToken);
+                    var sessionContext = new ActiveMqSessionContext(connectionContext, session, cancellationToken);
 
                     void HandleException(Exception exception)
                     {
@@ -95,7 +93,7 @@ namespace MassTransit.ActiveMqTransport.Transport
                 }
             });
 
-            var connectionTask = _connectionCache.Send(connectionPipe, cancellationToken);
+            var connectionTask = _connectionContextSupervisor.Send(connectionPipe, cancellationToken);
 
             Task NotifyCreateCanceled(Task task) => asyncContext.CreateCanceled();
 

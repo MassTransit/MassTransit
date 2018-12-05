@@ -45,7 +45,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         {
             var session = await context.CreateSession().ConfigureAwait(false);
 
-            var sessionContext = new ActiveMqSessionContext(context, session, _host, context.CancellationToken);
+            var sessionContext = new ActiveMqSessionContext(context, session, context.CancellationToken);
 
             void HandleException(Exception exception)
             {

@@ -22,9 +22,5 @@ namespace MassTransit.RabbitMqTransport.Contexts
         BrokerTopology BrokerTopology { get; }
 
         bool ExclusiveConsumer { get; }
-
-        ISendEndpointProvider CreateSendEndpointProvider(ReceiveContext receiveContext);
-
-        IPublishEndpointProvider CreatePublishEndpointProvider(ReceiveContext receiveContext);
     }
 }

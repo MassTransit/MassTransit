@@ -14,7 +14,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using AzureServiceBusTransport.Contexts;
+    using Azure.ServiceBus.Core.Contexts;
     using GreenPipes;
 
 
@@ -28,7 +28,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             _context = context;
         }
 
-        public Task Send(IPipe<SendEndpointContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+        public Task Send(IPipe<SendEndpointContext> pipe, CancellationToken cancellationToken = default)
         {
             var sharedContext = new SharedSendEndpointContext(_context, cancellationToken);
 

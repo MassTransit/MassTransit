@@ -38,7 +38,7 @@ namespace MassTransit.HttpTransport.Contexts
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new HttpSendTransportProvider(_configuration.BusConfiguration, _configuration.CreateReceivePipe(), this);
+            return new HttpSendTransportProvider(_configuration.BusConfiguration, ReceivePipe, this);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()

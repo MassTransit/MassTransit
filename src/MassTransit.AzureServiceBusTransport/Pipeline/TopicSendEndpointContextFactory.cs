@@ -27,9 +27,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         readonly SendSettings _settings;
 
-        public TopicSendEndpointContextFactory(IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache, IPipe<MessagingFactoryContext> messagingFactoryPipe,
+        public TopicSendEndpointContextFactory(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor, INamespaceContextSupervisor namespaceContextSupervisor, IPipe<MessagingFactoryContext> messagingFactoryPipe,
             IPipe<NamespaceContext> namespacePipe, SendSettings settings)
-            : base(namespaceCache, namespacePipe, messagingFactoryCache, messagingFactoryPipe)
+            : base(namespaceContextSupervisor, namespacePipe, messagingFactoryContextSupervisor, messagingFactoryPipe)
         {
             _settings = settings;
         }

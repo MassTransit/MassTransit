@@ -12,14 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport
 {
-    using GreenPipes.Agents;
     using Transports;
 
 
     public interface IActiveMqHostControl :
         IBusHostControl,
-        IActiveMqHost,
-        ISupervisor
+        IActiveMqHost
     {
     }
 }

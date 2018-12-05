@@ -18,7 +18,6 @@ namespace MassTransit.Transports.InMemory.Configurators
     using EndpointSpecifications;
     using MassTransit.Builders;
     using Topology.Configurators;
-    using Topology.Topologies;
 
 
     public class InMemoryBusFactoryConfigurator :
@@ -28,7 +27,6 @@ namespace MassTransit.Transports.InMemory.Configurators
     {
         readonly IInMemoryEndpointConfiguration _busEndpointConfiguration;
         readonly IInMemoryBusConfiguration _configuration;
-        readonly InMemoryHost _inMemoryHost;
         readonly IInMemoryHostConfiguration _inMemoryHostConfiguration;
 
         public InMemoryBusFactoryConfigurator(IInMemoryBusConfiguration configuration, IInMemoryEndpointConfiguration busEndpointConfiguration,
@@ -38,18 +36,12 @@ namespace MassTransit.Transports.InMemory.Configurators
             _configuration = configuration;
             _busEndpointConfiguration = busEndpointConfiguration;
 
-            TransportConcurrencyLimit = Environment.ProcessorCount;
-
-            var hostTopology = new InMemoryHostTopology(busEndpointConfiguration.Topology);
-            var host = new InMemoryHost(configuration, TransportConcurrencyLimit, hostTopology, baseAddress ?? new Uri("loopback://localhost/"));
-
-            _inMemoryHost = host;
-            _inMemoryHostConfiguration = _configuration.CreateHostConfiguration(host);
+            _inMemoryHostConfiguration = _configuration.CreateHostConfiguration(baseAddress, Environment.ProcessorCount);
         }
 
         public IBusControl CreateBus()
         {
-            var busQueueName = _inMemoryHost.Topology.CreateTemporaryQueueName("bus-");
+            var busQueueName = _inMemoryHostConfiguration.Topology.CreateTemporaryQueueName("bus-");
 
             var busReceiveEndpointConfiguration = _configuration.CreateReceiveEndpointConfiguration(busQueueName, _busEndpointConfiguration);
 
@@ -69,8 +61,6 @@ namespace MassTransit.Transports.InMemory.Configurators
         }
 
         public new IInMemoryPublishTopologyConfigurator PublishTopology => _configuration.Topology.Publish;
-
-        public int TransportConcurrencyLimit { private get; set; }
 
         public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
@@ -92,6 +82,11 @@ namespace MassTransit.Transports.InMemory.Configurators
             ReceiveEndpoint(queueName, configureEndpoint);
         }
 
-        public IInMemoryHost Host => _inMemoryHost;
+        public int TransportConcurrencyLimit
+        {
+            set => _inMemoryHostConfiguration.Host.TransportConcurrencyLimit = value;
+        }
+
+        public IInMemoryHost Host => _inMemoryHostConfiguration.Host;
     }
 }

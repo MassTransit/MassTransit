@@ -21,6 +21,6 @@ namespace MassTransit.HttpTransport
     {
         HttpHostSettings Settings { get; }
 
-        IHttpHostCache HttpHostCache { get; }
+        IHttpHostContextSupervisor HttpHostContextSupervisor { get; }
     }
 }

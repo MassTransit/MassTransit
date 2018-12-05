@@ -44,7 +44,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_configuration.Host, _publishTopology);
+            return new PublishTransportProvider(_configuration.HostConfiguration);
         }
     }
 }

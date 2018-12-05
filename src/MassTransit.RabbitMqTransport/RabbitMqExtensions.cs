@@ -63,7 +63,7 @@ namespace MassTransit.RabbitMqTransport
             }
         }
 
-        public static string ToDebugString(this RabbitMqHostSettings settings)
+        public static string ToDescription(this RabbitMqHostSettings settings)
         {
             var sb = new StringBuilder();
 

@@ -12,17 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.MongoDbIntegration.MessageData
 {
-    using NewIdFormatters;
+    using Util;
 
 
     public class NewIdFileNameGenerator :
         IFileNameGenerator
     {
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
-
         public string GenerateFileName()
         {
-            return _formatter.Format(NewId.Next().ToSequentialGuid().ToByteArray());
+            return FormatUtil.Formatter.Format(NewId.Next().ToSequentialGuid().ToByteArray());
         }
     }
 }

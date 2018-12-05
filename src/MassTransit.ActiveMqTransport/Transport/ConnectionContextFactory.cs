@@ -16,27 +16,22 @@ namespace MassTransit.ActiveMqTransport.Transport
     using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Configuration;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
-    using Topology;
 
 
     public class ConnectionContextFactory :
         IPipeContextFactory<ConnectionContext>
     {
+        readonly IActiveMqHostConfiguration _configuration;
         static readonly ILog _log = Logger.Get<ConnectionContextFactory>();
-        readonly string _description;
-        readonly ActiveMqHostSettings _settings;
-        readonly IActiveMqHostTopology _topology;
 
-        public ConnectionContextFactory(ActiveMqHostSettings settings, IActiveMqHostTopology topology)
+        public ConnectionContextFactory(IActiveMqHostConfiguration configuration)
         {
-            _settings = settings;
-            _topology = topology;
-
-            _description = settings.ToString();
+            _configuration = configuration;
         }
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
@@ -44,8 +39,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             IAsyncPipeContextAgent<ConnectionContext> asyncContext = supervisor.AddAsyncContext<ConnectionContext>();
 
             var context = Task.Factory.StartNew(() => CreateConnection(asyncContext, supervisor), supervisor.Stopping, TaskCreationOptions.None,
-                    TaskScheduler.Default)
-                .Unwrap();
+                TaskScheduler.Default).Unwrap();
 
             void HandleConnectionException(Exception exception)
             {
@@ -83,20 +77,19 @@ namespace MassTransit.ActiveMqTransport.Transport
             try
             {
                 if (supervisor.Stopping.IsCancellationRequested)
-                    throw new OperationCanceledException($"The connection is stopping and cannot be used: {_description}");
+                    throw new OperationCanceledException($"The connection is stopping and cannot be used: {_configuration.Description}");
 
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connecting: {0}", _description);
+                    _log.DebugFormat("Connecting: {0}", _configuration.Description);
 
-                connection = _settings.CreateConnection();
+                connection = _configuration.Settings.CreateConnection();
 
                 connection.Start();
 
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connected: {0} (client-id: {1}, version: {2})", _description, connection.ClientId, connection.MetaData.NMSVersion);
+                    _log.DebugFormat("Connected: {0} (client-id: {1}, version: {2})", _configuration.Description, connection.ClientId, connection.MetaData.NMSVersion);
 
-                var connectionContext = new ActiveMqConnectionContext(connection, _settings, _topology, _description, supervisor.Stopped);
-                connectionContext.GetOrAddPayload(() => _settings);
+                var connectionContext = new ActiveMqConnectionContext(connection, _configuration, supervisor.Stopped);
 
                 await asyncContext.Created(connectionContext).ConfigureAwait(false);
 
@@ -116,7 +109,7 @@ namespace MassTransit.ActiveMqTransport.Transport
 
                 connection?.Dispose();
 
-                throw new ActiveMqConnectException("Connect failed: " + _description, ex);
+                throw new ActiveMqConnectException("Connect failed: " + _configuration.Description, ex);
             }
         }
     }

@@ -12,16 +12,16 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Configuration
 {
-    using System;
     using MassTransit.Configuration;
     using Settings;
-    using Topology;
 
 
     public interface IServiceBusBusConfiguration :
         IBusConfiguration,
         IServiceBusEndpointConfiguration
     {
+        new IReadOnlyHostCollection<IServiceBusHostConfiguration> Hosts { get; }
+
         new IServiceBusTopologyConfiguration Topology { get; }
 
         /// <summary>
@@ -30,42 +30,18 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
         bool DeployTopologyOnly { get; set; }
 
         /// <summary>
-        /// Returns all the hosts
-        /// </summary>
-        new IServiceBusHostConfiguration[] Hosts { get; }
-
-        /// <summary>
-        /// Return the host associated with the specified address, if present.
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        bool TryGetHost(Uri address, out IServiceBusHostConfiguration host);
-
-        /// <summary>
-        /// Return the host if it is part of the configuration
-        /// </summary>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        /// <param name="hostConfiguration"></param>
-        bool TryGetHost(IServiceBusHost host, out IServiceBusHostConfiguration hostConfiguration);
-
-        ServiceBusHost GetHost(Uri address);
-
-        /// <summary>
         /// Create a host configuration, by adding a host to the bus
         /// </summary>
-        /// <param name="host"></param>
+        /// <param name="settings"></param>
         /// <returns></returns>
-        IServiceBusHostConfiguration CreateHostConfiguration(ServiceBusHost host);
+        IServiceBusHostConfiguration CreateHostConfiguration(ServiceBusHostSettings settings);
 
         /// <summary>
         /// Create a receive endpoint configuration for the default host
         /// </summary>
         /// <param name="queueName"></param>
-        /// <param name="endpointConfiguration"></param>
         /// <returns></returns>
-        IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, IServiceBusEndpointConfiguration endpointConfiguration);
+        IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName);
 
         /// <summary>
         /// Create a receive endpoint configuration for the default host
@@ -80,12 +56,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
         /// Create a subscription endpoint configuration for the default host
         /// </summary>
         /// <param name="subscriptionName"></param>
-        /// <param name="endpointConfiguration"></param>
         /// <param name="topicPath"></param>
         /// <returns></returns>
-        IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(string topicPath, string subscriptionName,
-            IServiceBusEndpointConfiguration endpointConfiguration);
-
-        IServiceBusHostTopology CreateHostTopology();
+        IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(string topicPath, string subscriptionName);
     }
 }

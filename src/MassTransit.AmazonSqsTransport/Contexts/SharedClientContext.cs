@@ -74,8 +74,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         ConnectionContext ClientContext.ConnectionContext => _context.ConnectionContext;
 
-        IAmazonSqsPublishTopology ClientContext.PublishTopology => _context.PublishTopology;
-
         Task<string> ClientContext.CreateTopic(string topicName)
         {
             return _context.CreateTopic(topicName);

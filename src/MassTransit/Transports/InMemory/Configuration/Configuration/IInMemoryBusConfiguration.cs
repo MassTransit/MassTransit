@@ -20,25 +20,15 @@ namespace MassTransit.Transports.InMemory.Configuration
         IBusConfiguration,
         IInMemoryEndpointConfiguration
     {
-        /// <summary>
-        /// Returns all the hosts
-        /// </summary>
-        new IInMemoryHostConfiguration[] Hosts { get; }
-
-        /// <summary>
-        /// Return the host associated with the specified address, if present.
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        bool TryGetHost(Uri address, out IInMemoryHostConfiguration host);
+        new IReadOnlyHostCollection<IInMemoryHostConfiguration> Hosts { get; }
 
         /// <summary>
         /// Create a host configuration, by adding a host to the bus
         /// </summary>
-        /// <param name="host"></param>
+        /// <param name="baseAddress"></param>
+        /// <param name="transportConcurrencyLimit"></param>
         /// <returns></returns>
-        IInMemoryHostConfiguration CreateHostConfiguration(InMemoryHost host);
+        IInMemoryHostConfiguration CreateHostConfiguration(Uri baseAddress, int transportConcurrencyLimit);
 
         /// <summary>
         /// Create an endpoint configuration on the bus, which can later be turned into a receive endpoint

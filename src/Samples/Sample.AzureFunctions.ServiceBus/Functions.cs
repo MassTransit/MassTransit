@@ -19,48 +19,47 @@ namespace Sample.AzureFunctions.ServiceBus
     using MassTransit;
     using MassTransit.Logging;
     using MassTransit.WebJobs.ServiceBusIntegration;
+    using Microsoft.Azure.EventHubs;
+    using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Azure.WebJobs.Host;
-    using Microsoft.Azure.WebJobs.ServiceBus;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Extensions.Logging;
 
 
     public static class Functions
     {
         [FunctionName("SubmitOrder")]
-        public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue", AccessRights.Manage)]
-            BrokeredMessage message, IBinder binder,
-            TraceWriter traceWriter, CancellationToken cancellationToken)
+        public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue")] Message message, IBinder binder, Microsoft.Extensions.Logging.ILogger logger,
+            CancellationToken cancellationToken)
         {
-            traceWriter.Info("Creating brokered message receiver");
+            logger.LogInformation("Creating brokered message receiver");
 
             var handler = Bus.Factory.CreateBrokeredMessageReceiver(binder, cfg =>
             {
                 cfg.CancellationToken = cancellationToken;
-                cfg.SetLog(traceWriter);
+                cfg.SetLog(logger);
                 cfg.InputAddress = new Uri("sb://masstransit-build.servicebus.windows.net/input-queue");
 
                 cfg.UseRetry(x => x.Intervals(10, 100, 500, 1000));
-                cfg.Consumer<SubmitOrderConsumer>(() => new SubmitOrderConsumer(cfg.Log));
+                cfg.Consumer(() => new SubmitOrderConsumer(cfg.Log));
             });
 
             return handler.Handle(message);
         }
 
         [FunctionName("AuditOrder")]
-        public static Task AuditOrderAsync([EventHubTrigger("input-hub")] EventData message, IBinder binder,
-            TraceWriter traceWriter, CancellationToken cancellationToken)
+        public static Task AuditOrderAsync([EventHubTrigger("input-hub")] EventData message, IBinder binder, Microsoft.Extensions.Logging.ILogger logger,
+            CancellationToken cancellationToken)
         {
-            traceWriter.Info("Creating EventHub receiver");
+            logger.LogInformation("Creating EventHub receiver");
 
             var handler = Bus.Factory.CreateEventDataReceiver(binder, cfg =>
             {
                 cfg.CancellationToken = cancellationToken;
-                cfg.SetLog(traceWriter);
+                cfg.SetLog(logger);
                 cfg.InputAddress = new Uri("sb://masstransit-eventhub.servicebus.windows.net/input-hub");
 
                 cfg.UseRetry(x => x.Intervals(10, 100, 500, 1000));
-                cfg.Consumer<AuditOrderConsumer>(() => new AuditOrderConsumer(cfg.Log));
+                cfg.Consumer(() => new AuditOrderConsumer(cfg.Log));
             });
 
             return handler.Handle(message);
@@ -86,7 +85,7 @@ namespace Sample.AzureFunctions.ServiceBus
             context.Publish<OrderReceived>(new
             {
                 context.Message.OrderNumber,
-                Timestamp = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow
             });
 
             return context.RespondAsync<OrderAccepted>(new {context.Message.OrderNumber});

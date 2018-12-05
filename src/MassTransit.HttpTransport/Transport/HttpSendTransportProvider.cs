@@ -37,14 +37,14 @@ namespace MassTransit.HttpTransport.Transport
 
         public Task<ISendTransport> GetSendTransport(Uri address)
         {
-            if (!_busConfiguration.TryGetHost(address, out var hostConfiguration))
+            if (!_busConfiguration.Hosts.TryGetHost(address, out var hostConfiguration))
                 throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
 
-            var clientCache = new HttpClientCache(_receivePipe);
+            var clientContextSupervisor = new HttpClientContextSupervisor(_receivePipe);
 
             var sendSettings = address.GetSendSettings();
 
-            return Task.FromResult<ISendTransport>(new HttpSendTransport(clientCache, sendSettings, _receiveEndpointContext));
+            return Task.FromResult<ISendTransport>(new HttpSendTransport(clientContextSupervisor, sendSettings, _receiveEndpointContext));
         }
     }
 }

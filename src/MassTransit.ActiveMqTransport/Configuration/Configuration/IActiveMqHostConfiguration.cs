@@ -12,7 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Configuration
 {
+    using System.Threading.Tasks;
     using MassTransit.Configuration;
+    using Topology;
+    using Transports;
 
 
     public interface IActiveMqHostConfiguration :
@@ -22,10 +25,15 @@ namespace MassTransit.ActiveMqTransport.Configuration
 
         new IActiveMqHostControl Host { get; }
 
-        /// <summary>
-        /// Create a receive endpoint configuration using the specified host
-        /// </summary>
-        /// <returns></returns>
+        new IActiveMqHostTopology Topology { get; }
+
+        string Description { get; }
+
+        ActiveMqHostSettings Settings { get; }
+
         IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName);
+
+        Task<ISendTransport> CreatePublishTransport<T>()
+            where T : class;
     }
 }

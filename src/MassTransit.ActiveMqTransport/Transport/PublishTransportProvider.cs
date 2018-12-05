@@ -14,47 +14,24 @@ namespace MassTransit.ActiveMqTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
-    using Apache.NMS;
-    using GreenPipes.Agents;
-    using Pipeline;
-    using Topology;
+    using Configuration;
     using Transports;
 
 
     public class PublishTransportProvider :
         IPublishTransportProvider
     {
-        readonly IActiveMqHostControl _host;
-        readonly IActiveMqPublishTopology _publishTopology;
+        readonly IActiveMqHostConfiguration _configuration;
 
-        public PublishTransportProvider(IActiveMqHostControl host, IActiveMqPublishTopology publishTopology)
+        public PublishTransportProvider(IActiveMqHostConfiguration configuration)
         {
-            _publishTopology = publishTopology;
-            _host = host;
+            _configuration = configuration;
         }
 
         public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
             where T : class
         {
-            IActiveMqMessagePublishTopology<T> publishTopology = _publishTopology.GetMessageTopology<T>();
-
-            var sendSettings = publishTopology.GetSendSettings();
-
-            IAgent<SessionContext> sessionAgent = GetSessionAgent();
-
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(sendSettings, publishTopology.GetBrokerTopology());
-
-            var sendTransport = new ActiveMqSendTransport(sessionAgent, configureTopologyFilter, sendSettings.EntityName, DestinationType.Topic);
-            sendTransport.Add(sessionAgent);
-
-            _host.Add(sendTransport);
-
-            return Task.FromResult<ISendTransport>(sendTransport);
-        }
-
-        protected virtual IAgent<SessionContext> GetSessionAgent()
-        {
-            return new ActiveMqSessionCache(_host, _host.ConnectionCache);
+            return _configuration.CreatePublishTransport<T>();
         }
     }
 }

@@ -17,6 +17,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
+    using Configuration.Configuration;
     using GreenPipes;
     using GreenPipes.Payloads;
     using Topology;
@@ -28,26 +29,21 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         BasePipeContext,
         ConnectionContext
     {
+        readonly IAmazonSqsHostConfiguration _configuration;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
-        public AmazonSqsConnectionContext(IConnection connection, AmazonSqsHostSettings hostSettings, IAmazonSqsHostTopology topology, string description,
-            CancellationToken cancellationToken)
+        public AmazonSqsConnectionContext(IConnection connection, IAmazonSqsHostConfiguration configuration, CancellationToken cancellationToken)
             : base(new PayloadCache(), cancellationToken)
         {
+            _configuration = configuration;
             Connection = connection;
-            HostSettings = hostSettings;
-            Topology = topology;
-
-            Description = description;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
         }
 
         public IConnection Connection { get; }
-        public IAmazonSqsHostTopology Topology { get; }
-        public AmazonSqsHostSettings HostSettings { get; }
-        public string Description { get; }
-        public Uri HostAddress => HostSettings.HostAddress;
+        public IAmazonSqsHostTopology Topology => _configuration.Topology;
+        public Uri HostAddress => _configuration.HostAddress;
 
         public Task<IAmazonSQS> CreateAmazonSqs()
         {

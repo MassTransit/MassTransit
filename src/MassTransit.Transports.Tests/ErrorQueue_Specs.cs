@@ -18,8 +18,6 @@ namespace MassTransit.Transports.Tests
         using System.Runtime.Serialization;
         using System.Threading.Tasks;
         using AmazonSqsTransport.Testing;
-        using GreenPipes.Internals.Extensions;
-        using Microsoft.Azure.ServiceBus;
         using NUnit.Framework;
         using Testing;
         using Util;
@@ -108,9 +106,67 @@ namespace MassTransit.Transports.Tests
                 await _errorHandler;
             }
 
+            [Test]
+            public async Task Should_publish_the_fault()
+            {
+                await _faultHandler;
+            }
+
+            [Test]
+            public async Task Should_have_the_correlation_id_in_fault()
+            {
+                ConsumeContext<Fault<FailingCommand>> context = await _faultHandler;
+
+                Assert.That(context.CorrelationId, Is.EqualTo(_correlationId));
+            }
+
+            [Test]
+            public async Task Should_have_the_exception_in_fault()
+            {
+                ConsumeContext<Fault<FailingCommand>> context = await _faultHandler;
+
+                Assert.That(context.Message.Exceptions[0].Message, Is.EqualTo("This is fine, forcing death"));
+            }
+
+            [Test]
+            public async Task Should_have_the_host_machine_name_in_fault()
+            {
+                if (HarnessType == typeof(AmazonSqsTestHarness))
+                    Assert.Ignore("Amazon SQS does not support enough message attributes to include host data");
+
+                ConsumeContext<Fault<FailingCommand>> context = await _faultHandler;
+
+                Assert.That(context.Host.MachineName, Is.EqualTo(HostMetadataCache.Host.MachineName));
+            }
+
+            [Test]
+            public async Task Should_have_a_null_fault_address_in_fault()
+            {
+                ConsumeContext<Fault<FailingCommand>> context = await _faultHandler;
+
+                Assert.That(context.FaultAddress, Is.Null);
+            }
+
+            [Test]
+            public async Task Should_have_a_null_response_address_in_fault()
+            {
+                ConsumeContext<Fault<FailingCommand>> context = await _faultHandler;
+
+                Assert.That(context.ResponseAddress, Is.Null);
+            }
+
+            [Test]
+            public async Task Should_have_the_original_source_address_in_fault()
+            {
+                ConsumeContext<Fault<FailingCommand>> context = await _faultHandler;
+
+                Assert.That(context.SourceAddress, Is.EqualTo(Harness.InputQueueAddress));
+            }
+
             Task<ConsumeContext<FailingCommand>> _errorHandler;
             readonly Guid? _correlationId = NewId.NextGuid();
             ConsumerTestHarness<TestCommandConsumer> _consumer;
+            Task<ConsumeContext<Fault<FailingCommand>>> _faultHandler;
 
             [OneTimeSetUp]
             public async Task Setup()
@@ -126,6 +182,8 @@ namespace MassTransit.Transports.Tests
                 };
 
                 await Harness.Start();
+
+                _faultHandler = Harness.SubscribeHandler<Fault<FailingCommand>>();
 
                 await Harness.InputQueueSendEndpoint.Send<FailingCommand>(new {CorrelationId = NewId.NextGuid()}, context =>
                 {

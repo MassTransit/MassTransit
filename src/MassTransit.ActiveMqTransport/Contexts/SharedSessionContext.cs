@@ -18,7 +18,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
     using Apache.NMS;
     using GreenPipes;
     using GreenPipes.Payloads;
-    using Topology;
 
 
     public class SharedSessionContext :
@@ -73,8 +72,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
         public ISession Session => _context.Session;
 
         ConnectionContext SessionContext.ConnectionContext => _context.ConnectionContext;
-
-        IActiveMqPublishTopology SessionContext.PublishTopology => _context.PublishTopology;
 
         Task<ITopic> SessionContext.GetTopic(string topicName)
         {

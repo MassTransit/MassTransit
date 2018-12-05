@@ -39,7 +39,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Builders
             return new ServiceBusEntityReceiveEndpointContext(_configuration, topologyLayout);
         }
 
-        BrokerTopology BuildTopology(SubscriptionSettings settings)
+        static BrokerTopology BuildTopology(SubscriptionSettings settings)
         {
             var topologyBuilder = new SubscriptionEndpointBrokerTopologyBuilder();
 

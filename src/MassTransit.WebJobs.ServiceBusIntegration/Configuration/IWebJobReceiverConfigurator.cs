@@ -13,9 +13,8 @@
 namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 {
     using System.Threading;
-    using AzureServiceBusTransport.Configurators;
-    using GreenPipes;
-    using Microsoft.Azure.WebJobs.Host;
+    using Azure.ServiceBus.Core.Configurators;
+    using Microsoft.Extensions.Logging;
 
 
     public interface IWebJobReceiverConfigurator :
@@ -26,13 +25,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
         /// <summary>
         /// Set the log for the receiver
         /// </summary>
-        /// <param name="traceWriter"></param>
-        void SetLog(TraceWriter traceWriter);
-    }
-
-
-    public interface IWebJobHandlerFactory :
-        ISpecification
-    {
+        /// <param name="logger"></param>
+        void SetLog(ILogger logger);
     }
 }

@@ -12,38 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Configuration
 {
-    using System;
+    using Hosting;
     using MassTransit.Configuration;
-    using Transport;
+    using Topology;
 
 
     public class HttpBusConfiguration :
         HttpEndpointConfiguration,
         IHttpBusConfiguration
     {
+        readonly IHttpTopologyConfiguration _topologyConfiguration;
         readonly IHostCollection<IHttpHostConfiguration> _hosts;
 
         public HttpBusConfiguration(IHttpTopologyConfiguration topologyConfiguration)
             : base(topologyConfiguration)
         {
+            _topologyConfiguration = topologyConfiguration;
+
             _hosts = new HostCollection<IHttpHostConfiguration>();
         }
 
-        public IHttpHostConfiguration[] Hosts => _hosts.Hosts;
+        public IReadOnlyHostCollection<IHttpHostConfiguration> Hosts => _hosts;
 
-        public bool TryGetHost(Uri address, out IHttpHostConfiguration host)
+        public IHttpHostConfiguration CreateHostConfiguration(HttpHostSettings settings)
         {
-            return _hosts.TryGetHost(address, out host);
-        }
+            var hostTopology = new HttpHostTopology(_topologyConfiguration);
 
-        public bool TryGetHost(IHttpHost host, out IHttpHostConfiguration hostConfiguration)
-        {
-            return _hosts.TryGetHost(host, out hostConfiguration);
-        }
-
-        public IHttpHostConfiguration CreateHostConfiguration(HttpHost host)
-        {
-            var hostConfiguration = new HttpHostConfiguration(this, host);
+            var hostConfiguration = new HttpHostConfiguration(this, settings, hostTopology);
 
             _hosts.Add(hostConfiguration);
 

@@ -29,14 +29,12 @@ namespace MassTransit.HttpTransport.Transport
     {
         static readonly ILog _log = Logger.Get<HttpConsumerFilter>();
         readonly HttpHostSettings _hostSettings;
-        readonly IPipe<ReceiveContext> _receivePipe;
         readonly ReceiveSettings _receiveSettings;
         readonly HttpReceiveEndpointContext _context;
 
-        public HttpConsumerFilter(IPipe<ReceiveContext> receivePipe, HttpHostSettings hostSettings, ReceiveSettings receiveSettings,
+        public HttpConsumerFilter(HttpHostSettings hostSettings, ReceiveSettings receiveSettings,
             HttpReceiveEndpointContext context)
         {
-            _receivePipe = receivePipe;
             _hostSettings = hostSettings;
             _receiveSettings = receiveSettings;
             _context = context;
@@ -51,7 +49,7 @@ namespace MassTransit.HttpTransport.Transport
         {
             var inputAddress = context.HostSettings.GetInputAddress();
 
-            var consumer = new HttpConsumer(_hostSettings, _receivePipe, _context);
+            var consumer = new HttpConsumer(_hostSettings, _context);
 
             context.RegisterEndpointHandler(_receiveSettings.PathMatch, consumer);
 

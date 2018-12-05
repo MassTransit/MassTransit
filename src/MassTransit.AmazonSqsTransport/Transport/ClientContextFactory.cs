@@ -25,13 +25,11 @@ namespace MassTransit.AmazonSqsTransport.Transport
         IPipeContextFactory<ClientContext>
     {
         static readonly ILog _log = Logger.Get<ClientContextFactory>();
-        readonly IConnectionCache _connectionCache;
-        readonly IAmazonSqsHost _host;
+        readonly IConnectionContextSupervisor _connectionContextSupervisor;
 
-        public ClientContextFactory(IConnectionCache connectionCache, IAmazonSqsHost host)
+        public ClientContextFactory(IConnectionContextSupervisor connectionContextSupervisor)
         {
-            _connectionCache = connectionCache;
-            _host = host;
+            _connectionContextSupervisor = connectionContextSupervisor;
         }
 
         IPipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateContext(ISupervisor supervisor)
@@ -61,14 +59,14 @@ namespace MassTransit.AmazonSqsTransport.Transport
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Creating model: {0}", connectionContext.Description);
+                    _log.DebugFormat("Creating model: {0}", connectionContext.HostAddress);
 
                 try
                 {
                     var amazonSqs = await connectionContext.CreateAmazonSqs().ConfigureAwait(false);
                     var amazonSns = await connectionContext.CreateAmazonSns().ConfigureAwait(false);
 
-                    var modelContext = new AmazonSqsClientContext(connectionContext, amazonSqs, amazonSns, _host, cancellationToken);
+                    var modelContext = new AmazonSqsClientContext(connectionContext, amazonSqs, amazonSns, cancellationToken);
 
                     await asyncContext.Created(modelContext).ConfigureAwait(false);
 
@@ -84,7 +82,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
                 }
             });
 
-            var connectionTask = _connectionCache.Send(connectionPipe, cancellationToken);
+            var connectionTask = _connectionContextSupervisor.Send(connectionPipe, cancellationToken);
 
             Task NotifyCreateCanceled(Task task) => asyncContext.CreateCanceled();
 

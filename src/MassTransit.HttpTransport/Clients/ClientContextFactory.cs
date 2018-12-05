@@ -39,7 +39,7 @@ namespace MassTransit.HttpTransport.Clients
         }
 
         public IActivePipeContextAgent<ClientContext> CreateActiveContext(ISupervisor supervisor, PipeContextHandle<ClientContext> context,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));
         }

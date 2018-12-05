@@ -17,13 +17,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using Context;
     using RabbitMQ.Client;
 
-
     public sealed class RabbitMqReceiveContext :
         BaseReceiveContext,
         RabbitMqBasicConsumeContext
     {
         readonly byte[] _body;
-        readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
 
         public RabbitMqReceiveContext(Uri inputAddress, string exchange, string routingKey, string consumerTag, ulong deliveryTag, byte[] body,
             bool redelivered, IBasicProperties properties, RabbitMqReceiveEndpointContext receiveEndpointContext)
@@ -34,7 +32,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
             ConsumerTag = consumerTag;
             DeliveryTag = deliveryTag;
             _body = body;
-            _receiveEndpointContext = receiveEndpointContext;
             Properties = properties;
         }
 
@@ -47,16 +44,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public IBasicProperties Properties { get; }
 
         byte[] RabbitMqBasicConsumeContext.Body => _body;
-
-        protected override ISendEndpointProvider GetSendEndpointProvider()
-        {
-            return _receiveEndpointContext.CreateSendEndpointProvider(this);
-        }
-
-        protected override IPublishEndpointProvider GetPublishEndpointProvider()
-        {
-            return _receiveEndpointContext.CreatePublishEndpointProvider(this);
-        }
 
         public override byte[] GetBody()
         {

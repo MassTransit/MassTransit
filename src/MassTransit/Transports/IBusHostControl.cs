@@ -12,11 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
-    using System;
     using System.Threading.Tasks;
+    using GreenPipes.Agents;
 
 
     public interface IBusHostControl :
+        ISupervisor,
         IHost
     {
         /// <summary>
@@ -24,13 +25,6 @@ namespace MassTransit.Transports
         /// </summary>
         /// <returns></returns>
         Task<HostHandle> Start();
-
-        /// <summary>
-        /// Returns true if the address matches the host
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        bool Matches(Uri address);
 
         void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint);
     }

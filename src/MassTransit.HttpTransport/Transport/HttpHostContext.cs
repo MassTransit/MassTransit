@@ -25,8 +25,6 @@ namespace MassTransit.HttpTransport.Transport
 
         void RegisterEndpointHandler(string pathMatch, HttpConsumer handler);
 
-        Task Stop(CancellationToken cancellationToken);
-        
         Task Start(CancellationToken cancellationToken);
     }
 }

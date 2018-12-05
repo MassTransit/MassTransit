@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Configuration
 {
+    using Hosting;
     using MassTransit.Configuration;
     using Transport;
 
@@ -22,6 +23,8 @@ namespace MassTransit.HttpTransport.Configuration
         new HttpHost Host { get; }
 
         IHttpBusConfiguration BusConfiguration { get; }
+
+        HttpHostSettings Settings { get; }
 
         IHttpReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string pathMatch);
     }

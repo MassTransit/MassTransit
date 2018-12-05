@@ -37,18 +37,16 @@ namespace MassTransit.RabbitMqTransport.Contexts
         static readonly ILog _log = Logger.Get<RabbitMqModelContext>();
 
         readonly ConnectionContext _connectionContext;
-        readonly IRabbitMqHost _host;
         readonly IModel _model;
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         ulong _publishTagMax;
 
-        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, IRabbitMqHost host, CancellationToken cancellationToken)
+        public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
             : base(new PayloadCacheScope(connectionContext), cancellationToken)
         {
             _connectionContext = connectionContext;
             _model = model;
-            _host = host;
 
             _published = new ConcurrentDictionary<ulong, PendingPublish>();
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
@@ -58,7 +56,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _model.BasicNacks += OnBasicNacks;
             _model.BasicReturn += OnBasicReturn;
 
-            if (host.Settings.PublisherConfirmation)
+            if (_connectionContext.PublisherConfirmation)
                 _model.ConfirmSelect();
         }
 
@@ -69,13 +67,21 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             try
             {
-                if (_host.Settings.PublisherConfirmation && _model.IsOpen && _published.Count > 0)
+                if (_connectionContext.PublisherConfirmation && _model.IsOpen && _published.Count > 0)
                 {
-                    _model.WaitForConfirms(TimeSpan.FromSeconds(30), out var timedOut);
-                    if (timedOut)
-                        _log.WarnFormat("Timeout waiting for pending confirms: {0}", _connectionContext.Description);
-                    else
-                        _log.DebugFormat("Pending confirms complete: {0}", _connectionContext.Description);
+                    bool timedOut;
+                    do
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                            break;
+
+                        _model.WaitForConfirms(_connectionContext.StopTimeout, out timedOut);
+                        if (timedOut)
+                            _log.WarnFormat("Timeout waiting for pending confirms: {0}", _connectionContext.Description);
+                        else
+                            _log.DebugFormat("Pending confirms complete: {0}", _connectionContext.Description);
+                    }
+                    while (timedOut);
                 }
             }
             catch (Exception ex)
@@ -92,12 +98,10 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         ConnectionContext ModelContext.ConnectionContext => _connectionContext;
 
-        IRabbitMqPublishTopology ModelContext.PublishTopology => _host.Topology.PublishTopology;
-
         async Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body,
             bool awaitAck)
         {
-            if (_host.Settings.PublisherConfirmation)
+            if (_connectionContext.PublisherConfirmation)
             {
                 var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, basicProperties, body),
                     CancellationToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
@@ -190,19 +194,16 @@ namespace MassTransit.RabbitMqTransport.Contexts
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("BasicReturn: {0}-{1} {2}", args.ReplyCode, args.ReplyText, args.BasicProperties.MessageId);
 
-            object value;
-            if (args.BasicProperties.Headers.TryGetValue("publishId", out value))
+            if (args.BasicProperties.Headers.TryGetValue("publishId", out var value))
             {
                 var bytes = value as byte[];
                 if (bytes == null)
                     return;
 
-                ulong id;
-                if (!ulong.TryParse(Encoding.UTF8.GetString(bytes), out id))
+                if (!ulong.TryParse(Encoding.UTF8.GetString(bytes), out var id))
                     return;
 
-                PendingPublish published;
-                if (_published.TryRemove(id, out published))
+                if (_published.TryRemove(id, out var published))
                     published.PublishReturned(args.ReplyCode, args.ReplyText);
             }
         }
@@ -227,8 +228,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             }
             catch
             {
-                PendingPublish ignored;
-                _published.TryRemove(publishTag, out ignored);
+                _published.TryRemove(publishTag, out _);
 
                 throw;
             }
@@ -266,6 +266,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             }
             catch (Exception)
             {
+                // ignored
             }
         }
 
@@ -276,15 +277,13 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
                 foreach (var id in ids)
                 {
-                    PendingPublish value;
-                    if (_published.TryRemove(id, out value))
+                    if (_published.TryRemove(id, out var value))
                         value.Nack();
                 }
             }
             else
             {
-                PendingPublish value;
-                if (_published.TryRemove(args.DeliveryTag, out value))
+                if (_published.TryRemove(args.DeliveryTag, out var value))
                     value.Nack();
             }
         }
@@ -296,15 +295,13 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 ulong[] ids = _published.Keys.Where(x => x <= args.DeliveryTag).ToArray();
                 foreach (var id in ids)
                 {
-                    PendingPublish value;
-                    if (_published.TryRemove(id, out value))
+                    if (_published.TryRemove(id, out var value))
                         value.Ack();
                 }
             }
             else
             {
-                PendingPublish value;
-                if (_published.TryRemove(args.DeliveryTag, out value))
+                if (_published.TryRemove(args.DeliveryTag, out var value))
                     value.Ack();
             }
         }

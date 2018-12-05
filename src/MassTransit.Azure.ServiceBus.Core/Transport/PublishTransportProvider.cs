@@ -15,57 +15,22 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using System;
     using System.Threading.Tasks;
     using Configuration;
-    using Contexts;
-    using GreenPipes;
-    using GreenPipes.Agents;
-    using Pipeline;
-    using Topology;
     using Transports;
 
 
     public class PublishTransportProvider :
         IPublishTransportProvider
     {
-        readonly IServiceBusBusConfiguration _busConfiguration;
-        readonly IServiceBusPublishTopology _publishTopology;
+        readonly IServiceBusHostConfiguration _hostConfiguration;
 
-        public PublishTransportProvider(IServiceBusBusConfiguration busConfiguration)
+        public PublishTransportProvider(IServiceBusHostConfiguration hostConfiguration)
         {
-            _busConfiguration = busConfiguration;
-
-            _publishTopology = _busConfiguration.Topology.Publish;
+            _hostConfiguration = hostConfiguration;
         }
 
         Task<ISendTransport> IPublishTransportProvider.GetPublishTransport<T>(Uri publishAddress)
         {
-            return Task.FromResult(GetSendTransport<T>(publishAddress));
-        }
-
-        ISendTransport GetSendTransport<T>(Uri address)
-            where T : class
-        {
-            var host = _busConfiguration.GetHost(address);
-
-            var settings = _publishTopology.GetMessageTopology<T>().GetSendSettings();
-
-            IAgent<SendEndpointContext> source = GetSendEndpointContextSource(host, settings, settings.GetBrokerTopology());
-
-            var transport = new ServiceBusSendTransport(source, address);
-
-            host.Add(transport);
-
-            return transport;
-        }
-
-        protected virtual IAgent<SendEndpointContext> GetSendEndpointContextSource(ServiceBusHost host, SendSettings settings, BrokerTopology brokerTopology)
-        {
-            IPipe<NamespaceContext> pipe =
-                Pipe.New<NamespaceContext>(x => x.UseFilter(new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology, false, host.Stopping)));
-
-            var contextFactory = new TopicSendEndpointContextFactory(host.MessagingFactoryCache, host.NamespaceCache, Pipe.Empty<MessagingFactoryContext>(),
-                pipe, settings);
-
-            return new SendEndpointContextCache(contextFactory);
+            return _hostConfiguration.CreatePublishTransport<T>();
         }
     }
 }

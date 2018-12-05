@@ -30,16 +30,15 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public string[] ClusterMembers
         {
-            get { return _clusterMembers.ToArray(); }
-            set { _clusterMembers = value.ToList(); }
+            get => _clusterMembers.ToArray();
+            set => _clusterMembers = value.ToList();
         }
 
         public void Node(string clusterNodeHostname)
         {
             if (string.IsNullOrWhiteSpace(clusterNodeHostname))
-            {
                 throw new ArgumentException("Cluster node hostname cannot be empty.");
-            }
+
             _clusterMembers.Add(clusterNodeHostname);
         }
 

@@ -29,8 +29,6 @@ namespace MassTransit.AmazonSqsTransport
         /// </summary>
         ConnectionContext ConnectionContext { get; }
 
-        IAmazonSqsPublishTopology PublishTopology { get; }
-
         Task<string> CreateTopic(string topicName);
 
         Task<string> CreateQueue(string queueName);

@@ -20,18 +20,18 @@ namespace MassTransit.Transports.InMemory.Topology.Topologies
         HostTopology,
         IInMemoryHostTopology
     {
-        readonly IInMemoryTopologyConfiguration _topologyConfiguration;
+        readonly IInMemoryTopologyConfiguration _configuration;
 
-        public InMemoryHostTopology(IInMemoryTopologyConfiguration topologyConfiguration)
-            : base(topologyConfiguration)
+        public InMemoryHostTopology(IInMemoryTopologyConfiguration configuration)
+            : base(configuration)
         {
-            _topologyConfiguration = topologyConfiguration;
+            _configuration = configuration;
         }
 
         public new IInMemoryMessagePublishTopology<T> Publish<T>()
             where T : class
         {
-            return _topologyConfiguration.Publish.GetMessageTopology<T>();
+            return _configuration.Publish.GetMessageTopology<T>();
         }
     }
 }

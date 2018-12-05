@@ -15,11 +15,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using System;
     using System.Threading.Tasks;
     using Configuration;
-    using Contexts;
-    using GreenPipes;
-    using GreenPipes.Agents;
-    using Pipeline;
-    using Topology;
     using Transports;
 
 
@@ -27,41 +22,25 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         ISendTransportProvider
     {
         readonly IServiceBusBusConfiguration _busConfiguration;
+        readonly Uri _hostAddress;
 
-        public SendEndpointSendTransportProvider(IServiceBusBusConfiguration busConfiguration)
+        public SendEndpointSendTransportProvider(IServiceBusBusConfiguration busConfiguration, Uri hostAddress)
         {
             _busConfiguration = busConfiguration;
+            _hostAddress = hostAddress;
         }
 
         Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
         {
-            return Task.FromResult(GetSendTransport(address));
-        }
+            if (!_busConfiguration.Hosts.TryGetHost(address, out var hostConfiguration))
+            {
+                var builder = new UriBuilder(address) {Host = _hostAddress.Host, Port = _hostAddress.Port};
 
-        ISendTransport GetSendTransport(Uri address)
-        {
-            var host = _busConfiguration.GetHost(address);
+                if (!_busConfiguration.Hosts.TryGetHost(builder.Uri, out hostConfiguration))
+                    throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
+            }
 
-            var settings = host.Topology.SendTopology.GetSendSettings(address);
-
-            IAgent<SendEndpointContext> source = GetSendEndpointContextSource(host, settings, settings.GetBrokerTopology());
-
-            var transport = new ServiceBusSendTransport(source, address);
-
-            host.Add(transport);
-
-            return transport;
-        }
-
-        IAgent<SendEndpointContext> GetSendEndpointContextSource(ServiceBusHost host, SendSettings settings, BrokerTopology brokerTopology)
-        {
-            IPipe<NamespaceContext> namespacePipe =
-                Pipe.New<NamespaceContext>(x => x.UseFilter(new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology, false, host.Stopping)));
-
-            var contextFactory = new QueueSendEndpointContextFactory(host.MessagingFactoryCache, host.NamespaceCache, Pipe.Empty<MessagingFactoryContext>(),
-                namespacePipe, settings);
-
-            return new SendEndpointContextCache(contextFactory);
+            return hostConfiguration.CreateSendTransport(address);
         }
     }
 }

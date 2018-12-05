@@ -30,34 +30,34 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         readonly IExchangeTypeSelector _exchangeTypeSelector;
         readonly Uri _hostAddress;
         readonly IMessageNameFormatter _messageNameFormatter;
-        readonly IRabbitMqTopologyConfiguration _topologyConfiguration;
+        readonly IRabbitMqTopologyConfiguration _configuration;
 
         public RabbitMqHostTopology(IExchangeTypeSelector exchangeTypeSelector, IMessageNameFormatter messageNameFormatter,
-            Uri hostAddress, IRabbitMqTopologyConfiguration topologyConfiguration)
-            : base(topologyConfiguration)
+            Uri hostAddress, IRabbitMqTopologyConfiguration configuration)
+            : base(configuration)
         {
             _exchangeTypeSelector = exchangeTypeSelector;
             _messageNameFormatter = messageNameFormatter;
             _hostAddress = hostAddress;
-            _topologyConfiguration = topologyConfiguration;
+            _configuration = configuration;
         }
 
-        IRabbitMqPublishTopology IRabbitMqHostTopology.PublishTopology => _topologyConfiguration.Publish;
-        IRabbitMqSendTopology IRabbitMqHostTopology.SendTopology => _topologyConfiguration.Send;
+        IRabbitMqPublishTopology IRabbitMqHostTopology.PublishTopology => _configuration.Publish;
+        IRabbitMqSendTopology IRabbitMqHostTopology.SendTopology => _configuration.Send;
 
         IRabbitMqMessagePublishTopology<T> IRabbitMqHostTopology.Publish<T>()
         {
-            return _topologyConfiguration.Publish.GetMessageTopology<T>();
+            return _configuration.Publish.GetMessageTopology<T>();
         }
 
         IRabbitMqMessageSendTopology<T> IRabbitMqHostTopology.Send<T>()
         {
-            return _topologyConfiguration.Send.GetMessageTopology<T>();
+            return _configuration.Send.GetMessageTopology<T>();
         }
 
         public SendSettings GetSendSettings(Uri address)
         {
-            return _topologyConfiguration.Send.GetSendSettings(address);
+            return _configuration.Send.GetSendSettings(address);
         }
 
         public Uri GetDestinationAddress(string exchangeName, Action<IExchangeConfigurator> configure = null)

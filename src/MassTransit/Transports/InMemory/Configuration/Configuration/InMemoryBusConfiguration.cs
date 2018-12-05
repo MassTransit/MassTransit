@@ -14,30 +14,31 @@ namespace MassTransit.Transports.InMemory.Configuration
 {
     using System;
     using MassTransit.Configuration;
+    using Topology.Topologies;
 
 
     public class InMemoryBusConfiguration :
         InMemoryEndpointConfiguration,
         IInMemoryBusConfiguration
     {
+        readonly IInMemoryTopologyConfiguration _topologyConfiguration;
         readonly IHostCollection<IInMemoryHostConfiguration> _hosts;
 
         public InMemoryBusConfiguration(IInMemoryTopologyConfiguration topologyConfiguration)
             : base(topologyConfiguration)
         {
+            _topologyConfiguration = topologyConfiguration;
+
             _hosts = new HostCollection<IInMemoryHostConfiguration>();
         }
 
-        public IInMemoryHostConfiguration[] Hosts => _hosts.Hosts;
+        IReadOnlyHostCollection<IInMemoryHostConfiguration> IInMemoryBusConfiguration.Hosts => _hosts;
 
-        public bool TryGetHost(Uri address, out IInMemoryHostConfiguration host)
+        public IInMemoryHostConfiguration CreateHostConfiguration(Uri baseAddress, int transportConcurrencyLimit)
         {
-            return _hosts.TryGetHost(address, out host);
-        }
+            var hostTopology = new InMemoryHostTopology(_topologyConfiguration);
 
-        public IInMemoryHostConfiguration CreateHostConfiguration(InMemoryHost host)
-        {
-            var hostConfiguration = new InMemoryHostConfiguration(this, host);
+            var hostConfiguration = new InMemoryHostConfiguration(this, baseAddress, transportConcurrencyLimit, hostTopology);
 
             _hosts.Add(hostConfiguration);
 

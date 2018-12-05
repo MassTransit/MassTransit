@@ -12,29 +12,57 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Configuration
 {
+    using System;
+    using System.Threading.Tasks;
+    using Hosting;
     using MassTransit.Configuration;
+    using MassTransit.Topology;
     using Transport;
+    using Transports;
 
 
     public class HttpHostConfiguration :
-        HostConfiguration<HttpHost>,
         IHttpHostConfiguration
     {
         readonly IHttpBusConfiguration _busConfiguration;
+        readonly HttpHostSettings _settings;
+        readonly IHostTopology _hostTopology;
 
-        public HttpHostConfiguration(IHttpBusConfiguration busConfiguration, HttpHost host)
-            : base(host)
+        public HttpHostConfiguration(IHttpBusConfiguration busConfiguration, HttpHostSettings settings, IHostTopology hostTopology)
         {
-            Host = host;
             _busConfiguration = busConfiguration;
+            _settings = settings;
+            _hostTopology = hostTopology;
+
+            HostAddress = settings.GetInputAddress();
+
+            Host = new HttpHost(this);
+        }
+
+        public Uri HostAddress { get; }
+
+        IBusHostControl IHostConfiguration.Host => Host;
+        IHostTopology IHostConfiguration.Topology => _hostTopology;
+
+        IHttpBusConfiguration IHttpHostConfiguration.BusConfiguration => _busConfiguration;
+        HttpHostSettings IHttpHostConfiguration.Settings => _settings;
+
+        public bool Matches(Uri address)
+        {
+            var settings = address.GetHostSettings();
+
+            return HttpHostEqualityComparer.Default.Equals(_settings, settings);
+        }
+
+        public Task<ISendTransport> CreateSendTransport(Uri address)
+        {
+            throw new NotImplementedException();
         }
 
         public IHttpReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string pathMatch)
         {
             return new HttpReceiveEndpointConfiguration(this, pathMatch, _busConfiguration.CreateEndpointConfiguration());
         }
-
-        public IHttpBusConfiguration BusConfiguration => _busConfiguration;
 
         public HttpHost Host { get; }
     }

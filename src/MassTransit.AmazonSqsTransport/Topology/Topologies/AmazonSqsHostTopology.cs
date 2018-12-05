@@ -28,32 +28,32 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
     {
         readonly Uri _hostAddress;
         readonly IMessageNameFormatter _messageNameFormatter;
-        readonly IAmazonSqsTopologyConfiguration _topologyConfiguration;
+        readonly IAmazonSqsTopologyConfiguration _configuration;
 
-        public AmazonSqsHostTopology(IMessageNameFormatter messageNameFormatter, Uri hostAddress, IAmazonSqsTopologyConfiguration topologyConfiguration)
-            : base(topologyConfiguration)
+        public AmazonSqsHostTopology(IMessageNameFormatter messageNameFormatter, Uri hostAddress, IAmazonSqsTopologyConfiguration configuration)
+            : base(configuration)
         {
             _messageNameFormatter = messageNameFormatter;
             _hostAddress = hostAddress;
-            _topologyConfiguration = topologyConfiguration;
+            _configuration = configuration;
         }
 
-        IAmazonSqsPublishTopology IAmazonSqsHostTopology.PublishTopology => _topologyConfiguration.Publish;
-        IAmazonSqsSendTopology IAmazonSqsHostTopology.SendTopology => _topologyConfiguration.Send;
+        IAmazonSqsPublishTopology IAmazonSqsHostTopology.PublishTopology => _configuration.Publish;
+        IAmazonSqsSendTopology IAmazonSqsHostTopology.SendTopology => _configuration.Send;
 
         IAmazonSqsMessagePublishTopology<T> IAmazonSqsHostTopology.Publish<T>()
         {
-            return _topologyConfiguration.Publish.GetMessageTopology<T>();
+            return _configuration.Publish.GetMessageTopology<T>();
         }
 
         IAmazonSqsMessageSendTopology<T> IAmazonSqsHostTopology.Send<T>()
         {
-            return _topologyConfiguration.Send.GetMessageTopology<T>();
+            return _configuration.Send.GetMessageTopology<T>();
         }
 
         public SendSettings GetSendSettings(Uri address)
         {
-            return _topologyConfiguration.Send.GetSendSettings(address);
+            return _configuration.Send.GetSendSettings(address);
         }
 
         public Uri GetDestinationAddress(string topicName, Action<ITopicConfigurator> configure = null)

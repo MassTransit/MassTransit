@@ -16,8 +16,11 @@ namespace MassTransit.ActiveMqTransport.Builders
     using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
+    using Pipeline;
     using Topology;
     using Topology.Builders;
+    using Transport;
+    using Transports;
 
 
     public class ActiveMqReceiveEndpointBuilder :
@@ -48,7 +51,31 @@ namespace MassTransit.ActiveMqTransport.Builders
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            return new ActiveMqConsumerReceiveEndpointContext(_configuration, brokerTopology);
+            IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport();
+            IErrorTransport errorTransport = CreateErrorTransport();
+
+            var receiveEndpointContext = new ActiveMqConsumerReceiveEndpointContext(_configuration, brokerTopology);
+
+            receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
+            receiveEndpointContext.GetOrAddPayload(() => errorTransport);
+
+            return receiveEndpointContext;
+        }
+
+        IErrorTransport CreateErrorTransport()
+        {
+            var errorSettings = _configuration.Topology.Send.GetErrorSettings(_configuration.Settings);
+            var filter = new ConfigureTopologyFilter<ErrorSettings>(errorSettings, errorSettings.GetBrokerTopology());
+
+            return new ActiveMqErrorTransport(errorSettings.EntityName, filter);
+        }
+
+        IDeadLetterTransport CreateDeadLetterTransport()
+        {
+            var deadLetterSettings = _configuration.Topology.Send.GetDeadLetterSettings(_configuration.Settings);
+            var filter = new ConfigureTopologyFilter<DeadLetterSettings>(deadLetterSettings, deadLetterSettings.GetBrokerTopology());
+
+            return new ActiveMqDeadLetterTransport(deadLetterSettings.EntityName, filter);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)

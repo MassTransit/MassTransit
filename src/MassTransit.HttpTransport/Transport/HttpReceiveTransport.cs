@@ -39,12 +39,13 @@ namespace MassTransit.HttpTransport.Transport
         {
             var scope = context.CreateScope("transport");
             scope.Add("type", "http");
-            scope.Set(_host.Settings);
+            scope.Add("inputAddress", _receiveEndpointContext.InputAddress);
         }
 
         public ReceiveTransportHandle Start()
         {
-            Task.Factory.StartNew(() => _host.HttpHostCache.Send(_hostPipe, Stopping), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+            Task.Factory.StartNew(() => _host.HttpHostContextSupervisor.Send(_hostPipe, Stopping), CancellationToken.None, TaskCreationOptions.None,
+                TaskScheduler.Default);
 
             return new Handle(this);
         }

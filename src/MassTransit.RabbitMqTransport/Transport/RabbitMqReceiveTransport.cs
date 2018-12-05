@@ -102,7 +102,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
                         try
                         {
-                            await _host.ConnectionCache.Send(_connectionPipe, Stopped).ConfigureAwait(false);
+                            await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
                         }
                         catch (RabbitMqConnectionException ex)
                         {
@@ -138,7 +138,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             if (_log.IsDebugEnabled)
                 _log.Debug(message, ex);
 
-            var exception = new RabbitMqConnectionException(message + _host.ConnectionCache, ex);
+            var exception = new RabbitMqConnectionException(message + _host.ConnectionContextSupervisor, ex);
 
             await NotifyFaulted(exception);
 

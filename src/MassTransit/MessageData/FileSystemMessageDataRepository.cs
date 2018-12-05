@@ -16,14 +16,13 @@ namespace MassTransit.MessageData
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
-    using NewIdFormatters;
+    using Util;
 
 
     public class FileSystemMessageDataRepository :
         IMessageDataRepository
     {
         const int DefaultBufferSize = 4096;
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         static readonly char[] _separator = {':'};
         readonly DirectoryInfo _dataDirectory;
 
@@ -77,7 +76,7 @@ namespace MassTransit.MessageData
 
         static string GenerateFilePath(TimeSpan? timeToLive)
         {
-            string fileId = _formatter.Format(NewId.Next().ToSequentialGuid().ToByteArray());
+            string fileId = FormatUtil.Formatter.Format(NewId.Next().ToSequentialGuid().ToByteArray());
 
             string expiration = timeToLive.HasValue && timeToLive.Value < TimeSpan.MaxValue && timeToLive >= TimeSpan.Zero
                 ? (DateTime.UtcNow + timeToLive.Value).ToString("yyyy-MM-dd-HH").Replace('-', Path.DirectorySeparatorChar)

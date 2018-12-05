@@ -16,6 +16,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
     using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Configuration;
     using GreenPipes;
     using GreenPipes.Payloads;
     using Logging;
@@ -31,25 +32,21 @@ namespace MassTransit.ActiveMqTransport.Contexts
         static readonly ILog _log = Logger.Get<ActiveMqConnectionContext>();
 
         readonly IConnection _connection;
+        readonly IActiveMqHostConfiguration _configuration;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
-        public ActiveMqConnectionContext(IConnection connection, ActiveMqHostSettings hostSettings, IActiveMqHostTopology topology, string description,
-            CancellationToken cancellationToken)
+        public ActiveMqConnectionContext(IConnection connection, IActiveMqHostConfiguration configuration, CancellationToken cancellationToken)
             : base(new PayloadCache(), cancellationToken)
         {
             _connection = connection;
-            HostSettings = hostSettings;
-            Topology = topology;
-
-            Description = description;
+            _configuration = configuration;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
         }
 
-        public IActiveMqHostTopology Topology { get; }
-        public ActiveMqHostSettings HostSettings { get; }
-        public string Description { get; }
-        public Uri HostAddress => HostSettings.HostAddress;
+        public string Description => _configuration.Description;
+        public Uri HostAddress => _configuration.HostAddress;
+        public IActiveMqHostTopology Topology => _configuration.Topology;
 
         public Task<ISession> CreateSession()
         {

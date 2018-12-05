@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
+    using System;
     using System.Threading.Tasks;
+    using Events;
 
 
     /// <summary>
@@ -40,5 +42,14 @@ namespace MassTransit
         /// <param name="faulted"></param>
         /// <returns></returns>
         Task Faulted(ReceiveTransportFaulted faulted);
+    }
+
+
+    public static class ReceiveTransportObserverExtensions
+    {
+        public static Task NotifyReady(this IReceiveTransportObserver observer, Uri inputAddress)
+        {
+            return observer.Ready(new ReceiveTransportReadyEvent(inputAddress));
+        }
     }
 }

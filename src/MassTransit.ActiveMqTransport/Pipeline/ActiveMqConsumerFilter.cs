@@ -22,7 +22,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using GreenPipes.Agents;
     using Logging;
     using Topology;
-    using Transports;
     using Transports.Metrics;
 
 
@@ -34,15 +33,11 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         IFilter<SessionContext>
     {
         static readonly ILog _log = Logger.Get<ActiveMqConsumerFilter>();
-        readonly IDeadLetterTransport _deadLetterTransport;
-        readonly IErrorTransport _errorTransport;
         readonly ActiveMqReceiveEndpointContext _context;
 
-        public ActiveMqConsumerFilter(ActiveMqReceiveEndpointContext context, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+        public ActiveMqConsumerFilter(ActiveMqReceiveEndpointContext context)
         {
             _context = context;
-            _deadLetterTransport = deadLetterTransport;
-            _errorTransport = errorTransport;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -53,7 +48,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostSettings.HostAddress);
+            var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostAddress);
 
             List<Task<ActiveMqBasicConsumer>> consumers = new List<Task<ActiveMqBasicConsumer>>();
 
@@ -117,8 +112,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var messageConsumer = await context.CreateMessageConsumer(queue, selector, false).ConfigureAwait(false);
 
-            var consumer = new ActiveMqBasicConsumer(context, messageConsumer, inputAddress, _context, _deadLetterTransport,
-                _errorTransport);
+            var consumer = new ActiveMqBasicConsumer(context, messageConsumer, inputAddress, _context);
 
             await consumer.Ready.ConfigureAwait(false);
 

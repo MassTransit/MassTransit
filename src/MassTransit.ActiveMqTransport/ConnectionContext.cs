@@ -40,11 +40,6 @@ namespace MassTransit.ActiveMqTransport
         IActiveMqHostTopology Topology { get; }
 
         /// <summary>
-        /// The host settings for the connection
-        /// </summary>
-        ActiveMqHostSettings HostSettings { get; }
-
-        /// <summary>
         /// Create a model on the connection
         /// </summary>
         /// <returns></returns>

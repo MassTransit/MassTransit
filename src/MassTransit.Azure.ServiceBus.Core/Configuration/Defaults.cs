@@ -18,7 +18,7 @@ namespace MassTransit.Azure.ServiceBus.Core
 
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    static class Defaults
+    public static class Defaults
     {
         public static QueueDescription CreateQueueDescription(string queueName)
         {

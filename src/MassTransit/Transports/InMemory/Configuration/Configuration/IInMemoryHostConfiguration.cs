@@ -18,7 +18,7 @@ namespace MassTransit.Transports.InMemory.Configuration
     public interface IInMemoryHostConfiguration :
         IHostConfiguration
     {
-        new InMemoryHost Host { get; }
+        new IInMemoryHostControl Host { get; }
 
         /// <summary>
         /// Create a receive endpoint configuration using the specified host

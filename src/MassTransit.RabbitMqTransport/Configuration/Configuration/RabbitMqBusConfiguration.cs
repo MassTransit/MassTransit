@@ -12,12 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration
 {
-    using System;
     using MassTransit.Configuration;
     using Topology;
     using Topology.Settings;
     using Topology.Topologies;
-    using Transport;
 
 
     public class RabbitMqBusConfiguration :
@@ -37,25 +35,15 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _messageNameFormatter = new RabbitMqMessageNameFormatter();
         }
 
+        IReadOnlyHostCollection<IRabbitMqHostConfiguration> IRabbitMqBusConfiguration.Hosts => _hosts;
+
         public bool DeployTopologyOnly { get; set; }
-
-        public bool TryGetHost(Uri address, out IRabbitMqHostConfiguration hostConfiguration)
-        {
-            return _hosts.TryGetHost(address, out hostConfiguration);
-        }
-
-        public bool TryGetHost(IRabbitMqHost host, out IRabbitMqHostConfiguration hostConfiguration)
-        {
-            return _hosts.TryGetHost(host, out hostConfiguration);
-        }
 
         public IRabbitMqHostConfiguration CreateHostConfiguration(RabbitMqHostSettings hostSettings)
         {
             var hostTopology = new RabbitMqHostTopology(_exchangeTypeSelector, _messageNameFormatter, hostSettings.HostAddress, Topology);
 
-            var host = new RabbitMqHost(this, hostSettings, hostTopology);
-
-            var hostConfiguration = new RabbitMqHostConfiguration(this, host);
+            var hostConfiguration = new RabbitMqHostConfiguration(this, hostSettings, hostTopology);
 
             _hosts.Add(hostConfiguration);
 

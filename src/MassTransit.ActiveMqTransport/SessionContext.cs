@@ -15,23 +15,14 @@ namespace MassTransit.ActiveMqTransport
     using System.Threading.Tasks;
     using Apache.NMS;
     using GreenPipes;
-    using Topology;
 
 
     public interface SessionContext :
         PipeContext
     {
-        /// <summary>
-        /// The ActiveMQ session
-        /// </summary>
         ISession Session { get; }
 
-        /// <summary>
-        /// The connection context for the session
-        /// </summary>
         ConnectionContext ConnectionContext { get; }
-
-        IActiveMqPublishTopology PublishTopology { get; }
 
         Task<ITopic> GetTopic(string topicName);
 

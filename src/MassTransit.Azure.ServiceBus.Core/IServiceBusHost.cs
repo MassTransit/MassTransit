@@ -39,12 +39,12 @@ namespace MassTransit.Azure.ServiceBus.Core
         /// <summary>
         /// The default messaging factory cache, could be AMQP or NET-TCP, depending upon configuration
         /// </summary>
-        IMessagingFactoryCache MessagingFactoryCache { get; }
+        IMessagingFactoryContextSupervisor MessagingFactoryContextSupervisor { get; }
 
         /// <summary>
         /// The namespace cache for operating on the service bus namespace (management)
         /// </summary>
-        INamespaceCache NamespaceCache { get; }
+        INamespaceContextSupervisor NamespaceContextSupervisor { get; }
 
         /// <summary>
         /// The retry policy shared by transports communicating with the host. Should be

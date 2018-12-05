@@ -17,6 +17,7 @@ namespace MassTransit.HttpTransport.Transport
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -32,23 +33,20 @@ namespace MassTransit.HttpTransport.Transport
         IHttpHostControl
     {
         static readonly ILog _log = Logger.Get<HttpHost>();
-        readonly HttpHostCache _httpHostCache;
 
-        readonly HttpHostSettings _settings;
+        readonly IHttpHostConfiguration _configuration;
+        readonly HttpHostContextSupervisor _httpHostContextSupervisor;
+        readonly IReceiveEndpointCollection _receiveEndpoints;
 
-        public HttpHost(HttpHostSettings hostSettings, IHostTopology topology)
+        public HttpHost(IHttpHostConfiguration configuration)
         {
-            _settings = hostSettings;
-            Topology = topology;
+            _configuration = configuration;
 
-            ReceiveEndpoints = new ReceiveEndpointCollection();
+            _receiveEndpoints = new ReceiveEndpointCollection();
+            Add(_receiveEndpoints);
 
-            _httpHostCache = new HttpHostCache(Settings);
+            _httpHostContextSupervisor = new HttpHostContextSupervisor(configuration);
         }
-
-        public IHttpReceiveEndpointFactory ReceiveEndpointFactory { get; set; }
-
-        public IReceiveEndpointCollection ReceiveEndpoints { get; }
 
         public async Task<HostHandle> Start()
         {
@@ -84,11 +82,11 @@ namespace MassTransit.HttpTransport.Transport
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Starting connection to {0}", Settings.Host);
 
-            var connectionTask = HttpHostCache.Send(connectionPipe, Stopping);
+            var connectionTask = HttpHostContextSupervisor.Send(connectionPipe, Stopping);
 
-            HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints();
+            HostReceiveEndpointHandle[] handles = _receiveEndpoints.StartEndpoints();
 
-            var hostHandle = new Handle(handles, this, _httpHostCache, connectionTask);
+            var hostHandle = new Handle(handles, this, _httpHostContextSupervisor, connectionTask);
 
             await hostHandle.Ready.ConfigureAwait(false);
 
@@ -103,12 +101,12 @@ namespace MassTransit.HttpTransport.Transport
         {
             var settings = address.GetHostSettings();
 
-            return HttpHostEqualityComparer.Default.Equals(_settings, settings);
+            return HttpHostEqualityComparer.Default.Equals(_configuration.Settings, settings);
         }
 
         public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
         {
-            ReceiveEndpoints.Add(endpointName, receiveEndpoint);
+            _receiveEndpoints.Add(endpointName, receiveEndpoint);
         }
 
         public void Probe(ProbeContext context)
@@ -122,43 +120,43 @@ namespace MassTransit.HttpTransport.Transport
                 Settings.Method.Method
             });
 
-            ReceiveEndpoints.Probe(scope);
+            _receiveEndpoints.Probe(scope);
         }
 
-        public IHttpHostCache HttpHostCache => _httpHostCache;
-        public HttpHostSettings Settings => _settings;
-        public Uri Address => new Uri($"{_settings.Scheme}://{_settings.Host}:{_settings.Port}");
+        public IHttpHostContextSupervisor HttpHostContextSupervisor => _httpHostContextSupervisor;
+        public HttpHostSettings Settings => _configuration.Settings;
+        public Uri Address => _configuration.HostAddress;
 
         public IHostTopology Topology { get; }
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
-            return ReceiveEndpoints.ConnectConsumeMessageObserver(observer);
+            return _receiveEndpoints.ConnectConsumeMessageObserver(observer);
         }
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
-            return ReceiveEndpoints.ConnectConsumeObserver(observer);
+            return _receiveEndpoints.ConnectConsumeObserver(observer);
         }
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return ReceiveEndpoints.ConnectReceiveObserver(observer);
+            return _receiveEndpoints.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
-            return ReceiveEndpoints.ConnectReceiveEndpointObserver(observer);
+            return _receiveEndpoints.ConnectReceiveEndpointObserver(observer);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return ReceiveEndpoints.ConnectPublishObserver(observer);
+            return _receiveEndpoints.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            return ReceiveEndpoints.ConnectSendObserver(observer);
+            return _receiveEndpoints.ConnectSendObserver(observer);
         }
 
 

@@ -20,7 +20,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using GreenPipes.Internals.Extensions;
     using Logging;
     using Microsoft.ServiceBus.Messaging;
-    using Transports;
     using Transports.Metrics;
     using Util;
 
@@ -33,16 +32,12 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         readonly ClientContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IBrokeredMessageReceiver _messageReceiver;
-        readonly IDeadLetterTransport _deadLetterTransport;
-        readonly IErrorTransport _errorTransport;
         readonly IDeliveryTracker _tracker;
 
-        public Receiver(ClientContext context, IBrokeredMessageReceiver messageReceiver, IDeadLetterTransport deadLetterTransport, IErrorTransport errorTransport)
+        public Receiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
         {
             _context = context;
             _messageReceiver = messageReceiver;
-            _deadLetterTransport = deadLetterTransport;
-            _errorTransport = errorTransport;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
             _deliveryComplete = new TaskCompletionSource<bool>();
@@ -140,9 +135,8 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         void AddReceiveContextPayloads(ReceiveContext receiveContext)
         {
+            receiveContext.GetOrAddPayload(() => _messageReceiver);
             receiveContext.GetOrAddPayload(() => _context.GetPayload<NamespaceContext>());
-            receiveContext.GetOrAddPayload(() => _errorTransport);
-            receiveContext.GetOrAddPayload(() => _deadLetterTransport);
         }
 
         async Task WaitAndAbandonMessage(BrokeredMessage message)

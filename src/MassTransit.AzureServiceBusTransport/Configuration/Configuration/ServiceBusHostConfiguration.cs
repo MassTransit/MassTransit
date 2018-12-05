@@ -12,9 +12,17 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
+    using System;
+    using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit.Configuration;
+    using MassTransit.Topology;
+    using Pipeline;
     using Settings;
+    using Topology;
+    using Transport;
     using Transports;
+    using Util;
 
 
     public class ServiceBusHostConfiguration :
@@ -22,16 +30,65 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
     {
         readonly IServiceBusBusConfiguration _busConfiguration;
         readonly ServiceBusHost _host;
+        readonly ServiceBusHostSettings _hostSettings;
+        readonly IServiceBusHostTopology _hostTopology;
 
-        public ServiceBusHostConfiguration(IServiceBusBusConfiguration busConfiguration, ServiceBusHost host)
+        public ServiceBusHostConfiguration(IServiceBusBusConfiguration busConfiguration, ServiceBusHostSettings hostSettings,
+            IServiceBusHostTopology hostTopology)
         {
             _busConfiguration = busConfiguration;
-            _host = host;
+            _hostSettings = hostSettings;
+            _hostTopology = hostTopology;
+
+            _host = new ServiceBusHost(this);
         }
 
-        IServiceBusBusConfiguration IServiceBusHostConfiguration.BusConfiguration => _busConfiguration;
         IBusHostControl IHostConfiguration.Host => _host;
-        ServiceBusHost IServiceBusHostConfiguration.Host => _host;
+        Uri IHostConfiguration.HostAddress => _hostSettings.ServiceUri;
+        IHostTopology IHostConfiguration.Topology => _hostTopology;
+
+        IServiceBusBusConfiguration IServiceBusHostConfiguration.BusConfiguration => _busConfiguration;
+        IServiceBusHostControl IServiceBusHostConfiguration.Host => _host;
+        ServiceBusHostSettings IServiceBusHostConfiguration.Settings => _hostSettings;
+        IServiceBusHostTopology IServiceBusHostConfiguration.Topology => _hostTopology;
+
+        public bool Matches(Uri address)
+        {
+            return _hostSettings.ServiceUri.GetLeftPart(UriPartial.Authority)
+                .Equals(address.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase);
+        }
+
+        public Task<ISendTransport> CreateSendTransport(Uri address)
+        {
+            var settings = _hostTopology.SendTopology.GetSendSettings(address);
+
+            var endpointContextSupervisor = CreateQueueSendEndpointContextSupervisor(settings);
+
+            var transport = new ServiceBusSendTransport(endpointContextSupervisor, address);
+
+            _host.Add(transport);
+
+            return Task.FromResult<ISendTransport>(transport);
+        }
+
+        public Task<ISendTransport> CreatePublishTransport<T>()
+            where T : class
+        {
+            var publishTopology = _hostTopology.Publish<T>();
+
+            if (!publishTopology.TryGetPublishAddress(_hostSettings.ServiceUri, out Uri publishAddress))
+                throw new ArgumentException($"The type did not return a valid publish address: {TypeMetadataCache<T>.ShortName}");
+
+            var settings = publishTopology.GetSendSettings();
+
+            var endpointContextSupervisor = CreateTopicSendEndpointContextSupervisor(settings);
+
+            var transport = new ServiceBusSendTransport(endpointContextSupervisor, publishAddress);
+
+            _host.Add(transport);
+
+            return Task.FromResult<ISendTransport>(transport);
+        }
 
         public IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
         {
@@ -41,6 +98,36 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings)
         {
             return new ServiceBusSubscriptionEndpointConfiguration(this, _busConfiguration.CreateEndpointConfiguration(), settings);
+        }
+
+        ISendEndpointContextSupervisor CreateQueueSendEndpointContextSupervisor(SendSettings settings)
+        {
+            IPipe<NamespaceContext> namespacePipe = CreateConfigureTopologyPipe(settings);
+
+            var contextFactory = new QueueSendEndpointContextFactory(_host.MessagingFactoryContextSupervisor, _host.NamespaceContextSupervisor,
+                Pipe.Empty<MessagingFactoryContext>(),
+                namespacePipe, settings);
+
+            return new SendEndpointContextSupervisor(contextFactory);
+        }
+
+        ISendEndpointContextSupervisor CreateTopicSendEndpointContextSupervisor(SendSettings settings)
+        {
+            IPipe<NamespaceContext> namespacePipe = CreateConfigureTopologyPipe(settings);
+
+            var contextFactory = new TopicSendEndpointContextFactory(_host.MessagingFactoryContextSupervisor, _host.NamespaceContextSupervisor,
+                Pipe.Empty<MessagingFactoryContext>(),
+                namespacePipe, settings);
+
+            return new SendEndpointContextSupervisor(contextFactory);
+        }
+
+        IPipe<NamespaceContext> CreateConfigureTopologyPipe(SendSettings settings)
+        {
+            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false, _host.Stopping);
+
+            IPipe<NamespaceContext> namespacePipe = configureTopologyFilter.ToPipe();
+            return namespacePipe;
         }
     }
 }

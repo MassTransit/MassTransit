@@ -27,32 +27,32 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
     {
         readonly Uri _hostAddress;
         readonly IMessageNameFormatter _messageNameFormatter;
-        readonly IActiveMqTopologyConfiguration _topologyConfiguration;
+        readonly IActiveMqTopologyConfiguration _configuration;
 
-        public ActiveMqHostTopology(IMessageNameFormatter messageNameFormatter, Uri hostAddress, IActiveMqTopologyConfiguration topologyConfiguration)
-            : base(topologyConfiguration)
+        public ActiveMqHostTopology(IMessageNameFormatter messageNameFormatter, Uri hostAddress, IActiveMqTopologyConfiguration configuration)
+            : base(configuration)
         {
             _messageNameFormatter = messageNameFormatter;
             _hostAddress = hostAddress;
-            _topologyConfiguration = topologyConfiguration;
+            _configuration = configuration;
         }
 
-        IActiveMqPublishTopology IActiveMqHostTopology.PublishTopology => _topologyConfiguration.Publish;
-        IActiveMqSendTopology IActiveMqHostTopology.SendTopology => _topologyConfiguration.Send;
+        IActiveMqPublishTopology IActiveMqHostTopology.PublishTopology => _configuration.Publish;
+        IActiveMqSendTopology IActiveMqHostTopology.SendTopology => _configuration.Send;
 
         IActiveMqMessagePublishTopology<T> IActiveMqHostTopology.Publish<T>()
         {
-            return _topologyConfiguration.Publish.GetMessageTopology<T>();
+            return _configuration.Publish.GetMessageTopology<T>();
         }
 
         IActiveMqMessageSendTopology<T> IActiveMqHostTopology.Send<T>()
         {
-            return _topologyConfiguration.Send.GetMessageTopology<T>();
+            return _configuration.Send.GetMessageTopology<T>();
         }
 
         public SendSettings GetSendSettings(Uri address)
         {
-            return _topologyConfiguration.Send.GetSendSettings(address);
+            return _configuration.Send.GetSendSettings(address);
         }
 
         public Uri GetDestinationAddress(string exchangeName, Action<ITopicConfigurator> configure = null)

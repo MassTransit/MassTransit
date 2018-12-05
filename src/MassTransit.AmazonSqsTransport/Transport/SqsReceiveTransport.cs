@@ -99,7 +99,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
                     {
                         try
                         {
-                            await _host.ConnectionCache.Send(_connectionPipe, Stopped).ConfigureAwait(false);
+                            await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
                         }
                         catch (OperationCanceledException)
                         {
@@ -122,7 +122,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
             if (_log.IsDebugEnabled)
                 _log.Debug(message, ex);
 
-            var exception = new AmazonSqsConnectException(message + _host.ConnectionCache, ex);
+            var exception = new AmazonSqsConnectException(message + _host.ConnectionContextSupervisor, ex);
 
             await NotifyFaulted(exception);
 

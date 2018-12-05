@@ -12,9 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Configuration
 {
-    using System;
-    using System.Linq;
-    using Configurators;
     using MassTransit.Configuration;
     using Settings;
     using Topology;
@@ -33,50 +30,28 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
             _hosts = new HostCollection<IServiceBusHostConfiguration>();
         }
 
+        IReadOnlyHostCollection IBusConfiguration.Hosts => _hosts;
         public bool DeployTopologyOnly { get; set; }
 
-        public IServiceBusHostConfiguration[] Hosts => _hosts.Hosts;
+        IReadOnlyHostCollection<IServiceBusHostConfiguration> IServiceBusBusConfiguration.Hosts => _hosts;
 
-        public bool TryGetHost(Uri address, out IServiceBusHostConfiguration host)
+        public IServiceBusHostConfiguration CreateHostConfiguration(ServiceBusHostSettings settings)
         {
-            return _hosts.TryGetHost(address, out host);
-        }
+            var hostTopology = CreateHostTopology();
 
-        public bool TryGetHost(IServiceBusHost host, out IServiceBusHostConfiguration hostConfiguration)
-        {
-            return _hosts.TryGetHost(host, out hostConfiguration);
-        }
-
-        public ServiceBusHost GetHost(Uri address)
-        {
-            var host = Hosts.Where(x => x.Host.Matches(address))
-                .OrderByDescending(x => address.AbsolutePath.StartsWith(x.Host.Address.AbsolutePath, StringComparison.OrdinalIgnoreCase)
-                    ? 1
-                    : 0)
-                .FirstOrDefault();
-
-            if (host == null)
-                throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
-
-            return host.Host;
-        }
-
-        public IServiceBusHostConfiguration CreateHostConfiguration(ServiceBusHost host)
-        {
-            var hostConfiguration = new ServiceBusHostConfiguration(this, host);
+            var hostConfiguration = new ServiceBusHostConfiguration(this, settings, hostTopology);
 
             _hosts.Add(hostConfiguration);
 
             return hostConfiguration;
         }
 
-        public IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
-            IServiceBusEndpointConfiguration endpointConfiguration)
+        public IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
         {
             if (_hosts.Count == 0)
                 throw new ConfigurationException("At least one host must be configured");
 
-            return new ServiceBusReceiveEndpointConfiguration(_hosts[0], endpointConfiguration, queueName);
+            return _hosts[0].CreateReceiveEndpointConfiguration(queueName);
         }
 
         public IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(ReceiveEndpointSettings settings,
@@ -88,20 +63,19 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
             return new ServiceBusReceiveEndpointConfiguration(_hosts[0], endpointConfiguration, settings);
         }
 
-        public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(string topicPath, string subscriptionName,
-            IServiceBusEndpointConfiguration endpointConfiguration)
+        public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(string topicPath, string subscriptionName)
         {
             if (_hosts.Count == 0)
                 throw new ConfigurationException("At least one host must be configured");
 
-            return new ServiceBusSubscriptionEndpointConfiguration(_hosts[0], endpointConfiguration, topicPath, subscriptionName);
+            var settings = new SubscriptionEndpointSettings(topicPath, subscriptionName);
+
+            return _hosts[0].CreateSubscriptionEndpointConfiguration(settings);
         }
 
-        public IServiceBusHostTopology CreateHostTopology()
+        IServiceBusHostTopology CreateHostTopology()
         {
             return new ServiceBusHostTopology(Topology);
         }
-
-        IReadOnlyHostCollection IBusConfiguration.Hosts => _hosts;
     }
 }

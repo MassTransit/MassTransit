@@ -12,39 +12,21 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Configuration
 {
-    using System;
     using MassTransit.Configuration;
-    using Topology;
     using Topology.Settings;
 
 
     public interface IActiveMqBusConfiguration :
         IBusConfiguration
     {
+        new IReadOnlyHostCollection<IActiveMqHostConfiguration> Hosts { get; }
+
         new IActiveMqTopologyConfiguration Topology { get; }
 
         /// <summary>
         /// If true, only the broker topology will be deployed
         /// </summary>
         bool DeployTopologyOnly { get; set; }
-
-        /// <summary>
-        /// Return the host that supports the specified address
-        /// </summary>
-        /// <param name="address">The address to match</param>
-        /// <param name="hostConfiguration">The matching host, if present</param>
-        /// <returns>True if the host was found, otherwise false</returns>
-        bool TryGetHost(Uri address, out IActiveMqHostConfiguration hostConfiguration);
-
-        /// <summary>
-        /// Return the host if it is part of the configuration
-        /// </summary>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        /// <param name="hostConfiguration"></param>
-        bool TryGetHost(IActiveMqHost host, out IActiveMqHostConfiguration hostConfiguration);
-
-        IActiveMqHostTopology CreateHostTopology(Uri hostAddress);
 
         /// <summary>
         /// Create an endpoint configuration on the bus, which can later be turned into a receive endpoint
@@ -55,9 +37,9 @@ namespace MassTransit.ActiveMqTransport.Configuration
         /// <summary>
         /// Create a host configuration, by adding a host to the bus
         /// </summary>
-        /// <param name="host"></param>
+        /// <param name="hostSettings"></param>
         /// <returns></returns>
-        IActiveMqHostConfiguration CreateHostConfiguration(IActiveMqHostControl host);
+        IActiveMqHostConfiguration CreateHostConfiguration(ActiveMqHostSettings hostSettings);
 
         /// <summary>
         /// Create a receive endpoint configuration for the default host

@@ -16,15 +16,12 @@ namespace MassTransit.HttpTransport.Transport
     using System.Net;
     using System.Threading.Tasks;
     using Contexts;
-    using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
     using Hosting;
-    using Internals.Extensions;
     using Logging;
     using Microsoft.AspNetCore.Http;
     using Pipeline;
-    using Topology;
     using Transports.Metrics;
 
 
@@ -36,17 +33,15 @@ namespace MassTransit.HttpTransport.Transport
 
         readonly Uri _inputAddress;
         readonly ILog _log = Logger.Get<HttpConsumer>();
-        readonly IPipe<ReceiveContext> _receivePipe;
         readonly HttpReceiveEndpointContext _context;
         readonly IDeliveryTracker _tracker;
 
-        public HttpConsumer(HttpHostSettings settings, IPipe<ReceiveContext> receivePipe, HttpReceiveEndpointContext context)
+        public HttpConsumer(HttpHostSettings settings, HttpReceiveEndpointContext context)
         {
-            _receivePipe = receivePipe;
             _context = context;
 
             _tracker = new DeliveryTracker(OnDeliveryComplete);
-            _inputAddress = settings.GetInputAddress();
+            _inputAddress = context.InputAddress;
             _deliveryComplete = new TaskCompletionSource<bool>();
 
             SetReady();
@@ -79,7 +74,7 @@ namespace MassTransit.HttpTransport.Transport
                 {
                     await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
-                    await _receivePipe.Send(context).ConfigureAwait(false);
+                    await _context.ReceivePipe.Send(context).ConfigureAwait(false);
 
                     await context.ReceiveCompleted.ConfigureAwait(false);
 

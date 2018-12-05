@@ -31,27 +31,15 @@ namespace MassTransit.ActiveMqTransport.Configuration
             _hosts = new HostCollection<IActiveMqHostConfiguration>();
         }
 
+        IReadOnlyHostCollection<IActiveMqHostConfiguration> IActiveMqBusConfiguration.Hosts => _hosts;
+
         public bool DeployTopologyOnly { get; set; }
 
-        public bool TryGetHost(Uri address, out IActiveMqHostConfiguration hostConfiguration)
+        public IActiveMqHostConfiguration CreateHostConfiguration(ActiveMqHostSettings hostSettings)
         {
-            return _hosts.TryGetHost(address, out hostConfiguration);
-        }
+            var hostTopology = CreateHostTopology(hostSettings.HostAddress);
 
-        public bool TryGetHost(IActiveMqHost host, out IActiveMqHostConfiguration hostConfiguration)
-        {
-            return _hosts.TryGetHost(host, out hostConfiguration);
-        }
-
-        public IActiveMqHostTopology CreateHostTopology(Uri hostAddress)
-        {
-            return new ActiveMqHostTopology(new ActiveMqMessageNameFormatter(), hostAddress, Topology);
-        }
-
-        public IActiveMqHostConfiguration CreateHostConfiguration(IActiveMqHostControl host)
-        {
-            var hostConfiguration = new ActiveMqHostConfiguration(this, host);
-
+            var hostConfiguration = new ActiveMqHostConfiguration(this, hostSettings, hostTopology);
             _hosts.Add(hostConfiguration);
 
             return hostConfiguration;
@@ -67,7 +55,8 @@ namespace MassTransit.ActiveMqTransport.Configuration
             return configuration;
         }
 
-        public IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings, IActiveMqEndpointConfiguration endpointConfiguration)
+        public IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
+            IActiveMqEndpointConfiguration endpointConfiguration)
         {
             if (_hosts.Count == 0)
                 throw new ConfigurationException("At least one host must be configured");
@@ -78,5 +67,10 @@ namespace MassTransit.ActiveMqTransport.Configuration
         }
 
         public IReadOnlyHostCollection Hosts => _hosts;
+
+        IActiveMqHostTopology CreateHostTopology(Uri hostAddress)
+        {
+            return new ActiveMqHostTopology(new ActiveMqMessageNameFormatter(), hostAddress, Topology);
+        }
     }
 }

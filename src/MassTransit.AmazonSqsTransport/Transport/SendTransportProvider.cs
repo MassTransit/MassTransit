@@ -15,9 +15,6 @@ namespace MassTransit.AmazonSqsTransport.Transport
     using System;
     using System.Threading.Tasks;
     using Configuration.Configuration;
-    using GreenPipes.Agents;
-    using Pipeline;
-    using Topology;
     using Transports;
 
 
@@ -33,11 +30,6 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
         Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
         {
-            return Task.FromResult(GetSendTransport(address));
-        }
-
-        ISendTransport GetSendTransport(Uri address)
-        {
             if (!_configuration.BusConfiguration.TryGetHost(address, out var hostConfiguration))
             {
                 var hostAddress = _configuration.Host.Address;
@@ -47,25 +39,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
                     throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
             }
 
-            var host = hostConfiguration.Host;
-
-            var settings = host.Topology.SendTopology.GetSendSettings(address);
-
-            IAgent<ClientContext> clientCache = GetClientCache(host);
-
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology());
-
-            var transport = new QueueSendTransport(clientCache, configureTopologyFilter, settings.EntityName);
-            transport.Add(clientCache);
-
-            host.Add(transport);
-
-            return transport;
-        }
-
-        protected virtual IAgent<ClientContext> GetClientCache(IAmazonSqsHost host)
-        {
-            return new AmazonSqsClientCache(host, host.ConnectionCache);
+            return hostConfiguration.CreateSendTransport(address);
         }
     }
 }

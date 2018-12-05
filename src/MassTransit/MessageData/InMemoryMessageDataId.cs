@@ -13,12 +13,11 @@
 namespace MassTransit.MessageData
 {
     using System;
-    using NewIdFormatters;
+    using Util;
 
 
     public class InMemoryMessageDataId
     {
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         NewId _id;
 
         public InMemoryMessageDataId()
@@ -26,6 +25,6 @@ namespace MassTransit.MessageData
             _id = NewId.Next();
         }
 
-        public Uri Uri => new Uri("urn:msgdata:" + _formatter.Format(_id.ToByteArray()));
+        public Uri Uri => new Uri("urn:msgdata:" + FormatUtil.Formatter.Format(_id.ToByteArray()));
     }
 }

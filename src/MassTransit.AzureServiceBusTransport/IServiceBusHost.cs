@@ -39,17 +39,12 @@ namespace MassTransit.AzureServiceBusTransport
         /// <summary>
         /// The default messaging factory cache, could be AMQP or NET-TCP, depending upon configuration
         /// </summary>
-        IMessagingFactoryCache MessagingFactoryCache { get; }
-
-        /// <summary>
-        /// The messaging factory cache for NET-TCP (may be the same as above, depending upon configuration)
-        /// </summary>
-        IMessagingFactoryCache NetMessagingFactoryCache { get; }
+        IMessagingFactoryContextSupervisor MessagingFactoryContextSupervisor { get; }
 
         /// <summary>
         /// The namespace cache for operating on the service bus namespace (management)
         /// </summary>
-        INamespaceCache NamespaceCache { get; }
+        INamespaceContextSupervisor NamespaceContextSupervisor { get; }
 
         /// <summary>
         /// The retry policy shared by transports communicating with the host. Should be
@@ -79,7 +74,7 @@ namespace MassTransit.AzureServiceBusTransport
         /// <param name="subscriptionName">The subscription name for this endpoint</param>
         /// <param name="configure">Configuration callback for the endpoint</param>
         /// <returns></returns>
-        HostReceiveEndpointHandle ConnectSubscriptionEndpoint<T>(string subscriptionName,Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
+        HostReceiveEndpointHandle ConnectSubscriptionEndpoint<T>(string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
             where T : class;
 
         /// <summary>

@@ -12,7 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 {
+    using System.Threading.Tasks;
     using MassTransit.Configuration;
+    using Topology;
+    using Transports;
 
 
     public interface IAmazonSqsHostConfiguration :
@@ -20,12 +23,19 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
     {
         IAmazonSqsBusConfiguration BusConfiguration { get; }
 
+        new IAmazonSqsHostTopology Topology { get; }
+
         new IAmazonSqsHostControl Host { get; }
+
+        AmazonSqsHostSettings Settings { get; }
 
         /// <summary>
         /// Create a receive endpoint configuration using the specified host
         /// </summary>
         /// <returns></returns>
         IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName);
+
+        Task<ISendTransport> CreatePublishTransport<T>()
+            where T : class;
     }
 }

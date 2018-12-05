@@ -27,6 +27,6 @@ namespace MassTransit.Transports
         /// Close the Host, shutting it down for good.
         /// </summary>
         /// <returns></returns>
-        Task Stop(CancellationToken cancellationToken = default(CancellationToken));
+        Task Stop(CancellationToken cancellationToken = default);
     }
 }

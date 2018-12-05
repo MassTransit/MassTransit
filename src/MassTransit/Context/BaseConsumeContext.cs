@@ -346,7 +346,7 @@ namespace MassTransit.Context
                 x.TransferConsumeContextHeaders(context);
 
                 x.CorrelationId = context.CorrelationId;
-                x.RequestId = RequestId;
+                x.RequestId = context.RequestId;
             });
 
             var destinationAddress = FaultAddress ?? ResponseAddress;

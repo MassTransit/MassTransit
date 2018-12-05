@@ -13,9 +13,11 @@
 namespace MassTransit.WebJobs.ServiceBusIntegration
 {
     using System;
-    using AzureServiceBusTransport;
-    using AzureServiceBusTransport.Configuration;
-    using AzureServiceBusTransport.Transport;
+    using Azure.ServiceBus.Core;
+    using Azure.ServiceBus.Core.Configuration;
+    using Azure.ServiceBus.Core.Settings;
+    using Azure.ServiceBus.Core.Topology.Configuration.Configurators;
+    using Azure.ServiceBus.Core.Transport;
     using Configuration;
     using Microsoft.Azure.WebJobs;
 
@@ -33,29 +35,17 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
 
             var topologyConfiguration = new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology);
             var busConfiguration = new ServiceBusBusConfiguration(topologyConfiguration);
-            var busEndpointConfiguration = busConfiguration.CreateReceiveEndpointConfiguration(new Uri("sb://localhost/"), new Uri("sb://localhost/"));
+
+            var queueConfigurator = new QueueConfigurator("no-host-configured")
+            {
+                AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle,
+            };
+
+            var settings = new ReceiveEndpointSettings("no-host-configured", queueConfigurator);
+
+            var busEndpointConfiguration = busConfiguration.CreateReceiveEndpointConfiguration(settings, busConfiguration);
 
             var configurator = new WebJobBrokeredMessageReceiverSpecification(binder, busEndpointConfiguration);
-
-            configure(configurator);
-
-            return configurator.Build();
-        }
-
-        public static IEventDataReceiver CreateEventDataReceiver(this IBusFactorySelector selector, IBinder binder,
-            Action<IWebJobReceiverConfigurator> configure)
-        {
-            if (binder == null)
-                throw new ArgumentNullException(nameof(binder));
-
-            if (configure == null)
-                throw new ArgumentNullException(nameof(configure));
-
-            var topologyConfiguration = new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology);
-            var busConfiguration = new ServiceBusBusConfiguration(topologyConfiguration);
-            var busEndpointConfiguration = busConfiguration.CreateReceiveEndpointConfiguration(new Uri("sb://localhost/"), new Uri("sb://localhost/"));
-
-            var configurator = new WebJobEventDataReceiverSpecification(binder, busEndpointConfiguration);
 
             configure(configurator);
 

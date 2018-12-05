@@ -41,7 +41,7 @@ namespace MassTransit
         /// <param name="key">The header name</param>
         /// <param name="defaultValue">The default value of the header if not found</param>
         /// <returns>The header value</returns>
-        T Get<T>(string key, T defaultValue = default(T))
+        T Get<T>(string key, T defaultValue = default)
             where T : class;
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace MassTransit
         /// <param name="key">The header name</param>
         /// <param name="defaultValue">The default value of the header if not found</param>
         /// <returns>The header value</returns>
-        T? Get<T>(string key, T? defaultValue = default(T?))
+        T? Get<T>(string key, T? defaultValue = default)
             where T : struct;
     }
 }

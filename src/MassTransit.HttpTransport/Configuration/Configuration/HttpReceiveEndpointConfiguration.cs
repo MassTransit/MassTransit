@@ -18,9 +18,7 @@ namespace MassTransit.HttpTransport.Configuration
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using MassTransit.Configuration;
-    using MassTransit.Context;
     using Transport;
-    using Transports;
 
 
     public class HttpReceiveEndpointConfiguration :
@@ -40,8 +38,8 @@ namespace MassTransit.HttpTransport.Configuration
             _pathMatch = pathMatch;
             _endpointConfiguration = endpointConfiguration;
 
-            HostAddress = hostConfiguration.Host.Address;
-            InputAddress = new Uri(hostConfiguration.Host.Address, $"{pathMatch}");
+            HostAddress = hostConfiguration.HostAddress;
+            InputAddress = new Uri(hostConfiguration.HostAddress, $"{pathMatch}");
 
             _httpHostPipeConfigurator = new PipeConfigurator<HttpHostContext>();
         }
@@ -62,13 +60,11 @@ namespace MassTransit.HttpTransport.Configuration
 
             ApplySpecifications(builder);
 
-            var receivePipe = CreateReceivePipe();
-
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
             var receiveSettings = new Settings(_pathMatch);
 
-            _httpHostPipeConfigurator.UseFilter(new HttpConsumerFilter(receivePipe, _hostConfiguration.Host.Settings, receiveSettings, receiveEndpointContext));
+            _httpHostPipeConfigurator.UseFilter(new HttpConsumerFilter(_hostConfiguration.Settings, receiveSettings, receiveEndpointContext));
 
             var transport = new HttpReceiveTransport(_hostConfiguration.Host, receiveEndpointContext, _httpHostPipeConfigurator.Build());
 

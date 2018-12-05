@@ -14,8 +14,6 @@ namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
     using Amazon.SimpleNotificationService.Model;
 
 
@@ -23,21 +21,11 @@ namespace MassTransit.AmazonSqsTransport.Transport
     {
         public static void Set(this IDictionary<string, MessageAttributeValue> attributes, SendHeaders sendHeaders)
         {
-            KeyValuePair<string, object>[] headers = sendHeaders.GetAll()
-                .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().GetTypeInfo().IsValueType))
-                .ToArray();
-
-            foreach (KeyValuePair<string, object> header in headers)
+            attributes.SetTextHeaders(sendHeaders, (key, text) => new MessageAttributeValue
             {
-                if (attributes.ContainsKey(header.Key))
-                    continue;
-
-                attributes[header.Key] = new MessageAttributeValue
-                {
-                    StringValue = header.Value.ToString(),
-                    DataType = "String"
-                };
-            }
+                StringValue = text,
+                DataType = "String"
+            });
         }
 
         public static void Set(this IDictionary<string, MessageAttributeValue> attributes, string key, string value)

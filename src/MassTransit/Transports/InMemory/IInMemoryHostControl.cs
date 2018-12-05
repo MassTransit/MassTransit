@@ -12,13 +12,20 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory
 {
-    using GreenPipes.Agents;
+    using Builders;
+    using Topology.Builders;
 
 
     public interface IInMemoryHostControl :
         IInMemoryHost,
         IBusHostControl,
-        ISupervisor
+        ISendTransportProvider
     {
+        int TransportConcurrencyLimit { set; }
+
+        IInMemoryPublishTopologyBuilder CreatePublishTopologyBuilder(
+            PublishEndpointTopologyBuilder.Options options = PublishEndpointTopologyBuilder.Options.MaintainHierarchy);
+
+        IInMemoryConsumeTopologyBuilder CreateConsumeTopologyBuilder();
     }
 }

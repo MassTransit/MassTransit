@@ -12,7 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory.Configuration
 {
+    using System;
+    using System.Threading.Tasks;
     using MassTransit.Configuration;
+    using MassTransit.Topology;
 
 
     public class InMemoryHostConfiguration :
@@ -21,19 +24,32 @@ namespace MassTransit.Transports.InMemory.Configuration
         readonly IInMemoryBusConfiguration _busConfiguration;
         readonly InMemoryHost _host;
 
-        public InMemoryHostConfiguration(IInMemoryBusConfiguration busConfiguration, InMemoryHost host)
+        public InMemoryHostConfiguration(IInMemoryBusConfiguration busConfiguration, Uri baseAddress, int transportConcurrencyLimit, IHostTopology hostTopology)
         {
             _busConfiguration = busConfiguration;
-            _host = host;
+
+            _host = new InMemoryHost(this, transportConcurrencyLimit, hostTopology, baseAddress);
         }
 
+        Uri IHostConfiguration.HostAddress => _host.Address;
         IBusHostControl IHostConfiguration.Host => _host;
+        public IHostTopology Topology => _host.Topology;
+
+        public bool Matches(Uri address)
+        {
+            return address.ToString().StartsWith(_host.Address.ToString(), StringComparison.OrdinalIgnoreCase);
+        }
+
+        public Task<ISendTransport> CreateSendTransport(Uri address)
+        {
+            return _host.GetSendTransport(address);
+        }
 
         public IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
         {
             return new InMemoryReceiveEndpointConfiguration(this, queueName, _busConfiguration.CreateEndpointConfiguration());
         }
 
-        public InMemoryHost Host => _host;
+        public IInMemoryHostControl Host => _host;
     }
 }

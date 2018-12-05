@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
 {
     using Configuration;
     using Context;
-    using Topology;
     using Topology.Builders;
     using Transport;
 
@@ -23,39 +22,32 @@ namespace MassTransit.RabbitMqTransport.Contexts
         BaseReceiveEndpointContext,
         RabbitMqReceiveEndpointContext
     {
-        readonly IRabbitMqReceiveEndpointConfiguration _configuration;
-        readonly IRabbitMqPublishTopology _publishTopology;
+        readonly IRabbitMqBusConfiguration _busConfiguration;
+        readonly IRabbitMqHostConfiguration _hostConfiguration;
 
         public RabbitMqQueueReceiveEndpointContext(IRabbitMqReceiveEndpointConfiguration configuration, BrokerTopology brokerTopology)
             : base(configuration)
         {
-            _configuration = configuration;
+            _busConfiguration = configuration.HostConfiguration.BusConfiguration;
+            _hostConfiguration = configuration.HostConfiguration;
+
+            ExclusiveConsumer = configuration.Settings.ExclusiveConsumer;
+
             BrokerTopology = brokerTopology;
-            _publishTopology = configuration.Topology.Publish;
         }
 
         public BrokerTopology BrokerTopology { get; }
 
-        public bool ExclusiveConsumer => _configuration.Settings.ExclusiveConsumer;
-
-        public ISendEndpointProvider CreateSendEndpointProvider(ReceiveContext receiveContext)
-        {
-            return SendEndpointProvider;
-        }
-
-        public IPublishEndpointProvider CreatePublishEndpointProvider(ReceiveContext receiveContext)
-        {
-            return PublishEndpointProvider;
-        }
+        public bool ExclusiveConsumer { get; }
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendTransportProvider(_configuration);
+            return new SendTransportProvider(_busConfiguration, _hostConfiguration.HostAddress);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_configuration.Host, _publishTopology);
+            return new PublishTransportProvider(_hostConfiguration);
         }
     }
 }

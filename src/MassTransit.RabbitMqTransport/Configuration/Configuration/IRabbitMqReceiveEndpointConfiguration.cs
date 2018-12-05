@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 {
     using MassTransit.Configuration;
     using Topology;
-    using Transport;
 
 
     public interface IRabbitMqReceiveEndpointConfiguration :
@@ -25,9 +24,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         IRabbitMqBusConfiguration BusConfiguration { get; }
 
-        IRabbitMqHostControl Host { get; }
+        IRabbitMqHostConfiguration HostConfiguration { get; }
 
-        bool BindMessageExchanges { get; set; }
+        bool BindMessageExchanges { get; }
 
         ReceiveSettings Settings { get; }
     }

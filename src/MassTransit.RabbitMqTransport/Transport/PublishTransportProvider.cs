@@ -14,46 +14,24 @@ namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes.Agents;
-    using Integration;
-    using Pipeline;
-    using Topology;
+    using Configuration;
     using Transports;
 
 
     public class PublishTransportProvider :
         IPublishTransportProvider
     {
-        readonly IRabbitMqHostControl _host;
-        readonly IRabbitMqPublishTopology _publishTopology;
+        readonly IRabbitMqHostConfiguration _hostConfiguration;
 
-        public PublishTransportProvider(IRabbitMqHostControl host, IRabbitMqPublishTopology publishTopology)
+        public PublishTransportProvider(IRabbitMqHostConfiguration hostConfiguration)
         {
-            _publishTopology = publishTopology;
-            _host = host;
+            _hostConfiguration = hostConfiguration;
         }
 
         public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
             where T : class
         {
-            IRabbitMqMessagePublishTopology<T> publishTopology = _publishTopology.GetMessageTopology<T>();
-
-            var sendSettings = publishTopology.GetSendSettings();
-
-            var brokerTopology = publishTopology.GetBrokerTopology(_publishTopology.BrokerTopologyOptions);
-
-            IAgent<ModelContext> modelSource = GetModelSource();
-
-            var sendTransport = new RabbitMqSendTransport(modelSource, new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology), sendSettings.ExchangeName);
-
-            _host.Add(sendTransport);
-
-            return Task.FromResult<ISendTransport>(sendTransport);
-        }
-
-        protected virtual IAgent<ModelContext> GetModelSource()
-        {
-            return new RabbitMqModelCache(_host, _host.ConnectionCache);
+            return _hostConfiguration.CreatePublishTransport<T>();
         }
     }
 }

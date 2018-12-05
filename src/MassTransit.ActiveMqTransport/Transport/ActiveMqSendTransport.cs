@@ -34,13 +34,13 @@ namespace MassTransit.ActiveMqTransport.Transport
         readonly DestinationType _destinationType;
         readonly string _entityName;
         readonly IFilter<SessionContext> _filter;
-        readonly IPipeContextSource<SessionContext> _sessionAgent;
+        readonly ISessionContextSupervisor _sessionContextSupervisor;
         readonly SendObservable _observers;
 
-        public ActiveMqSendTransport(IAgent<SessionContext> sessionAgent, IFilter<SessionContext> preSendFilter, string entityName,
+        public ActiveMqSendTransport(ISessionContextSupervisor sessionContextSupervisor, IFilter<SessionContext> preSendFilter, string entityName,
             DestinationType destinationType)
         {
-            _sessionAgent = sessionAgent;
+            _sessionContextSupervisor = sessionContextSupervisor;
             _filter = preSendFilter;
             _entityName = entityName;
             _destinationType = destinationType;
@@ -70,6 +70,8 @@ namespace MassTransit.ActiveMqTransport.Transport
                         byte[] body = sendContext.Body;
 
                         var transportMessage = sessionContext.Session.CreateBytesMessage();
+
+                        transportMessage.Properties.SetTextHeaders(sendContext.Headers);
 
                         KeyValuePair<string, object>[] headers = sendContext.Headers.GetAll()
                             .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().GetTypeInfo().IsValueType))
@@ -122,7 +124,7 @@ namespace MassTransit.ActiveMqTransport.Transport
                 });
             });
 
-            await _sessionAgent.Send(sessionPipe, cancellationToken).ConfigureAwait(false);
+            await _sessionContextSupervisor.Send(sessionPipe, cancellationToken).ConfigureAwait(false);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

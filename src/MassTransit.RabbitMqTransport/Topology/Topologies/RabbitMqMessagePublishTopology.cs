@@ -17,8 +17,10 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
     using Builders;
     using Configurators;
     using Entities;
+    using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
+    using Pipeline;
     using Settings;
     using Specifications;
     using Util;
@@ -31,11 +33,14 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
     {
         readonly ExchangeConfigurator _exchange;
         readonly IList<IRabbitMqMessagePublishTopology> _implementedMessageTypes;
+        readonly IRabbitMqPublishTopology _publishTopology;
         readonly IMessageTopology<TMessage> _messageTopology;
         readonly IList<IRabbitMqPublishTopologySpecification> _specifications;
 
-        public RabbitMqMessagePublishTopology(IMessageTopology<TMessage> messageTopology, IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector)
+        public RabbitMqMessagePublishTopology(IRabbitMqPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology,
+            IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector)
         {
+            _publishTopology = publishTopology;
             _messageTopology = messageTopology;
             ExchangeTypeSelector = exchangeTypeSelector;
 
@@ -83,9 +88,9 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             return new RabbitMqSendSettings(_exchange.ExchangeName, _exchange.ExchangeType, _exchange.Durable, _exchange.AutoDelete);
         }
 
-        public BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options)
+        public BrokerTopology GetBrokerTopology()
         {
-            var builder = new PublishEndpointBrokerTopologyBuilder(options);
+            var builder = new PublishEndpointBrokerTopologyBuilder(_publishTopology.BrokerTopologyOptions);
 
             Apply(builder);
 

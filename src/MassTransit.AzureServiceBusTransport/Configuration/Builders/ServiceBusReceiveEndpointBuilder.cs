@@ -20,17 +20,16 @@ namespace MassTransit.AzureServiceBusTransport.Builders
     using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
-    using NewIdFormatters;
     using Topology;
     using Topology.Builders;
     using Transport;
+    using Util;
 
 
     public class ServiceBusReceiveEndpointBuilder :
         ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly IServiceBusReceiveEndpointConfiguration _configuration;
 
         public ServiceBusReceiveEndpointBuilder(IServiceBusReceiveEndpointConfiguration configuration)
@@ -76,7 +75,7 @@ namespace MassTransit.AzureServiceBusTransport.Builders
                 {
                     byte[] buffer = Encoding.UTF8.GetBytes(subscriptionName);
                     byte[] hash = hasher.ComputeHash(buffer);
-                    hashed = _formatter.Format(hash).Substring(0, 6);
+                    hashed = FormatUtil.Formatter.Format(hash).Substring(0, 6);
                 }
 
                 name = $"{subscriptionName.Substring(0, 43)}-{hashed}";

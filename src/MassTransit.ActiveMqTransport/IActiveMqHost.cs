@@ -21,7 +21,7 @@ namespace MassTransit.ActiveMqTransport
     public interface IActiveMqHost :
         IHost
     {
-        IConnectionCache ConnectionCache { get; }
+        IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         IRetryPolicy ConnectionRetryPolicy { get; }
 

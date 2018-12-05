@@ -20,7 +20,7 @@ namespace MassTransit.Transports.InMemory
     public class InMemoryPublishTransportProvider :
         IPublishTransportProvider
     {
-        readonly InMemoryHost _host;
+        readonly IInMemoryHostControl _host;
         readonly IInMemoryPublishTopology _publishTopology;
         readonly ISendTransportProvider _transportProvider;
 
@@ -28,7 +28,8 @@ namespace MassTransit.Transports.InMemory
         {
             _transportProvider = transportProvider;
             _publishTopology = publishTopology;
-            _host = transportProvider as InMemoryHost;
+            _host = transportProvider as IInMemoryHostControl
+                ?? throw new ArgumentException("The transport provider must be an InMemoryHost", nameof(transportProvider));
         }
 
         public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)

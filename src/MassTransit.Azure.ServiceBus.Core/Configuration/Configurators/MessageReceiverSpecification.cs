@@ -61,11 +61,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
             foreach (var specification in Specifications)
                 specification.Configure(builder);
 
-            ReceivePipeConfigurator.UseFilter(new DeserializeFilter(builder.MessageDeserializer, builder.ConsumePipe));
+            ReceivePipeConfigurator.UseFilter(new DeserializeFilter(_configuration.Serialization.Deserializer, _configuration.ConsumePipe));
 
             IPipe<ReceiveContext> receivePipe = ReceivePipeConfigurator.Build();
 
-            return new ReceivePipe(receivePipe, builder.ConsumePipe);
+            return new ReceivePipe(receivePipe, _configuration.ConsumePipe);
         }
     }
 }

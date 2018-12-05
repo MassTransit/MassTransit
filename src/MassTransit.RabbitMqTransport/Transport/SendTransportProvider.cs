@@ -14,60 +14,33 @@ namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
-    using Configuration;
-    using GreenPipes.Agents;
-    using Integration;
-    using Pipeline;
-    using Topology;
+    using MassTransit.Configuration;
     using Transports;
 
 
     public class SendTransportProvider :
         ISendTransportProvider
     {
-        readonly IRabbitMqReceiveEndpointConfiguration _configuration;
+        readonly IBusConfiguration _busConfiguration;
+        readonly Uri _hostAddress;
 
-        public SendTransportProvider(IRabbitMqReceiveEndpointConfiguration configuration)
+        public SendTransportProvider(IBusConfiguration busConfiguration, Uri hostAddress)
         {
-            _configuration = configuration;
+            _busConfiguration = busConfiguration;
+            _hostAddress = hostAddress;
         }
 
         Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
         {
-            return Task.FromResult(GetSendTransport(address));
-        }
-
-        ISendTransport GetSendTransport(Uri address)
-        {
-            if (!_configuration.BusConfiguration.TryGetHost(address, out var hostConfiguration))
+            if (!_busConfiguration.Hosts.TryGetHost(address, out var hostConfiguration))
             {
-                var hostAddress = _configuration.Host.Address;
-                var builder = new UriBuilder(address) {Host = hostAddress.Host, Port = hostAddress.Port};
+                var builder = new UriBuilder(address) {Host = _hostAddress.Host, Port = _hostAddress.Port};
 
-                if (!_configuration.BusConfiguration.TryGetHost(builder.Uri, out hostConfiguration))
+                if (!_busConfiguration.Hosts.TryGetHost(builder.Uri, out hostConfiguration))
                     throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
             }
 
-            var host = hostConfiguration.Host;
-
-            var settings = host.Topology.SendTopology.GetSendSettings(address);
-
-            var brokerTopology = settings.GetBrokerTopology();
-
-            IAgent<ModelContext> modelSource = GetModelSource(host);
-
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology);
-
-            var transport = new RabbitMqSendTransport(modelSource, configureTopologyFilter, settings.ExchangeName);
-
-            host.Add(transport);
-
-            return transport;
-        }
-
-        protected virtual IAgent<ModelContext> GetModelSource(IRabbitMqHostControl host)
-        {
-            return new RabbitMqModelCache(host, host.ConnectionCache);
+            return hostConfiguration.CreateSendTransport(address);
         }
     }
 }

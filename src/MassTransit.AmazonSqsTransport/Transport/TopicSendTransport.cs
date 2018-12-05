@@ -3,6 +3,7 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Amazon.SimpleNotificationService.Model;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;

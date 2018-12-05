@@ -57,10 +57,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         }
 
         IConnection ConnectionContext.Connection => _context.Connection;
-        public string Description => _context.Description;
         public Uri HostAddress => _context.HostAddress;
         public IAmazonSqsHostTopology Topology => _context.Topology;
-        AmazonSqsHostSettings ConnectionContext.HostSettings => _context.HostSettings;
 
         Task<IAmazonSQS> ConnectionContext.CreateAmazonSqs()
         {

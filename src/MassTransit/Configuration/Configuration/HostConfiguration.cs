@@ -12,20 +12,33 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Configuration
 {
+    using System;
+    using System.Threading.Tasks;
+    using Topology;
     using Transports;
 
 
-    public class HostConfiguration<THost> :
+    public abstract class HostConfiguration<THost> :
         IHostConfiguration
         where THost : IBusHostControl
     {
         readonly THost _host;
 
-        public HostConfiguration(THost host)
+        protected HostConfiguration(THost host)
         {
             _host = host;
+
+            HostAddress = host.Address;
+            Topology = host.Topology;
         }
 
         IBusHostControl IHostConfiguration.Host => _host;
+
+        public Uri HostAddress { get; }
+        public IHostTopology Topology { get; }
+
+        public abstract bool Matches(Uri address);
+
+        public abstract Task<ISendTransport> CreateSendTransport(Uri address);
     }
 }

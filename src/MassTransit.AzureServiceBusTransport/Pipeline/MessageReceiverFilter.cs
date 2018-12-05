@@ -18,7 +18,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using GreenPipes.Agents;
     using Logging;
     using Transport;
-    using Transports;
 
 
     /// <summary>
@@ -31,16 +30,11 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
         readonly IBrokeredMessageReceiver _messageReceiver;
         readonly IReceiveTransportObserver _transportObserver;
-        protected readonly IDeadLetterTransport DeadLetterTransport;
-        protected readonly IErrorTransport ErrorTransport;
 
-        public MessageReceiverFilter(IBrokeredMessageReceiver messageReceiver, IReceiveTransportObserver transportObserver, IDeadLetterTransport deadLetterTransport,
-            IErrorTransport errorTransport)
+        public MessageReceiverFilter(IBrokeredMessageReceiver messageReceiver, IReceiveTransportObserver transportObserver)
         {
             _messageReceiver = messageReceiver;
             _transportObserver = transportObserver;
-            DeadLetterTransport = deadLetterTransport;
-            ErrorTransport = errorTransport;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -83,7 +77,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         protected virtual IReceiver CreateMessageReceiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
         {
-            return new Receiver(context, messageReceiver, DeadLetterTransport, ErrorTransport);
+            return new Receiver(context, messageReceiver);
         }
     }
 }

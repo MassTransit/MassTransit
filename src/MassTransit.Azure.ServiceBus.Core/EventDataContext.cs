@@ -22,7 +22,6 @@ namespace MassTransit.Azure.ServiceBus.Core
         string Offset { get; }
         string PartitionKey { get; }
         long SequenceNumber { get; }
-        long SerializedSizeInBytes { get; }
         IDictionary<string, object> SystemProperties { get; }
         IDictionary<string, object> Properties { get; }
     }

@@ -17,7 +17,7 @@ namespace MassTransit.Topology
 
 
     /// <summary>
-    /// Configures the Consumeing of a message type, allowing filters to be applied
+    /// Configures the Consuming of a message type, allowing filters to be applied
     /// on Consume.
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>

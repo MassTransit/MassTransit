@@ -13,7 +13,6 @@
 namespace MassTransit.Transports.InMemory.Configuration
 {
     using MassTransit.Configuration;
-    using MassTransit.EndpointSpecifications;
     using Topology.Configurators;
 
 

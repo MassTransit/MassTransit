@@ -35,7 +35,7 @@ namespace MassTransit
         /// An address that identifies the host
         /// </summary>
         Uri Address { get; }
-        
+
         IHostTopology Topology { get; }
     }
 }

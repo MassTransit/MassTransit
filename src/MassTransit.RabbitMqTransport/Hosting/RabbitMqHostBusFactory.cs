@@ -47,7 +47,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
                 var host = configurator.Host(_hostSettings);
 
                 if (_log.IsInfoEnabled)
-                    _log.Info($"Configuring Host: {_hostSettings.ToDebugString()}");
+                    _log.Info($"Configuring Host: {_hostSettings.ToDescription()}");
 
                 var serviceConfigurator = new RabbitMqServiceConfigurator(configurator, host);
 

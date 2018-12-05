@@ -18,6 +18,7 @@ namespace MassTransit.HttpTransport.Contexts
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using GreenPipes;
     using GreenPipes.Payloads;
     using Hosting;
@@ -35,19 +36,20 @@ namespace MassTransit.HttpTransport.Contexts
     {
         static readonly ILog _log = Logger.Get<KestrelHttpHostContext>();
 
+        readonly IHttpHostConfiguration _configuration;
         readonly SortedDictionary<string, List<Endpoint>> _endpoints;
         IWebHost _webHost;
         bool _started;
 
-        public KestrelHttpHostContext(HttpHostSettings settings, CancellationToken cancellationToken)
+        public KestrelHttpHostContext(IHttpHostConfiguration configuration, CancellationToken cancellationToken)
             : base(new PayloadCache(), cancellationToken)
         {
-            HostSettings = settings;
+            _configuration = configuration;
 
             _endpoints = new SortedDictionary<string, List<Endpoint>>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public HttpHostSettings HostSettings { get; }
+        public HttpHostSettings HostSettings => _configuration.Settings;
 
         public async Task Stop(CancellationToken cancellationToken)
         {
@@ -73,24 +75,24 @@ namespace MassTransit.HttpTransport.Contexts
             }
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Building Web Host: {0}", HostSettings.Description);
+                _log.DebugFormat("Building Web Host: {0}", _configuration.HostAddress);
 
             _webHost = BuildWebHost();
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting Web Host: {0}", HostSettings.Description);
+                _log.DebugFormat("Starting Web Host: {0}", _configuration.HostAddress);
 
             try
             {
                 await _webHost.StartAsync(cancellationToken).ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Started Web Host: {0}", HostSettings.Description);
+                    _log.DebugFormat("Started Web Host: {0}", _configuration.HostAddress);
             }
             catch (Exception exception)
             {
                 if (_log.IsErrorEnabled)
-                    _log.Error($"Fault Starting Web Host: {HostSettings.Description}", exception);
+                    _log.Error($"Fault Starting Web Host: {_configuration.HostAddress}", exception);
 
                 throw;
             }

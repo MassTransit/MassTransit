@@ -17,7 +17,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     using Contexts;
     using GreenPipes;
     using Logging;
-    using Microsoft.Azure.ServiceBus;
     using Transport;
 
 
@@ -28,9 +27,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
         readonly SendSettings _settings;
 
-        public QueueSendEndpointContextFactory(IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache, IPipe<MessagingFactoryContext> messagingFactoryPipe,
+        public QueueSendEndpointContextFactory(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor, INamespaceContextSupervisor namespaceContextSupervisor, IPipe<MessagingFactoryContext> messagingFactoryPipe,
             IPipe<NamespaceContext> namespacePipe, SendSettings settings)
-            : base(namespaceCache, namespacePipe, messagingFactoryCache, messagingFactoryPipe)
+            : base(namespaceContextSupervisor, namespacePipe, messagingFactoryContextSupervisor, messagingFactoryPipe)
         {
             _settings = settings;
         }

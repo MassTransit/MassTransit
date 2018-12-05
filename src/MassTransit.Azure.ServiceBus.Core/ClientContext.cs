@@ -18,7 +18,6 @@ namespace MassTransit.Azure.ServiceBus.Core
     using GreenPipes;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
-    using Transport;
 
 
     /// <summary>

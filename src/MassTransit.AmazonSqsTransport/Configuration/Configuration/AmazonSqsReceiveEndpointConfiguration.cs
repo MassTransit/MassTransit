@@ -60,6 +60,7 @@
         public IAmazonSqsReceiveEndpointConfigurator Configurator => this;
 
         public IAmazonSqsBusConfiguration BusConfiguration => _hostConfiguration.BusConfiguration;
+        public IAmazonSqsHostConfiguration HostConfiguration => _hostConfiguration;
 
         public IAmazonSqsHostControl Host => _hostConfiguration.Host;
 
@@ -86,7 +87,7 @@
             IAgent consumerAgent;
             if (_hostConfiguration.BusConfiguration.DeployTopologyOnly)
             {
-                var transportReadyFilter = new TransportReadyFilter<ClientContext>(receiveEndpointContext.TransportObservers, InputAddress);
+                var transportReadyFilter = new TransportReadyFilter<ClientContext>(receiveEndpointContext);
                 _clientConfigurator.UseFilter(transportReadyFilter);
 
                 consumerAgent = transportReadyFilter;
@@ -103,7 +104,7 @@
                 consumerAgent = consumerFilter;
             }
 
-            IFilter<ConnectionContext> clientFilter = new ReceiveClientFilter(_clientConfigurator.Build(), _hostConfiguration.Host);
+            IFilter<ConnectionContext> clientFilter = new ReceiveClientFilter(_clientConfigurator.Build());
 
             _connectionConfigurator.UseFilter(clientFilter);
 

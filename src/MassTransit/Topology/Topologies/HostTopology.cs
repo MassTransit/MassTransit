@@ -14,60 +14,61 @@ namespace MassTransit.Topology.Topologies
 {
     using System.Text;
     using Configuration;
-    using EndpointSpecifications;
-    using NewIdFormatters;
     using Util;
 
 
     public abstract class HostTopology :
         IHostTopology
     {
-        protected static readonly INewIdFormatter Formatter = new ZBase32Formatter();
-        readonly ITopologyConfiguration _topologyConfiguration;
+        protected static readonly INewIdFormatter Formatter = FormatUtil.Formatter;
 
-        protected HostTopology(ITopologyConfiguration topologyConfiguration)
+        readonly ITopologyConfiguration _configuration;
+
+        protected HostTopology(ITopologyConfiguration configuration)
         {
-            _topologyConfiguration = topologyConfiguration;
+            _configuration = configuration;
         }
 
         public virtual string CreateTemporaryQueueName(string prefix)
         {
-            var sb = new StringBuilder();
-
             var host = HostMetadataCache.Host;
 
+            var sb = new StringBuilder(host.MachineName.Length + host.ProcessName.Length + prefix.Length + 36);
+
             foreach (var c in host.MachineName)
-                if (char.IsLetterOrDigit(c))
+                if (char.IsLetterOrDigit(c) || c == '_')
                     sb.Append(c);
-                else if (c == '_')
-                    sb.Append(c);
+
             sb.Append('_');
             foreach (var c in host.ProcessName)
-                if (char.IsLetterOrDigit(c))
+                if (char.IsLetterOrDigit(c) || c == '_')
                     sb.Append(c);
-                else if (c == '_')
-                    sb.Append(c);
+
             sb.AppendFormat("_{0}_", prefix);
             sb.Append(NewId.Next().ToString(Formatter));
 
             return sb.ToString();
         }
 
-        public IPublishTopology PublishTopology => _topologyConfiguration.Publish;
+        public IPublishTopology PublishTopology => _configuration.Publish;
+        public ISendTopology SendTopology => _configuration.Send;
 
-        public IMessagePublishTopology<T> Publish<T>() where T : class
+        public IMessagePublishTopology<T> Publish<T>()
+            where T : class
         {
-            return _topologyConfiguration.Publish.GetMessageTopology<T>();
+            return _configuration.Publish.GetMessageTopology<T>();
         }
 
-        public IMessageSendTopology<T> Send<T>() where T : class
+        public IMessageSendTopology<T> Send<T>()
+            where T : class
         {
-            return _topologyConfiguration.Send.GetMessageTopology<T>();
+            return _configuration.Send.GetMessageTopology<T>();
         }
 
-        public IMessageTopology<T> Message<T>() where T : class
+        public IMessageTopology<T> Message<T>()
+            where T : class
         {
-            return _topologyConfiguration.Message.GetMessageTopology<T>();
+            return _configuration.Message.GetMessageTopology<T>();
         }
     }
 }

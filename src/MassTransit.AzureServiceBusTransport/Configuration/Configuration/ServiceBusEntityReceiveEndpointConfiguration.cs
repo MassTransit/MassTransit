@@ -10,7 +10,6 @@
     using GreenPipes.Configurators;
     using Logging;
     using MassTransit.Configuration;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
     using Pipeline;
     using Settings;
@@ -41,6 +40,9 @@
             NamespacePipeConfigurator = new PipeConfigurator<NamespaceContext>();
             MessagingFactoryPipeConfigurator = new PipeConfigurator<MessagingFactoryContext>();
         }
+
+        public IServiceBusBusConfiguration BusConfiguration => _hostConfiguration.BusConfiguration;
+        public IServiceBusHostConfiguration HostConfiguration => _hostConfiguration;
 
         public int MaxConcurrentCalls
         {
@@ -137,7 +139,7 @@
             IAgent consumerAgent;
             if (_hostConfiguration.BusConfiguration.DeployTopologyOnly)
             {
-                var transportReadyFilter = new TransportReadyFilter<ClientContext>(transportObserver, InputAddress);
+                var transportReadyFilter = new TransportReadyFilter<ClientContext>(context);
                 ClientPipeConfigurator.UseFilter(transportReadyFilter);
 
                 consumerAgent = transportReadyFilter;
@@ -149,9 +151,12 @@
                 var errorTransport = CreateErrorTransport(_hostConfiguration.Host);
                 var deadLetterTransport = CreateDeadLetterTransport(_hostConfiguration.Host);
 
+                context.GetOrAddPayload(() => deadLetterTransport);
+                context.GetOrAddPayload(() => errorTransport);
+
                 var receiverFilter = _settings.RequiresSession
-                    ? new MessageSessionReceiverFilter(messageReceiver, transportObserver, deadLetterTransport, errorTransport)
-                    : new MessageReceiverFilter(messageReceiver, transportObserver, deadLetterTransport, errorTransport);
+                    ? new MessageSessionReceiverFilter(messageReceiver, transportObserver)
+                    : new MessageReceiverFilter(messageReceiver, transportObserver);
 
                 ClientPipeConfigurator.UseFilter(receiverFilter);
 
@@ -160,7 +165,7 @@
 
             IPipe<ClientContext> clientPipe = ClientPipeConfigurator.Build();
 
-            var clientCache = CreateClientCache(InputAddress, _hostConfiguration.Host.MessagingFactoryCache, _hostConfiguration.Host.NamespaceCache);
+            var clientCache = CreateClientCache(InputAddress, _hostConfiguration.Host.MessagingFactoryContextSupervisor, _hostConfiguration.Host.NamespaceContextSupervisor);
 
             var transport = new ReceiveTransport(_hostConfiguration.Host, _settings, clientCache, clientPipe, context);
 
@@ -169,15 +174,15 @@
             return CreateReceiveEndpoint(_settings.Name, transport, context);
         }
 
-        protected abstract IErrorTransport CreateErrorTransport(ServiceBusHost host);
-        protected abstract IDeadLetterTransport CreateDeadLetterTransport(ServiceBusHost host);
+        protected abstract IErrorTransport CreateErrorTransport(IServiceBusHostControl host);
+        protected abstract IDeadLetterTransport CreateDeadLetterTransport(IServiceBusHostControl host);
 
-        protected abstract IClientCache CreateClientCache(Uri inputAddress, IMessagingFactoryCache messagingFactoryCache, INamespaceCache namespaceCache);
+        protected abstract IClientContextSupervisor CreateClientCache(Uri inputAddress, IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor, INamespaceContextSupervisor namespaceContextSupervisor);
 
         protected abstract IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings,
             IPipe<NamespaceContext> namespacePipe);
 
-        protected IPipeContextSource<SendEndpointContext> CreateSendEndpointContextCache(ServiceBusHost host, SendSettings settings)
+        protected ISendEndpointContextSupervisor CreateSendEndpointContextCache(IServiceBusHostControl host, SendSettings settings)
         {
             var brokerTopology = settings.GetBrokerTopology();
 
@@ -185,7 +190,7 @@
 
             IPipeContextFactory<SendEndpointContext> factory = CreateSendEndpointContextFactory(host, settings, namespacePipe);
 
-            var cache = new SendEndpointContextCache(factory);
+            var cache = new SendEndpointContextSupervisor(factory);
             host.Add(cache);
 
             return cache;

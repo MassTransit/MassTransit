@@ -20,7 +20,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
-    using NewIdFormatters;
     using Specifications;
     using Util;
 
@@ -29,7 +28,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         ConsumeTopology,
         IActiveMqConsumeTopologyConfigurator
     {
-        static readonly INewIdFormatter _formatter = new ZBase32Formatter();
         readonly IMessageTopology _messageTopology;
         readonly IActiveMqPublishTopology _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
@@ -106,7 +104,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
                     sb.Append(c);
 
             sb.Append('-');
-            sb.Append(NewId.Next().ToString(_formatter));
+            sb.Append(NewId.Next().ToString(FormatUtil.Formatter));
 
             return sb.ToString();
         }

@@ -15,6 +15,6 @@
         public static string SharedAccessKey =>
             TestContext.Parameters.Exists(nameof(SharedAccessKey))
                 ? TestContext.Parameters.Get(nameof(SharedAccessKey))
-                : "u07PCkrzic95bk6UtpDXl8YdHmV40WtJihoGz2CnMMQ=";
+                : "YfN2b8jT84759bZy5sMhd0P+3K/qHqO81I5VrNrJYkI=";
     }
 }

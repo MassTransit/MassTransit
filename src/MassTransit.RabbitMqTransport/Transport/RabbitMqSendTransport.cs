@@ -15,13 +15,12 @@ namespace MassTransit.RabbitMqTransport.Transport
     using System;
     using System.Collections.Generic;
     using System.Globalization;
-    using System.Linq;
-    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using Integration;
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline.Observables;
@@ -37,18 +36,18 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         readonly string _exchange;
         readonly IFilter<ModelContext> _filter;
-        readonly IAgent<ModelContext> _modelSource;
+        readonly IModelContextSupervisor _modelContextSupervisor;
         readonly SendObservable _observers;
 
-        public RabbitMqSendTransport(IAgent<ModelContext> modelSource, IFilter<ModelContext> preSendFilter, string exchange)
+        public RabbitMqSendTransport(IModelContextSupervisor modelContextSupervisor, IFilter<ModelContext> preSendFilter, string exchange)
         {
-            _modelSource = modelSource;
+            _modelContextSupervisor = modelContextSupervisor;
             _filter = preSendFilter;
             _exchange = exchange;
 
             _observers = new SendObservable();
 
-            Add(modelSource);
+            Add(modelContextSupervisor);
         }
 
         Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
@@ -79,24 +78,14 @@ namespace MassTransit.RabbitMqTransport.Transport
                         if (context.TryGetPayload(out PublishContext publishContext))
                             context.Mandatory = context.Mandatory || publishContext.Mandatory;
 
+                        if (properties.Headers == null)
+                            properties.Headers = new Dictionary<string, object>();
+
                         properties.ContentType = context.ContentType.MediaType;
 
-                        KeyValuePair<string, object>[] headers = context.Headers.GetAll()
-                            .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().GetTypeInfo().IsValueType))
-                            .ToArray();
-
-                        if (properties.Headers == null)
-                            properties.Headers = new Dictionary<string, object>(headers.Length);
-
-                        foreach (KeyValuePair<string, object> header in headers)
-                        {
-                            if (properties.Headers.ContainsKey(header.Key))
-                                continue;
-
-                            properties.SetHeader(header.Key, header.Value);
-                        }
-
                         properties.Headers["Content-Type"] = context.ContentType.MediaType;
+
+                        properties.Headers.SetTextHeaders(context.Headers, (_, text) => text);
 
                         properties.Persistent = context.Durable;
 
@@ -131,7 +120,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                 });
             });
 
-            await _modelSource.Send(modelPipe, cancellationToken).ConfigureAwait(false);
+            await _modelContextSupervisor.Send(modelPipe, cancellationToken).ConfigureAwait(false);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

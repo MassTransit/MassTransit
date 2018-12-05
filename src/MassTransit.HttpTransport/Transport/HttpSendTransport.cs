@@ -36,14 +36,14 @@ namespace MassTransit.HttpTransport.Transport
     {
         static readonly ILog _log = Logger.Get<HttpSendTransport>();
 
-        readonly IClientCache _clientCache;
+        readonly IClientContextSupervisor _clientContextSupervisor;
         readonly SendObservable _observers;
         readonly HttpSendSettings _sendSettings;
         readonly ReceiveEndpointContext _topology;
 
-        public HttpSendTransport(IClientCache clientCache, HttpSendSettings sendSettings, ReceiveEndpointContext topology)
+        public HttpSendTransport(IClientContextSupervisor clientContextSupervisor, HttpSendSettings sendSettings, ReceiveEndpointContext topology)
         {
-            _clientCache = clientCache;
+            _clientContextSupervisor = clientContextSupervisor;
             _sendSettings = sendSettings;
             _topology = topology;
             _observers = new SendObservable();
@@ -59,8 +59,6 @@ namespace MassTransit.HttpTransport.Transport
         {
             IPipe<ClientContext> clientPipe = Pipe.New<ClientContext>(p =>
             {
-                //TODO: p.UseFilter(_filter);
-
                 p.UseExecuteAsync(async clientContext =>
                 {
                     var context = new HttpSendContextImpl<T>(message, cancellationToken);
@@ -133,7 +131,7 @@ namespace MassTransit.HttpTransport.Transport
                 });
             });
 
-            await _clientCache.Send(clientPipe, cancellationToken).ConfigureAwait(false);
+            await _clientContextSupervisor.Send(clientPipe, cancellationToken).ConfigureAwait(false);
         }
 
         public Task Move(ReceiveContext context, IPipe<SendContext> pipe)

@@ -21,7 +21,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
     using MassTransit.Builders;
     using Topology.Configuration;
     using Topology.Settings;
-    using Transport;
 
 
     public class AmazonSqsBusFactoryConfigurator :
@@ -90,13 +89,9 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 
         public IAmazonSqsHost Host(AmazonSqsHostSettings settings)
         {
-            var hostTopology = _configuration.CreateHostTopology(settings.HostAddress);
+            var hostConfiguration = _configuration.CreateHostConfiguration(settings);
 
-            var host = new AmazonSqsHost(_configuration, settings, hostTopology);
-
-            _configuration.CreateHostConfiguration(host);
-
-            return host;
+            return hostConfiguration.Host;
         }
 
         void IAmazonSqsBusFactoryConfigurator.Send<T>(Action<IAmazonSqsMessageSendTopologyConfigurator<T>> configureTopology)

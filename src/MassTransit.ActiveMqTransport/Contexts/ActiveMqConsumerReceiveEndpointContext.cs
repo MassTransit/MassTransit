@@ -14,7 +14,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
 {
     using Configuration;
     using Context;
-    using Topology;
     using Topology.Builders;
     using Transport;
 
@@ -24,15 +23,12 @@ namespace MassTransit.ActiveMqTransport.Contexts
         ActiveMqReceiveEndpointContext
     {
         readonly IActiveMqReceiveEndpointConfiguration _configuration;
-        readonly IActiveMqPublishTopology _publishTopology;
 
         public ActiveMqConsumerReceiveEndpointContext(IActiveMqReceiveEndpointConfiguration configuration, BrokerTopology brokerTopology)
             : base(configuration)
         {
             _configuration = configuration;
             BrokerTopology = brokerTopology;
-
-            _publishTopology = configuration.Topology.Publish;
         }
 
         public BrokerTopology BrokerTopology { get; }
@@ -54,7 +50,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_configuration.Host, _publishTopology);
+            return new PublishTransportProvider(_configuration.HostConfiguration);
         }
     }
 }

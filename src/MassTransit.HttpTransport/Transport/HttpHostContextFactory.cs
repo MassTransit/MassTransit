@@ -14,10 +14,10 @@ namespace MassTransit.HttpTransport.Transport
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Hosting;
     using Logging;
 
 
@@ -25,24 +25,21 @@ namespace MassTransit.HttpTransport.Transport
         IPipeContextFactory<HttpHostContext>
     {
         static readonly ILog _log = Logger.Get<HttpHostContextFactory>();
-        readonly HttpHostSettings _settings;
+        readonly IHttpHostConfiguration _configuration;
 
-        public HttpHostContextFactory(HttpHostSettings settings)
+        public HttpHostContextFactory(IHttpHostConfiguration configuration)
         {
-            _settings = settings;
+            _configuration = configuration;
         }
 
         IPipeContextAgent<HttpHostContext> IPipeContextFactory<HttpHostContext>.CreateContext(ISupervisor supervisor)
         {
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Connecting: {0}", _settings.Description);
+                _log.DebugFormat("Created: {0}", _configuration.HostAddress);
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Connected: {0} (address: {1}, local: {2}", _settings.Description, _settings.Host, _settings.Port);
+            HttpHostContext hostContext = new KestrelHttpHostContext(_configuration, supervisor.Stopped);
 
-            HttpHostContext hostContext = new KestrelHttpHostContext(_settings, supervisor.Stopped);
-
-            hostContext.GetOrAddPayload(() => _settings);
+            hostContext.GetOrAddPayload(() => _configuration);
 
             IPipeContextAgent<HttpHostContext> contextHandle = supervisor.AddContext(hostContext);
 

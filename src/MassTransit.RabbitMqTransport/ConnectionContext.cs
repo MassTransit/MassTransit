@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
     using RabbitMQ.Client;
@@ -35,22 +36,28 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         string Description { get; }
 
-        /// <summary>
-        /// The Host Address for this connection
-        /// </summary>
         Uri HostAddress { get; }
 
-        IRabbitMqHostTopology Topology { get; }
-        
+        bool PublisherConfirmation { get; }
+
         /// <summary>
-        /// The host settings for the connection
+        /// The time to wait during shutdown of any dependencies before giving up and killing things
         /// </summary>
-        RabbitMqHostSettings HostSettings { get; }
+        TimeSpan StopTimeout { get; }
+
+        IRabbitMqHostTopology Topology { get; }
 
         /// <summary>
         /// Create a model on the connection
         /// </summary>
         /// <returns></returns>
-        Task<IModel> CreateModel();
+        Task<IModel> CreateModel(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Create a channel, and return the <see cref="ModelContext"/>.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ModelContext> CreateModelContext(CancellationToken cancellationToken);
     }
 }
