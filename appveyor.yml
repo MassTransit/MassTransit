@@ -53,6 +53,7 @@ test:
   - src/Persistence/MassTransit.NHibernateIntegration.Tests/bin/Release/net461/MassTransit.NHibernateIntegration.Tests.dll
   - src/Persistence/MassTransit.DocumentDbIntegration.Tests/bin/Release/net452/MassTransit.DocumentDbIntegration.Tests.dll
   - src/MassTransit.HttpTransport.Tests/bin/Release/net452/MassTransit.HttpTransport.Tests.dll
+  - src/MassTransit.SignalR.Tests/bin/Release/netcoreapp2.2/MassTransit.SignalR.Tests.dll
   categories:
     except:
     - Flakey
