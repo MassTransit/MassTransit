@@ -70,7 +70,7 @@ namespace MassTransit.ApplicationInsights
                 {
                     await next.Send(context).ConfigureAwait(false);
 
-                    _telemetryClient.StopOperation(operation);
+                    operation.Telemetry.Success = true;
                 }
                 catch (Exception ex)
                 {
@@ -79,6 +79,10 @@ namespace MassTransit.ApplicationInsights
                     operation.Telemetry.Success = false;
 
                     throw;
+                }
+                finally
+                {
+                     _telemetryClient.StopOperation(operation);
                 }
             }
         }
