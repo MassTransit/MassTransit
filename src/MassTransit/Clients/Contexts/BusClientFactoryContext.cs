@@ -40,6 +40,8 @@ namespace MassTransit.Clients.Contexts
             return _bus.ConnectSendObserver(observer);
         }
 
+        public Uri HostAddress => _bus.HostAddress;
+
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             return _bus.GetSendEndpoint(address);

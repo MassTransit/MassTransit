@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework
 {
@@ -152,10 +152,10 @@ namespace MassTransit.TestFramework
 
         public void AddConsumeTask(Task task)
         {
-
         }
 
-        public Task RespondAsync<T>(T message) where T : class
+        public Task RespondAsync<T>(T message)
+            where T : class
         {
             throw new NotImplementedException();
         }
@@ -165,27 +165,32 @@ namespace MassTransit.TestFramework
             throw new NotImplementedException();
         }
 
-        public Task RespondAsync<T>(object values) where T : class
+        public Task RespondAsync<T>(object values)
+            where T : class
         {
             throw new NotImplementedException();
         }
 
-        public Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe) where T : class
+        public Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe)
+            where T : class
         {
             throw new NotImplementedException();
         }
 
-        public Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe) where T : class
+        public Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe)
+            where T : class
         {
             throw new NotImplementedException();
         }
 
-        public Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe) where T : class
+        public Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
+            where T : class
         {
             throw new NotImplementedException();
         }
 
-        public Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe) where T : class
+        public Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe)
+            where T : class
         {
             throw new NotImplementedException();
         }
@@ -205,17 +210,21 @@ namespace MassTransit.TestFramework
             throw new NotImplementedException();
         }
 
-        public void Respond<T>(T message) where T : class
+        public void Respond<T>(T message)
+            where T : class
         {
             throw new NotImplementedException();
         }
+
+        public Uri HostAddress => throw new NotImplementedException();
 
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             throw new NotImplementedException();
         }
 
-        public async Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
+        public async Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+            where T : class
         {
         }
 
@@ -248,7 +257,7 @@ namespace MassTransit.TestFramework
     }
 
 
-    public class TestReceiveContext : 
+    public class TestReceiveContext :
         BaseReceiveContext
     {
         public TestReceiveContext(Uri sourceAddress)

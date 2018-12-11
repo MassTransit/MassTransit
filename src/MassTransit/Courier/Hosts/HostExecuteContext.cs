@@ -281,6 +281,8 @@ namespace MassTransit.Courier.Hosts
             return Faulted(exception);
         }
 
+        Uri ISendEndpointProvider.HostAddress => _context.HostAddress;
+
         Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
             return _context.GetSendEndpoint(address);
