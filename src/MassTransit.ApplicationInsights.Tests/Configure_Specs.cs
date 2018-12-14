@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ApplicationInsights.Tests
 {
+    using System;
     using Microsoft.ApplicationInsights;
+    using Moq;
     using NUnit.Framework;
 
 
@@ -24,13 +26,50 @@ namespace MassTransit.ApplicationInsights.Tests
         {
             var telemetryClient = new TelemetryClient();
 
-            IBusControl CreateBus() =>
+            void CreateBus() =>
                 Bus.Factory.CreateUsingInMemory(x =>
                 {
                     x.UseApplicationInsights(telemetryClient, (operation, context) => operation.Telemetry.Properties.Add("prop", "v"));
                 });
 
-            Assert.DoesNotThrow(() => CreateBus());
+            Assert.DoesNotThrow(CreateBus);
+        }
+
+        [Test]
+        public void Bus_should_be_created_when_use_ApplicationInsightsOnPublish_extension()
+        {
+            var telemetryClient = new TelemetryClient();
+
+            void CreateBus() =>
+                Bus.Factory.CreateUsingInMemory(x =>
+                {
+                    x.UseApplicationInsightsOnPublish(
+                        telemetryClient,
+                        (holder, context) =>
+                        {
+                            holder.Telemetry.Properties.Add("key", "value");
+                        });
+                });
+
+            Assert.DoesNotThrow(CreateBus);
+        }
+
+        [Test]
+        public void Should_add_an_ApplicationInsightsPublishFilter_to_the_pipe_configurator()
+        {
+            // Arrange.
+            var pipelineConfiguratorMock = new Mock<IPublishPipelineConfigurator>();
+
+            pipelineConfiguratorMock.Setup(c => c.ConfigurePublish(It.IsAny<Action<IPublishPipeConfigurator>>()));
+
+            var pipelineConfigurator = pipelineConfiguratorMock.Object;
+            var telemetryClient = new TelemetryClient();
+
+            // Act.
+            pipelineConfigurator.UseApplicationInsightsOnPublish(telemetryClient);
+
+            // Assert.
+            pipelineConfiguratorMock.Verify(c => c.ConfigurePublish(It.IsAny<Action<IPublishPipeConfigurator>>()), Times.Once);
         }
     }
 }

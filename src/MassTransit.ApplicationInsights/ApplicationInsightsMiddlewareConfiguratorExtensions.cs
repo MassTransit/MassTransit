@@ -35,5 +35,38 @@ namespace MassTransit.ApplicationInsights
         {
             configurator.AddPipeSpecification(new ApplicationInsightsSpecification<T>(telemetryClient, configureOperation));
         }
+
+        /// <summary>
+        /// Add support for ApplicationInsights to the pipeline, which will be used to track all message publication.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="telemetryClient">Telemetry client</param>
+        /// <param name="configureOperation">Add additional information to operation</param>
+        /// <typeparam name="T"></typeparam>
+        public static void UseApplicationInsightsOnPublish<T>(this IPipeConfigurator<T> configurator,
+            TelemetryClient telemetryClient,
+            Action<IOperationHolder<DependencyTelemetry>, T> configureOperation = null)
+            where T : class, PublishContext
+        {
+
+            configurator.AddPipeSpecification(new ApplicationInsightsPublishSpecification<T>(telemetryClient, configureOperation));
+        }
+
+        /// <summary>
+        /// Add support for ApplicationInsights to the pipeline, which will be used to track all message publication.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="telemetryClient">Telemetry client</param>
+        /// <param name="configureOperation">Add additional information to operation</param>
+        public static void UseApplicationInsightsOnPublish(this IPublishPipelineConfigurator configurator,
+            TelemetryClient telemetryClient,
+            Action<IOperationHolder<DependencyTelemetry>, PublishContext> configureOperation = null)
+        {
+            configurator.ConfigurePublish(pipeConfigurator =>
+            {
+                var specification = new ApplicationInsightsPublishSpecification<PublishContext>(telemetryClient, configureOperation);
+                pipeConfigurator.AddPipeSpecification(specification);
+            });
+        }
     }
 }
