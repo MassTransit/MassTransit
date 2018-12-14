@@ -22,7 +22,7 @@ namespace MassTransit.ApplicationInsights.Tests
     public class Configure_Specs
     {
         [Test]
-        public void Test()
+        public void Bus_should_be_created_when_use_ApplicationInsights_extension()
         {
             var telemetryClient = new TelemetryClient();
 
@@ -55,13 +55,10 @@ namespace MassTransit.ApplicationInsights.Tests
         }
 
         [Test]
-        public void Should_add_an_ApplicationInsightsPublishFilter_to_the_pipe_configurator()
+        public void Should_call_ConfigurePublish_on_the_given_pipeline_configurator()
         {
             // Arrange.
             var pipelineConfiguratorMock = new Mock<IPublishPipelineConfigurator>();
-
-            pipelineConfiguratorMock.Setup(c => c.ConfigurePublish(It.IsAny<Action<IPublishPipeConfigurator>>()));
-
             var pipelineConfigurator = pipelineConfiguratorMock.Object;
             var telemetryClient = new TelemetryClient();
 
