@@ -244,8 +244,8 @@ namespace MassTransit.Tests.Conventional
             await Bus.Publish<MessageA>(new { Value = "Hello" });
             await Bus.Publish<MessageB>(new { Name = "World" });
 
-            Assert.That(async () => await _receivedA.Task.WithTimeout(TimeSpan.FromSeconds(3)), Throws.TypeOf<TaskCanceledException>());
-            Assert.That(async () => await _receivedB.Task.WithTimeout(TimeSpan.FromSeconds(3)), Throws.TypeOf<TaskCanceledException>());
+            Assert.That(async () => await _receivedA.Task.WithTimeout(TimeSpan.FromSeconds(3)), Throws.TypeOf<OperationCanceledException>());
+            Assert.That(async () => await _receivedB.Task.WithTimeout(TimeSpan.FromSeconds(3)), Throws.TypeOf<OperationCanceledException>());
         }
     }
 }

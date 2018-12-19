@@ -17,6 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="2.1.3" />
-    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.7.2" />
+    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.8.1" />
   </ItemGroup>
 </Project>

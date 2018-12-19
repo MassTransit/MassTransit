@@ -9,7 +9,7 @@
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.LamarIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Lamar" Version="1.1.2" />
+    <PackageReference Include="Lamar" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />

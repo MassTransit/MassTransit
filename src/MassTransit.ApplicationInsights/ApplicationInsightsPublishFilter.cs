@@ -20,22 +20,19 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
 
-
-    public class ApplicationInsightsFilter<T> :
-        IFilter<T>
-        where T : class, ConsumeContext
+    public class ApplicationInsightsPublishFilter<T> : IFilter<T> where T : class, PublishContext
     {
         const string MessageId = nameof(MessageId);
         const string ConversationId = nameof(ConversationId);
         const string CorrelationId = nameof(CorrelationId);
         const string RequestId = nameof(RequestId);
 
-        const string StepName = "MassTransit:Consumer";
+        const string StepName = "MassTransit:Publisher";
 
         readonly TelemetryClient _telemetryClient;
-        readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
+        readonly Action<IOperationHolder<DependencyTelemetry>, T> _configureOperation;
 
-        public ApplicationInsightsFilter(TelemetryClient telemetryClient, Action<IOperationHolder<RequestTelemetry>, T> configureOperation)
+        public ApplicationInsightsPublishFilter(TelemetryClient telemetryClient, Action<IOperationHolder<DependencyTelemetry>, T> configureOperation)
         {
             _telemetryClient = telemetryClient;
             _configureOperation = configureOperation;
@@ -43,14 +40,15 @@ namespace MassTransit.ApplicationInsights
 
         public void Probe(ProbeContext context)
         {
-            context.CreateFilterScope("ApplicationInsightsFilter");
+            context.CreateFilterScope(nameof(ApplicationInsightsPublishFilter<T>));
         }
 
         public async Task Send(T context, IPipe<T> next)
         {
-            var messageType = context.SupportedMessageTypes.FirstOrDefault() ?? "Unknown";
+            var contextType = context.GetType();
+            var messageType = contextType.GetGenericArguments().FirstOrDefault();
 
-            using (IOperationHolder<RequestTelemetry> operation = _telemetryClient.StartOperation<RequestTelemetry>($"{StepName} {messageType}"))
+            using (var operation = _telemetryClient.StartOperation<DependencyTelemetry>($"{StepName} {messageType?.FullName ?? "Unknown"}"))
             {
                 if (context.MessageId.HasValue)
                     operation.Telemetry.Properties.Add(MessageId, context.MessageId.Value.ToString());
@@ -70,11 +68,10 @@ namespace MassTransit.ApplicationInsights
                 {
                     await next.Send(context).ConfigureAwait(false);
 
-                    operation.Telemetry.Success = true;
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    _telemetryClient.TrackException(ex, operation.Telemetry.Properties);
+                    _telemetryClient.TrackException(e, operation.Telemetry.Properties);
 
                     operation.Telemetry.Success = false;
 
@@ -82,7 +79,7 @@ namespace MassTransit.ApplicationInsights
                 }
                 finally
                 {
-                     _telemetryClient.StopOperation(operation);
+                    _telemetryClient.StopOperation(operation);
                 }
             }
         }
