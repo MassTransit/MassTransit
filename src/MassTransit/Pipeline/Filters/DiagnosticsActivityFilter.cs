@@ -40,7 +40,7 @@ namespace MassTransit.Pipeline.Filters
 
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             finally
             {
@@ -54,7 +54,7 @@ namespace MassTransit.Pipeline.Filters
 
             try
             {
-                await next.Send(context);
+                await next.Send(context).ConfigureAwait(false);
             }
             finally
             {
