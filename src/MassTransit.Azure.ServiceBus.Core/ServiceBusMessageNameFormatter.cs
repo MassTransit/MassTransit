@@ -23,7 +23,7 @@ namespace MassTransit.Azure.ServiceBus.Core
 
         public ServiceBusMessageNameFormatter()
         {
-            _formatter = new DefaultMessageNameFormatter("::", "--", "/", "-");
+            _formatter = new DefaultMessageNameFormatter("---", "--", "/", "-");
         }
 
         public MessageName GetMessageName(Type type)
