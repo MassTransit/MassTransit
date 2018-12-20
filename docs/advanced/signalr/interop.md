@@ -9,7 +9,7 @@ To publish a message from a backend service (eg. console app, topshelf):
 ```csharp
 await busControl.Publish<All<ChatHub>>(new
 {
-    Messages = protocols.ToProtocolDictionary("ReceiveMessage", new object[] { "backend-process", "Hello" })
+    Messages = protocols.ToProtocolDictionary("broadcastMessage", new object[] { "backend-process", "Hello" })
 });
 ```
 You are done!
