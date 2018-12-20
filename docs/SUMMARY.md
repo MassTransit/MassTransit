@@ -102,12 +102,12 @@
 * [Transactions](advanced/transactions.md)
 * [Interoperability](advanced/interoperability.md)
   * [Encrypted Messages](advanced/interoperability/encrypted-messages.md)
-* [SignalR](signalr/README.md)
-  * [Quick Start](signalr/quickstart.md)
-  * [Hub Endpoints](signalr/hub_endpoints.md)
-  * [Interop](signalr/interop.md)
-  * [Sample](signalr/sample.md)
-  * [Considerations](signalr/considerations.md)
+* [SignalR](advanced/signalr/README.md)
+  * [Quick Start](advanced/signalr/quickstart.md)
+  * [Hub Endpoints](advanced/signalr/hub_endpoints.md)
+  * [Interop](advanced/signalr/interop.md)
+  * [Sample](advanced/signalr/sample.md)
+  * [Considerations](advanced/signalr/considerations.md)
 
 ## Troubleshooting
 
