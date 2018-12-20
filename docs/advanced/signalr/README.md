@@ -15,23 +15,8 @@ MassTransit offers a package which provides an easy option to get a SignalR Back
   * ActiveMq
   * Azure Service Bus
 
-* [Just scaleout already](quickstart.md)
+* [Quick Start](quickstart.md)
 * [Hub Endpoints](hub_endpoints.md)
 * [Interop](interop.md)
 * [Sample](sample.md)
 * [Considerations](considerations.md)
-
-- dotnet run --launch-profile sample1
-- dotnet run --launch-profile sample2
-make sure rabbitmq is running on localhost as well with guest,guest creds
-
-then go to each server in different browser.
-
-also open the MassTransit.SignalR.SampleConsole folder and run
-- dotnet run
-
-
-
-
-- mention this in documentation: https://docs.microsoft.com/en-us/aspnet/signalr/overview/performance/scaleout-in-signalr#limitations
-- also mention sticky sessions (https://github.com/aspnet/SignalR/issues/2002)
