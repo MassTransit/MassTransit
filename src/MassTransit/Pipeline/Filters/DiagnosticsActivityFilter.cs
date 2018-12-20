@@ -50,7 +50,7 @@ namespace MassTransit.Pipeline.Filters
 
         public async Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
-            var activity = StartIfEnabled(_diagnosticSource, "Consuming Message", new {context}, context);
+            var activity = StartIfEnabled(_diagnosticSource, $"Consuming Message", new {context}, context);
 
             try
             {
@@ -69,7 +69,7 @@ namespace MassTransit.Pipeline.Filters
 
         static Activity StartIfEnabled(DiagnosticSource source, string name, object args, SendContext context)
         {
-            if (!source.IsEnabled(name))
+            if (!source.IsEnabled(name) || context.TryGetPayload<Activity>(out _))
                 return null;
 
             var activity = new Activity(name)
@@ -84,7 +84,7 @@ namespace MassTransit.Pipeline.Filters
 
             Inject(context, activity);
 
-            return activity;
+            return context.AddOrUpdatePayload(() => activity, a => activity);
         }
 
         static void Inject(SendContext context, Activity activity)
@@ -99,7 +99,7 @@ namespace MassTransit.Pipeline.Filters
 
         static Activity StartIfEnabled(DiagnosticSource source, string name, object args, ConsumeContext context)
         {
-            if (!source.IsEnabled(name))
+            if (!source.IsEnabled(name) || context.TryGetPayload<Activity>(out _))
                 return null;
 
             var activity = new Activity(name)
@@ -118,7 +118,7 @@ namespace MassTransit.Pipeline.Filters
 
             source.StartActivity(activity, args ?? new { });
 
-            return activity;
+            return context.AddOrUpdatePayload(() => activity, a => activity);
         }
 
         static void Extract(ConsumeContext context, Activity activity)
