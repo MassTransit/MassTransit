@@ -4,7 +4,11 @@ We've included a sample ASP.NET Core project, and backend console app to show in
 
 ## MassTransit.SignalR.Sample
 
-A near identical copy of the [ASP.NET Core SignalR Tutorial](https://docs.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-2.1&tabs=visual-studio), but with the MassTransit backplane registration included. Plus two run profile to simulate scaleout.
+This [chat sample](https://github.com/aspnet/SignalR-samples/tree/master/ChatSample) was used, which is nearly identical to the [tutorial here](https://docs.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-2.2&tabs=visual-studio), except the only different is it's stripped down to the bare minimum (no razor Pages, bootstrap or jquery libraries).
+
+The other difference is the javascript client callback method name is "ReceiveMessage" versus "broadcastMessage", but both samples are nearly the same. and the hub route is /chat versus /chatHub.
+
+The other addition we added is in the Properties/launchSettings.json, which lets us start 2 profiles on different ports. Then helps simulate horizontal scaling.
 
 ### Dotnet Run
 

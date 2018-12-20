@@ -1,14 +1,10 @@
 ﻿using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MassTransit.SignalR.Sample.HostedServices
 {
-    public class BusService :
-    IHostedService
+    public class BusService : IHostedService
     {
         private readonly IBusControl _busControl;
 

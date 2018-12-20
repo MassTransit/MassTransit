@@ -1,49 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using MassTransit.ExtensionsDependencyInjectionIntegration;
-using Microsoft.Extensions.DependencyInjection;
-using MassTransit.SignalR.Sample.Hubs;
-using Microsoft.Extensions.Hosting;
-using MassTransit.SignalR.Sample.HostedServices;
-using Microsoft.AspNetCore.SignalR;
-using MassTransit.SignalR.Consumers;
-using MassTransit.SignalR.Contracts;
+﻿using System;
 using MassTransit.RabbitMqTransport;
+using MassTransit.SignalR.Contracts;
+using MassTransit.SignalR.Sample.HostedServices;
+using MassTransit.SignalR.Sample.Hubs;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace MassTransit.SignalR.Sample
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
-
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
             services.AddSignalR();
-                
+
             services.AddMassTransitBackplane(out var hubConsumers, typeof(Startup).Assembly);
 
             services.AddSingleton(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
@@ -54,7 +27,7 @@ namespace MassTransit.SignalR.Sample
                     h.Password("guest");
                 });
 
-                cfg.CreateBackplaneEndpoints<IRabbitMqReceiveEndpointConfigurator>(provider, host, hubConsumers, e=>
+                cfg.CreateBackplaneEndpoints<IRabbitMqReceiveEndpointConfigurator>(provider, host, hubConsumers, e =>
                 {
                     e.AutoDelete = true;
                     e.Durable = false;
@@ -70,28 +43,19 @@ namespace MassTransit.SignalR.Sample
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseHsts();
-            }
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseCookiePolicy();
+            app.UseFileServer();
 
             app.UseSignalR(routes =>
             {
-                routes.MapHub<ChatHub>("/chatHub");
+                routes.MapHub<ChatHub>("/chat");
             });
-
-            app.UseMvc();
         }
     }
 }

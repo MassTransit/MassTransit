@@ -37,7 +37,7 @@ namespace MassTransit.SignalR.SampleConsole
 
                 await busControl.Publish<All<ChatHub>>(new
                 {
-                    Messages = protocols.ToProtocolDictionary("ReceiveMessage", new object[] { "backend-process", value })
+                    Messages = protocols.ToProtocolDictionary("broadcastMessage", new object[] { "backend-process", value })
                 });
             }
             while (true);

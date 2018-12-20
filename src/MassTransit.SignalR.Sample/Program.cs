@@ -14,15 +14,11 @@ namespace MassTransit.SignalR.Sample
     {
         public static void Main(string[] args)
         {
-            var configuration = new ConfigurationBuilder()
-                .AddCommandLine(args)
-                .Build();
-            CreateWebHostBuilder(args, configuration).Build().Run();
+            CreateWebHostBuilder(args).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args, IConfiguration configuration) =>
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseConfiguration(configuration)
                 .UseStartup<Startup>();
     }
 }
