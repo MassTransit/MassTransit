@@ -53,7 +53,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
         /// Create a host configuration, by adding a host to the bus
         /// </summary>
         /// <param name="settings"></param>
-        /// <param name="hostTopology"></param>
         /// <returns></returns>
         IAmazonSqsHostConfiguration CreateHostConfiguration(AmazonSqsHostSettings settings);
 

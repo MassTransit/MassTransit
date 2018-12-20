@@ -20,7 +20,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology
     {
         new IServiceBusPublishTopology PublishTopology { get; }
 
-        IServiceBusSendTopology SendTopology { get; }
+        new IServiceBusSendTopology SendTopology { get; }
 
         new IServiceBusMessagePublishTopology<T> Publish<T>()
             where T : class;

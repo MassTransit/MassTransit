@@ -74,7 +74,9 @@ namespace MassTransit.ActiveMqTransport.Transport
 
                     connectionContext.Connection.ExceptionListener += HandleException;
 
+                #pragma warning disable 4014
                     asyncContext.Completed.ContinueWith(task =>
+                #pragma warning restore 4014
                     {
                         connectionContext.Connection.ExceptionListener -= HandleException;
                     });

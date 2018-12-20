@@ -18,12 +18,6 @@
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="3.0.2" />
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Xml" />
     <ProjectReference Include="..\MassTransit.Azure.ServiceBus.Core\MassTransit.Azure.ServiceBus.Core.csproj" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
     <ProjectReference Include="..\Loggers\MassTransit.ExtensionsLoggingIntegration\MassTransit.ExtensionsLoggingIntegration.csproj" />

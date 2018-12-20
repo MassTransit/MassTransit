@@ -22,7 +22,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
     {
         new IAmazonSqsPublishTopology PublishTopology { get; }
 
-        IAmazonSqsSendTopology SendTopology { get; }
+        new IAmazonSqsSendTopology SendTopology { get; }
 
         /// <summary>
         /// Returns the destination address for the specified exchange

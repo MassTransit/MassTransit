@@ -21,7 +21,7 @@ namespace MassTransit.RabbitMqTransport.Topology
     {
         new IRabbitMqPublishTopology PublishTopology { get; }
 
-        IRabbitMqSendTopology SendTopology { get; }
+        new IRabbitMqSendTopology SendTopology { get; }
 
         /// <summary>
         /// Returns the destination address for the specified exchange

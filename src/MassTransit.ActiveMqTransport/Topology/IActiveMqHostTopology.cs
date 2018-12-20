@@ -21,7 +21,7 @@ namespace MassTransit.ActiveMqTransport.Topology
     {
         new IActiveMqPublishTopology PublishTopology { get; }
 
-        IActiveMqSendTopology SendTopology { get; }
+        new IActiveMqSendTopology SendTopology { get; }
 
         /// <summary>
         /// Returns the destination address for the specified exchange

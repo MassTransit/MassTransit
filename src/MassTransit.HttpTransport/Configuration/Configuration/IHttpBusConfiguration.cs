@@ -24,7 +24,6 @@ namespace MassTransit.HttpTransport.Configuration
         /// <summary>
         /// Create a host configuration, by adding a host to the bus
         /// </summary>
-        /// <param name="host"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
         IHttpHostConfiguration CreateHostConfiguration(HttpHostSettings settings);
