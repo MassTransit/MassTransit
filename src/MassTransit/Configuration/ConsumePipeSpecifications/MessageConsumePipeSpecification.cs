@@ -21,7 +21,6 @@ namespace MassTransit.ConsumePipeSpecifications
     using GreenPipes.Specifications;
     using GreenPipes.Util;
     using PipeBuilders;
-    using Pipeline;
     using Util;
 
 
@@ -33,19 +32,19 @@ namespace MassTransit.ConsumePipeSpecifications
         readonly IList<ISpecificationPipeSpecification<ConsumeContext<TMessage>>> _implementedMessageTypeSpecifications;
         readonly IList<ISpecificationPipeSpecification<ConsumeContext<TMessage>>> _parentMessageSpecifications;
         readonly IList<IPipeSpecification<ConsumeContext<TMessage>>> _specifications;
+        readonly IList<IPipeSpecification<ConsumeContext>> _baseSpecifications;
 
         public MessageConsumePipeSpecification()
         {
             _specifications = new List<IPipeSpecification<ConsumeContext<TMessage>>>();
+            _baseSpecifications = new List<IPipeSpecification<ConsumeContext>>();
             _implementedMessageTypeSpecifications = new List<ISpecificationPipeSpecification<ConsumeContext<TMessage>>>();
             _parentMessageSpecifications = new List<ISpecificationPipeSpecification<ConsumeContext<TMessage>>>();
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            var splitSpecification = new SplitFilterPipeSpecification<ConsumeContext<TMessage>, ConsumeContext>(specification, MergeContext, FilterContext);
-
-            _specifications.Add(splitSpecification);
+            _baseSpecifications.Add(specification);
         }
 
         IMessageConsumePipeSpecification<T> IMessageConsumePipeSpecification.GetMessageSpecification<T>()
@@ -79,7 +78,7 @@ namespace MassTransit.ConsumePipeSpecifications
 
         public void Apply(ISpecificationPipeBuilder<ConsumeContext<TMessage>> builder)
         {
-            if (!builder.IsDelegated)
+            if (!builder.IsDelegated && _parentMessageSpecifications.Count > 0)
             {
                 ISpecificationPipeBuilder<ConsumeContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
@@ -92,6 +91,15 @@ namespace MassTransit.ConsumePipeSpecifications
             foreach (IPipeSpecification<ConsumeContext<TMessage>> specification in _specifications)
             {
                 specification.Apply(builder);
+            }
+
+            if (!builder.IsImplemented)
+            {
+                foreach (IPipeSpecification<ConsumeContext> specification in _baseSpecifications)
+                {
+                    var split = new SplitFilterPipeSpecification<ConsumeContext<TMessage>, ConsumeContext>(specification, MergeContext, FilterContext);
+                    split.Apply(builder);
+                }
             }
         }
 

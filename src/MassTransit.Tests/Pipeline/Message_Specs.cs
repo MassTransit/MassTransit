@@ -154,6 +154,90 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async Task Should_only_be_called_once()
         {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            await _consumer.Received;
+
+            Assert.That(_sendFilter.Count, Is.EqualTo(1));
+        }
+
+        MyConsumer _consumer;
+        SendFilter _sendFilter;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            _sendFilter = new SendFilter();
+
+            configurator.ConfigureSend(pc => pc.AddPipeSpecification(_sendFilter));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new MyConsumer(GetTask<PingMessage>());
+
+            configurator.Instance(_consumer);
+        }
+
+
+        public class SendFilter :
+            IFilter<SendContext>,
+            IPipeSpecification<SendContext>
+        {
+            int _count;
+
+            public int Count => _count;
+
+            void IPipeSpecification<SendContext>.Apply(IPipeBuilder<SendContext> builder)
+            {
+                builder.AddFilter(this);
+            }
+
+            void IProbeSite.Probe(ProbeContext context)
+            {
+            }
+
+            Task IFilter<SendContext>.Send(SendContext context, IPipe<SendContext> next)
+            {
+                Interlocked.Increment(ref _count);
+
+                return next.Send(context);
+            }
+
+            IEnumerable<ValidationResult> ISpecification.Validate()
+            {
+                yield break;
+            }
+        }
+
+
+        class MyConsumer :
+            IConsumer<PingMessage>
+        {
+            readonly TaskCompletionSource<PingMessage> _received;
+
+            public MyConsumer(TaskCompletionSource<PingMessage> received)
+            {
+                _received = received;
+            }
+
+            public Task<PingMessage> Received => _received.Task;
+
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                _received.TrySetResult(context.Message);
+
+                return TaskUtil.Completed;
+            }
+        }
+    }
+
+    [TestFixture]
+    public class Filters_on_the_publish_pipeline :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_only_be_called_once()
+        {
             await Bus.Publish(new PingMessage());
 
             await _consumer.Received;
@@ -167,7 +251,7 @@ namespace MassTransit.Tests.Pipeline
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             _sendFilter = new SendFilter();
-            
+
             configurator.ConfigurePublish(pc => pc.AddPipeSpecification(_sendFilter));
         }
 
@@ -223,6 +307,197 @@ namespace MassTransit.Tests.Pipeline
             public Task<PingMessage> Received => _received.Task;
 
             public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                _received.TrySetResult(context.Message);
+
+                return TaskUtil.Completed;
+            }
+        }
+    }
+
+
+    [TestFixture]
+    public class Filters_on_the_send_pipeline_for_nested_messages :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_only_be_called_once()
+        {
+            await InputQueueSendEndpoint.Send(new Message());
+
+            await _consumer.Received;
+
+            Assert.That(_sendFilter.Count, Is.EqualTo(1));
+        }
+
+        MyConsumer _consumer;
+        SendFilter _sendFilter;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            _sendFilter = new SendFilter();
+
+            configurator.ConfigureSend(pc => pc.AddPipeSpecification(_sendFilter));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new MyConsumer(GetTask<Message>());
+
+            configurator.Instance(_consumer);
+        }
+
+
+        class SendFilter :
+            IFilter<SendContext>,
+            IPipeSpecification<SendContext>
+        {
+            int _count;
+
+            public int Count => _count;
+
+            void IPipeSpecification<SendContext>.Apply(IPipeBuilder<SendContext> builder)
+            {
+                builder.AddFilter(this);
+            }
+
+            void IProbeSite.Probe(ProbeContext context)
+            {
+            }
+
+            Task IFilter<SendContext>.Send(SendContext context, IPipe<SendContext> next)
+            {
+                Interlocked.Increment(ref _count);
+
+                return next.Send(context);
+            }
+
+            IEnumerable<ValidationResult> ISpecification.Validate()
+            {
+                yield break;
+            }
+        }
+
+
+        public abstract class ParentMessage
+        {
+        }
+
+
+        public class Message :
+            ParentMessage
+        {
+        }
+
+
+        class MyConsumer :
+            IConsumer<Message>
+        {
+            readonly TaskCompletionSource<Message> _received;
+
+            public MyConsumer(TaskCompletionSource<Message> received)
+            {
+                _received = received;
+            }
+
+            public Task<Message> Received => _received.Task;
+
+            public Task Consume(ConsumeContext<Message> context)
+            {
+                _received.TrySetResult(context.Message);
+
+                return TaskUtil.Completed;
+            }
+        }
+    }
+
+    [TestFixture]
+    public class Filters_on_the_publish_pipeline_for_nested_messages :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_only_be_called_once()
+        {
+            await Bus.Publish(new Message());
+
+            await _consumer.Received;
+
+            Assert.That(_sendFilter.Count, Is.EqualTo(1));
+        }
+
+        MyConsumer _consumer;
+        SendFilter _sendFilter;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            _sendFilter = new SendFilter();
+
+            configurator.ConfigurePublish(pc => pc.AddPipeSpecification(_sendFilter));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new MyConsumer(GetTask<Message>());
+
+            configurator.Instance(_consumer);
+        }
+
+
+        class SendFilter :
+            IFilter<SendContext>,
+            IPipeSpecification<SendContext>
+        {
+            int _count;
+
+            public int Count => _count;
+
+            void IPipeSpecification<SendContext>.Apply(IPipeBuilder<SendContext> builder)
+            {
+                builder.AddFilter(this);
+            }
+
+            void IProbeSite.Probe(ProbeContext context)
+            {
+            }
+
+            Task IFilter<SendContext>.Send(SendContext context, IPipe<SendContext> next)
+            {
+                Interlocked.Increment(ref _count);
+
+                return next.Send(context);
+            }
+
+            IEnumerable<ValidationResult> ISpecification.Validate()
+            {
+                yield break;
+            }
+        }
+
+
+        public abstract class ParentMessage
+        {
+        }
+
+
+        public class Message :
+            ParentMessage
+        {
+        }
+
+
+        class MyConsumer :
+            IConsumer<Message>
+        {
+            readonly TaskCompletionSource<Message> _received;
+
+            public MyConsumer(TaskCompletionSource<Message> received)
+            {
+                _received = received;
+            }
+
+            public Task<Message> Received => _received.Task;
+
+            public Task Consume(ConsumeContext<Message> context)
             {
                 _received.TrySetResult(context.Message);
 

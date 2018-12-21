@@ -51,7 +51,8 @@ namespace MassTransit.PublishPipeSpecifications
             }
         }
 
-        public void AddPipeSpecification<T>(IPipeSpecification<PublishContext<T>> specification) where T : class
+        public void AddPipeSpecification<T>(IPipeSpecification<PublishContext<T>> specification)
+            where T : class
         {
             IMessagePublishPipeSpecification<T> messageSpecification = GetMessageSpecification<T>();
 
@@ -122,10 +123,9 @@ namespace MassTransit.PublishPipeSpecifications
         {
             var specification = new MessagePublishPipeSpecification<T>();
 
-            foreach (var pipeSpecification in _specifications)
-            {
-                specification.AddPipeSpecification(pipeSpecification);
-            }
+            lock (_lock)
+                foreach (var pipeSpecification in _specifications)
+                    specification.AddPipeSpecification(pipeSpecification);
 
             _observers.MessageSpecificationCreated(specification);
 

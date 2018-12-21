@@ -32,19 +32,19 @@ namespace MassTransit.SendPipeSpecifications
         readonly IList<ISpecificationPipeSpecification<SendContext<TMessage>>> _implementedMessageTypeSpecifications;
         readonly IList<ISpecificationPipeSpecification<SendContext<TMessage>>> _parentMessageSpecifications;
         readonly IList<IPipeSpecification<SendContext<TMessage>>> _specifications;
+        readonly IList<IPipeSpecification<SendContext>> _baseSpecifications;
 
         public MessageSendPipeSpecification()
         {
             _specifications = new List<IPipeSpecification<SendContext<TMessage>>>();
+            _baseSpecifications = new List<IPipeSpecification<SendContext>>();
             _implementedMessageTypeSpecifications = new List<ISpecificationPipeSpecification<SendContext<TMessage>>>();
             _parentMessageSpecifications = new List<ISpecificationPipeSpecification<SendContext<TMessage>>>();
         }
 
         public void AddPipeSpecification(IPipeSpecification<SendContext> specification)
         {
-            var splitSpecification = new SplitFilterPipeSpecification<SendContext<TMessage>, SendContext>(specification, MergeContext, FilterContext);
-
-            _specifications.Add(splitSpecification);
+            _baseSpecifications.Add(specification);
         }
 
         IMessageSendPipeSpecification<T> IMessageSendPipeSpecification.GetMessageSpecification<T>()
@@ -78,7 +78,7 @@ namespace MassTransit.SendPipeSpecifications
 
         public void Apply(ISpecificationPipeBuilder<SendContext<TMessage>> builder)
         {
-            if (!builder.IsDelegated)
+            if (!builder.IsDelegated && _implementedMessageTypeSpecifications.Count > 0)
             {
                 ISpecificationPipeBuilder<SendContext<TMessage>> implementedBuilder = builder.CreateImplementedBuilder();
 
@@ -98,6 +98,17 @@ namespace MassTransit.SendPipeSpecifications
             foreach (IPipeSpecification<SendContext<TMessage>> specification in _specifications)
             {
                 specification.Apply(builder);
+            }
+
+
+            if (!builder.IsImplemented)
+            {
+                foreach (IPipeSpecification<SendContext> specification in _baseSpecifications)
+                {
+                    var split = new SplitFilterPipeSpecification<SendContext<TMessage>, SendContext>(specification, MergeContext, FilterContext);
+
+                    split.Apply(builder);
+                }
             }
         }
 
