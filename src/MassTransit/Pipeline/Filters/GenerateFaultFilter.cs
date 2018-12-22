@@ -28,7 +28,7 @@ namespace MassTransit.Pipeline.Filters
     {
         void IProbeSite.Probe(ProbeContext context)
         {
-            context.CreateFilterScope("moveFault");
+            context.CreateFilterScope("generateFault");
         }
 
         async Task IFilter<ExceptionReceiveContext>.Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)

@@ -157,20 +157,14 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                     await context.ReceiveCompleted.ConfigureAwait(false);
 
-                    if (context.IsFaulted)
-                    {
-                        _model.BasicNack(deliveryTag, false, true);
-                    }
-                    else
-                    {
-                        _model.BasicAck(deliveryTag, false);
+                    _model.BasicAck(deliveryTag, false);
 
-                        await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
-                    }
+                    await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+
                     try
                     {
                         _model.BasicNack(deliveryTag, false, true);
