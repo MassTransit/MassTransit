@@ -59,6 +59,7 @@
   * [Observe lifecycle](usage/lifecycle-observers.md)
   * Monitoring
     * [AppInsights](usage/monitoring/applications-insights.md)
+    * [Diagnostic Source](usage/monitoring/diagnostic-source.md)
   * [Connect endpoints](usage/connect-endpoint.md)
   * [Logging](usage/logging.md)
   * [Testing](usage/testing/README.md)

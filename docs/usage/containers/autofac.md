@@ -76,6 +76,28 @@ namespace Example
     }
 }
 ```
+## Using Nested Container
+MassTransit and Autofac give you an ability to reconfigure your container based on Consumer. It could be very powerful when you have different way to resolve your services depends on Consumer's type. It could be very helpful to build Multitenant applications.
+
+```csharp
+builder.RegisterType<HttpTenantProvider>().As<ITenantProvider>();
+
+builder.Register(context =>
+{
+    var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+    {
+        //configuration
+        cfg.ReceiveEndpoint("name", ec => 
+        {
+            ec.Consumer<YourConsumer>(context, "scope_name", (c, context) =>
+            {
+                c.RegisterInstance(new ConsumerTenantProvider(context)).As<ITenantProvider>();
+                //other configuration
+            });
+        })
+    }
+}
+```
 
 ## Using a Module
 
