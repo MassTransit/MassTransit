@@ -10,8 +10,8 @@ let buildArtifactPath = FullName "./build_artifacts"
 let packagesPath = FullName "./src/packages"
 let keyFile = FullName "./MassTransit.snk"
 
-let assemblyVersion = "5.1.0.0"
-let baseVersion = "5.1.6"
+let assemblyVersion = "5.2.0.0"
+let baseVersion = "5.2.0"
 
 let envVersion = (environVarOrDefault "APPVEYOR_BUILD_VERSION" (baseVersion + ".0"))
 let buildVersion = (envVersion.Substring(0, envVersion.LastIndexOf('.')))
