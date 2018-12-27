@@ -29,13 +29,32 @@ namespace MassTransit.ApplicationInsights.Tests
             void CreateBus() =>
                 Bus.Factory.CreateUsingInMemory(x =>
                 {
-                    x.UseApplicationInsights(telemetryClient, (operation, context) => operation.Telemetry.Properties.Add("prop", "v"));
+                    x.UseApplicationInsightsOnConsume(telemetryClient, (operation, context) => operation.Telemetry.Properties.Add("prop", "v"));
                 });
 
             Assert.DoesNotThrow(CreateBus);
-        }
+		}
 
-        [Test]
+		[Test]
+		public void Bus_should_be_created_when_use_ApplicationInsightsOnSend_extension()
+		{
+			var telemetryClient = new TelemetryClient();
+
+			void CreateBus() =>
+				Bus.Factory.CreateUsingInMemory(x =>
+				{
+					x.UseApplicationInsightsOnSend(
+						telemetryClient,
+						configureOperation: (holder, context) =>
+						{
+							holder.Telemetry.Properties.Add("key", "value");
+						});
+				});
+
+			Assert.DoesNotThrow(CreateBus);
+		}
+
+		[Test]
         public void Bus_should_be_created_when_use_ApplicationInsightsOnPublish_extension()
         {
             var telemetryClient = new TelemetryClient();
@@ -45,7 +64,7 @@ namespace MassTransit.ApplicationInsights.Tests
                 {
                     x.UseApplicationInsightsOnPublish(
                         telemetryClient,
-                        (holder, context) =>
+						configureOperation: (holder, context) =>
                         {
                             holder.Telemetry.Properties.Add("key", "value");
                         });
