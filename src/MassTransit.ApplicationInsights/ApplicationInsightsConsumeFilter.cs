@@ -20,59 +20,59 @@ namespace MassTransit.ApplicationInsights
 	using Microsoft.ApplicationInsights.DataContracts;
 	using Microsoft.ApplicationInsights.Extensibility;
 
-	public class ApplicationInsightsPublishFilter<T> 
-		: IFilter<T>
-		where T : class, PublishContext
+
+	public class ApplicationInsightsConsumeFilter<T> :
+		IFilter<T>
+		where T : class, ConsumeContext
 	{
 		const string MessageId = nameof(MessageId);
 		const string ConversationId = nameof(ConversationId);
 		const string CorrelationId = nameof(CorrelationId);
 		const string RequestId = nameof(RequestId);
 		const string MessageType = nameof(MessageType);
+		const string QueuePath = nameof(QueuePath);
 
-		const string StepName = "MassTransit:Publish";
-		const string DependencyType = "Queue";
+		const string StepName = "MassTransit:Consumer";
 
 		private readonly TelemetryClient _telemetryClient;
+		private readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
 		private readonly string _telemetryHeaderRootKey;
 		private readonly string _telemetryHeaderParentKey;
-		private readonly Action<IOperationHolder<DependencyTelemetry>, T> _configureOperation;
 
-		public ApplicationInsightsPublishFilter(TelemetryClient telemetryClient
+		public ApplicationInsightsConsumeFilter(TelemetryClient telemetryClient
+			, Action<IOperationHolder<RequestTelemetry>, T> configureOperation
 			, string telemetryHeaderRootKey
 			, string telemetryHeaderParentKey
-			, Action<IOperationHolder<DependencyTelemetry>, T> configureOperation
 			)
 		{
 			_telemetryClient = telemetryClient;
+			_configureOperation = configureOperation;
 			_telemetryHeaderRootKey = telemetryHeaderRootKey;
 			_telemetryHeaderParentKey = telemetryHeaderParentKey;
-			_configureOperation = configureOperation;
 		}
 
 		public void Probe(ProbeContext context)
 		{
-			context.CreateFilterScope("TelemetryPublishFilter");
+			context.CreateFilterScope("TelemetryConsumeFilter");
 		}
 
 		public async Task Send(T context, IPipe<T> next)
 		{
-			var contextType = context.GetType();
-			var messageType = contextType.GetGenericArguments().FirstOrDefault()?.FullName ?? "Unknown";
+			var messageType = context.SupportedMessageTypes.FirstOrDefault() ?? "Unknown";
 
-			var telemetry = new DependencyTelemetry()
+			// After the message is taken from the queue, create RequestTelemetry to track its processing.
+			var requestTelemetry = new RequestTelemetry
 			{
-				Name = $"{StepName} {messageType}",
-				Type = DependencyType,
-				Data = $"{StepName} {context.DestinationAddress}"
+				Name = $"{StepName} {context.ReceiveContext.InputAddress.LocalPath} {messageType}",
 			};
 
-			using (var operation = _telemetryClient.StartOperation(telemetry))
-			{
-				context.Headers.Set(_telemetryHeaderRootKey, operation.Telemetry.Context.Operation.Id);
-				context.Headers.Set(_telemetryHeaderParentKey, operation.Telemetry.Id);
+			requestTelemetry.Context.Operation.Id = context.Headers.Get<string>(_telemetryHeaderRootKey);
+			requestTelemetry.Context.Operation.ParentId = context.Headers.Get<string>(_telemetryHeaderParentKey);
 
+			using (IOperationHolder<RequestTelemetry> operation = _telemetryClient.StartOperation(requestTelemetry))
+			{
 				operation.Telemetry.Properties.Add(MessageType, messageType);
+				operation.Telemetry.Properties.Add(QueuePath, context.ReceiveContext.InputAddress.LocalPath);
 
 				if (context.MessageId.HasValue)
 					operation.Telemetry.Properties.Add(MessageId, context.MessageId.Value.ToString());
@@ -94,9 +94,9 @@ namespace MassTransit.ApplicationInsights
 
 					operation.Telemetry.Success = true;
 				}
-				catch (Exception e)
+				catch (Exception ex)
 				{
-					_telemetryClient.TrackException(e, operation.Telemetry.Properties);
+					_telemetryClient.TrackException(ex, operation.Telemetry.Properties);
 
 					operation.Telemetry.Success = false;
 					throw;

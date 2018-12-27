@@ -20,25 +20,25 @@ namespace MassTransit.ApplicationInsights
 	using Microsoft.ApplicationInsights.DataContracts;
 	using Microsoft.ApplicationInsights.Extensibility;
 
-	public class ApplicationInsightsPublishSpecification<T> 
+	public class ApplicationInsightsConsumeSpecification<T>
 		: IPipeSpecification<T>
-		where T : class, PublishContext
+		where T : class, ConsumeContext
 	{
 		private readonly TelemetryClient _telemetryClient;
+		private readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
 		private readonly string _telemetryHeaderRootKey;
 		private readonly string _telemetryHeaderParentKey;
-		private readonly Action<IOperationHolder<DependencyTelemetry>, T> _configureOperation;
 
-		public ApplicationInsightsPublishSpecification(TelemetryClient telemetryClient
+		public ApplicationInsightsConsumeSpecification(TelemetryClient telemetryClient
+			, Action<IOperationHolder<RequestTelemetry>, T> configureOperation
 			, string telemetryHeaderRootKey
 			, string telemetryHeaderParentKey
-			, Action<IOperationHolder<DependencyTelemetry>, T> configureOperation
 			)
 		{
 			_telemetryClient = telemetryClient;
+			_configureOperation = configureOperation;
 			_telemetryHeaderRootKey = telemetryHeaderRootKey;
 			_telemetryHeaderParentKey = telemetryHeaderParentKey;
-			_configureOperation = configureOperation;
 		}
 
 		public IEnumerable<ValidationResult> Validate()
@@ -48,7 +48,7 @@ namespace MassTransit.ApplicationInsights
 
 		public void Apply(IPipeBuilder<T> builder)
 		{
-			builder.AddFilter(new ApplicationInsightsPublishFilter<T>(_telemetryClient, _telemetryHeaderRootKey, _telemetryHeaderParentKey, _configureOperation));
+			builder.AddFilter(new ApplicationInsightsConsumeFilter<T>(_telemetryClient, _configureOperation, _telemetryHeaderRootKey, _telemetryHeaderParentKey));
 		}
 	}
 }

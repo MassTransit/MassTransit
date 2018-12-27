@@ -20,9 +20,9 @@ namespace MassTransit.ApplicationInsights
 	using Microsoft.ApplicationInsights.DataContracts;
 	using Microsoft.ApplicationInsights.Extensibility;
 
-	public class ApplicationInsightsPublishFilter<T> 
+	public class ApplicationInsightsSendFilter<T> 
 		: IFilter<T>
-		where T : class, PublishContext
+		where T : class, SendContext
 	{
 		const string MessageId = nameof(MessageId);
 		const string ConversationId = nameof(ConversationId);
@@ -30,7 +30,7 @@ namespace MassTransit.ApplicationInsights
 		const string RequestId = nameof(RequestId);
 		const string MessageType = nameof(MessageType);
 
-		const string StepName = "MassTransit:Publish";
+		const string StepName = "MassTransit:Send";
 		const string DependencyType = "Queue";
 
 		private readonly TelemetryClient _telemetryClient;
@@ -38,7 +38,7 @@ namespace MassTransit.ApplicationInsights
 		private readonly string _telemetryHeaderParentKey;
 		private readonly Action<IOperationHolder<DependencyTelemetry>, T> _configureOperation;
 
-		public ApplicationInsightsPublishFilter(TelemetryClient telemetryClient
+		public ApplicationInsightsSendFilter(TelemetryClient telemetryClient
 			, string telemetryHeaderRootKey
 			, string telemetryHeaderParentKey
 			, Action<IOperationHolder<DependencyTelemetry>, T> configureOperation
@@ -52,7 +52,7 @@ namespace MassTransit.ApplicationInsights
 
 		public void Probe(ProbeContext context)
 		{
-			context.CreateFilterScope("TelemetryPublishFilter");
+			context.CreateFilterScope("TelemetrySendFilter");
 		}
 
 		public async Task Send(T context, IPipe<T> next)
@@ -60,14 +60,14 @@ namespace MassTransit.ApplicationInsights
 			var contextType = context.GetType();
 			var messageType = contextType.GetGenericArguments().FirstOrDefault()?.FullName ?? "Unknown";
 
-			var telemetry = new DependencyTelemetry()
+			var requestTelemetry = new DependencyTelemetry()
 			{
 				Name = $"{StepName} {messageType}",
 				Type = DependencyType,
 				Data = $"{StepName} {context.DestinationAddress}"
 			};
 
-			using (var operation = _telemetryClient.StartOperation(telemetry))
+			using (var operation = _telemetryClient.StartOperation(requestTelemetry))
 			{
 				context.Headers.Set(_telemetryHeaderRootKey, operation.Telemetry.Context.Operation.Id);
 				context.Headers.Set(_telemetryHeaderParentKey, operation.Telemetry.Id);
