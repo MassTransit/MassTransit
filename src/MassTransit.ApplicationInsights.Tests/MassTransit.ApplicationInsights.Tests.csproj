@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.ApplicationInsights\MassTransit.ApplicationInsights.csproj" />
+    <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
   <ItemGroup>
