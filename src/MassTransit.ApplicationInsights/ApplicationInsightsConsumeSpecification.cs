@@ -12,25 +12,31 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ApplicationInsights
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using GreenPipes;
 	using Microsoft.ApplicationInsights;
+	using Microsoft.ApplicationInsights.DataContracts;
+	using Microsoft.ApplicationInsights.Extensibility;
 
-	public class ApplicationInsightsPublishSpecification<T> 
+	public class ApplicationInsightsConsumeSpecification<T>
 		: IPipeSpecification<T>
-		where T : class, PublishContext
+		where T : class, ConsumeContext
 	{
 		private readonly TelemetryClient _telemetryClient;
+		private readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
 		private readonly string _telemetryHeaderRootKey;
 		private readonly string _telemetryHeaderParentKey;
 
-		public ApplicationInsightsPublishSpecification(TelemetryClient telemetryClient
+		public ApplicationInsightsConsumeSpecification(TelemetryClient telemetryClient
+			, Action<IOperationHolder<RequestTelemetry>, T> configureOperation
 			, string telemetryHeaderRootKey
 			, string telemetryHeaderParentKey
 			)
 		{
 			_telemetryClient = telemetryClient;
+			_configureOperation = configureOperation;
 			_telemetryHeaderRootKey = telemetryHeaderRootKey;
 			_telemetryHeaderParentKey = telemetryHeaderParentKey;
 		}
@@ -42,7 +48,7 @@ namespace MassTransit.ApplicationInsights
 
 		public void Apply(IPipeBuilder<T> builder)
 		{
-			builder.AddFilter(new ApplicationInsightsPublishFilter<T>(_telemetryClient, _telemetryHeaderRootKey, _telemetryHeaderParentKey));
+			builder.AddFilter(new ApplicationInsightsConsumeFilter<T>(_telemetryClient, _configureOperation, _telemetryHeaderRootKey, _telemetryHeaderParentKey));
 		}
 	}
 }

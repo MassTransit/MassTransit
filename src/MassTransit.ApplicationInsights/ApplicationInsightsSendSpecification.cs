@@ -17,15 +17,15 @@ namespace MassTransit.ApplicationInsights
 	using GreenPipes;
 	using Microsoft.ApplicationInsights;
 
-	public class ApplicationInsightsPublishSpecification<T> 
+	public class ApplicationInsightsSendSpecification<T> 
 		: IPipeSpecification<T>
-		where T : class, PublishContext
+		where T : class, SendContext
 	{
 		private readonly TelemetryClient _telemetryClient;
 		private readonly string _telemetryHeaderRootKey;
 		private readonly string _telemetryHeaderParentKey;
 
-		public ApplicationInsightsPublishSpecification(TelemetryClient telemetryClient
+		public ApplicationInsightsSendSpecification(TelemetryClient telemetryClient
 			, string telemetryHeaderRootKey
 			, string telemetryHeaderParentKey
 			)
@@ -42,7 +42,7 @@ namespace MassTransit.ApplicationInsights
 
 		public void Apply(IPipeBuilder<T> builder)
 		{
-			builder.AddFilter(new ApplicationInsightsPublishFilter<T>(_telemetryClient, _telemetryHeaderRootKey, _telemetryHeaderParentKey));
+			builder.AddFilter(new ApplicationInsightsSendFilter<T>(_telemetryClient, _telemetryHeaderRootKey, _telemetryHeaderParentKey));
 		}
 	}
 }
