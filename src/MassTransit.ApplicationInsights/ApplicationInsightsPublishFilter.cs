@@ -13,30 +13,41 @@
 namespace MassTransit.ApplicationInsights
 {
 	using System;
+	using System.Linq;
 	using System.Threading.Tasks;
 	using GreenPipes;
 	using Microsoft.ApplicationInsights;
 	using Microsoft.ApplicationInsights.DataContracts;
+	using Microsoft.ApplicationInsights.Extensibility;
 
 	public class ApplicationInsightsPublishFilter<T> 
 		: IFilter<T>
 		where T : class, PublishContext
 	{
+		const string MessageId = nameof(MessageId);
+		const string ConversationId = nameof(ConversationId);
+		const string CorrelationId = nameof(CorrelationId);
+		const string RequestId = nameof(RequestId);
+		const string MessageType = nameof(MessageType);
+
 		const string StepName = "MassTransit:Publish";
 		const string DependencyType = "Queue";
 
 		private readonly TelemetryClient _telemetryClient;
 		private readonly string _telemetryHeaderRootKey;
 		private readonly string _telemetryHeaderParentKey;
+		private readonly Action<IOperationHolder<DependencyTelemetry>, T> _configureOperation;
 
 		public ApplicationInsightsPublishFilter(TelemetryClient telemetryClient
 			, string telemetryHeaderRootKey
 			, string telemetryHeaderParentKey
+			, Action<IOperationHolder<DependencyTelemetry>, T> configureOperation
 			)
 		{
 			_telemetryClient = telemetryClient;
 			_telemetryHeaderRootKey = telemetryHeaderRootKey;
 			_telemetryHeaderParentKey = telemetryHeaderParentKey;
+			_configureOperation = configureOperation;
 		}
 
 		public void Probe(ProbeContext context)
@@ -46,68 +57,23 @@ namespace MassTransit.ApplicationInsights
 
 		public async Task Send(T context, IPipe<T> next)
 		{
-			var requestTelemetry = new DependencyTelemetry()
+			var contextType = context.GetType();
+			var messageType = contextType.GetGenericArguments().FirstOrDefault()?.FullName ?? "Unknown";
+
+			var telemetry = new DependencyTelemetry()
 			{
-				Name = $"{StepName} {context.DestinationAddress}",
+				Name = $"{StepName} {messageType}",
 				Type = DependencyType,
 				Data = $"{StepName} {context.DestinationAddress}"
 			};
 
-			using (var operation = _telemetryClient.StartOperation(requestTelemetry))
+			using (var operation = _telemetryClient.StartOperation(telemetry))
 			{
 				context.Headers.Set(_telemetryHeaderRootKey, operation.Telemetry.Context.Operation.Id);
 				context.Headers.Set(_telemetryHeaderParentKey, operation.Telemetry.Id);
 
-				try
-				{
-					await next.Send(context);
+				operation.Telemetry.Properties.Add(MessageType, messageType);
 
-					operation.Telemetry.Success = true;
-				}
-				catch (Exception e)
-				{
-					_telemetryClient.TrackException(e, operation.Telemetry.Properties);
-
-					operation.Telemetry.Success = false;
-					throw;
-				}
-				finally
-				{
-					_telemetryClient.StopOperation(operation);
-				}
-			}
-		}
-	}
-	public class ApplicationInsightsPublishFilter<T> : IFilter<T> where T : class, PublishContext
-	{
-		const string MessageId = nameof(MessageId);
-		const string ConversationId = nameof(ConversationId);
-		const string CorrelationId = nameof(CorrelationId);
-		const string RequestId = nameof(RequestId);
-
-		const string StepName = "MassTransit:Publisher";
-
-		readonly TelemetryClient _telemetryClient;
-		readonly Action<IOperationHolder<DependencyTelemetry>, T> _configureOperation;
-
-		public ApplicationInsightsPublishFilter(TelemetryClient telemetryClient, Action<IOperationHolder<DependencyTelemetry>, T> configureOperation)
-		{
-			_telemetryClient = telemetryClient;
-			_configureOperation = configureOperation;
-		}
-
-		public void Probe(ProbeContext context)
-		{
-			context.CreateFilterScope(nameof(ApplicationInsightsPublishFilter<T>));
-		}
-
-		public async Task Send(T context, IPipe<T> next)
-		{
-			var contextType = context.GetType();
-			var messageType = contextType.GetGenericArguments().FirstOrDefault();
-
-			using (var operation = _telemetryClient.StartOperation<DependencyTelemetry>($"{StepName} {messageType?.FullName ?? "Unknown"}"))
-			{
 				if (context.MessageId.HasValue)
 					operation.Telemetry.Properties.Add(MessageId, context.MessageId.Value.ToString());
 
@@ -126,13 +92,13 @@ namespace MassTransit.ApplicationInsights
 				{
 					await next.Send(context).ConfigureAwait(false);
 
+					operation.Telemetry.Success = true;
 				}
 				catch (Exception e)
 				{
 					_telemetryClient.TrackException(e, operation.Telemetry.Properties);
 
 					operation.Telemetry.Success = false;
-
 					throw;
 				}
 				finally

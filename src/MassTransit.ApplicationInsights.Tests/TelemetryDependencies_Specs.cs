@@ -24,13 +24,13 @@ namespace MassTransit.ApplicationInsights.Tests
 	using NUnit.Framework;
 
 	[TestFixture]
-	public class Telemetry_Specs
+	public class TelemetryDependencies_Specs
        : InMemoryTestFixture
 	{
 		private TelemetryClient _telemetryClient;
 		private List<ITelemetry> _sendItems;
 
-		public Telemetry_Specs()
+		public TelemetryDependencies_Specs()
 		{
 			var configuration = new TelemetryConfiguration();
 			_sendItems = new List<ITelemetry>();
@@ -56,9 +56,9 @@ namespace MassTransit.ApplicationInsights.Tests
 		protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator cfg)
 		{
 			base.ConfigureInMemoryBus(cfg);
-			cfg.UseConsumeApplicationInsightsTelemetry(_telemetryClient, (operation, context) => operation.Telemetry.Properties.Add("prop", "v"));
-			cfg.ConfigurePublish(p => p.UsePublishApplicationInsightsTelemetry(_telemetryClient));
-			cfg.ConfigureSend(p => p.UseSendApplicationInsightsTelemetry(_telemetryClient));
+			cfg.UseApplicationInsightsOnConsume(_telemetryClient);
+			cfg.UseApplicationInsightsOnPublish(_telemetryClient);
+			cfg.UseApplicationInsightsOnSend(_telemetryClient);
 		}
 
         Task<ConsumeContext<FakeMessage>> _handled;

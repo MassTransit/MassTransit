@@ -12,27 +12,29 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ApplicationInsights.Tests
 {
-    using GreenPipes;
-    using Microsoft.ApplicationInsights;
-    using Moq;
-    using NUnit.Framework;
-    using System.Threading.Tasks;
+	using GreenPipes;
+	using Microsoft.ApplicationInsights;
+	using Moq;
+	using NUnit.Framework;
+	using System.Threading.Tasks;
 
-    public class ApplicationInsightsPublishFilter_Specs
-    {
-        [Test]
-        public async Task Should_send_context_to_next_pipe()
-        {
-            bool configureOperationHasBeenCalled = false;
+	public class ApplicationInsightsPublishFilter_Specs
+	{
+		[Test]
+		public async Task Should_send_context_to_next_pipe()
+		{
+			bool configureOperationHasBeenCalled = false;
 
-            var mockPublishContext = new Mock<PublishContext>();
-            var filter = new ApplicationInsightsPublishFilter<PublishContext>(new TelemetryClient(), ((holder, context) => configureOperationHasBeenCalled = true));
+			var mockPublishContext = new Mock<PublishContext>();
+			mockPublishContext.SetupGet(p => p.Headers).Returns(Mock.Of<SendHeaders>());
 
-            var mockPipe = new Mock<IPipe<PublishContext>>();
-            await filter.Send(mockPublishContext.Object, mockPipe.Object);
+			var filter = new ApplicationInsightsPublishFilter<PublishContext>(new TelemetryClient(), "", "", ((holder, context) => configureOperationHasBeenCalled = true));
 
-            Assert.IsTrue(configureOperationHasBeenCalled);
-            mockPipe.Verify(action => action.Send(mockPublishContext.Object), Times.Once);
-        }
-    }
+			var mockPipe = new Mock<IPipe<PublishContext>>();
+			await filter.Send(mockPublishContext.Object, mockPipe.Object);
+
+			Assert.IsTrue(configureOperationHasBeenCalled);
+			mockPipe.Verify(action => action.Send(mockPublishContext.Object), Times.Once);
+		}
+	}
 }
