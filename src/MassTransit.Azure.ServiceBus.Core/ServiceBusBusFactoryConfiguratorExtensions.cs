@@ -94,6 +94,7 @@ namespace MassTransit
             configurator.ReceiveEndpoint(host, queueName, x =>
             {
                 x.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle;
+                x.RemoveSubscriptions = true;
 
                 configure(x);
             });
