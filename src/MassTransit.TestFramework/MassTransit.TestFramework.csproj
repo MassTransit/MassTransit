@@ -1,23 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PackageId>MassTransit.TestFramework</PackageId>
-    <Title>MassTransit.TestFramework</Title>
-    <Description>MassTransit Test Framework (NUnit); $(Description)</Description>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.TestFramework.xml</DocumentationFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.3" />
-    <PackageReference Include="NewId" Version="3.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="NUnit" Version="3.11.0" />
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+        <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>MassTransit.TestFramework</PackageId>
+        <Title>MassTransit.TestFramework</Title>
+        <Description>MassTransit Test Framework (NUnit); $(Description)</Description>
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.TestFramework.xml</DocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="GreenPipes" Version="2.1.3"/>
+        <PackageReference Include="NewId" Version="3.0.1"/>
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
+        <PackageReference Include="NUnit" Version="3.11.0"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+        <ProjectReference Include="..\MassTransit\MassTransit.csproj"/>
+    </ItemGroup>
 </Project>
