@@ -41,20 +41,6 @@ namespace MassTransit.ApplicationInsights
 		/// <summary>
 		/// Add support for ApplicationInsight to track all send message on the bus.
 		/// </summary>
-		public static void UseApplicationInsightsOnSend<T>(this IPipeConfigurator<T> configurator
-			, TelemetryClient telemetryClient
-			, string telemetryHeaderRootKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderRootKey
-			, string telemetryHeaderParentKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderParentKey
-			, Action<IOperationHolder<DependencyTelemetry>, SendContext> configureOperation = null)
-			where T : class, SendContext
-		{
-			configurator.AddPipeSpecification(
-				new ApplicationInsightsSendSpecification<T>(telemetryClient, telemetryHeaderRootKey, telemetryHeaderParentKey, configureOperation));
-		}
-
-		/// <summary>
-		/// Add support for ApplicationInsight to track all send message on the bus.
-		/// </summary>
 		public static void UseApplicationInsightsOnSend(this ISendPipelineConfigurator configurator
 			, TelemetryClient telemetryClient
 			, string telemetryHeaderRootKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderRootKey
@@ -66,25 +52,6 @@ namespace MassTransit.ApplicationInsights
 				pipeConfigurator.AddPipeSpecification(
 					new ApplicationInsightsSendSpecification<SendContext>(telemetryClient, telemetryHeaderRootKey, telemetryHeaderParentKey, configureOperation));
 			});
-		}
-
-		/// <summary>
-		/// Add support for ApplicationInsights to the pipeline, which will be used to track all message publication.
-		/// </summary>
-		/// <param name="configurator"></param>
-		/// <param name="telemetryClient">Telemetry client</param>
-		/// <param name="configureOperation">Add additional information to operation</param>
-		/// <typeparam name="T"></typeparam>
-		public static void UseApplicationInsightsOnPublish<T>(this IPipeConfigurator<T> configurator
-			, TelemetryClient telemetryClient
-			, string telemetryHeaderRootKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderRootKey
-			, string telemetryHeaderParentKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderParentKey
-			, Action<IOperationHolder<DependencyTelemetry>, PublishContext> configureOperation = null)
-			where T : class, PublishContext
-		{
-
-			configurator.AddPipeSpecification(
-				new ApplicationInsightsPublishSpecification<T>(telemetryClient, telemetryHeaderRootKey, telemetryHeaderParentKey, configureOperation));
 		}
 
 		/// <summary>
