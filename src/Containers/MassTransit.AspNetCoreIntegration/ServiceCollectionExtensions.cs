@@ -19,9 +19,9 @@ namespace MassTransit.AspNetCoreIntegration
     using Logging.Tracing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using Testing.Indicators;
 
 
     public static class ServiceCollectionExtensions
@@ -96,17 +96,26 @@ namespace MassTransit.AspNetCoreIntegration
             return services;
         }
 
-        static IServiceCollection AddHostedService(this IServiceCollection services)
+        static void AddHostedService(this IServiceCollection services)
         {
-            return services.AddSingleton<IHostedService>(p =>
+            var busCheck = new HealthChecks.SimplifiedBusHealthCheck();
+            var receiveEndpointCheck = new HealthChecks.ReceiveEndpointHealthCheck();
+
+            services.AddHealthChecks()
+                .AddBusHealthCheck("bus", busCheck)
+                .AddBusHealthCheck("endpoint", receiveEndpointCheck);
+
+            services.AddSingleton<IHostedService>(p =>
             {
                 var bus = p.GetRequiredService<IBusControl>();
                 var loggerFactory = p.GetService<ILoggerFactory>();
-                var busCheck = new HealthChecks.SimplifiedBusHealthCheck();
-                var receiveEndpointCheck = new HealthChecks.ReceiveEndpointHealthCheck();
 
                 return new MassTransitHostedService(bus, loggerFactory, busCheck, receiveEndpointCheck);
             });
         }
+
+        static IHealthChecksBuilder AddBusHealthCheck(this IHealthChecksBuilder builder,
+            string suffix, IHealthCheck healthCheck) =>
+            builder.AddCheck($"masstransit-{suffix}", healthCheck, HealthStatus.Unhealthy, new[] {"ready"});
     }
 }
