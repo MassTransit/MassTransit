@@ -21,6 +21,7 @@ namespace MassTransit.AspNetCoreIntegration
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
+    using Testing.Indicators;
 
 
     public static class ServiceCollectionExtensions
@@ -48,7 +49,7 @@ namespace MassTransit.AspNetCoreIntegration
             services.TryAddSingleton<IPublishEndpoint>(p => p.GetRequiredService<IBusControl>());
             services.TryAddSingleton<ISendEndpointProvider>(p => p.GetRequiredService<IBusControl>());
 
-            services.AddSingleton<IHostedService, MassTransitHostedService>();
+            services.AddHostedService();
 
             return services;
         }
@@ -90,7 +91,22 @@ namespace MassTransit.AspNetCoreIntegration
             services.TryAddSingleton<IPublishEndpoint>(bus);
             services.TryAddSingleton<ISendEndpointProvider>(bus);
 
+            services.AddHostedService();
+
             return services;
+        }
+
+        static IServiceCollection AddHostedService(this IServiceCollection services)
+        {
+            return services.AddSingleton<IHostedService>(p =>
+            {
+                var bus = p.GetRequiredService<IBusControl>();
+                var loggerFactory = p.GetService<ILoggerFactory>();
+                var busCheck = new HealthChecks.SimplifiedBusHealthCheck();
+                var receiveEndpointCheck = new HealthChecks.ReceiveEndpointHealthCheck();
+
+                return new MassTransitHostedService(bus, loggerFactory, busCheck, receiveEndpointCheck);
+            });
         }
     }
 }
