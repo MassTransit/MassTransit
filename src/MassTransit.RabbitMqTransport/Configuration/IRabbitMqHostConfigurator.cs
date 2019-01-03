@@ -54,5 +54,11 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         /// <param name="configureCluster">The cluster configuration</param>
         void UseCluster(Action<IRabbitMqClusterConfigurator> configureCluster);
+
+        /// <summary>
+        /// Set the maximum number of channels allowed for the connection
+        /// </summary>
+        /// <param name="value"></param>
+        void RequestedChannelMax(ushort value);
     }
 }

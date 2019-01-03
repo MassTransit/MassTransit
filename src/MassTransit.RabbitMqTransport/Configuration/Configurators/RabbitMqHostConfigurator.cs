@@ -89,6 +89,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
             _settings.HostNameSelector = configurator.GetHostNameSelector();
         }
 
+        public void RequestedChannelMax(ushort value)
+        {
+            _settings.RequestedChannelMax = value;
+        }
+
         string GetVirtualHost(Uri address)
         {
             string[] segments = address.AbsolutePath.Split(_pathSeparator, StringSplitOptions.RemoveEmptyEntries);

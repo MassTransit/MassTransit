@@ -59,6 +59,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public string ClientProvidedName { get; set; }
         public bool PublisherConfirmation { get; set; }
         public Uri HostAddress => _hostAddress.Value;
+        public ushort RequestedChannelMax { get; set; }
 
         Uri FormatHostAddress()
         {
