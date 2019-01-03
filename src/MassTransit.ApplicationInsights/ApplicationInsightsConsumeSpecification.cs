@@ -20,8 +20,7 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
 
-    public class ApplicationInsightsConsumeSpecification<T> : IPipeSpecification<T>
-        where T : class, ConsumeContext
+    public class ApplicationInsightsConsumeSpecification<T> : IPipeSpecification<T> where T : class, ConsumeContext
     {
         readonly TelemetryClient _telemetryClient;
         readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;

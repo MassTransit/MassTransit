@@ -29,9 +29,9 @@ namespace MassTransit.ApplicationInsights
 
         public ApplicationInsightsPublishSpecification(
             TelemetryClient telemetryClient,
+            Action<IOperationHolder<DependencyTelemetry>, T> configureOperation,
             string telemetryHeaderRootKey,
-            string telemetryHeaderParentKey,
-            Action<IOperationHolder<DependencyTelemetry>, T> configureOperation)
+            string telemetryHeaderParentKey)
         {
             _telemetryClient = telemetryClient;
             _telemetryHeaderRootKey = telemetryHeaderRootKey;
@@ -46,7 +46,7 @@ namespace MassTransit.ApplicationInsights
 
         public void Apply(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new ApplicationInsightsPublishFilter<T>(_telemetryClient, _telemetryHeaderRootKey, _telemetryHeaderParentKey, _configureOperation));
+            builder.AddFilter(new ApplicationInsightsPublishFilter<T>(_telemetryClient, _configureOperation, _telemetryHeaderRootKey, _telemetryHeaderParentKey));
         }
     }
 }

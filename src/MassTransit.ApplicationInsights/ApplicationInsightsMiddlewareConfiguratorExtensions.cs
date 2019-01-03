@@ -46,14 +46,14 @@ namespace MassTransit.ApplicationInsights
         public static void UseApplicationInsightsOnSend(
             this ISendPipelineConfigurator configurator,
             TelemetryClient telemetryClient,
+            Action<IOperationHolder<DependencyTelemetry>, SendContext> configureOperation = null,
             string telemetryHeaderRootKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderRootKey,
-            string telemetryHeaderParentKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderParentKey,
-            Action<IOperationHolder<DependencyTelemetry>, SendContext> configureOperation = null)
+            string telemetryHeaderParentKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderParentKey)
         {
             configurator.ConfigureSend(pipeConfigurator =>
             {
                 pipeConfigurator.AddPipeSpecification(
-                    new ApplicationInsightsSendSpecification<SendContext>(telemetryClient, telemetryHeaderRootKey, telemetryHeaderParentKey, configureOperation));
+                    new ApplicationInsightsSendSpecification<SendContext>(telemetryClient, configureOperation, telemetryHeaderRootKey, telemetryHeaderParentKey));
             });
         }
 
@@ -63,14 +63,14 @@ namespace MassTransit.ApplicationInsights
         public static void UseApplicationInsightsOnPublish(
             this IPublishPipelineConfigurator configurator,
             TelemetryClient telemetryClient,
+            Action<IOperationHolder<DependencyTelemetry>, PublishContext> configureOperation = null,
             string telemetryHeaderRootKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderRootKey,
-            string telemetryHeaderParentKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderParentKey,
-            Action<IOperationHolder<DependencyTelemetry>, PublishContext> configureOperation = null)
+            string telemetryHeaderParentKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderParentKey)
         {
             configurator.ConfigurePublish(pipeConfigurator =>
             {
                 pipeConfigurator.AddPipeSpecification(
-                    new ApplicationInsightsPublishSpecification<PublishContext>(telemetryClient, telemetryHeaderRootKey, telemetryHeaderParentKey, configureOperation));
+                    new ApplicationInsightsPublishSpecification<PublishContext>(telemetryClient, configureOperation, telemetryHeaderRootKey, telemetryHeaderParentKey));
             });
         }
     }

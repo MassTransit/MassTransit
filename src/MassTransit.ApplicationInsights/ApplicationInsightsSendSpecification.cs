@@ -29,10 +29,9 @@ namespace MassTransit.ApplicationInsights
 
         public ApplicationInsightsSendSpecification(
             TelemetryClient telemetryClient,
+            Action<IOperationHolder<DependencyTelemetry>, T> configureOperation,
             string telemetryHeaderRootKey,
-            string telemetryHeaderParentKey,
-            Action<IOperationHolder<DependencyTelemetry>, T> configureOperation
-            )
+            string telemetryHeaderParentKey)
         {
             _telemetryClient = telemetryClient;
             _telemetryHeaderRootKey = telemetryHeaderRootKey;

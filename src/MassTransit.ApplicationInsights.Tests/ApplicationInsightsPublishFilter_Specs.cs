@@ -39,7 +39,7 @@ namespace MassTransit.ApplicationInsights.Tests
             // Arrange.
             var mockPublishContext = new Mock<PublishContext>();
             mockPublishContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
-            var filter = new ApplicationInsightsPublishFilter<PublishContext>(new TelemetryClient(), "", "", null);
+            var filter = new ApplicationInsightsPublishFilter<PublishContext>(new TelemetryClient(), null, "", "");
 
             var mockPipe = new Mock<IPipe<PublishContext>>();
 
@@ -58,7 +58,7 @@ namespace MassTransit.ApplicationInsights.Tests
             mockPublishContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
             bool configureOperationHasBeenCalled = false;
 
-            var filter = new ApplicationInsightsPublishFilter<PublishContext>(new TelemetryClient(), "", "", (holder, context) => configureOperationHasBeenCalled = true);
+            var filter = new ApplicationInsightsPublishFilter<PublishContext>(new TelemetryClient(), (holder, context) => configureOperationHasBeenCalled = true, "", "");
 
             // Act.
             await filter.Send(mockPublishContext.Object, new Mock<IPipe<PublishContext>>().Object);
@@ -87,7 +87,7 @@ namespace MassTransit.ApplicationInsights.Tests
 
             var capturedTelemetry = default(DependencyTelemetry);
 
-            var filter = new ApplicationInsightsPublishFilter<PublishContext>(new TelemetryClient(), "", "", (holder, context) => capturedTelemetry = holder.Telemetry);
+            var filter = new ApplicationInsightsPublishFilter<PublishContext>(new TelemetryClient(), (holder, context) => capturedTelemetry = holder.Telemetry, "", "");
 
             // Act.
             await filter.Send(publishContextProxy, new Mock<IPipe<PublishContext>>().Object);
