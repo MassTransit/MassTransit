@@ -29,33 +29,47 @@ namespace MassTransit.Configuration
         ISpecification
     {
         readonly IBuildPipeConfigurator<ReceiveContext> _configurator;
-        readonly IBuildPipeConfigurator<ReceiveContext> _deadLetterPipeConfigurator;
-        readonly IBuildPipeConfigurator<ExceptionReceiveContext> _errorPipeConfigurator;
         bool _created;
 
         public ReceivePipeConfiguration()
         {
             _configurator = new PipeConfigurator<ReceiveContext>();
-            _deadLetterPipeConfigurator = new PipeConfigurator<ReceiveContext>();
-            _errorPipeConfigurator = new PipeConfigurator<ExceptionReceiveContext>();
+            DeadLetterConfigurator = new PipeConfigurator<ReceiveContext>();
+            ErrorConfigurator = new PipeConfigurator<ExceptionReceiveContext>();
         }
 
         public ISpecification Specification => _configurator;
 
         public IReceivePipeConfigurator Configurator => this;
 
+        public IBuildPipeConfigurator<ReceiveContext> DeadLetterConfigurator { get; }
+
+        public IBuildPipeConfigurator<ExceptionReceiveContext> ErrorConfigurator { get; }
+
+        public void AddPipeSpecification(IPipeSpecification<ReceiveContext> specification)
+        {
+            _configurator.AddPipeSpecification(specification);
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return _configurator.Validate()
+                .Concat(DeadLetterConfigurator.Validate())
+                .Concat(ErrorConfigurator.Validate());
+        }
+
         public IReceivePipe CreatePipe(IConsumePipe consumePipe, IMessageDeserializer messageDeserializer)
         {
             if (_created)
                 throw new ConfigurationException("The ReceivePipeConfiguration can only be used once.");
 
-            _deadLetterPipeConfigurator.UseFilter(new DeadLetterTransportFilter());
-            _configurator.UseDeadLetter(_deadLetterPipeConfigurator.Build());
+            DeadLetterConfigurator.UseFilter(new DeadLetterTransportFilter());
+            _configurator.UseDeadLetter(DeadLetterConfigurator.Build());
 
-            _errorPipeConfigurator.UseFilter(new GenerateFaultFilter());
-            _errorPipeConfigurator.UseFilter(new ErrorTransportFilter());
+            ErrorConfigurator.UseFilter(new GenerateFaultFilter());
+            ErrorConfigurator.UseFilter(new ErrorTransportFilter());
 
-            _configurator.UseRescue(_errorPipeConfigurator.Build(), x =>
+            _configurator.UseRescue(ErrorConfigurator.Build(), x =>
             {
                 x.Ignore<OperationCanceledException>();
             });
@@ -67,20 +81,9 @@ namespace MassTransit.Configuration
             return new ReceivePipe(_configurator.Build(), consumePipe);
         }
 
-        public IPipeConfigurator<ReceiveContext> DeadLetterConfigurator => _deadLetterPipeConfigurator;
-
-        public IPipeConfigurator<ExceptionReceiveContext> ErrorConfigurator => _errorPipeConfigurator;
-
-        public void AddPipeSpecification(IPipeSpecification<ReceiveContext> specification)
+        public IPipe<ReceiveContext> Build()
         {
-            _configurator.AddPipeSpecification(specification);
-        }
-
-        public IEnumerable<ValidationResult> Validate()
-        {
-            return _configurator.Validate()
-                .Concat(_deadLetterPipeConfigurator.Validate())
-                .Concat(_errorPipeConfigurator.Validate());
+            return _configurator.Build();
         }
     }
 }

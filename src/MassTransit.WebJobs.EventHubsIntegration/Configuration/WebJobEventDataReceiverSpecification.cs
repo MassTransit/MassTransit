@@ -66,7 +66,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration.Configuration
 
             try
             {
-                return new EventDataReceiver(InputAddress, CreateReceivePipe(), Log, CreateReceiveEndpointContext());
+                return new EventDataReceiver(InputAddress, CreateReceiveEndpointContext());
             }
             catch (Exception ex)
             {

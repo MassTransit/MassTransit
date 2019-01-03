@@ -162,7 +162,7 @@ namespace MassTransit.Configuration
         public abstract Uri HostAddress { get; }
         public abstract Uri InputAddress { get; }
 
-        public IReceivePipe CreateReceivePipe()
+        public virtual IReceivePipe CreateReceivePipe()
         {
             return _configuration.Receive.CreatePipe(ConsumePipe, _configuration.Serialization.Deserializer);
         }
