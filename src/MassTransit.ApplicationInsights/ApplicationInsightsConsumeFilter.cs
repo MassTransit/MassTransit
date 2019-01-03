@@ -12,100 +12,100 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ApplicationInsights
 {
-	using System;
-	using System.Linq;
-	using System.Threading.Tasks;
-	using GreenPipes;
-	using Microsoft.ApplicationInsights;
-	using Microsoft.ApplicationInsights.DataContracts;
-	using Microsoft.ApplicationInsights.Extensibility;
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using GreenPipes;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.DataContracts;
+    using Microsoft.ApplicationInsights.Extensibility;
 
 
-	public class ApplicationInsightsConsumeFilter<T> :
-		IFilter<T>
-		where T : class, ConsumeContext
-	{
-		const string MessageId = nameof(MessageId);
-		const string ConversationId = nameof(ConversationId);
-		const string CorrelationId = nameof(CorrelationId);
-		const string RequestId = nameof(RequestId);
-		const string MessageType = nameof(MessageType);
-		const string QueuePath = nameof(QueuePath);
+    public class ApplicationInsightsConsumeFilter<T> :
+        IFilter<T>
+        where T : class, ConsumeContext
+    {
+        const string MessageId = nameof(MessageId);
+        const string ConversationId = nameof(ConversationId);
+        const string CorrelationId = nameof(CorrelationId);
+        const string RequestId = nameof(RequestId);
+        const string MessageType = nameof(MessageType);
+        const string QueuePath = nameof(QueuePath);
 
-		const string StepName = "MassTransit:Consumer";
+        const string StepName = "MassTransit:Consumer";
 
-		private readonly TelemetryClient _telemetryClient;
-		private readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
-		private readonly string _telemetryHeaderRootKey;
-		private readonly string _telemetryHeaderParentKey;
+        private readonly TelemetryClient _telemetryClient;
+        private readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
+        private readonly string _telemetryHeaderRootKey;
+        private readonly string _telemetryHeaderParentKey;
 
-		public ApplicationInsightsConsumeFilter(TelemetryClient telemetryClient
-			, Action<IOperationHolder<RequestTelemetry>, T> configureOperation
-			, string telemetryHeaderRootKey
-			, string telemetryHeaderParentKey
-			)
-		{
-			_telemetryClient = telemetryClient;
-			_configureOperation = configureOperation;
-			_telemetryHeaderRootKey = telemetryHeaderRootKey;
-			_telemetryHeaderParentKey = telemetryHeaderParentKey;
-		}
+        public ApplicationInsightsConsumeFilter(TelemetryClient telemetryClient,
+                                                Action<IOperationHolder<RequestTelemetry>, T> configureOperation,
+                                                string telemetryHeaderRootKey,
+                                                string telemetryHeaderParentKey
+            )
+        {
+            _telemetryClient = telemetryClient;
+            _configureOperation = configureOperation;
+            _telemetryHeaderRootKey = telemetryHeaderRootKey;
+            _telemetryHeaderParentKey = telemetryHeaderParentKey;
+        }
 
-		public void Probe(ProbeContext context)
-		{
-			context.CreateFilterScope("TelemetryConsumeFilter");
-		}
+        public void Probe(ProbeContext context)
+        {
+            context.CreateFilterScope("TelemetryConsumeFilter");
+        }
 
-		public async Task Send(T context, IPipe<T> next)
-		{
-			var messageType = context.SupportedMessageTypes.FirstOrDefault() ?? "Unknown";
+        public async Task Send(T context, IPipe<T> next)
+        {
+            var messageType = context.SupportedMessageTypes.FirstOrDefault() ?? "Unknown";
 
-			// After the message is taken from the queue, create RequestTelemetry to track its processing.
-			var requestTelemetry = new RequestTelemetry
-			{
-				Name = $"{StepName} {context.ReceiveContext.InputAddress.LocalPath} {messageType}",
-			};
+            // After the message is taken from the queue, create RequestTelemetry to track its processing.
+            var requestTelemetry = new RequestTelemetry
+            {
+                Name = $"{StepName} {context.ReceiveContext.InputAddress.LocalPath} {messageType}",
+            };
 
-			requestTelemetry.Context.Operation.Id = context.Headers.Get<string>(_telemetryHeaderRootKey);
-			requestTelemetry.Context.Operation.ParentId = context.Headers.Get<string>(_telemetryHeaderParentKey);
+            requestTelemetry.Context.Operation.Id = context.Headers.Get<string>(_telemetryHeaderRootKey);
+            requestTelemetry.Context.Operation.ParentId = context.Headers.Get<string>(_telemetryHeaderParentKey);
 
-			using (IOperationHolder<RequestTelemetry> operation = _telemetryClient.StartOperation(requestTelemetry))
-			{
-				operation.Telemetry.Properties.Add(MessageType, messageType);
-				operation.Telemetry.Properties.Add(QueuePath, context.ReceiveContext.InputAddress.LocalPath);
+            using (IOperationHolder<RequestTelemetry> operation = _telemetryClient.StartOperation(requestTelemetry))
+            {
+                operation.Telemetry.Properties.Add(MessageType, messageType);
+                operation.Telemetry.Properties.Add(QueuePath, context.ReceiveContext.InputAddress.LocalPath);
 
-				if (context.MessageId.HasValue)
-					operation.Telemetry.Properties.Add(MessageId, context.MessageId.Value.ToString());
+                if (context.MessageId.HasValue)
+                    operation.Telemetry.Properties.Add(MessageId, context.MessageId.Value.ToString());
 
-				if (context.ConversationId.HasValue)
-					operation.Telemetry.Properties.Add(ConversationId, context.ConversationId.Value.ToString());
+                if (context.ConversationId.HasValue)
+                    operation.Telemetry.Properties.Add(ConversationId, context.ConversationId.Value.ToString());
 
-				if (context.CorrelationId.HasValue)
-					operation.Telemetry.Properties.Add(CorrelationId, context.CorrelationId.Value.ToString());
+                if (context.CorrelationId.HasValue)
+                    operation.Telemetry.Properties.Add(CorrelationId, context.CorrelationId.Value.ToString());
 
-				if (context.RequestId.HasValue)
-					operation.Telemetry.Properties.Add(RequestId, context.RequestId.Value.ToString());
+                if (context.RequestId.HasValue)
+                    operation.Telemetry.Properties.Add(RequestId, context.RequestId.Value.ToString());
 
-				_configureOperation?.Invoke(operation, context);
+                _configureOperation?.Invoke(operation, context);
 
-				try
-				{
-					await next.Send(context).ConfigureAwait(false);
+                try
+                {
+                    await next.Send(context).ConfigureAwait(false);
 
-					operation.Telemetry.Success = true;
-				}
-				catch (Exception ex)
-				{
-					_telemetryClient.TrackException(ex, operation.Telemetry.Properties);
+                    operation.Telemetry.Success = true;
+                }
+                catch (Exception ex)
+                {
+                    _telemetryClient.TrackException(ex, operation.Telemetry.Properties);
 
-					operation.Telemetry.Success = false;
-					throw;
-				}
-				finally
-				{
-					_telemetryClient.StopOperation(operation);
-				}
-			}
-		}
-	}
+                    operation.Telemetry.Success = false;
+                    throw;
+                }
+                finally
+                {
+                    _telemetryClient.StopOperation(operation);
+                }
+            }
+        }
+    }
 }
