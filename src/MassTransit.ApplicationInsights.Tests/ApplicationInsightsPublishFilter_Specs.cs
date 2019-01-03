@@ -28,7 +28,7 @@ namespace MassTransit.ApplicationInsights.Tests
 			var mockPublishContext = new Mock<PublishContext>();
 			mockPublishContext.SetupGet(p => p.Headers).Returns(Mock.Of<SendHeaders>());
 
-			var filter = new ApplicationInsightsPublishFilter<PublishContext>(new TelemetryClient(), "", "", ((holder, context) => configureOperationHasBeenCalled = true));
+			var filter = new ApplicationInsightsPublishFilter<PublishContext>(new TelemetryClient(), "", "", (holder, context) => configureOperationHasBeenCalled = true);
 
 			var mockPipe = new Mock<IPipe<PublishContext>>();
 			await filter.Send(mockPublishContext.Object, mockPipe.Object);
