@@ -100,6 +100,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
             await Completed.ConfigureAwait(false);
+
+            await _context.CloseAsync(context.CancellationToken).ConfigureAwait(false);
         }
 
         async Task ActiveAndActualAgentsCompleted(StopSupervisorContext context)

@@ -57,9 +57,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         string ClientContext.EntityPath => _context.EntityPath;
 
-        void ClientContext.OnMessageAsync(Func<IMessageReceiver, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
+        void ClientContext.OnMessageAsync(Func<IMessageReceiver, Message, CancellationToken, Task> callback,
+            Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
         {
             _context.OnMessageAsync(callback, exceptionHandler);
+        }
+
+        Task ClientContext.CloseAsync(CancellationToken cancellationToken)
+        {
+            return _context.CloseAsync(cancellationToken);
         }
     }
 }

@@ -42,5 +42,12 @@ namespace MassTransit.Azure.ServiceBus.Core
         /// <param name="callback"></param>
         /// <param name="exceptionHandler"></param>
         void OnMessageAsync(Func<IMessageReceiver, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler);
+
+        /// <summary>
+        /// Close down the message handler on the received
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task CloseAsync(CancellationToken cancellationToken);
     }
 }
