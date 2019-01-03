@@ -20,18 +20,18 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
 
-
     public class ApplicationInsightsPublishSpecification<T> :
         IPipeSpecification<T>
         where T : class, PublishContext
     {
         readonly Action<IOperationHolder<DependencyTelemetry>, T> _configureOperation;
         readonly TelemetryClient _telemetryClient;
-        readonly string _telemetryHeaderParentKey;
         readonly string _telemetryHeaderRootKey;
+        readonly string _telemetryHeaderParentKey;
 
-        public ApplicationInsightsPublishSpecification(TelemetryClient telemetryClient, string telemetryHeaderRootKey, string telemetryHeaderParentKey,
-            Action<IOperationHolder<DependencyTelemetry>, T> configureOperation)
+        public ApplicationInsightsPublishSpecification(TelemetryClient telemetryClient,
+            Action<IOperationHolder<DependencyTelemetry>, T> configureOperation, string telemetryHeaderRootKey,
+            string telemetryHeaderParentKey)
         {
             _telemetryClient = telemetryClient;
             _telemetryHeaderRootKey = telemetryHeaderRootKey;
@@ -46,8 +46,8 @@ namespace MassTransit.ApplicationInsights
 
         public void Apply(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(
-                new ApplicationInsightsPublishFilter<T>(_telemetryClient, _telemetryHeaderRootKey, _telemetryHeaderParentKey, _configureOperation));
+            builder.AddFilter(new ApplicationInsightsPublishFilter<T>(_telemetryClient, _configureOperation,
+                _telemetryHeaderRootKey, _telemetryHeaderParentKey));
         }
     }
 }

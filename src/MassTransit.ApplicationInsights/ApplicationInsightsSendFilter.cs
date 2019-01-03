@@ -20,7 +20,6 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
 
-
     public class ApplicationInsightsSendFilter<T> :
         IFilter<T>
         where T : class, SendContext
@@ -28,6 +27,7 @@ namespace MassTransit.ApplicationInsights
         const string MessageId = nameof(MessageId);
         const string ConversationId = nameof(ConversationId);
         const string CorrelationId = nameof(CorrelationId);
+        const string DestinationAddress = nameof(DestinationAddress);
         const string RequestId = nameof(RequestId);
         const string MessageType = nameof(MessageType);
 
@@ -36,11 +36,11 @@ namespace MassTransit.ApplicationInsights
         readonly Action<IOperationHolder<DependencyTelemetry>, T> _configureOperation;
 
         readonly TelemetryClient _telemetryClient;
-        readonly string _telemetryHeaderParentKey;
         readonly string _telemetryHeaderRootKey;
+        readonly string _telemetryHeaderParentKey;
 
-        public ApplicationInsightsSendFilter(TelemetryClient telemetryClient, string telemetryHeaderRootKey, string telemetryHeaderParentKey,
-            Action<IOperationHolder<DependencyTelemetry>, T> configureOperation)
+        public ApplicationInsightsSendFilter(TelemetryClient telemetryClient, string telemetryHeaderRootKey,
+            string telemetryHeaderParentKey, Action<IOperationHolder<DependencyTelemetry>, T> configureOperation)
         {
             _telemetryClient = telemetryClient;
             _telemetryHeaderRootKey = telemetryHeaderRootKey;
@@ -58,7 +58,7 @@ namespace MassTransit.ApplicationInsights
             var contextType = context.GetType();
             var messageType = contextType.GetGenericArguments().FirstOrDefault()?.FullName ?? "Unknown";
 
-            var requestTelemetry = new DependencyTelemetry
+            var requestTelemetry = new DependencyTelemetry()
             {
                 Name = $"{StepName} {messageType}",
                 Type = DependencyType,
@@ -80,6 +80,9 @@ namespace MassTransit.ApplicationInsights
 
                 if (context.CorrelationId.HasValue)
                     operation.Telemetry.Properties.Add(CorrelationId, context.CorrelationId.Value.ToString());
+
+                if (context.DestinationAddress != null)
+                    operation.Telemetry.Properties.Add(DestinationAddress, context.DestinationAddress.ToString());
 
                 if (context.RequestId.HasValue)
                     operation.Telemetry.Properties.Add(RequestId, context.RequestId.Value.ToString());

@@ -44,11 +44,11 @@ namespace MassTransit.ApplicationInsights.Tests
 				Bus.Factory.CreateUsingInMemory(x =>
 				{
 					x.UseApplicationInsightsOnSend(
-						telemetryClient,
-						configureOperation: (holder, context) =>
-						{
-							holder.Telemetry.Properties.Add("key", "value");
-						});
+                        telemetryClient,
+                        configureOperation: (holder, context) =>
+                        {
+                            holder.Telemetry.Properties.Add("key", "value");
+                        });
 				});
 
 			Assert.DoesNotThrow(CreateBus);
@@ -64,7 +64,7 @@ namespace MassTransit.ApplicationInsights.Tests
                 {
                     x.UseApplicationInsightsOnPublish(
                         telemetryClient,
-						configureOperation: (holder, context) =>
+                        configureOperation: (holder, context) =>
                         {
                             holder.Telemetry.Properties.Add("key", "value");
                         });

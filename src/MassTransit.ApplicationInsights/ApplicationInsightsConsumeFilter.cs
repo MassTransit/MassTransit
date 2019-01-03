@@ -20,7 +20,6 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
 
-
     public class ApplicationInsightsConsumeFilter<T> :
         IFilter<T>
         where T : class, ConsumeContext
@@ -28,19 +27,21 @@ namespace MassTransit.ApplicationInsights
         const string MessageId = nameof(MessageId);
         const string ConversationId = nameof(ConversationId);
         const string CorrelationId = nameof(CorrelationId);
+        const string DestinationAddress = nameof(DestinationAddress);
+        const string InputAddress = nameof(InputAddress);
         const string RequestId = nameof(RequestId);
         const string MessageType = nameof(MessageType);
-        const string QueuePath = nameof(QueuePath);
 
         const string StepName = "MassTransit:Consumer";
         readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
 
         readonly TelemetryClient _telemetryClient;
-        readonly string _telemetryHeaderParentKey;
         readonly string _telemetryHeaderRootKey;
+        readonly string _telemetryHeaderParentKey;
 
-        public ApplicationInsightsConsumeFilter(TelemetryClient telemetryClient, Action<IOperationHolder<RequestTelemetry>, T> configureOperation,
-            string telemetryHeaderRootKey, string telemetryHeaderParentKey)
+        public ApplicationInsightsConsumeFilter(TelemetryClient telemetryClient,
+            Action<IOperationHolder<RequestTelemetry>, T> configureOperation, string telemetryHeaderRootKey,
+            string telemetryHeaderParentKey)
         {
             _telemetryClient = telemetryClient;
             _configureOperation = configureOperation;
@@ -55,7 +56,8 @@ namespace MassTransit.ApplicationInsights
 
         public async Task Send(T context, IPipe<T> next)
         {
-            var messageType = context.SupportedMessageTypes.FirstOrDefault() ?? "Unknown";
+            var contextType = context.GetType();
+            var messageType = contextType.GetGenericArguments().FirstOrDefault()?.FullName ?? "Unknown";
 
             // After the message is taken from the queue, create RequestTelemetry to track its processing.
             var requestTelemetry = new RequestTelemetry
@@ -69,7 +71,6 @@ namespace MassTransit.ApplicationInsights
             using (IOperationHolder<RequestTelemetry> operation = _telemetryClient.StartOperation(requestTelemetry))
             {
                 operation.Telemetry.Properties.Add(MessageType, messageType);
-                operation.Telemetry.Properties.Add(QueuePath, context.ReceiveContext.InputAddress.LocalPath);
 
                 if (context.MessageId.HasValue)
                     operation.Telemetry.Properties.Add(MessageId, context.MessageId.Value.ToString());
@@ -79,6 +80,12 @@ namespace MassTransit.ApplicationInsights
 
                 if (context.CorrelationId.HasValue)
                     operation.Telemetry.Properties.Add(CorrelationId, context.CorrelationId.Value.ToString());
+
+                if (context.DestinationAddress != null)
+                    operation.Telemetry.Properties.Add(DestinationAddress, context.DestinationAddress.ToString());
+
+                if (context.ReceiveContext.InputAddress != null)
+                    operation.Telemetry.Properties.Add(InputAddress, context.ReceiveContext.InputAddress.ToString());
 
                 if (context.RequestId.HasValue)
                     operation.Telemetry.Properties.Add(RequestId, context.RequestId.Value.ToString());
