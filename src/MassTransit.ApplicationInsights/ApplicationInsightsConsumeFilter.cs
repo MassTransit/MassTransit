@@ -56,7 +56,8 @@ namespace MassTransit.ApplicationInsights
 
         public async Task Send(T context, IPipe<T> next)
         {
-            var messageType = context.SupportedMessageTypes.FirstOrDefault() ?? "Unknown";
+            var contextType = context.GetType();
+            var messageType = contextType.GetGenericArguments().FirstOrDefault()?.FullName ?? "Unknown";
 
             // After the message is taken from the queue, create RequestTelemetry to track its processing.
             var requestTelemetry = new RequestTelemetry
