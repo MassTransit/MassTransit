@@ -26,6 +26,7 @@ namespace MassTransit.ApplicationInsights
         const string MessageId = nameof(MessageId);
         const string ConversationId = nameof(ConversationId);
         const string CorrelationId = nameof(CorrelationId);
+        const string DestinationAddress = nameof(DestinationAddress);
         const string RequestId = nameof(RequestId);
         const string MessageType = nameof(MessageType);
         const string QueuePath = nameof(QueuePath);
@@ -81,6 +82,9 @@ namespace MassTransit.ApplicationInsights
 
                 if (context.CorrelationId.HasValue)
                     operation.Telemetry.Properties.Add(CorrelationId, context.CorrelationId.Value.ToString());
+
+                if (context.DestinationAddress != null)
+                    operation.Telemetry.Properties.Add(DestinationAddress, context.DestinationAddress.ToString());
 
                 if (context.RequestId.HasValue)
                     operation.Telemetry.Properties.Add(RequestId, context.RequestId.Value.ToString());

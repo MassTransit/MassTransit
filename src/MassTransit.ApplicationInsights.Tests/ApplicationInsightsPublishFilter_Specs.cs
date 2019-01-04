@@ -75,6 +75,7 @@ namespace MassTransit.ApplicationInsights.Tests
             var conversationId = Guid.NewGuid();
             var correlationId = Guid.NewGuid();
             var requestId = Guid.NewGuid();
+            var destinationAddress = new Uri("sb://my-organization.servicebus.windows.net/MyNamespace/MyMessage");
 
             var mockSendContext = new Mock<SendContext>();
             mockSendContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
@@ -82,8 +83,9 @@ namespace MassTransit.ApplicationInsights.Tests
             mockSendContext.Setup(c => c.ConversationId).Returns(conversationId);
             mockSendContext.Setup(c => c.CorrelationId).Returns(correlationId);
             mockSendContext.Setup(c => c.RequestId).Returns(requestId);
+            mockSendContext.Setup(c => c.DestinationAddress).Returns(destinationAddress);
 
-            var publishContextProxy = new PublishContextProxy<SampleMessage>(mockSendContext.Object, new SampleMessage());
+            var publishContextProxy = new PublishContextProxy<object>(mockSendContext.Object, new object());
 
             var capturedTelemetry = default(DependencyTelemetry);
 
@@ -95,14 +97,11 @@ namespace MassTransit.ApplicationInsights.Tests
             // Assert.
             Assert.IsNotNull(capturedTelemetry);
             Assert.AreEqual(capturedTelemetry.Properties["MessageId"], messageId.ToString());
-            Assert.AreEqual(capturedTelemetry.Properties["MessageType"], typeof(SampleMessage).FullName);
+            Assert.AreEqual(capturedTelemetry.Properties["MessageType"], typeof(object).FullName);
             Assert.AreEqual(capturedTelemetry.Properties["ConversationId"], conversationId.ToString());
             Assert.AreEqual(capturedTelemetry.Properties["CorrelationId"], correlationId.ToString());
+            Assert.AreEqual(capturedTelemetry.Properties["DestinationAddress"], destinationAddress.ToString());
             Assert.AreEqual(capturedTelemetry.Properties["RequestId"], requestId.ToString());
         }
-    }
-
-    public class SampleMessage
-    {
     }
 }

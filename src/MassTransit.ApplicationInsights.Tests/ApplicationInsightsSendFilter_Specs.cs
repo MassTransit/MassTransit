@@ -77,6 +77,7 @@ namespace MassTransit.ApplicationInsights.Tests
             var correlationId = Guid.NewGuid();
             var requestId = Guid.NewGuid();
             var inputAddress = new Uri("http://masstransit-project.com/");
+            var destinationAddress = new Uri("sb://my-organization.servicebus.windows.net/MyNamespace/MyMessage");
 
             var mockReceiveContext = new Mock<ReceiveContext>();
             mockReceiveContext.Setup(c => c.InputAddress).Returns(inputAddress);
@@ -87,6 +88,7 @@ namespace MassTransit.ApplicationInsights.Tests
             mockSendContext.Setup(c => c.ConversationId).Returns(conversationId);
             mockSendContext.Setup(c => c.CorrelationId).Returns(correlationId);
             mockSendContext.Setup(c => c.RequestId).Returns(requestId);
+            mockSendContext.Setup(c => c.DestinationAddress).Returns(destinationAddress);
 
             var sendContextProxy = new SendContextProxy<object>(mockSendContext.Object, new Mock<IPayloadCache>().Object);
 
@@ -103,6 +105,7 @@ namespace MassTransit.ApplicationInsights.Tests
             Assert.AreEqual(capturedTelemetry.Properties["MessageType"], typeof(object).FullName);
             Assert.AreEqual(capturedTelemetry.Properties["ConversationId"], conversationId.ToString());
             Assert.AreEqual(capturedTelemetry.Properties["CorrelationId"], correlationId.ToString());
+            Assert.AreEqual(capturedTelemetry.Properties["DestinationAddress"], destinationAddress.ToString());
             Assert.AreEqual(capturedTelemetry.Properties["RequestId"], requestId.ToString());
         }
     }

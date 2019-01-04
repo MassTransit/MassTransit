@@ -61,7 +61,7 @@ namespace MassTransit.ApplicationInsights.Tests
         {
             // Arrange.
 
-           var mockConsumeContext = new Mock<ConsumeContext>();
+            var mockConsumeContext = new Mock<ConsumeContext>();
             mockConsumeContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
             mockConsumeContext.Setup(c => c.ReceiveContext).Returns(_mockReceiveContext.Object);
             bool configureOperationHasBeenCalled = false;
@@ -84,6 +84,7 @@ namespace MassTransit.ApplicationInsights.Tests
             var correlationId = Guid.NewGuid();
             var requestId = Guid.NewGuid();
             var inputAddress = new Uri("http://masstransit-project.com/");
+            var destinationAddress = new Uri("sb://my-organization.servicebus.windows.net/MyNamespace/MyMessage");
 
             var mockReceiveContext = new Mock<ReceiveContext>();
             mockReceiveContext.Setup(c => c.InputAddress).Returns(inputAddress);
@@ -95,6 +96,7 @@ namespace MassTransit.ApplicationInsights.Tests
             mockConsumeContext.Setup(c => c.ConversationId).Returns(conversationId);
             mockConsumeContext.Setup(c => c.CorrelationId).Returns(correlationId);
             mockConsumeContext.Setup(c => c.RequestId).Returns(requestId);
+            mockConsumeContext.Setup(c => c.DestinationAddress).Returns(destinationAddress);
 
             var consumeContextProxy = new ConsumeContextProxy<object>(mockConsumeContext.Object, new Mock<IPayloadCache>().Object);
 
@@ -111,6 +113,7 @@ namespace MassTransit.ApplicationInsights.Tests
             Assert.AreEqual(capturedRequestTelemetry.Properties["MessageType"], typeof(object).FullName);
             Assert.AreEqual(capturedRequestTelemetry.Properties["ConversationId"], conversationId.ToString());
             Assert.AreEqual(capturedRequestTelemetry.Properties["CorrelationId"], correlationId.ToString());
+            Assert.AreEqual(capturedRequestTelemetry.Properties["DestinationAddress"], destinationAddress.ToString());
             Assert.AreEqual(capturedRequestTelemetry.Properties["QueuePath"], inputAddress.LocalPath);
             Assert.AreEqual(capturedRequestTelemetry.Properties["RequestId"], requestId.ToString());
         }
