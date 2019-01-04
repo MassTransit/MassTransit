@@ -1,14 +1,14 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
+﻿// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ApplicationInsights
 {
@@ -20,20 +20,18 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
 
-    public class ApplicationInsightsConsumeSpecification<T>
-        : IPipeSpecification<T>
+
+    public class ApplicationInsightsConsumeSpecification<T> :
+        IPipeSpecification<T>
         where T : class, ConsumeContext
     {
-        private readonly TelemetryClient _telemetryClient;
-        private readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
-        private readonly string _telemetryHeaderRootKey;
-        private readonly string _telemetryHeaderParentKey;
+        readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
+        readonly TelemetryClient _telemetryClient;
+        readonly string _telemetryHeaderParentKey;
+        readonly string _telemetryHeaderRootKey;
 
-        public ApplicationInsightsConsumeSpecification(TelemetryClient telemetryClient,
-                                                       Action<IOperationHolder<RequestTelemetry>, T> configureOperation,
-                                                       string telemetryHeaderRootKey,
-                                                       string telemetryHeaderParentKey
-            )
+        public ApplicationInsightsConsumeSpecification(TelemetryClient telemetryClient, Action<IOperationHolder<RequestTelemetry>, T> configureOperation,
+            string telemetryHeaderRootKey, string telemetryHeaderParentKey)
         {
             _telemetryClient = telemetryClient;
             _configureOperation = configureOperation;
@@ -48,10 +46,8 @@ namespace MassTransit.ApplicationInsights
 
         public void Apply(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new ApplicationInsightsConsumeFilter<T>(_telemetryClient,
-                                                                      _configureOperation,
-                                                                      _telemetryHeaderRootKey,
-                                                                      _telemetryHeaderParentKey));
+            builder.AddFilter(new ApplicationInsightsConsumeFilter<T>(_telemetryClient, _configureOperation, _telemetryHeaderRootKey,
+                _telemetryHeaderParentKey));
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the
@@ -20,8 +20,9 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
 
-    public class ApplicationInsightsPublishFilter<T> 
-        : IFilter<T>
+
+    public class ApplicationInsightsPublishFilter<T> :
+        IFilter<T>
         where T : class, PublishContext
     {
         const string MessageId = nameof(MessageId);
@@ -32,17 +33,14 @@ namespace MassTransit.ApplicationInsights
 
         const string StepName = "MassTransit:Publish";
         const string DependencyType = "Queue";
+        readonly Action<IOperationHolder<DependencyTelemetry>, T> _configureOperation;
 
-        private readonly TelemetryClient _telemetryClient;
-        private readonly string _telemetryHeaderRootKey;
-        private readonly string _telemetryHeaderParentKey;
-        private readonly Action<IOperationHolder<DependencyTelemetry>, T> _configureOperation;
+        readonly TelemetryClient _telemetryClient;
+        readonly string _telemetryHeaderParentKey;
+        readonly string _telemetryHeaderRootKey;
 
-        public ApplicationInsightsPublishFilter(TelemetryClient telemetryClient,
-                                                string telemetryHeaderRootKey,
-                                                string telemetryHeaderParentKey,
-                                                Action<IOperationHolder<DependencyTelemetry>, T> configureOperation
-            )
+        public ApplicationInsightsPublishFilter(TelemetryClient telemetryClient, string telemetryHeaderRootKey, string telemetryHeaderParentKey,
+            Action<IOperationHolder<DependencyTelemetry>, T> configureOperation)
         {
             _telemetryClient = telemetryClient;
             _telemetryHeaderRootKey = telemetryHeaderRootKey;
@@ -60,14 +58,14 @@ namespace MassTransit.ApplicationInsights
             var contextType = context.GetType();
             var messageType = contextType.GetGenericArguments().FirstOrDefault()?.FullName ?? "Unknown";
 
-            var telemetry = new DependencyTelemetry()
+            var telemetry = new DependencyTelemetry
             {
                 Name = $"{StepName} {messageType}",
                 Type = DependencyType,
                 Data = $"{StepName} {context.DestinationAddress}"
             };
 
-            using (var operation = _telemetryClient.StartOperation(telemetry))
+            using (IOperationHolder<DependencyTelemetry> operation = _telemetryClient.StartOperation(telemetry))
             {
                 context.Headers.Set(_telemetryHeaderRootKey, operation.Telemetry.Context.Operation.Id);
                 context.Headers.Set(_telemetryHeaderParentKey, operation.Telemetry.Id);

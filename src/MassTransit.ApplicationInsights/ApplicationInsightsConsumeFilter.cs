@@ -1,14 +1,14 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
+﻿// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ApplicationInsights
 {
@@ -33,17 +33,14 @@ namespace MassTransit.ApplicationInsights
         const string QueuePath = nameof(QueuePath);
 
         const string StepName = "MassTransit:Consumer";
+        readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
 
-        private readonly TelemetryClient _telemetryClient;
-        private readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
-        private readonly string _telemetryHeaderRootKey;
-        private readonly string _telemetryHeaderParentKey;
+        readonly TelemetryClient _telemetryClient;
+        readonly string _telemetryHeaderParentKey;
+        readonly string _telemetryHeaderRootKey;
 
-        public ApplicationInsightsConsumeFilter(TelemetryClient telemetryClient,
-                                                Action<IOperationHolder<RequestTelemetry>, T> configureOperation,
-                                                string telemetryHeaderRootKey,
-                                                string telemetryHeaderParentKey
-            )
+        public ApplicationInsightsConsumeFilter(TelemetryClient telemetryClient, Action<IOperationHolder<RequestTelemetry>, T> configureOperation,
+            string telemetryHeaderRootKey, string telemetryHeaderParentKey)
         {
             _telemetryClient = telemetryClient;
             _configureOperation = configureOperation;
@@ -63,7 +60,7 @@ namespace MassTransit.ApplicationInsights
             // After the message is taken from the queue, create RequestTelemetry to track its processing.
             var requestTelemetry = new RequestTelemetry
             {
-                Name = $"{StepName} {context.ReceiveContext.InputAddress.LocalPath} {messageType}",
+                Name = $"{StepName} {context.ReceiveContext.InputAddress.LocalPath} {messageType}"
             };
 
             requestTelemetry.Context.Operation.Id = context.Headers.Get<string>(_telemetryHeaderRootKey);
