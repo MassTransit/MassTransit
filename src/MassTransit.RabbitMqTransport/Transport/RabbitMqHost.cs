@@ -19,26 +19,20 @@ namespace MassTransit.RabbitMqTransport.Transport
     using GreenPipes.Agents;
     using Integration;
     using MassTransit.Configurators;
-    using MassTransit.Pipeline;
-    using MassTransit.Topology;
     using Topology;
     using Transports;
 
 
     public class RabbitMqHost :
-        Supervisor,
+        BaseHost,
         IRabbitMqHostControl
     {
         readonly IRabbitMqHostConfiguration _hostConfiguration;
-        readonly IReceiveEndpointCollection _receiveEndpoints;
-        HostHandle _handle;
 
         public RabbitMqHost(IRabbitMqHostConfiguration hostConfiguration)
+            : base(hostConfiguration)
         {
             _hostConfiguration = hostConfiguration;
-
-            _receiveEndpoints = new ReceiveEndpointCollection();
-            Add(_receiveEndpoints);
 
             ConnectionRetryPolicy = Retry.CreatePolicy(x =>
             {
@@ -50,27 +44,9 @@ namespace MassTransit.RabbitMqTransport.Transport
             ConnectionContextSupervisor = new RabbitMqConnectionContextSupervisor(hostConfiguration);
         }
 
-        public async Task<HostHandle> Start()
+        protected override void Probe(ProbeContext context)
         {
-            if (_handle != null)
-                throw new MassTransitException($"The host was already started: {_hostConfiguration.Description}");
-
-            HostReceiveEndpointHandle[] handles = _receiveEndpoints.StartEndpoints();
-
-            _handle = new StartHostHandle(this, handles);
-
-            return _handle;
-        }
-
-        public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
-        {
-            _receiveEndpoints.Add(endpointName, receiveEndpoint);
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            var scope = context.CreateScope("host");
-            scope.Set(new
+            context.Set(new
             {
                 Type = "RabbitMQ",
                 Settings.Host,
@@ -84,24 +60,19 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             if (Settings.Ssl)
             {
-                scope.Set(new
+                context.Set(new
                 {
                     Settings.SslServerName
                 });
             }
 
-            ConnectionContextSupervisor.Probe(scope);
-
-            _receiveEndpoints.Probe(scope);
+            ConnectionContextSupervisor.Probe(context);
         }
-
-        public Uri Address => _hostConfiguration.HostAddress;
-        IHostTopology IHost.Topology => _hostConfiguration.Topology;
 
         public IConnectionContextSupervisor ConnectionContextSupervisor { get; }
         public IRetryPolicy ConnectionRetryPolicy { get; }
         public RabbitMqHostSettings Settings => _hostConfiguration.Settings;
-        public IRabbitMqHostTopology Topology => _hostConfiguration.Topology;
+        IRabbitMqHostTopology IRabbitMqHost.Topology => _hostConfiguration.Topology;
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
         {
@@ -118,37 +89,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             configuration.Build();
 
-            return _receiveEndpoints.Start(queueName);
-        }
-
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-        {
-            return _receiveEndpoints.ConnectConsumeMessageObserver(observer);
-        }
-
-        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
-        {
-            return _receiveEndpoints.ConnectConsumeObserver(observer);
-        }
-
-        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
-        {
-            return _receiveEndpoints.ConnectReceiveObserver(observer);
-        }
-
-        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
-        {
-            return _receiveEndpoints.ConnectReceiveEndpointObserver(observer);
-        }
-
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
-        {
-            return _receiveEndpoints.ConnectPublishObserver(observer);
-        }
-
-        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
-        {
-            return _receiveEndpoints.ConnectSendObserver(observer);
+            return ReceiveEndpoints.Start(queueName);
         }
 
         protected override async Task StopSupervisor(StopSupervisorContext context)

@@ -28,16 +28,19 @@ namespace MassTransit.Transports.InMemory.Configuration
         {
             _busConfiguration = busConfiguration;
 
-            _host = new InMemoryHost(this, transportConcurrencyLimit, hostTopology, baseAddress);
+            Topology = hostTopology;
+            HostAddress = baseAddress ?? new Uri("loopback://localhost/");
+
+            _host = new InMemoryHost(this, transportConcurrencyLimit);
         }
 
-        Uri IHostConfiguration.HostAddress => _host.Address;
+        public Uri HostAddress { get; }
         IBusHostControl IHostConfiguration.Host => _host;
-        public IHostTopology Topology => _host.Topology;
+        public IHostTopology Topology { get; }
 
         public bool Matches(Uri address)
         {
-            return address.ToString().StartsWith(_host.Address.ToString(), StringComparison.OrdinalIgnoreCase);
+            return address.ToString().StartsWith(HostAddress.ToString(), StringComparison.OrdinalIgnoreCase);
         }
 
         public Task<ISendTransport> CreateSendTransport(Uri address)
