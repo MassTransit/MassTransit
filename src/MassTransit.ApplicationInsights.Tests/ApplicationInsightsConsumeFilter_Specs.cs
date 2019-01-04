@@ -114,7 +114,7 @@ namespace MassTransit.ApplicationInsights.Tests
             Assert.AreEqual(capturedRequestTelemetry.Properties["ConversationId"], conversationId.ToString());
             Assert.AreEqual(capturedRequestTelemetry.Properties["CorrelationId"], correlationId.ToString());
             Assert.AreEqual(capturedRequestTelemetry.Properties["DestinationAddress"], destinationAddress.ToString());
-            Assert.AreEqual(capturedRequestTelemetry.Properties["QueuePath"], inputAddress.LocalPath);
+            Assert.AreEqual(capturedRequestTelemetry.Properties["InputAddress"], inputAddress.ToString());
             Assert.AreEqual(capturedRequestTelemetry.Properties["RequestId"], requestId.ToString());
         }
     }

@@ -27,9 +27,9 @@ namespace MassTransit.ApplicationInsights
         const string ConversationId = nameof(ConversationId);
         const string CorrelationId = nameof(CorrelationId);
         const string DestinationAddress = nameof(DestinationAddress);
+        const string InputAddress = nameof(InputAddress);
         const string RequestId = nameof(RequestId);
         const string MessageType = nameof(MessageType);
-        const string QueuePath = nameof(QueuePath);
 
         const string StepName = "MassTransit:Consumer";
 
@@ -72,7 +72,6 @@ namespace MassTransit.ApplicationInsights
             using (IOperationHolder<RequestTelemetry> operation = _telemetryClient.StartOperation(requestTelemetry))
             {
                 operation.Telemetry.Properties.Add(MessageType, messageType);
-                operation.Telemetry.Properties.Add(QueuePath, context.ReceiveContext.InputAddress.LocalPath);
 
                 if (context.MessageId.HasValue)
                     operation.Telemetry.Properties.Add(MessageId, context.MessageId.Value.ToString());
@@ -85,6 +84,9 @@ namespace MassTransit.ApplicationInsights
 
                 if (context.DestinationAddress != null)
                     operation.Telemetry.Properties.Add(DestinationAddress, context.DestinationAddress.ToString());
+
+                if (context.ReceiveContext.InputAddress != null)
+                    operation.Telemetry.Properties.Add(InputAddress, context.ReceiveContext.InputAddress.ToString());
 
                 if (context.RequestId.HasValue)
                     operation.Telemetry.Properties.Add(RequestId, context.RequestId.Value.ToString());
