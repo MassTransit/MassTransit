@@ -20,17 +20,17 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
 
-    public class ApplicationInsightsConsumeSpecification<T> : IPipeSpecification<T> where T : class, ConsumeContext
+    public class ApplicationInsightsConsumeSpecification<T> :
+        IPipeSpecification<T>
+        where T : class, ConsumeContext
     {
         readonly TelemetryClient _telemetryClient;
         readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
         readonly string _telemetryHeaderRootKey;
         readonly string _telemetryHeaderParentKey;
 
-        public ApplicationInsightsConsumeSpecification(
-            TelemetryClient telemetryClient,
-            Action<IOperationHolder<RequestTelemetry>, T> configureOperation,
-            string telemetryHeaderRootKey,
+        public ApplicationInsightsConsumeSpecification(TelemetryClient telemetryClient,
+            Action<IOperationHolder<RequestTelemetry>, T> configureOperation, string telemetryHeaderRootKey,
             string telemetryHeaderParentKey)
         {
             _telemetryClient = telemetryClient;
@@ -46,7 +46,8 @@ namespace MassTransit.ApplicationInsights
 
         public void Apply(IPipeBuilder<T> builder)
         {
-            builder.AddFilter(new ApplicationInsightsConsumeFilter<T>(_telemetryClient, _configureOperation, _telemetryHeaderRootKey, _telemetryHeaderParentKey));
+            builder.AddFilter(new ApplicationInsightsConsumeFilter<T>(_telemetryClient, _configureOperation,
+                _telemetryHeaderRootKey, _telemetryHeaderParentKey));
         }
     }
 }

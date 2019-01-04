@@ -20,8 +20,9 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
 
-
-    public class ApplicationInsightsConsumeFilter<T> : IFilter<T> where T : class, ConsumeContext
+    public class ApplicationInsightsConsumeFilter<T> :
+        IFilter<T>
+        where T : class, ConsumeContext
     {
         const string MessageId = nameof(MessageId);
         const string ConversationId = nameof(ConversationId);
@@ -38,10 +39,8 @@ namespace MassTransit.ApplicationInsights
         readonly string _telemetryHeaderRootKey;
         readonly string _telemetryHeaderParentKey;
 
-        public ApplicationInsightsConsumeFilter(
-            TelemetryClient telemetryClient,
-            Action<IOperationHolder<RequestTelemetry>, T> configureOperation,
-            string telemetryHeaderRootKey,
+        public ApplicationInsightsConsumeFilter(TelemetryClient telemetryClient,
+            Action<IOperationHolder<RequestTelemetry>, T> configureOperation, string telemetryHeaderRootKey,
             string telemetryHeaderParentKey)
         {
             _telemetryClient = telemetryClient;

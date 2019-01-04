@@ -20,7 +20,9 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
 
-    public class ApplicationInsightsSendFilter<T> : IFilter<T> where T : class, SendContext
+    public class ApplicationInsightsSendFilter<T> :
+        IFilter<T>
+        where T : class, SendContext
     {
         const string MessageId = nameof(MessageId);
         const string ConversationId = nameof(ConversationId);
@@ -37,11 +39,8 @@ namespace MassTransit.ApplicationInsights
         readonly string _telemetryHeaderParentKey;
         readonly Action<IOperationHolder<DependencyTelemetry>, T> _configureOperation;
 
-        public ApplicationInsightsSendFilter(
-            TelemetryClient telemetryClient,
-            string telemetryHeaderRootKey,
-            string telemetryHeaderParentKey,
-            Action<IOperationHolder<DependencyTelemetry>, T> configureOperation)
+        public ApplicationInsightsSendFilter(TelemetryClient telemetryClient, string telemetryHeaderRootKey,
+            string telemetryHeaderParentKey, Action<IOperationHolder<DependencyTelemetry>, T> configureOperation)
         {
             _telemetryClient = telemetryClient;
             _telemetryHeaderRootKey = telemetryHeaderRootKey;
