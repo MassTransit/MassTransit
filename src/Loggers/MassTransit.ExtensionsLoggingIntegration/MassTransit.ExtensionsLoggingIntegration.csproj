@@ -1,20 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <RootNamespace>MassTransit.ExtensionsLoggingIntegration</RootNamespace>
-    <AssemblyName>MassTransit.ExtensionsLoggingIntegration</AssemblyName>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PackageId>MassTransit.Extensions.Logging</PackageId>
-    <Title>MassTransit.Extensions.Logging</Title>
-    <Description>MassTransit Microsoft.Extensions.Logging support; $(Description)</Description>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.ExtensionsLoggingIntegration.xml</DocumentationFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
-  </ItemGroup>
+    <PropertyGroup>
+        <RootNamespace>MassTransit.ExtensionsLoggingIntegration</RootNamespace>
+        <AssemblyName>MassTransit.ExtensionsLoggingIntegration</AssemblyName>
+        <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>MassTransit.Extensions.Logging</PackageId>
+        <Title>MassTransit.Extensions.Logging</Title>
+        <Description>MassTransit Microsoft.Extensions.Logging support; $(Description)</Description>
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.ExtensionsLoggingIntegration.xml</DocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+    </ItemGroup>
 </Project>
