@@ -127,6 +127,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
 
 
         [Test]
+        [Category("Flakey")]
         public async Task Should_not_get_the_message()
         {
             await InputQueueSendEndpoint.Send(new FirstMessage());

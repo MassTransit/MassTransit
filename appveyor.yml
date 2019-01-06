@@ -1,65 +1,66 @@
 branches:
   only:
-  - develop
-  - master
+    - develop
+    - master
+
 skip_tags: true
+
 skip_commits:
   files:
     - docs/*
     - '**/*.html'
-image: Visual Studio 2017
-configuration: Release
-platform: Any CPU
+
+image:
+  - Visual Studio 2017
+  - Ubuntu1804
+
 services:
-- mongodb
-- postgresql
-nuget:
-  project_feed: true
-  disable_publish_on_pr: true
+  - mongodb
+  - postgresql
+  - mssql
+  - rabbitmq
+  - redis
+
+build: off
+test: off
+
+artifacts:
+  - path: artifacts/*.*nupkg
+    name: Packages
+
+environment:
+  APPVEYOR_YML_DISABLE_PS_LINUX: true
+
+# cmd and ps will only be ran on windows images, sh will only be ran on linux images
+build_script:
+  - cmd: >-
+      SET PGUSER=postgres
+
+      SET PGPASSWORD=Password12!
+
+      PATH=C:\Program Files\PostgreSQL\9.6\bin\;%PATH%
+
+      createdb MartenTest
+  - ps: .\Build.ps1
+  - sh: >-
+      wget https://dl.bintray.com/rabbitmq/community-plugins/3.6.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-20171215-3.6.x.zip
+
+      sudo unzip ./rabbitmq_delayed_message_exchange-20171215-3.6.x.zip -d /usr/lib/rabbitmq/plugins
+
+      sudo rabbitmqctl add_vhost test
+
+      sudo rabbitmqctl set_permissions -p test guest ".*" ".*" ".*"
+
+      sudo rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+  - sh: ./build.sh
+
 install:
   # Follow Official Appveyor Initialization: https://github.com/appveyor-tests/CosmosDb/blob/master
   - ps: |
       Set-Content -Value '"C:\Program Files\Azure Cosmos DB Emulator\CosmosDB.Emulator.exe" /NoUI /NoExplorer /NoFirewall' -Path .\startCosmosDb.cmd
       Start-Process -FilePath .\startCosmosDb.cmd
       .\waitforport.ps1 -port 8081 -maxAttempts 4
-build_script:
-- cmd: >-
-    @echo off
 
-    cls
-
-    SET PGUSER=postgres
-
-    SET PGPASSWORD=Password12!
-
-    PATH=C:\Program Files\PostgreSQL\9.6\bin\;%PATH%
-
-    createdb MartenTest
-
-    If Not Exist src\.nuget\nuget.exe msbuild src\.nuget\NuGet.targets -Target:RestorePackages
-
-    If Not Exist src\packages\gitlink\lib\net45\GitLink.exe src\.nuget\nuget.exe Install gitlink -Source "https://www.nuget.org/api/v2/" -OutputDirectory "src\packages" -ExcludeVersion
-
-    If Not Exist src\packages\FAKE\tools\fake.exe src\.nuget\nuget.exe Install FAKE -OutputDirectory "src\packages" -ExcludeVersion
-
-    src\packages\FAKE\tools\fake.exe build.fsx %*
-test:
-  assemblies:
-  - src/MassTransit.Tests/bin/Release/net452/MassTransit.Tests.dll
-  - src/Containers/MassTransit.Containers.Tests/bin/Release/net452/MassTransit.Containers.Tests.dll
-  - src/MassTransit.AutomatonymousIntegration.Tests/bin/Release/net461/MassTransit.AutomatonymousIntegration.Tests.dll
-  - src/Persistence/MassTransit.MongoDbIntegration.Tests/bin/Release/net452/MassTransit.MongoDbIntegration.Tests.dll
-  - src/Persistence/MassTransit.MartenIntegration.Tests/bin/Release/net452/MassTransit.MartenIntegration.Tests.dll
-  - src/Persistence/MassTransit.NHibernateIntegration.Tests/bin/Release/net461/MassTransit.NHibernateIntegration.Tests.dll
-  - src/Persistence/MassTransit.DocumentDbIntegration.Tests/bin/Release/net452/MassTransit.DocumentDbIntegration.Tests.dll
-  - src/MassTransit.HttpTransport.Tests/bin/Release/net452/MassTransit.HttpTransport.Tests.dll
-  - src/MassTransit.SignalR.Tests/bin/Release/netcoreapp2.2/MassTransit.SignalR.Tests.dll
-  categories:
-    except:
-    - Flakey
-artifacts:
-- path: build_artifacts/*.nupkg
-  name: Packages
 deploy:
 - provider: NuGet
   name: Prerelease
@@ -73,6 +74,7 @@ deploy:
     secure: 0B2TmwiOnNW+CavGbvgr6S8WcuB2A/5enkf/ZrlRW+8Q8AwW5P9T7+B3QDAtYiEi
   on:
     branch: master
+
 notifications:
 - provider: Webhook
   url: https://webhooks.gitter.im/e/27919bcbf1f770b0befd

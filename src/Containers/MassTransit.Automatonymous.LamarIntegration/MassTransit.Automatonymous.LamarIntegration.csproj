@@ -1,26 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <RootNamespace>MassTransit.AutomatonymousLamarIntegration</RootNamespace>
-        <AssemblyName>MassTransit.Automatonymous.LamarIntegration</AssemblyName>
-        <LangVersion>latest</LangVersion>
-        <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    </PropertyGroup>
-    <PropertyGroup>
-        <PackageId>MassTransit.Automatonymous.Lamar</PackageId>
-        <Title>MassTransit.Automatonymous.Lamar</Title>
-        <Description>MassTransit Lamar container support for Automatonymous; $(Description)</Description>
-        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Automatonymous.LamarIntegration.xml</DocumentationFile>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Lamar" Version="2.0.1"/>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj"/>
-        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
-        <ProjectReference Include="..\MassTransit.LamarIntegration\MassTransit.LamarIntegration.csproj"/>
-    </ItemGroup>
+  <Import Project="../../netfx.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <RootNamespace>MassTransit.AutomatonymousLamarIntegration</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.Automatonymous.Lamar</PackageId>
+    <Title>MassTransit.Automatonymous.Lamar</Title>
+    <PackageTags>MassTransit;Automatonmous;Lamar</PackageTags>
+    <Description>MassTransit Lamar container support for Automatonymous; $(Description)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lamar" Version="2.0.1"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj"/>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+    <ProjectReference Include="..\MassTransit.LamarIntegration\MassTransit.LamarIntegration.csproj"/>
+  </ItemGroup>
 </Project>

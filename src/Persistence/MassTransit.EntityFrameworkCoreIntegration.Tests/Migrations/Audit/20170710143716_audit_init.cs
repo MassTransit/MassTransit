@@ -20,6 +20,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.Audit
                     CorrelationId = table.Column<Guid>(nullable: true),
                     DestinationAddress = table.Column<string>(nullable: true),
                     FaultAddress = table.Column<string>(nullable: true),
+                    InputAddress = table.Column<string>(nullable: true),
                     InitiatorId = table.Column<Guid>(nullable: true),
                     MessageId = table.Column<Guid>(nullable: true),
                     MessageType = table.Column<string>(nullable: true),

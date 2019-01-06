@@ -1,5 +1,5 @@
 MassTransit
-=======
+===========
 
 MassTransit is a _free, open-source_ distributed application framework for .NET. MassTransit makes it easy to create applications and services that leverage message-based, loosely-coupled asynchronous communication for higher availability, reliability, and scalability.
 
@@ -7,8 +7,61 @@ MassTransit is a _free, open-source_ distributed application framework for .NET.
 
 MassTransit is Apache 2.0 licensed.
 
-![master](https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7jsf4/branch/master?svg=true)
-![develop](https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7jsf4/branch/develop?svg=true)
+Build Status
+------------
+
+Branch | Status
+--- | :---:
+master | [![master](https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7jsf4/branch/master?svg=true)](https://ci.appveyor.com/project/phatboyg/masstransit/branch/master)
+develop | [![develop](https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7jsf4/branch/develop?svg=true)](https://ci.appveyor.com/project/phatboyg/masstransit/branch/develop)
+
+MassTransit Nuget Packages
+---------------------------
+
+| Package Name | FullFramework | .NET Standard |
+| ------------ | :-----------: | :-----------: |
+| **Main** |
+| [MassTransit][MassTransit.nuget] | 4.5.2 | 2.0 |
+| **Other** |
+| [MassTransit.Host][Host.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.Reactive][Reactive.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.SignalR][SignalR.nuget] | - | 2.0 |
+| [MassTransit.TestFramework][TestFramework.nuget] | 4.5.2 | 2.0 |
+| **Containers** |
+| [MassTransit.Autofac][Autofac.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.Extensions.DependencyInjection][CoreDI.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.Lamar][Lamar.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.Ninject][Ninject.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.SimpleInjector][SimpleInjector.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.StructureMap][StructureMap.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.Unity][Unity.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.CastleWindsor][Windsor.nuget] | 4.5.2 | 2.0 |
+| **Loggers** |
+| [MassTransit.Extensions.Logging][CoreLogger.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.Log4Net][Log4Net.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.NLog][NLog.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.SerilogIntegration][Serilog.nuget] | 4.5.2 | 2.0 |
+| **Monitoring** |
+| [MassTransit.ApplicationInsights][AppInsights.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.AspNetCore][AspNetCore.nuget] | 4.5 | 2.0 |
+| **Persistence** |
+| [MassTransit.Dapper][Dapper.nuget] | 4.6.1 | - |
+| [MassTransit.DocumentDb][DocumentDb.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.EntityFrameworkCore][EFCore.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.EntityFramework][EF.nuget] | 4.5.2 | - |
+| [MassTransit.Marten][Marten.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.MongoDb][MongoDb.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.NHibernate][NHibernate.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.Redis][Redis.nuget] | 4.5.2 | 2.0 |
+| **Transports** |
+| [MassTransit.ActiveMQ][ActiveMQ.nuget] | 4.5 | 2.0 |
+| [MassTransit.AmazonSQS][AmazonSQS.nuget] | 4.5 | 2.0 |
+| [MassTransit.Azure.ServiceBus.Core][AzureSbCore.nuget] | 4.6.2 | 2.0 |
+| [MassTransit.AzureServiceBus][AzureSb.nuget] | 4.5.2 | - |
+| [MassTransit.Http][Http.nuget] | 4.5 | 2.0 |
+| [MassTransit.RabbitMQ][RabbitMQ.nuget] | 4.5 | - |
+| [MassTransit.WebJobs.EventHubs][EventHubs.nuget] | - | 2.0 |
+| [MassTransit.WebJobs.ServiceBus][AzureFunc.nuget] | - | 2.0 |
 
 ## Getting started with MassTransit
 
@@ -123,3 +176,44 @@ MassTransit is built on [AppVeyor](https://ci.appveyor.com/project/phatboyg/mass
 
 # CREDITS
 Logo Design by [The Agile Badger](http://www.theagilebadger.com)
+
+[MassTransit.nuget]: https://www.nuget.org/packages/MassTransit
+[Host.nuget]: https://www.nuget.org/packages/MassTransit.Host
+[Reactive.nuget]: https://www.nuget.org/packages/MassTransit.Reactive
+[SignalR.nuget]: https://www.nuget.org/packages/MassTransit.SignalR
+[TestFramework.nuget]: https://www.nuget.org/packages/MassTransit.TestFramework
+
+[Autofac.nuget]: https://www.nuget.org/packages/MassTransit.Autofac
+[CoreDI.nuget]: https://www.nuget.org/packages/MassTransit.Extensions.DependencyInjection
+[Lamar.nuget]: https://www.nuget.org/packages/MassTransit.Lamar
+[Ninject.nuget]: https://www.nuget.org/packages/MassTransit.Ninject
+[SimpleInjector.nuget]: https://www.nuget.org/packages/MassTransit.SimpleInjector
+[StructureMap.nuget]: https://www.nuget.org/packages/MassTransit.StructureMap
+[Unity.nuget]: https://www.nuget.org/packages/MassTransit.Unity
+[Windsor.nuget]: https://www.nuget.org/packages/MassTransit.CastleWindsor
+
+[CoreLogger.nuget]: https://www.nuget.org/packages/MassTransit.Extensions.Logging
+[Log4Net.nuget]: https://www.nuget.org/packages/MassTransit.Log4Net
+[NLog.nuget]: https://www.nuget.org/packages/MassTransit.NLog
+[Serilog.nuget]: https://www.nuget.org/packages/MassTransit.SerilogIntegration
+
+[AppInsights.nuget]: https://www.nuget.org/packages/MassTransit.ApplicationInsights
+[AspNetCore.nuget]: https://www.nuget.org/packages/MassTransit.AspNetCore
+
+[Dapper.nuget]: https://www.nuget.org/packages/MassTransit.Dapper
+[DocumentDb.nuget]: https://www.nuget.org/packages/MassTransit.DocumentDb
+[EFCore.nuget]: https://www.nuget.org/packages/MassTransit.EntityFrameworkCore
+[EF.nuget]: https://www.nuget.org/packages/MassTransit.EntityFramework
+[Marten.nuget]: https://www.nuget.org/packages/MassTransit.Marten
+[MongoDb.nuget]: https://www.nuget.org/packages/MassTransit.MongoDb
+[NHibernate.nuget]: https://www.nuget.org/packages/MassTransit.NHibernate
+[Redis.nuget]: https://www.nuget.org/packages/MassTransit.Redis
+
+[ActiveMQ.nuget]: https://www.nuget.org/packages/MassTransit.ActiveMQ
+[AmazonSQS.nuget]: https://www.nuget.org/packages/MassTransit.AmazonSQS
+[AzureSbCore.nuget]: https://www.nuget.org/packages/MassTransit.Azure.ServiceBus.Core
+[AzureSb.nuget]: https://www.nuget.org/packages/MassTransit.AzureServiceBus
+[Http.nuget]: https://www.nuget.org/packages/MassTransit.Http
+[RabbitMQ.nuget]: https://www.nuget.org/packages/MassTransit.RabbitMQ
+[EventHubs.nuget]: https://www.nuget.org/packages/MassTransit.WebJobs.EventHubs
+[AzureFunc.nuget]: https://www.nuget.org/packages/MassTransit.WebJobs.ServiceBus

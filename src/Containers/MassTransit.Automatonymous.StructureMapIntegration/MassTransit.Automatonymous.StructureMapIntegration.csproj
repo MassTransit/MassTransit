@@ -1,28 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <RootNamespace>MassTransit.AutomatonymousStructureMapIntegration</RootNamespace>
-        <AssemblyName>MassTransit.Automatonymous.StructureMapIntegration</AssemblyName>
-        <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-        <LangVersion>latest</LangVersion>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    </PropertyGroup>
-    <PropertyGroup>
-        <PackageId>MassTransit.Automatonymous.StructureMap</PackageId>
-        <Title>MassTransit.Automatonymous.StructureMap</Title>
-        <Description>MassTransit StructureMap container support for Automatonymous; $(Description)</Description>
-        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Automatonymous.StructureMapIntegration.xml</DocumentationFile>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="Automatonymous" Version="4.1.3"/>
-        <PackageReference Include="GreenPipes" Version="2.1.3"/>
-        <PackageReference Include="NewId" Version="3.0.1"/>
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
-        <PackageReference Include="StructureMap" Version="4.7.0"/>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
-        <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj"/>
-        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
-        <ProjectReference Include="..\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj"/>
-    </ItemGroup>
+  <Import Project="../../netfx.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <RootNamespace>MassTransit.AutomatonymousStructureMapIntegration</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.Automatonymous.StructureMap</PackageId>
+    <Title>MassTransit.Automatonymous.StructureMap</Title>
+    <PackageTags>MassTransit;Automatonmous;StructureMap</PackageTags>
+    <Description>MassTransit StructureMap container support for Automatonymous; $(Description)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <PackageReference Include="Automatonymous" Version="4.1.3"/>
+      <PackageReference Include="GreenPipes" Version="2.1.3"/>
+      <PackageReference Include="NewId" Version="3.0.1"/>
+      <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
+      <PackageReference Include="StructureMap" Version="4.7.0"/>
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+      <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj"/>
+      <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+      <ProjectReference Include="..\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj"/>
+  </ItemGroup>
 </Project>

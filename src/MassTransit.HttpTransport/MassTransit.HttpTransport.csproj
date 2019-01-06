@@ -1,18 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../netfx.props" />
+
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>latest</LangVersion>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
+
   <PropertyGroup>
     <PackageId>MassTransit.Http</PackageId>
     <Title>MassTransit.Http</Title>
+    <PackageTags>MassTransit;Http</PackageTags>
     <Description>MassTransit HTTP transport support; $(Description)</Description>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.HttpTransport.xml</DocumentationFile>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="2.1.3" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />

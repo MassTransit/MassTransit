@@ -1,20 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../netfx.props" />
+  <Import Project="../signing.props" />
+
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
     <AzureFunctionsVersion>v2</AzureFunctionsVersion>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
+
   <PropertyGroup>
     <PackageId>MassTransit.WebJobs.EventHubs</PackageId>
     <Title>MassTransit.WebJobs.EventHubs</Title>
+    <PackageTags>MassTransit;Azure;EventHubs;AzureFunctions</PackageTags>
     <Description>MassTransit Azure WebJobs Event Hubs support; $(Description)</Description>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.WebJobs.EventHubsIntegration.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="2.1.3" />

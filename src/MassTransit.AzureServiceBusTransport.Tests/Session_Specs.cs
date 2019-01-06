@@ -31,6 +31,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [Test]
+        [Category("Flakey")]
         public async Task Should_succeed()
         {
             var context = await _handler;
@@ -41,6 +42,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [Test]
+        [Category("Flakey")]
         public async Task Should_receive_published_message()
         {
             var context = await _received;
@@ -49,6 +51,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [Test]
+        [Category("Flakey")]
         public async Task Should_receive_sent_message()
         {
             var context = await _accepted;

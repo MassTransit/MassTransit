@@ -53,3 +53,11 @@ _book
 .vscode
 **/.idea/
 appsettings.Development.json
+
+# Cake
+tools/**
+!tools/packages.config
+
+# Artifacts
+artifacts/**
+artifacts_old/**

@@ -1,10 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../netfx.props" />
 
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <IsPackable>false</IsPackable>
+    <TargetFrameworks>net461</TargetFrameworks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj"/>

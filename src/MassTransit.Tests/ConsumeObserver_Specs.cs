@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -24,7 +24,7 @@ namespace MassTransit.Tests
         using TestFramework.Messages;
 
 
-        [TestFixture]
+        [TestFixture, Category("Unit")]
         public class Observing_consumer_messages :
             InMemoryTestFixture
         {

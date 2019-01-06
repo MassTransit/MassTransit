@@ -1,21 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <LangVersion>latest</LangVersion>
-        <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-        <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
-    </PropertyGroup>
-    <PropertyGroup>
-        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.xml</DocumentationFile>
-    </PropertyGroup>
-    <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+  <Import Project="../netfx.props" />
+  <Import Project="../signing.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageTags>MassTransit</PackageTags>
+    <Description>$(Description)</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
         <Compile Remove="Util/NHProfIntegration.cs" />
         <Compile Remove="Configuration/BusConfigurators/PerformanceCounterBusFactorySpecification.cs" />
         <Compile Remove="Serialization/StaticHeaders.cs" />
@@ -25,8 +25,9 @@
         <Compile Remove="Serialization/BinaryMessageDeserializer.cs" />
         <Compile Remove="Monitoring/Performance/**" />
         <Compile Remove="Configuration/PerformanceCounterExtensions.cs" />
-    </ItemGroup>
-    <ItemGroup>
+  </ItemGroup>
+
+  <ItemGroup>
         <PackageReference Include="GreenPipes" Version="2.1.3" />
         <PackageReference Include="NewId" Version="3.0.1" />
         <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
@@ -34,8 +35,9 @@
         <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
         <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' ">
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' ">
         <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
         <PackageReference Include="System.Reflection.Extensions" Version="4.3.0" />
         <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
@@ -43,11 +45,13 @@
         <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
         <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.5.1" />
         <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
-    </ItemGroup>
-    <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
         <Reference Include="System.Transactions" />
-    </ItemGroup>
-    <ItemGroup>
+  </ItemGroup>
+
+  <ItemGroup>
         <Folder Include="Monitoring\Performance\Configuration" />
-    </ItemGroup>
+  </ItemGroup>
 </Project>

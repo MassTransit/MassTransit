@@ -1,24 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../netfx.props" />
+  <Import Project="../../signing.props" />
 
-    <PropertyGroup>
-        <RootNamespace>MassTransit.AspNetCoreIntegration</RootNamespace>
-        <AssemblyName>MassTransit.AspNetCoreIntegration</AssemblyName>
-        <LangVersion>latest</LangVersion>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <DebugType>portable</DebugType>
-        <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    </PropertyGroup>
-    <PropertyGroup>
-        <PackageId>MassTransit.AspNetCore</PackageId>
-        <Title>MassTransit.AspNetCore</Title>
-        <Description>MassTransit hosting for ASP.NET Core; $(Description)</Description>
-        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AspNetCoreIntegration.xml</DocumentationFile>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.AspNetCore</PackageId>
+    <Title>MassTransit.AspNetCore</Title>
+    <PackageTags>MassTransit;AspNetCore</PackageTags>
+    <Description>MassTransit hosting for ASP.NET Core; $(Description)</Description>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.0" />
@@ -29,9 +22,9 @@
   </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Loggers\MassTransit.ExtensionsLoggingIntegration\MassTransit.ExtensionsLoggingIntegration.csproj"/>
-        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
-        <ProjectReference Include="..\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj"/>
+      <ProjectReference Include="..\..\Loggers\MassTransit.ExtensionsLoggingIntegration\MassTransit.ExtensionsLoggingIntegration.csproj"/>
+      <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+      <ProjectReference Include="..\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj"/>
     </ItemGroup>
 
 </Project>

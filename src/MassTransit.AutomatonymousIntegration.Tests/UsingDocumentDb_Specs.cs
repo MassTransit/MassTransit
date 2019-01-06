@@ -30,6 +30,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
 
     [TestFixture]
+    [Category("DocumentDb")]
     public class When_using_DocumentDB :
         InMemoryTestFixture
     {

@@ -24,6 +24,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         AzureServiceBusTestFixture
     {
         [Test]
+        [Category("Flakey")]
         public async Task Should_allow_scheduling_a_job()
         {
             var endpoint = await Bus.GetSendEndpoint(_commandEndpointAddress);
@@ -84,6 +85,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         AzureServiceBusTestFixture
     {
         [Test]
+        [Category("Flakey")]
         public async Task Should_send_the_job_canceled()
         {
             var endpoint = await Bus.GetSendEndpoint(_commandEndpointAddress);
@@ -147,6 +149,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         AzureServiceBusTestFixture
     {
         [Test]
+        [Category("Flakey")]
         public async Task Should_send_the_job_canceled()
         {
             var endpoint = await Bus.GetSendEndpoint(_commandEndpointAddress);

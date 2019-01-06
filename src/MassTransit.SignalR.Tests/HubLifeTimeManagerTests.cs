@@ -127,7 +127,11 @@
 
                 await manager.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout();
 
+                await Task.Delay(2000);
+
                 await manager.OnDisconnectedAsync(connection).OrTimeout();
+
+                await Task.Delay(2000);
 
                 await manager.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout();
 

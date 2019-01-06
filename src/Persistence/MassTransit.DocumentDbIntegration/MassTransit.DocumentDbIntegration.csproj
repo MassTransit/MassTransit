@@ -1,39 +1,40 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-        <LangVersion>latest</LangVersion>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <SignAssembly>true</SignAssembly>
-        <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    </PropertyGroup>
-    <PropertyGroup>
-        <PackageId>MassTransit.DocumentDb</PackageId>
-        <Title>MassTransit.DocumentDb</Title>
-        <Description>MassTransit DocumentDb support; $(Description)</Description>
-        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.DocumentDbIntegration.xml</DocumentationFile>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-        <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="GreenPipes" Version="2.1.3"/>
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
-        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
-    </ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)'=='net452'">
-        <Reference Include="System"/>
-        <Reference Include="System.ComponentModel.DataAnnotations"/>
-        <Reference Include="System.Core"/>
-        <Reference Include="System.Data.DataSetExtensions"/>
-        <Reference Include="System.Data"/>
-        <Reference Include="System.Xml"/>
-        <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.2.1"/>
-    </ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
-        <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.2.1"/>
-    </ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../netfx.props" />
+  <Import Project="../../signing.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.DocumentDb</PackageId>
+    <Title>MassTransit.DocumentDb</Title>
+    <PackageTags>MassTransit;DocumentDb</PackageTags>
+    <Description>MassTransit DocumentDb persistence support; $(Description)</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+      <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <PackageReference Include="GreenPipes" Version="2.1.3"/>
+      <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+      <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net452'">
+      <Reference Include="System"/>
+      <Reference Include="System.ComponentModel.DataAnnotations"/>
+      <Reference Include="System.Core"/>
+      <Reference Include="System.Data.DataSetExtensions"/>
+      <Reference Include="System.Data"/>
+      <Reference Include="System.Xml"/>
+      <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.2.1"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+      <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.2.1"/>
+  </ItemGroup>
 </Project>

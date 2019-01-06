@@ -29,6 +29,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
 
     [TestFixture]
+    [Category("DocumentDb")]
     public class When_using_DocumentDbConcurrencyNoRetry :
         InMemoryTestFixture
     {

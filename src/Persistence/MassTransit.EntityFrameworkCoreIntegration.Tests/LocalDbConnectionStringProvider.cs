@@ -12,9 +12,10 @@
         /// </summary>
         private static readonly string[] _possibleLocalDbConnectionStrings = new[]
         {
-            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=MassTransitUnitTests_v12_2015;",  // the localdb installed with VS 2015
-            @"Data Source=(LocalDb)\ProjectsV12;Integrated Security=True;Initial Catalog=MassTransitUnitTests_v12;",        // the localdb with VS 2013
-            @"Data Source=(LocalDb)\v11.0;Integrated Security=True;Initial Catalog=MassTransitUnitTests_v11;"               // the older version of localdb
+            @"Server=tcp:localhost;Persist Security Info=False;User ID=sa;Password=Password12!;Encrypt=False;TrustServerCertificate=True;",  // the linux mssql 2017 installed on appveyor
+            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;",  // the localdb installed with VS 2015
+            @"Data Source=(LocalDb)\ProjectsV12;Integrated Security=True;",        // the localdb with VS 2013
+            @"Data Source=(LocalDb)\v11.0;Integrated Security=True;"               // the older version of localdb
         };
 
         private static object _lockConnectionString = new object();
@@ -40,8 +41,10 @@
                     {
                         using (var connection = new SqlConnection(connectionString))
                         {
+                            connection.Open();
+
                             // It worked, we can save this as our connection string
-                            _connectionString = connectionString;
+                            _connectionString = connectionString + "Initial Catalog=MassTransitUnitTests_v12_2015;";
                             break;
                         }
                     }

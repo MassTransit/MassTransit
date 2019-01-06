@@ -1,19 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../netfx.props" />
+  <Import Project="../signing.props" />
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageTags>MassTransit</PackageTags>
+    <Description>MassTransit Host Service; $(Description)</Description>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup>
-    <PackageId>MassTransit.Host</PackageId>
-    <Title>MassTransit.Host</Title>
-    <Description>MassTransit Host Service; $(Description)</Description>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Host.xml</DocumentationFile>
-  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.8.1" />
     <PackageReference Include="GreenPipes" Version="2.1.3" />

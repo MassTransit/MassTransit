@@ -30,6 +30,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
     // Both of these tests will pass in Debug, because the TestTimeout is 50 minutes, which is enough time for all concurrency to settle. Marked as explicit so they don't run on Appveyor
     [TestFixture]
+    [Category("DocumentDb")]
     public class When_using_DocumentDbConcurrencyOptimistic :
         InMemoryTestFixture
     {

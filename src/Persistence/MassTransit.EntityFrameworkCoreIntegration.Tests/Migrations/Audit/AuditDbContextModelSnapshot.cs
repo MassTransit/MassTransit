@@ -31,6 +31,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.Audit
 
                     b.Property<string>("FaultAddress");
 
+                    b.Property<string>("InputAddress");
+
                     b.Property<Guid?>("InitiatorId");
 
                     b.Property<Guid?>("MessageId");

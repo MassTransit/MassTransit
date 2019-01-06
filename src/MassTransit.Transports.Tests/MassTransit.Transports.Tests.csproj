@@ -1,14 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../netfx.props" />
+
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
+
   <ItemGroup>
+    <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="NUnit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.AmazonSqsTransport\MassTransit.AmazonSqsTransport.csproj" />
     <ProjectReference Include="..\MassTransit.Azure.ServiceBus.Core\MassTransit.Azure.ServiceBus.Core.csproj" />

@@ -23,6 +23,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         AzureServiceBusTestFixture
     {
         [Test]
+        [Category("Flakey")]
         public async Task Should_receive_message()
         {
             await Bus.Publish(new PingMessage());

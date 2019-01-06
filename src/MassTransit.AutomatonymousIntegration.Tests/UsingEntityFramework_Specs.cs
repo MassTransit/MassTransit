@@ -27,6 +27,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
 
     [TestFixture]
+    [Category("EntityFramework")]
     public class When_using_EntityFramework :
         InMemoryTestFixture
     {

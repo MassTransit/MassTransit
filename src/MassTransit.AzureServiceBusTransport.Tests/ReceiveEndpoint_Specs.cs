@@ -89,6 +89,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         AzureServiceBusTestFixture
     {
         [Test]
+        [Category("Flakey")]
         public async Task Should_be_allowed()
         {
             Task<ConsumeContext<PingMessage>> pingHandled = null;
@@ -117,6 +118,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         }
 
         [Test]
+        [Category("Flakey")]
         public async Task Should_not_be_allowed_twice()
         {
             var handle = Host.ConnectSubscriptionEndpoint<PingMessage>("second_subscription", x =>

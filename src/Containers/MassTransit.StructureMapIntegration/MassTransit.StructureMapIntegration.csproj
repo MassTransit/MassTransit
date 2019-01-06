@@ -1,23 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-        <LangVersion>latest</LangVersion>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    </PropertyGroup>
-    <PropertyGroup>
-        <PackageId>MassTransit.StructureMap</PackageId>
-        <Title>MassTransit.StructureMap</Title>
-        <Description>MassTransit StructureMap container support; $(Description)</Description>
-        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.StructureMapIntegration.xml</DocumentationFile>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="GreenPipes" Version="2.1.3"/>
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
-        <PackageReference Include="StructureMap" Version="4.7.0"/>
+  <Import Project="../../netfx.props" />
 
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
-        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.StructureMap</PackageId>
+    <Title>MassTransit.StructureMap</Title>
+    <PackageTags>MassTransit;StructureMap</PackageTags>
+    <Description>MassTransit StructureMap container support; $(Description)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <PackageReference Include="GreenPipes" Version="2.1.3"/>
+      <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
+      <PackageReference Include="StructureMap" Version="4.7.0"/>
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+      <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+  </ItemGroup>
 </Project>

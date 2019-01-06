@@ -1,27 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?><!-- The new msbuild allows you to set properties in this file that will be inherited by all projects -->
-<!-- see: http://blog.seravy.com/directory-build-targets-solution-wide-msbuild-target-part-2/ -->
 <Project>
   <!-- These properties will be shared for all projects -->
+  <Import Project="../version.props" />
+
   <PropertyGroup>
-    <Title>MassTransit</Title>
     <Product>MassTransit</Product>
-    <Description>MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com</Description>
-    <PackageProjectUrl>https://github.com/MassTransit/MassTransit</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/MassTransit/MassTransit/blob/master/LICENSE</PackageLicenseUrl>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <PackageTags>MassTransit</PackageTags>
+    <Copyright>Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.</Copyright>
     <Authors>Chris Patterson;Dru Sellers;Travis Smith</Authors>
-    <Copyright>Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.</Copyright>
-    <WarningLevel>4</WarningLevel>
-    <NoWarn>1587,1591,1998,3008,3001</NoWarn>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>CS1587,CS1591,CS1998,NU5105</NoWarn>
     <DebugSymbols>True</DebugSymbols>
     <DebugType>portable</DebugType>
-
-    <IsTestProject>$(MSBuildProjectName.Contains('Tests'))</IsTestProject>
-
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -34,10 +25,24 @@
     <DefineConstants>TRACE;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
-<!--
-  <ItemGroup Condition="'$(IsTestProject)' != 'true' and '$(SourceLinkEnabled)' != 'false'">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All"/>
-  </ItemGroup>
--->
+  <PropertyGroup Condition="'$(MSBuildProjectName.Contains(Tests))' == false">
+    <!-- Nuget Package Details -->
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Description>MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com</Description>
+    <IsPackable>True</IsPackable>
+
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- SourceLink Config, needs nuget package in each csproj Microsoft.SourceLink.GitHub in order to work -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MSBuildProjectName.Contains(Tests))' == true">
+    <NoWarn>$(NoWarn),CS0618</NoWarn>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>False</IsPackable>
+  </PropertyGroup>
 
 </Project>

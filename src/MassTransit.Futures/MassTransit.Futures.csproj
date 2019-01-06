@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../netfx.props" />
+
   <PropertyGroup>
-    <RootNamespace>MassTransit</RootNamespace>
-    <AssemblyName>MassTransit.Futures</AssemblyName>
-    <IsPackable>false</IsPackable>
     <TargetFrameworks>net452</TargetFrameworks>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>MassTransit</RootNamespace>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="GreenPipes" Version="2.1.3" />

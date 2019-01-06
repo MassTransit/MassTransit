@@ -1,10 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../netfx.props" />
+
   <PropertyGroup>
     <TargetFrameworks>net452;netcoreapp2.0</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
+
   <ItemGroup>
+    <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
     <PackageReference Include="GreenPipes" Version="2.1.3" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
@@ -19,6 +21,7 @@
     <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)'=='net452'">
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -31,9 +34,11 @@
     <Reference Include="System.Xml" />
     <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.2.1" />
   </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp2.0'">
     <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.2.1" />
   </ItemGroup>
+
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
