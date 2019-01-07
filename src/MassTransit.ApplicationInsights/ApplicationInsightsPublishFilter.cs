@@ -68,6 +68,8 @@ namespace MassTransit.ApplicationInsights
 
             using (IOperationHolder<DependencyTelemetry> operation = _telemetryClient.StartOperation(telemetry))
             {
+                _configureOperation?.Invoke(operation, context);
+
                 context.Headers.Set(_telemetryHeaderRootKey, operation.Telemetry.Context.Operation.Id);
                 context.Headers.Set(_telemetryHeaderParentKey, operation.Telemetry.Id);
 
@@ -87,8 +89,6 @@ namespace MassTransit.ApplicationInsights
 
                 if (context.RequestId.HasValue)
                     operation.Telemetry.Properties.Add(RequestId, context.RequestId.Value.ToString());
-
-                _configureOperation?.Invoke(operation, context);
 
                 try
                 {
