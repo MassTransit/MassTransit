@@ -69,6 +69,35 @@ namespace MassTransit.ApplicationInsights.Tests
         }
 
         [Test]
+        public async Task Should_use_updated_telemetryId_and_parent_id_on_context_headers_using_configure_op()
+        {
+            // Arrange.
+            var operationId         = Guid.NewGuid().ToString();
+            var parentId            = Guid.NewGuid().ToString();
+            var rootKeyHeaderName   = "RootKey";
+            var parentKeyHeaderName = "ParentKey";
+
+            var mockPublishContext = new Mock<SendContext>();
+            mockPublishContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
+
+            _mockHeaders.Setup(x => x.Set(It.IsAny<string>(), It.IsAny<string>()));
+
+            var filter = new ApplicationInsightsSendFilter<SendContext>(new TelemetryClient(), rootKeyHeaderName, parentKeyHeaderName,
+                                                                              (holder, context) =>
+                                                                              {
+                                                                                  holder.Telemetry.Context.Operation.Id = operationId;
+                                                                                  holder.Telemetry.Id                   = parentId;
+                                                                              });
+
+            // Act.
+            await filter.Send(mockPublishContext.Object, new Mock<IPipe<SendContext>>().Object);
+
+            // Assert.
+            _mockHeaders.Verify(x => x.Set(rootKeyHeaderName, operationId), Times.Once);
+            _mockHeaders.Verify(x => x.Set(parentKeyHeaderName, parentId), Times.Once);
+        }
+
+        [Test]
         public async Task Should_add_the_expected_properties_to_the_dependency_telemetry()
         {
             // Arrange.
