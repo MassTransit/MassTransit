@@ -10,19 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ApplicationInsights
+namespace MassTransit.ApplicationInsights.Pipeline
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
+    using Util;
+
 
     public class ApplicationInsightsConsumeFilter<T> :
-        IFilter<T>
-        where T : class, ConsumeContext
+        IFilter<ConsumeContext<T>>
+        where T : class
     {
         const string MessageId = nameof(MessageId);
         const string ConversationId = nameof(ConversationId);
@@ -33,15 +34,14 @@ namespace MassTransit.ApplicationInsights
         const string MessageType = nameof(MessageType);
 
         const string StepName = "MassTransit:Consumer";
-        readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
+        readonly Action<IOperationHolder<RequestTelemetry>, ConsumeContext> _configureOperation;
 
         readonly TelemetryClient _telemetryClient;
         readonly string _telemetryHeaderRootKey;
         readonly string _telemetryHeaderParentKey;
 
-        public ApplicationInsightsConsumeFilter(TelemetryClient telemetryClient,
-            Action<IOperationHolder<RequestTelemetry>, T> configureOperation, string telemetryHeaderRootKey,
-            string telemetryHeaderParentKey)
+        public ApplicationInsightsConsumeFilter(TelemetryClient telemetryClient, string telemetryHeaderRootKey, string telemetryHeaderParentKey,
+            Action<IOperationHolder<RequestTelemetry>, ConsumeContext> configureOperation)
         {
             _telemetryClient = telemetryClient;
             _configureOperation = configureOperation;
@@ -54,15 +54,12 @@ namespace MassTransit.ApplicationInsights
             context.CreateFilterScope("TelemetryConsumeFilter");
         }
 
-        public async Task Send(T context, IPipe<T> next)
+        public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
-            var contextType = context.GetType();
-            var messageType = contextType.GetGenericArguments().FirstOrDefault()?.FullName ?? "Unknown";
-
             // After the message is taken from the queue, create RequestTelemetry to track its processing.
             var requestTelemetry = new RequestTelemetry
             {
-                Name = $"{StepName} {context.ReceiveContext.InputAddress.LocalPath} {messageType}"
+                Name = $"{StepName} {context.ReceiveContext.InputAddress.LocalPath} {TypeMetadataCache<T>.ShortName}"
             };
 
             requestTelemetry.Context.Operation.Id = context.Headers.Get<string>(_telemetryHeaderRootKey);
@@ -70,7 +67,7 @@ namespace MassTransit.ApplicationInsights
 
             using (IOperationHolder<RequestTelemetry> operation = _telemetryClient.StartOperation(requestTelemetry))
             {
-                operation.Telemetry.Properties.Add(MessageType, messageType);
+                operation.Telemetry.Properties.Add(MessageType, TypeMetadataCache<T>.ShortName);
 
                 if (context.MessageId.HasValue)
                     operation.Telemetry.Properties.Add(MessageId, context.MessageId.Value.ToString());

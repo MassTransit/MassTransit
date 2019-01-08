@@ -21,6 +21,9 @@ namespace MassTransit.ApplicationInsights.Tests
     using Context;
     using GreenPipes.Payloads;
     using Microsoft.ApplicationInsights.DataContracts;
+    using Pipeline;
+    using TestFramework.Messages;
+    using Util;
 
 
     [TestFixture]
@@ -42,12 +45,12 @@ namespace MassTransit.ApplicationInsights.Tests
         public async Task Should_send_context_to_next_pipe()
         {
             // Arrange.
-            var mockConsumeContext = new Mock<ConsumeContext>();
+            var mockConsumeContext = new Mock<ConsumeContext<PingMessage>>();
             mockConsumeContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
             mockConsumeContext.Setup(c => c.ReceiveContext).Returns(_mockReceiveContext.Object);
-            var filter = new ApplicationInsightsConsumeFilter<ConsumeContext>(new TelemetryClient(), null, "", "");
+            var filter = new ApplicationInsightsConsumeFilter<PingMessage>(new TelemetryClient(), "", "", null);
 
-            var mockPipe = new Mock<IPipe<ConsumeContext>>();
+            var mockPipe = new Mock<IPipe<ConsumeContext<PingMessage>>>();
 
             // Act.
             await filter.Send(mockConsumeContext.Object, mockPipe.Object);
@@ -61,15 +64,15 @@ namespace MassTransit.ApplicationInsights.Tests
         {
             // Arrange.
 
-            var mockConsumeContext = new Mock<ConsumeContext>();
+            var mockConsumeContext = new Mock<ConsumeContext<PingMessage>>();
             mockConsumeContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
             mockConsumeContext.Setup(c => c.ReceiveContext).Returns(_mockReceiveContext.Object);
             bool configureOperationHasBeenCalled = false;
 
-            var filter = new ApplicationInsightsConsumeFilter<ConsumeContext>(new TelemetryClient(), (holder, context) => configureOperationHasBeenCalled = true, "", "");
+            var filter = new ApplicationInsightsConsumeFilter<PingMessage>(new TelemetryClient(), "", "", (holder, context) => configureOperationHasBeenCalled = true);
 
             // Act.
-            await filter.Send(mockConsumeContext.Object, new Mock<IPipe<ConsumeContext>>().Object);
+            await filter.Send(mockConsumeContext.Object, new Mock<IPipe<ConsumeContext<PingMessage>>>().Object);
 
             // Assert.
             Assert.IsTrue(configureOperationHasBeenCalled);
@@ -89,7 +92,7 @@ namespace MassTransit.ApplicationInsights.Tests
             var mockReceiveContext = new Mock<ReceiveContext>();
             mockReceiveContext.Setup(c => c.InputAddress).Returns(inputAddress);
 
-            var mockConsumeContext = new Mock<ConsumeContext<object>>();
+            var mockConsumeContext = new Mock<ConsumeContext<PingMessage>>();
             mockConsumeContext.Setup(c => c.ReceiveContext).Returns(mockReceiveContext.Object);
             mockConsumeContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
             mockConsumeContext.Setup(c => c.MessageId).Returns(messageId);
@@ -98,19 +101,19 @@ namespace MassTransit.ApplicationInsights.Tests
             mockConsumeContext.Setup(c => c.RequestId).Returns(requestId);
             mockConsumeContext.Setup(c => c.DestinationAddress).Returns(destinationAddress);
 
-            var consumeContextProxy = new ConsumeContextProxy<object>(mockConsumeContext.Object, new Mock<IPayloadCache>().Object);
+            var consumeContextProxy = new ConsumeContextProxy<PingMessage>(mockConsumeContext.Object, new Mock<IPayloadCache>().Object);
 
             var capturedRequestTelemetry = default(RequestTelemetry);
 
-            var filter = new ApplicationInsightsConsumeFilter<ConsumeContext>(new TelemetryClient(), (holder, context) => capturedRequestTelemetry = holder.Telemetry, "", "");
+            var filter = new ApplicationInsightsConsumeFilter<PingMessage>(new TelemetryClient(), "", "", (holder, context) => capturedRequestTelemetry = holder.Telemetry);
 
             // Act.
-            await filter.Send(consumeContextProxy, new Mock<IPipe<ConsumeContext>>().Object);
+            await filter.Send(consumeContextProxy, new Mock<IPipe<ConsumeContext<PingMessage>>>().Object);
 
             // Assert.
             Assert.IsNotNull(capturedRequestTelemetry);
             Assert.AreEqual(capturedRequestTelemetry.Properties["MessageId"], messageId.ToString());
-            Assert.AreEqual(capturedRequestTelemetry.Properties["MessageType"], typeof(object).FullName);
+            Assert.AreEqual(capturedRequestTelemetry.Properties["MessageType"], TypeMetadataCache<PingMessage>.ShortName);
             Assert.AreEqual(capturedRequestTelemetry.Properties["ConversationId"], conversationId.ToString());
             Assert.AreEqual(capturedRequestTelemetry.Properties["CorrelationId"], correlationId.ToString());
             Assert.AreEqual(capturedRequestTelemetry.Properties["DestinationAddress"], destinationAddress.ToString());

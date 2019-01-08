@@ -10,27 +10,33 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ApplicationInsights
+namespace MassTransit
 {
     using System;
-    using GreenPipes;
+    using ApplicationInsights.Configuration;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
+
 
     public static class ApplicationInsightsMiddlewareConfiguratorExtensions
     {
         /// <summary>
         /// Add support for ApplicationInsights to the pipeline, which will be used to track all consumer message reception.
         /// </summary>
-        public static void UseApplicationInsightsOnConsume<T>(this IPipeConfigurator<T> configurator,
-            TelemetryClient telemetryClient, Action<IOperationHolder<RequestTelemetry>, T> configureOperation = null,
+        public static void UseApplicationInsightsOnConsume(this IConsumePipeConfigurator configurator,
+            TelemetryClient telemetryClient, Action<IOperationHolder<RequestTelemetry>, ConsumeContext> configureOperation = null,
             string telemetryHeaderRootKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderRootKey,
             string telemetryHeaderParentKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderParentKey)
-            where T : class, ConsumeContext
         {
-            configurator.AddPipeSpecification(new ApplicationInsightsConsumeSpecification<T>(telemetryClient,
-                configureOperation, telemetryHeaderRootKey, telemetryHeaderParentKey));
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            if (telemetryClient == null)
+                throw new ArgumentNullException(nameof(telemetryClient));
+
+            var observer = new TelemetryConsumeConfigurationObserver(configurator, telemetryClient, telemetryHeaderRootKey,
+                telemetryHeaderParentKey, configureOperation);
         }
 
         /// <summary>
@@ -42,12 +48,8 @@ namespace MassTransit.ApplicationInsights
             string telemetryHeaderRootKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderRootKey,
             string telemetryHeaderParentKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderParentKey)
         {
-            configurator.ConfigureSend(pipeConfigurator =>
-            {
-                pipeConfigurator.AddPipeSpecification(
-                    new ApplicationInsightsSendSpecification<SendContext>(telemetryClient, configureOperation,
-                        telemetryHeaderRootKey, telemetryHeaderParentKey));
-            });
+            configurator.ConfigureSend(x => x.Connect(new TelemetrySendPipeSpecificationObserver(telemetryClient, telemetryHeaderRootKey,
+                telemetryHeaderParentKey, configureOperation)));
         }
 
         /// <summary>
@@ -59,12 +61,8 @@ namespace MassTransit.ApplicationInsights
             string telemetryHeaderRootKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderRootKey,
             string telemetryHeaderParentKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderParentKey)
         {
-            configurator.ConfigurePublish(pipeConfigurator =>
-            {
-                pipeConfigurator.AddPipeSpecification(
-                    new ApplicationInsightsPublishSpecification<PublishContext>(telemetryClient, configureOperation,
-                        telemetryHeaderRootKey, telemetryHeaderParentKey));
-            });
+            configurator.ConfigurePublish(x => x.Connect(new TelemetryPublishPipeSpecificationObserver(telemetryClient, telemetryHeaderRootKey,
+                telemetryHeaderParentKey, configureOperation)));
         }
     }
 }

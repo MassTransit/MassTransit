@@ -32,7 +32,7 @@ namespace MassTransit.PipeConfigurators
         readonly IConsumePipeConfigurator _configurator;
         readonly HashSet<Type> _messageTypes;
 
-        public ConfigurationObserver(IConsumePipeConfigurator configurator)
+        protected ConfigurationObserver(IConsumePipeConfigurator configurator)
         {
             _configurator = configurator;
 

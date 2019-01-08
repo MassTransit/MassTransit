@@ -77,7 +77,7 @@ namespace MassTransit.ApplicationInsights.Tests
 
 			var post = await _observer.PostConsumed;
 
-			Assert.AreEqual(_sendItems.Count, 2);
+			Assert.AreEqual(2, _sendItems.Count);
 			//check root id
 			Assert.AreEqual(_sendItems[0].Context.Operation.Id, _sendItems[1].Context.Operation.Id);
 			//check parent id
@@ -93,7 +93,7 @@ namespace MassTransit.ApplicationInsights.Tests
 
 			var post = await _observer.PostConsumed;
 
-			Assert.AreEqual(_sendItems.Count, 2);
+			Assert.AreEqual(2, _sendItems.Count);
 			//check root id
 			Assert.AreEqual(_sendItems[0].Context.Operation.Id, _sendItems[1].Context.Operation.Id);
 			//check parent id

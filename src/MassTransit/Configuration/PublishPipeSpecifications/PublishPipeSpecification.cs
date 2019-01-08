@@ -59,14 +59,14 @@ namespace MassTransit.PublishPipeSpecifications
             messageSpecification.AddPipeSpecification(specification);
         }
 
-        void IPipeConfigurator<SendContext>.AddPipeSpecification(IPipeSpecification<SendContext> specification)
+        void IPublishPipeConfigurator.AddPipeSpecification(IPipeSpecification<SendContext> specification)
         {
             var splitSpecification = new SplitFilterPipeSpecification<PublishContext, SendContext>(specification, MergeContext, FilterContext);
 
             AddPipeSpecification(splitSpecification);
         }
 
-        void ISendPipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification)
+        void IPublishPipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification)
         {
             var splitSpecification = new SplitFilterPipeSpecification<PublishContext<T>, SendContext<T>>(specification, MergeContext, FilterContext);
 

@@ -14,10 +14,12 @@ namespace MassTransit
 {
     using System.ComponentModel;
     using GreenPipes;
+    using SendPipeSpecifications;
 
 
     public interface ISendPipeConfigurator :
-        IPipeConfigurator<SendContext>
+        IPipeConfigurator<SendContext>,
+        IConnectSendPipeSpecificationObserver
     {
         /// <summary>
         /// Adds a type-specific pipe specification to the consume pipe

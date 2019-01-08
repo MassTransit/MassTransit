@@ -17,11 +17,11 @@
         <Title>MassTransit.ApplicationInsights</Title>
     </PropertyGroup>
     <ItemGroup>
-        <ProjectReference Include="..\MassTransit\MassTransit.csproj"/>
+        <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="GreenPipes" Version="2.1.3"/>
-        <PackageReference Include="Microsoft.ApplicationInsights" Version="2.8.1"/>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+        <PackageReference Include="GreenPipes" Version="2.1.3" />
+        <PackageReference Include="Microsoft.ApplicationInsights" Version="2.8.1" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
     </ItemGroup>
 </Project>

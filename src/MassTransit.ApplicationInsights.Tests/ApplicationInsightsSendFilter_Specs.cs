@@ -19,8 +19,10 @@ namespace MassTransit.ApplicationInsights.Tests
     using NUnit.Framework;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes.Payloads;
     using Microsoft.ApplicationInsights.DataContracts;
+    using Pipeline;
+    using TestFramework.Messages;
+    using Util;
 
 
     [TestFixture]
@@ -38,11 +40,11 @@ namespace MassTransit.ApplicationInsights.Tests
         public async Task Should_send_context_to_next_pipe()
         {
             // Arrange.
-            var mockConsumeContext = new Mock<SendContext>();
+            var mockConsumeContext = new Mock<SendContext<PingMessage>>();
             mockConsumeContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
-            var filter = new ApplicationInsightsSendFilter<SendContext>(new TelemetryClient(), "", "", null);
+            var filter = new ApplicationInsightsSendFilter<PingMessage>(new TelemetryClient(), "", "", null);
 
-            var mockPipe = new Mock<IPipe<SendContext>>();
+            var mockPipe = new Mock<IPipe<SendContext<PingMessage>>>();
 
             // Act.
             await filter.Send(mockConsumeContext.Object, mockPipe.Object);
@@ -55,14 +57,14 @@ namespace MassTransit.ApplicationInsights.Tests
         public async Task Should_invoke_the_configure_operation()
         {
             // Arrange.
-            var mockConsumeContext = new Mock<SendContext>();
+            var mockConsumeContext = new Mock<SendContext<PingMessage>>();
             mockConsumeContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
             bool configureOperationHasBeenCalled = false;
 
-            var filter = new ApplicationInsightsSendFilter<SendContext>(new TelemetryClient(), "", "", (holder, context) => configureOperationHasBeenCalled = true);
+            var filter = new ApplicationInsightsSendFilter<PingMessage>(new TelemetryClient(), "", "", (holder, context) => configureOperationHasBeenCalled = true);
 
             // Act.
-            await filter.Send(mockConsumeContext.Object, new Mock<IPipe<SendContext>>().Object);
+            await filter.Send(mockConsumeContext.Object, new Mock<IPipe<SendContext<PingMessage>>>().Object);
 
             // Assert.
             Assert.IsTrue(configureOperationHasBeenCalled);
@@ -77,12 +79,12 @@ namespace MassTransit.ApplicationInsights.Tests
             var rootKeyHeaderName   = "RootKey";
             var parentKeyHeaderName = "ParentKey";
 
-            var mockPublishContext = new Mock<SendContext>();
+            var mockPublishContext = new Mock<SendContext<PingMessage>>();
             mockPublishContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
 
             _mockHeaders.Setup(x => x.Set(It.IsAny<string>(), It.IsAny<string>()));
 
-            var filter = new ApplicationInsightsSendFilter<SendContext>(new TelemetryClient(), rootKeyHeaderName, parentKeyHeaderName,
+            var filter = new ApplicationInsightsSendFilter<PingMessage>(new TelemetryClient(), rootKeyHeaderName, parentKeyHeaderName,
                                                                               (holder, context) =>
                                                                               {
                                                                                   holder.Telemetry.Context.Operation.Id = operationId;
@@ -111,7 +113,7 @@ namespace MassTransit.ApplicationInsights.Tests
             var mockReceiveContext = new Mock<ReceiveContext>();
             mockReceiveContext.Setup(c => c.InputAddress).Returns(inputAddress);
 
-            var mockSendContext = new Mock<SendContext>();
+            var mockSendContext = new Mock<SendContext<PingMessage>>();
             mockSendContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
             mockSendContext.Setup(c => c.MessageId).Returns(messageId);
             mockSendContext.Setup(c => c.ConversationId).Returns(conversationId);
@@ -119,19 +121,19 @@ namespace MassTransit.ApplicationInsights.Tests
             mockSendContext.Setup(c => c.RequestId).Returns(requestId);
             mockSendContext.Setup(c => c.DestinationAddress).Returns(destinationAddress);
 
-            var sendContextProxy = new SendContextProxy<object>(mockSendContext.Object, new Mock<IPayloadCache>().Object);
+            var sendContextProxy = new SendContextProxy<PingMessage>(mockSendContext.Object, new PingMessage());
 
             var capturedTelemetry = default(DependencyTelemetry);
 
-            var filter = new ApplicationInsightsSendFilter<SendContext>(new TelemetryClient(), "", "", (holder, context) => capturedTelemetry = holder.Telemetry);
+            var filter = new ApplicationInsightsSendFilter<PingMessage>(new TelemetryClient(), "", "", (holder, context) => capturedTelemetry = holder.Telemetry);
 
             // Act.
-            await filter.Send(sendContextProxy, new Mock<IPipe<SendContext>>().Object);
+            await filter.Send(sendContextProxy, new Mock<IPipe<SendContext<PingMessage>>>().Object);
 
             // Assert.
             Assert.IsNotNull(capturedTelemetry);
             Assert.AreEqual(capturedTelemetry.Properties["MessageId"], messageId.ToString());
-            Assert.AreEqual(capturedTelemetry.Properties["MessageType"], typeof(object).FullName);
+            Assert.AreEqual(capturedTelemetry.Properties["MessageType"], TypeMetadataCache<PingMessage>.ShortName);
             Assert.AreEqual(capturedTelemetry.Properties["ConversationId"], conversationId.ToString());
             Assert.AreEqual(capturedTelemetry.Properties["CorrelationId"], correlationId.ToString());
             Assert.AreEqual(capturedTelemetry.Properties["DestinationAddress"], destinationAddress.ToString());

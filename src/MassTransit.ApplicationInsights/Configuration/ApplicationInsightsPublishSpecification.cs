@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.ApplicationInsights
+namespace MassTransit.ApplicationInsights.Configuration
 {
     using System;
     using System.Collections.Generic;
@@ -19,24 +19,25 @@ namespace MassTransit.ApplicationInsights
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
+    using Pipeline;
 
-    public class ApplicationInsightsConsumeSpecification<T> :
-        IPipeSpecification<T>
-        where T : class, ConsumeContext
+
+    public class ApplicationInsightsPublishSpecification<T> :
+        IPipeSpecification<PublishContext<T>>
+        where T : class
     {
-        readonly Action<IOperationHolder<RequestTelemetry>, T> _configureOperation;
+        readonly Action<IOperationHolder<DependencyTelemetry>, PublishContext> _configureOperation;
         readonly TelemetryClient _telemetryClient;
         readonly string _telemetryHeaderRootKey;
         readonly string _telemetryHeaderParentKey;
 
-        public ApplicationInsightsConsumeSpecification(TelemetryClient telemetryClient,
-            Action<IOperationHolder<RequestTelemetry>, T> configureOperation, string telemetryHeaderRootKey,
-            string telemetryHeaderParentKey)
+        public ApplicationInsightsPublishSpecification(TelemetryClient telemetryClient, string telemetryHeaderRootKey, string telemetryHeaderParentKey,
+            Action<IOperationHolder<DependencyTelemetry>, PublishContext> configureOperation)
         {
             _telemetryClient = telemetryClient;
-            _configureOperation = configureOperation;
             _telemetryHeaderRootKey = telemetryHeaderRootKey;
             _telemetryHeaderParentKey = telemetryHeaderParentKey;
+            _configureOperation = configureOperation;
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -44,10 +45,10 @@ namespace MassTransit.ApplicationInsights
             return Enumerable.Empty<ValidationResult>();
         }
 
-        public void Apply(IPipeBuilder<T> builder)
+        public void Apply(IPipeBuilder<PublishContext<T>> builder)
         {
-            builder.AddFilter(new ApplicationInsightsConsumeFilter<T>(_telemetryClient, _configureOperation,
-                _telemetryHeaderRootKey, _telemetryHeaderParentKey));
+            builder.AddFilter(
+                new ApplicationInsightsPublishFilter<T>(_telemetryClient, _telemetryHeaderRootKey, _telemetryHeaderParentKey, _configureOperation));
         }
     }
 }
