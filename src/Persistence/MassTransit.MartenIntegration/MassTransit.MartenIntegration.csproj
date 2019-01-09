@@ -17,20 +17,20 @@
         <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
     </PropertyGroup>
     <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-        <Reference Include="System"/>
-        <Reference Include="System.Core"/>
-        <Reference Include="System.Data"/>
-        <Reference Include="System.ComponentModel.Composition"/>
-        <Reference Include="System.IO.Compression.FileSystem"/>
-        <Reference Include="System.Xml.Linq"/>
-        <Reference Include="System.Xml"/>
+        <Reference Include="System" />
+        <Reference Include="System.Core" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.ComponentModel.Composition" />
+        <Reference Include="System.IO.Compression.FileSystem" />
+        <Reference Include="System.Xml.Linq" />
+        <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="GreenPipes" Version="2.1.3"/>
-        <PackageReference Include="Marten" Version="3.2.0"/>
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
-        <PackageReference Include="Npgsql" Version="4.0.3"/>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
-        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+        <PackageReference Include="GreenPipes" Version="2.1.3" />
+        <PackageReference Include="Marten" Version="3.3.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+        <PackageReference Include="Npgsql" Version="4.0.3" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
     </ItemGroup>
 </Project>

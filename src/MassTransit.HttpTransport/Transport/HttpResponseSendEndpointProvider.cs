@@ -14,8 +14,8 @@ namespace MassTransit.HttpTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
-    using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
     using Microsoft.AspNetCore.Http;
     using Transports;
@@ -24,23 +24,16 @@ namespace MassTransit.HttpTransport.Transport
     public class HttpResponseSendEndpointProvider :
         ISendEndpointProvider
     {
-        readonly Uri _inputAddress;
         readonly SendObservable _observers;
         readonly HttpContext _httpContext;
-        readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly ISendPipe _sendPipe;
-        readonly IMessageSerializer _serializer;
+        readonly ReceiveEndpointContext _receiveEndpointContext;
 
-        public HttpResponseSendEndpointProvider(HttpContext httpContext, Uri inputAddress, ISendPipe sendPipe, IMessageSerializer serializer,
-            ISendEndpointProvider sendEndpointProvider)
+        public HttpResponseSendEndpointProvider(HttpContext httpContext, ReceiveEndpointContext receiveEndpointContext)
         {
-            _serializer = serializer;
+            _receiveEndpointContext = receiveEndpointContext;
             _httpContext = httpContext;
-            _inputAddress = inputAddress;
-            _sendPipe = sendPipe;
 
             _observers = new SendObservable();
-            _sendEndpointProvider = sendEndpointProvider;
         }
 
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)
@@ -49,14 +42,15 @@ namespace MassTransit.HttpTransport.Transport
             {
                 var responseTransport = new HttpResponseTransport(_httpContext);
 
-                var endpoint = new SendEndpoint(responseTransport, _serializer, address, _inputAddress, _sendPipe);
+                var endpoint = new SendEndpoint(responseTransport, _receiveEndpointContext.Serializer, address, _receiveEndpointContext.InputAddress,
+                    _receiveEndpointContext.SendPipe);
 
                 endpoint.ConnectSendObserver(_observers);
 
                 return Task.FromResult<ISendEndpoint>(endpoint);
             }
 
-            return _sendEndpointProvider.GetSendEndpoint(address);
+            return _receiveEndpointContext.SendEndpointProvider.GetSendEndpoint(address);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

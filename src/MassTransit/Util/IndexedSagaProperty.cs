@@ -160,7 +160,7 @@ namespace MassTransit.Util
 
         static Func<TSaga, TProperty> GetGetMethod(PropertyInfo property)
         {
-            return new ReadOnlyProperty<TSaga, TProperty>(property).GetProperty;
+            return ReadPropertyCache<TSaga>.GetProperty<TProperty>(property).Get;
         }
     }
 }

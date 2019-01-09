@@ -14,10 +14,8 @@ namespace MassTransit.HttpTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
-    using Clients;
     using Configuration;
     using Context;
-    using MassTransit.Pipeline;
     using Transports;
 
 
@@ -26,12 +24,10 @@ namespace MassTransit.HttpTransport.Transport
     {
         readonly IHttpBusConfiguration _busConfiguration;
         readonly ReceiveEndpointContext _receiveEndpointContext;
-        readonly IReceivePipe _receivePipe;
 
-        public HttpSendTransportProvider(IHttpBusConfiguration busConfiguration, IReceivePipe receivePipe, ReceiveEndpointContext receiveEndpointContext)
+        public HttpSendTransportProvider(IHttpBusConfiguration busConfiguration, ReceiveEndpointContext receiveEndpointContext)
         {
             _busConfiguration = busConfiguration;
-            _receivePipe = receivePipe;
             _receiveEndpointContext = receiveEndpointContext;
         }
 
@@ -40,11 +36,7 @@ namespace MassTransit.HttpTransport.Transport
             if (!_busConfiguration.Hosts.TryGetHost(address, out var hostConfiguration))
                 throw new EndpointNotFoundException($"The host was not found for the specified address: {address}");
 
-            var clientContextSupervisor = new HttpClientContextSupervisor(_receivePipe);
-
-            var sendSettings = address.GetSendSettings();
-
-            return Task.FromResult<ISendTransport>(new HttpSendTransport(clientContextSupervisor, sendSettings, _receiveEndpointContext));
+            return hostConfiguration.CreateSendTransport(address, _receiveEndpointContext);
         }
     }
 }

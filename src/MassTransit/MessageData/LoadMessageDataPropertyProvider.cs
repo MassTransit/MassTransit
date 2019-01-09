@@ -20,13 +20,13 @@ namespace MassTransit.MessageData
     public class LoadMessageDataPropertyProvider<TInput, TValue> :
         IPropertyProvider<MessageData<TValue>, TInput>
     {
-        readonly ReadOnlyProperty<TInput, MessageData<TValue>> _property;
+        readonly IReadProperty<TInput, MessageData<TValue>> _property;
         readonly IMessageDataRepository _repository;
 
         public LoadMessageDataPropertyProvider(IMessageDataRepository repository, PropertyInfo property)
         {
             _repository = repository;
-            _property = new ReadOnlyProperty<TInput, MessageData<TValue>>(property);
+            _property = ReadPropertyCache<TInput>.GetProperty<MessageData<TValue>>(property);
         }
 
         public MessageData<TValue> GetProperty(TransformContext<TInput> context)

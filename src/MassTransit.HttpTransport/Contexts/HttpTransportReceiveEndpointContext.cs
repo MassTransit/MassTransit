@@ -33,12 +33,12 @@ namespace MassTransit.HttpTransport.Contexts
 
         public ReceiveEndpointContext CreateResponseEndpointContext(HttpContext httpContext)
         {
-            return new HttpResponseReceiveEndpointContext(this, httpContext, SendPipe, Serializer);
+            return new HttpResponseReceiveEndpointContext(this, httpContext);
         }
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new HttpSendTransportProvider(_configuration.BusConfiguration, ReceivePipe, this);
+            return new HttpSendTransportProvider(_configuration.BusConfiguration, this);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()

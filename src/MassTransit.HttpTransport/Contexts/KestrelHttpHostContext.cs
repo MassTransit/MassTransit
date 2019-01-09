@@ -51,21 +51,24 @@ namespace MassTransit.HttpTransport.Contexts
 
         public HttpHostSettings HostSettings => _configuration.Settings;
 
-        public async Task Stop(CancellationToken cancellationToken)
-        {
-            if (_started)
-                await _webHost.StopAsync(cancellationToken).ConfigureAwait(false);
-        }
-
         public async Task Start(CancellationToken cancellationToken)
         {
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Configuring Web Host: {0}", _configuration.HostAddress);
+
+            IPHostEntry entries = await Dns.GetHostEntryAsync(_configuration.Settings.Host).ConfigureAwait(false);
+
             IWebHost BuildWebHost(params string[] args)
             {
                 return WebHost.CreateDefaultBuilder(args)
                     .Configure(Configure)
                     .UseKestrel(options =>
                     {
-                        options.Listen(IPAddress.Loopback, HostSettings.Port);
+                        foreach (var ipAddress in entries.AddressList)
+                        {
+                            options.Listen(ipAddress, HostSettings.Port);
+                        }
+
                         //                        options.Listen(IPAddress.Loopback, 5001, listenOptions =>
                         //                        {
                         //                            listenOptions.UseHttps("testCert.pfx", "testPassword");

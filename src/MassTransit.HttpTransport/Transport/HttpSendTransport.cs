@@ -24,6 +24,7 @@ namespace MassTransit.HttpTransport.Transport
     using Clients;
     using Contexts;
     using GreenPipes;
+    using GreenPipes.Agents;
     using Logging;
     using MassTransit.Context;
     using MassTransit.Pipeline.Observables;
@@ -32,6 +33,7 @@ namespace MassTransit.HttpTransport.Transport
 
 
     public class HttpSendTransport :
+        Supervisor,
         ISendTransport
     {
         static readonly ILog _log = Logger.Get<HttpSendTransport>();
@@ -46,7 +48,10 @@ namespace MassTransit.HttpTransport.Transport
             _clientContextSupervisor = clientContextSupervisor;
             _sendSettings = sendSettings;
             _topology = topology;
+
             _observers = new SendObservable();
+
+            Add(clientContextSupervisor);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

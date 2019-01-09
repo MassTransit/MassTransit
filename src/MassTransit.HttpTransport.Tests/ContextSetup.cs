@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Tests
 {
+    using System.IO;
     using Log4NetIntegration.Logging;
     using NUnit.Framework;
 
@@ -23,6 +24,9 @@ namespace MassTransit.HttpTransport.Tests
         public void Before_any()
         {
             string file = "test.log4net.xml";
+
+            var fileInfo = new FileInfo(file);
+            Assert.IsTrue(fileInfo.Exists);
 
             Log4NetLogger.Use(file);
         }

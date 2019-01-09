@@ -13,7 +13,6 @@
 namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System;
-    using System.Threading.Tasks;
     using Configuration;
     using Configuration.Configuration;
     using Configurators;
@@ -81,11 +80,9 @@ namespace MassTransit.AmazonSqsTransport.Transport
             return ReceiveEndpoints.Start(queueName);
         }
 
-        protected override async Task StopSupervisor(StopSupervisorContext context)
+        protected override IAgent[] GetAgentHandles()
         {
-            await base.StopSupervisor(context).ConfigureAwait(false);
-
-            await ConnectionContextSupervisor.Stop(context).ConfigureAwait(false);
+            return new IAgent[] {ConnectionContextSupervisor};
         }
     }
 }

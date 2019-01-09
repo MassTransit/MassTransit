@@ -2,19 +2,16 @@
 {
     using System;
     using System.Collections.Generic;
-    using Util;
+    using System.Reflection;
 
 
     public class ReadPropertyCache<T> :
         IReadPropertyCache<T>
     {
-        readonly Type _implementationType;
         readonly IDictionary<string, IReadProperty<T>> _properties;
 
         ReadPropertyCache()
         {
-            _implementationType = typeof(T).IsInterface ? TypeMetadataCache<T>.ImplementationType : typeof(T);
-
             _properties = new Dictionary<string, IReadProperty<T>>(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -25,17 +22,37 @@
                 if (_properties.TryGetValue(name, out var property))
                     return property as IReadProperty<T, TProperty>;
 
-                var writeProperty = new ReadProperty<T, TProperty>(_implementationType, name);
+                var readProperty = new ReadProperty<T, TProperty>(name);
 
-                _properties[name] = writeProperty;
+                _properties[name] = readProperty;
 
-                return writeProperty;
+                return readProperty;
+            }
+        }
+
+        IReadProperty<T, TProperty> IReadPropertyCache<T>.GetProperty<TProperty>(PropertyInfo propertyInfo)
+        {
+            lock (_properties)
+            {
+                if (_properties.TryGetValue(propertyInfo.Name, out var property))
+                    return property as IReadProperty<T, TProperty>;
+
+                var readProperty = new ReadProperty<T, TProperty>(propertyInfo);
+
+                _properties[propertyInfo.Name] = readProperty;
+
+                return readProperty;
             }
         }
 
         public static IReadProperty<T, TProperty> GetProperty<TProperty>(string name)
         {
             return Cached.PropertyCache.GetProperty<TProperty>(name);
+        }
+
+        public static IReadProperty<T, TProperty> GetProperty<TProperty>(PropertyInfo propertyInfo)
+        {
+            return Cached.PropertyCache.GetProperty<TProperty>(propertyInfo);
         }
 
 
