@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Topology.Builders
 {
+    using System.Linq;
     using Logging;
 
 
@@ -23,7 +24,13 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
         {
             foreach (var topic in layout.Topics)
             {
-                _log.InfoFormat("Topic: {0}, type: {1}, durable: {2}, auto-delete: {3}", topic.EntityName, topic.Durable, topic.AutoDelete);
+                _log.InfoFormat(
+                    "Topic: {0}, type: {1}, durable: {2}, auto-delete: {3}, attributes: {4}", 
+                    topic.EntityName, 
+                    topic.Durable, 
+                    topic.AutoDelete, 
+                    topic.Attributes.Any() ? string.Join(";", topic.Attributes.Select(a => $"{a.Key}={a.Value}")) : "-"
+                );
             }
 
             foreach (var consumer in layout.QueueSubscriptions)

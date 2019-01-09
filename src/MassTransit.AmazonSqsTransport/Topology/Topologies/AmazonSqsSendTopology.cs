@@ -51,7 +51,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             EntityNameValidator.ThrowIfInvalidEntityName(name);
 
             var isTemporary = address.Query.GetValueFromQueryString("temporary", false);
-
             var durable = address.Query.GetValueFromQueryString("durable", !isTemporary);
             var autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
 

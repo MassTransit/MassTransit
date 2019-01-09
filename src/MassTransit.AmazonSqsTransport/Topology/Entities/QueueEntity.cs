@@ -16,16 +16,18 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
     using System.Linq;
 
 
+    // TODO upgrade QueueEntityEqualityComparer, NameEqualityComparer??? same applies to TopicEntity
     public class QueueEntity :
         Queue,
         QueueHandle
     {
-        public QueueEntity(long id, string name, bool durable, bool autoDelete)
+        public QueueEntity(long id, string name, bool durable, bool autoDelete, IReadOnlyDictionary<string, string> attributes = null)
         {
             Id = id;
             EntityName = name;
             Durable = durable;
             AutoDelete = autoDelete;
+            Attributes = attributes ?? new Dictionary<string, string>();
         }
 
         public static IEqualityComparer<QueueEntity> NameComparer { get; } = new NameEqualityComparer();
@@ -36,6 +38,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         public bool Durable { get; }
         public bool AutoDelete { get; }
         public long Id { get; }
+        public IReadOnlyDictionary<string, string> Attributes { get; }
         public Queue Queue => this;
 
         public override string ToString()
@@ -43,8 +46,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
             return string.Join(", ", new[]
             {
                 $"name: {EntityName}",
-                Durable ? "durable" : "",
-                AutoDelete ? "auto-delete" : "",
+                Durable ? "durable" : string.Empty,
+                AutoDelete ? "auto-delete" : string.Empty,
+                Attributes.Any() ? $"attributes: {string.Join(";", Attributes.Select(a => $"{a.Key}={a.Value}"))}" : string.Empty
             }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 

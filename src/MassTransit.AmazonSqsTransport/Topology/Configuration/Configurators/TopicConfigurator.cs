@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
 {
+    using System.Collections.Generic;
     using AmazonSqsTransport.Configuration;
     using Entities;
 
@@ -21,13 +22,13 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
         ITopicConfigurator,
         Topic
     {
-        public TopicConfigurator(string topicName, bool durable = true, bool autoDelete = false)
-            : base(topicName, durable, autoDelete)
+        public TopicConfigurator(string topicName, bool durable = true, bool autoDelete = false, IReadOnlyDictionary<string, string> attributes = null)
+            : base(topicName, durable, autoDelete, attributes)
         {
         }
 
         public TopicConfigurator(Topic source)
-            : base(source.EntityName, source.Durable, source.AutoDelete)
+            : base(source.EntityName, source.Durable, source.AutoDelete, source.Attributes)
         {
         }
     }
