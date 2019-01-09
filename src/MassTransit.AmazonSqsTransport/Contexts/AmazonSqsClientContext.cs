@@ -27,7 +27,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using Logging;
     using Pipeline;
     using Topology;
+    using Topology.Entities;
     using Util;
+    using Topic = Topology.Entities.Topic;
 
 
     public class AmazonSqsClientContext :
@@ -72,36 +74,39 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         ConnectionContext ClientContext.ConnectionContext => _connectionContext;
 
-        public async Task<string> CreateTopic(string topicName)
+        public async Task<string> CreateTopic(Topic topic)
         {
             lock (_lock)
-                if (_topicArns.TryGetValue(topicName, out var result))
+                if (_topicArns.TryGetValue(topic.EntityName, out var result))
                     return result;
 
-            var response = await _amazonSns.CreateTopicAsync(topicName).ConfigureAwait(false);
+            var request = new CreateTopicRequest(topic.EntityName)
+            {
+                Attributes = topic.Attributes.ToDictionary(x => x.Key, x => x.Value)
+            };
+
+            var response = await _amazonSns.CreateTopicAsync(request).ConfigureAwait(false);
 
             await Task.Delay(500).ConfigureAwait(false);
 
             var topicArn = response.TopicArn;
 
             lock (_lock)
-                _topicArns[topicName] = topicArn;
+                _topicArns[topic.EntityName] = topicArn;
 
             return topicArn;
         }
 
-        public async Task<string> CreateQueue(string queueName)
+        public async Task<string> CreateQueue(Queue queue)
         {
             lock (_lock)
-                if (_queueUrls.TryGetValue(queueName, out var result))
+                if (_queueUrls.TryGetValue(queue.EntityName, out var result))
                     return result;
 
-            var request = new CreateQueueRequest(queueName);
-
-            if (queueName.EndsWith(".fifo", StringComparison.InvariantCultureIgnoreCase))
+            var request = new CreateQueueRequest(queue.EntityName)
             {
-                request.Attributes[QueueAttributeName.FifoQueue] = "true";
-            }
+                Attributes = queue.Attributes.ToDictionary(x => x.Key, x => x.Value)
+            };
 
             var response = await _amazonSqs.CreateQueueAsync(request).ConfigureAwait(false);
 
@@ -110,14 +115,14 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             var queueUrl = response.QueueUrl;
 
             lock (_lock)
-                _queueUrls[queueName] = queueUrl;
+                _queueUrls[queue.EntityName] = queueUrl;
 
             return queueUrl;
         }
 
-        async Task ClientContext.CreateQueueSubscription(string topicName, string queueName)
+        async Task ClientContext.CreateQueueSubscription(Topic topic, Queue queue)
         {
-            var results = await Task.WhenAll(CreateTopic(topicName), CreateQueue(queueName)).ConfigureAwait(false);
+            var results = await Task.WhenAll(CreateTopic(topic), CreateQueue(queue)).ConfigureAwait(false);
 
             var topicArn = results[0];
             var queueUrl = results[1];
@@ -129,15 +134,15 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             await _amazonSns.SetSubscriptionAttributesAsync(response, "RawMessageDelivery", "true").ConfigureAwait(false);
         }
 
-        async Task ClientContext.DeleteTopic(string topicName)
+        async Task ClientContext.DeleteTopic(Topic topic)
         {
-            var topicArn = await CreateTopic(topicName).ConfigureAwait(false);
+            var topicArn = await CreateTopic(topic).ConfigureAwait(false);
             await _amazonSns.DeleteTopicAsync(topicArn).ConfigureAwait(false);
         }
 
-        async Task ClientContext.DeleteQueue(string queueName)
+        async Task ClientContext.DeleteQueue(Queue queue)
         {
-            var queueUrl = await CreateQueue(queueName).ConfigureAwait(false);
+            var queueUrl = await CreateQueue(queue).ConfigureAwait(false);
             await _amazonSqs.DeleteQueueAsync(queueUrl).ConfigureAwait(false);
         }
 

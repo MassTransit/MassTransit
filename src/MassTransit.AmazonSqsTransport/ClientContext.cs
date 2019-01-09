@@ -19,6 +19,8 @@ namespace MassTransit.AmazonSqsTransport
     using GreenPipes;
     using Pipeline;
     using Topology;
+    using Topology.Entities;
+    using Topic = Topology.Entities.Topic;
 
 
     public interface ClientContext :
@@ -29,15 +31,15 @@ namespace MassTransit.AmazonSqsTransport
         /// </summary>
         ConnectionContext ConnectionContext { get; }
 
-        Task<string> CreateTopic(string topicName);
+        Task<string> CreateTopic(Topic topic);
+        
+        Task<string> CreateQueue(Queue queue);
 
-        Task<string> CreateQueue(string queueName);
+        Task CreateQueueSubscription(Topic topic, Queue queue);
 
-        Task CreateQueueSubscription(string topicName, string queueName);
+        Task DeleteTopic(Topic topic);
 
-        Task DeleteTopic(string topicName);
-
-        Task DeleteQueue(string queueName);
+        Task DeleteQueue(Queue queue);
 
         Task BasicConsume(ReceiveSettings receiveSettings, IBasicConsumer consumer);
 

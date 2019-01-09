@@ -21,6 +21,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using GreenPipes.Payloads;
     using Pipeline;
     using Topology;
+    using Topic = Topology.Entities.Topic;
+    using Queue = Topology.Entities.Queue;
 
 
     public class SharedClientContext :
@@ -74,29 +76,29 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         ConnectionContext ClientContext.ConnectionContext => _context.ConnectionContext;
 
-        Task<string> ClientContext.CreateTopic(string topicName)
+        Task<string> ClientContext.CreateTopic(Topic topic)
         {
-            return _context.CreateTopic(topicName);
+            return _context.CreateTopic(topic);
         }
 
-        Task<string> ClientContext.CreateQueue(string queueName)
+        Task<string> ClientContext.CreateQueue(Queue queue)
         {
-            return _context.CreateQueue(queueName);
+            return _context.CreateQueue(queue);
         }
 
-        Task ClientContext.CreateQueueSubscription(string topicName, string queueName)
+        Task ClientContext.CreateQueueSubscription(Topic topic, Queue queue)
         {
-            return _context.CreateQueueSubscription(topicName, queueName);
+            return _context.CreateQueueSubscription(topic, queue);
         }
 
-        Task ClientContext.DeleteTopic(string topicName)
+        Task ClientContext.DeleteTopic(Topic topic)
         {
-            return _context.DeleteTopic(topicName);
+            return _context.DeleteTopic(topic);
         }
 
-        Task ClientContext.DeleteQueue(string queueName)
+        Task ClientContext.DeleteQueue(Queue queue)
         {
-            return _context.DeleteQueue(queueName);
+            return _context.DeleteQueue(queue);
         }
 
         Task ClientContext.BasicConsume(ReceiveSettings receiveSettings, IBasicConsumer consumer)

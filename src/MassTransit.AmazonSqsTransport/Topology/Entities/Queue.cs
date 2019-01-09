@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Topology.Entities
 {
+    using System.Collections.Generic;
+
+
     /// <summary>
     /// The queue details used to declare the queue to AmazonSQS
     /// </summary>
@@ -31,5 +34,10 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         /// True if the queue should be deleted when the connection is closed
         /// </summary>
         bool AutoDelete { get; }
+
+        /// <summary>
+        /// TODO add summary
+        /// </summary>
+        IReadOnlyDictionary<string, string> Attributes { get; }
     }
 }

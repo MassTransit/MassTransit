@@ -17,16 +17,18 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
 
     public abstract class EntityConfigurator
     {
-        protected EntityConfigurator(string entityName, bool durable = true, bool autoDelete = false)
+        protected EntityConfigurator(string entityName, bool durable = true, bool autoDelete = false, IReadOnlyDictionary<string, string> attributes = null)
         {
             EntityName = entityName;
             Durable = durable;
             AutoDelete = autoDelete;
+            Attributes = attributes ?? new Dictionary<string, string>();
         }
 
         public bool Durable { get; set; }
         public bool AutoDelete { get; set; }
         public string EntityName { get; }
+        public IReadOnlyDictionary<string, string> Attributes { get; }
 
         protected virtual IEnumerable<string> GetQueryStringOptions()
         {
@@ -35,6 +37,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
 
             if (AutoDelete)
                 yield return "autodelete=true";
+
+            foreach (var attribute in Attributes)
+            {
+                yield return $"{attribute.Key}={attribute.Value}";
+            }
         }
     }
 }

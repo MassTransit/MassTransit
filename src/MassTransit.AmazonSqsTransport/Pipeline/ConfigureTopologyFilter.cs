@@ -20,6 +20,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using Topology.Builders;
     using Topology.Entities;
 
+
     /// <summary>
     /// Configures the broker with the supplied topology once the model is created, to ensure
     /// that the exchanges, queues, and bindings for the model are properly configured in AmazonSQS.
@@ -85,7 +86,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Declare topic ({0})", topic);
 
-            return context.CreateTopic(topic.EntityName);
+            return context.CreateTopic(topic);
         }
 
         Task Declare(ClientContext context, QueueSubscription subscription)
@@ -93,7 +94,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Binding topic ({0}) to queue ({1})", subscription.Source, subscription.Destination);
 
-            return context.CreateQueueSubscription(subscription.Source.EntityName, subscription.Destination.EntityName);
+            return context.CreateQueueSubscription(subscription.Source, subscription.Destination);
         }
 
         Task Declare(ClientContext context, Queue queue)
@@ -101,7 +102,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Declare queue ({0})", queue);
 
-            return context.CreateQueue(queue.EntityName);
+            return context.CreateQueue(queue);
         }
 
         Task Delete(ClientContext context, Topic topic)
@@ -109,7 +110,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Delete topic ({0})", topic);
 
-            return context.DeleteTopic(topic.EntityName);
+            return context.DeleteTopic(topic);
         }
 
         Task Delete(ClientContext context, Queue queue)
@@ -117,7 +118,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Delete queue ({0})", queue);
 
-            return context.DeleteQueue(queue.EntityName);
+            return context.DeleteQueue(queue);
         }
     }
 }
