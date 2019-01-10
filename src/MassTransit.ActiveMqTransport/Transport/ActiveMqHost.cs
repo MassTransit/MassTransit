@@ -13,7 +13,6 @@
 namespace MassTransit.ActiveMqTransport.Transport
 {
     using System;
-    using System.Threading.Tasks;
     using Configuration;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -79,11 +78,9 @@ namespace MassTransit.ActiveMqTransport.Transport
             return ReceiveEndpoints.Start(queueName);
         }
 
-        protected override async Task StopSupervisor(StopSupervisorContext context)
+        protected override IAgent[] GetAgentHandles()
         {
-            await base.StopSupervisor(context).ConfigureAwait(false);
-
-            await ConnectionContextSupervisor.Stop(context).ConfigureAwait(false);
+            return new IAgent[] {ConnectionContextSupervisor};
         }
     }
 }

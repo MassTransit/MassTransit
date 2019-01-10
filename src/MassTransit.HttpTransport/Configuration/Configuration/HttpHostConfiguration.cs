@@ -14,6 +14,8 @@ namespace MassTransit.HttpTransport.Configuration
 {
     using System;
     using System.Threading.Tasks;
+    using Clients;
+    using Context;
     using Hosting;
     using MassTransit.Configuration;
     using MassTransit.Topology;
@@ -27,6 +29,7 @@ namespace MassTransit.HttpTransport.Configuration
         readonly IHttpBusConfiguration _busConfiguration;
         readonly HttpHostSettings _settings;
         readonly IHostTopology _hostTopology;
+        readonly HttpHost _host;
 
         public HttpHostConfiguration(IHttpBusConfiguration busConfiguration, HttpHostSettings settings, IHostTopology hostTopology)
         {
@@ -36,14 +39,15 @@ namespace MassTransit.HttpTransport.Configuration
 
             HostAddress = settings.GetInputAddress();
 
-            Host = new HttpHost(this);
+            _host = new HttpHost(this);
         }
 
         public Uri HostAddress { get; }
 
-        IBusHostControl IHostConfiguration.Host => Host;
+        IBusHostControl IHostConfiguration.Host => _host;
         IHostTopology IHostConfiguration.Topology => _hostTopology;
 
+        IHttpHost IHttpHostConfiguration.Host => _host;
         IHttpBusConfiguration IHttpHostConfiguration.BusConfiguration => _busConfiguration;
         HttpHostSettings IHttpHostConfiguration.Settings => _settings;
 
@@ -64,6 +68,17 @@ namespace MassTransit.HttpTransport.Configuration
             return new HttpReceiveEndpointConfiguration(this, pathMatch, _busConfiguration.CreateEndpointConfiguration());
         }
 
-        public HttpHost Host { get; }
+        public Task<ISendTransport> CreateSendTransport(Uri address, ReceiveEndpointContext receiveEndpointContext)
+        {
+            var clientContextSupervisor = new HttpClientContextSupervisor(receiveEndpointContext.ReceivePipe);
+
+            var sendSettings = address.GetSendSettings();
+
+            var transport = new HttpSendTransport(clientContextSupervisor, sendSettings, receiveEndpointContext);
+
+            _host.Add(transport);
+
+            return Task.FromResult<ISendTransport>(transport);
+        }
     }
 }

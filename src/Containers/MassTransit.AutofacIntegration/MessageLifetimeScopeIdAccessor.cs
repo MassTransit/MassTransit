@@ -19,11 +19,11 @@ namespace MassTransit.AutofacIntegration
     public class MessageLifetimeScopeIdAccessor<TMessage, TId> :
         ILifetimeScopeIdAccessor<TMessage, TId>
     {
-        readonly ReadOnlyProperty<TMessage, TId> _property;
+        readonly IReadProperty<TMessage, TId> _property;
 
         public MessageLifetimeScopeIdAccessor(PropertyInfo propertyInfo)
         {
-            _property = new ReadOnlyProperty<TMessage, TId>(propertyInfo);
+            _property = ReadPropertyCache<TMessage>.GetProperty<TId>(propertyInfo);
         }
 
         public bool TryGetScopeId(TMessage input, out TId id)

@@ -64,9 +64,13 @@ namespace MassTransit.HttpTransport.Configuration
 
             var receiveSettings = new Settings(_pathMatch);
 
-            _httpHostPipeConfigurator.UseFilter(new HttpConsumerFilter(_hostConfiguration.Settings, receiveSettings, receiveEndpointContext));
+            var httpConsumerFilter = new HttpConsumerFilter(_hostConfiguration.Settings, receiveSettings, receiveEndpointContext);
+
+            _httpHostPipeConfigurator.UseFilter(httpConsumerFilter);
 
             var transport = new HttpReceiveTransport(_hostConfiguration.Host, receiveEndpointContext, _httpHostPipeConfigurator.Build());
+
+            transport.Add(httpConsumerFilter);
 
             return CreateReceiveEndpoint(string.IsNullOrWhiteSpace(_pathMatch) ? NewId.Next().ToString() : _pathMatch, transport, receiveEndpointContext);
         }

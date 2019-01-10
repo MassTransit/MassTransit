@@ -29,11 +29,10 @@ namespace MassTransit.Transformation.PropertyProviders
             _valueProvider = valueProvider;
             if (inputProperty != null)
             {
-                var getProperty = new ReadOnlyProperty<TInput, TProperty>(inputProperty);
-                _getValue = getProperty.Get;
+                _getValue = ReadPropertyCache<TInput>.GetProperty<TProperty>(inputProperty).Get;
             }
             else
-                _getValue = input => default(TProperty);
+                _getValue = input => default;
         }
 
         public TProperty GetProperty(TransformContext<TInput> context)

@@ -29,16 +29,11 @@ namespace MassTransit.HttpTransport.Topology
         readonly HttpContext _httpContext;
         readonly ReceiveEndpointContext _receiveEndpointContext;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
-        readonly ISendPipe _sendPipe;
-        readonly IMessageSerializer _serializer;
 
-        public HttpResponseReceiveEndpointContext(ReceiveEndpointContext receiveEndpointContext, HttpContext httpContext, ISendPipe sendPipe,
-            IMessageSerializer serializer)
+        public HttpResponseReceiveEndpointContext(ReceiveEndpointContext receiveEndpointContext, HttpContext httpContext)
         {
             _receiveEndpointContext = receiveEndpointContext;
             _httpContext = httpContext;
-            _sendPipe = sendPipe;
-            _serializer = serializer;
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
         }
@@ -49,10 +44,12 @@ namespace MassTransit.HttpTransport.Topology
         public IReceiveEndpointObserver EndpointObservers => _receiveEndpointContext.EndpointObservers;
 
         IPublishTopology ReceiveEndpointContext.Publish => _receiveEndpointContext.Publish;
-        public IReceivePipe ReceivePipe { get; }
+        IReceivePipe ReceiveEndpointContext.ReceivePipe => _receiveEndpointContext.ReceivePipe;
 
         ISendEndpointProvider ReceiveEndpointContext.SendEndpointProvider => _sendEndpointProvider.Value;
         IPublishEndpointProvider ReceiveEndpointContext.PublishEndpointProvider => _receiveEndpointContext.PublishEndpointProvider;
+        ISendPipe ReceiveEndpointContext.SendPipe => _receiveEndpointContext.SendPipe;
+        IMessageSerializer ReceiveEndpointContext.Serializer => _receiveEndpointContext.Serializer;
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
@@ -66,8 +63,7 @@ namespace MassTransit.HttpTransport.Topology
 
         ISendEndpointProvider CreateSendEndpointProvider()
         {
-            return new HttpResponseSendEndpointProvider(_httpContext, _receiveEndpointContext.InputAddress, _sendPipe, _serializer,
-                _receiveEndpointContext.SendEndpointProvider);
+            return new HttpResponseSendEndpointProvider(_httpContext, _receiveEndpointContext);
         }
 
         ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
