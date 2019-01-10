@@ -25,7 +25,5 @@ namespace MassTransit.ActiveMqTransport
         /// </summary>
         /// <param name="password"></param>
         void Password(string password);
-
-        void UseSsl();
     }
 }

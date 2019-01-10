@@ -27,21 +27,10 @@ namespace MassTransit.ActiveMqTransport.Configurators
 
             _settings = new ConfigurationHostSettings
             {
-                Host = address.Host,
+                ConnectionString = address,
                 Username = "",
                 Password = "",
             };
-
-            _settings.Port = !address.IsDefaultPort ? address.Port : 61616;
-
-            if (!string.IsNullOrEmpty(address.UserInfo))
-            {
-                string[] parts = address.UserInfo.Split(':');
-                _settings.Username = parts[0];
-
-                if (parts.Length >= 2)
-                    _settings.Password = parts[1];
-            }
         }
 
         public ActiveMqHostSettings Settings => _settings;
@@ -54,13 +43,6 @@ namespace MassTransit.ActiveMqTransport.Configurators
         public void Password(string password)
         {
             _settings.Password = password;
-        }
-
-        public void UseSsl()
-        {
-            _settings.UseSsl = true;
-            if (_settings.Port == 61616)
-                _settings.Port = 61617;
         }
     }
 }

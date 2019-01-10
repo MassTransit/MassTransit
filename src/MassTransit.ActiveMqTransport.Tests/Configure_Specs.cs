@@ -124,12 +124,10 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
-                var host = cfg.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", 61617, h =>
+                var host = cfg.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", true, h =>
                 {
                     h.Username("masstransit-build");
                     h.Password("build-Br0k3r");
-
-                    h.UseSsl();
                 });
 
                 cfg.ReceiveEndpoint(host, "input-queue", x =>
@@ -167,12 +165,10 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var bus = Bus.Factory.CreateUsingActiveMq(sbc =>
             {
-                var host = sbc.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", 61617, h =>
+                var host = sbc.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", true, h =>
                 {
                     h.Username("masstransit-build");
                     h.Password("build-Br0k3r");
-
-                    h.UseSsl();
                 });
 
                 sbc.ReceiveEndpoint(host, "test", e =>
@@ -278,12 +274,10 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
-                cfg.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", 61617, h =>
+                cfg.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", true, h =>
                 {
                     h.Username("masstransit-build");
                     h.Password("build-Br0k3r");
-
-                    h.UseSsl();
                 });
             });
         }

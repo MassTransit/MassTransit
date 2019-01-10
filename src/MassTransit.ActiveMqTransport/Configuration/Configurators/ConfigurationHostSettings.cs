@@ -14,10 +14,6 @@ namespace MassTransit.ActiveMqTransport.Configurators
 {
     using System;
     using Apache.NMS;
-    using Apache.NMS.ActiveMQ;
-    using Apache.NMS.ActiveMQ.Transport;
-    using Apache.NMS.ActiveMQ.Transport.Tcp;
-    using Apache.NMS.ActiveMQ.Util;
 
 
     public class ConfigurationHostSettings :
@@ -25,81 +21,40 @@ namespace MassTransit.ActiveMqTransport.Configurators
     {
         readonly Lazy<Uri> _hostAddress;
         readonly Lazy<Uri> _brokerAddress;
+        readonly Lazy<IConnectionFactory> _connectionFactory;
 
         public ConfigurationHostSettings()
         {
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
             _brokerAddress = new Lazy<Uri>(FormatBrokerAddress);
+            _connectionFactory = new Lazy<IConnectionFactory>(() => new NMSConnectionFactory(BrokerAddress));
         }
 
-        public string Host { get; set; }
-        public int Port { get; set; }
+        public Uri ConnectionString { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        public bool UseSsl { get; set; }
 
         public Uri HostAddress => _hostAddress.Value;
         public Uri BrokerAddress => _brokerAddress.Value;
 
         public IConnection CreateConnection()
         {
-            ITransport transport;
-            if (UseSsl)
-            {
-                var sslTransportFactory = new SslTransportFactory
-                {
-                    SslProtocol = "Tls"
-                };
-
-                transport = sslTransportFactory.CreateTransport(BrokerAddress);
-            }
-            else
-            {
-                transport = TransportFactory.CreateTransport(BrokerAddress);
-            }
-
-            return new Connection(BrokerAddress, transport, new IdGenerator())
-            {
-                UserName = Username,
-                Password = Password
-            };
+            return _connectionFactory.Value.CreateConnection(Username, Password);
         }
 
         Uri FormatHostAddress()
         {
-            var builder = new UriBuilder
-            {
-                Scheme = "activemq",
-                Host = Host,
-                Port = Port,
-                Path = "/"
-            };
-
-            return builder.Uri;
+            return ConnectionString;
         }
 
         Uri FormatBrokerAddress()
         {
-            // create broker URI: http://activemq.apache.org/nms/activemq-uri-configuration.html
-            var builder = new UriBuilder
-            {
-                Scheme = UseSsl ? "ssl" : "tcp",
-                Host = Host,
-                Port = Port,
-                Query = "wireFormat.tightEncodingEnabled=true&nms.AsyncSend=true"
-            };
-
-            return builder.Uri;
+            return ConnectionString;
         }
 
         public override string ToString()
         {
-            return new UriBuilder
-            {
-                Scheme = UseSsl ? "ssl" : "tcp",
-                Host = Host,
-                Port = Port
-            }.Uri.ToString();
+            return ConnectionString.ToString();
         }
     }
 }

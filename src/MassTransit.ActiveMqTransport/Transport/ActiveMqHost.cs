@@ -53,8 +53,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             context.Set(new
             {
                 Type = "ActiveMQ",
-                Settings.Host,
-                Settings.Port,
+                Settings.ConnectionString,
                 Settings.Username,
                 Password = new string('*', Settings.Password.Length)
             });

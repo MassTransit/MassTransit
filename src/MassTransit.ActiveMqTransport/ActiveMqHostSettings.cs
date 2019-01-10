@@ -22,14 +22,9 @@ namespace MassTransit.ActiveMqTransport
     public interface ActiveMqHostSettings
     {
         /// <summary>
-        ///     The ActiveMQ host to connect to (should be a valid hostname)
+        ///     The ActiveMQ connection string
         /// </summary>
-        string Host { get; }
-
-        /// <summary>
-        ///     The ActiveMQ port to connect
-        /// </summary>
-        int Port { get; }
+        Uri ConnectionString { get; }
 
         /// <summary>
         ///     The Username for connecting to the host
@@ -46,8 +41,6 @@ namespace MassTransit.ActiveMqTransport
         /// Returns the host address
         /// </summary>
         Uri HostAddress { get; }
-
-        bool UseSsl { get; }
 
         Uri BrokerAddress { get; }
 

@@ -32,15 +32,14 @@ namespace MassTransit.ActiveMqTransport.Topology
             if (ReferenceEquals(y, null))
                 return false;
 
-            return string.Equals(x.Host, y.Host, StringComparison.OrdinalIgnoreCase) && x.Port == y.Port;
+            return x.ConnectionString.Equals(y.ConnectionString);
         }
 
         public int GetHashCode(ActiveMqHostSettings obj)
         {
             unchecked
             {
-                var hashCode = obj.Host?.GetHashCode() ?? 0;
-                hashCode = (hashCode * 397) ^ obj.Port;
+                var hashCode = obj.ConnectionString?.GetHashCode() ?? 0;
                 return hashCode;
             }
         }

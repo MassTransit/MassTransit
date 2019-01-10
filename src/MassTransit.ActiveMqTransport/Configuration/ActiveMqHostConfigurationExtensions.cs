@@ -18,11 +18,14 @@ namespace MassTransit.ActiveMqTransport
 
     public static class ActiveMqHostConfigurationExtensions
     {
+        const int DefaultPort = 61616;
+        const int DefaultSslPort = 61617;
+
         /// <summary>
         ///     Configure a ActiveMQ host using the configuration API
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="hostAddress">The URI host address of the ActiveMQ host (activemq://host:port/vhost)</param>
+        /// <param name="hostAddress">The NMS URI connection as specified here: http://activemq.apache.org/nms/activemq-uri-configuration.html. Scheme must be activemq:</param>
         /// <param name="configure"></param>
         public static IActiveMqHost Host(this IActiveMqBusFactoryConfigurator configurator, Uri hostAddress, Action<IActiveMqHostConfigurator> configure)
         {
@@ -44,7 +47,19 @@ namespace MassTransit.ActiveMqTransport
         /// <param name="configure">The configuration callback</param>
         public static IActiveMqHost Host(this IActiveMqBusFactoryConfigurator configurator, string hostName, Action<IActiveMqHostConfigurator> configure)
         {
-            return configurator.Host(new UriBuilder("activemq", hostName).Uri, configure);
+            return configurator.Host(hostName, DefaultPort, false, configure);
+        }
+
+        /// <summary>
+        /// Configure a ActiveMQ host with a host name and virtual host
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="hostName">The host name of the broker</param>
+        /// <param name="useSsl">Whether to use an SSL connection or not</param>
+        /// <param name="configure">The configuration callback</param>
+        public static IActiveMqHost Host(this IActiveMqBusFactoryConfigurator configurator, string hostName, bool useSsl, Action<IActiveMqHostConfigurator> configure)
+        {
+            return configurator.Host(hostName, useSsl ? DefaultSslPort : DefaultPort, useSsl, configure);
         }
 
         /// <summary>
@@ -56,7 +71,23 @@ namespace MassTransit.ActiveMqTransport
         /// <param name="configure">The configuration callback</param>
         public static IActiveMqHost Host(this IActiveMqBusFactoryConfigurator configurator, string hostName, int port, Action<IActiveMqHostConfigurator> configure)
         {
-            return configurator.Host(new UriBuilder("activemq", hostName, port).Uri, configure);
+            return configurator.Host(hostName, port, false, configure);
+        }
+
+        /// <summary>
+        /// Configure a ActiveMQ host with a host name and virtual host
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="hostName">The host name of the broker</param>
+        /// <param name="port">The port to connect to the broker</param>
+        /// <param name="useSsl">Whether to use an SSL connection or not</param>
+        /// <param name="configure">The configuration callback</param>
+        public static IActiveMqHost Host(this IActiveMqBusFactoryConfigurator configurator, string hostName, int port, bool useSsl, Action<IActiveMqHostConfigurator> configure)
+        {
+            var hostScheme = useSsl ? "ssl" : "tcp";
+            // Using failover by default so NMS connection does reconnection
+            var uri = new Uri($"activemq:failover:({hostScheme}://{hostName}:{port})?wireFormat.tightEncodingEnabled=true&nms.AsyncSend=true");
+            return configurator.Host(uri, configure);
         }
 
         /// <summary>
