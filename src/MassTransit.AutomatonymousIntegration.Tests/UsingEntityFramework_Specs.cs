@@ -14,9 +14,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 {
     using System;
     using System.Data.Entity.Infrastructure;
-    using System.Linq;
     using System.Threading.Tasks;
-    using Automatonymous;
     using EntityFrameworkIntegration;
     using EntityFrameworkIntegration.Saga;
     using GreenPipes;
@@ -24,6 +22,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     using Saga;
     using TestFramework;
     using System.Collections.Generic;
+    using System.Linq;
     using Testing;
 
 
@@ -32,7 +31,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         InMemoryTestFixture
     {
         SuperShopper _machine;
-        readonly SagaDbContextFactory _sagaDbContextFactory;
+        readonly ISagaDbContextFactory<ShoppingChore> _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<ShoppingChore>> _repository;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -44,13 +43,15 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 x.Handle<DbUpdateException>();
                 x.Immediate(5);
             });
+
             configurator.StateMachineSaga(_machine, _repository.Value);
         }
 
         public When_using_EntityFramework()
         {
-            _sagaDbContextFactory =
-                () => new SagaDbContext<ShoppingChore, EntityFrameworkShoppingChoreMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString());
+            _sagaDbContextFactory = new DelegateSagaDbContextFactory<ShoppingChore>(
+                () => new SagaDbContext<ShoppingChore, EntityFrameworkShoppingChoreMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+
             _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => new EntityFrameworkSagaRepository<ShoppingChore>(_sagaDbContextFactory));
         }
 
@@ -61,7 +62,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
         async Task<ShoppingChore> GetSaga(Guid id)
         {
-            using (var dbContext = _sagaDbContextFactory())
+            using (var dbContext = _sagaDbContextFactory.Create())
             {
                 var sagaInstance = dbContext.Set<ShoppingChore>().SingleOrDefault(x => x.CorrelationId == id);
                 return sagaInstance;

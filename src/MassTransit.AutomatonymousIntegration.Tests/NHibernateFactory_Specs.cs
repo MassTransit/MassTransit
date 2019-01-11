@@ -113,6 +113,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 _machine = new TestStateMachine();
                 _sessionFactory = new SQLiteSessionFactoryProvider(typeof(InstanceMap))
                     .GetSessionFactory();
+
                 _repository = new NHibernateSagaRepository<Instance>(_sessionFactory);
 
                 configurator.StateMachineSaga(_machine, _repository);
@@ -192,6 +193,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 _machine = new TestStateMachine();
                 _sessionFactory = new SQLiteSessionFactoryProvider(typeof(InstanceMap))
                     .GetSessionFactory();
+
                 _repository = new NHibernateSagaRepository<Instance>(_sessionFactory);
 
                 configurator.StateMachineSaga(_machine, _repository);
@@ -292,8 +294,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             public When_pre_inserting_in_an_invalid_state_with_ef()
             {
-                SagaDbContextFactory sagaDbContextFactory =
-                    () => new SagaDbContext<Instance, EntityFrameworkInstanceMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString());
+                ISagaDbContextFactory<Instance> sagaDbContextFactory = new DelegateSagaDbContextFactory<Instance>(
+                    () => new SagaDbContext<Instance, EntityFrameworkInstanceMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+
                 _repository = new EntityFrameworkSagaRepository<Instance>(sagaDbContextFactory);
             }
 

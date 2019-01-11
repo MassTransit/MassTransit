@@ -16,16 +16,16 @@
         <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.EntityFrameworkIntegration.xml</DocumentationFile>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="EntityFramework" Version="6.2.0"/>
-        <PackageReference Include="GreenPipes" Version="2.1.3"/>
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
-        <Reference Include="System"/>
-        <Reference Include="System.ComponentModel.DataAnnotations"/>
-        <Reference Include="System.Core"/>
-        <Reference Include="System.Data.DataSetExtensions"/>
-        <Reference Include="System.Data"/>
-        <Reference Include="System.Xml"/>
-        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+        <PackageReference Include="EntityFramework" Version="6.2.0" />
+        <PackageReference Include="GreenPipes" Version="2.1.3" />
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+        <Reference Include="System" />
+        <Reference Include="System.ComponentModel.DataAnnotations" />
+        <Reference Include="System.Core" />
+        <Reference Include="System.Data.DataSetExtensions" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Xml" />
+        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
     </ItemGroup>
 </Project>
