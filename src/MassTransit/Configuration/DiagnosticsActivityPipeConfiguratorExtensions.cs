@@ -10,20 +10,22 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
+
 #if NETSTANDARD
 namespace MassTransit
 {
     using System.Diagnostics;
-    using PipeConfigurators;
-
+    using ConsumePipeSpecifications;
+    using PublishPipeSpecifications;
+    using SendPipeSpecifications;
 
     public static class DiagnosticsActivityPipeConfiguratorExtensions
     {
         public static void UseDiagnosticsActivity(this IBusFactoryConfigurator configurator, DiagnosticSource diagnosticSource)
         {
-            configurator.ConfigureSend(cfg => cfg.AddPipeSpecification(new DiagnosticsActivityPipeSpecification(diagnosticSource)));
-            configurator.ConfigurePublish(cfg => cfg.AddPipeSpecification(new DiagnosticsActivityPipeSpecification(diagnosticSource)));
-            configurator.AddPipeSpecification(new DiagnosticsActivityPipeSpecification(diagnosticSource));
+            configurator.ConfigureSend(x => x.Connect(new ActivitySendPipeSpecificationObserver(diagnosticSource)));
+            configurator.ConfigurePublish(x => x.Connect(new ActivityPublishPipeSpecificationObserver(diagnosticSource)));
+            var observer = new ActivityConsumePipeSpecificationObserver(configurator, diagnosticSource);
         }
     }
 }

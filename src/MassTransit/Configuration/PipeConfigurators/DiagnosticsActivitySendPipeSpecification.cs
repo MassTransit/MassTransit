@@ -10,6 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
+
 #if NETSTANDARD
 namespace MassTransit.PipeConfigurators
 {
@@ -18,27 +19,29 @@ namespace MassTransit.PipeConfigurators
     using System.Linq;
     using GreenPipes;
     using Pipeline.Filters;
+    using Pipeline.Filters.DiagnosticActivity;
 
 
-    public class DiagnosticsActivityPipeSpecification :
-        IPipeSpecification<SendContext>,
-        IPipeSpecification<ConsumeContext>
+    public class DiagnosticsActivitySendPipeSpecification<T> :
+        IPipeSpecification<SendContext<T>>,
+        IPipeSpecification<PublishContext<T>>
+        where T : class
     {
         readonly DiagnosticSource _diagnosticSource;
 
-        public DiagnosticsActivityPipeSpecification(DiagnosticSource diagnosticSource)
+        public DiagnosticsActivitySendPipeSpecification(DiagnosticSource diagnosticSource)
         {
             _diagnosticSource = diagnosticSource;
         }
 
-        public void Apply(IPipeBuilder<SendContext> builder)
+        public void Apply(IPipeBuilder<SendContext<T>> builder)
         {
-            builder.AddFilter(new DiagnosticsActivityFilter(_diagnosticSource));
+            builder.AddFilter(new DiagnosticsActivitySendFilter<T>(_diagnosticSource));
         }
 
-        public void Apply(IPipeBuilder<ConsumeContext> builder)
+        public void Apply(IPipeBuilder<PublishContext<T>> builder)
         {
-            builder.AddFilter(new DiagnosticsActivityFilter(_diagnosticSource));
+            builder.AddFilter(new DiagnosticsActivityPublishFilter<T>(_diagnosticSource));
         }
 
         public IEnumerable<ValidationResult> Validate()
