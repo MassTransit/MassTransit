@@ -68,5 +68,18 @@ namespace MassTransit.ActiveMqTransport.Configurators
             if (_settings.Port == 61616)
                 _settings.Port = 61617;
         }
+
+        public void FailoverHosts(string[] hosts)
+        {
+            _settings.FailoverHosts = hosts;
+        }
+
+        public void TransportOptions(Dictionary<string, string> options)
+        {
+            foreach (KeyValuePair<string, string> option in options)
+            {
+                _settings.TransportOptions[option.Key] = option.Value;
+            }
+        }
     }
 }

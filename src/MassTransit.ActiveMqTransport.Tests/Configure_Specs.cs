@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -13,9 +13,11 @@
 namespace MassTransit.ActiveMqTransport.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configurators;
     using GreenPipes.Internals.Extensions;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -118,6 +120,12 @@ namespace MassTransit.ActiveMqTransport.Tests
         const string TestBrokerHost = "b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com";
         const string TestUsername = "masstransit-build";
         const string TestPassword = "build-Br0k3r";
+
+        readonly string[] FailoverHosts = new string[]
+        {
+            
+        };
+
 
         [Test]
         public async Task Should_succeed_and_connect_when_properly_configured()
@@ -290,6 +298,67 @@ namespace MassTransit.ActiveMqTransport.Tests
                     h.UseSsl();
                 });
             });
+        }
+
+        [Test]
+        public void Failover_should_take_precendence_in_uri_construction()
+        {
+            var settings = new ConfigurationHostSettings()
+            {
+                Host = "fake-host",
+                Port = 61616,
+                FailoverHosts = new []
+                {
+                    "failover1",
+                    "failover2"
+                }
+            };
+
+            Assert.That(settings.BrokerAddress, Is.EqualTo(new Uri("activemq:failover:(tcp://failover1:61616/,tcp://failover2:61616/)")));
+        }
+
+        [Test]
+        public async Task Should_do_a_bunch_of_requests_and_responses_on_failover_transport()
+        {
+            if (FailoverHosts.Length == 0)
+            {
+                // Ignoring this test if there are no failovers
+                return;
+            }
+
+            var bus = Bus.Factory.CreateUsingActiveMq(sbc =>
+            {
+                var host = sbc.Host("activemq-cluster", 61617, h =>
+                {
+                    h.Username(TestUsername);
+                    h.Password(TestPassword);
+                    h.FailoverHosts(FailoverHosts);
+                    h.TransportOptions(new Dictionary<string, string>()
+                    {
+                        { "transport.randomize", "true" }
+                    });
+
+                    h.UseSsl();
+                });
+
+                sbc.ReceiveEndpoint(host, "test", e =>
+                {
+                    e.Handler<PingMessage>(async context => await context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
+                });
+            });
+
+            await bus.StartAsync();
+            try
+            {
+                for (var i = 0; i < 100; i = i + 1)
+                {
+                    var result = await bus.Request<PingMessage, PongMessage>(new PingMessage());
+                }
+            }
+            finally
+            {
+                await bus.StopAsync();
+            }
         }
     }
 }
