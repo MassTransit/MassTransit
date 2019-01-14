@@ -13,6 +13,7 @@
 namespace MassTransit.ActiveMqTransport.Configurators
 {
     using System;
+    using System.Collections.Generic;
 
 
     public class ActiveMqHostConfigurator :
@@ -30,6 +31,11 @@ namespace MassTransit.ActiveMqTransport.Configurators
                 Host = address.Host,
                 Username = "",
                 Password = "",
+                TransportOptions = new Dictionary<string, string>()
+                {
+                    { "wireFormat.tightEncodingEnabled", "true" },
+                    { "nms.AsyncSend", "true" }
+                }
             };
 
             _settings.Port = !address.IsDefaultPort ? address.Port : 61616;

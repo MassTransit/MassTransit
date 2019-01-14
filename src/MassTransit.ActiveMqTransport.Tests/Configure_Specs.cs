@@ -115,6 +115,10 @@ namespace MassTransit.ActiveMqTransport.Tests
     [TestFixture]
     public class Configuring_ActiveMQ
     {
+        const string TestBrokerHost = "b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com";
+        const string TestUsername = "masstransit-build";
+        const string TestPassword = "build-Br0k3r";
+
         [Test]
         public async Task Should_succeed_and_connect_when_properly_configured()
         {
@@ -124,10 +128,10 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
-                var host = cfg.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", 61617, h =>
+                var host = cfg.Host(TestBrokerHost, 61617, h =>
                 {
-                    h.Username("masstransit-build");
-                    h.Password("build-Br0k3r");
+                    h.Username(TestUsername);
+                    h.Password(TestPassword);
 
                     h.UseSsl();
                 });
@@ -167,10 +171,10 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var bus = Bus.Factory.CreateUsingActiveMq(sbc =>
             {
-                var host = sbc.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", 61617, h =>
+                var host = sbc.Host(TestBrokerHost, 61617, h =>
                 {
-                    h.Username("masstransit-build");
-                    h.Password("build-Br0k3r");
+                    h.Username(TestUsername);
+                    h.Password(TestPassword);
 
                     h.UseSsl();
                 });
@@ -278,10 +282,10 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
-                cfg.Host("b-15a8b984-a883-4143-a4e7-8f97bc5db37d-1.mq.us-east-2.amazonaws.com", 61617, h =>
+                cfg.Host(TestBrokerHost, 61617, h =>
                 {
-                    h.Username("masstransit-build");
-                    h.Password("build-Br0k3r");
+                    h.Username(TestUsername);
+                    h.Password(TestPassword);
 
                     h.UseSsl();
                 });
