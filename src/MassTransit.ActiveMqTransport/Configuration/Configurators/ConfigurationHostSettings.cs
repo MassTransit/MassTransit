@@ -34,7 +34,7 @@ namespace MassTransit.ActiveMqTransport.Configurators
         public Dictionary<string, string> TransportOptions { get; set; }
 
         public string Host { get; set; }
-        public int Port { get; set; } = 61616;
+        public int Port { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public bool UseSsl { get; set; }
