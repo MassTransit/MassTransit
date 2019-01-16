@@ -19,14 +19,19 @@ namespace MassTransit.SendPipeSpecifications
     public class ActivitySendPipeSpecificationObserver : ISendPipeSpecificationObserver
     {
         readonly DiagnosticSource _diagnosticSource;
-        public ActivitySendPipeSpecificationObserver(DiagnosticSource diagnosticSource)
+        readonly string _activityIdKey;
+        readonly string _activityCorrelationContextKey;
+
+        public ActivitySendPipeSpecificationObserver(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
         {
             _diagnosticSource = diagnosticSource;
+            _activityIdKey = activityIdKey;
+            _activityCorrelationContextKey = activityCorrelationContextKey;
         }
         void ISendPipeSpecificationObserver.MessageSpecificationCreated<T>(IMessageSendPipeSpecification<T> specification)
         {
             var applicationInsightsSendSpecification =
-                new DiagnosticsActivitySendPipeSpecification<T>(_diagnosticSource);
+                new DiagnosticsActivitySendPipeSpecification<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey);
 
             specification.AddPipeSpecification(applicationInsightsSendSpecification);
         }

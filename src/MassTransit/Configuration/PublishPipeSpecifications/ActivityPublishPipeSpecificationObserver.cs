@@ -20,14 +20,19 @@ namespace MassTransit.PublishPipeSpecifications
     public class ActivityPublishPipeSpecificationObserver : IPublishPipeSpecificationObserver
     {
         readonly DiagnosticSource _diagnosticSource;
-        public ActivityPublishPipeSpecificationObserver(DiagnosticSource diagnosticSource)
+        readonly string _activityIdKey;
+        readonly string _activityCorrelationContextKey;
+
+        public ActivityPublishPipeSpecificationObserver(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
         {
             _diagnosticSource = diagnosticSource;
+            _activityIdKey = activityIdKey;
+            _activityCorrelationContextKey = activityCorrelationContextKey;
         }
         void IPublishPipeSpecificationObserver.MessageSpecificationCreated<T>(IMessagePublishPipeSpecification<T> specification)
         {
             var applicationInsightsPublishSpecification =
-                new DiagnosticsActivitySendPipeSpecification<T>(_diagnosticSource);
+                new DiagnosticsActivitySendPipeSpecification<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey);
 
             specification.AddPipeSpecification(applicationInsightsPublishSpecification);
         }

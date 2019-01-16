@@ -25,12 +25,14 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
         IFilter<ConsumeContext<T>>
         where T : class
     {
-        const string ActivityIdHeader = "MT-Activity-ID";
-        const string ActivityCorrelationContext = "MT-Activity-Correlation-Context";
+        readonly string _activityIdHeader;
+        readonly string _activityCorrelationContext;
         readonly DiagnosticSource _diagnosticSource;
-        public DiagnosticsActivityConsumeFilter(DiagnosticSource diagnosticSource)
+        public DiagnosticsActivityConsumeFilter(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
         {
             _diagnosticSource = diagnosticSource;
+            _activityIdHeader = activityIdKey;
+            _activityCorrelationContext = activityCorrelationContextKey;
         }
 
         public void Probe(ProbeContext context)
@@ -41,7 +43,7 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
             var messageType = TypeMetadataCache<T>.ShortName;
-            var activity    = StartIfEnabled(_diagnosticSource, $"Consuming Message {messageType}", new { context }, context);
+            var activity    = StartIfEnabled(_diagnosticSource, $"Consuming Message: {messageType}", new { context }, context);
 
             try
             {
@@ -53,7 +55,7 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
             }
         }
 
-        static Activity StartIfEnabled(DiagnosticSource source, string name, object args, ConsumeContext context)
+        Activity StartIfEnabled(DiagnosticSource source, string name, object args, ConsumeContext context)
         {
             if (!source.IsEnabled(name) || context.TryGetPayload<Activity>(out _))
                 return null;
@@ -77,14 +79,14 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
             return context.AddOrUpdatePayload(() => activity, a => activity);
         }
 
-        static void Extract(ConsumeContext context, Activity activity)
+        void Extract(ConsumeContext context, Activity activity)
         {
             try
             {
-                if (context.Headers.TryGetHeader(ActivityIdHeader, out var parent) && !string.IsNullOrEmpty(parent?.ToString()))
+                if (context.Headers.TryGetHeader(_activityIdHeader, out var parent) && !string.IsNullOrEmpty(parent?.ToString()))
                     activity.SetParentId(parent.ToString());
 
-                foreach (KeyValuePair<string, string> item in context.Headers.Get(ActivityCorrelationContext, Enumerable.Empty<KeyValuePair<string, string>>()))
+                foreach (KeyValuePair<string, string> item in context.Headers.Get(_activityCorrelationContext, Enumerable.Empty<KeyValuePair<string, string>>()))
                 {
                     if (!string.IsNullOrEmpty(item.Value))
                         activity.AddBaggage(item.Key, item.Value);
@@ -98,7 +100,7 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
             }
         }
 
-        static void StopIfEnabled(DiagnosticSource source, Activity activity, object args)
+        void StopIfEnabled(DiagnosticSource source, Activity activity, object args)
         {
             if (activity != null && source.IsEnabled(activity.OperationName))
                 source.StopActivity(activity, args ?? new { });

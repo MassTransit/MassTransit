@@ -23,19 +23,22 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
     public class DiagnosticsActivitySendFilter<T> :
         IFilter<SendContext<T>> where T: class
     {
-        const string ActivityIdHeader = "MT-Activity-ID";
-        const string ActivityCorrelationContext = "MT-Activity-Correlation-Context";
+        readonly string _activityIdHeader;
+        readonly string _activityCorrelationContext;
         readonly DiagnosticSource _diagnosticSource;
 
-        public DiagnosticsActivitySendFilter(DiagnosticSource diagnosticSource)
+        public DiagnosticsActivitySendFilter(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
         {
-            _diagnosticSource = diagnosticSource;
+            _diagnosticSource           = diagnosticSource;
+            _activityIdHeader           = activityIdKey;
+            _activityCorrelationContext = activityCorrelationContextKey;
         }
+
 
         public async Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
         {
             var messageType = TypeMetadataCache<T>.ShortName;
-            var activity = StartIfEnabled(_diagnosticSource, $"Sending Message {messageType}", new { context }, context);
+            var activity = StartIfEnabled(_diagnosticSource, $"Sending Message: {messageType}", new { context }, context);
 
             try
             {
@@ -49,10 +52,10 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
 
         public void Probe(ProbeContext context)
         {
-            context.CreateScope("send-activity-scope");
+            context.CreateFilterScope("send-activity-scope");
         }
 
-        static Activity StartIfEnabled(DiagnosticSource source, string name, object args, SendContext context)
+        Activity StartIfEnabled(DiagnosticSource source, string name, object args, SendContext context)
         {
             if (!source.IsEnabled(name) || context.TryGetPayload<Activity>(out _))
                 return null;
@@ -72,17 +75,17 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
             return context.AddOrUpdatePayload(() => activity, a => activity);
         }
 
-        static void Inject(SendContext context, Activity activity)
+        void Inject(SendContext context, Activity activity)
         {
-            if (context.Headers.TryGetHeader(ActivityIdHeader, out _))
+            if (context.Headers.TryGetHeader(_activityIdHeader, out _))
                 return;
 
-            context.Headers.Set(ActivityIdHeader, activity.Id);
+            context.Headers.Set(_activityIdHeader, activity.Id);
             if (activity.Baggage.Any())
-                context.Headers.Set(ActivityCorrelationContext, activity.Baggage.ToList());
+                context.Headers.Set(_activityCorrelationContext, activity.Baggage.ToList());
         }
 
-        static void StopIfEnabled(DiagnosticSource source, Activity activity, object args)
+        void StopIfEnabled(DiagnosticSource source, Activity activity, object args)
         {
             if (activity != null && source.IsEnabled(activity.OperationName))
                 source.StopActivity(activity, args ?? new { });

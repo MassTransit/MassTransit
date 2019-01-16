@@ -23,16 +23,22 @@ namespace MassTransit.ConsumePipeSpecifications
         IMessageConfigurationObserver
     {
         readonly DiagnosticSource _diagnosticSource;
-        public ActivityConsumePipeSpecificationObserver(IConsumePipeConfigurator receiveEndpointConfigurator, DiagnosticSource diagnosticSource)
+        readonly string _activityIdKey;
+        readonly string _activityCorrelationContextKey;
+
+        public ActivityConsumePipeSpecificationObserver(IConsumePipeConfigurator receiveEndpointConfigurator, DiagnosticSource diagnosticSource,
+                                                        string activityIdKey, string activityCorrelationContextKey)
             : base(receiveEndpointConfigurator)
         {
             _diagnosticSource = diagnosticSource;
+            _activityIdKey = activityIdKey;
+            _activityCorrelationContextKey = activityCorrelationContextKey;
             Connect(this);
         }
         public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
             where TMessage : class
         {
-            var specification = new DiagnosticsActivityConsumePipeSpecification<TMessage>(_diagnosticSource);
+            var specification = new DiagnosticsActivityConsumePipeSpecification<TMessage>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey);
             configurator.AddPipeSpecification(specification);
         }
     }

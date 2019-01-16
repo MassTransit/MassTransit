@@ -26,21 +26,29 @@ namespace MassTransit.PipeConfigurators
         where T : class
     {
         readonly DiagnosticSource _diagnosticSource;
+        readonly string _activityIdKey;
+        readonly string _activityCorrelationContextKey;
 
-        public DiagnosticsActivityConsumePipeSpecification(DiagnosticSource diagnosticSource)
+        public DiagnosticsActivityConsumePipeSpecification(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
         {
             _diagnosticSource = diagnosticSource;
+            this._activityIdKey = activityIdKey;
+            this._activityCorrelationContextKey = activityCorrelationContextKey;
         }
 
         public void Apply(IPipeBuilder<ConsumeContext<T>> builder)
         {
-            builder.AddFilter(new DiagnosticsActivityConsumeFilter<T>(_diagnosticSource));
+            builder.AddFilter(new DiagnosticsActivityConsumeFilter<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey));
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
             if (_diagnosticSource == null)
                 yield return this.Failure("Diagnostic Source should not be null");
+            if (string.IsNullOrEmpty(_activityIdKey))
+                yield return this.Failure("Diagnostic Activity Id Key should not be null");
+            if (string.IsNullOrEmpty(_activityCorrelationContextKey))
+                yield return this.Failure("Diagnostic Activity Correlation Context Key should not be null");
         }
     }
 }

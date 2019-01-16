@@ -21,11 +21,13 @@ namespace MassTransit
 
     public static class DiagnosticsActivityPipeConfiguratorExtensions
     {
-        public static void UseDiagnosticsActivity(this IBusFactoryConfigurator configurator, DiagnosticSource diagnosticSource)
+        public static void UseDiagnosticsActivity(this IBusFactoryConfigurator configurator, DiagnosticSource diagnosticSource,
+                                                  string activityIdKey = DiagnosticHeaders.ActivityIdHeader,
+                                                  string activityCorrelationContextKey = DiagnosticHeaders.ActivityCorrelationContext)
         {
-            configurator.ConfigureSend(x => x.Connect(new ActivitySendPipeSpecificationObserver(diagnosticSource)));
-            configurator.ConfigurePublish(x => x.Connect(new ActivityPublishPipeSpecificationObserver(diagnosticSource)));
-            var observer = new ActivityConsumePipeSpecificationObserver(configurator, diagnosticSource);
+            configurator.ConfigureSend(x => x.Connect(new ActivitySendPipeSpecificationObserver(diagnosticSource, activityIdKey, activityCorrelationContextKey)));
+            configurator.ConfigurePublish(x => x.Connect(new ActivityPublishPipeSpecificationObserver(diagnosticSource, activityIdKey, activityCorrelationContextKey)));
+            var observer = new ActivityConsumePipeSpecificationObserver(configurator, diagnosticSource, activityIdKey, activityCorrelationContextKey);
         }
     }
 }
