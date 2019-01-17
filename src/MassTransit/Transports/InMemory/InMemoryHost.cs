@@ -20,12 +20,9 @@ namespace MassTransit.Transports.InMemory
     using Context;
     using Fabric;
     using GreenPipes;
-    using GreenPipes.Agents;
     using GreenPipes.Caching;
     using Logging;
     using MassTransit.Configurators;
-    using MassTransit.Topology;
-    using Pipeline;
     using Topology.Builders;
 
 
@@ -33,7 +30,7 @@ namespace MassTransit.Transports.InMemory
     ///     Caches InMemory transport instances so that they are only created and used once
     /// </summary>
     public class InMemoryHost :
-        Supervisor,
+        BaseHost,
         IInMemoryHostControl
     {
         static readonly ILog _log = Logger.Get<InMemoryHost>();
@@ -41,49 +38,18 @@ namespace MassTransit.Transports.InMemory
         readonly IInMemoryHostConfiguration _hostConfiguration;
         readonly IIndex<string, InMemorySendTransport> _index;
         readonly IMessageFabric _messageFabric;
-        readonly IReceiveEndpointCollection _receiveEndpoints;
 
-        public InMemoryHost(IInMemoryHostConfiguration hostConfiguration, int concurrencyLimit, IHostTopology topology, Uri baseAddress = null)
+        public InMemoryHost(IInMemoryHostConfiguration hostConfiguration, int concurrencyLimit)
+            : base(hostConfiguration)
         {
             _hostConfiguration = hostConfiguration;
-            Topology = topology;
-            Address = baseAddress ?? new Uri("loopback://localhost/");
 
             _messageFabric = new MessageFabric(concurrencyLimit);
-
-            _receiveEndpoints = new ReceiveEndpointCollection();
-            Add(_receiveEndpoints);
 
             var cacheSettings = new CacheSettings(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24));
 
             var cache = new GreenCache<InMemorySendTransport>(cacheSettings);
             _index = cache.AddIndex("exchangeName", x => x.ExchangeName);
-        }
-
-        public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
-        {
-            _receiveEndpoints.Add(endpointName, receiveEndpoint);
-        }
-
-        public async Task<HostHandle> Start()
-        {
-            HostReceiveEndpointHandle[] handles = _receiveEndpoints.StartEndpoints();
-
-            return new StartHostHandle(this, handles);
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            var scope = context.CreateScope("host");
-            scope.Set(new
-            {
-                Type = "InMemory",
-                BaseAddress = Address
-            });
-
-            _messageFabric.Probe(scope);
-
-            _receiveEndpoints.Probe(scope);
         }
 
         public IReceiveTransport GetReceiveTransport(string queueName, ReceiveEndpointContext receiveEndpointContext)
@@ -99,7 +65,7 @@ namespace MassTransit.Transports.InMemory
             IErrorTransport errorTransport = new InMemoryMessageErrorTransport(_messageFabric.GetExchange($"{queueName}_error"));
             receiveEndpointContext.GetOrAddPayload(() => errorTransport);
 
-            var transport = new InMemoryReceiveTransport(new Uri(Address, queueName), queue, receiveEndpointContext);
+            var transport = new InMemoryReceiveTransport(new Uri(_hostConfiguration.HostAddress, queueName), queue, receiveEndpointContext);
             Add(transport);
 
             return transport;
@@ -115,41 +81,7 @@ namespace MassTransit.Transports.InMemory
 
             configuration.Build();
 
-            return _receiveEndpoints.Start(queueName);
-        }
-
-        public Uri Address { get; }
-
-        public IHostTopology Topology { get; }
-
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-        {
-            return _receiveEndpoints.ConnectConsumeMessageObserver(observer);
-        }
-
-        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
-        {
-            return _receiveEndpoints.ConnectConsumeObserver(observer);
-        }
-
-        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
-        {
-            return _receiveEndpoints.ConnectReceiveObserver(observer);
-        }
-
-        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
-        {
-            return _receiveEndpoints.ConnectReceiveEndpointObserver(observer);
-        }
-
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
-        {
-            return _receiveEndpoints.ConnectPublishObserver(observer);
-        }
-
-        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
-        {
-            return _receiveEndpoints.ConnectSendObserver(observer);
+            return ReceiveEndpoints.Start(queueName);
         }
 
         public async Task<ISendTransport> GetSendTransport(Uri address)
@@ -183,6 +115,17 @@ namespace MassTransit.Transports.InMemory
         public IInMemoryConsumeTopologyBuilder CreateConsumeTopologyBuilder()
         {
             return new InMemoryConsumeTopologyBuilder(_messageFabric);
+        }
+
+        protected override void Probe(ProbeContext context)
+        {
+            context.Set(new
+            {
+                Type = "InMemory",
+                BaseAddress = _hostConfiguration.HostAddress
+            });
+
+            _messageFabric.Probe(context);
         }
 
         public IInMemoryExchange GetExchange(Uri address)

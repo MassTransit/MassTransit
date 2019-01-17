@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport
 {
+    using System.Collections.Generic;
+
+
     public interface IActiveMqHostConfigurator
     {
         /// <summary>
@@ -27,5 +30,17 @@ namespace MassTransit.ActiveMqTransport
         void Password(string password);
 
         void UseSsl();
+
+        /// <summary>
+        /// Sets a list of hosts to enable the failover transport
+        /// </summary>
+        /// <param name="hosts"></param>
+        void FailoverHosts(string[] hosts);
+
+        /// <summary>
+        /// Sets options on the underlying NMS transport
+        /// </summary>
+        /// <param name="options"></param>
+        void TransportOptions(Dictionary<string, string> options);
     }
 }

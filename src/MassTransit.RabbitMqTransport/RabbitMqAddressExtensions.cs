@@ -113,7 +113,8 @@ namespace MassTransit.RabbitMqTransport
                 Port = settings.Port,
                 VirtualHost = settings.VirtualHost ?? "/",
                 RequestedHeartbeat = settings.Heartbeat,
-                RequestedConnectionTimeout = 10000
+                RequestedConnectionTimeout = 10000,
+                RequestedChannelMax = settings.RequestedChannelMax
             };
 
             if (settings.ClusterMembers != null && settings.ClusterMembers.Any())

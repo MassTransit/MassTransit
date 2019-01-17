@@ -48,5 +48,8 @@ namespace MassTransit.Context
         ISendEndpointProvider SendEndpointProvider { get; }
 
         IPublishEndpointProvider PublishEndpointProvider { get; }
+        
+        IMessageSerializer Serializer { get; }
+        ISendPipe SendPipe { get; }
     }
 }

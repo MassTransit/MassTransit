@@ -15,8 +15,7 @@ namespace MassTransit
     using System;
     using Azure.ServiceBus.Core;
     using Azure.ServiceBus.Core.Configuration;
-    using Azure.ServiceBus.Core.Settings;
-    using Azure.ServiceBus.Core.Topology.Configuration.Configurators;
+    using Azure.ServiceBus.Core.Configurators;
     using Microsoft.Azure.WebJobs;
     using WebJobs.EventHubsIntegration;
     using WebJobs.EventHubsIntegration.Configuration;
@@ -36,16 +35,13 @@ namespace MassTransit
             var topologyConfiguration = new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology);
             var busConfiguration = new ServiceBusBusConfiguration(topologyConfiguration);
 
-            var queueConfigurator = new QueueConfigurator("no-host-configured")
-            {
-                AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle,
-            };
+            ServiceBusHostConfigurator hostConfigurator = new ServiceBusHostConfigurator(new Uri("sb://no-host-configured/"));
 
-            var settings = new ReceiveEndpointSettings("no-host-configured", queueConfigurator);
+            var hostConfiguration = busConfiguration.CreateHostConfiguration(hostConfigurator.Settings);
 
-            var busEndpointConfiguration = busConfiguration.CreateReceiveEndpointConfiguration(settings, busConfiguration);
+            var endpointConfiguration = new BrokeredMessageReceiverServiceBusEndpointConfiguration(hostConfiguration, busConfiguration);
 
-            var configurator = new WebJobEventDataReceiverSpecification(binder, busEndpointConfiguration);
+            var configurator = new WebJobEventDataReceiverSpecification(binder, endpointConfiguration);
 
             configure(configurator);
 

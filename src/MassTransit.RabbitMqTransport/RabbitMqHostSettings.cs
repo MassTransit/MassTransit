@@ -134,5 +134,10 @@ namespace MassTransit.RabbitMqTransport
         /// True if the publisher should confirm acceptance of messages
         /// </summary>
         bool PublisherConfirmation { get; }
+        
+        /// <summary>
+        /// The maximum number of channels for the connection
+        /// </summary>
+        ushort RequestedChannelMax { get; }
     }
 }

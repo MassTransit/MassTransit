@@ -20,13 +20,11 @@ namespace MassTransit.Context.SetCorrelationIds
         ISetCorrelationId<T>
         where T : class, CorrelatedBy<Guid>
     {
-        readonly ReadOnlyProperty<CorrelatedBy<Guid>, Guid> _property;
+        readonly IReadProperty<CorrelatedBy<Guid>, Guid> _property;
 
         public CorrelatedBySetCorrelationId()
         {
-            var propertyInfo = typeof(CorrelatedBy<Guid>).GetProperty("CorrelationId");
-
-            _property = new ReadOnlyProperty<CorrelatedBy<Guid>, Guid>(propertyInfo);
+            _property = ReadPropertyCache<CorrelatedBy<Guid>>.GetProperty<Guid>(nameof(CorrelatedBy<Guid>.CorrelationId));
         }
 
         public void SetCorrelationId(SendContext<T> context)

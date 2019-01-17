@@ -1,28 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PackageId>MassTransit.NHibernate</PackageId>
-    <Title>MassTransit.NHibernate</Title>
-    <Description>MassTransit NHiberate support; $(Description)</Description>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.NHibernateIntegration.xml</DocumentationFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.3" />
-    <PackageReference Include="Iesi.Collections" Version="4.0.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="NHibernate" Version="5.2.1" />
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Transactions" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>MassTransit.NHibernate</PackageId>
+        <Title>MassTransit.NHibernate</Title>
+        <Description>MassTransit NHiberate support; $(Description)</Description>
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.NHibernateIntegration.xml</DocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="GreenPipes" Version="2.1.3" />
+        <PackageReference Include="Iesi.Collections" Version="4.0.4" />
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+        <PackageReference Include="NHibernate" Version="5.2.2" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+        <Reference Include="System" />
+        <Reference Include="System.Core" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Xml" />
+        <Reference Include="System.Transactions" />
+    </ItemGroup>
 </Project>

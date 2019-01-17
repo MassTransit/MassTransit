@@ -17,7 +17,6 @@ namespace MassTransit.WebJobs.EventHubsIntegration
     using Context;
     using Contexts;
     using GreenPipes;
-    using Logging;
     using Pipeline;
     using Transports;
 
@@ -28,13 +27,11 @@ namespace MassTransit.WebJobs.EventHubsIntegration
         IEventDataReceiver
     {
         readonly Uri _inputAddress;
-        readonly IReceivePipe _receivePipe;
         readonly ReceiveEndpointContext _receiveEndpointContext;
 
-        public EventDataReceiver(Uri inputAddress, IReceivePipe receivePipe, ILog log, ReceiveEndpointContext receiveEndpointContext)
+        public EventDataReceiver(Uri inputAddress, ReceiveEndpointContext receiveEndpointContext)
         {
             _inputAddress = inputAddress;
-            _receivePipe = receivePipe;
             _receiveEndpointContext = receiveEndpointContext;
         }
 
@@ -67,7 +64,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
             try
             {
                 await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
-                await _receivePipe.Send(context).ConfigureAwait(false);
+                await _receiveEndpointContext.ReceivePipe.Send(context).ConfigureAwait(false);
 
                 await context.ReceiveCompleted.ConfigureAwait(false);
 
@@ -84,12 +81,12 @@ namespace MassTransit.WebJobs.EventHubsIntegration
         }
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
-            return _receivePipe.ConnectConsumeMessageObserver(observer);
+            return _receiveEndpointContext.ReceivePipe.ConnectConsumeMessageObserver(observer);
         }
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
-            return _receivePipe.ConnectConsumeObserver(observer);
+            return _receiveEndpointContext.ReceivePipe.ConnectConsumeObserver(observer);
         }
     }
 }

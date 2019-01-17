@@ -28,7 +28,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         public class StateMachineTest :
             StateMachineTestFixture
         {
-            SagaDbContextFactory _sagaDbContextFactory;
+            ISagaDbContextFactory<SimpleState> _sagaDbContextFactory;
 
             [Test]
             public async Task Test_Discarded_Missing_Saga_Instance_Is_Not_Persisted()
@@ -47,7 +47,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
                 Assert.IsTrue(wasDiscarded);
 
-                using (var dbContext = _sagaDbContextFactory())
+                using (var dbContext = _sagaDbContextFactory.Create())
                 {
                     var result = dbContext.Set<SimpleState>().FirstOrDefault(x => x.CorrelationId == sagaId);
                     // THE PROBLEM : the missing instance is not discarded and is persisted to the repository
@@ -68,10 +68,11 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                     CorrelationId = sagaId,
                     TestName = "Test_Event_Persists_Saga_By_Default"
                 });
+
                 await Task.Delay(10 * 1000).ConfigureAwait(false);
 
                 // assert
-                using (var dbContext = _sagaDbContextFactory())
+                using (var dbContext = _sagaDbContextFactory.Create())
                 {
                     var result = dbContext.Set<SimpleState>().FirstOrDefault(x => x.CorrelationId == sagaId);
                     Assert.IsNotNull(result);
@@ -91,8 +92,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                     _discarded.TrySetResult(true);
                 });
 
-                _sagaDbContextFactory =
-    () => new SagaDbContext<SimpleState, SimpleStateMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString());
+                _sagaDbContextFactory = new DelegateSagaDbContextFactory<SimpleState>(() =>
+                    new SagaDbContext<SimpleState, SimpleStateMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+
                 _simpleStateRepository = new Lazy<ISagaRepository<SimpleState>>(() => new EntityFrameworkSagaRepository<SimpleState>(_sagaDbContextFactory));
 
 
@@ -141,7 +143,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
 
-        public sealed class SimpleStateMachine : 
+        public sealed class SimpleStateMachine :
             MassTransitStateMachine<SimpleState>
         {
             public SimpleStateMachine(Action<string> executionMessage)

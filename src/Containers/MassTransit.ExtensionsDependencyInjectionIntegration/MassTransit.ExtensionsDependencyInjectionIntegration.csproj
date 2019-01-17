@@ -1,21 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <RootNamespace>MassTransit.ExtensionsDependencyInjectionIntegration</RootNamespace>
-    <AssemblyName>MassTransit.Extensions.DependencyInjectionIntegration</AssemblyName>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PackageId>MassTransit.Extensions.DependencyInjection</PackageId>
-    <Title>MassTransit.Extensions.DependencyInjection</Title>
-    <Description>MassTransit Microsoft.Extensions.DependencyInjection support; $(Description)</Description>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Extensions.DependencyInjectionIntegration.xml</DocumentationFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.3" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
-  </ItemGroup>
+    <PropertyGroup>
+        <RootNamespace>MassTransit.ExtensionsDependencyInjectionIntegration</RootNamespace>
+        <AssemblyName>MassTransit.Extensions.DependencyInjectionIntegration</AssemblyName>
+        <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>MassTransit.Extensions.DependencyInjection</PackageId>
+        <Title>MassTransit.Extensions.DependencyInjection</Title>
+        <Description>MassTransit Microsoft.Extensions.DependencyInjection support; $(Description)</Description>
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.Extensions.DependencyInjectionIntegration.xml</DocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="GreenPipes" Version="2.1.3"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+    </ItemGroup>
 </Project>

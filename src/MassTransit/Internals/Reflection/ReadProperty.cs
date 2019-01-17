@@ -14,20 +14,19 @@
     {
         Func<T, TProperty> _getMethod;
 
-        public ReadProperty(Type implementationType, string propertyName)
+        public ReadProperty(PropertyInfo propertyInfo)
         {
+            if (propertyInfo == null)
+                throw new ArgumentNullException(nameof(propertyInfo));
+
             if (typeof(T).GetTypeInfo().IsValueType)
                 throw new ArgumentException("The message type must be a reference type");
-
-            var propertyInfo = implementationType.GetProperty(propertyName);
-            if (propertyInfo == null)
-                throw new ArgumentException("The implementation does not have a property named: " + propertyName);
 
             var getMethod = propertyInfo.GetGetMethod(true);
             if (getMethod == null)
                 throw new ArgumentException("The property does not have an accessible get method");
 
-            Name = propertyName;
+            Name = propertyInfo.Name;
 
             TProperty GetUsingReflection(T entity) => (TProperty)getMethod.Invoke(entity, null);
 
@@ -35,13 +34,18 @@
             {
                 Interlocked.Exchange(ref _getMethod, GetUsingReflection);
 
-                Task.Factory.StartNew(() => GenerateExpressionGetMethod(implementationType, getMethod),
+                Task.Factory.StartNew(() => GenerateExpressionGetMethod(getMethod),
                     CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
 
                 return GetUsingReflection(entity);
             }
 
             _getMethod = Initialize;
+        }
+
+        public ReadProperty(string propertyName)
+            : this(typeof(T).GetProperty(propertyName) ?? throw new ArgumentException("The implementation does not have a property named: " + propertyName))
+        {
         }
 
         public string Name { get; }
@@ -51,37 +55,35 @@
             return _getMethod(content);
         }
 
-        async Task GenerateExpressionGetMethod(Type implementationType, MethodInfo getMethod)
+        async Task GenerateExpressionGetMethod(MethodInfo getMethod)
         {
             await Task.Yield();
 
             try
             {
-                var method = CompileGetMethod(implementationType, getMethod);
+                var method = CompileGetMethod(getMethod);
 
                 Interlocked.Exchange(ref _getMethod, method);
             }
-            #if NETCORE
+        #if NETCORE
             catch (Exception)
             {
             }
-            #else
+        #else
             catch (Exception ex)
             {
                 if (Trace.Listeners.Count > 0)
                     Trace.WriteLine(ex.Message);
             }
-            #endif
+        #endif
         }
 
-        static Func<T, TProperty> CompileGetMethod(Type implementationType, MethodInfo getMethod)
+        static Func<T, TProperty> CompileGetMethod(MethodInfo getMethod)
         {
             try
             {
                 var instance = Expression.Parameter(typeof(T), "instance");
-                var cast = Expression.TypeAs(instance, implementationType);
-
-                var call = Expression.Call(cast, getMethod);
+                var call = Expression.Call(instance, getMethod);
 
                 var lambdaExpression = Expression.Lambda<Func<T, TProperty>>(call, instance);
 

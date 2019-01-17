@@ -43,7 +43,7 @@ The official set of packages published for MassTransit include:
 * [MassTransit.Extensions.Logging](https://nuget.org/packages/MassTransit.Extensions.Logging/)
 * [MassTransit.Log4Net](https://nuget.org/packages/MassTransit.Log4Net/)
 * [MassTransit.NLog](https://nuget.org/packages/MassTransit.NLog/)
-* [MassTransit.SeriLog](https://nuget.org/packages/MassTransit.SeriLog/)
+* [MassTransit.SeriLogIntegration](https://www.nuget.org/packages/MassTransit.SeriLogIntegration/)
 
 ## Scheduling
 

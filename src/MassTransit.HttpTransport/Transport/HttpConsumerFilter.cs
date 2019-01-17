@@ -20,7 +20,6 @@ namespace MassTransit.HttpTransport.Transport
     using Hosting;
     using Logging;
     using Pipeline;
-    using Topology;
 
 
     public class HttpConsumerFilter :
@@ -49,7 +48,7 @@ namespace MassTransit.HttpTransport.Transport
         {
             var inputAddress = context.HostSettings.GetInputAddress();
 
-            var consumer = new HttpConsumer(_hostSettings, _context);
+            var consumer = new HttpConsumer(_context);
 
             context.RegisterEndpointHandler(_receiveSettings.PathMatch, consumer);
 

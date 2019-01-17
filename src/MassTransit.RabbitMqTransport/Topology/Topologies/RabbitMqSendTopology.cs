@@ -76,6 +76,10 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             if (!string.IsNullOrWhiteSpace(bindExchange))
                 settings.BindToExchange(bindExchange);
 
+            var alternateExchange = address.Query.GetValueFromQueryString("alternateexchange");
+            if (!string.IsNullOrWhiteSpace(alternateExchange))
+                settings.SetExchangeArgument("alternate-exchange", alternateExchange);
+            
             return settings;
         }
 

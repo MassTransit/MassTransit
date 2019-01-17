@@ -27,7 +27,7 @@ namespace MassTransit.Serialization.JsonConverters
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            string text = Convert.ToString(value);
+            string text = Convert.ToString(value, CultureInfo.InvariantCulture);
             if (string.IsNullOrEmpty(text))
                 text = "";
 

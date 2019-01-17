@@ -14,12 +14,30 @@ namespace MassTransit
 {
     using System.ComponentModel;
     using GreenPipes;
+    using PublishPipeSpecifications;
 
 
     public interface IPublishPipeConfigurator :
         IPipeConfigurator<PublishContext>,
-        ISendPipeConfigurator
+        IConnectPublishPipeSpecificationObserver
     {
+        /// <summary>
+        /// Adds a type-specific pipe specification to the consume pipe
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="specification"></param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void AddPipeSpecification(IPipeSpecification<SendContext> specification);
+
+        /// <summary>
+        /// Adds a type-specific pipe specification to the consume pipe
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <param name="specification"></param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification)
+            where T : class;
+
         /// <summary>
         /// Adds a type-specific pipe specification to the consume pipe
         /// </summary>

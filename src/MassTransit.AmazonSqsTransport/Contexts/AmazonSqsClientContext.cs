@@ -96,7 +96,14 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 if (_queueUrls.TryGetValue(queueName, out var result))
                     return result;
 
-            var response = await _amazonSqs.CreateQueueAsync(queueName).ConfigureAwait(false);
+            var request = new CreateQueueRequest(queueName);
+
+            if (queueName.EndsWith(".fifo", StringComparison.InvariantCultureIgnoreCase))
+            {
+                request.Attributes[QueueAttributeName.FifoQueue] = "true";
+            }
+
+            var response = await _amazonSqs.CreateQueueAsync(request).ConfigureAwait(false);
 
             await Task.Delay(500).ConfigureAwait(false);
 

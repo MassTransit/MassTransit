@@ -50,7 +50,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             }, _settings.GetOnMessageOptions(exceptionHandler));
         }
 
-        async Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        public async Task CloseAsync(CancellationToken cancellationToken)
         {
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Closing client: {0}", InputAddress);
@@ -68,6 +68,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                 if (_log.IsWarnEnabled)
                     _log.Warn($"Exception closing the client: {InputAddress}", exception);
             }
+        }
+
+        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        {
+            return CloseAsync(cancellationToken);
         }
     }
 }

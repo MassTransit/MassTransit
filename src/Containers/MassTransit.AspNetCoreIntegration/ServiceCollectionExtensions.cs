@@ -19,6 +19,7 @@ namespace MassTransit.AspNetCoreIntegration
     using Logging.Tracing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 
@@ -48,7 +49,7 @@ namespace MassTransit.AspNetCoreIntegration
             services.TryAddSingleton<IPublishEndpoint>(p => p.GetRequiredService<IBusControl>());
             services.TryAddSingleton<ISendEndpointProvider>(p => p.GetRequiredService<IBusControl>());
 
-            services.AddSingleton<IHostedService, MassTransitHostedService>();
+            services.AddHostedService();
 
             return services;
         }
@@ -90,7 +91,31 @@ namespace MassTransit.AspNetCoreIntegration
             services.TryAddSingleton<IPublishEndpoint>(bus);
             services.TryAddSingleton<ISendEndpointProvider>(bus);
 
+            services.AddHostedService();
+
             return services;
         }
+
+        static void AddHostedService(this IServiceCollection services)
+        {
+            var busCheck = new HealthChecks.SimplifiedBusHealthCheck();
+            var receiveEndpointCheck = new HealthChecks.ReceiveEndpointHealthCheck();
+
+            services.AddHealthChecks()
+                .AddBusHealthCheck("bus", busCheck)
+                .AddBusHealthCheck("endpoint", receiveEndpointCheck);
+
+            services.AddSingleton<IHostedService>(p =>
+            {
+                var bus = p.GetRequiredService<IBusControl>();
+                var loggerFactory = p.GetService<ILoggerFactory>();
+
+                return new MassTransitHostedService(bus, loggerFactory, busCheck, receiveEndpointCheck);
+            });
+        }
+
+        static IHealthChecksBuilder AddBusHealthCheck(this IHealthChecksBuilder builder,
+            string suffix, IHealthCheck healthCheck) =>
+            builder.AddCheck($"masstransit-{suffix}", healthCheck, HealthStatus.Unhealthy, new[] {"ready"});
     }
 }

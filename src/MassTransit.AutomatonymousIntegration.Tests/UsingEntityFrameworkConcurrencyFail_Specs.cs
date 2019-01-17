@@ -30,7 +30,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         InMemoryTestFixture
     {
         ChoirStateMachine _machine;
-        readonly SagaDbContextFactory _sagaDbContextFactory;
+        readonly ISagaDbContextFactory<ChoirState> _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<ChoirState>> _repository;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -42,14 +42,14 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
         public When_using_EntityFrameworkConcurrencyFail()
         {
-            _sagaDbContextFactory =
-                () => new SagaDbContext<ChoirState, EntityFrameworkChoirStateMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString());
+            _sagaDbContextFactory = new DelegateSagaDbContextFactory<ChoirState>(
+                () => new SagaDbContext<ChoirState, EntityFrameworkChoirStateMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
             _repository = new Lazy<ISagaRepository<ChoirState>>(() => new EntityFrameworkSagaRepository<ChoirState>(_sagaDbContextFactory, optimistic: true));
         }
 
         async Task<ChoirState> GetSaga(Guid id)
         {
-            using (var dbContext = _sagaDbContextFactory())
+            using (var dbContext = _sagaDbContextFactory.Create())
             {
                 return await dbContext.Set<ChoirState>().SingleOrDefaultAsync(x => x.CorrelationId == id);
             }

@@ -44,11 +44,11 @@ namespace MassTransit.HttpTransport.Clients
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));
         }
 
-        async Task<ClientContext> CreateSharedConnection(Task<ClientContext> context, CancellationToken cancellationToken)
+        static async Task<ClientContext> CreateSharedConnection(Task<ClientContext> context, CancellationToken cancellationToken)
         {
-            var connectionContext = await context.ConfigureAwait(false);
+            var clientContext = await context.ConfigureAwait(false);
 
-            return new SharedHttpClientContext(connectionContext, cancellationToken);
+            return new SharedHttpClientContext(clientContext, cancellationToken);
         }
     }
 }

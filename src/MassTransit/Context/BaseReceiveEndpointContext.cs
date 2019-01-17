@@ -66,8 +66,8 @@ namespace MassTransit.Context
         }
 
         protected IPublishPipe PublishPipe => _publishPipe.Value;
-        protected ISendPipe SendPipe => _sendPipe.Value;
-        protected IMessageSerializer Serializer => _serializer.Value;
+        public ISendPipe SendPipe => _sendPipe.Value;
+        public IMessageSerializer Serializer => _serializer.Value;
 
         protected Uri HostAddress { get; }
 

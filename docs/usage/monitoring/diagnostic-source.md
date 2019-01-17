@@ -4,7 +4,7 @@ To enable it you just need to create `DiagnosticSource` and add a filter
 ```csharp
 public static async Task Main(string[] args)
 {
-    var source = new DiagnosticSourceListener("Listener.Name");
+    var source = new DiagnosticListener("Listener.Name");
     var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
     {
         //your configuration

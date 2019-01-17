@@ -18,7 +18,6 @@ namespace MassTransit.HttpTransport.Transport
     using Contexts;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Hosting;
     using Logging;
     using Microsoft.AspNetCore.Http;
     using Pipeline;
@@ -36,7 +35,7 @@ namespace MassTransit.HttpTransport.Transport
         readonly HttpReceiveEndpointContext _context;
         readonly IDeliveryTracker _tracker;
 
-        public HttpConsumer(HttpHostSettings settings, HttpReceiveEndpointContext context)
+        public HttpConsumer(HttpReceiveEndpointContext context)
         {
             _context = context;
 
@@ -66,9 +65,9 @@ namespace MassTransit.HttpTransport.Transport
 
             using (_tracker.BeginDelivery())
             {
-                var responseEndpointTopology = _context.CreateResponseEndpointContext(httpContext);
+                var responseEndpointContext = _context.CreateResponseEndpointContext(httpContext);
 
-                var context = new HttpReceiveContext(httpContext, false, responseEndpointTopology);
+                var context = new HttpReceiveContext(httpContext, false, responseEndpointContext);
 
                 try
                 {

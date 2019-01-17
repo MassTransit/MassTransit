@@ -1,23 +1,28 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!--<SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>-->
-  </PropertyGroup>
-  <PropertyGroup>
-    <PackageId>MassTransit.DapperIntegration</PackageId>
-    <Title>MassTransit.DapperIntegration</Title>
-    <Description>MassTransit Dapper support; $(Description)</Description>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.DapperIntegration.xml</DocumentationFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="dapper.contrib" Version="1.50.5" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Transactions" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net461</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <!--<SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>-->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>MassTransit.DapperIntegration</PackageId>
+        <Title>MassTransit.DapperIntegration</Title>
+        <Description>MassTransit Dapper support; $(Description)</Description>
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.DapperIntegration.xml</DocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="dapper.contrib" Version="1.50.5"/>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="System.Transactions"/>
+    </ItemGroup>
 </Project>

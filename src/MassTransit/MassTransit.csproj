@@ -2,8 +2,12 @@
     <PropertyGroup>
         <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
         <SignAssembly>true</SignAssembly>
         <AssemblyOriginatorKeyFile>..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
         <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
@@ -28,7 +32,8 @@
         <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
         <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.1" />
         <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+        <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     </ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' ">
         <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -66,12 +66,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveEndpointContext);
             contextCallback?.Invoke(context);
 
-            var messageReceiver = context.GetPayload<Microsoft.Azure.ServiceBus.Core.IMessageReceiver>();
-
-            if (messageReceiver == null)
-            {
-                throw new Exception($"Message receiver: {nameof(Microsoft.Azure.ServiceBus.Core.IMessageReceiver)} is missing in context Payload");
-            }
+            context.TryGetPayload<Microsoft.Azure.ServiceBus.Core.IMessageReceiver>(out var messageReceiver);
 
             try
             {
@@ -87,12 +82,18 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
                 await context.ReceiveCompleted.ConfigureAwait(false);
 
-                await messageReceiver.CompleteAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
+                if (messageReceiver != null)
+                    await messageReceiver.CompleteAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
 
                 await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
+                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+
+                if (messageReceiver == null)
+                    throw;
+
                 try
                 {
                     await messageReceiver.AbandonAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
@@ -102,8 +103,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                     if (_log.IsWarnEnabled)
                         _log.Warn($"Abandon message faulted: {message.MessageId}", exception);
                 }
-
-                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             finally
             {

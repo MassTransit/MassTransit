@@ -62,8 +62,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             return TaskUtil.Completed;
         }
 
-        protected IDeliveryTracker DeliveryTracker => _tracker;
-
         protected Task ExceptionHandler(ExceptionReceivedEventArgs args)
         {
             if (!(args.Exception is OperationCanceledException))
@@ -102,6 +100,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
             await Completed.ConfigureAwait(false);
+
+            await _context.CloseAsync(context.CancellationToken).ConfigureAwait(false);
         }
 
         async Task ActiveAndActualAgentsCompleted(StopSupervisorContext context)
@@ -120,7 +120,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 }
         }
 
-        async Task OnMessage(Microsoft.Azure.ServiceBus.Core.IMessageReceiver messageReceiver, Message message, CancellationToken cancellationToken)
+        async Task OnMessage(IMessageReceiver messageReceiver, Message message, CancellationToken cancellationToken)
         {
             if (IsStopping)
             {
@@ -137,7 +137,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             }
         }
 
-        void AddReceiveContextPayloads(ReceiveContext receiveContext, Microsoft.Azure.ServiceBus.Core.IMessageReceiver messageReceiver)
+        void AddReceiveContextPayloads(ReceiveContext receiveContext, IMessageReceiver messageReceiver)
         {
             receiveContext.GetOrAddPayload(() => messageReceiver);
             receiveContext.GetOrAddPayload(() => _context.GetPayload<NamespaceContext>());

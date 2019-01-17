@@ -36,13 +36,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         readonly bool _optimistic;
         readonly Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
         readonly IRelationalEntityMetadataHelper _relationalEntityMetadataHelper;
-        readonly Func<DbContext> _sagaDbContextFactory;
+        readonly ISagaDbContextFactory<TSaga> _sagaDbContextFactory;
 
-        public EntityFrameworkSagaRepository(
-            Func<DbContext> sagaDbContextFactory,
-            IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
-            bool optimistic = false,
-            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null,
+        public EntityFrameworkSagaRepository(ISagaDbContextFactory<TSaga> sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
+            bool optimistic = false, Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null,
             IRelationalEntityMetadataHelper relationalEntityMetadataHelper = null)
         {
             _sagaDbContextFactory = sagaDbContextFactory;
@@ -52,9 +49,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             _relationalEntityMetadataHelper = relationalEntityMetadataHelper ?? new EntityFrameworkMetadataHelper();
         }
 
+        public EntityFrameworkSagaRepository(Func<DbContext> sagaDbContextFactory, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
+            bool optimistic = false, Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null,
+            IRelationalEntityMetadataHelper relationalEntityMetadataHelper = null)
+            : this(new DelegateSagaDbContextFactory<TSaga>(sagaDbContextFactory), isolationLevel, optimistic, queryCustomization,
+                relationalEntityMetadataHelper)
+        {
+        }
+
         async Task<IEnumerable<Guid>> IQuerySagaRepository<TSaga>.Find(ISagaQuery<TSaga> query)
         {
-            using (var dbContext = _sagaDbContextFactory())
+            using (var dbContext = _sagaDbContextFactory.Create())
             {
                 return await dbContext.Set<TSaga>()
                     .Where(query.FilterExpression)
@@ -66,13 +71,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("sagaRepository");
-            using (var dbContext = _sagaDbContextFactory())
+            var dbContext = _sagaDbContextFactory.Create();
+            try
             {
                 scope.Set(new
                 {
                     Persistence = "entityFramework",
                     Entities = dbContext.Model.GetEntityTypes().Select(type => type.Name)
                 });
+            }
+            finally
+            {
+                _sagaDbContextFactory.Release(dbContext);
             }
         }
 
@@ -84,78 +94,96 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
             var sagaId = context.CorrelationId.Value;
 
-            using (var dbContext = _sagaDbContextFactory())
-            using (var transaction = await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
+            var dbContext = _sagaDbContextFactory.CreateScoped(context);
+            try
             {
-                if (!_optimistic)
+                using (var transaction = await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
                 {
-                    // Hack for locking row for the duration of the transaction.
-                    var tableName = _relationalEntityMetadataHelper.GetTableName<TSaga>(dbContext);
-                    await dbContext.Database.ExecuteSqlCommandAsync(
-                        $"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0",
-                        new object[] {sagaId},
-                        context.CancellationToken).ConfigureAwait(false);
-                }
-
-                var inserted = false;
-
-                TSaga instance;
-                if (policy.PreInsertInstance(context, out instance))
-                    inserted = await PreInsertSagaInstance<T>(dbContext, instance, context.CancellationToken).ConfigureAwait(false);
-
-                try
-                {
-                    if (instance == null)
+                    if (!_optimistic)
                     {
-                        instance =
-                            await QuerySagas<T>(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken)
-                                .ConfigureAwait(false);
+                        // Hack for locking row for the duration of the transaction.
+                        var tableName = _relationalEntityMetadataHelper.GetTableName<TSaga>(dbContext);
+                        await dbContext.Database.ExecuteSqlCommandAsync(
+                            $"select 1 from {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0",
+                            new object[] {sagaId},
+                            context.CancellationToken).ConfigureAwait(false);
                     }
 
-                    if (instance == null)
-                    {
-                        var missingSagaPipe = new MissingPipe<T>(dbContext, next);
+                    TSaga instance;
+                    if (policy.PreInsertInstance(context, out instance))
+                        await PreInsertSagaInstance<T>(dbContext, instance, context.CancellationToken).ConfigureAwait(false);
 
-                        await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        if (_log.IsDebugEnabled)
-                        {
-                            _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                                TypeMetadataCache<T>.ShortName);
-                        }
-
-                        var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
-
-                        await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
-                    }
-
-                    await dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
-
-                    transaction.Commit();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
                     try
                     {
-                        transaction.Rollback();
-                    }
-                    catch (Exception innerException)
-                    {
-                        if (_log.IsWarnEnabled)
-                            _log.Warn("The transaction rollback failed", innerException);
-                    }
+                        if (instance == null)
+                        {
+                            instance =
+                                await QuerySagas(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken)
+                                    .ConfigureAwait(false);
+                        }
 
-                    throw;
-                }
-                catch (DbUpdateException ex)
-                {
-                    if (IsDeadlockException(ex))
-                    {
-                        // deadlock, no need to rollback
+                        if (instance == null)
+                        {
+                            var missingSagaPipe = new MissingPipe<T>(dbContext, next);
+
+                            await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            if (_log.IsDebugEnabled)
+                            {
+                                _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                                    TypeMetadataCache<T>.ShortName);
+                            }
+
+                            var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
+
+                            await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
+                        }
+
+                        await dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
+
+                        transaction.Commit();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        try
+                        {
+                            transaction.Rollback();
+                        }
+                        catch (Exception innerException)
+                        {
+                            if (_log.IsWarnEnabled)
+                                _log.Warn("The transaction rollback failed", innerException);
+                        }
+
+                        throw;
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        if (IsDeadlockException(ex))
+                        {
+                            // deadlock, no need to rollback
+                        }
+                        else
+                        {
+                            if (_log.IsErrorEnabled)
+                                _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+
+                            try
+                            {
+                                transaction.Rollback();
+                            }
+                            catch (Exception innerException)
+                            {
+                                if (_log.IsWarnEnabled)
+                                    _log.Warn("The transaction rollback failed", innerException);
+                            }
+                        }
+
+                        throw;
+                    }
+                    catch (Exception ex)
                     {
                         if (_log.IsErrorEnabled)
                             _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
@@ -169,27 +197,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                             if (_log.IsWarnEnabled)
                                 _log.Warn("The transaction rollback failed", innerException);
                         }
-                    }
 
-                    throw;
+                        throw;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    if (_log.IsErrorEnabled)
-                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
-
-                    try
-                    {
-                        transaction.Rollback();
-                    }
-                    catch (Exception innerException)
-                    {
-                        if (_log.IsWarnEnabled)
-                            _log.Warn("The transaction rollback failed", innerException);
-                    }
-
-                    throw;
-                }
+            }
+            finally
+            {
+                _sagaDbContextFactory.Release(dbContext);
             }
         }
 
@@ -197,7 +212,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
-            using (var dbContext = _sagaDbContextFactory())
+            var dbContext = _sagaDbContextFactory.CreateScoped(context);
+            try
             {
                 // We just get the correlation ids related to our Filter.
                 // We do this outside of the transaction to make sure we don't create a range lock.
@@ -229,7 +245,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                                 }
 
                                 var instance =
-                                    await QuerySagas<T>(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == correlationId, context.CancellationToken)
+                                    await QuerySagas(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == correlationId, context.CancellationToken)
                                         .ConfigureAwait(false);
 
                                 if (instance != null)
@@ -322,6 +338,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                     }
                 }
             }
+            finally
+            {
+                _sagaDbContextFactory.Release(dbContext);
+            }
         }
 
         static bool IsDeadlockException(Exception exception)
@@ -378,7 +398,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             }
         }
 
-        IQueryable<TSaga> QuerySagas<T>(DbContext dbContext)
+        IQueryable<TSaga> QuerySagas(DbContext dbContext)
         {
             IQueryable<TSaga> query = dbContext.Set<TSaga>();
 

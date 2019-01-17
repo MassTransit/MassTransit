@@ -28,7 +28,7 @@
 
             foundId.HasValue.ShouldBe(true);
 
-            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
+            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -50,19 +50,20 @@
             foundId.HasValue.ShouldBe(true);
         }
 
-        readonly SagaDbContextFactory sagaDbContextFactory;
+        readonly ISagaDbContextFactory<SimpleSaga> _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;
 
         public Locating_an_existing_ef_saga()
         {
-            sagaDbContextFactory = () => new SagaDbContext<SimpleSaga, SimpleSagaMap>(LocalDbConnectionStringProvider.GetLocalDbConnectionString());
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new EntityFrameworkSagaRepository<SimpleSaga>(sagaDbContextFactory));
+            _sagaDbContextFactory = new DelegateSagaDbContextFactory<SimpleSaga>(() =>
+                new SagaDbContext<SimpleSaga, SimpleSagaMap>(LocalDbConnectionStringProvider.GetLocalDbConnectionString()));
+
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new EntityFrameworkSagaRepository<SimpleSaga>(_sagaDbContextFactory));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Saga(_sagaRepository.Value);
         }
-
     }
 }

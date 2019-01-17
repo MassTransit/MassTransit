@@ -1,30 +1,37 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <RootNamespace>MassTransit.AspNetCoreIntegration</RootNamespace>
-    <AssemblyName>MassTransit.AspNetCoreIntegration</AssemblyName>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>portable</DebugType>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PackageId>MassTransit.AspNetCore</PackageId>
-    <Title>MassTransit.AspNetCore</Title>
-    <Description>MassTransit hosting for ASP.NET Core; $(Description)</Description>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AspNetCoreIntegration.xml</DocumentationFile>
-  </PropertyGroup>
+    <PropertyGroup>
+        <RootNamespace>MassTransit.AspNetCoreIntegration</RootNamespace>
+        <AssemblyName>MassTransit.AspNetCoreIntegration</AssemblyName>
+        <LangVersion>latest</LangVersion>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DebugType>portable</DebugType>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\MassTransit.snk</AssemblyOriginatorKeyFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>MassTransit.AspNetCore</PackageId>
+        <Title>MassTransit.AspNetCore</Title>
+        <Description>MassTransit hosting for ASP.NET Core; $(Description)</Description>
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\MassTransit.AspNetCoreIntegration.xml</DocumentationFile>
+    </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Loggers\MassTransit.ExtensionsLoggingIntegration\MassTransit.ExtensionsLoggingIntegration.csproj" />
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
-    <ProjectReference Include="..\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\Loggers\MassTransit.ExtensionsLoggingIntegration\MassTransit.ExtensionsLoggingIntegration.csproj"/>
+        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+        <ProjectReference Include="..\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj"/>
+    </ItemGroup>
 
 </Project>
