@@ -13,7 +13,8 @@
     <PackageReference Include="NUnit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />
     <PackageReference Include="Shouldly" Version="3.0.0" />
-    <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
+    <PackageReference Include="StackExchange.Redis" Version="1.2.6" Condition="'$(TargetFramework)' == 'net452'"/>
+    <PackageReference Include="StackExchange.Redis" Version="2.0.519" Condition="'$(TargetFramework)' == 'netcoreapp2.0'"/>
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
     <ProjectReference Include="..\MassTransit.RedisIntegration\MassTransit.RedisIntegration.csproj" />

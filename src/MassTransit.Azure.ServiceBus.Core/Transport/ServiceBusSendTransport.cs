@@ -13,8 +13,6 @@
 namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
@@ -61,7 +59,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                     await pipe.Send(context).ConfigureAwait(false);
 
                     if (message is CancelScheduledMessage cancelScheduledMessage
-                        && (context.TryGetScheduledMessageId(out var sequenceNumber) || context.TryGetSequencyNumber(cancelScheduledMessage.TokenId, out sequenceNumber)))
+                        && (context.TryGetScheduledMessageId(out var sequenceNumber)
+                            || context.TryGetSequencyNumber(cancelScheduledMessage.TokenId, out sequenceNumber)))
                     {
                         try
                         {
@@ -81,37 +80,24 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
                     await _observers.PreSend(context).ConfigureAwait(false);
 
-                    var brokeredMessage = new Message(context.Body)
-                    {
-                        ContentType = context.ContentType.MediaType
-                    };
+                    var brokeredMessage = CreateBrokeredMessage(context);
 
-                    brokeredMessage.UserProperties.SetTextHeaders(context.Headers, (_, text) => text);
-
-                    if (context.TimeToLive.HasValue)
-                        brokeredMessage.TimeToLive = context.TimeToLive.Value;
-                    if (context.MessageId.HasValue)
-                        brokeredMessage.MessageId = context.MessageId.Value.ToString("N");
-                    if (context.CorrelationId.HasValue)
-                        brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
-                    CopyIncomingIdentifiersIfPresent(context);
-                    if (context.PartitionKey != null)
-                        brokeredMessage.PartitionKey = context.PartitionKey;
-                    var sessionId = string.IsNullOrWhiteSpace(context.SessionId) ? context.ConversationId?.ToString("N") : context.SessionId;
-                    if (!string.IsNullOrWhiteSpace(sessionId))
-                    {
-                        brokeredMessage.SessionId = sessionId;
-
-                        if (context.ReplyToSessionId == null)
-                            brokeredMessage.ReplyToSessionId = sessionId;
-                    }
-                    if (context.ReplyToSessionId != null)
-                        brokeredMessage.ReplyToSessionId = context.ReplyToSessionId;
-                    if (context.ScheduledEnqueueTimeUtc.HasValue)
+                    if (context.ScheduledEnqueueTimeUtc.HasValue && context.ScheduledEnqueueTimeUtc.Value < DateTime.UtcNow)
                     {
                         var enqueueTimeUtc = context.ScheduledEnqueueTimeUtc.Value;
 
-                        sequenceNumber = await clientContext.ScheduleSend(brokeredMessage, enqueueTimeUtc).ConfigureAwait(false);
+                        try
+                        {
+                            sequenceNumber = await clientContext.ScheduleSend(brokeredMessage, enqueueTimeUtc).ConfigureAwait(false);
+                        }
+                        catch (ArgumentOutOfRangeException exception)
+                        {
+                            brokeredMessage = CreateBrokeredMessage(context);
+
+                            await clientContext.Send(brokeredMessage).ConfigureAwait(false);
+
+                            sequenceNumber = 0;
+                        }
 
                         context.SetScheduledMessageId(sequenceNumber);
 
@@ -135,6 +121,44 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             });
 
             return _source.Send(clientPipe, cancellationToken);
+        }
+
+        Message CreateBrokeredMessage<T>(AzureServiceBusSendContext<T> context)
+            where T : class
+        {
+            var brokeredMessage = new Message(context.Body)
+            {
+                ContentType = context.ContentType.MediaType
+            };
+
+            brokeredMessage.UserProperties.SetTextHeaders(context.Headers, (_, text) => text);
+
+            if (context.TimeToLive.HasValue)
+                brokeredMessage.TimeToLive = context.TimeToLive.Value;
+
+            if (context.MessageId.HasValue)
+                brokeredMessage.MessageId = context.MessageId.Value.ToString("N");
+
+            if (context.CorrelationId.HasValue)
+                brokeredMessage.CorrelationId = context.CorrelationId.Value.ToString("N");
+
+            CopyIncomingIdentifiersIfPresent(context);
+            if (context.PartitionKey != null)
+                brokeredMessage.PartitionKey = context.PartitionKey;
+
+            var sessionId = string.IsNullOrWhiteSpace(context.SessionId) ? context.ConversationId?.ToString("N") : context.SessionId;
+            if (!string.IsNullOrWhiteSpace(sessionId))
+            {
+                brokeredMessage.SessionId = sessionId;
+
+                if (context.ReplyToSessionId == null)
+                    brokeredMessage.ReplyToSessionId = sessionId;
+            }
+
+            if (context.ReplyToSessionId != null)
+                brokeredMessage.ReplyToSessionId = context.ReplyToSessionId;
+
+            return brokeredMessage;
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
