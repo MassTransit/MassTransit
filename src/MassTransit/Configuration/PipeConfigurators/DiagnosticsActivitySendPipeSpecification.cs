@@ -16,9 +16,7 @@ namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using GreenPipes;
-    using Pipeline.Filters;
     using Pipeline.Filters.DiagnosticActivity;
 
 
@@ -27,20 +25,15 @@ namespace MassTransit.PipeConfigurators
         IPipeSpecification<PublishContext<T>>
         where T : class
     {
-        readonly DiagnosticSource _diagnosticSource;
-        readonly string _activityIdKey;
         readonly string _activityCorrelationContextKey;
+        readonly string _activityIdKey;
+        readonly DiagnosticSource _diagnosticSource;
 
         public DiagnosticsActivitySendPipeSpecification(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
         {
-            _diagnosticSource = diagnosticSource;
-            this._activityIdKey = activityIdKey;
+            _diagnosticSource              = diagnosticSource;
+            _activityIdKey                 = activityIdKey;
             _activityCorrelationContextKey = activityCorrelationContextKey;
-        }
-
-        public void Apply(IPipeBuilder<SendContext<T>> builder)
-        {
-            builder.AddFilter(new DiagnosticsActivitySendFilter<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey));
         }
 
         public void Apply(IPipeBuilder<PublishContext<T>> builder)
@@ -48,12 +41,19 @@ namespace MassTransit.PipeConfigurators
             builder.AddFilter(new DiagnosticsActivityPublishFilter<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey));
         }
 
+        public void Apply(IPipeBuilder<SendContext<T>> builder)
+        {
+            builder.AddFilter(new DiagnosticsActivitySendFilter<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey));
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             if (_diagnosticSource == null)
                 yield return this.Failure("Diagnostic Source should not be null");
+
             if (string.IsNullOrEmpty(_activityIdKey))
                 yield return this.Failure("Diagnostic Activity Id Key should not be null");
+
             if (string.IsNullOrEmpty(_activityCorrelationContextKey))
                 yield return this.Failure("Diagnostic Activity Correlation Context Key should not be null");
         }

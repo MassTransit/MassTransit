@@ -19,11 +19,14 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
     using System.Threading.Tasks;
     using GreenPipes;
     using Util;
+
+
     public class DiagnosticsActivityPublishFilter<T> :
-        IFilter<PublishContext<T>> where T: class
+        IFilter<PublishContext<T>>
+        where T : class
     {
-        readonly string _activityIdHeader;
         readonly string _activityCorrelationContext;
+        readonly string _activityIdHeader;
         readonly DiagnosticSource _diagnosticSource;
 
         public DiagnosticsActivityPublishFilter(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
@@ -36,7 +39,7 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
         public async Task Send(PublishContext<T> context, IPipe<PublishContext<T>> next)
         {
             var messageType = TypeMetadataCache<T>.ShortName;
-            var activity = StartIfEnabled(_diagnosticSource, $"Publishing Message: {messageType}", new { context }, context);
+            var activity    = StartIfEnabled(_diagnosticSource, $"Publishing Message: {messageType}", new {context}, context);
 
             try
             {
@@ -44,7 +47,7 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
             }
             finally
             {
-                StopIfEnabled(_diagnosticSource, activity, new { context });
+                StopIfEnabled(_diagnosticSource, activity, new {context});
             }
         }
 
@@ -59,12 +62,12 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
                 return null;
 
             var activity = new Activity(name)
-                .AddTag("message-id", context.MessageId.ToString())
-                .AddTag("initiator-id", context.InitiatorId.ToString())
-                .AddTag("source-address", context.SourceAddress.ToString())
-                .AddTag("destination-address", context.DestinationAddress.ToString())
-                .AddBaggage("correlation-id", context.CorrelationId.ToString())
-                .AddBaggage("correlation-conversation-id", context.ConversationId.ToString());
+                           .AddTag("message-id", context.MessageId.ToString())
+                           .AddTag("initiator-id", context.InitiatorId.ToString())
+                           .AddTag("source-address", context.SourceAddress.ToString())
+                           .AddTag("destination-address", context.DestinationAddress.ToString())
+                           .AddBaggage("correlation-id", context.CorrelationId.ToString())
+                           .AddBaggage("correlation-conversation-id", context.ConversationId.ToString());
 
             source.StartActivity(activity, args ?? new { });
 

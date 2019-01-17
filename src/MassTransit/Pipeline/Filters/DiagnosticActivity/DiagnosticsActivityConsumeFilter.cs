@@ -10,6 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
+
 #if NETSTANDARD
 namespace MassTransit.Pipeline.Filters.DiagnosticActivity
 {
@@ -21,17 +22,19 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
     using GreenPipes;
     using Util;
 
+
     public class DiagnosticsActivityConsumeFilter<T> :
         IFilter<ConsumeContext<T>>
         where T : class
     {
-        readonly string _activityIdHeader;
         readonly string _activityCorrelationContext;
+        readonly string _activityIdHeader;
         readonly DiagnosticSource _diagnosticSource;
+
         public DiagnosticsActivityConsumeFilter(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
         {
-            _diagnosticSource = diagnosticSource;
-            _activityIdHeader = activityIdKey;
+            _diagnosticSource           = diagnosticSource;
+            _activityIdHeader           = activityIdKey;
             _activityCorrelationContext = activityCorrelationContextKey;
         }
 
@@ -43,7 +46,7 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
             var messageType = TypeMetadataCache<T>.ShortName;
-            var activity    = StartIfEnabled(_diagnosticSource, $"Consuming Message: {messageType}", new { context }, context);
+            var activity    = StartIfEnabled(_diagnosticSource, $"Consuming Message: {messageType}", new {context}, context);
 
             try
             {
@@ -51,7 +54,7 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
             }
             finally
             {
-                StopIfEnabled(_diagnosticSource, activity, new { context });
+                StopIfEnabled(_diagnosticSource, activity, new {context});
             }
         }
 
@@ -86,7 +89,8 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
                 if (context.Headers.TryGetHeader(_activityIdHeader, out var parent) && !string.IsNullOrEmpty(parent?.ToString()))
                     activity.SetParentId(parent.ToString());
 
-                foreach (KeyValuePair<string, string> item in context.Headers.Get(_activityCorrelationContext, Enumerable.Empty<KeyValuePair<string, string>>()))
+                foreach (KeyValuePair<string, string> item in context.Headers.Get(_activityCorrelationContext, Enumerable.Empty<KeyValuePair<string, string>>())
+                )
                 {
                     if (!string.IsNullOrEmpty(item.Value))
                         activity.AddBaggage(item.Key, item.Value);

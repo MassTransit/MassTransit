@@ -16,24 +16,23 @@ namespace MassTransit.PipeConfigurators
 {
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using GreenPipes;
-    using Pipeline.Filters;
     using Pipeline.Filters.DiagnosticActivity;
+
 
     public class DiagnosticsActivityConsumePipeSpecification<T> :
         IPipeSpecification<ConsumeContext<T>>
         where T : class
     {
-        readonly DiagnosticSource _diagnosticSource;
-        readonly string _activityIdKey;
         readonly string _activityCorrelationContextKey;
+        readonly string _activityIdKey;
+        readonly DiagnosticSource _diagnosticSource;
 
         public DiagnosticsActivityConsumePipeSpecification(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
         {
-            _diagnosticSource = diagnosticSource;
-            this._activityIdKey = activityIdKey;
-            this._activityCorrelationContextKey = activityCorrelationContextKey;
+            _diagnosticSource              = diagnosticSource;
+            _activityIdKey                 = activityIdKey;
+            _activityCorrelationContextKey = activityCorrelationContextKey;
         }
 
         public void Apply(IPipeBuilder<ConsumeContext<T>> builder)
@@ -45,8 +44,10 @@ namespace MassTransit.PipeConfigurators
         {
             if (_diagnosticSource == null)
                 yield return this.Failure("Diagnostic Source should not be null");
+
             if (string.IsNullOrEmpty(_activityIdKey))
                 yield return this.Failure("Diagnostic Activity Id Key should not be null");
+
             if (string.IsNullOrEmpty(_activityCorrelationContextKey))
                 yield return this.Failure("Diagnostic Activity Correlation Context Key should not be null");
         }
