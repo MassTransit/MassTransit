@@ -4,7 +4,8 @@ namespace MassTransit.Azure.ServiceBus.Core
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
-   
+
+
     public class MessagingFactory
     {
         public MessagingFactorySettings Settings { get; }
@@ -13,19 +14,26 @@ namespace MassTransit.Azure.ServiceBus.Core
         {
             Address = serviceUri ?? throw new ArgumentNullException(nameof(serviceUri));
             Settings = settings ?? throw new ArgumentNullException(nameof(settings));
-
         }
 
-        public IMessageReceiver CreateMessageReceiver(string entityPath)
+        public IQueueClient CreateQueueClient(string entityPath)
         {
-            var messageReceiver = new MessageReceiver(
-                ServiceBusConnection.Value,
-                entityPath,
-                ReceiveMode.PeekLock,
-                RetryPolicy
-            );
+            var queueClient = new QueueClient(ServiceBusConnection.Value, entityPath, ReceiveMode.PeekLock, RetryPolicy)
+            {
+                OperationTimeout = Settings.OperationTimeout
+            };
 
-            return messageReceiver;
+            return queueClient;
+        }
+
+        public ISubscriptionClient CreateSubscriptionClient(string topicPath, string subscriptionName)
+        {
+            var subscriptionClient = new SubscriptionClient(ServiceBusConnection.Value, topicPath, subscriptionName, ReceiveMode.PeekLock, RetryPolicy)
+            {
+                OperationTimeout = Settings.OperationTimeout,
+            };
+
+            return subscriptionClient;
         }
 
         public IMessageSender CreateMessageSender(string entityPath)
@@ -39,16 +47,18 @@ namespace MassTransit.Azure.ServiceBus.Core
             return messageSender;
         }
 
-        public Lazy<ServiceBusConnection> ServiceBusConnection => new Lazy<ServiceBusConnection>(
-            () =>
-            {
-                var connection = new ServiceBusConnection(Address.ToString(), Settings.TransportType, RetryPolicy)
+        public Lazy<ServiceBusConnection> ServiceBusConnection =>
+            new Lazy<ServiceBusConnection>(
+                () =>
                 {
-                    TokenProvider = Settings.TokenProvider
-                };
+                    var connection = new ServiceBusConnection(Address.ToString(), Settings.TransportType, RetryPolicy)
+                    {
+                        TokenProvider = Settings.TokenProvider,
+                        OperationTimeout = Settings.OperationTimeout,
+                    };
 
-                return connection;
-            }); 
+                    return connection;
+                });
 
         public Uri Address { get; set; }
         public RetryPolicy RetryPolicy { get; set; }

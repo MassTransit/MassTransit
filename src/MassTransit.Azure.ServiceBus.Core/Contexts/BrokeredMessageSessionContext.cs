@@ -13,7 +13,6 @@
 namespace MassTransit.Azure.ServiceBus.Core.Contexts
 {
     using System;
-    using System.IO;
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
 

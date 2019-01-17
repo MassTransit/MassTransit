@@ -149,7 +149,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             configurator.Publish<PartitionedMessage>(x =>
             {
                 x.EnablePartitioning = true;
-                //x.EnableExpress = true;
             });
 
             configurator.ReceiveEndpoint(host, "partitioned-input-queue", x =>

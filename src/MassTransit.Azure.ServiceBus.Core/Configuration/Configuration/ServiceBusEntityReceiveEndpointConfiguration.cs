@@ -171,7 +171,7 @@
 
             transport.Add(consumerAgent);
 
-            return CreateReceiveEndpoint(_settings.Name, transport, context);
+            return CreateReceiveEndpoint(_settings.Path, transport, context);
         }
 
         protected abstract IErrorTransport CreateErrorTransport(IServiceBusHostControl host);

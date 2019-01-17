@@ -31,17 +31,18 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         IReceiver
     {
         static readonly ILog _log = Logger.Get<Receiver>();
+
         readonly ClientContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IBrokeredMessageReceiver _messageReceiver;
-        readonly IDeliveryTracker _tracker;
+        protected readonly IDeliveryTracker Tracker;
 
         public Receiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
         {
             _context = context;
             _messageReceiver = messageReceiver;
 
-            _tracker = new DeliveryTracker(HandleDeliveryComplete);
+            Tracker = new DeliveryTracker(HandleDeliveryComplete);
             _deliveryComplete = new TaskCompletionSource<bool>();
         }
 
@@ -50,7 +51,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         public DeliveryMetrics GetDeliveryMetrics()
         {
-            return _tracker.GetDeliveryMetrics();
+            return Tracker.GetDeliveryMetrics();
         }
 
         public virtual Task Start()
@@ -68,7 +69,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 if (_log.IsErrorEnabled)
                     _log.Error($"Exception received on receiver: {_context.InputAddress} during {args.ExceptionReceivedContext.Action}", args.Exception);
 
-            if (_tracker.ActiveDeliveryCount == 0)
+            if (Tracker.ActiveDeliveryCount == 0)
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Receiver shutdown completed: {0}", _context.InputAddress);
@@ -108,7 +109,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             await Task.WhenAll(context.Agents.Select(x => Completed)).UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
 
-            if (_tracker.ActiveDeliveryCount > 0)
+            if (Tracker.ActiveDeliveryCount > 0)
                 try
                 {
                     await _deliveryComplete.Task.UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
@@ -120,7 +121,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 }
         }
 
-        async Task OnMessage(IMessageReceiver messageReceiver, Message message, CancellationToken cancellationToken)
+        async Task OnMessage(IReceiverClient messageReceiver, Message message, CancellationToken cancellationToken)
         {
             if (IsStopping)
             {
@@ -128,7 +129,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 return;
             }
 
-            using (var delivery = _tracker.BeginDelivery())
+            using (var delivery = Tracker.BeginDelivery())
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Receiving {0}:{1}({2})", delivery.Id, message.MessageId, _context.EntityPath);
@@ -137,13 +138,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             }
         }
 
-        void AddReceiveContextPayloads(ReceiveContext receiveContext, IMessageReceiver messageReceiver)
+        void AddReceiveContextPayloads(ReceiveContext receiveContext, IReceiverClient receiverClient)
         {
-            receiveContext.GetOrAddPayload(() => messageReceiver);
+            receiveContext.GetOrAddPayload(() => receiverClient);
             receiveContext.GetOrAddPayload(() => _context.GetPayload<NamespaceContext>());
         }
 
-        async Task WaitAndAbandonMessage(IReceiverClient receiverClient, Message message)
+        protected async Task WaitAndAbandonMessage(IReceiverClient receiverClient, Message message)
         {
             try
             {

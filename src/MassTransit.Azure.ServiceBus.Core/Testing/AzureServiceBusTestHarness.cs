@@ -15,6 +15,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Testing
     using System;
     using Logging;
     using MassTransit.Testing;
+    using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Primitives;
 
 

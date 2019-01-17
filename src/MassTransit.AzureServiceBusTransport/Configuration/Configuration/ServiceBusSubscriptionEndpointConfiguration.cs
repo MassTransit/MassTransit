@@ -39,7 +39,7 @@
             _endpointConfiguration = endpointConfiguration;
             _settings = settings;
 
-            HostAddress = hostConfiguration.Host.Address;
+            HostAddress = hostConfiguration.HostAddress;
             InputAddress = new UriBuilder(hostConfiguration.Host.Address)
             {
                 Path = settings.Name

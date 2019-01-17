@@ -130,6 +130,8 @@ namespace MassTransit.AzureServiceBusTransport
 
             BusConfigurationResult.CompileResults(configuration.Validate());
 
+            configuration.Build();
+
             return ReceiveEndpoints.Start(settings.Path);
         }
     }

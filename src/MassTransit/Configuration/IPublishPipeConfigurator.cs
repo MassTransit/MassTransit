@@ -24,7 +24,6 @@ namespace MassTransit
         /// <summary>
         /// Adds a type-specific pipe specification to the consume pipe
         /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
         /// <param name="specification"></param>
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddPipeSpecification(IPipeSpecification<SendContext> specification);

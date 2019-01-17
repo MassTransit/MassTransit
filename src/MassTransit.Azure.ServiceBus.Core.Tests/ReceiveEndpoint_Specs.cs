@@ -13,6 +13,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
+    using System.IO;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework.Messages;
@@ -47,7 +48,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
                 ConsumeContext<PingMessage> pinged = await pingHandled;
 
-                Assert.That(pinged.ReceiveContext.InputAddress, Is.EqualTo(new Uri(Host.Address, "second_queue")));
+                Assert.That(pinged.ReceiveContext.InputAddress,
+                    Is.EqualTo(new Uri(string.Join("/", Host.Address.GetLeftPart(UriPartial.Path), "second_queue"))));
             }
             finally
             {
@@ -79,7 +81,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
                     ConsumeContext<PingMessage> pinged = await pingHandled;
 
-                    Assert.That(pinged.ReceiveContext.InputAddress, Is.EqualTo(new Uri(Host.Address, "second_queue")));
+                    Assert.That(pinged.ReceiveContext.InputAddress,
+                        Is.EqualTo(new Uri(string.Join("/", Host.Address.GetLeftPart(UriPartial.Path), "second_queue"))));
                 }
                 finally
                 {

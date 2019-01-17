@@ -97,7 +97,7 @@ namespace MassTransit.Azure.ServiceBus.Core
 
             configuration.Build();
 
-            return ReceiveEndpoints.Start(queueName);
+            return ReceiveEndpoints.Start(configuration.Settings.Path);
         }
 
         public HostReceiveEndpointHandle ConnectSubscriptionEndpoint<T>(string subscriptionName,
@@ -130,6 +130,8 @@ namespace MassTransit.Azure.ServiceBus.Core
             configure?.Invoke(configuration.Configurator);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
+
+            configuration.Build();
 
             return ReceiveEndpoints.Start(settings.Path);
         }

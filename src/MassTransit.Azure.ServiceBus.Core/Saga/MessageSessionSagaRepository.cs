@@ -47,13 +47,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Saga
 
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            MessageSessionContext sessionContext;
-            if (!context.TryGetPayload(out sessionContext))
+            if (!context.TryGetPayload(out MessageSessionContext sessionContext))
                 throw new SagaException($"The session-based saga repository requires an active message session: {TypeMetadataCache<TSaga>.ShortName}",
                     typeof(TSaga), typeof(T));
 
-            Guid sessionId;
-            if (Guid.TryParse(sessionContext.SessionId, out sessionId))
+            if (Guid.TryParse(sessionContext.SessionId, out var sessionId))
                 context = new CorrelationIdConsumeContextProxy<T>(context, sessionId);
 
             var saga = await ReadSagaState(sessionContext).ConfigureAwait(false);
@@ -113,24 +111,20 @@ namespace MassTransit.Azure.ServiceBus.Core.Saga
 
         async Task<TSaga> ReadSagaState(MessageSessionContext context)
         {
-            try
-            {
-                var state = await context.GetStateAsync().ConfigureAwait(false);
-                using (var stateStream = new MemoryStream(state))
-                {
-                    if (stateStream == null || stateStream.Length == 0)
-                        return default;
+            var state = await context.GetStateAsync().ConfigureAwait(false);
+            if (state == null)
+                return default;
 
-                    using (var reader = new StreamReader(stateStream, Encoding.UTF8, false, 1024, true))
-                    using (var bsonReader = new JsonTextReader(reader))
-                    {
-                        return JsonMessageSerializer.Deserializer.Deserialize<TSaga>(bsonReader);
-                    }
-                }
-            }
-            catch (NotImplementedException exception)
+            using (var stateStream = new MemoryStream(state))
             {
-                throw new ConfigurationException("NetMessaging must be used for session-based sagas", exception);
+                if (stateStream.Length == 0)
+                    return default;
+
+                using (var reader = new StreamReader(stateStream, Encoding.UTF8, false, 1024, true))
+                using (var bsonReader = new JsonTextReader(reader))
+                {
+                    return JsonMessageSerializer.Deserializer.Deserialize<TSaga>(bsonReader);
+                }
             }
         }
 

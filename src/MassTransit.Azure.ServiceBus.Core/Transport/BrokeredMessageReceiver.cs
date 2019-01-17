@@ -66,7 +66,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveEndpointContext);
             contextCallback?.Invoke(context);
 
-            context.TryGetPayload<Microsoft.Azure.ServiceBus.Core.IMessageReceiver>(out var messageReceiver);
+            context.TryGetPayload<Microsoft.Azure.ServiceBus.Core.IReceiverClient>(out var messageReceiver);
 
             try
             {

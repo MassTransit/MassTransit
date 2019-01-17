@@ -28,12 +28,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         IAsyncDisposable
     {
         static readonly ILog _log = Logger.Get<QueueClientContext>();
-        readonly IMessageReceiver _messageReceiver;
+
+        readonly ISubscriptionClient _subscriptionClient;
         readonly SubscriptionSettings _settings;
 
-        public SubscriptionClientContext(IMessageReceiver messageReceiver, Uri inputAddress, SubscriptionSettings settings)
+        public SubscriptionClientContext(ISubscriptionClient subscriptionClient, Uri inputAddress, SubscriptionSettings settings)
         {
-            _messageReceiver = messageReceiver;
+            _subscriptionClient = subscriptionClient;
             _settings = settings;
             InputAddress = inputAddress;
         }
@@ -41,12 +42,20 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         public string EntityPath => _settings.TopicDescription.Path;
         public Uri InputAddress { get; }
 
-        public void OnMessageAsync(Func<IMessageReceiver, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
+        public void OnMessageAsync(Func<IReceiverClient, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
         {
-            _messageReceiver.RegisterMessageHandler(async (message, token) =>
+            _subscriptionClient.RegisterMessageHandler(async (message, token) =>
             {
-                await callback(_messageReceiver, message, token);
+                await callback(_subscriptionClient, message, token);
             }, _settings.GetOnMessageOptions(exceptionHandler));
+        }
+
+        public void OnSessionAsync(Func<IMessageSession, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
+        {
+            _subscriptionClient.RegisterSessionHandler(async (session, message, token) =>
+            {
+                await callback(session, message, token);
+            }, _settings.GetSessionHandlerOptions(exceptionHandler));
         }
 
         public async Task CloseAsync(CancellationToken cancellationToken)
@@ -56,8 +65,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
             try
             {
-                if (_messageReceiver != null && !_messageReceiver.IsClosedOrClosing)
-                    await _messageReceiver.CloseAsync().ConfigureAwait(false);
+                if (_subscriptionClient != null && !_subscriptionClient.IsClosedOrClosing)
+                    await _subscriptionClient.CloseAsync().ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Closed client: {0}", InputAddress);

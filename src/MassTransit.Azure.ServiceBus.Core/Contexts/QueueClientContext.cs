@@ -28,26 +28,31 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         IAsyncDisposable
     {
         static readonly ILog _log = Logger.Get<QueueClientContext>();
-        readonly IMessageReceiver _messageReceiver;
+        readonly IQueueClient _queueClient;
         readonly ClientSettings _settings;
 
-        public QueueClientContext(IMessageReceiver messageReceiver, Uri inputAddress, ClientSettings settings)
+        public QueueClientContext(IQueueClient queueClient, Uri inputAddress, ClientSettings settings)
         {
-            _messageReceiver = messageReceiver;
+            _queueClient = queueClient;
             _settings = settings;
             InputAddress = inputAddress;
         }
 
-        public string EntityPath => _messageReceiver.Path;
+        public string EntityPath => _queueClient.Path;
 
         public Uri InputAddress { get; }
 
-        public void OnMessageAsync(Func<IMessageReceiver, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
+        public void OnMessageAsync(Func<IReceiverClient, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
         {
-            _messageReceiver.RegisterMessageHandler(async (message, token) =>
+            _queueClient.RegisterMessageHandler(async (message, token) =>
             {
-                await callback(_messageReceiver, message, token);
+                await callback(_queueClient, message, token);
             }, _settings.GetOnMessageOptions(exceptionHandler));
+        }
+
+        public void OnSessionAsync(Func<IMessageSession, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
+        {
+            _queueClient.RegisterSessionHandler(callback, _settings.GetSessionHandlerOptions(exceptionHandler));
         }
 
         public async Task CloseAsync(CancellationToken cancellationToken)
@@ -57,8 +62,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
             try
             {
-                if (_messageReceiver != null && !_messageReceiver.IsClosedOrClosing)
-                    await _messageReceiver.CloseAsync().ConfigureAwait(false);
+                if (_queueClient != null && !_queueClient.IsClosedOrClosing)
+                    await _queueClient.CloseAsync().ConfigureAwait(false);
 
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Closed client: {0}", InputAddress);

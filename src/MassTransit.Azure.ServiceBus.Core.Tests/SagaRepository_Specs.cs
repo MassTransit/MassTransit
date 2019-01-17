@@ -135,6 +135,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
             {
                 configurator.RequiresSession = true;
+                configurator.EnablePartitioning = true;
 
                 configurator.Saga(_repository);
             }

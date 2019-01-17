@@ -64,7 +64,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
                 var factory = await MessagingFactory.CreateAsync(serviceUri, mfs);
 
-                var receiver = factory.CreateMessageReceiver("Control");
+                var receiver = factory.CreateQueueClient("Control");
                 receiver.PrefetchCount = 100;
 
                 var done = new TaskCompletionSource<bool>();

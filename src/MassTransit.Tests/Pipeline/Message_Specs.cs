@@ -17,6 +17,7 @@ namespace MassTransit.Tests.Pipeline
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Specifications;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -253,6 +254,11 @@ namespace MassTransit.Tests.Pipeline
             _sendFilter = new SendFilter();
 
             configurator.ConfigurePublish(pc => pc.AddPipeSpecification(_sendFilter));
+
+            configurator.ConfigurePublish(pc =>
+                pc.AddPipeSpecification(new DelegatePipeSpecification<PublishContext<PingMessage>>(context =>
+            {
+            })));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
