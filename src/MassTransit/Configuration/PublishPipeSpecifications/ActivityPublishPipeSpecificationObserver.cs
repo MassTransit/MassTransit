@@ -10,14 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-
 #if NETSTANDARD
 namespace MassTransit.PublishPipeSpecifications
 {
     using System.Diagnostics;
     using PipeConfigurators;
 
-    public class ActivityPublishPipeSpecificationObserver : IPublishPipeSpecificationObserver
+
+    public class ActivityPublishPipeSpecificationObserver :
+        IPublishPipeSpecificationObserver
     {
         readonly DiagnosticSource _diagnosticSource;
         readonly string _activityIdKey;
@@ -29,10 +30,11 @@ namespace MassTransit.PublishPipeSpecifications
             _activityIdKey = activityIdKey;
             _activityCorrelationContextKey = activityCorrelationContextKey;
         }
+
         void IPublishPipeSpecificationObserver.MessageSpecificationCreated<T>(IMessagePublishPipeSpecification<T> specification)
         {
             var applicationInsightsPublishSpecification =
-                new DiagnosticsActivitySendPipeSpecification<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey);
+                new DiagnosticsActivityPipeSpecification<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey);
 
             specification.AddPipeSpecification(applicationInsightsPublishSpecification);
         }

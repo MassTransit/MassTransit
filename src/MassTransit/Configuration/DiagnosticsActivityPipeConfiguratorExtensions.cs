@@ -10,7 +10,6 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-
 #if NETSTANDARD
 namespace MassTransit
 {
@@ -19,14 +18,19 @@ namespace MassTransit
     using PublishPipeSpecifications;
     using SendPipeSpecifications;
 
+
     public static class DiagnosticsActivityPipeConfiguratorExtensions
     {
         public static void UseDiagnosticsActivity(this IBusFactoryConfigurator configurator, DiagnosticSource diagnosticSource,
-                                                  string activityIdKey = DiagnosticHeaders.ActivityIdHeader,
-                                                  string activityCorrelationContextKey = DiagnosticHeaders.ActivityCorrelationContext)
+            string activityIdKey = DiagnosticHeaders.ActivityIdHeader,
+            string activityCorrelationContextKey = DiagnosticHeaders.ActivityCorrelationContext)
         {
-            configurator.ConfigureSend(x => x.Connect(new ActivitySendPipeSpecificationObserver(diagnosticSource, activityIdKey, activityCorrelationContextKey)));
-            configurator.ConfigurePublish(x => x.Connect(new ActivityPublishPipeSpecificationObserver(diagnosticSource, activityIdKey, activityCorrelationContextKey)));
+            configurator.ConfigureSend(x =>
+                x.Connect(new ActivitySendPipeSpecificationObserver(diagnosticSource, activityIdKey, activityCorrelationContextKey)));
+
+            configurator.ConfigurePublish(x =>
+                x.Connect(new ActivityPublishPipeSpecificationObserver(diagnosticSource, activityIdKey, activityCorrelationContextKey)));
+
             var observer = new ActivityConsumePipeSpecificationObserver(configurator, diagnosticSource, activityIdKey, activityCorrelationContextKey);
         }
     }

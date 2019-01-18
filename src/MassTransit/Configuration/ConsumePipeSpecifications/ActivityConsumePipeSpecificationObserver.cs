@@ -10,13 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-
 #if NETSTANDARD
 namespace MassTransit.ConsumePipeSpecifications
 {
     using System.Diagnostics;
     using ConsumeConfigurators;
+    using GreenPipes;
     using PipeConfigurators;
+
 
     public class ActivityConsumePipeSpecificationObserver :
         ConfigurationObserver,
@@ -27,18 +28,22 @@ namespace MassTransit.ConsumePipeSpecifications
         readonly string _activityCorrelationContextKey;
 
         public ActivityConsumePipeSpecificationObserver(IConsumePipeConfigurator receiveEndpointConfigurator, DiagnosticSource diagnosticSource,
-                                                        string activityIdKey, string activityCorrelationContextKey)
+            string activityIdKey, string activityCorrelationContextKey)
             : base(receiveEndpointConfigurator)
         {
             _diagnosticSource = diagnosticSource;
             _activityIdKey = activityIdKey;
             _activityCorrelationContextKey = activityCorrelationContextKey;
+
             Connect(this);
         }
+
         public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
             where TMessage : class
         {
-            var specification = new DiagnosticsActivityConsumePipeSpecification<TMessage>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey);
+            IPipeSpecification<ConsumeContext<TMessage>> specification = new DiagnosticsActivityPipeSpecification<TMessage>(_diagnosticSource, _activityIdKey,
+                _activityCorrelationContextKey);
+
             configurator.AddPipeSpecification(specification);
         }
     }

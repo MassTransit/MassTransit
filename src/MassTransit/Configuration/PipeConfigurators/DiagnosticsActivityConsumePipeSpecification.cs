@@ -10,7 +10,6 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-
 #if NETSTANDARD
 namespace MassTransit.PipeConfigurators
 {
@@ -30,8 +29,8 @@ namespace MassTransit.PipeConfigurators
 
         public DiagnosticsActivityConsumePipeSpecification(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
         {
-            _diagnosticSource              = diagnosticSource;
-            _activityIdKey                 = activityIdKey;
+            _diagnosticSource = diagnosticSource;
+            _activityIdKey = activityIdKey;
             _activityCorrelationContextKey = activityCorrelationContextKey;
         }
 

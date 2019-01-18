@@ -17,5 +17,19 @@ namespace MassTransit
     {
         public const string ActivityIdHeader = "MT-Activity-ID";
         public const string ActivityCorrelationContext = "MT-Activity-Correlation-Context";
+
+        public const string MessageId = "message-id";
+        public const string CorrelationId = "correlation-id";
+        public const string InitiatorId = "initiator-id";
+        public const string SourceAddress = "source-address";
+        public const string DestinationAddress = "destination-address";
+        public const string InputAddress = "input-address";
+        public const string CorrelationConversationId = "correlation-conversation-id";
+
+        public const string SourceHostMachine = "source-host-machine";
+        public const string SourceHostProcessId = "source-host-process-id";
+        public const string SourceHostFrameworkVersion = "source-host-framework-version";
+        public const string SourceHostMassTransitVersion = "source-host-masstransit-version";
+        public const string MessageTypes = "message-types";
     }
 }

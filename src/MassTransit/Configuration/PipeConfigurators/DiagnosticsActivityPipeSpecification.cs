@@ -10,7 +10,6 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-
 #if NETSTANDARD
 namespace MassTransit.PipeConfigurators
 {
@@ -20,20 +19,26 @@ namespace MassTransit.PipeConfigurators
     using Pipeline.Filters.DiagnosticActivity;
 
 
-    public class DiagnosticsActivitySendPipeSpecification<T> :
+    public class DiagnosticsActivityPipeSpecification<T> :
         IPipeSpecification<SendContext<T>>,
-        IPipeSpecification<PublishContext<T>>
+        IPipeSpecification<PublishContext<T>>,
+        IPipeSpecification<ConsumeContext<T>>
         where T : class
     {
         readonly string _activityCorrelationContextKey;
         readonly string _activityIdKey;
         readonly DiagnosticSource _diagnosticSource;
 
-        public DiagnosticsActivitySendPipeSpecification(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
+        public DiagnosticsActivityPipeSpecification(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
         {
-            _diagnosticSource              = diagnosticSource;
-            _activityIdKey                 = activityIdKey;
+            _diagnosticSource = diagnosticSource;
+            _activityIdKey = activityIdKey;
             _activityCorrelationContextKey = activityCorrelationContextKey;
+        }
+
+        public void Apply(IPipeBuilder<SendContext<T>> builder)
+        {
+            builder.AddFilter(new DiagnosticsActivitySendFilter<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey));
         }
 
         public void Apply(IPipeBuilder<PublishContext<T>> builder)
@@ -41,9 +46,9 @@ namespace MassTransit.PipeConfigurators
             builder.AddFilter(new DiagnosticsActivityPublishFilter<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey));
         }
 
-        public void Apply(IPipeBuilder<SendContext<T>> builder)
+        public void Apply(IPipeBuilder<ConsumeContext<T>> builder)
         {
-            builder.AddFilter(new DiagnosticsActivitySendFilter<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey));
+            builder.AddFilter(new DiagnosticsActivityConsumeFilter<T>(_diagnosticSource, _activityIdKey, _activityCorrelationContextKey));
         }
 
         public IEnumerable<ValidationResult> Validate()

@@ -10,7 +10,6 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-
 #if NETSTANDARD
 namespace MassTransit.Pipeline.Filters.DiagnosticActivity
 {
@@ -33,8 +32,8 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
 
         public DiagnosticsActivityConsumeFilter(DiagnosticSource diagnosticSource, string activityIdKey, string activityCorrelationContextKey)
         {
-            _diagnosticSource           = diagnosticSource;
-            _activityIdHeader           = activityIdKey;
+            _diagnosticSource = diagnosticSource;
+            _activityIdHeader = activityIdKey;
             _activityCorrelationContext = activityCorrelationContextKey;
         }
 
@@ -45,8 +44,7 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
 
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
-            var messageType = TypeMetadataCache<T>.ShortName;
-            var activity    = StartIfEnabled(_diagnosticSource, $"Consuming Message: {messageType}", new {context}, context);
+            var activity = StartIfEnabled(_diagnosticSource, $"Consuming Message: {TypeMetadataCache<T>.ShortName}", new {context}, context);
 
             try
             {
@@ -64,16 +62,18 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
                 return null;
 
             var activity = new Activity(name)
-                           .AddTag("message-id", context.MessageId.ToString())
-                           .AddTag("initiator-id", context.InitiatorId.ToString())
-                           .AddTag("source-address", context.SourceAddress.ToString())
-                           .AddTag("environment-host-machine", context.Host.MachineName)
-                           .AddTag("environment-host-framework-version", context.Host.FrameworkVersion)
-                           .AddTag("environment-host-process-id", context.Host.ProcessId.ToString())
-                           .AddTag("environment-host-mt-version", context.Host.MassTransitVersion)
-                           .AddTag("message-types", string.Join(",", context.SupportedMessageTypes))
-                           .AddBaggage("correlation-id", context.CorrelationId.ToString())
-                           .AddBaggage("correlation-conversation-id", context.ConversationId.ToString());
+                .AddTag(DiagnosticHeaders.MessageId, context.MessageId.ToString())
+                .AddTag(DiagnosticHeaders.InitiatorId, context.InitiatorId.ToString())
+                .AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress.ToString())
+                .AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString())
+                .AddTag(DiagnosticHeaders.InputAddress, context.ReceiveContext.InputAddress.ToString())
+                .AddTag(DiagnosticHeaders.SourceHostMachine, context.Host.MachineName)
+                .AddTag(DiagnosticHeaders.SourceHostFrameworkVersion, context.Host.FrameworkVersion)
+                .AddTag(DiagnosticHeaders.SourceHostProcessId, context.Host.ProcessId.ToString())
+                .AddTag(DiagnosticHeaders.SourceHostMassTransitVersion, context.Host.MassTransitVersion)
+                .AddTag(DiagnosticHeaders.MessageTypes, string.Join(",", context.SupportedMessageTypes))
+                .AddBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId.ToString())
+                .AddBaggage(DiagnosticHeaders.CorrelationConversationId, context.ConversationId.ToString());
 
             Extract(context, activity);
 
