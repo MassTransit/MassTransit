@@ -18,13 +18,15 @@ public class BuildVersion
 
         if(!buildParameters.IsLocalBuild)
         {
+            var commitHash = buildSystem.AppVeyor.Environment.Repository.Commit.Id;
+
             suffix =
                 buildParameters.IsMasterBranch ? null
-                : buildParameters.IsDevelopBranch ? "preview"
+                : buildParameters.IsDevelopBranch ? "develop"
                 : "beta";
 
             if(suffix != null)
-                suffix += "." + buildSystem.AppVeyor.Environment.Build.Number + "+git.hash" + buildSystem.AppVeyor.Environment.Repository.Commit.Id;
+                suffix += "." + buildSystem.AppVeyor.Environment.Build.Number + "+sha." + commitHash.Substring(0,Math.Min(commitHash.Length,7));
         }
 
 
