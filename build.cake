@@ -114,7 +114,7 @@ Task("Test")
 
 Task("Pack")
     .IsDependentOn("Build")
-    .WithCriteria<BuildParameters>((context,data) => !data.ShouldPublish)
+    .WithCriteria<BuildParameters>((context,data) => data.ShouldPublish)
     .Does<BuildParameters>(data =>
 {
     var settings = new DotNetCorePackSettings{
