@@ -115,6 +115,7 @@
 
         #region From Scaleout
         [Test]
+        [Category("Flakey")]
         public async Task DisconnectConnectionRemovesConnectionFromGroup()
         {
             using (var client = new TestClient())
