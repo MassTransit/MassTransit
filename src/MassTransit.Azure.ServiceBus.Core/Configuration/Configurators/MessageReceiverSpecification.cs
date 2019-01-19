@@ -54,6 +54,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
                 yield return result;
         }
 
+
         protected IReceivePipe CreateReceivePipe()
         {
             var builder = new MessageReceiverBuilder(_configuration);

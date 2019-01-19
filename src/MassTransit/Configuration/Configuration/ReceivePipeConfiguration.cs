@@ -58,21 +58,29 @@ namespace MassTransit.Configuration
                 .Concat(ErrorConfigurator.Validate());
         }
 
-        public IReceivePipe CreatePipe(IConsumePipe consumePipe, IMessageDeserializer messageDeserializer)
+        IReceivePipe IReceivePipeConfiguration.CreatePipe(IConsumePipe consumePipe, IMessageDeserializer messageDeserializer,
+            Action<IPipeConfigurator<ReceiveContext>> configure)
         {
             if (_created)
                 throw new ConfigurationException("The ReceivePipeConfiguration can only be used once.");
 
-            DeadLetterConfigurator.UseFilter(new DeadLetterTransportFilter());
-            _configurator.UseDeadLetter(DeadLetterConfigurator.Build());
-
-            ErrorConfigurator.UseFilter(new GenerateFaultFilter());
-            ErrorConfigurator.UseFilter(new ErrorTransportFilter());
-
-            _configurator.UseRescue(ErrorConfigurator.Build(), x =>
+            if (configure == null)
             {
-                x.Ignore<OperationCanceledException>();
-            });
+                DeadLetterConfigurator.UseFilter(new DeadLetterTransportFilter());
+                _configurator.UseDeadLetter(DeadLetterConfigurator.Build());
+
+                ErrorConfigurator.UseFilter(new GenerateFaultFilter());
+                ErrorConfigurator.UseFilter(new ErrorTransportFilter());
+
+                _configurator.UseRescue(ErrorConfigurator.Build(), x =>
+                {
+                    x.Ignore<OperationCanceledException>();
+                });
+            }
+            else
+            {
+                configure(_configurator);
+            }
 
             _configurator.UseFilter(new DeserializeFilter(messageDeserializer, consumePipe));
 

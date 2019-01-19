@@ -165,7 +165,7 @@
 
             IPipe<ClientContext> clientPipe = ClientPipeConfigurator.Build();
 
-            var clientCache = CreateClientCache(InputAddress, _hostConfiguration.Host.MessagingFactoryContextSupervisor, _hostConfiguration.Host.NamespaceContextSupervisor);
+            var clientCache = CreateClientCache(_hostConfiguration.Host.MessagingFactoryContextSupervisor, _hostConfiguration.Host.NamespaceContextSupervisor);
 
             var transport = new ReceiveTransport(_hostConfiguration.Host, _settings, clientCache, clientPipe, context);
 
@@ -177,7 +177,7 @@
         protected abstract IErrorTransport CreateErrorTransport(IServiceBusHostControl host);
         protected abstract IDeadLetterTransport CreateDeadLetterTransport(IServiceBusHostControl host);
 
-        protected abstract IClientContextSupervisor CreateClientCache(Uri inputAddress, IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor, INamespaceContextSupervisor namespaceContextSupervisor);
+        protected abstract IClientContextSupervisor CreateClientCache(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor, INamespaceContextSupervisor namespaceContextSupervisor);
 
         protected abstract IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings,
             IPipe<NamespaceContext> namespacePipe);

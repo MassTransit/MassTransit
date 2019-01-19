@@ -116,7 +116,7 @@
                 settings);
         }
 
-        protected override IClientContextSupervisor CreateClientCache(Uri inputAddress, IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor, INamespaceContextSupervisor namespaceContextSupervisor)
+        protected override IClientContextSupervisor CreateClientCache(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor, INamespaceContextSupervisor namespaceContextSupervisor)
         {
             return new ClientContextSupervisor(new SubscriptionClientContextFactory(messagingFactoryContextSupervisor, namespaceContextSupervisor,
                 MessagingFactoryPipeConfigurator.Build(), NamespacePipeConfigurator.Build(), _settings));

@@ -6,7 +6,6 @@
     using MassTransit.Configuration;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
-    using MassTransit.Pipeline.Pipes;
     using Transports;
 
 
@@ -26,16 +25,15 @@
 
         public override IReceivePipe CreateReceivePipe()
         {
-            Receive.ErrorConfigurator.UseFilter(new GenerateFaultFilter());
-
-            Receive.Configurator.UseRescue(Receive.ErrorConfigurator.Build(), x =>
+            return Receive.CreatePipe(ConsumePipe, Serialization.Deserializer, configurator =>
             {
-                x.Ignore<OperationCanceledException>();
+                Receive.ErrorConfigurator.UseFilter(new GenerateFaultFilter());
+
+                configurator.UseRescue(Receive.ErrorConfigurator.Build(), x =>
+                {
+                    x.Ignore<OperationCanceledException>();
+                });
             });
-
-            Receive.Configurator.UseFilter(new DeserializeFilter(Serialization.Deserializer, ConsumePipe));
-
-            return new ReceivePipe(Receive.Build(), ConsumePipe);
         }
 
         protected override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport,

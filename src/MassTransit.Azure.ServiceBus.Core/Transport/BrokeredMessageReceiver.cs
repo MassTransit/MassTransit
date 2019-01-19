@@ -44,6 +44,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             var scope = context.CreateScope("receiver");
             scope.Add("type", "brokeredMessage");
+
+            _receiveEndpointContext.ReceivePipe.Probe(scope);
         }
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)

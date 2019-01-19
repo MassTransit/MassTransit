@@ -14,6 +14,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 {
     using System;
     using System.Threading;
+    using Azure.ServiceBus.Core.Builders;
     using Azure.ServiceBus.Core.Configurators;
     using Azure.ServiceBus.Core.Transport;
     using Configurators;
@@ -67,6 +68,11 @@ namespace MassTransit.WebJobs.ServiceBusIntegration.Configuration
 
             try
             {
+                var builder = new MessageReceiverBuilder(_endpointConfiguration);
+
+                foreach (var specification in Specifications)
+                    specification.Configure(builder);
+
                 return new BrokeredMessageReceiver(InputAddress, Log, CreateReceiveEndpointContext());
             }
             catch (Exception ex)

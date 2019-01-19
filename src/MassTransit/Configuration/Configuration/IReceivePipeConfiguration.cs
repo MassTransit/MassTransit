@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Configuration
 {
+    using System;
     using GreenPipes;
     using GreenPipes.Builders;
     using Pipeline;
@@ -24,7 +25,8 @@ namespace MassTransit.Configuration
         IBuildPipeConfigurator<ReceiveContext> DeadLetterConfigurator { get; }
         IBuildPipeConfigurator<ExceptionReceiveContext> ErrorConfigurator { get; }
 
-        IReceivePipe CreatePipe(IConsumePipe consumePipe, IMessageDeserializer messageDeserializer);
+        IReceivePipe CreatePipe(IConsumePipe consumePipe, IMessageDeserializer messageDeserializer,
+            Action<IPipeConfigurator<ReceiveContext>> configure = null);
 
         IPipe<ReceiveContext> Build();
     }

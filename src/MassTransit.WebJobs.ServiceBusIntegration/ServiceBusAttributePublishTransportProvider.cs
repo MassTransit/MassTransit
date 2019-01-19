@@ -19,7 +19,6 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     using Contexts;
     using Logging;
     using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.ServiceBus;
     using Transports;
