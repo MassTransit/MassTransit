@@ -1,6 +1,5 @@
 public class BuildPaths
 {
-    public BuildFiles Files { get; private set; }
     public BuildDirectories Directories { get; private set; }
 
     public static BuildPaths GetPaths(
@@ -23,14 +22,8 @@ public class BuildPaths
             rootDir,
             solutionDir);
 
-        // Files
-        var buildFiles = new BuildFiles(
-            rootDir.CombineWithFilePath("version.props")
-            );
-
         return new BuildPaths
         {
-            Files = buildFiles,
             Directories = buildDirectories
         };
     }

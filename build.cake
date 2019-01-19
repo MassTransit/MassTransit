@@ -56,7 +56,7 @@ Task("Build")
     var settings = new DotNetCoreBuildSettings{
         NoRestore = true,
         Configuration = data.Configuration,
-        VersionSuffix = data.Version.Suffix
+        MSBuildSettings = new DotNetCoreMSBuildSettings().WithProperty("Version", data.Version.Version)
     };
 
     DotNetCoreBuild(data.Paths.Directories.Solution.FullPath, settings);
@@ -122,7 +122,7 @@ Task("Pack")
         NoBuild = true,
         OutputDirectory = data.Paths.Directories.Artifacts,
         Configuration = data.Configuration,
-        VersionSuffix = data.Version.Suffix
+        MSBuildSettings = new DotNetCoreMSBuildSettings().WithProperty("Version", data.Version.Version)
     };
     DotNetCorePack(data.Paths.Directories.Solution.FullPath, settings);
 });
