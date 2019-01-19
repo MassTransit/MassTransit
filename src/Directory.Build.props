@@ -1,6 +1,5 @@
 <Project>
   <!-- These properties will be shared for all projects -->
-  <Import Project="../version.props" />
 
   <PropertyGroup>
     <Product>MassTransit</Product>
