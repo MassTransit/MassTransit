@@ -14,6 +14,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration.Configuration
 {
     using System;
     using System.Threading;
+    using Azure.ServiceBus.Core.Builders;
     using Azure.ServiceBus.Core.Configurators;
     using Configurators;
     using Context;
@@ -66,6 +67,11 @@ namespace MassTransit.WebJobs.EventHubsIntegration.Configuration
 
             try
             {
+                var builder = new MessageReceiverBuilder(_endpointConfiguration);
+
+                foreach (var specification in Specifications)
+                    specification.Configure(builder);
+
                 return new EventDataReceiver(InputAddress, CreateReceiveEndpointContext());
             }
             catch (Exception ex)
