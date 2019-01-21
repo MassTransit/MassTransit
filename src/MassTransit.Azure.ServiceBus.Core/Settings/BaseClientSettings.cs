@@ -27,7 +27,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
             MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
             PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
 
-            MaxAutoRenewDuration = TimeSpan.FromSeconds(60);
+            MaxAutoRenewDuration = TimeSpan.FromMinutes(5);
             MessageWaitTimeout = TimeSpan.FromSeconds(10);
         }
 

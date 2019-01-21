@@ -14,8 +14,6 @@ namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus.Core;
 
 
     /// <summary>
@@ -43,11 +41,5 @@ namespace MassTransit.Azure.ServiceBus.Core
         TimeSpan TimeToLive { get; }
         string CorrelationId { get; }
         string MessageId { get; }
-
-        /// <summary>
-        /// Renew the message lock
-        /// </summary>
-        /// <returns></returns>
-        Task RenewLockAsync(IMessageReceiver receiver);
     }
 }

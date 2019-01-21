@@ -59,9 +59,11 @@ namespace MassTransit
 
             var hostConfigurator = new ServiceBusHostConfigurator(namespaceManager.Address)
             {
-                TokenProvider = namespaceManager.Settings.TokenProvider,
-                OperationTimeout = namespaceManager.Settings.OperationTimeout
+                TokenProvider = namespaceManager.Settings.TokenProvider
             };
+
+            if (namespaceManager.Settings.OperationTimeout > TimeSpan.Zero)
+                hostConfigurator.OperationTimeout = namespaceManager.Settings.OperationTimeout;
 
             configure(hostConfigurator);
 

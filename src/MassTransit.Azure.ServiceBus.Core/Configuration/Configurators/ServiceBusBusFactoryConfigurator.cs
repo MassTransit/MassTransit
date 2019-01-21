@@ -258,15 +258,20 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
             _settings.SelectBasicTier();
         }
 
+        public TimeSpan MessageWaitTimeout
+        {
+            set => _settings.MessageWaitTimeout = value;
+        }
+
+        public TimeSpan MaxAutoRenewDuration
+        {
+            set => _settings.MaxAutoRenewDuration = value;
+        }
+
         public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
         {
             _queueConfigurator.RequiresDuplicateDetection = true;
             _queueConfigurator.DuplicateDetectionHistoryTimeWindow = historyTimeWindow;
-        }
-
-        TimeSpan IServiceBusQueueEndpointConfigurator.MessageWaitTimeout
-        {
-            set => _settings.MessageWaitTimeout = value;
         }
     }
 }

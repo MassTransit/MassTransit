@@ -78,5 +78,15 @@ namespace MassTransit.Azure.ServiceBus.Core
         /// IF using the Basic Tier of Service Bus, this resets some values to avoid failing
         /// </summary>
         void SelectBasicTier();
+
+        /// <summary>
+        /// Sets the message session timeout period
+        /// </summary>
+        TimeSpan MessageWaitTimeout { set; }
+
+        /// <summary>
+        /// Sets the maximum time for locks/sessions to be automatically renewed
+        /// </summary>
+        TimeSpan MaxAutoRenewDuration { set; }
     }
 }

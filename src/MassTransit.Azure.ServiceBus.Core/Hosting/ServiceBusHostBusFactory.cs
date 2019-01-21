@@ -122,7 +122,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
             public string SharedAccessKey => _settings.SharedAccessKey;
             public TimeSpan TokenTimeToLive => _settings.TokenTimeToLive ?? TimeSpan.FromDays(1);
             public TokenScope TokenScope => _settings.TokenScope;
-            public TimeSpan OperationTimeout => _settings.OperationTimeout ?? TimeSpan.FromSeconds(30);
+            public TimeSpan OperationTimeout => _settings.OperationTimeout ?? TimeSpan.FromSeconds(60);
 
             public TimeSpan RetryMinBackoff => _settings.RetryMinBackoff ?? TimeSpan.Zero;
 

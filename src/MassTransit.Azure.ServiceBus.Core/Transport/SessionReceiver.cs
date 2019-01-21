@@ -18,7 +18,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using GreenPipes;
     using Logging;
     using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
 
 
     public class SessionReceiver :
@@ -58,16 +57,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Receiving {0}:{1}({2})", delivery.Id, message.MessageId, _context.EntityPath);
 
-                await _messageReceiver.Handle(message, context => AddReceiveContextPayloads(context, messageSession)).ConfigureAwait(false);
+                await _messageReceiver.Handle(message, context => AddReceiveContextPayloads(context, messageSession, message)).ConfigureAwait(false);
             }
         }
 
-        void AddReceiveContextPayloads(ReceiveContext receiveContext, IMessageSession messageSession)
+        void AddReceiveContextPayloads(ReceiveContext receiveContext, IMessageSession messageSession, Message message)
         {
-            var sessionContext = new BrokeredMessageSessionContext(messageSession);
+            MessageSessionContext sessionContext = new BrokeredMessageSessionContext(messageSession);
+            MessageLockContext lockContext = new SessionMessageLockContext(messageSession, message);
 
-            receiveContext.GetOrAddPayload<IReceiverClient>(() => messageSession);
             receiveContext.GetOrAddPayload(() => sessionContext);
+            receiveContext.GetOrAddPayload(() => lockContext);
             receiveContext.GetOrAddPayload(() => _context.GetPayload<NamespaceContext>());
         }
     }

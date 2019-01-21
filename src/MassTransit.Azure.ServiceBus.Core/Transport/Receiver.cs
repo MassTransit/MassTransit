@@ -16,6 +16,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
@@ -134,13 +135,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Receiving {0}:{1}({2})", delivery.Id, message.MessageId, _context.EntityPath);
 
-                await _messageReceiver.Handle(message, context => AddReceiveContextPayloads(context, messageReceiver)).ConfigureAwait(false);
+                await _messageReceiver.Handle(message, context => AddReceiveContextPayloads(context, messageReceiver, message)).ConfigureAwait(false);
             }
         }
 
-        void AddReceiveContextPayloads(ReceiveContext receiveContext, IReceiverClient receiverClient)
+        void AddReceiveContextPayloads(ReceiveContext receiveContext, IReceiverClient receiverClient, Message message)
         {
-            receiveContext.GetOrAddPayload(() => receiverClient);
+            MessageLockContext lockContext = new ReceiverClientMessageLockContext(receiverClient, message);
+
+            receiveContext.GetOrAddPayload(() => lockContext);
             receiveContext.GetOrAddPayload(() => _context.GetPayload<NamespaceContext>());
         }
 

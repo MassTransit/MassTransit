@@ -68,7 +68,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveEndpointContext);
             contextCallback?.Invoke(context);
 
-            context.TryGetPayload<Microsoft.Azure.ServiceBus.Core.IReceiverClient>(out var messageReceiver);
+            context.TryGetPayload<MessageLockContext>(out var lockContext);
 
             try
             {
@@ -84,8 +84,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
                 await context.ReceiveCompleted.ConfigureAwait(false);
 
-                if (messageReceiver != null)
-                    await messageReceiver.CompleteAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
+                if (lockContext != null)
+                    await lockContext.Complete().ConfigureAwait(false);
 
                 await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
@@ -93,12 +93,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             {
                 await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
-                if (messageReceiver == null)
+                if (lockContext == null)
                     throw;
 
                 try
                 {
-                    await messageReceiver.AbandonAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
+                    await lockContext.Abandon(ex).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {

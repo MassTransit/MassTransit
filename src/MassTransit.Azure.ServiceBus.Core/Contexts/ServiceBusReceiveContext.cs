@@ -16,10 +16,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using System.Collections.Generic;
     using System.IO;
     using System.Net.Mime;
-    using System.Threading.Tasks;
     using Context;
     using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
 
 
     public sealed class ServiceBusReceiveContext :
@@ -75,11 +73,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         public DateTime EnqueuedTime => _message.SystemProperties.EnqueuedTimeUtc;
 
         public DateTime ScheduledEnqueueTime => _message.ScheduledEnqueueTimeUtc;
-
-        public Task RenewLockAsync(IMessageReceiver receiver)
-        {
-            return receiver.RenewLockAsync(_message);
-        }
 
         public override byte[] GetBody()
         {

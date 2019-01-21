@@ -114,6 +114,16 @@
             _settings.SelectBasicTier();
         }
 
+        public TimeSpan MessageWaitTimeout
+        {
+            set => _settings.MessageWaitTimeout = value;
+        }
+
+        public TimeSpan MaxAutoRenewDuration
+        {
+            set => _settings.MaxAutoRenewDuration = value;
+        }
+
         public override IEnumerable<ValidationResult> Validate()
         {
             return ClientPipeConfigurator.Validate()
@@ -177,7 +187,8 @@
         protected abstract IErrorTransport CreateErrorTransport(IServiceBusHostControl host);
         protected abstract IDeadLetterTransport CreateDeadLetterTransport(IServiceBusHostControl host);
 
-        protected abstract IClientContextSupervisor CreateClientCache(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor, INamespaceContextSupervisor namespaceContextSupervisor);
+        protected abstract IClientContextSupervisor CreateClientCache(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor,
+            INamespaceContextSupervisor namespaceContextSupervisor);
 
         protected abstract IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings,
             IPipe<NamespaceContext> namespacePipe);

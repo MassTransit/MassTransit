@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using Azure.ServiceBus.Core.Specifications;
     using GreenPipes;
 
 
@@ -25,11 +24,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="delay">The delay before the lock is renewed (should be reasonably less than the lock time).</param>
+        [Obsolete("Locks are automatically renewed by the Azure Service Bus client, change MaxAutoRenewDuration to your requested max lock timeout")]
         public static void UseRenewLock(this IPipeConfigurator<ConsumeContext> configurator, TimeSpan? delay = default(TimeSpan?))
         {
-            var specification = new RenewLockSpecification(delay);
-
-            configurator.AddPipeSpecification(specification);
         }
     }
 }

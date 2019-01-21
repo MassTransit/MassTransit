@@ -30,8 +30,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             configurator.LockDuration = TimeSpan.FromSeconds(60);
-
-            configurator.UseRenewLock(TimeSpan.FromSeconds(20));
+            configurator.MaxAutoRenewDuration = TimeSpan.FromMinutes(5);
 
             configurator.Consumer<PingConsumer>();
         }
@@ -48,6 +47,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             var context = await PingConsumer.Completed.Task;
         }
 
+
         class PingConsumer :
             IConsumer<PingMessage>
         {
@@ -58,7 +58,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                 await Task.Delay(TimeSpan.FromMinutes(2), context.CancellationToken).ConfigureAwait(false);
 
                 Completed.TrySetResult(context.Message);
-
             }
         }
     }

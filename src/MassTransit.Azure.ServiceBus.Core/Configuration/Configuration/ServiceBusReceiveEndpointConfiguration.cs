@@ -114,11 +114,6 @@
 
         public ReceiveSettings Settings => _settings;
 
-        TimeSpan IServiceBusQueueEndpointConfigurator.MessageWaitTimeout
-        {
-            set => _settings.MessageWaitTimeout = value;
-        }
-
         public override IEnumerable<ValidationResult> Validate()
         {
             return _settings.QueueConfigurator.Validate()
