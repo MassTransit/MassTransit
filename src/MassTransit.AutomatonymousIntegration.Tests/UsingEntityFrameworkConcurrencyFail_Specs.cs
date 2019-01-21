@@ -27,6 +27,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
     [TestFixture]
     [Category("EntityFramework")]
+    [Category("Flakey")]
     public class When_using_EntityFrameworkConcurrencyFail :
         InMemoryTestFixture
     {
