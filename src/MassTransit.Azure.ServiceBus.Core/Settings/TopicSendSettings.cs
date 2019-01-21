@@ -14,7 +14,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 {
     using Microsoft.Azure.ServiceBus.Management;
     using Topology;
-    using Topology.Builders;
     using Transport;
 
 
@@ -22,21 +21,19 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
         SendSettings
     {
         readonly TopicDescription _description;
+        readonly BrokerTopology _brokerTopology;
 
-        public TopicSendSettings(TopicDescription description)
+        public TopicSendSettings(TopicDescription description, BrokerTopology brokerTopology)
         {
             _description = description;
+            _brokerTopology = brokerTopology;
         }
 
         public string EntityPath => _description.Path;
 
         public BrokerTopology GetBrokerTopology()
         {
-            var builder = new PublishEndpointBrokerTopologyBuilder();
-
-            builder.Topic = builder.CreateTopic(_description);
-
-            return builder.BuildBrokerTopology();
+            return _brokerTopology;
         }
     }
 }

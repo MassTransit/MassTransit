@@ -13,9 +13,13 @@
 namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
 {
     using System;
+    using System.Linq;
+    using System.Security.Cryptography;
+    using System.Text;
     using Entities;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
+    using Util;
 
 
     public class PublishEndpointBrokerTopologyBuilder :
@@ -32,7 +36,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
 
         readonly Options _options;
 
-        public PublishEndpointBrokerTopologyBuilder(Options options = Options.FlattenHierarchy)
+        public PublishEndpointBrokerTopologyBuilder(Options options = Options.MaintainHierarchy)
         {
             _options = options;
         }
@@ -68,13 +72,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
 
             public TopicHandle Topic
             {
-                get { return _topic; }
+                get => _topic;
                 set
                 {
                     _topic = value;
                     if (_builder.Topic != null)
                     {
-                        var subscriptionDescription = new SubscriptionDescription(_builder.Topic.Topic.TopicDescription.Path, NewId.NextGuid().ToString("N"))
+                        var subscriptionName = string.Join("-", value.Topic.TopicDescription.Path.Split('/').Reverse());
+                        var subscriptionDescription = new SubscriptionDescription(_builder.Topic.Topic.TopicDescription.Path,
+                            GenerateSubscriptionName(subscriptionName))
                         {
                             ForwardTo = value.Topic.TopicDescription.Path
                         };
@@ -99,7 +105,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                 return _builder.CreateTopic(topicDescription);
             }
 
-            public SubscriptionHandle CreateSubscription(TopicHandle topic, SubscriptionDescription subscriptionDescription, RuleDescription rule, Filter filter)
+            public SubscriptionHandle CreateSubscription(TopicHandle topic, SubscriptionDescription subscriptionDescription, RuleDescription rule,
+                Filter filter)
             {
                 return _builder.CreateSubscription(topic, subscriptionDescription, rule, filter);
             }
@@ -114,10 +121,32 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                 return _builder.CreateQueue(queueDescription);
             }
 
-            public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, SubscriptionDescription subscriptionDescription, RuleDescription rule,
+            public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, SubscriptionDescription subscriptionDescription,
+                RuleDescription rule,
                 Filter filter)
             {
                 return _builder.CreateQueueSubscription(exchange, queue, subscriptionDescription, rule, filter);
+            }
+
+            string GenerateSubscriptionName(string subscriptionName)
+            {
+                string name;
+                if (subscriptionName.Length > 50)
+                {
+                    string hashed;
+                    using (var hasher = new SHA1Managed())
+                    {
+                        byte[] buffer = Encoding.UTF8.GetBytes(subscriptionName);
+                        byte[] hash = hasher.ComputeHash(buffer);
+                        hashed = FormatUtil.Formatter.Format(hash).Substring(0, 6);
+                    }
+
+                    name = $"{subscriptionName.Substring(0, 43)}-{hashed}";
+                }
+                else
+                    name = subscriptionName;
+
+                return name;
             }
         }
     }

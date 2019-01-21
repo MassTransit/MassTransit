@@ -16,6 +16,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
     using Configuration;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
+    using Metadata;
 
 
     public class ServiceBusPublishTopology :
@@ -43,9 +44,37 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
         {
             var messageTopology = new ServiceBusMessagePublishTopology<T>(_messageTopology.GetMessageTopology<T>());
 
+            var connector = new ImplementedMessageTypeConnector<T>(this, messageTopology);
+
+            ImplementedMessageTypeCache<T>.EnumerateImplementedTypes(connector);
+
             OnMessageTopologyCreated(messageTopology);
 
             return messageTopology;
+        }
+
+
+        class ImplementedMessageTypeConnector<TMessage> :
+            IImplementedMessageType
+            where TMessage : class
+        {
+            readonly ServiceBusMessagePublishTopology<TMessage> _messagePublishTopologyConfigurator;
+            readonly IServiceBusPublishTopologyConfigurator _publishTopology;
+
+            public ImplementedMessageTypeConnector(IServiceBusPublishTopologyConfigurator publishTopology,
+                ServiceBusMessagePublishTopology<TMessage> messagePublishTopologyConfigurator)
+            {
+                _publishTopology = publishTopology;
+                _messagePublishTopologyConfigurator = messagePublishTopologyConfigurator;
+            }
+
+            public void ImplementsMessageType<T>(bool direct)
+                where T : class
+            {
+                IServiceBusMessagePublishTopologyConfigurator<T> messageTopology = _publishTopology.GetMessageTopology<T>();
+
+                _messagePublishTopologyConfigurator.AddImplementedMessageConfigurator(messageTopology, direct);
+            }
         }
     }
 }

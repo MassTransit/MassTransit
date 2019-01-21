@@ -17,10 +17,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
     using Builders;
     using Configurators;
     using Entities;
-    using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
-    using Pipeline;
     using Settings;
     using Specifications;
     using Util;

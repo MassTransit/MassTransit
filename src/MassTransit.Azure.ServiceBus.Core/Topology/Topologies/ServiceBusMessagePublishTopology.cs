@@ -13,6 +13,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 {
     using System;
+    using System.Collections.Generic;
     using Builders;
     using Configuration;
     using Configuration.Configurators;
@@ -29,6 +30,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
         IServiceBusMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
+        readonly IList<IServiceBusMessagePublishTopology> _implementedMessageTypes;
         readonly IMessageTopology<TMessage> _messageTopology;
         readonly TopicConfigurator _topicConfigurator;
         readonly Lazy<TopicDescription> _topicDescription;
@@ -40,6 +42,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
             _topicDescription = new Lazy<TopicDescription>(GetTopicDescription);
 
             _topicConfigurator = new TopicConfigurator(messageTopology.EntityName, TypeMetadataCache<TMessage>.IsTemporaryMessageType);
+            _implementedMessageTypes = new List<IServiceBusMessagePublishTopology>();
         }
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
@@ -61,7 +64,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
         {
             var description = GetTopicDescription();
 
-            var sendSettings = new TopicSendSettings(description);
+            var builder = new PublishEndpointBrokerTopologyBuilder();
+
+            Apply(builder);
+
+            var sendSettings = new TopicSendSettings(description, builder.BuildBrokerTopology());
 
             return sendSettings;
         }
@@ -130,26 +137,48 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
         {
             var topicHandle = builder.CreateTopic(_topicDescription.Value);
 
-            if (builder.Topic == null)
-                builder.Topic = topicHandle;
-
-            // TODO add publisher exchange bindings for message inherited types, similar to RMQ
-            /*
-
-            builder.CreateTopicSubscription(builder.Topic, topicHandle, new SubscriptionConfigurator(builder.Topic.Topic.TopicDescription.Path, topicHandle));
-            
-                builder.ExchangeBind(builder.Exchange, exchangeHandle, "", new Dictionary<string, object>());
-            else
-                builder.Exchange = exchangeHandle;
+            builder.Topic = topicHandle;
 
             foreach (IServiceBusMessagePublishTopology configurator in _implementedMessageTypes)
                 configurator.Apply(builder);
-*/
         }
 
         TopicDescription GetTopicDescription()
         {
             return _topicConfigurator.GetTopicDescription();
+        }
+
+        public void AddImplementedMessageConfigurator<T>(IServiceBusMessagePublishTopologyConfigurator<T> configurator, bool direct)
+            where T : class
+        {
+            var adapter = new ImplementedTypeAdapter<T>(configurator, direct);
+
+            _implementedMessageTypes.Add(adapter);
+        }
+
+
+        class ImplementedTypeAdapter<T> :
+            IServiceBusMessagePublishTopology
+            where T : class
+        {
+            readonly IServiceBusMessagePublishTopologyConfigurator<T> _configurator;
+            readonly bool _direct;
+
+            public ImplementedTypeAdapter(IServiceBusMessagePublishTopologyConfigurator<T> configurator, bool direct)
+            {
+                _configurator = configurator;
+                _direct = direct;
+            }
+
+            public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
+            {
+                if (_direct)
+                {
+                    var implementedBuilder = builder.CreateImplementedBuilder();
+
+                    _configurator.Apply(implementedBuilder);
+                }
+            }
         }
     }
 }

@@ -20,7 +20,7 @@ namespace MassTransit.Azure.ServiceBus.Core
 
 
     /// <summary>
-    /// A service bus namespace which has the appropropriate messaging factories available
+    /// A service bus namespace which has the appropriate messaging factories available
     /// </summary>
     public interface NamespaceContext :
         PipeContext
