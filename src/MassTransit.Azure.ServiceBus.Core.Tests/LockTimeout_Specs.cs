@@ -24,13 +24,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     {
         public Renewing_a_lock_on_an_existing_message()
         {
-            TestTimeout = TimeSpan.FromMinutes(3);
+            TestTimeout = TimeSpan.FromMinutes(10);
         }
 
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             configurator.LockDuration = TimeSpan.FromSeconds(60);
-            configurator.MaxAutoRenewDuration = TimeSpan.FromMinutes(5);
+            configurator.MaxAutoRenewDuration = TimeSpan.FromMinutes(10);
 
             configurator.Consumer<PingConsumer>();
         }
@@ -55,7 +55,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             public async Task Consume(ConsumeContext<PingMessage> context)
             {
-                await Task.Delay(TimeSpan.FromMinutes(2), context.CancellationToken).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromMinutes(8), context.CancellationToken).ConfigureAwait(false);
 
                 Completed.TrySetResult(context.Message);
             }

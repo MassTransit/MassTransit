@@ -89,6 +89,20 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
                 await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
+            catch (SessionLockLostException ex)
+            {
+                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+
+                if (_log.IsWarnEnabled)
+                    _log.Warn($"Session Lock Lost: {message.MessageId}", ex);
+            }
+            catch (MessageLockLostException ex)
+            {
+                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+
+                if (_log.IsWarnEnabled)
+                    _log.Warn($"Message Lock Lost: {message.MessageId}", ex);
+            }
             catch (Exception ex)
             {
                 await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
