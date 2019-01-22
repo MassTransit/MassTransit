@@ -1,6 +1,6 @@
 # Configuring Castle Windsor
 
-The following example shows how to configure a simple Castle Windsor container, and include the bus in the
+Add reference to MassTransit CastleWindsor NuGet package. The following example shows how to configure a simple Castle Windsor container, and include the bus in the
 container. The two bus interfaces, `IBus` and `IBusControl`, are included.
 
 <div class="alert alert-info">
@@ -33,6 +33,9 @@ public static void Main(string[] args)
         {
             endpoint.EnableMessageScope();
             endpoint.LoadFrom(container);
+            
+            // Above method works but it is deprecated, instead below method should be used to get Consumer from container.
+            endPoint.Consumer<YourConsumer>(container.Kernel);
         })
     });
 
@@ -67,7 +70,11 @@ public class MassTransitInstaller :
             config.ReceiveEndpoint(busConfig.QueueName, endpoint =>
             {
                 endpoint.EnableMessageScope();
+                
                 endpoint.LoadFrom(container);
+                
+                // Above method works but it is deprecated, instead below method should be used to get Consumer from container.
+                endPoint.Consumer<YourConsumer>(container.Kernel);
             })
         });
 
