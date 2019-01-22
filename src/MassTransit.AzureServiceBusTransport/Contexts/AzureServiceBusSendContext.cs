@@ -70,13 +70,13 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
         public bool TryGetScheduledMessageId(out long sequenceNumber)
         {
             if (ScheduledMessageId.HasValue)
-                return TryGetSequencyNumber(ScheduledMessageId.Value, out sequenceNumber);
+                return TryGetSequenceNumber(ScheduledMessageId.Value, out sequenceNumber);
 
             sequenceNumber = 0;
             return false;
         }
 
-        public bool TryGetSequencyNumber(Guid id, out long sequenceNumber)
+        public bool TryGetSequenceNumber(Guid id, out long sequenceNumber)
         {
             byte[] bytes = id.ToByteArray();
 

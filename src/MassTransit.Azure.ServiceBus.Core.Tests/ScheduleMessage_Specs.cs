@@ -56,7 +56,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
         }
     }
-    
+
+
     [TestFixture]
     public class Scheduling_a_message_using_quartz :
         AzureServiceBusTestFixture
@@ -70,7 +71,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         }
 
         Uri QuartzAddress { get; set; }
-
 
         [Test]
         public async Task Should_get_the_message()
@@ -110,7 +110,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
         }
     }
-    
+
+
     [TestFixture]
     public class Scheduling_a_message_using_quartz_and_cancelling_it :
         AzureServiceBusTestFixture
@@ -124,7 +125,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         }
 
         Uri QuartzAddress { get; set; }
-
 
         [Test]
         public async Task Should_not_get_the_message()
@@ -146,7 +146,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                 ScheduledMessage<SecondMessage> scheduledMessage = await context.ScheduleSend(DateTime.Now + TimeSpan.FromSeconds(5), new SecondMessage());
 
                 await Task.Delay(1000);
-                
+
                 await context.CancelScheduledSend(scheduledMessage);
             });
 
@@ -225,7 +225,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             await _first;
 
-            Assert.That(async () => await _second.WithTimeout(TimeSpan.FromSeconds(8)), Throws.TypeOf<TaskCanceledException>());
+            Assert.That(async () => await _second.WithTimeout(TimeSpan.FromSeconds(20)), Throws.TypeOf<OperationCanceledException>());
         }
 
         protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
@@ -237,17 +237,22 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
+        Guid _testId;
 
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
+            _testId = NewId.NextGuid();
+
             _first = Handler<FirstMessage>(configurator, async context =>
             {
-                var scheduledMessage = await context.ScheduleSend(TimeSpan.FromSeconds(5), new SecondMessage());
+                var scheduledMessage = await context.ScheduleSend(TimeSpan.FromSeconds(15), new SecondMessage() {Id = _testId});
+
+                await Task.Delay(1000);
 
                 await context.CancelScheduledSend(scheduledMessage);
             });
 
-            _second = Handled<SecondMessage>(configurator);
+            _second = Handled<SecondMessage>(configurator, context => context.Message.Id == _testId);
         }
 
 
@@ -258,6 +263,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         public class SecondMessage
         {
+            public Guid Id { get; set; }
         }
     }
 }

@@ -18,7 +18,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Scheduling
 
 
     /// <summary>
-    /// Sets the message endqueue time when sending the message, and invokes
+    /// Sets the message enqueue time when sending the message, and invokes
     /// any developer-specified pipes.
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -86,7 +86,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Scheduling
 
 
     /// <summary>
-    /// Sets the message endqueue time when sending the message, and invokes
+    /// Sets the message enqueue time when sending the message, and invokes
     /// any developer-specified pipes.
     /// </summary>
     public class ServiceBusScheduleMessagePipe :

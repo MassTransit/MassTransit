@@ -93,9 +93,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
-            ISymmetricKeyProvider keyProvider = new TestSymmetricKeyProvider();
-            var streamProvider = new AesCryptoStreamProvider(keyProvider, "default");
-            configurator.UseEncryptedSerializer(streamProvider);
+            var key = new byte[]
+            {
+                31, 182, 254, 29, 98, 114, 85, 168, 176, 48, 113,
+                206, 198, 176, 181, 125, 106, 134, 98, 217, 113,
+                158, 88, 75, 118, 223, 117, 160, 224, 1, 47, 162
+            };
+
+            var keyProvider = new ConstantSecureKeyProvider(key);
+
+            var streamProvider = new AesCryptoStreamProviderV2(keyProvider);
+            configurator.UseEncryptedSerializerV2(streamProvider);
 
             base.ConfigureServiceBusBus(configurator);
         }
@@ -115,7 +123,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             ConsumeContext<PingMessage> received = await _handler;
 
-            Assert.AreEqual(EncryptedMessageSerializer.EncryptedContentType, received.ReceiveContext.ContentType);
+            Assert.AreEqual(EncryptedMessageSerializerV2.EncryptedContentType, received.ReceiveContext.ContentType);
         }
     }
 

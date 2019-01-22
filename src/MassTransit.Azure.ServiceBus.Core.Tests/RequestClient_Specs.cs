@@ -22,7 +22,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         TwoScopeAzureServiceBusTestFixture
     {
         Task<ConsumeContext<PingMessage>> _handler;
-        IRequestClient<PingMessage, PongMessage> _requestClient;
+        IRequestClient<PingMessage> _requestClient;
 
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
@@ -36,14 +36,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(SecondBus, InputQueueAddress, TestTimeout);
+            _requestClient = SecondBus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
         }
 
         [Test]
         public async Task Should_succeed()
         {
-            var response = await _requestClient.Request(new PingMessage());
+            var pingMessage = new PingMessage();
 
+            var response = await _requestClient.GetResponse<PongMessage>(pingMessage);
+
+            Assert.That(response.Message.CorrelationId, Is.EqualTo(pingMessage.CorrelationId));
         }
     }
 }

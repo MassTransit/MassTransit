@@ -13,7 +13,6 @@
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
-    using System.IO;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework.Messages;

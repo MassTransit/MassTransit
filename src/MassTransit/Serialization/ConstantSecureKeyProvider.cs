@@ -15,7 +15,8 @@ namespace MassTransit.Serialization
     using GreenPipes;
 
 
-    public class ConstantSecureKeyProvider : ISecureKeyProvider
+    public class ConstantSecureKeyProvider :
+        ISecureKeyProvider
     {
         readonly byte[] _key;
 
