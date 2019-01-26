@@ -19,6 +19,7 @@ namespace MassTransit
     using Courier;
     using Internals.Extensions;
     using PipeConfigurators;
+    using Registration;
     using Saga;
     using Scoping;
     using Unity;

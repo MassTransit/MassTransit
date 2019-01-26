@@ -18,35 +18,6 @@ namespace MassTransit.Containers.Tests
     using Scenarios;
 
 
-    public class Autofac_Consumer :
-        When_registering_a_consumer
-    {
-        readonly IContainer _container;
-
-        public Autofac_Consumer()
-        {
-            var builder = new ContainerBuilder();
-            builder.RegisterType<SimpleConsumer>();
-            builder.RegisterType<SimpleConsumerDependency>()
-                .As<ISimpleConsumerDependency>();
-            builder.RegisterType<AnotherMessageConsumerImpl>()
-                .As<AnotherMessageConsumer>();
-
-            _container = builder.Build();
-        }
-
-        [OneTimeTearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
-        }
-
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.LoadFrom(_container);
-        }
-    }
-
     public class Autofac_Consumer_by_interface :
         When_registering_a_consumer_by_interface
     {
@@ -78,16 +49,18 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    public class Autofac_Saga :
+    public class AutofacRegistration_Saga :
         When_registering_a_saga
     {
-        public Autofac_Saga()
+        public AutofacRegistration_Saga()
         {
             var builder = new ContainerBuilder();
-            builder.RegisterGeneric(typeof(InMemorySagaRepository<>))
-                .As(typeof(ISagaRepository<>))
-                .SingleInstance();
-            builder.RegisterType<SimpleSaga>();
+            builder.AddMassTransit(cfg =>
+            {
+                cfg.AddSaga<SimpleSaga>();
+            });
+
+            builder.RegisterInMemorySagaRepository();
 
             _container = builder.Build();
         }

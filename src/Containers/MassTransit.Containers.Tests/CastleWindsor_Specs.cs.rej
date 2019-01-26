@@ -1,9 +1,0 @@
-diff a/src/Containers/MassTransit.Containers.Tests/CastleWindsor_Specs.cs b/src/Containers/MassTransit.Containers.Tests/CastleWindsor_Specs.cs	(rejected hunks)
-@@ -166,6 +166,7 @@
-                 Component.For<FirstConsumer>(),
-                 Component.For<SecondConsumer>(),
-                 Component.For<IScopedDependency>()
-+                    .UsingFactoryMethod(() => new Depedency(GetTask<string>(), GetTask<string>()))
-                     .ImplementedBy<Depedency>()
-                     .LifestyleScoped<MessageScope>());
-         }

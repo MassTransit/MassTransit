@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.UnityIntegration
 {
+    using System;
+    using Registration;
     using Saga;
     using Scoping;
     using Unity;
@@ -27,11 +29,14 @@ namespace MassTransit.UnityIntegration
             _container = container;
         }
 
-        public ISagaRepository<T> CreateSagaRepository<T>() where T : class, ISaga
+        public ISagaRepository<T> CreateSagaRepository<T>(Action<ConsumeContext> scopeAction)
+            where T : class, ISaga
         {
             var repository = _container.Resolve<ISagaRepository<T>>();
 
             var scopeProvider = new UnitySagaScopeProvider<T>(_container);
+            // if (scopeAction != null)
+            //     scopeProvider.AddScopeAction(scopeAction);
 
             var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
 

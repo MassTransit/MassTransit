@@ -37,7 +37,7 @@ namespace MassTransit.UnityIntegration
             context.Add("provider", "unity");
         }
 
-        public ISagaScopeContext<T> GetScope<T>(ConsumeContext<T> context) where T : class
+        ISagaScopeContext<T> ISagaScopeProvider<TSaga>.GetScope<T>(ConsumeContext<T> context)
         {
             if (context.TryGetPayload<IUnityContainer>(out var existingScope))
                 return new ExistingSagaScopeContext<T>(context);
@@ -60,7 +60,7 @@ namespace MassTransit.UnityIntegration
             }
         }
 
-        public ISagaQueryScopeContext<TSaga, T> GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context) where T : class
+        ISagaQueryScopeContext<TSaga, T> ISagaScopeProvider<TSaga>.GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
         {
             if (context.TryGetPayload<IUnityContainer>(out var existingScope))
                 return new ExistingSagaQueryScopeContext<TSaga, T>(context);

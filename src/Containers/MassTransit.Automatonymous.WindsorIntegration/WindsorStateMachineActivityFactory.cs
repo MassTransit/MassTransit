@@ -5,7 +5,8 @@
     using GreenPipes;
 
 
-    public class WindsorStateMachineActivityFactory : IStateMachineActivityFactory
+    public class WindsorStateMachineActivityFactory :
+        IStateMachineActivityFactory
     {
         public Activity<TInstance, TData> GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
             where TActivity : Activity<TInstance, TData>

@@ -24,70 +24,6 @@ namespace MassTransit.Containers.Tests
     using WindsorIntegration;
 
 
-    public class Castle_Consumer :
-        When_registering_a_consumer
-    {
-        [TearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
-        }
-
-        readonly IWindsorContainer _container;
-
-        public Castle_Consumer()
-        {
-            _container = new WindsorContainer();
-            _container.Register(
-                Component.For<SimpleConsumer>()
-                    .LifestyleTransient(),
-                Component.For<ISimpleConsumerDependency>()
-                    .ImplementedBy<SimpleConsumerDependency>()
-                    .LifestyleTransient(),
-                Component.For<AnotherMessageConsumer>()
-                    .ImplementedBy<AnotherMessageConsumerImpl>()
-                    .LifestyleTransient());
-        }
-
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.LoadFrom(_container);
-        }
-    }
-
-
-    public class Castle_Saga :
-        When_registering_a_saga
-    {
-        [OneTimeTearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
-        }
-
-        readonly IWindsorContainer _container;
-
-        public Castle_Saga()
-        {
-            _container = new WindsorContainer();
-            _container.Register(
-                Component.For<SimpleSaga>(),
-                Component.For(typeof(ISagaRepository<>))
-                    .ImplementedBy(typeof(InMemorySagaRepository<>))
-                    .LifeStyle.Singleton);
-        }
-
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.LoadFrom(_container);
-        }
-
-        protected override ISagaRepository<T> GetSagaRepository<T>()
-        {
-            return _container.Resolve<ISagaRepository<T>>();
-        }
-    }
-
 
     public class Test_Bus_Subscriptions_For_Consumers_In_Dummy_Saga_Using_Castle_As_IoC :
         Given_a_service_bus_instance
@@ -178,8 +114,8 @@ namespace MassTransit.Containers.Tests
         {
             configurator.UseMessageScope();
 
-            configurator.Consumer(new WindsorConsumerFactory<FirstConsumer>(_container.Kernel));
-            configurator.Consumer(new WindsorConsumerFactory<SecondConsumer>(_container.Kernel));
+            configurator.Consumer<FirstConsumer>(_container);
+            configurator.Consumer<SecondConsumer>(_container);
         }
 
 

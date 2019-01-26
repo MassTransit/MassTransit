@@ -15,14 +15,12 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using ConsumeConfigurators;
-    using Courier;
     using Internals.Extensions;
-    using PipeConfigurators;
+    using Registration;
     using Saga;
-    using Scoping;
     using StructureMap;
-    using StructureMapIntegration;
+    using StructureMapIntegration.Registration;
+    using StructureMapIntegration.ScopeProviders;
 
 
     public static class StructureMapExtensions
@@ -61,140 +59,6 @@ namespace MassTransit
             var container = context.GetInstance<IContainer>();
 
             configurator.LoadFrom(container);
-        }
-
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<IConsumerConfigurator<T>> configure = null)
-            where T : class, IConsumer
-        {
-            var consumerFactory = new ScopeConsumerFactory<T>(new StructureMapConsumerScopeProvider(container));
-
-            configurator.Consumer(consumerFactory, configure);
-        }
-
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IContext context)
-            where T : class, IConsumer
-        {
-            var consumerFactory = new ScopeConsumerFactory<T>(new StructureMapConsumerScopeProvider(context));
-
-            configurator.Consumer(consumerFactory);
-        }
-
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IContext context, Action<IConsumerConfigurator<T>> configure)
-            where T : class, IConsumer
-        {
-            var consumerFactory = new ScopeConsumerFactory<T>(new StructureMapConsumerScopeProvider(context));
-
-            configurator.Consumer(consumerFactory, configure);
-        }
-
-        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<ISagaConfigurator<T>> configure = null)
-            where T : class, ISaga
-        {
-            var repository = container.GetInstance<ISagaRepository<T>>();
-
-            var sagaRepository = new ScopeSagaRepository<T>(repository, new StructureMapSagaScopeProvider<T>(container));
-
-            configurator.Saga(sagaRepository, configure);
-        }
-
-        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContext context)
-            where T : class, ISaga
-        {
-            var repository = context.GetInstance<ISagaRepository<T>>();
-
-            var sagaRepository = new ScopeSagaRepository<T>(repository, new StructureMapSagaScopeProvider<T>(context));
-
-            configurator.Saga(sagaRepository);
-        }
-
-        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContext context, Action<ISagaConfigurator<T>> configure)
-            where T : class, ISaga
-        {
-            var repository = context.GetInstance<ISagaRepository<T>>();
-
-            var sagaRepository = new ScopeSagaRepository<T>(repository, new StructureMapSagaScopeProvider<T>(context));
-
-            configurator.Saga(sagaRepository, configure);
-        }
-
-        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
-            IContainer container)
-            where TActivity : class, ExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            var executeActivityScopeProvider = new StructureMapExecuteActivityScopeProvider<TActivity, TArguments>(container);
-
-            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
-
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
-
-            configurator.AddEndpointSpecification(specification);
-        }
-
-        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
-            IContext context)
-            where TActivity : class, ExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            var executeActivityScopeProvider = new StructureMapExecuteActivityScopeProvider<TActivity, TArguments>(context);
-
-            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
-
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
-
-            configurator.AddEndpointSpecification(specification);
-        }
-
-        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, IContainer container)
-            where TActivity : class, ExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            var executeActivityScopeProvider = new StructureMapExecuteActivityScopeProvider<TActivity, TArguments>(container);
-
-            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
-
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
-
-            configurator.AddEndpointSpecification(specification);
-        }
-
-        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, IContext context)
-            where TActivity : class, ExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            var executeActivityScopeProvider = new StructureMapExecuteActivityScopeProvider<TActivity, TArguments>(context);
-
-            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
-
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
-
-            configurator.AddEndpointSpecification(specification);
-        }
-
-        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IContainer container)
-            where TActivity : class, CompensateActivity<TLog>
-            where TLog : class
-        {
-            var compensateActivityScopeProvider = new StructureMapCompensateActivityScopeProvider<TActivity, TLog>(container);
-
-            var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
-
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
-
-            configurator.AddEndpointSpecification(specification);
-        }
-
-        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IContext context)
-            where TActivity : class, CompensateActivity<TLog>
-            where TLog : class
-        {
-            var compensateActivityScopeProvider = new StructureMapCompensateActivityScopeProvider<TActivity, TLog>(context);
-
-            var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
-
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
-
-            configurator.AddEndpointSpecification(specification);
         }
 
         static IList<Type> FindTypes<T>(IContainer container, Func<Type, bool> filter)

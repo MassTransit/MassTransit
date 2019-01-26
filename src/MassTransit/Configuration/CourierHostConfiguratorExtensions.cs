@@ -37,28 +37,28 @@ namespace MassTransit
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
-            Uri compensateAddress, Func<TActivity> controllerFactory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
+            Uri compensateAddress, Func<TActivity> activityFactory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            ExecuteActivityHost(configurator, compensateAddress, _ => controllerFactory(), configure);
+            ExecuteActivityHost(configurator, compensateAddress, _ => activityFactory(), configure);
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
-            Func<TActivity> controllerFactory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
+            Func<TActivity> activityFactory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            ExecuteActivityHost(configurator, _ => controllerFactory(), configure);
+            ExecuteActivityHost(configurator, _ => activityFactory(), configure);
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
-            Uri compensateAddress, Func<TArguments, TActivity> controllerFactory,
+            Uri compensateAddress, Func<TArguments, TActivity> activityFactory,
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(controllerFactory);
+            var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(activityFactory);
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
 
             configure?.Invoke(specification);
@@ -67,12 +67,12 @@ namespace MassTransit
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
-            Func<TArguments, TActivity> controllerFactory,
+            Func<TArguments, TActivity> activityFactory,
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(controllerFactory);
+            var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(activityFactory);
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
 
             configure?.Invoke(specification);

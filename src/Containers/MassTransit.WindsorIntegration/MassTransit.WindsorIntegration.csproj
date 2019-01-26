@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../../netfx.props" />
   <Import Project="../../signing.props" />
 
@@ -12,17 +12,17 @@
     <PackageTags>MassTransit;CastleWindsor</PackageTags>
     <Description>MassTransit CastleWindsor container support; $(Description)</Description>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <Compile Remove="MassTransitReleasePolicy.cs"/>
+    <Compile Remove="MassTransitReleasePolicy.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="4.2.0"/>
-    <PackageReference Include="Castle.Windsor" Version="4.1.1"/>
-    <PackageReference Include="GreenPipes" Version="2.1.3"/>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+    <PackageReference Include="Castle.Core" Version="4.2.0" />
+    <PackageReference Include="Castle.Windsor" Version="4.1.1" />
+    <PackageReference Include="GreenPipes" Version="2.1.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

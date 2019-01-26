@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -12,12 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using System.Linq;
+    using System;
     using System.Reflection;
     using Autofac;
-    using Autofac.Builder;
-    using Autofac.Features.Scanning;
     using Automatonymous;
+    using Automatonymous.Registration;
+    using AutomatonymousAutofacIntegration.Registration;
 
 
     public static class AutofacStateMachineRegisterSagaExtensions
@@ -29,13 +29,60 @@ namespace MassTransit
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="assemblies"></param>
-        public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle> RegisterStateMachineSagas(this ContainerBuilder builder,
+        [Obsolete("use RegisterSagaStateMachines instead, this method now forwards to that one")]
+        public static void RegisterStateMachineSagas(this ContainerBuilder builder,
             params Assembly[] assemblies)
         {
-            return builder.RegisterAssemblyTypes(assemblies)
-                .Where(t => t.GetTypeInfo().ImplementedInterfaces.Any(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == typeof(SagaStateMachine<>)))
-                .AsImplementedInterfaces()
-                .AsSelf();
+            RegisterSagaStateMachines(builder, assemblies);
+        }
+
+        /// <summary>
+        /// Add the state machine sagas in the specified assembly to the service collection
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="type">The state machine saga type</param>
+        public static void RegisterSagaStateMachine(this ContainerBuilder builder, Type type)
+        {
+            var registrar = new AutofacSagaStateMachineRegistrar(builder);
+
+            SagaStateMachineRegistrationCache.Register(type, registrar);
+        }
+
+        /// <summary>
+        /// Add the state machine sagas in the specified assembly to the service collection
+        /// </summary>
+        /// <param name="builder"></param>
+        public static void RegisterSagaStateMachine<TStateMachine, TInstance>(this ContainerBuilder builder)
+            where TStateMachine : class, SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            var registrar = new AutofacSagaStateMachineRegistrar(builder);
+
+            SagaStateMachineRegistrationCache.Register(typeof(TStateMachine), registrar);
+        }
+
+        /// <summary>
+        /// Add the state machine sagas in the specified assembly to the service collection
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="assemblies">If specified, only the specified assemblies are scanned</param>
+        public static void RegisterSagaStateMachines(this ContainerBuilder builder, params Assembly[] assemblies)
+        {
+            var registrar = new AutofacSagaStateMachineRegistrar(builder);
+
+            registrar.RegisterSagaStateMachines(assemblies);
+        }
+
+        /// <summary>
+        /// Add the state machine sagas by type
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="types">If specified, only the specified assemblies are scanned</param>
+        public static void RegisterSagaStateMachines(this ContainerBuilder builder, params Type[] types)
+        {
+            var registrar = new AutofacSagaStateMachineRegistrar(builder);
+
+            registrar.RegisterSagaStateMachines(types);
         }
     }
 }

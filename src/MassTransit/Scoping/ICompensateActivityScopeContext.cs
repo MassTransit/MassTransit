@@ -4,7 +4,7 @@
     using Courier;
 
 
-    public interface ICompensateActivityScopeContext<out TActivity, TLog> :
+    public interface ICompensateActivityScopeContext<out TActivity, out TLog> :
         IDisposable
         where TActivity : class, CompensateActivity<TLog>
         where TLog : class

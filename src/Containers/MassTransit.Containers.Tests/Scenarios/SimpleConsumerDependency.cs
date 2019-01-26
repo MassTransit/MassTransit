@@ -29,6 +29,8 @@ namespace MassTransit.Containers.Tests.Scenarios
 
         public void Dispose()
         {
+            Console.WriteLine("Disposing Simple Dependency");
+
             _disposed.TrySetResult(true);
         }
 

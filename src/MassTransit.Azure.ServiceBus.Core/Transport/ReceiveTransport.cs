@@ -36,7 +36,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         readonly ClientSettings _settings;
         readonly ServiceBusReceiveEndpointContext _receiveEndpointContext;
 
-        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IClientContextSupervisor clientContextSupervisor, IPipe<ClientContext> clientPipe,
+        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IClientContextSupervisor clientContextSupervisor,
+            IPipe<ClientContext> clientPipe,
             ServiceBusReceiveEndpointContext receiveEndpointContext)
         {
             _host = host;
@@ -93,8 +94,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         async Task Receiver()
         {
-            var inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri, _settings.Path);
-
             while (!IsStopping)
             {
                 try
@@ -102,7 +101,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                     await _host.RetryPolicy.Retry(async () =>
                     {
                         if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Connecting receive transport: {0}", inputAddress);
+                            _log.DebugFormat("Connecting receive transport: {0}", _receiveEndpointContext.InputAddress);
 
                         try
                         {
@@ -114,9 +113,10 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                         catch (Exception ex)
                         {
                             if (_log.IsErrorEnabled)
-                                _log.Error($"ReceiveTransport Faulted: {inputAddress}", ex);
+                                _log.Error($"ReceiveTransport Faulted: {_receiveEndpointContext.InputAddress}", ex);
 
-                            await _receiveEndpointContext.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(inputAddress, ex)).ConfigureAwait(false);
+                            await _receiveEndpointContext.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_receiveEndpointContext.InputAddress, ex))
+                                .ConfigureAwait(false);
 
                             throw;
                         }

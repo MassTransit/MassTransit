@@ -7,8 +7,11 @@
     using Courier;
     using Internals.Extensions;
     using Lamar;
+    using MassTransit.Registration;
     using PipeConfigurators;
+    using Registration;
     using Saga;
+    using ScopeProviders;
     using Scoping;
 
 
@@ -63,73 +66,10 @@
             configurator.LoadFrom(container);
         }
 
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<IConsumerConfigurator<T>> configure = null)
-            where T : class, IConsumer
-        {
-            var consumerFactory = new ScopeConsumerFactory<T>(new LamarConsumerScopeProvider(container));
-            configurator.Consumer(consumerFactory, configure);
-        }
-
-        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<ISagaConfigurator<T>> configure = null)
-            where T : class, ISaga
-        {
-            var repository = container.GetInstance<ISagaRepository<T>>();
-            var sagaRepository = new ScopeSagaRepository<T>(repository, new LamarSagaScopeProvider<T>(container));
-
-            configurator.Saga(sagaRepository, configure);
-        }
-
-        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress, IContainer container)
-            where TActivity : class, ExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            var executeActivityScopeProvider = new LamarExecuteActivityScopeProvider<TActivity, TArguments>(container);
-            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
-            configurator.AddEndpointSpecification(specification);
-        }
-
-        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, IContainer container)
-            where TActivity : class, ExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            var executeActivityScopeProvider = new LamarExecuteActivityScopeProvider<TActivity, TArguments>(container);
-            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
-            configurator.AddEndpointSpecification(specification);
-        }
-
-        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IContainer container)
-            where TActivity : class, CompensateActivity<TLog>
-            where TLog : class
-        {
-            var compensateActivityScopeProvider = new LamarCompensateActivityScopeProvider<TActivity, TLog>(container);
-            var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
-            configurator.AddEndpointSpecification(specification);
-        }
-
-        public static void AddMassTransit(this ServiceRegistry serviceRegistry)
-        {
-            serviceRegistry.Injectable<LamarActivityFactory>();
-            serviceRegistry.Injectable<ConsumeContext>();
-        }
-
         internal static INestedContainer GetNestedContainer(this IContainer container, ConsumeContext context)
         {
             var nestedContainer = container.GetNestedContainer();
-            nestedContainer.Inject(LamarActivityFactory.Instance);
             nestedContainer.Inject(context);
-
-            return nestedContainer;
-        }
-
-        internal static INestedContainer GetNestedContainer<T>(this IContainer container, ConsumeContext<T> context)
-            where T : class
-        {
-            var nestedContainer = container.GetNestedContainer();
-            nestedContainer.Inject(LamarActivityFactory.Instance);
-            nestedContainer.Inject<ConsumeContext>(context);
 
             return nestedContainer;
         }

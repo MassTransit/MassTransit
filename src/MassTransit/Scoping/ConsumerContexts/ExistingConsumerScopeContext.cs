@@ -1,5 +1,8 @@
 ﻿namespace MassTransit.Scoping.ConsumerContexts
 {
+    using System;
+
+
     public class ExistingConsumerScopeContext :
         IConsumerScopeContext
     {
@@ -16,18 +19,22 @@
     }
 
 
-    public class ExistingConsumerScopeContext<TConsumer,T> :
-        IConsumerScopeContext<TConsumer,T>
+    public class ExistingConsumerScopeContext<TConsumer, T> :
+        IConsumerScopeContext<TConsumer, T>
         where TConsumer : class
         where T : class
     {
-        public ExistingConsumerScopeContext(ConsumerConsumeContext<TConsumer, T> context)
+        readonly Action<TConsumer> _disposeCallback;
+
+        public ExistingConsumerScopeContext(ConsumerConsumeContext<TConsumer, T> context, Action<TConsumer> disposeCallback = null)
         {
+            _disposeCallback = disposeCallback;
             Context = context;
         }
 
         public void Dispose()
         {
+            _disposeCallback?.Invoke(Context.Consumer);
         }
 
         public ConsumerConsumeContext<TConsumer, T> Context { get; }

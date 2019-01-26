@@ -13,7 +13,7 @@
 namespace MassTransit.AutomatonymousStructureMapIntegration
 {
     using Automatonymous;
-    using Automatonymous.Scoping;
+    using Automatonymous.Registration;
     using StructureMap;
 
 

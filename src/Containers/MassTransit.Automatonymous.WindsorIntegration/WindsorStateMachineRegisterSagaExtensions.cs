@@ -1,7 +1,6 @@
-﻿namespace MassTransit.AutomatonymousWindsorIntegration
+﻿namespace MassTransit
 {
     using System;
-    using System.Linq;
     using Automatonymous;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;

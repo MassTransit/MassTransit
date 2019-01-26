@@ -29,7 +29,7 @@ namespace MassTransit.Scoping.ConsumerContexts
 
         public void Dispose()
         {
-            _scope.Dispose();
+            _scope?.Dispose();
         }
 
         public ConsumeContext Context { get; }
@@ -43,16 +43,19 @@ namespace MassTransit.Scoping.ConsumerContexts
         where T : class
     {
         readonly TScope _scope;
+        readonly Action<TConsumer> _disposeCallback;
 
-        public CreatedConsumerScopeContext(TScope scope, ConsumerConsumeContext<TConsumer, T> context)
+        public CreatedConsumerScopeContext(TScope scope, ConsumerConsumeContext<TConsumer, T> context, Action<TConsumer> disposeCallback = null)
         {
             _scope = scope;
+            _disposeCallback = disposeCallback;
             Context = context;
         }
 
         public void Dispose()
         {
-            _scope.Dispose();
+            _disposeCallback?.Invoke(Context.Consumer);
+            _scope?.Dispose();
         }
 
         public ConsumerConsumeContext<TConsumer, T> Context { get; }

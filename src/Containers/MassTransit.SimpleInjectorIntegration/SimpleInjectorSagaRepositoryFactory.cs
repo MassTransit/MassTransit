@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SimpleInjectorIntegration
 {
+    using System;
+    using Registration;
     using Saga;
     using Scoping;
     using SimpleInjector;
@@ -27,11 +29,14 @@ namespace MassTransit.SimpleInjectorIntegration
             _container = container;
         }
 
-        public ISagaRepository<T> CreateSagaRepository<T>() where T : class, ISaga
+        public ISagaRepository<T> CreateSagaRepository<T>(Action<ConsumeContext> scopeAction)
+            where T : class, ISaga
         {
             var repository = _container.GetInstance<ISagaRepository<T>>();
 
             var scopeProvider = new SimpleInjectorSagaScopeProvider<T>(_container);
+            // if (scopeAction != null)
+            //     scopeProvider.AddScopeAction(scopeAction);
 
             var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
 

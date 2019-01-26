@@ -11,15 +11,18 @@
         where TLog : class
     {
         readonly TScope _scope;
+        readonly Action<TActivity> _disposeCallback;
 
-        public CreatedCompensateActivityScopeContext(TScope scope, CompensateActivityContext<TActivity, TLog> context)
+        public CreatedCompensateActivityScopeContext(TScope scope, CompensateActivityContext<TActivity, TLog> context, Action<TActivity> disposeCallback = null)
         {
             _scope = scope;
+            _disposeCallback = disposeCallback;
             Context = context;
         }
 
         public void Dispose()
         {
+            _disposeCallback?.Invoke(Context.Activity);
             _scope.Dispose();
         }
 

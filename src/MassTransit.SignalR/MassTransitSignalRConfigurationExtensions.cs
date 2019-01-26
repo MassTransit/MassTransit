@@ -1,52 +1,43 @@
 ﻿namespace MassTransit.SignalR
 {
     using MassTransit;
-    using MassTransit.ConsumeConfigurators;
-    using MassTransit.ExtensionsDependencyInjectionIntegration;
-    using MassTransit.Scoping;
+    using Scoping;
     using System;
     using System.Collections.Generic;
+    using ExtensionsDependencyInjectionIntegration.ScopeProviders;
+    using Registration;
+
 
     public static class MassTransitSignalRConfigurationExtensions
     {
-        public static void CreateBackplaneEndpoints<T>(this IBusFactoryConfigurator configurator, IServiceProvider serviceProvider, IHost host, IReadOnlyDictionary<Type, IReadOnlyList<Type>> hubConsumers, Action<T> configureEndpoint = null)
-            where T : class, IReceiveEndpointConfigurator
+        public static void CreateBackplaneEndpoints<TEndpointConfigurator>(this IBusFactoryConfigurator configurator,
+            IServiceProvider serviceProvider,
+            IHost host, IReadOnlyDictionary<Type, IReadOnlyList<Type>> hubConsumers, Action<TEndpointConfigurator> configureEndpoint = null)
+            where TEndpointConfigurator : class, IReceiveEndpointConfigurator
         {
-            var factoryType = typeof(ScopeConsumerFactory<>);
-            var consumerConfiguratorType = typeof(ConsumerConfigurator<>);
+            IConsumerScopeProvider scopeProvider = new DependencyInjectionConsumerScopeProvider(serviceProvider);
 
             foreach (var hub in hubConsumers)
             {
                 var queueNameBase = host.Topology.CreateTemporaryQueueName($"signalRBackplane-{hub.Key.Name}-");
 
                 // Loop through our 5 hub consumers and create a temporary endpoint for each
-                foreach (var consumer in hub.Value)
+                foreach (var consumerType in hub.Value)
                 {
                     // remove `1 from generic type
-                    var name = consumer.Name;
+                    var name = consumerType.Name;
                     int index = name.IndexOf('`');
                     if (index > 0)
                         name = name.Remove(index);
 
                     configurator.ReceiveEndpoint($"{queueNameBase}{name}-", e =>
                     {
-                        configureEndpoint?.Invoke((T)e);
+                        configureEndpoint?.Invoke((TEndpointConfigurator)e);
 
-                        IConsumerScopeProvider scopeProvider = new DependencyInjectionConsumerScopeProvider(serviceProvider);
-
-                        var concreteFactoryType = factoryType.MakeGenericType(consumer);
-
-                        var consumerFactory = Activator.CreateInstance(concreteFactoryType, scopeProvider);
-
-                        var concreteConsumerConfiguratorType = consumerConfiguratorType.MakeGenericType(consumer);
-
-                        var consumerConfigurator = Activator.CreateInstance(concreteConsumerConfiguratorType, consumerFactory, e);
-
-                        e.AddEndpointSpecification((IReceiveEndpointSpecification)consumerConfigurator);
+                        ConsumerConfiguratorCache.Configure(consumerType, e, scopeProvider);
                     });
                 }
             }
-
         }
     }
 }

@@ -3,10 +3,10 @@
     using System;
 
 
-    public interface ISagaScopeContext<out T> :
+    public interface ISagaScopeContext<out TSaga> :
         IDisposable
-        where T : class
+        where TSaga : class
     {
-        ConsumeContext<T> Context { get; }
+        ConsumeContext<TSaga> Context { get; }
     }
 }

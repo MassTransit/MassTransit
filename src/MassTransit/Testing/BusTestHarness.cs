@@ -41,6 +41,7 @@ namespace MassTransit.Testing
         TestSendObserver _sent;
 
         public IBus Bus => _bus;
+        public IBusControl BusControl => _bus;
 
         /// <summary>
         /// The address of the default bus endpoint, used as the SourceAddress for requests and published messages

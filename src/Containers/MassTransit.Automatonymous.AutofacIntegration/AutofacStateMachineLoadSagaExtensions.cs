@@ -18,9 +18,11 @@ namespace MassTransit
     using Autofac;
     using Autofac.Core;
     using AutofacIntegration;
+    using AutofacIntegration.Registration;
     using Automatonymous;
-    using Automatonymous.Scoping;
+    using Automatonymous.Registration;
     using AutomatonymousAutofacIntegration;
+    using AutomatonymousAutofacIntegration.Registration;
     using Internals.Extensions;
 
 
@@ -37,6 +39,14 @@ namespace MassTransit
         public static void LoadStateMachineSagas(this IReceiveEndpointConfigurator configurator, IComponentContext context, string name = "message",
             Action<ContainerBuilder, ConsumeContext> configureScope = null)
         {
+            var registration = context.ResolveOptional<IRegistration>();
+            if (registration != null)
+            {
+                registration.ConfigureSagas(configurator);
+
+                return;
+            }
+
             var scope = context.Resolve<ILifetimeScope>();
 
             IEnumerable<Type> sagaTypes = FindStateMachineSagaTypes(context);
@@ -44,18 +54,19 @@ namespace MassTransit
             var stateMachineFactory = new AutofacSagaStateMachineFactory(scope);
 
             var scopeProvider = new SingleLifetimeScopeProvider(scope);
-            var repositoryFactory = new AutofacStateMachineSagaRepositoryFactory(scopeProvider, name, configureScope);
+            var repositoryFactory = new AutofacSagaRepositoryFactory(scopeProvider, name, configureScope);
+            var activityFactory = new AutofacStateMachineActivityFactory();
 
             foreach (var sagaType in sagaTypes)
             {
-                StateMachineSagaConfiguratorCache.Configure(sagaType, configurator, stateMachineFactory, repositoryFactory);
+                StateMachineSagaConfiguratorCache.Configure(sagaType, configurator, stateMachineFactory, repositoryFactory, activityFactory);
             }
         }
 
         static IEnumerable<Type> FindStateMachineSagaTypes(IComponentContext context)
         {
             return context.ComponentRegistry.Registrations
-                .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new { r, s })
+                .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})
                 .Where(rs => rs.s.ServiceType.HasInterface(typeof(SagaStateMachine<>)))
                 .Select(rs => rs.s.ServiceType.GetClosingArguments(typeof(SagaStateMachine<>)).Single())
                 .Distinct()

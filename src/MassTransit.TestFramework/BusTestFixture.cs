@@ -32,6 +32,7 @@ namespace MassTransit.TestFramework
         protected BusTestHarness BusTestHarness { get; }
 
         protected IBus Bus => BusTestHarness.Bus;
+        protected IBusControl BusControl => BusTestHarness.BusControl;
 
         /// <summary>
         /// Subscribes a message handler to the bus, which is disconnected after the message

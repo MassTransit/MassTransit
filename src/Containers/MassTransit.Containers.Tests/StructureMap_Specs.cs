@@ -18,35 +18,6 @@ namespace MassTransit.Containers.Tests
     using StructureMap;
 
 
-    public class StructureMap_Consumer :
-        When_registering_a_consumer
-    {
-        [TearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
-        }
-
-        readonly IContainer _container;
-
-        public StructureMap_Consumer()
-        {
-            _container = new Container(x =>
-            {
-                x.For<SimpleConsumer>()
-                    .Use<SimpleConsumer>();
-                x.For<ISimpleConsumerDependency>()
-                    .Use<SimpleConsumerDependency>();
-                x.For<AnotherMessageConsumer>()
-                    .Use<AnotherMessageConsumerImpl>();
-            });
-        }
-
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.LoadFrom(_container);
-        }
-    }
 
 
     public class StructureMap_Saga :

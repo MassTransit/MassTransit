@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.Scoping.CourierContexts
 {
+    using System;
     using Courier;
 
 
@@ -8,13 +9,17 @@
         where TActivity : class, CompensateActivity<TLog>
         where TLog : class
     {
-        public ExistingCompensateActivityScopeContext(CompensateActivityContext<TActivity, TLog> context)
+        readonly Action<TActivity> _disposeCallback;
+
+        public ExistingCompensateActivityScopeContext(CompensateActivityContext<TActivity, TLog> context, Action<TActivity> disposeCallback = null)
         {
+            _disposeCallback = disposeCallback;
             Context = context;
         }
 
         public void Dispose()
         {
+            _disposeCallback?.Invoke(Context.Activity);
         }
 
         public CompensateActivityContext<TActivity, TLog> Context { get; }

@@ -17,6 +17,7 @@ namespace MassTransit.AutofacIntegration
     using Autofac;
     using Courier;
     using GreenPipes;
+    using ScopeProviders;
     using Scoping;
 
 

@@ -16,7 +16,6 @@ namespace MassTransit
     using ConsumeConfigurators;
     using GreenPipes;
     using Saga;
-    using SagaConfigurators;
 
 
     public interface ISagaConfigurator<TSaga> :
