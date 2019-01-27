@@ -1,5 +1,9 @@
 # Configuring Microsoft Dependency Injection
 
+**Important**
+This documentation applies to ASP.NET Core 2.0 and 2.1. For the ASP.NET Core 2.2, you can use the 
+[ASP.NET Core integration](../configuration.md) package that does many things out of the box.
+
 MassTransit supports the default dependency injection framework used by ASP.NET.
 
 > Support requires an additional NuGet package, `MassTransit.Extensions.DependencyInjection`, which is available using [NuGet](https://www.nuget.org/packages/MassTransit.Extensions.DependencyInjection/).
@@ -31,9 +35,7 @@ public class Startup
                 e.PrefetchCount = 16;
                 e.UseMessageRetry(x => x.Interval(2, 100));
 
-                e.LoadFrom(provider);
-
-                EndpointConvention.Map<SubmitOrder>(e.InputAddress);
+                e.Consumer<OrderConsumer>(provider);
             });
         }));
 
