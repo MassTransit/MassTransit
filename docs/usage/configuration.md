@@ -1,6 +1,19 @@
 # Configuring MassTransit
 
-<!-- TOC -->autoauto- [Configuring MassTransit](#configuring-masstransit)auto    - [MassTransit in a console application](#masstransit-in-a-console-application)auto    - [MassTransit and ASP.NET Core](#masstransit-and-aspnet-core)auto    - [MassTransit in a Windows service](#masstransit-in-a-windows-service)auto    - [MassTransit in a web application](#masstransit-in-a-web-application)auto        - [ASP.NET (MVC/WebApi2)](#aspnet-mvcwebapi2)auto        - [OWIN Pipeline (WebApi2)](#owin-pipeline-webapi2)autoauto<!-- /TOC -->
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+* [Configuring MassTransit](#configuring-masstransit)
+	* [MassTransit in a console application](#masstransit-in-a-console-application)
+	* [MassTransit and ASP.NET Core](#masstransit-and-aspnet-core)
+	* [MassTransit in a Windows service](#masstransit-in-a-windows-service)
+	* [MassTransit in a web application](#masstransit-in-a-web-application)
+		* [ASP.NET (MVC/WebApi2)](#aspnet-mvcwebapi2)
+		* [OWIN Pipeline (WebApi2)](#owin-pipeline-webapi2)
+
+<!-- /code_chunk_output -->
+
 
 To configure MassTransit in your application, it depends upon the application type.
 There are several application types, which are covered below. In these examples, the
