@@ -2,7 +2,7 @@
 
 **Important**
 This documentation applies to ASP.NET Core 2.0 and 2.1. For the ASP.NET Core 2.2, you can use the 
-[ASP.NET Core integration](../configuration.md) package that does many things out of the box.
+[ASP.NET Core integration](../configuration.md#masstransit-and-aspnet-core) package that does many things out of the box.
 
 MassTransit supports the default dependency injection framework used by ASP.NET.
 
