@@ -33,6 +33,11 @@ namespace MassTransit
         /// When the last message in this batch was received
         /// </summary>
         DateTime LastMessageReceived { get; }
+        
+        /// <summary>
+        /// Returns all messages from batch
+        /// </summary>
+        ConsumeContext<T>[] Messages { get; }
 
         /// <summary>
         /// Returns the message at the specified index

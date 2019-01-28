@@ -163,6 +163,8 @@ namespace MassTransit.Pipeline.ConsumerFactories
             public DateTime FirstMessageReceived { get; }
             public DateTime LastMessageReceived { get; }
 
+            public ConsumeContext<TMessage>[] Messages => _messages;
+
             public ConsumeContext<TMessage> this[int index] => _messages[index];
 
             public int Length => _messages.Length;
