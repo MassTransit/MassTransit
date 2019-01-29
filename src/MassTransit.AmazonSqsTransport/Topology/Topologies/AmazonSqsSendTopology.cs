@@ -13,6 +13,7 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 {
     using System;
+    using System.Globalization;
     using Configuration;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
@@ -24,6 +25,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         SendTopology,
         IAmazonSqsSendTopologyConfigurator
     {
+        const string FifoSuffix = ".fifo";
+
         public AmazonSqsSendTopology(IEntityNameValidator validator)
         {
             EntityNameValidator = validator;
@@ -59,12 +62,34 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public ErrorSettings GetErrorSettings(EntitySettings settings)
         {
-            return new QueueErrorSettings(settings, settings.EntityName + "_error");
+            string entityName;
+
+            if (settings.EntityName.EndsWith(FifoSuffix, true, CultureInfo.InvariantCulture))
+            {
+                entityName = settings.EntityName.Substring(0, settings.EntityName.Length - FifoSuffix.Length) + "_error" + FifoSuffix;
+            }
+            else
+            {
+                entityName = settings.EntityName + "_error";
+            }
+
+            return new QueueErrorSettings(settings, entityName);
         }
 
         public DeadLetterSettings GetDeadLetterSettings(EntitySettings settings)
         {
-            return new QueueDeadLetterSettings(settings, settings.EntityName + "_skipped");
+            string entityName;
+
+            if (settings.EntityName.EndsWith(FifoSuffix, true, CultureInfo.InvariantCulture))
+            {
+                entityName = settings.EntityName.Substring(0, settings.EntityName.Length - FifoSuffix.Length) + "_skipped" + FifoSuffix;
+            }
+            else
+            {
+                entityName = settings.EntityName + "_skipped";
+            }
+
+            return new QueueDeadLetterSettings(settings, entityName);
         }
 
         protected override IMessageSendTopologyConfigurator CreateMessageTopology<T>(Type type)

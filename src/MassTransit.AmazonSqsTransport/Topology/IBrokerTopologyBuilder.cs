@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Topology
 {
+    using System.Collections.Generic;
     using Entities;
 
 
@@ -32,8 +33,9 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// <param name="name"></param>
         /// <param name="durable"></param>
         /// <param name="autoDelete"></param>
+        /// <param name="attributes"></param>
         /// <returns></returns>
-        QueueHandle CreateQueue(string name, bool durable, bool autoDelete);
+        QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object> attributes = null);
 
         /// <summary>
         /// Create a subscription on a topic to a queue

@@ -22,14 +22,18 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
         IQueueConfigurator,
         Queue
     {
-        protected QueueConfigurator(string queueName, bool durable = true, bool autoDelete = false, IReadOnlyDictionary<string, string> attributes = null)
-            : base(queueName, durable, autoDelete, attributes)
+        protected QueueConfigurator(string queueName, bool durable = true, bool autoDelete = false, IDictionary<string, object> attributes = null)
+            : base(queueName, durable, autoDelete)
         {
+            Attributes = attributes ?? new Dictionary<string, object>();
         }
 
         public QueueConfigurator(Queue source)
-            : base(source.EntityName, source.Durable, source.AutoDelete, source.Attributes)
+            : base(source.EntityName, source.Durable, source.AutoDelete)
         {
+            Attributes = source.Attributes;
         }
+
+        public IDictionary<string, object> Attributes { get; set; }
     }
 }

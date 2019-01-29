@@ -152,6 +152,8 @@
             set => _settings.PurgeOnStartup = value;
         }
 
+        public IDictionary<string, object> Attributes => _settings.Attributes;
+
         public void Subscribe(string topicName, Action<ITopicSubscriptionConfigurator> configure = null)
         {
             if (topicName == null)

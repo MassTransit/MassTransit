@@ -20,13 +20,12 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         Topic,
         TopicHandle
     {
-        public TopicEntity(long id, string name, bool durable, bool autoDelete, IReadOnlyDictionary<string, string> attributes = null)
+        public TopicEntity(long id, string name, bool durable, bool autoDelete)
         {
             Id = id;
             EntityName = name;
             Durable = durable;
             AutoDelete = autoDelete;
-            Attributes = attributes ?? new Dictionary<string, string>();
         }
 
         public static IEqualityComparer<TopicEntity> NameComparer { get; } = new NameEqualityComparer();
@@ -37,7 +36,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         public bool Durable { get; }
         public bool AutoDelete { get; }
         public long Id { get; }
-        public IReadOnlyDictionary<string, string> Attributes { get; }
         public Topic Topic => this;
 
         public override string ToString()
@@ -46,8 +44,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
             {
                 $"name: {EntityName}",
                 Durable ? "durable" : string.Empty,
-                AutoDelete ? "auto-delete" : string.Empty,
-                Attributes.Any() ? $"attributes: {string.Join(";", Attributes.Select(a => $"{a.Key}={a.Value}"))}" : string.Empty
+                AutoDelete ? "auto-delete" : string.Empty
             }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 

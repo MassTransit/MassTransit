@@ -14,6 +14,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
     using System.Threading;
@@ -80,12 +81,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 if (_topicArns.TryGetValue(topic.EntityName, out var result))
                     return result;
 
-            var request = new CreateTopicRequest(topic.EntityName)
-            {
-                Attributes = topic.Attributes.ToDictionary(x => x.Key, x => x.Value)
-            };
-
-            var response = await _amazonSns.CreateTopicAsync(request).ConfigureAwait(false);
+            var response = await _amazonSns.CreateTopicAsync(topic.EntityName).ConfigureAwait(false);
 
             await Task.Delay(500).ConfigureAwait(false);
 
@@ -103,9 +99,17 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 if (_queueUrls.TryGetValue(queue.EntityName, out var result))
                     return result;
 
+            // required to preserve backwards compability
+            if (queue.EntityName.EndsWith(".fifo", true, CultureInfo.InvariantCulture) && !queue.Attributes.ContainsKey(QueueAttributeName.FifoQueue))
+            {
+                _log.Warn("Using '.fifo' suffix without 'FifoQueue' attribute might cause unexpected behavior.");
+
+                queue.Attributes[QueueAttributeName.FifoQueue] = true;
+            }
+
             var request = new CreateQueueRequest(queue.EntityName)
             {
-                Attributes = queue.Attributes.ToDictionary(x => x.Key, x => x.Value)
+                Attributes = queue.Attributes.ToDictionary(x => x.Key, x => x.Value.ToString())
             };
 
             var response = await _amazonSqs.CreateQueueAsync(request).ConfigureAwait(false);
