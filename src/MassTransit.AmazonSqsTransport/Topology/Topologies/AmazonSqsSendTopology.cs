@@ -25,8 +25,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         SendTopology,
         IAmazonSqsSendTopologyConfigurator
     {
-        const string FifoSuffix = ".fifo";
-
         public AmazonSqsSendTopology(IEntityNameValidator validator)
         {
             EntityNameValidator = validator;
@@ -62,34 +60,12 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public ErrorSettings GetErrorSettings(EntitySettings settings)
         {
-            string entityName;
-
-            if (settings.EntityName.EndsWith(FifoSuffix, true, CultureInfo.InvariantCulture))
-            {
-                entityName = settings.EntityName.Substring(0, settings.EntityName.Length - FifoSuffix.Length) + "_error" + FifoSuffix;
-            }
-            else
-            {
-                entityName = settings.EntityName + "_error";
-            }
-
-            return new QueueErrorSettings(settings, entityName);
+            return new QueueErrorSettings(settings, BuildEntityName(settings.EntityName, "_error"));
         }
 
         public DeadLetterSettings GetDeadLetterSettings(EntitySettings settings)
         {
-            string entityName;
-
-            if (settings.EntityName.EndsWith(FifoSuffix, true, CultureInfo.InvariantCulture))
-            {
-                entityName = settings.EntityName.Substring(0, settings.EntityName.Length - FifoSuffix.Length) + "_skipped" + FifoSuffix;
-            }
-            else
-            {
-                entityName = settings.EntityName + "_skipped";
-            }
-
-            return new QueueDeadLetterSettings(settings, entityName);
+            return new QueueDeadLetterSettings(settings, BuildEntityName(settings.EntityName, "_skipped"));
         }
 
         protected override IMessageSendTopologyConfigurator CreateMessageTopology<T>(Type type)
@@ -99,6 +75,18 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             OnMessageTopologyCreated(messageTopology);
 
             return messageTopology;
+        }
+
+        string BuildEntityName(string entityName, string suffix)
+        {
+            const string fifoSuffix = ".fifo";
+
+            if (!entityName.EndsWith(fifoSuffix, true, CultureInfo.InvariantCulture))
+            {
+                return entityName + suffix;
+            }
+
+            return entityName.Substring(0, entityName.Length - fifoSuffix.Length) + suffix + fifoSuffix;
         }
     }
 }

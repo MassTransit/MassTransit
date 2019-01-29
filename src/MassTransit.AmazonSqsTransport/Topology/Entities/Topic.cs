@@ -12,8 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Topology.Entities
 {
-
-
     /// <summary>
     /// The exchange details used to declare the exchange to AmazonSQS
     /// </summary>
