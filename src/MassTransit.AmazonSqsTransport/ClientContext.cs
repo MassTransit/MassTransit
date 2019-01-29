@@ -19,7 +19,7 @@ namespace MassTransit.AmazonSqsTransport
     using GreenPipes;
     using Pipeline;
     using Topology;
-    using Topology.Entities;
+    using Queue = Topology.Entities.Queue;
     using Topic = Topology.Entities.Topic;
 
 

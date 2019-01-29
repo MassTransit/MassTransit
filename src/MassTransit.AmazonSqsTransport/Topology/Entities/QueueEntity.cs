@@ -16,7 +16,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
     using System.Linq;
 
 
-    // TODO upgrade QueueEntityEqualityComparer, NameEqualityComparer??? same applies to TopicEntity
     public class QueueEntity :
         Queue,
         QueueHandle
@@ -46,9 +45,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
             return string.Join(", ", new[]
             {
                 $"name: {EntityName}",
-                Durable ? "durable" : string.Empty,
-                AutoDelete ? "auto-delete" : string.Empty,
-                Attributes.Any() ? $"attributes: {string.Join(";", Attributes.Select(a => $"{a.Key}={a.Value}"))}" : string.Empty
+                Durable ? "durable" : "",
+                AutoDelete ? "auto-delete" : "",
+                Attributes.Any() ? $"attributes: {string.Join(";", Attributes.Select(a => $"{a.Key}={a.Value}"))}" : ""
             }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 

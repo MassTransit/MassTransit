@@ -43,8 +43,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
             return string.Join(", ", new[]
             {
                 $"name: {EntityName}",
-                Durable ? "durable" : string.Empty,
-                AutoDelete ? "auto-delete" : string.Empty
+                Durable ? "durable" : "",
+                AutoDelete ? "auto-delete" : ""
             }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 
