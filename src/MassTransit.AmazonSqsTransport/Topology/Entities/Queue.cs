@@ -36,8 +36,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         bool AutoDelete { get; }
 
         /// <summary>
-        /// TODO add summary
+        /// Additional <see href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SetQueueAttributes.html">attributes</see> for the queue.
         /// </summary>
-        IReadOnlyDictionary<string, string> Attributes { get; }
+        IDictionary<string, object> Attributes { get; }
     }
 }

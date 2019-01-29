@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Configuration
 {
+    using System.Collections.Generic;
+
+
     /// <summary>
     /// Configures a queue/exchange pair in AmazonSQS
     /// </summary>
@@ -27,5 +30,10 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// Specify that the queue (and the exchange of the same name) should be created as auto-delete
         /// </summary>
         bool AutoDelete { set; }
+
+        /// <summary>
+        /// Specify optional <see href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SetQueueAttributes.html">attributes</see> for the queue.  
+        /// </summary>
+        IDictionary<string, object> Attributes { get; }
     }
 }
