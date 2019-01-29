@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary>
@@ -37,7 +38,7 @@ namespace MassTransit
         /// <summary>
         /// Returns all messages from batch
         /// </summary>
-        ConsumeContext<T>[] Messages { get; }
+        IEnumerable<ConsumeContext<T>> Messages { get; }
 
         /// <summary>
         /// Returns the message at the specified index
