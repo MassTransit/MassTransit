@@ -13,9 +13,12 @@ The official set of packages published for MassTransit include:
 ## Transports
 
 * [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/)
-* [MassTransit.AzureServiceBus](https://nuget.org/packages/MassTransit.AzureServiceBus/)
+* [MassTransit.Azure.ServiceBus.Core](https://nuget.org/packages/MassTransit.Azure.ServiceBus.Core/) (.NET Standard)
+* [MassTransit.AzureServiceBus](https://nuget.org/packages/MassTransit.AzureServiceBus/) (legacy .NET Framework)
 * [MassTransit.WebJobs.ServiceBus](https://nuget.org/packages/MassTransit.WebJobs.ServiceBus/)
+* [MassTransit.WebJobs.EventHubs](https://nuget.org/packages/MassTransit.WebJobs.EventHubs/)
 * [MassTransit.ActiveMQ](https://nuget.org/packages/MassTransit.ActiveMQ/)
+* [MassTransit.AmazonSQS](https://nuget.org/packages/MassTransit.AmazonSQS/)
 * [MassTransit.Http](https://nuget.org/packages/MassTransit.Http/)
 
 ## Containers
@@ -52,12 +55,13 @@ The official set of packages published for MassTransit include:
 ## State Machine
 
 * [MassTransit.Automatonymous](https://nuget.org/packages/MassTransit.Automatonymous/)
-
   Includes:
   * [Automatonymous](https://nuget.org/packages/Automatonymous/)
 * [MassTransit.Automatonymous.Autofac](https://nuget.org/packages/MassTransit.Automatonymous.Autofac/)
 * [MassTransit.Automatonymous.Extensions.DependencyInjection](https://nuget.org/packages/MassTransit.Automatonymous.Extensions.DependencyInjection/)
+* [MassTransit.Automatonymous.Lamar](https://nuget.org/packages/MassTransit.Automatonymous.Lamar/)
 * [MassTransit.Automatonymous.StructureMap](https://nuget.org/packages/MassTransit.Automatonymous.StructureMap/)
+* [MassTransit.Automatonymous.Windsor](https://nuget.org/packages/MassTransit.Automatonymous.Windsor/)
 
 ## Other
 

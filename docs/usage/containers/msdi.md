@@ -24,34 +24,31 @@ public class Startup
         services.AddMassTransit(x =>
         {
             x.AddConsumer<OrderConsumer>();
-        });
 
-        services.AddSingleton(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
-        {
-            var host = cfg.Host("localhost", "/", h => { });
-
-            cfg.ReceiveEndpoint(host, "submit-order", e =>
+            x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
-                e.PrefetchCount = 16;
-                e.UseMessageRetry(x => x.Interval(2, 100));
+                var host = cfg.Host("localhost", "/", h => { });
 
-                e.Consumer<OrderConsumer>(provider);
-            });
+                cfg.ReceiveEndpoint(host, "submit-order", e =>
+                {
+                    e.PrefetchCount = 16;
+                    e.UseMessageRetry(x => x.Interval(2, 100));
+
+                    e.ConfigureConsumer<OrderConsumer>(provider);
+                    
+                    EndpointConvention.Map<SubmitOrder>(e.InputAddress);
+                });
+            }));
+
+            x.AddRequestClient<SubmitOrder>();
         }));
-
-        services.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
-        services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
-        services.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
-
-        services.AddScoped(provider => provider.GetRequiredService<IBus>().CreateRequestClient<SubmitOrder>());
 
         services.AddSingleton<IHostedService, BusService>();
     }
 }
 ```
 
-Once the bus is configured, a hosted service is used to start/stop the bus with the application. It is registered in
-the configuration above, using the interface type `IHostedService`.
+Once the bus is configured, a hosted service is used to start/stop the bus with the application. It is registered in the configuration above, using the interface type `IHostedService`.
 
 ```csharp
 public class BusService :

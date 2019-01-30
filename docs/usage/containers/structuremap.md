@@ -15,37 +15,38 @@ public static void Main(string[] args)
 {
     var container = new Container(cfg =>
     {
-        // register each consumer
-        cfg.ForConcreteType<UpdateCustomerAddressConsumer>();
-
-        //or use StructureMap's excellent scanning capabilities
-    });
-
-    var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-    {
-        var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
+        cfg.AddMassTransit(x =>
         {
-            h.Username("guest");
-            h.Password("guest");
+            // add a specific consumer
+            x.AddConsumer<UpdateCustomerAddressConsumer>();
+
+            // add all consumers in the specified assembly
+            x.AddConsumers(Assembly.GetExecutingAssembly());
+
+            // add consumers by type
+            x.AddConsumers(typeof(ConsumerOne), typeof(ConsumerTwo));
+
+            // add the bus to the container, may need to create Local function
+            x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+            {
+                var host = cfg.Host("localhost/");
+
+                cfg.ReceiveEndpoint("customer_update", ec =>
+                {
+                    // Configure a single consumer
+                    ec.ConfigureConsumer<UpdateCustomerConsumer>(context);
+
+                    // configure all consumers
+                    ec.ConfigureConsumers(context);
+
+                    // configure consumer by type
+                    ec.ConsumerConsumer(typeof(ConsumerOne), context);
+                });
+            });
         });
-
-        sbc.ReceiveEndpoint("customer_update_queue", ec =>
-        {
-            // if only one consumer in the consumer for this queue
-            ec.LoadFrom(container);
-
-            // otherwise, be smart, register explicitly
-            ec.Consumer<UpdateCustomerConsumer>(container);
-        })
     });
 
-    container.Configure(cfg =>
-    {
-        For<IBusControl>()
-            .Use(busControl);
-        Forward<IBusControl, IBus>();
-    });
-
+    IBusControl busControl = container.GetInstance<IBusControl>();
     busControl.Start();
 }
 ```

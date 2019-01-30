@@ -1,16 +1,12 @@
 # Configuring Autofac
 
-Autofac is a powerful and fast container, and is well supported by MassTransit. Nested lifetime scopes are used
-extensively to encapsulate dependencies and ensure clean object lifetime management. The following examples show the
-various ways that MassTransit can be configured, including the appropriate interfaces necessary.
+Autofac is a powerful and fast container, and is well supported by MassTransit. Nested lifetime scopes are used extensively to encapsulate dependencies and ensure clean object lifetime management. The following examples show the various ways that MassTransit can be configured, including the appropriate interfaces necessary.
 
 > Requires NuGets `MassTransit`, `MassTransit.AutoFac`, and `MassTransit.RabbitMQ`
 
 <div class="alert alert-info">
 <b>Note:</b>
-    Consumers should not typically depend upon <i>IBus</i> or <i>IBusControl</i>. A consumer should use the <i>ConsumeContext</i>
-    instead, which has all of the same methods as <i>IBus</i>, but is scoped to the receive endpoint. This ensures that
-    messages can be tracked between consumers, and are sent from the proper address.
+    Consumers should not depend upon <i>IBus</i> or <i>IBusControl</i>. A consumer should use the <i>ConsumeContext</i> instead, which has all of the same methods as <i>IBus</i>, but is scoped to the receive endpoint. This ensures that messages can be tracked between consumers and are sent from the proper address.
 </div>
 
 ```csharp
@@ -22,9 +18,10 @@ using MassTransit;
 
 namespace Example
 {
-    public class UpdateCustomerAddressConsumer : MassTransit.IConsumer<object>
+    public class UpdateCustomerAddressConsumer : 
+        MassTransit.IConsumer<UpdateCustomerAddress>
     {
-        public async Task Consume(ConsumeContext<object> context)
+        public Task Consume(ConsumeContext<UpdateCustomerAddress> context)
         {
             //do stuff
         }
@@ -35,39 +32,35 @@ namespace Example
         public static void Main(string[] args)
         {
             var builder = new ContainerBuilder();
-
-            // register a specific consumer
-            builder.RegisterType<UpdateCustomerAddressConsumer>();
-
-            // just register all the consumers
-            builder.RegisterConsumers(Assembly.GetExecutingAssembly());
-
-            builder.Register(context =>
+            builder.AddMassTransit(x =>
             {
-                var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+                // add a specific consumer
+                x.AddConsumer<UpdateCustomerAddressConsumer>();
+
+                // add all consumers in the specified assembly
+                x.AddConsumers(Assembly.GetExecutingAssembly());
+
+                // add consumers by type
+                x.AddConsumers(typeof(ConsumerOne), typeof(ConsumerTwo));
+
+                // add the bus to the container
+                x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
                 {
-                    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-                    {
-                        h.Username("guest");
-                        h.Password("guest");
-                    });
+                    var host = cfg.Host("localhost/");
 
-                    cfg.ReceiveEndpoint("customer_update_queue", ec =>
+                    cfg.ReceiveEndpoint("customer_update", ec =>
                     {
-                        // if only one consumer in the consumer for this queue
-                        ec.LoadFrom(context);
+                        // Configure a single consumer
+                        ec.ConfigureConsumer<UpdateCustomerConsumer>(context);
 
-                        // otherwise, be smart, register explicitly
-                        ec.Consumer<UpdateCustomerConsumer>(context);
+                        // configure all consumers
+                        ec.ConfigureConsumers(context);
+
+                        // configure consumer by type
+                        ec.ConsumerConsumer(typeof(ConsumerOne));
                     });
                 });
-
-                return busControl;
-            })
-                .SingleInstance()
-                .As<IBusControl>()
-                .As<IBus>();
-
+            });
             var container = builder.Build();
 
             var bc = container.Resolve<IBusControl>();
@@ -76,6 +69,7 @@ namespace Example
     }
 }
 ```
+
 ## Using Nested Container
 MassTransit and Autofac give you an ability to reconfigure your container based on Consumer. It could be very powerful when you have different way to resolve your services depends on Consumer's type. It could be very helpful to build Multitenant applications.
 
@@ -101,15 +95,17 @@ builder.Register(context =>
 
 ## Using a Module
 
-Autofac modules are great for encapsulating configuration, and that is equally true when using MassTransit. An example of
-using modules with Autofac is shown below.
+Autofac modules are great for encapsulating configuration, and that is equally true when using MassTransit. An example of using modules with Autofac is shown below.
 
 ```csharp
 class ConsumerModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterType<UpdateCustomerAddressConsumer>();
+        // requires that AddMassTransit has been called prior to this 
+        // module being loaded, maybe, I don't know for sure that this
+        // is even possible
+        builder.AddConsumer<UpdateCustomerAddressConsumer>();
 
         builder.RegisterType<SqlCustomerRegistry>()
             .As<ICustomerRegistry>();
@@ -196,10 +192,10 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
     cfg.ReceiveEndpoint(busSettings.QueueName, ec =>
     {
         // loading consumers
-        ec.LoadFrom(context);
+        ec.ConfigureConsumers(context);
 
         // loading saga state machines
-        ec.LoadStateMachineSagas(context);
+        ec.ConfigureSagas(context);
     })
 });
 ```
@@ -212,12 +208,9 @@ Below you find samples of how to register different saga persistence implementat
 
 ### NHibernate
 
-For NHibernate you can scan an assembly where your saga instance mappings are defined to find
-the mapping classes, and then give the list of mapping types as a parameter to the session factory provider.
+For NHibernate you can scan an assembly where your saga instance mappings are defined to find the mapping classes, and then give the list of mapping types as a parameter to the session factory provider.
 
-Then, you instruct Autofac to use the session factory provider to get the `ISession` instance.
-NHibernate saga repository is then registered as generic and since it only uses the `ISession`,
-everything will just work.
+Then, you instruct Autofac to use the session factory provider to get the `ISession` instance. NHibernate saga repository is then registered as generic and since it only uses the `ISession`, everything will just work.
 
 ```csharp
 var mappings = mappingsAssembly
@@ -235,12 +228,9 @@ builder.RegisterGeneric(typeof(NHibernateSagaRepository<>))
 
 ### Entity Framework
 
-Entity Framework saga repository needs to have a context factory as a constructor parameter.
-This factory just returns a `DbContext` instance, which should have the information about
-the saga instance class mapping.
+Entity Framework saga repository needs to have a context factory as a constructor parameter. This factory just returns a `DbContext` instance, which should have the information about the saga instance class mapping.
 
-When using the `SagaDbContext<TSaga, TSagaClassMapping>`, you need to register each repository
-separately like this:
+When using the `SagaDbContext<TSaga, TSagaClassMapping>`, you need to register each repository separately like this:
 
 ```csharp
 builder.Register(c => new EntityFrameworkSagaRepository<MySaga>(
@@ -259,5 +249,4 @@ builder.RegisterGeneric(typeof(EntityFrameworkSagaRepository<>))
 builder.RegisterStateMachineSagas(typeof(MySaga).Assembly);
 ```
 
-The example above uses the assembly scanning `DbContext` implementation, which
-you can find in [this gist](https://gist.github.com/alexeyzimarev/34542645ff8f27550d0679c7cb696111).
+The example above uses the assembly scanning `DbContext` implementation, which you can find in [this gist](https://gist.github.com/alexeyzimarev/34542645ff8f27550d0679c7cb696111).

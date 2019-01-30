@@ -1,13 +1,8 @@
 # Creating Automatonymous State Machines
 
-[Automatonymous][1] is a state machine library built by the same team that created MassTransit. 
-Automatonymous provides a friendly syntax for declaring a state machine, including the states, 
-events (both trigger event and data events are supported), and behaviors. The simple syntax makes 
-it easy to get started with your own state machines, while including many advanced features that 
-make it extremely flexible in a variety of business contexts.
+[Automatonymous][1] is a state machine library built by the same team that created MassTransit. Automatonymous provides a friendly syntax for declaring a state machine, including the states, events (both trigger event and data events are supported), and behaviors. The simple syntax makes it easy to get started with your own state machines, while including many advanced features that make it extremely flexible in a variety of business contexts.
 
-Like MassTransit, Automatonymous is free, open source, and licensed under the very permissive 
-Apache 2.0 license, making usable at no cost to anyone for both commercial and non-commercial use.
+Like MassTransit, Automatonymous is free, open source, and licensed under the very permissive Apache 2.0 license, making usable at no cost to anyone for both commercial and non-commercial use.
 
 ## Sample State Machine
 
@@ -19,8 +14,7 @@ The code in this section will require installing a few NuGet dependencies:
 
 ### Defining a state machine saga
 
-To define a state machine saga, create a class that inherits from `MassTransitStateMachine`. 
-The `MassTransit.Automatonymous` NuGet package must be referenced.
+To define a state machine saga, create a class that inherits from `MassTransitStateMachine`. The `MassTransit.Automatonymous` NuGet package must be referenced.
 
 > This section is written using the shopping cart sample, which is [hosted on GitHub][2].
 
@@ -40,8 +34,7 @@ The state machine class, and the specification of the property for the current s
         .SelectId(context => Guid.NewGuid()));
 ```
 
-The event that is observed when an item is added to the cart, along with the correlation between the state 
-machine instance and the message are defined. The id generator for the saga instance is also defined.
+The event that is observed when an item is added to the cart, along with the correlation between the state machine instance and the message are defined. The id generator for the saga instance is also defined.
 
 ```csharp
     Event(() => Submitted, x => x.CorrelateById(context => context.Message.CartId));
@@ -57,8 +50,7 @@ The order submitted event, and the correlation for that order.
     });
 ```
 
-In order to schedule the timeout, a schedule is defined, including the time delay for the scheduled event, 
-and the correlation of the event back to the state machine.
+In order to schedule the timeout, a schedule is defined, including the time delay for the scheduled event, and the correlation of the event back to the state machine.
 
 Now, it is time for the actual behavior of the events and how they interact with the state of the *ShoppingCart*.
 
@@ -79,8 +71,7 @@ Now, it is time for the actual behavior of the events and how they interact with
         );
 ```
 
-Initially defined events that can create a state machine instance. In the above, the properties of the 
-instance are initialized, and then the *CartExpired* event is scheduled, after which the state is set to *Active*.
+Initially defined events that can create a state machine instance. In the above, the properties of the instance are initialized, and then the *CartExpired* event is scheduled, after which the state is set to *Active*.
 
 ```csharp
     During(Active,
@@ -98,8 +89,7 @@ instance are initialized, and then the *CartExpired* event is scheduled, after w
             .TransitionTo(Ordered),
 ```
 
-While the shopping cart is active, if the order is submitted, the expiration is canceled (via *Unschedule*) 
-and the state is set to Ordered.
+While the shopping cart is active, if the order is submitted, the expiration is canceled (via *Unschedule*) and the state is set to Ordered.
 
 ```csharp
             When(ItemAdded)
@@ -114,8 +104,7 @@ and the state is set to Ordered.
                 .Schedule(CartExpired, context => new CartExpiredEvent(context.Instance)),
 ```
 
-If another item is added to the cart, the *CartExpired* event is scheduled, and the existence of a 
-previously scheduled event (via the *ExpirationId* property) is used to cancel the previously scheduled event.
+If another item is added to the cart, the *CartExpired* event is scheduled, and the existence of a previously scheduled event (via the *ExpirationId* property) is used to cancel the previously scheduled event.
 
 ```csharp
         When(CartExpired.Received)
@@ -156,8 +145,7 @@ The schedule definition for the CartExpired event.
 
 The events that are observed by the state machine (the correlations are defined earlier in the state machine).
 
-The state machine is generic, and requires a state class (because sagas are stateful), so that is defined below. 
-The state class has the values that are persisted between events.
+The state machine is generic, and requires a state class (because sagas are stateful), so that is defined below. The state class has the values that are persisted between events.
 
 ```csharp
 class ShoppingCartState :
@@ -166,24 +154,19 @@ class ShoppingCartState :
     public Guid CorrelationId { get; set; }
 ```
 
-The CorrelationId is the primary key of the saga state instance. It is assigned either from a property on the 
-initial message that creates the saga instance, or can be generated using `NewId.NextGuid()`, 
-which ensures a nice ordered sequential identifier.
+The CorrelationId is the primary key of the saga state instance. It is assigned either from a property on the initial message that creates the saga instance, or can be generated using `NewId.NextGuid()`, which ensures a nice ordered sequential identifier.
 
 ```csharp
     public string CurrentState { get; set; }
 ```
 
-The current state of the saga, which can be saved as a *string* or an *int*, depending upon your 
-database requirements. An *int* is smaller, but requires that all valid states be mapped to integers 
-during the definition of the state machine.
+The current state of the saga, which can be saved as a *string* or an *int*, depending upon your database requirements. An *int* is smaller, but requires that all valid states be mapped to integers during the definition of the state machine.
 
 ```csharp
     public Guid? ExpirationId { get; set; }
 ```
 
-This is an identifier that is used by the state machine's scheduling feature, to capture the scheduled 
-message identifier. Message scheduling within sagas is a powerful feature, which is described later.
+This is an identifier that is used by the state machine's scheduling feature, to capture the scheduled message identifier. Message scheduling within sagas is a powerful feature, which is described later.
 
 ```csharp
     public string UserName { get; set; }
@@ -195,9 +178,7 @@ message identifier. Message scheduling within sagas is a powerful feature, which
 }
 ```
 
-The remainder of the properties are relevant to the application, and are saved when properly mapped 
-using the saga repository (which can be any supported storage engine, Entity Framework and NHibernate 
-are supported out of the box).
+The remainder of the properties are relevant to the application, and are saved when properly mapped using the saga repository (which can be any supported storage engine, Entity Framework and NHibernate are supported out of the box).
 
 ### Connecting the saga to a receive endpoint
 
@@ -222,8 +203,7 @@ _busControl = Bus.Factory.CreateUsingRabbitMq(x =>
 
 ### Combining events (think Fork/Join)
 
-Multiple events can be combined into a single event, for the purposes of joining together multiple operations. 
-To define a combined event, the `Event` syntax has an overload.
+Multiple events can be combined into a single event, for the purposes of joining together multiple operations. To define a combined event, the `Event` syntax has an overload.
 
 ```csharp
     public Event<OrderReady> Ready { get; private set; }
@@ -237,17 +217,13 @@ Once both events have been delivered to the state machine, the third event, *Ord
 
 <div class="alert alert-info">
 <b>Note:</b>
-    The order of events being declared can impact the order in which they execute. Therefore, it is best to declare 
-    composite events at the end of the state machine declaration, after all other events and behaviors are declared. 
-    That way, the composite events will be raised <i>after</i> the dependent event behaviors.
+    The order of events being declared can impact the order in which they execute. Therefore, it is best to declare composite events at the end of the state machine declaration, after all other events and behaviors are declared. That way, the composite events will be raised <i>after</i> the dependent event behaviors.
 </div>
 
 
 ### Ignoring events
 
-In some cases you may want to ignore events, which can not be handled by the saga, because of inapropriate state. Without
- additional configuration handling of such events end with exception and messages being moved to the error queue.
- State machine can be configured to ignore events if they can not be handled. This can be done with the use of <i>Ignore()</i> method:
+In some cases you may want to ignore events, which can not be handled by the saga, because of inapropriate state. Without additional configuration handling of such events end with exception and messages being moved to the error queue. State machine can be configured to ignore events if they can not be handled. This can be done with the use of <i>Ignore()</i> method:
 
 ```csharp
     public State Intermediate { get; set; }
@@ -270,11 +246,9 @@ In some cases you may want to ignore events, which can not be handled by the sag
     }
 ```
 
-In the example above MyMachine will only handle Start event in <i>Initial</i> state. If Start event is correlated with the saga,
-    which is in the state <i>Intermediate</i>, such event will be ignored without moving message to the error queue.
+In the example above MyMachine will only handle Start event in <i>Initial</i> state. If Start event is correlated with the saga, which is in the state <i>Intermediate</i>, such event will be ignored without moving message to the error queue.
 
-Another approach to configure ignorance is to use <i>Ignore()</i> method inside <i>DuringAny()</i>. This approach is more 
-suitable when a sufficiently large number of states is defined:
+Another approach to configure ignorance is to use <i>Ignore()</i> method inside <i>DuringAny()</i>. This approach is more suitable when a sufficiently large number of states is defined:
 
 ```csharp
     public State Intermediate { get; set; }

@@ -14,33 +14,41 @@ container. The two bus interfaces, `IBus` and `IBusControl`, are included.
 public static void Main(string[] args)
 {
     var container = new WindsorContainer();
-
-    // register each consumer manually
-    container.Register(Component.For<YourConsumer>().LifestyleTransient());
-
-    //or use Windsor's excellent scanning capabilities
-    container.Register(AllTypes.FromThisAssembly().BasedOn<IConsumer>());
-
-    var busControl = Bus.Factory.CreateUsingRabbitMq(config =>
+    container.AddMassTransit(x =>
     {
-        cfg.Host(new Uri("rabbitmq://localhost/"), host =>
-        {
-            host.Username("guest");
-            host.Password("guest");
-        });
+        // add a specific consumer
+        x.AddConsumer<UpdateCustomerAddressConsumer>();
 
-        config.ReceiveEndpoint("customer_update_queue", endpoint =>
+        // add all consumers in the specified assembly
+        x.AddConsumers(Assembly.GetExecutingAssembly());
+
+        // add consumers by type
+        x.AddConsumers(typeof(ConsumerOne), typeof(ConsumerTwo));
+
+        // add the bus to the container
+        x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
         {
-            endpoint.EnableMessageScope();
-            endpoint.LoadFrom(container);
-            
-            // Above method works but it is deprecated, instead below method should be used to get Consumer from container.
-            endPoint.Consumer<YourConsumer>(container.Kernel);
-        })
+            var host = cfg.Host("localhost/");
+
+            cfg.ReceiveEndpoint("customer_update", ec =>
+            {
+                // if a shared scope for multiple concurrent consumers
+                // is needed.
+                endpoint.EnableMessageScope();
+
+                // Configure a single consumer
+                ec.ConfigureConsumer<UpdateCustomerConsumer>(context);
+
+                // configure all consumers
+                ec.ConfigureConsumers(context);
+
+                // configure consumer by type
+                ec.ConsumerConsumer(typeof(ConsumerOne), context);
+            });
+        });
     });
 
-    container.Register(Component.For<IBus, IBusControl>().Instance(busControl));
-
+    IBusControl busControl = container.Kernel.Resolve<IBusControl>();
     busControl.Start();
 }
 ```
