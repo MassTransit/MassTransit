@@ -13,6 +13,7 @@
 namespace MassTransit.Pipeline.ConsumerFactories
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -81,9 +82,11 @@ namespace MassTransit.Pipeline.ConsumerFactories
 
                 if (_messages.Count > 0)
                 {
-                    ConsumeContext<TMessage>[] messages = _messages.Values.ToArray();
+                    List<ConsumeContext<TMessage>> messages = _messages.Values.ToList();
+
                     Deliver(messages[0], messages, BatchCompletionMode.Time);
                 }
+
             }, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
         }
 
@@ -98,7 +101,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
             {
                 _isCompleted = true;
 
-                Deliver(context, _messages.Values.ToArray(), BatchCompletionMode.Size);
+                Deliver(context, _messages.Values.ToList(), BatchCompletionMode.Size);
             }
         }
 
@@ -114,14 +117,14 @@ namespace MassTransit.Pipeline.ConsumerFactories
         {
             _isCompleted = true;
 
-            ConsumeContext<TMessage>[] consumeContexts = _messages.Values.ToArray();
-            if (consumeContexts.Length == 0)
+            List<ConsumeContext<TMessage>> consumeContexts = _messages.Values.ToList();
+            if (consumeContexts.Count == 0)
                 return;
 
             Deliver(consumeContexts.Last(), consumeContexts, BatchCompletionMode.Forced);
         }
 
-        async void Deliver(ConsumeContext context, ConsumeContext<TMessage>[] messages, BatchCompletionMode batchCompletionMode)
+        async void Deliver(ConsumeContext context, IReadOnlyList<ConsumeContext<TMessage>> messages, BatchCompletionMode batchCompletionMode)
         {
             _timer.Dispose();
 
@@ -149,9 +152,10 @@ namespace MassTransit.Pipeline.ConsumerFactories
         class Batch :
             Batch<TMessage>
         {
-            readonly ConsumeContext<TMessage>[] _messages;
+            readonly IReadOnlyList<ConsumeContext<TMessage>> _messages;
 
-            public Batch(DateTime firstMessageReceived, DateTime lastMessageReceived, BatchCompletionMode mode, ConsumeContext<TMessage>[] messages)
+            public Batch(DateTime firstMessageReceived, DateTime lastMessageReceived, BatchCompletionMode mode,
+                IReadOnlyList<ConsumeContext<TMessage>> messages)
             {
                 FirstMessageReceived = firstMessageReceived;
                 LastMessageReceived = lastMessageReceived;
@@ -165,7 +169,17 @@ namespace MassTransit.Pipeline.ConsumerFactories
 
             public ConsumeContext<TMessage> this[int index] => _messages[index];
 
-            public int Length => _messages.Length;
+            public int Length => _messages.Count;
+
+            public IEnumerator<ConsumeContext<TMessage>> GetEnumerator()
+            {
+                return _messages.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
         }
     }
 }

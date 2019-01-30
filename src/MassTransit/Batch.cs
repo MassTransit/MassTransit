@@ -13,13 +13,15 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary>
     /// A batch of messages which are delivered to a consumer all at once
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface Batch<out T>
+    public interface Batch<out T> :
+        IEnumerable<ConsumeContext<T>>
         where T : class
     {
         BatchCompletionMode Mode { get; }
