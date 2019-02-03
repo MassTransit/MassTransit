@@ -38,7 +38,7 @@ namespace MassTransit.UnityIntegration
         {
             if (context.TryGetPayload<IUnityContainer>(out var existingContainer))
             {
-                var activity = existingContainer.Resolve<TActivity>(new DependencyOverride(typeof(TArguments), InjectionParameterValue.ToParameter(context.Arguments)));
+                var activity = existingContainer.Resolve<TActivity>(new DependencyOverride(typeof(TArguments), new InjectionParameter(context.Arguments)));
 
                 ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
 
@@ -48,7 +48,7 @@ namespace MassTransit.UnityIntegration
             var scope = _container.CreateChildContainer();
             try
             {
-                var activity = scope.Resolve<TActivity>(new DependencyOverride(typeof(TArguments), InjectionParameterValue.ToParameter(context.Arguments)));
+                var activity = scope.Resolve<TActivity>(new DependencyOverride(typeof(TArguments), new InjectionParameter(context.Arguments)));
 
                 ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
 

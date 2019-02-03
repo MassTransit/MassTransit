@@ -17,8 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-        <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.3.14" />
-        <PackageReference Include="AWSSDK.SQS" Version="3.3.3.50" />
+        <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.3.17" />
+        <PackageReference Include="AWSSDK.SQS" Version="3.3.3.53" />
         <PackageReference Include="GreenPipes" Version="2.1.3" />
         <PackageReference Include="NewId" Version="3.0.1" />
         <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
