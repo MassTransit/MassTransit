@@ -30,29 +30,29 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     public class When_using_EntityFrameworkConcurrencyPessimistic :
         InMemoryTestFixture
     {
-        ChoirStateMachine _machine;
-        readonly ISagaDbContextFactory<ChoirState> _sagaDbContextFactory;
-        readonly Lazy<ISagaRepository<ChoirState>> _repository;
+        ChoirStatePessimisticMachine _machine;
+        readonly ISagaDbContextFactory<ChoirStatePessimistic> _sagaDbContextFactory;
+        readonly Lazy<ISagaRepository<ChoirStatePessimistic>> _repository;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            _machine = new ChoirStateMachine();
+            _machine = new ChoirStatePessimisticMachine();
 
             configurator.StateMachineSaga(_machine, _repository.Value);
         }
 
         public When_using_EntityFrameworkConcurrencyPessimistic()
         {
-            _sagaDbContextFactory = new DelegateSagaDbContextFactory<ChoirState>(
-                () => new SagaDbContext<ChoirState, EntityFrameworkChoirStateMapPessmistic>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
-            _repository = new Lazy<ISagaRepository<ChoirState>>(() => new EntityFrameworkSagaRepository<ChoirState>(_sagaDbContextFactory));
+            _sagaDbContextFactory = new DelegateSagaDbContextFactory<ChoirStatePessimistic>(
+                () => new SagaDbContext<ChoirStatePessimistic, EntityFrameworkChoirStateMapPessmistic>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+            _repository = new Lazy<ISagaRepository<ChoirStatePessimistic>>(() => new EntityFrameworkSagaRepository<ChoirStatePessimistic>(_sagaDbContextFactory, System.Data.IsolationLevel.Serializable, new MsSqlLockStatements()));
         }
 
-        async Task<ChoirState> GetSaga(Guid id)
+        async Task<ChoirStatePessimistic> GetSaga(Guid id)
         {
             using (var dbContext = _sagaDbContextFactory.Create())
             {
-                return await dbContext.Set<ChoirState>().SingleOrDefaultAsync(x => x.CorrelationId == id);
+                return await dbContext.Set<ChoirStatePessimistic>().SingleOrDefaultAsync(x => x.CorrelationId == id);
             }
         }
 
@@ -120,7 +120,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             Assert.IsTrue(sagaId.HasValue);
 
-            ChoirState instance = await GetSaga(correlationId);
+            ChoirStatePessimistic instance = await GetSaga(correlationId);
 
             Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
         }
@@ -134,11 +134,11 @@ namespace MassTransit.AutomatonymousIntegration.Tests
     }
 
     class EntityFrameworkChoirStateMapPessmistic :
-        SagaClassMapping<ChoirState>
+        SagaClassMapping<ChoirStatePessimistic>
     {
         public EntityFrameworkChoirStateMapPessmistic()
         {
-            ToTable("ChoirStates", "test");
+            ToTable("ChoirStatesPessimistic", "test");
 
             Property(x => x.CurrentState);
             Property(x => x.BassName);

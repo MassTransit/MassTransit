@@ -53,7 +53,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _sagaDbContextFactory = new DelegateSagaDbContextFactory<ShoppingChore>(
                 () => new SagaDbContext<ShoppingChore, EntityFrameworkShoppingChoreMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
 
-            _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => new EntityFrameworkSagaRepository<ShoppingChore>(_sagaDbContextFactory));
+            _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => EntityFrameworkSagaRepository<ShoppingChore>.CreatePessimistic(_sagaDbContextFactory));
         }
 
         [OneTimeTearDown]

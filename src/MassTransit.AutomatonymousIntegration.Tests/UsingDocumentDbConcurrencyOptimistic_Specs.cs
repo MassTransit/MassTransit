@@ -38,7 +38,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         readonly DocumentClient _documentClient;
         readonly string _databaseName;
         readonly string _collectionName;
-        readonly Lazy<ISagaRepository<ChoirState>> _repository;
+        readonly Lazy<ISagaRepository<ChoirStateOptimistic>> _repository;
         readonly JsonSerializerSettings _jsonSerializerSettings;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -58,9 +58,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             _databaseName = "choirSagas";
             _collectionName = "sagas";
             _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
-            _jsonSerializerSettings = JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirState>();
+            _jsonSerializerSettings = JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirStateOptimistic>();
 
-            _repository = new Lazy<ISagaRepository<ChoirState>>(() => new DocumentDbSagaRepository<ChoirState>(_documentClient, _databaseName, _jsonSerializerSettings));
+            _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() => new DocumentDbSagaRepository<ChoirStateOptimistic>(_documentClient, _databaseName, _jsonSerializerSettings));
         }
 
         [OneTimeSetUp]
@@ -78,12 +78,12 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             await _documentClient.DeleteDatabaseAsync(UriFactory.CreateDatabaseUri(_databaseName)).ConfigureAwait(false);
         }
 
-        async Task<ChoirState> GetSaga(Guid id)
+        async Task<ChoirStateOptimistic> GetSaga(Guid id)
         {
             try
             {
                 var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
-                return JsonConvert.DeserializeObject<ChoirState>(document.Resource.ToString(), _jsonSerializerSettings);
+                return JsonConvert.DeserializeObject<ChoirStateOptimistic>(document.Resource.ToString(), _jsonSerializerSettings);
             }
             catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -91,7 +91,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             }
         }
 
-        async Task<ChoirState> GetSagaRetry(Guid id, TimeSpan timeout, Func<ChoirState, bool> filterExpression = null)
+        async Task<ChoirStateOptimistic> GetSagaRetry(Guid id, TimeSpan timeout, Func<ChoirStateOptimistic, bool> filterExpression = null)
         {
             DateTime giveUpAt = DateTime.Now + timeout;
 
@@ -100,7 +100,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 try
                 {
                     var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
-                    var saga = JsonConvert.DeserializeObject<ChoirState>(document.Resource.ToString(), _jsonSerializerSettings);
+                    var saga = JsonConvert.DeserializeObject<ChoirStateOptimistic>(document.Resource.ToString(), _jsonSerializerSettings);
 
                     if (filterExpression?.Invoke(saga) == false) continue;
                     return saga;
@@ -152,7 +152,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             foreach (var sid in sagaIds)
             {
-                ChoirState instance = await GetSagaRetry(sid, TestTimeout, x => x.CurrentState == _machine.Harmony.Name);
+                ChoirStateOptimistic instance = await GetSagaRetry(sid, TestTimeout, x => x.CurrentState == _machine.Harmony.Name);
 
                 Assert.IsNotNull(instance);
                 Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
@@ -182,7 +182,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             Assert.IsNotNull(saga);
             Assert.IsTrue(saga.CurrentState == _machine.Harmony.Name);
 
-            ChoirState instance = await GetSaga(correlationId);
+            ChoirStateOptimistic instance = await GetSaga(correlationId);
 
             Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
         }

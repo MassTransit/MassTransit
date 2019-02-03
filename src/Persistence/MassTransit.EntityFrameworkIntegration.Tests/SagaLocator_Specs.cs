@@ -58,7 +58,7 @@
             _sagaDbContextFactory = new DelegateSagaDbContextFactory<SimpleSaga>(() =>
                 new SagaDbContext<SimpleSaga, SimpleSagaMap>(LocalDbConnectionStringProvider.GetLocalDbConnectionString()));
 
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new EntityFrameworkSagaRepository<SimpleSaga>(_sagaDbContextFactory));
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => EntityFrameworkSagaRepository<SimpleSaga>.CreatePessimistic(_sagaDbContextFactory));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

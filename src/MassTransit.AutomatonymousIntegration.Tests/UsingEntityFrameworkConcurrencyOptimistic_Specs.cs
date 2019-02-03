@@ -33,8 +33,8 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         InMemoryTestFixture
     {
         ChoirStateMachine _machine;
-        readonly ISagaDbContextFactory<ChoirState> _sagaDbContextFactory;
-        readonly Lazy<ISagaRepository<ChoirState>> _repository;
+        readonly ISagaDbContextFactory<ChoirStateOptimistic> _sagaDbContextFactory;
+        readonly Lazy<ISagaRepository<ChoirStateOptimistic>> _repository;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -50,16 +50,16 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
         public When_using_EntityFrameworkConcurrencyOptimistic()
         {
-            _sagaDbContextFactory = new DelegateSagaDbContextFactory<ChoirState>(
-                () => new SagaDbContext<ChoirState, EntityFrameworkChoirStateMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
-            _repository = new Lazy<ISagaRepository<ChoirState>>(() => new EntityFrameworkSagaRepository<ChoirState>(_sagaDbContextFactory, optimistic: true));
+            _sagaDbContextFactory = new DelegateSagaDbContextFactory<ChoirStateOptimistic>(
+                () => new SagaDbContext<ChoirStateOptimistic, EntityFrameworkChoirStateMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+            _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() => EntityFrameworkSagaRepository<ChoirStateOptimistic>.CreateOptimistic(_sagaDbContextFactory));
         }
 
-        async Task<ChoirState> GetSaga(Guid id)
+        async Task<ChoirStateOptimistic> GetSaga(Guid id)
         {
             using (var dbContext = _sagaDbContextFactory.Create())
             {
-                return await dbContext.Set<ChoirState>().SingleOrDefaultAsync(x => x.CorrelationId == id);
+                return await dbContext.Set<ChoirStateOptimistic>().SingleOrDefaultAsync(x => x.CorrelationId == id);
             }
         }
 
@@ -127,7 +127,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
             Assert.IsTrue(sagaId.HasValue);
 
-            ChoirState instance = await GetSaga(correlationId);
+            ChoirStateOptimistic instance = await GetSaga(correlationId);
 
             Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
         }
@@ -142,7 +142,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
 
     class EntityFrameworkChoirStateMap :
-        SagaClassMapping<ChoirState>
+        SagaClassMapping<ChoirStateOptimistic>
     {
         public EntityFrameworkChoirStateMap()
         {

@@ -89,6 +89,15 @@ MassTransit supports several storage engines, including NHibernate, Entity Frame
 * [Azure Service Bus](#azure-service-bus)
 * [Dapper](#dapper)
 
+### Relational DB Recommendations
+
+While it's nice if you are developing a green-field system and you can define your Saga Db Entity with CorrelationId as the Primary Key (Clustered), sometimes we have to work within existing db entities. If this is the case, please remember in order to keep your saga's performing quickly (optimistic OR pessimistic, it doesn't matter), follow the note below.
+
+<div class="alert alert-info">
+<b>Note:</b>
+    The CorrelationId should preferably be the Primary Key + Clustered for your saga table. If unable, then it must be a Clustered Index + Unique. And it's also highly recommended to use the NewId package for creating nice Db Friendly guids.
+</div>
+
 ### Optimistic vs pessimistic concurrency
 
 Most persistence mechanisms for sagas supported by MassTransit need some way to guarantee ACID when processing sagas. Because there can be multiple threads _consuming_ multiple bus events meant for the same saga instance, they could end up overwriting each other (race condition). 
@@ -101,7 +110,7 @@ This is type of concurrency is called an _optimistic concurrency_. It doesn't gu
 
 #### So, which one should I use?
 
-For almost every scenario, it is recommended using the optimistic concurrency, because most state machine logic should be fairly quick. 
+For almost every scenario, it is recommended using the optimistic concurrency, because most state machine logic should be fairly quick.
 
 If the chosen persistence method supports optimistic concurrency, race conditions can be handled rather easily by specifying a retry policy for concurrency exceptions or using generic retry policy.
 
@@ -109,7 +118,8 @@ If the chosen persistence method supports optimistic concurrency, race condition
 
 Entity Framework seems to be the most common ORM for class-SQL mappings, and SQL is still widely used for storing data. So it's a win to have it supported out of the box by MassTransit.
 
-#### Concurrency handling
+#### Concurrency handling (for optimistic)
+
 Fortunately, Entity Framework is a repository pattern itself, and has a column type `[Timestamp]` (a.k.a. `IsRowVersion` with fluent mapping), which will check the value of the column when it starts it's "unit of work" and if that value is the same when updating that row in the database - everybody is happy! But, if that column value is different, then it has been updated elsewhere. So, the Entity Framework will throw a `DbUpdateConcurrencyException`, which can be handled by a retry policyto fix the concurrency violation.
 
 #### Configuration and usage
@@ -130,7 +140,7 @@ public class SagaInstance : SagaStateMachineInstance
     public string CurrentState { get; set; }
     public string ServiceName { get; set; }
     public Guid CorrelationId { get; set; }
-    public byte[] RowVersion { get; set; } // For Optimistic Concurrency
+    public byte[] RowVersion { get; set; } // For Optimistic Concurrency, omit if using pessimistic
 }
 
 public class SagaInstanceMap : SagaClassMapping<SagaInstance>
@@ -139,29 +149,32 @@ public class SagaInstanceMap : SagaClassMapping<SagaInstance>
     {
         Property(x => x.CurrentState);
         Property(x => x.ServiceName, x => x.Length(40));
-        Property(x => x.RowVersion).IsRowVersion(); // For Optimistic Concurrency
+        Property(x => x.RowVersion).IsRowVersion(); // For Optimistic Concurrency, omit if using pessimistic
     }
 }
 ```
 
 > Important:
-> The `SagaClassMapping` has default mapping for the `CorrelationId` as a database generated primary key. If you use your own mapping, you must follow the same convention, otherwise there is a big chance to get deadlock exceptions in case of high throughput.
+> The `SagaClassMapping` has default mapping for the `CorrelationId` as a primary key. If you use your own mapping, you must follow the same convention, or at least make it a Clustered Index + Unique, otherwise there is a big chance to get deadlock exceptions and/or performance issues in case of high throughput.
 
 The repository is then created on the context factory:
 ```csharp
 SagaDbContextFactory contextFactory = () => 
     new SagaDbContext<SagaInstance, SagaInstanceMap>(_connectionString);
 
-var repository = new EntityFrameworkSagaRepository<SagaInstance>(
-    contextFactory, optimistic: true); // true For Optimistic Concurrency, false is default for pessimistic
+// For Optimistic
+var repository = new EntityFrameworkSagaRepository<SagaInstance>.CreateOptimistic(contextFactory);
+
+// For Pessimistic
+var repository = new EntityFrameworkSagaRepository<SagaInstance>.CreatePessimistic(contextFactory);
 ```
 
-Lastly, the snippet below is _only needed for optimistic concurrency_, because the saga should retry processing if failure occurred when writing to the database. This snippet is adding [retry policies](../../usage/retries.md) middleware to the saga receive endpoint from the [first section](#specifying-saga-persistence).
+Lastly, the snippet below is **_only needed for optimistic concurrency_**, because the saga should retry processing if failure occurred when writing to the database. This snippet is adding [retry policies](../../usage/retries.md) middleware to the saga receive endpoint from the [first section](#specifying-saga-persistence).
 
 ```csharp
 x.ReceiveEndpoint(host, "shopping_cart_state", e =>
 {
-    e.UseRetry(x => 
+    e.UseRetry(x =>
         {
             x.Handle<DbUpdateConcurrencyException>();
             x.Interval(5, TimeSpan.FromMilliseconds(100)));
@@ -171,6 +184,47 @@ x.ReceiveEndpoint(host, "shopping_cart_state", e =>
 ```
 
 Hence, that if you have retry policy without an exception filter, it will also handle the concurrency exception, so explicit configuration is not required in this case.
+
+#### Consume Lifetime (Scoped) DBContext
+
+By Default, EF Saga Pipeline will get it's own DBContext using the default implementation of ISagaDbContextFactory which is `DelegateSagaDbContextFactory<TSaga>`. This will not be shared if
+you want to access the same dbContext from within a Saga. So you can implement a delegate factory which
+is scoped to the parent lifetime (the lifetime of the Saga Event Consumption).
+
+Here is how you would implement it for Autofac. Other containers would have a similar implementation.
+
+```csharp
+public class AutofacSagaDbContextFactory<TSaga> :
+	ISagaDbContextFactory<TSaga>
+	where TSaga : class, ISaga
+{
+	readonly ILifetimeScope _defaultLifetimeScope;
+
+	public DelegateSagaDbContextFactory(ILifetimeScope defaultLifetimeScope)
+	{
+		_defaultLifetimeScope = defaultLifetimeScope;
+	}
+
+	public DbContext Create()
+	{
+		return _defaultLifetimeScope.Resolve<DbContext>();
+	}
+
+	public DbContext CreateScoped<T>(ConsumeContext<T> context)
+		where T : class
+	{            
+		if (context.TryGetPayload(out ILifetimeScope currentScope))
+			return currentScope.Resolve<DbContext>();
+
+		return Create();
+	}
+
+	public void Release(DbContext dbContext)
+	{
+        // Purposely left blank, the disposal of the dbContext is controlled by the container (autofac in this case)
+	}
+}
+```
 
 ### MongoDB
 

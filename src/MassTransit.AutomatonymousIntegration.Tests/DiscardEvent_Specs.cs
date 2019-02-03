@@ -95,7 +95,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 _sagaDbContextFactory = new DelegateSagaDbContextFactory<SimpleState>(() =>
                     new SagaDbContext<SimpleState, SimpleStateMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
 
-                _simpleStateRepository = new Lazy<ISagaRepository<SimpleState>>(() => new EntityFrameworkSagaRepository<SimpleState>(_sagaDbContextFactory));
+                _simpleStateRepository = new Lazy<ISagaRepository<SimpleState>>(() => new EntityFrameworkSagaRepository<SimpleState>(_sagaDbContextFactory, System.Data.IsolationLevel.Serializable, new MsSqlLockStatements()));
 
 
                 configurator.StateMachineSaga(_simpleStateMachine, _simpleStateRepository.Value);
