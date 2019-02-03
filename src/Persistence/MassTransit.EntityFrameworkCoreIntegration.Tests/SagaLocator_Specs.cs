@@ -81,7 +81,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 
             _sagaDbContextFactory = () => contextFactory.CreateDbContext(Array.Empty<string>());
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() =>
-                new EntityFrameworkSagaRepository<SimpleSaga>(_sagaDbContextFactory));
+                EntityFrameworkSagaRepository<SimpleSaga>.CreatePessimistic(_sagaDbContextFactory));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

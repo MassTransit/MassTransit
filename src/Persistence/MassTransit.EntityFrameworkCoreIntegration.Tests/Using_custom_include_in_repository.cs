@@ -71,7 +71,7 @@
 
             _sagaDbContextFactory = () => contextFactory.CreateDbContext(Array.Empty<string>());
             _sagaRepository = new Lazy<ISagaRepository<SagaWithDependency>>(() =>
-                new EntityFrameworkSagaRepository<SagaWithDependency>(_sagaDbContextFactory,
+                EntityFrameworkSagaRepository<SagaWithDependency>.CreatePessimistic(_sagaDbContextFactory,
                     queryCustomization: queryable =>
                         queryable.Include(it => it.Dependency).ThenInclude(dependency => dependency.SagaInnerDependency)
                     ));
