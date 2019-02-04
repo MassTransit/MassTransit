@@ -6,22 +6,41 @@ In your ASP.NET Core Startup.cs file add the following
 public void ConfigureServices(IServiceCollection services)
 {
     // other config...
-    services.AddMassTransitBackplane(out var hubConsumers, typeof(Startup).Assembly); // This is the first important line
+    
+    services.AddSignalR().AddMassTransitBackplane(typeof(Startup).Assembly); // This is the first important line
 
     // Other config perhaps...
 
     // creating the bus config
-    services.AddSingleton(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+    services.AddMassTransit(x =>
     {
-        // other config...
+        // Add this for each Hub you have
+        x.AddSignalRHubConsumers<ChatHub>();
 
-        // Creates a non-durable, temporary endpoint per hub
-        cfg.CreateBackplaneEndpoints<IRabbitMqReceiveEndpointConfigurator>(provider, host, hubConsumers, e=>
+        x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
         {
-            e.AutoDelete = true;
-            e.Durable = false;
-        });
-    }));
+            var host = cfg.Host("localhost", "/", h =>
+            {
+                h.Username("guest");
+                h.Password("guest");
+            });
+
+            // Register endpoint for each hub you have
+            cfg.AddSignalRHubEndpoints<ChatHub, IRabbitMqReceiveEndpointConfigurator>(provider, host, e =>
+            {
+                e.AutoDelete = true;
+                e.Durable = false;
+            });
+            
+            // Or for azure Service Bus
+            // Register endpoint for each hub you have
+            cfg.AddSignalRHubEndpoints<ChatHub, IServiceBusReceiveEndpointConfigurator>(provider, host, e =>
+            {
+                e.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
+                e.RemoveSubscriptions = true;
+            });
+        }));
+    });
 }
 ```
 

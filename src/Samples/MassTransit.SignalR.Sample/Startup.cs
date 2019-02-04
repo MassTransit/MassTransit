@@ -12,17 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SignalR.Sample
 {
-    using System;
-    using System.Collections.Generic;
-    using Contracts;
     using HostedServices;
     using Hubs;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using RabbitMqTransport;
-    using Scoping;
-
 
     public class Startup
     {
@@ -30,41 +25,29 @@ namespace MassTransit.SignalR.Sample
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSignalR();
+            services.AddSignalR().AddMassTransitBackplane(typeof(Startup).Assembly);
 
-            services.AddMassTransitBackplane(out IReadOnlyDictionary<Type, IReadOnlyList<Type>> hubConsumers, typeof(Startup).Assembly);
-
-            services.AddSingleton(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+            services.AddMassTransit(x =>
             {
-                var host = cfg.Host("localhost", "/", h =>
+                x.AddSignalRHubConsumers<ChatHub>();
+
+                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
                 {
-                    h.Username("guest");
-                    h.Password("guest");
-                });
+                    var host = cfg.Host("localhost", "/", h =>
+                    {
+                        h.Username("guest");
+                        h.Password("guest");
+                    });
 
-                cfg.CreateBackplaneEndpoints<IRabbitMqReceiveEndpointConfigurator>(provider, host, hubConsumers, e =>
-                {
-                    e.AutoDelete = true;
-                    e.Durable = false;
-                });
-            }));
-
-            services.AddScoped<ScopedConsumeContextProvider>();
-            services.AddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext());
-
-            services.AddScoped(provider => (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
-                provider.GetRequiredService<IBus>());
-
-            services.AddScoped(provider => (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
-                provider.GetRequiredService<IBus>());
-
-            services.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
-            services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBus>());
-            services.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBus>());
+                    cfg.AddSignalRHubEndpoints<ChatHub, IRabbitMqReceiveEndpointConfigurator>(provider, host, e =>
+                    {
+                        e.AutoDelete = true;
+                        e.Durable = false;
+                    });
+                }));
+            });
 
             services.AddSingleton<IHostedService, BusService>();
-
-            services.AddSingleton(provider => provider.GetRequiredService<IBus>().CreateRequestClient<GroupManagement<ChatHub>>(TimeSpan.FromSeconds(30)));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
