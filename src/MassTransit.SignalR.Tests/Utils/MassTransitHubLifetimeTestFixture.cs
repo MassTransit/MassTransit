@@ -35,7 +35,7 @@
 
             var manager = new MassTransitHubLifetimeManager<THub>(
             Harness.Bus,
-            Harness.Bus.CreateRequestClient<GroupManagement<THub>>(TimeSpan.FromSeconds(5)),
+            Harness.Bus.CreateClientFactory(TimeSpan.FromSeconds(5)),
             new DefaultHubProtocolResolver(new IHubProtocol[]
             {
                 new JsonHubProtocol(Options.Create(jsonOptions)),

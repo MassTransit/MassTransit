@@ -1,42 +1,52 @@
 ﻿namespace MassTransit.SignalR
 {
     using MassTransit;
-    using Scoping;
+    using MassTransit.ExtensionsDependencyInjectionIntegration;
+    using MassTransit.SignalR.Contracts;
+    using MassTransit.SignalR.Utils;
+    using Microsoft.AspNetCore.SignalR;
     using System;
-    using System.Collections.Generic;
-    using ExtensionsDependencyInjectionIntegration.ScopeProviders;
-    using Registration;
-
 
     public static class MassTransitSignalRConfigurationExtensions
     {
-        public static void CreateBackplaneEndpoints<TEndpointConfigurator>(this IBusFactoryConfigurator configurator,
-            IServiceProvider serviceProvider,
-            IHost host, IReadOnlyDictionary<Type, IReadOnlyList<Type>> hubConsumers, Action<TEndpointConfigurator> configureEndpoint = null)
-            where TEndpointConfigurator : class, IReceiveEndpointConfigurator
+        public static void AddSignalRHubConsumers<THub>(this IServiceCollectionConfigurator configurator)
+            where THub : Hub
         {
-            IConsumerScopeProvider scopeProvider = new DependencyInjectionConsumerScopeProvider(serviceProvider);
+            configurator.AddRequestClient<GroupManagement<THub>>(TimeSpan.FromSeconds(10));
 
-            foreach (var hub in hubConsumers)
+            var consumers = HubConsumersCache.GetOrAdd<THub>();
+
+            foreach (var consumer in consumers)
             {
-                var queueNameBase = host.Topology.CreateTemporaryQueueName($"signalRBackplane-{hub.Key.Name}-");
+                configurator.AddConsumer(consumer);
+            }
+        }
 
-                // Loop through our 5 hub consumers and create a temporary endpoint for each
-                foreach (var consumerType in hub.Value)
+        public static void AddSignalRHubEndpoints<THub, TEndpointConfigurator>(this IBusFactoryConfigurator configurator,
+            IServiceProvider serviceProvider,
+            IHost host, Action<TEndpointConfigurator> configureEndpoint = null)
+            where TEndpointConfigurator : class, IReceiveEndpointConfigurator
+            where THub : Hub
+        {
+            var consumers = HubConsumersCache.GetOrAdd<THub>();
+
+            var queueNameBase = host.Topology.CreateTemporaryQueueName($"signalRBackplane-{typeof(THub).Name}-");
+
+            // Loop through our 5 hub consumers and create a temporary endpoint for each
+            foreach (var consumerType in consumers)
+            {
+                // remove `1 from generic type
+                var name = consumerType.Name;
+                int index = name.IndexOf('`');
+                if (index > 0)
+                    name = name.Remove(index);
+
+                configurator.ReceiveEndpoint($"{queueNameBase}{name}-", e =>
                 {
-                    // remove `1 from generic type
-                    var name = consumerType.Name;
-                    int index = name.IndexOf('`');
-                    if (index > 0)
-                        name = name.Remove(index);
+                    configureEndpoint?.Invoke((TEndpointConfigurator)e);
 
-                    configurator.ReceiveEndpoint($"{queueNameBase}{name}-", e =>
-                    {
-                        configureEndpoint?.Invoke((TEndpointConfigurator)e);
-
-                        ConsumerConfiguratorCache.Configure(consumerType, e, scopeProvider);
-                    });
-                }
+                    e.ConfigureConsumer(serviceProvider, consumerType);
+                });
             }
         }
     }

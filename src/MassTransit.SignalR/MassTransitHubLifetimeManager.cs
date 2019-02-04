@@ -34,11 +34,11 @@ namespace MassTransit.SignalR
         readonly IPublishEndpoint _publishEndpoint;
 
         public MassTransitHubLifetimeManager(IPublishEndpoint publishEndpoint,
-            IRequestClient<GroupManagement<THub>> groupManagementRequestClient,
+            IClientFactory clientFactory,
             IHubProtocolResolver hubProtocolResolver)
         {
             _publishEndpoint = publishEndpoint;
-            _groupManagementRequestClient = groupManagementRequestClient;
+            _groupManagementRequestClient = clientFactory.CreateRequestClient<GroupManagement<THub>>(TimeSpan.FromSeconds(20));
             _protocols = hubProtocolResolver.AllProtocols;
         }
 

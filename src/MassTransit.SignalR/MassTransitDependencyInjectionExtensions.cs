@@ -12,47 +12,36 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SignalR
 {
+    using MassTransit.SignalR.Utils;
+    using Microsoft.AspNetCore.SignalR;
+    using Microsoft.Extensions.DependencyInjection;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Microsoft.AspNetCore.SignalR;
-    using Microsoft.Extensions.DependencyInjection;
 
 
     public static class MassTransitDependencyInjectionExtensions
     {
-        public static void AddMassTransitBackplane(this IServiceCollection serviceCollection, out IReadOnlyDictionary<Type, IReadOnlyList<Type>> hubConsumers,
+        public static void AddMassTransitBackplane(this ISignalRServerBuilder signalRServerBuilder,
             params Assembly[] hubAssemblies)
         {
-            var dict = new Dictionary<Type, IReadOnlyList<Type>>();
-
             IEnumerable<Type> hubs = from a in hubAssemblies
                 from t in a.GetTypes()
                 where typeof(Hub).IsAssignableFrom(t)
                 select t;
 
-            Type[] consumers = (from t in typeof(MassTransitDependencyInjectionExtensions).Assembly.GetTypes()
-                where typeof(IConsumer).IsAssignableFrom(t)
-                select t).ToArray();
-
             foreach (var hub in hubs)
             {
-                var consumerTypes = new List<Type>(consumers.Length);
+                var consumerTypes = HubConsumersCache.GetOrAdd(hub);
 
-                foreach (var consumer in consumers)
+                foreach (var consumer in consumerTypes)
                 {
-                    var consumerType = consumer.MakeGenericType(hub);
-                    consumerTypes.Add(consumerType);
-                    serviceCollection.AddScoped(consumerType);
+                    signalRServerBuilder.Services.AddScoped(consumer);
                 }
-
-                dict.Add(hub, consumerTypes);
             }
 
-            hubConsumers = dict;
-
-            serviceCollection.AddSingleton(typeof(HubLifetimeManager<>), typeof(MassTransitHubLifetimeManager<>));
+            signalRServerBuilder.Services.AddSingleton(typeof(HubLifetimeManager<>), typeof(MassTransitHubLifetimeManager<>));
         }
     }
 }
