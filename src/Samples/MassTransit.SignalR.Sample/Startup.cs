@@ -21,6 +21,7 @@ namespace MassTransit.SignalR.Sample
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using RabbitMqTransport;
+    using Scoping;
 
 
     public class Startup
@@ -48,8 +49,18 @@ namespace MassTransit.SignalR.Sample
                 });
             }));
 
-            services.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
+            services.AddScoped<ScopedConsumeContextProvider>();
+            services.AddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext());
+
+            services.AddScoped(provider => (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
+                provider.GetRequiredService<IBus>());
+
+            services.AddScoped(provider => (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
+                provider.GetRequiredService<IBus>());
+
             services.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
+            services.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBus>());
+            services.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBus>());
 
             services.AddSingleton<IHostedService, BusService>();
 

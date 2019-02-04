@@ -39,32 +39,16 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configure a consumer (or consumers) on the receive endpoint
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="lifetimeScope"></param>
-        /// <param name="consumerTypes">The consumer type(s) to configure</param>
-        public static void ConfigureConsumer(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope, params Type[] consumerTypes)
-        {
-            var registryConfigurator = lifetimeScope.Resolve<IRegistration>();
-
-            foreach (var consumerType in consumerTypes)
-            {
-                registryConfigurator.ConfigureConsumer(consumerType, configurator);
-            }
-        }
-
-        /// <summary>
         /// Configure a consumer on the receive endpoint, with an optional configuration action
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="lifetimeScope"></param>
+        /// <param name="componentContext"></param>
         /// <param name="configure"></param>
-        public static void ConfigureConsumer<T>(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope,
+        public static void ConfigureConsumer<T>(this IReceiveEndpointConfigurator configurator, IComponentContext componentContext,
             Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
-            var registryConfigurator = lifetimeScope.Resolve<IRegistration>();
+            var registryConfigurator = componentContext.Resolve<IRegistration>();
 
             registryConfigurator.ConfigureConsumer<T>(configurator, configure);
         }
@@ -73,10 +57,10 @@ namespace MassTransit
         /// Configure all registered consumers on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="lifetimeScope"></param>
-        public static void ConfigureConsumers(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope)
+        /// <param name="componentContext"></param>
+        public static void ConfigureConsumers(this IReceiveEndpointConfigurator configurator, IComponentContext componentContext)
         {
-            var registryConfigurator = lifetimeScope.Resolve<IRegistration>();
+            var registryConfigurator = componentContext.Resolve<IRegistration>();
 
             registryConfigurator.ConfigureConsumers(configurator);
         }
@@ -85,11 +69,11 @@ namespace MassTransit
         /// Configure a saga (or sagas) on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="lifetimeScope"></param>
+        /// <param name="componentContext"></param>
         /// <param name="sagaTypes">The saga type(s) to configure</param>
-        public static void ConfigureSaga(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope, params Type[] sagaTypes)
+        public static void ConfigureSaga(this IReceiveEndpointConfigurator configurator, IComponentContext componentContext, params Type[] sagaTypes)
         {
-            var registryConfigurator = lifetimeScope.Resolve<IRegistration>();
+            var registryConfigurator = componentContext.Resolve<IRegistration>();
 
             foreach (var sagaType in sagaTypes)
             {
@@ -101,13 +85,13 @@ namespace MassTransit
         /// Configure a saga on the receive endpoint, with an optional configuration action
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="lifetimeScope"></param>
+        /// <param name="componentContext"></param>
         /// <param name="configure"></param>
-        public static void ConfigureSaga<T>(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope,
+        public static void ConfigureSaga<T>(this IReceiveEndpointConfigurator configurator, IComponentContext componentContext,
             Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var registryConfigurator = lifetimeScope.Resolve<IRegistration>();
+            var registryConfigurator = componentContext.Resolve<IRegistration>();
 
             registryConfigurator.ConfigureSaga<T>(configurator, configure);
         }
@@ -116,10 +100,10 @@ namespace MassTransit
         /// Configure all registered sagas on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="lifetimeScope"></param>
-        public static void ConfigureSagas(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope)
+        /// <param name="componentContext"></param>
+        public static void ConfigureSagas(this IReceiveEndpointConfigurator configurator, IComponentContext componentContext)
         {
-            var registryConfigurator = lifetimeScope.Resolve<IRegistration>();
+            var registryConfigurator = componentContext.Resolve<IRegistration>();
 
             registryConfigurator.ConfigureSagas(configurator);
         }
@@ -128,11 +112,11 @@ namespace MassTransit
         /// Configure the execute activity on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="lifetimeScope"></param>
+        /// <param name="componentContext"></param>
         /// <param name="activityType"></param>
-        public static void ConfigureExecuteActivity(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope, Type activityType)
+        public static void ConfigureExecuteActivity(this IReceiveEndpointConfigurator configurator, IComponentContext componentContext, Type activityType)
         {
-            var registryConfigurator = lifetimeScope.Resolve<IRegistration>();
+            var registryConfigurator = componentContext.Resolve<IRegistration>();
 
             registryConfigurator.ConfigureExecuteActivity(activityType, configurator);
         }
@@ -142,12 +126,12 @@ namespace MassTransit
         /// </summary>
         /// <param name="executeEndpointConfigurator"></param>
         /// <param name="compensateEndpointConfigurator"></param>
-        /// <param name="lifetimeScope"></param>
+        /// <param name="componentContext"></param>
         /// <param name="activityType"></param>
         public static void ConfigureActivity(this IReceiveEndpointConfigurator executeEndpointConfigurator,
-            IReceiveEndpointConfigurator compensateEndpointConfigurator, ILifetimeScope lifetimeScope, Type activityType)
+            IReceiveEndpointConfigurator compensateEndpointConfigurator, IComponentContext componentContext, Type activityType)
         {
-            var registryConfigurator = lifetimeScope.Resolve<IRegistration>();
+            var registryConfigurator = componentContext.Resolve<IRegistration>();
 
             registryConfigurator.ConfigureActivity(activityType, executeEndpointConfigurator, compensateEndpointConfigurator);
         }

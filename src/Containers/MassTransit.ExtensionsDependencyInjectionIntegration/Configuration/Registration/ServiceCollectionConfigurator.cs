@@ -40,6 +40,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         {
             Collection.AddSingleton(busFactory);
             Collection.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
+            Collection.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
+            Collection.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
 
             Collection.AddSingleton(context => context.GetRequiredService<IBus>().CreateClientFactory());
         }
