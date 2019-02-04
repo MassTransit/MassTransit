@@ -19,22 +19,26 @@ namespace MassTransit.SignalR
     using System.Threading.Tasks;
     using Contracts;
     using Logging;
+    using MassTransit.MessageData;
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.AspNetCore.SignalR.Protocol;
     using Utils;
 
 
-    public class MassTransitHubLifetimeManager<THub> : BaseMassTransitHubLifetimeManager<THub>
+    public class MassTransitMessageDataHubLifetimeManager<THub> : BaseMassTransitHubLifetimeManager<THub>
         where THub : Hub
     {
         static readonly ILog _logger = Logger.Get<MassTransitHubLifetimeManager<THub>>();
 
-        public MassTransitHubLifetimeManager(
-            IPublishEndpoint publishEndpoint,
+        readonly IMessageDataRepository _repository;
+
+        public MassTransitMessageDataHubLifetimeManager(IPublishEndpoint publishEndpoint,
             IClientFactory clientFactory,
-            IHubProtocolResolver hubProtocolResolver)
+            IHubProtocolResolver hubProtocolResolver,
+            IMessageDataRepository repository)
             : base(publishEndpoint, clientFactory, hubProtocolResolver)
         {
+            _repository = repository;
         }
 
         public override Task OnConnectedAsync(HubConnectionContext connection)
@@ -64,21 +68,21 @@ namespace MassTransit.SignalR
             return Task.CompletedTask;
         }
 
-        public override Task SendAllAsync(string methodName, object[] args, CancellationToken cancellationToken = default)
+        public override async Task SendAllAsync(string methodName, object[] args, CancellationToken cancellationToken = default)
         {
             _logger.Info("Publishing All<THub> message to MassTransit.");
-            return _publishEndpoint.Publish<All<THub>>(new {Messages = _protocols.ToProtocolDictionary(methodName, args)}, cancellationToken);
+            await _publishEndpoint.Publish<AllMessageData<THub>>(new { Messages = await _protocols.ToProtocolDictionary(methodName, args).ToMessageData(_repository) }, cancellationToken);
         }
 
-        public override Task SendAllExceptAsync(string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds,
+        public override async Task SendAllExceptAsync(string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds,
             CancellationToken cancellationToken = default)
         {
             _logger.Info("Publishing All<THub> message to MassTransit, with exceptions.");
-            return _publishEndpoint.Publish<All<THub>>(
-                new {Messages = _protocols.ToProtocolDictionary(methodName, args), ExcludedConnectionIds = excludedConnectionIds.ToArray()}, cancellationToken);
+            await _publishEndpoint.Publish<AllMessageData<THub>>(
+                new { Messages = await _protocols.ToProtocolDictionary(methodName, args).ToMessageData(_repository), ExcludedConnectionIds = excludedConnectionIds.ToArray() }, cancellationToken);
         }
 
-        public override Task SendConnectionAsync(string connectionId, string methodName, object[] args, CancellationToken cancellationToken = default)
+        public override async Task SendConnectionAsync(string connectionId, string methodName, object[] args, CancellationToken cancellationToken = default)
         {
             if (connectionId == null)
                 throw new ArgumentNullException(nameof(connectionId));
@@ -89,15 +93,16 @@ namespace MassTransit.SignalR
             if (connection != null)
             {
                 // Connection is local, so we can skip publish
-                return connection.WriteAsync(new InvocationMessage(methodName, args)).AsTask();
+                await connection.WriteAsync(new InvocationMessage(methodName, args)).AsTask();
+                return;
             }
 
             _logger.Info("Publishing Connection<THub> message to MassTransit.");
-            return _publishEndpoint.Publish<Connection<THub>>(new {ConnectionId = connectionId, Messages = _protocols.ToProtocolDictionary(methodName, args)},
+            await _publishEndpoint.Publish<ConnectionMessageData<THub>>(new { ConnectionId = connectionId, Messages = await _protocols.ToProtocolDictionary(methodName, args).ToMessageData(_repository) },
                 cancellationToken);
         }
 
-        public override Task SendConnectionsAsync(IReadOnlyList<string> connectionIds, string methodName, object[] args,
+        public override async Task SendConnectionsAsync(IReadOnlyList<string> connectionIds, string methodName, object[] args,
             CancellationToken cancellationToken = default)
         {
             if (connectionIds == null)
@@ -105,91 +110,87 @@ namespace MassTransit.SignalR
 
             if (connectionIds.Count > 0)
             {
-                IDictionary<string, byte[]> protocolDictionary = _protocols.ToProtocolDictionary(methodName, args);
+                var protocolDictionary = _protocols.ToProtocolDictionary(methodName, args);
                 var publishTasks = new List<Task>(connectionIds.Count);
 
                 foreach (var connectionId in connectionIds)
-                    publishTasks.Add(_publishEndpoint.Publish<Connection<THub>>(new {ConnectionId = connectionId, Messages = protocolDictionary},
+                    publishTasks.Add(_publishEndpoint.Publish<Connection<THub>>(new { ConnectionId = connectionId, Messages = await protocolDictionary.ToMessageData(_repository) },
                         cancellationToken));
 
                 _logger.Info("Publishing multiple Connection<THub> messages to MassTransit.");
-                return Task.WhenAll(publishTasks);
+                await Task.WhenAll(publishTasks);
             }
-
-            return Task.CompletedTask;
         }
 
-        public override Task SendGroupAsync(string groupName, string methodName, object[] args, CancellationToken cancellationToken = default)
+        public override async Task SendGroupAsync(string groupName, string methodName, object[] args, CancellationToken cancellationToken = default)
         {
             if (groupName == null)
                 throw new ArgumentNullException(nameof(groupName));
 
             _logger.Info("Publishing Group<THub> message to MassTransit.");
-            return _publishEndpoint.Publish<Group<THub>>(new {GroupName = groupName, Messages = _protocols.ToProtocolDictionary(methodName, args)},
+            await _publishEndpoint.Publish<GroupMessageData<THub>>(new { GroupName = groupName, Messages = await _protocols.ToProtocolDictionary(methodName, args).ToMessageData(_repository) },
                 cancellationToken);
         }
 
-        public override Task SendGroupExceptAsync(string groupName, string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds,
+        public override async Task SendGroupExceptAsync(string groupName, string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds,
             CancellationToken cancellationToken = default)
         {
             if (groupName == null)
                 throw new ArgumentNullException(nameof(groupName));
 
             _logger.Info("Publishing Group<THub> message to MassTransit, with exceptions.");
-            return _publishEndpoint.Publish<Group<THub>>(
+            await _publishEndpoint.Publish<GroupMessageData<THub>>(
                 new
                 {
-                    GroupName = groupName, Messages = _protocols.ToProtocolDictionary(methodName, args), ExcludedConnectionIds = excludedConnectionIds.ToArray()
+                    GroupName = groupName,
+                    Messages = await _protocols.ToProtocolDictionary(methodName, args).ToMessageData(_repository),
+                    ExcludedConnectionIds = excludedConnectionIds.ToArray()
                 }, cancellationToken);
         }
 
-        public override Task SendGroupsAsync(IReadOnlyList<string> groupNames, string methodName, object[] args, CancellationToken cancellationToken = default)
+        public override async Task SendGroupsAsync(IReadOnlyList<string> groupNames, string methodName, object[] args, CancellationToken cancellationToken = default)
         {
             if (groupNames == null)
                 throw new ArgumentNullException(nameof(groupNames));
 
             if (groupNames.Count > 0)
             {
-                IDictionary<string, byte[]> protocolDictionary = _protocols.ToProtocolDictionary(methodName, args);
+                var protocolDictionary = _protocols.ToProtocolDictionary(methodName, args);
                 var publishTasks = new List<Task>(groupNames.Count);
 
                 foreach (var groupName in groupNames)
                 {
                     if (!string.IsNullOrEmpty(groupName))
-                        publishTasks.Add(_publishEndpoint.Publish<Group<THub>>(new {GroupName = groupName, Messages = protocolDictionary}, cancellationToken));
+                        publishTasks.Add(_publishEndpoint.Publish<GroupMessageData<THub>>(new { GroupName = groupName, Messages = await protocolDictionary.ToMessageData(_repository) }, cancellationToken));
                 }
 
                 _logger.Info("Publishing multiple Group<THub> messages to MassTransit.");
-                return Task.WhenAll(publishTasks);
+                await Task.WhenAll(publishTasks);
             }
-
-            return Task.CompletedTask;
         }
 
-        public override Task SendUserAsync(string userId, string methodName, object[] args, CancellationToken cancellationToken = default)
+        public override async Task SendUserAsync(string userId, string methodName, object[] args, CancellationToken cancellationToken = default)
         {
             _logger.Info("Publishing User<THub> message to MassTransit.");
-            return _publishEndpoint.Publish<User<THub>>(new {UserId = userId, Messages = _protocols.ToProtocolDictionary(methodName, args)}, cancellationToken);
+            await _publishEndpoint.Publish<UserMessageData<THub>>(new { UserId = userId, Messages = await _protocols.ToProtocolDictionary(methodName, args).ToMessageData(_repository) }, cancellationToken);
         }
 
-        public override Task SendUsersAsync(IReadOnlyList<string> userIds, string methodName, object[] args, CancellationToken cancellationToken = default)
+        public override async Task SendUsersAsync(IReadOnlyList<string> userIds, string methodName, object[] args, CancellationToken cancellationToken = default)
         {
             if (userIds == null)
                 throw new ArgumentNullException(nameof(userIds));
 
             if (userIds.Count > 0)
             {
-                IDictionary<string, byte[]> protocolDictionary = _protocols.ToProtocolDictionary(methodName, args);
+                var protocolDictionary = _protocols.ToProtocolDictionary(methodName, args);
                 var publishTasks = new List<Task>(userIds.Count);
 
                 foreach (var userId in userIds)
-                    publishTasks.Add(_publishEndpoint.Publish<User<THub>>(new {UserId = userId, Messages = protocolDictionary}, cancellationToken));
+                    publishTasks.Add(_publishEndpoint.Publish<UserMessageData<THub>>(new { UserId = userId, Messages = await protocolDictionary.ToMessageData(_repository) }, cancellationToken));
 
                 _logger.Info("Publishing multiple User<THub> messages to MassTransit.");
-                return Task.WhenAll(publishTasks);
+                await Task.WhenAll(publishTasks);
             }
-
-            return Task.CompletedTask;
         }
 
         public override async Task AddToGroupAsync(string connectionId, string groupName, CancellationToken cancellationToken = default)
@@ -214,10 +215,10 @@ namespace MassTransit.SignalR
             {
                 _logger.Info("Publishing add GroupManagement<THub> message to MassTransit.");
                 RequestHandle<GroupManagement<THub>> request =
-                    _groupManagementRequestClient.Create(new {ConnectionId = connectionId, GroupName = groupName, ServerName, Action = GroupAction.Add},
+                    _groupManagementRequestClient.Create(new { ConnectionId = connectionId, GroupName = groupName, ServerName, Action = GroupAction.Add },
                         cancellationToken);
 
-                Response<Ack<THub>> ack = await request.GetResponse<Ack<THub>>().ConfigureAwait(false);
+                Response<Ack<THub>> ack = await request.GetResponse<Ack<THub>>();
                 _logger.Info($"Request Received for add GroupManagement<THub> from {ack.Message.ServerName}.");
             }
             catch (RequestTimeoutException e)
@@ -249,10 +250,10 @@ namespace MassTransit.SignalR
             {
                 _logger.Info("Publishing remove GroupManagement<THub> message to MassTransit.");
                 RequestHandle<GroupManagement<THub>> request =
-                    _groupManagementRequestClient.Create(new {ConnectionId = connectionId, GroupName = groupName, ServerName, Action = GroupAction.Remove},
+                    _groupManagementRequestClient.Create(new { ConnectionId = connectionId, GroupName = groupName, ServerName, Action = GroupAction.Remove },
                         cancellationToken);
 
-                Response<Ack<THub>> ack = await request.GetResponse<Ack<THub>>().ConfigureAwait(false);
+                Response<Ack<THub>> ack = await request.GetResponse<Ack<THub>>();
                 _logger.Info($"Request Received for remove GroupManagement<THub> from {ack.Message.ServerName}.");
             }
             catch (RequestTimeoutException e)
