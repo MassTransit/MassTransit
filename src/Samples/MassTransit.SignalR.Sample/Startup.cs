@@ -15,6 +15,7 @@ namespace MassTransit.SignalR.Sample
     using System.Linq;
     using System.Threading.Tasks;
     using Hubs;
+    using MassTransit.MessageData;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
     using Microsoft.AspNetCore.Http;
@@ -23,7 +24,6 @@ namespace MassTransit.SignalR.Sample
     using Microsoft.Extensions.Hosting;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using RabbitMqTransport;
 
 
     public class Startup
@@ -32,7 +32,7 @@ namespace MassTransit.SignalR.Sample
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSignalR().AddMassTransitBackplane(typeof(Startup).Assembly);
+            services.AddSignalR().AddMassTransitBackplane();
 
             services.AddMassTransit(x =>
             {
@@ -44,11 +44,7 @@ namespace MassTransit.SignalR.Sample
 
                     cfg.UseHealthCheck(provider);
 
-                    cfg.AddSignalRHubEndpoints<ChatHub, IRabbitMqReceiveEndpointConfigurator>(provider, host, e =>
-                    {
-                        e.AutoDelete = true;
-                        e.Durable = false;
-                    });
+                    cfg.AddSignalRHubEndpoints<ChatHub>(provider);
                 }));
             });
 

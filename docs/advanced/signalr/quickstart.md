@@ -7,7 +7,7 @@ public void ConfigureServices(IServiceCollection services)
 {
     // other config...
     
-    services.AddSignalR().AddMassTransitBackplane(typeof(Startup).Assembly); // This is the first important line
+    services.AddSignalR().AddMassTransitBackplane(); // This is the first important line
 
     // Other config perhaps...
 
@@ -26,19 +26,7 @@ public void ConfigureServices(IServiceCollection services)
             });
 
             // Register endpoint for each hub you have
-            cfg.AddSignalRHubEndpoints<ChatHub, IRabbitMqReceiveEndpointConfigurator>(provider, host, e =>
-            {
-                e.AutoDelete = true;
-                e.Durable = false;
-            });
-            
-            // Or for azure Service Bus
-            // Register endpoint for each hub you have
-            cfg.AddSignalRHubEndpoints<ChatHub, IServiceBusReceiveEndpointConfigurator>(provider, host, e =>
-            {
-                e.AutoDeleteOnIdle = TimeSpan.FromMinutes(5);
-                e.RemoveSubscriptions = true;
-            });
+            cfg.AddSignalRHubEndpoints<ChatHub>(provider);
         }));
     });
 }

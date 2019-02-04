@@ -56,7 +56,7 @@ MassTransit Nuget Packages
 | **Transports** |
 | [MassTransit.ActiveMQ][ActiveMQ.nuget] | 4.5 | 2.0 |
 | [MassTransit.AmazonSQS][AmazonSQS.nuget] | 4.5 | 2.0 |
-| [MassTransit.Azure.ServiceBus.Core][AzureSbCore.nuget] | 4.6.2 | 2.0 |
+| [MassTransit.Azure.ServiceBus.Core][AzureSbCore.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.AzureServiceBus][AzureSb.nuget] | 4.5.2 | - |
 | [MassTransit.Http][Http.nuget] | 4.5 | 2.0 |
 | [MassTransit.RabbitMQ][RabbitMQ.nuget] | 4.5 | - |
