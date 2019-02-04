@@ -30,6 +30,17 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(configurator));
 
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
+            return configurator.UseInMemoryScheduler(schedulerFactory, queueName);
+        }
+
+        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory, string queueName = "quartz")
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            if (schedulerFactory == null)
+                throw new ArgumentNullException(nameof(schedulerFactory));
+
             var scheduler = TaskUtil.Await(() => schedulerFactory.GetScheduler());
 
             Uri inputAddress = null;
