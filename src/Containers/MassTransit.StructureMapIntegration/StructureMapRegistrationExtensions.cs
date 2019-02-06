@@ -55,6 +55,22 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure a consumer (or consumers) on the receive endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        /// <param name="consumerTypes">The consumer type(s) to configure</param>
+        public static void ConfigureConsumer(this IReceiveEndpointConfigurator configurator, IContext context, params Type[] consumerTypes)
+        {
+            var registryConfigurator = context.GetInstance<IRegistration>();
+
+            foreach (var consumerType in consumerTypes)
+            {
+                registryConfigurator.ConfigureConsumer(consumerType, configurator);
+            }
+        }
+
+        /// <summary>
         /// Configure a consumer on the receive endpoint, with an optional configuration action
         /// </summary>
         /// <param name="configurator"></param>
@@ -65,6 +81,21 @@ namespace MassTransit
             where T : class, IConsumer
         {
             var registryConfigurator = container.GetInstance<IRegistration>();
+
+            registryConfigurator.ConfigureConsumer(configurator, configure);
+        }
+
+        /// <summary>
+        /// Configure a consumer on the receive endpoint, with an optional configuration action
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        /// <param name="configure"></param>
+        public static void ConfigureConsumer<T>(this IReceiveEndpointConfigurator configurator, IContext context,
+            Action<IConsumerConfigurator<T>> configure = null)
+            where T : class, IConsumer
+        {
+            var registryConfigurator = context.GetInstance<IRegistration>();
 
             registryConfigurator.ConfigureConsumer(configurator, configure);
         }
@@ -82,6 +113,18 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure all registered consumers on the receive endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        public static void ConfigureConsumers(this IReceiveEndpointConfigurator configurator, IContext context)
+        {
+            var registryConfigurator = context.GetInstance<IRegistration>();
+
+            registryConfigurator.ConfigureConsumers(configurator);
+        }
+
+        /// <summary>
         /// Configure a saga (or sagas) on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
@@ -90,6 +133,22 @@ namespace MassTransit
         public static void ConfigureSaga(this IReceiveEndpointConfigurator configurator, IContainer container, params Type[] sagaTypes)
         {
             var registryConfigurator = container.GetInstance<IRegistration>();
+
+            foreach (var sagaType in sagaTypes)
+            {
+                registryConfigurator.ConfigureSaga(sagaType, configurator);
+            }
+        }
+
+        /// <summary>
+        /// Configure a saga (or sagas) on the receive endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        /// <param name="sagaTypes">The saga type(s) to configure</param>
+        public static void ConfigureSaga(this IReceiveEndpointConfigurator configurator, IContext context, params Type[] sagaTypes)
+        {
+            var registryConfigurator = context.GetInstance<IRegistration>();
 
             foreach (var sagaType in sagaTypes)
             {
@@ -113,6 +172,21 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure a saga on the receive endpoint, with an optional configuration action
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        /// <param name="configure"></param>
+        public static void ConfigureSaga<T>(this IReceiveEndpointConfigurator configurator, IContext context,
+            Action<ISagaConfigurator<T>> configure = null)
+            where T : class, ISaga
+        {
+            var registryConfigurator = context.GetInstance<IRegistration>();
+
+            registryConfigurator.ConfigureSaga(configurator, configure);
+        }
+
+        /// <summary>
         /// Configure all registered sagas on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
@@ -120,6 +194,18 @@ namespace MassTransit
         public static void ConfigureSagas(this IReceiveEndpointConfigurator configurator, IContainer container)
         {
             var registryConfigurator = container.GetInstance<IRegistration>();
+
+            registryConfigurator.ConfigureSagas(configurator);
+        }
+
+        /// <summary>
+        /// Configure all registered sagas on the receive endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        public static void ConfigureSagas(this IReceiveEndpointConfigurator configurator, IContext context)
+        {
+            var registryConfigurator = context.GetInstance<IRegistration>();
 
             registryConfigurator.ConfigureSagas(configurator);
         }
@@ -138,6 +224,19 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the execute activity on the receive endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        /// <param name="activityType"></param>
+        public static void ConfigureExecuteActivity(this IReceiveEndpointConfigurator configurator, IContext context, Type activityType)
+        {
+            var registryConfigurator = context.GetInstance<IRegistration>();
+
+            registryConfigurator.ConfigureExecuteActivity(activityType, configurator);
+        }
+
+        /// <summary>
         /// Configure an activity on two endpoints, one for execute, and the other for compensate
         /// </summary>
         /// <param name="executeEndpointConfigurator"></param>
@@ -148,6 +247,21 @@ namespace MassTransit
             IReceiveEndpointConfigurator compensateEndpointConfigurator, IContainer container, Type activityType)
         {
             var registryConfigurator = container.GetInstance<IRegistration>();
+
+            registryConfigurator.ConfigureActivity(activityType, executeEndpointConfigurator, compensateEndpointConfigurator);
+        }
+
+        /// <summary>
+        /// Configure an activity on two endpoints, one for execute, and the other for compensate
+        /// </summary>
+        /// <param name="executeEndpointConfigurator"></param>
+        /// <param name="compensateEndpointConfigurator"></param>
+        /// <param name="context"></param>
+        /// <param name="activityType"></param>
+        public static void ConfigureActivity(this IReceiveEndpointConfigurator executeEndpointConfigurator,
+            IReceiveEndpointConfigurator compensateEndpointConfigurator, IContext context, Type activityType)
+        {
+            var registryConfigurator = context.GetInstance<IRegistration>();
 
             registryConfigurator.ConfigureActivity(activityType, executeEndpointConfigurator, compensateEndpointConfigurator);
         }

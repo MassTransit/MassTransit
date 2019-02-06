@@ -13,7 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using System.ComponentModel;
     using ConsumeConfigurators;
     using Courier;
     using ExtensionsDependencyInjectionIntegration.ScopeProviders;
