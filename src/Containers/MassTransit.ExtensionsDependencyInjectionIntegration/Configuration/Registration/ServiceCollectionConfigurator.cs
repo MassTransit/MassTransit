@@ -49,6 +49,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         public void AddRequestClient<T>(RequestTimeout timeout = default)
             where T : class
         {
+            Collection.AddSingleton(provider =>
+            {
+                var clientFactory = provider.GetRequiredService<IClientFactory>();
+
+                return clientFactory.CreateRequestClient<T>(timeout);
+            });
+
             Collection.AddScoped(context =>
             {
                 var clientFactory = context.GetRequiredService<IClientFactory>();
@@ -63,12 +70,19 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         public void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
             where T : class
         {
+            Collection.AddSingleton(provider =>
+            {
+                var clientFactory = provider.GetRequiredService<IClientFactory>();
+
+                return clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+            });
+
             Collection.AddScoped(context =>
             {
                 var clientFactory = context.GetRequiredService<IClientFactory>();
 
                 var consumeContext = context.GetService<ConsumeContext>();
-                return (consumeContext != null)
+                return consumeContext != null
                     ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
                     : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
             });

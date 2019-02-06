@@ -98,7 +98,7 @@ namespace MassTransit.LamarIntegration.Registration
                 return (consumeContext != null)
                     ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
                     : clientFactory.CreateRequestClient<T>(timeout);
-            });
+            }).Scoped();
         }
 
         public void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
@@ -112,7 +112,7 @@ namespace MassTransit.LamarIntegration.Registration
                 return (consumeContext != null)
                     ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
                     : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-            });
+            }).Scoped();
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IServiceContext context)
