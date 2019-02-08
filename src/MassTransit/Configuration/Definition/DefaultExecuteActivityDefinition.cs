@@ -10,24 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Registration
+namespace MassTransit.Definition
 {
-    using System;
     using Courier;
-    using Definition;
 
 
-    /// <summary>
-    /// An execute activity, which doesn't have compensation
-    /// </summary>
-    public interface IExecuteActivityRegistration
+    public class DefaultExecuteActivityDefinition<TActivity, TArguments> :
+        ExecuteActivityDefinition<TActivity, TArguments>
+        where TActivity : class, ExecuteActivity<TArguments>
+        where TArguments : class
     {
-        void AddConfigureAction<T, TArguments>(Action<IExecuteActivityConfigurator<T, TArguments>> configure)
-            where T : class, ExecuteActivity<TArguments>
-            where TArguments : class;
-
-        void Configure(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider scopeProvider);
-
-        IExecuteActivityDefinition GetDefinition(IConfigurationServiceProvider provider);
     }
 }

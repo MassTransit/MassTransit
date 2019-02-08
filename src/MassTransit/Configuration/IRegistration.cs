@@ -40,16 +40,6 @@ namespace MassTransit
             where T : class, IConsumer;
 
         /// <summary>
-        /// Configure a consumer on the receive endpoint, with an optional configuration action, if present
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="configure"></param>
-        /// <typeparam name="T">The consumer type</typeparam>
-        /// <returns>True if the consumer was configured, otherwise false</returns>
-        bool TryConfigureConsumer<T>(IReceiveEndpointConfigurator configurator, Action<IConsumerConfigurator<T>> configure = null)
-            where T : class, IConsumer;
-
-        /// <summary>
         /// Configure all registered consumers on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
@@ -69,15 +59,6 @@ namespace MassTransit
         /// <param name="configure"></param>
         /// <typeparam name="T">The saga type</typeparam>
         void ConfigureSaga<T>(IReceiveEndpointConfigurator configurator, Action<ISagaConfigurator<T>> configure = null)
-            where T : class, ISaga;
-
-        /// <summary>
-        /// Configure a saga on the receive endpoint, with an optional configuration action
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="configure"></param>
-        /// <typeparam name="T">The saga type</typeparam>
-        bool TryConfigureSaga<T>(IReceiveEndpointConfigurator configurator, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga;
 
         /// <summary>

@@ -78,6 +78,15 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Use<TDefinition>();
         }
 
+        public void RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>()
+            where TDefinition : class, IExecuteActivityDefinition<TActivity, TArguments>
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            _expression.For<IExecuteActivityDefinition<TActivity, TArguments>>()
+                .Use<TDefinition>();
+        }
+
         public void RegisterCompensateActivity<TActivity, TLog>()
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class

@@ -207,6 +207,16 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 return context.Compensated();
             }
         }
+
+
+        public class PingSecondActivity :
+            Courier.ExecuteActivity<PingArguments>
+        {
+            public async Task<ExecutionResult> Execute(ExecuteContext<PingArguments> context)
+            {
+                return context.Completed();
+            }
+        }
     }
 
 
@@ -240,8 +250,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
             var completed = SubscribeHandler<RoutingSlipCompleted>();
 
             var builder = new RoutingSlipBuilder(NewId.NextGuid());
-            builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
+            builder.AddSubscription(Bus.Address, RoutingSlipEvents.Completed);
             builder.AddActivity("Ping", new Uri("loopback://localhost/Ping_execute"));
+            builder.AddActivity("PingSecond", new Uri("loopback://localhost/PingSecond_execute"));
 
             await Bus.Execute(builder.Build());
 

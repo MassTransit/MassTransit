@@ -118,9 +118,10 @@ namespace MassTransit.Registration
             configurator.AddConfigureAction(configure);
         }
 
-        void IRegistrationConfigurator.AddExecuteActivity(Type activityType)
+        void IRegistrationConfigurator.AddExecuteActivity(Type activityType, Type activityDefinitionType)
         {
-            _executeActivityRegistrations.GetOrAdd(activityType, type => ExecuteActivityRegistrationCache.CreateRegistration(type, _containerRegistrar));
+            _executeActivityRegistrations.GetOrAdd(activityType,
+                type => ExecuteActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, _containerRegistrar));
         }
 
         void IRegistrationConfigurator.AddActivity<TActivity, TArguments, TLog>(Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute,

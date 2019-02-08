@@ -18,7 +18,6 @@ namespace MassTransit.Registration
     using ConsumeConfigurators;
     using Definition;
     using Logging;
-    using Saga;
     using Util;
 
 
@@ -46,99 +45,65 @@ namespace MassTransit.Registration
 
         public void ConfigureConsumer(Type consumerType, IReceiveEndpointConfigurator configurator)
         {
-            if (_consumers.TryGetValue(consumerType, out var consumer))
-                consumer.Configure(configurator, _configurationServiceProvider);
-            else
+            if (!_consumers.TryGetValue(consumerType, out var consumer))
                 throw new ArgumentException($"The consumer type was not found: {TypeMetadataCache.GetShortName(consumerType)}", nameof(consumerType));
+
+            consumer.Configure(configurator, _configurationServiceProvider);
         }
 
         void IRegistration.ConfigureConsumer<T>(IReceiveEndpointConfigurator configurator, Action<IConsumerConfigurator<T>> configure)
         {
-            if (TryConfigureConsumer(configurator, configure))
-                return;
+            if (!_consumers.TryGetValue(typeof(T), out var consumer))
+                throw new ArgumentException($"The consumer type was not found: {TypeMetadataCache.GetShortName(typeof(T))}", nameof(T));
 
-            throw new ArgumentException($"The consumer type was not found: {TypeMetadataCache.GetShortName(typeof(T))}", nameof(T));
-        }
-
-        public bool TryConfigureConsumer<T>(IReceiveEndpointConfigurator configurator, Action<IConsumerConfigurator<T>> configure)
-            where T : class, IConsumer
-        {
-            if (_consumers.TryGetValue(typeof(T), out var consumer))
-            {
-                consumer.AddConfigureAction(configure);
-                consumer.Configure(configurator, _configurationServiceProvider);
-
-                return true;
-            }
-
-            return false;
+            consumer.AddConfigureAction(configure);
+            consumer.Configure(configurator, _configurationServiceProvider);
         }
 
         public void ConfigureConsumers(IReceiveEndpointConfigurator configurator)
         {
             foreach (var consumer in _consumers.Values)
-            {
                 consumer.Configure(configurator, _configurationServiceProvider);
-            }
         }
 
         public void ConfigureSaga(Type sagaType, IReceiveEndpointConfigurator configurator)
         {
-            if (_sagas.TryGetValue(sagaType, out var saga))
-                saga.Configure(configurator, _configurationServiceProvider);
-            else
+            if (!_sagas.TryGetValue(sagaType, out var saga))
                 throw new ArgumentException($"The saga type was not found: {TypeMetadataCache.GetShortName(sagaType)}", nameof(sagaType));
+
+            saga.Configure(configurator, _configurationServiceProvider);
         }
 
         void IRegistration.ConfigureSaga<T>(IReceiveEndpointConfigurator configurator, Action<ISagaConfigurator<T>> configure)
         {
-            if (TryConfigureSaga(configurator, configure))
-                return;
+            if (!_sagas.TryGetValue(typeof(T), out var saga))
+                throw new ArgumentException($"The saga type was not found: {TypeMetadataCache.GetShortName(typeof(T))}", nameof(T));
 
-            throw new ArgumentException($"The saga type was not found: {TypeMetadataCache.GetShortName(typeof(T))}", nameof(T));
-        }
-
-        public bool TryConfigureSaga<T>(IReceiveEndpointConfigurator configurator, Action<ISagaConfigurator<T>> configure = null)
-            where T : class, ISaga
-        {
-            if (_sagas.TryGetValue(typeof(T), out var saga))
-            {
-                saga.AddConfigureAction(configure);
-                saga.Configure(configurator, _configurationServiceProvider);
-
-                return true;
-            }
-
-            return false;
+            saga.AddConfigureAction(configure);
+            saga.Configure(configurator, _configurationServiceProvider);
         }
 
         void IRegistration.ConfigureSagas(IReceiveEndpointConfigurator configurator)
         {
             foreach (var saga in _sagas.Values)
-            {
                 saga.Configure(configurator, _configurationServiceProvider);
-            }
         }
 
         public void ConfigureExecuteActivity(Type activityType, IReceiveEndpointConfigurator configurator)
         {
-            if (_executeActivities.TryGetValue(activityType, out var activity))
-            {
-                activity.Configure(configurator, _configurationServiceProvider);
-            }
-            else
+            if (!_executeActivities.TryGetValue(activityType, out var activity))
                 throw new ArgumentException($"The activity type was not found: {TypeMetadataCache.GetShortName(activityType)}", nameof(activityType));
+
+            activity.Configure(configurator, _configurationServiceProvider);
         }
 
         public void ConfigureActivity(Type activityType, IReceiveEndpointConfigurator executeEndpointConfigurator,
             IReceiveEndpointConfigurator compensateEndpointConfigurator)
         {
-            if (_activities.TryGetValue(activityType, out var activity))
-            {
-                activity.Configure(executeEndpointConfigurator, compensateEndpointConfigurator, _configurationServiceProvider);
-            }
-            else
+            if (!_activities.TryGetValue(activityType, out var activity))
                 throw new ArgumentException($"The activity type was not found: {TypeMetadataCache.GetShortName(activityType)}", nameof(activityType));
+
+            activity.Configure(executeEndpointConfigurator, compensateEndpointConfigurator, _configurationServiceProvider);
         }
 
         public void ConfigureEndpoints<T>(T configurator, IEndpointNameFormatter endpointNameFormatter)
@@ -162,9 +127,14 @@ namespace MassTransit.Registration
                 .Select(x => x.GetDefinition(_configurationServiceProvider))
                 .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter));
 
+            var executeActivitiesByEndpoint = _executeActivities.Values
+                .Select(x => x.GetDefinition(_configurationServiceProvider))
+                .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter));
+
             var endpointNames = consumersByEndpoint.Select(x => x.Key)
                 .Union(sagasByEndpoint.Select(x => x.Key))
-                .Union(activitiesByExecuteEndpoint.Select(x => x.Key));
+                .Union(activitiesByExecuteEndpoint.Select(x => x.Key))
+                .Union(executeActivitiesByEndpoint.Select(x => x.Key));
 
             var endpoints =
                 from e in endpointNames
@@ -174,7 +144,9 @@ namespace MassTransit.Registration
                 from s in ss.DefaultIfEmpty()
                 join a in activitiesByExecuteEndpoint on e equals a.Key into aes
                 from a in aes.DefaultIfEmpty()
-                select new {Name = e, Consumers = c, Sagas = s, Activities = a};
+                join ea in executeActivitiesByEndpoint on e equals ea.Key into eas
+                from ea in eas.DefaultIfEmpty()
+                select new {Name = e, Consumers = c, Sagas = s, Activities = a, ExecuteActivities = ea};
 
             foreach (var endpoint in endpoints)
             {
@@ -204,10 +176,25 @@ namespace MassTransit.Registration
                     if (endpoint.Activities != null)
                         foreach (var activity in endpoint.Activities)
                         {
-                            configurator.ReceiveEndpoint(activity.GetCompensateEndpointName(endpointNameFormatter), compensateEndpointConfigurator =>
+                            var compensateEndpointName = activity.GetCompensateEndpointName(endpointNameFormatter);
+
+                            configurator.ReceiveEndpoint(compensateEndpointName, compensateEndpointConfigurator =>
                             {
+                                if (_log.IsDebugEnabled)
+                                    _log.DebugFormat("Configuring activity {0} on {1}/{2}", TypeMetadataCache.GetShortName(activity.ActivityType),
+                                        endpoint.Name, compensateEndpointName);
+
                                 ConfigureActivity(activity.ActivityType, cfg, compensateEndpointConfigurator);
                             });
+                        }
+
+                    if (endpoint.ExecuteActivities != null)
+                        foreach (var activity in endpoint.ExecuteActivities)
+                        {
+                            if (_log.IsDebugEnabled)
+                                _log.DebugFormat("Configuring activity {0} on {1}", TypeMetadataCache.GetShortName(activity.ActivityType), endpoint.Name);
+
+                            ConfigureExecuteActivity(activity.ActivityType, cfg);
                         }
                 });
             }

@@ -16,35 +16,38 @@ namespace MassTransit.Definition
     using Courier;
 
 
-    public interface IActivityDefinition :
-        IExecuteActivityDefinition
+    public interface IExecuteActivityDefinition
     {
         /// <summary>
-        /// The log type
+        /// The Activity type
         /// </summary>
-        Type LogType { get; }
+        Type ActivityType { get; }
 
         /// <summary>
-        /// Return the endpoint name for the compensate activity
+        /// The argument type
+        /// </summary>
+        Type ArgumentType { get; }
+
+        /// <summary>
+        /// Return the endpoint name for the execute activity
         /// </summary>
         /// <param name="formatter"></param>
         /// <returns></returns>
-        string GetCompensateEndpointName(IEndpointNameFormatter formatter);
+        string GetExecuteEndpointName(IEndpointNameFormatter formatter);
+
     }
 
 
-    public interface IActivityDefinition<TActivity, TArguments, TLog> :
-        IActivityDefinition,
-        IExecuteActivityDefinition<TActivity, TArguments>
-        where TActivity : class, Activity<TArguments, TLog>
-        where TLog : class
+    public interface IExecuteActivityDefinition<TActivity, TArguments> :
+        IExecuteActivityDefinition
+        where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
         /// <summary>
-        /// Configure the compensate activity
+        /// Configure the execute activity
         /// </summary>
         /// <param name="endpointConfigurator"></param>
-        /// <param name="compensateActivityConfigurator"></param>
-        void Configure(IReceiveEndpointConfigurator endpointConfigurator, ICompensateActivityConfigurator<TActivity, TLog> compensateActivityConfigurator);
+        /// <param name="executeActivityConfigurator"></param>
+        void Configure(IReceiveEndpointConfigurator endpointConfigurator, IExecuteActivityConfigurator<TActivity, TArguments> executeActivityConfigurator);
     }
 }

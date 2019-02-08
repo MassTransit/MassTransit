@@ -76,6 +76,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
             _collection.AddTransient<IActivityDefinition<TActivity, TArguments, TLog>, TDefinition>();
         }
 
+        public void RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>()
+            where TDefinition : class, IExecuteActivityDefinition<TActivity, TArguments>
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            _collection.AddTransient<IExecuteActivityDefinition<TActivity, TArguments>, TDefinition>();
+        }
+
         public void RegisterCompensateActivity<TActivity, TLog>()
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class

@@ -38,7 +38,7 @@ namespace MassTransit
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class;
 
-        void AddExecuteActivity(Type activityType);
+        void AddExecuteActivity(Type activityType, Type activityDefinitionType);
 
         void AddActivity<TActivity, TArguments, TLog>(Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute = null,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate = null)

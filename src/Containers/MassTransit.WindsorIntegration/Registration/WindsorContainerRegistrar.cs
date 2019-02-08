@@ -85,6 +85,16 @@ namespace MassTransit.WindsorIntegration.Registration
                     .ImplementedBy<TDefinition>());
         }
 
+        public void RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>()
+            where TDefinition : class, IExecuteActivityDefinition<TActivity, TArguments>
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            _container.Register(
+                Component.For<IExecuteActivityDefinition<TActivity, TArguments>>()
+                    .ImplementedBy<TDefinition>());
+        }
+
         public void RegisterCompensateActivity<TActivity, TLog>()
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class

@@ -210,16 +210,16 @@ namespace MassTransit
             foreach (var activity in activities)
                 configurator.AddActivity(activity.ActivityType, activity.DefinitionType);
 
-            foreach (var type in types)
-            {
-                if (type.HasInterface(typeof(Activity<,>)))
-                {
-                }
-                else if (type.HasInterface(typeof(ExecuteActivity<>)))
-                    configurator.AddExecuteActivity(type);
-                else
-                    throw new ArgumentException($"The type is not an activity: {TypeMetadataCache.GetShortName(type)}", nameof(types));
-            }
+            IEnumerable<Type> executeActivityTypes = types.Where(x => x.HasInterface(typeof(ExecuteActivity<>))).Except(activityTypes);
+            IEnumerable<Type> executeActivityDefinitionTypes = types.Where(x => x.HasInterface(typeof(IExecuteActivityDefinition<,>)));
+
+            var executeActivities = from c in executeActivityTypes
+                join d in executeActivityDefinitionTypes on c equals d.GetClosingArguments(typeof(IExecuteActivityDefinition<,>)).First() into dc
+                from d in dc.DefaultIfEmpty()
+                select new {ActivityType = c, DefinitionType = d};
+
+            foreach (var executeActivity in executeActivities)
+                configurator.AddExecuteActivity(executeActivity.ActivityType, executeActivity.DefinitionType);
         }
 
         static IEnumerable<Type> FindTypesInNamespace(Type type, Func<Type, bool> typeFilter)

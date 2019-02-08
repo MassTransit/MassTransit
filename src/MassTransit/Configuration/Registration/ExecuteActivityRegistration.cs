@@ -15,6 +15,7 @@ namespace MassTransit.Registration
     using System;
     using System.Collections.Generic;
     using Courier;
+    using Definition;
     using PipeConfigurators;
     using Scoping;
 
@@ -25,6 +26,7 @@ namespace MassTransit.Registration
         where TArguments : class
     {
         readonly List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>> _configureActions;
+        IExecuteActivityDefinition<TActivity, TArguments> _definition;
 
         public ExecuteActivityRegistration()
         {
@@ -49,6 +51,17 @@ namespace MassTransit.Registration
                 action(specification);
 
             configurator.AddEndpointSpecification(specification);
+        }
+
+        IExecuteActivityDefinition IExecuteActivityRegistration.GetDefinition(IConfigurationServiceProvider provider)
+        {
+            return GetActivityDefinition(provider);
+        }
+
+        IExecuteActivityDefinition<TActivity, TArguments> GetActivityDefinition(IConfigurationServiceProvider provider)
+        {
+            return _definition ?? (_definition = provider.GetService<IExecuteActivityDefinition<TActivity, TArguments>>()
+                ?? new DefaultExecuteActivityDefinition<TActivity, TArguments>());
         }
     }
 }
