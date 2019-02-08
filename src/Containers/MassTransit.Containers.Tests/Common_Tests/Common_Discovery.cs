@@ -44,11 +44,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
         public class DiscoveryPingConsumer :
             IConsumer<PingMessage>
         {
-            public Task Consume(ConsumeContext<PingMessage> context)
+            public async Task Consume(ConsumeContext<PingMessage> context)
             {
-                context.Publish(new PingReceived() {CorrelationId = context.Message.CorrelationId});
+                await context.Publish(new PingReceived() {CorrelationId = context.Message.CorrelationId});
 
-                return context.RespondAsync(new PongMessage(context.Message.CorrelationId));
+                await Task.Delay(1000);
+
+                await context.RespondAsync(new PongMessage(context.Message.CorrelationId));
             }
         }
 
