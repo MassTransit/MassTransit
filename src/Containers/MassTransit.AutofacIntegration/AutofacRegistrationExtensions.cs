@@ -43,12 +43,13 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="componentContext"></param>
-        public static void ConfigureEndpoints<T>(this T configurator, IComponentContext componentContext)
+        /// <param name="endpointNameFormatter">Specify a name formatter to override the default endpoint naming conventions</param>
+        public static void ConfigureEndpoints<T>(this T configurator, IComponentContext componentContext, IEndpointNameFormatter endpointNameFormatter = null)
             where T : IBusFactoryConfigurator
         {
             var endpointRegistration = componentContext.Resolve<IRegistration>();
 
-            endpointRegistration.ConfigureEndpoints(configurator);
+            endpointRegistration.ConfigureEndpoints(configurator, endpointNameFormatter);
         }
 
         /// <summary>
@@ -63,7 +64,7 @@ namespace MassTransit
         {
             var registration = componentContext.Resolve<IRegistration>();
 
-            registration.ConfigureConsumer<T>(configurator, configure);
+            registration.ConfigureConsumer(configurator, configure);
         }
 
         /// <summary>
@@ -106,7 +107,7 @@ namespace MassTransit
         {
             var registration = componentContext.Resolve<IRegistration>();
 
-            registration.ConfigureSaga<T>(configurator, configure);
+            registration.ConfigureSaga(configurator, configure);
         }
 
         /// <summary>

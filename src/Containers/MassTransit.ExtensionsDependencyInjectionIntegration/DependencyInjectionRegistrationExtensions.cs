@@ -43,12 +43,13 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="provider"></param>
-        public static void ConfigureEndpoints<T>(this T configurator, IServiceProvider provider)
+        /// <param name="endpointNameFormatter">Specify a name formatter to override the default endpoint naming conventions</param>
+        public static void ConfigureEndpoints<T>(this T configurator, IServiceProvider provider, IEndpointNameFormatter endpointNameFormatter = null)
             where T : IBusFactoryConfigurator
         {
             var registration = provider.GetRequiredService<IRegistration>();
 
-            registration.ConfigureEndpoints(configurator);
+            registration.ConfigureEndpoints(configurator, endpointNameFormatter);
         }
 
         /// <summary>

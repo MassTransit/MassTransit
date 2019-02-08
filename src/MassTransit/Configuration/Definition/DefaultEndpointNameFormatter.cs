@@ -23,23 +23,20 @@ namespace MassTransit.Definition
         public string Consumer<T>()
             where T : class, IConsumer
         {
-            Type type = typeof(T);
-            return GetConsumerName(type.Name);
+            return GetConsumerName(typeof(T).Name);
         }
 
         public string Saga<T>()
             where T : class, ISaga
         {
-            Type type = typeof(T);
-            return GetSagaName(type.Name);
+            return GetSagaName(typeof(T).Name);
         }
 
         public string ExecuteActivity<T, TArguments>()
             where T : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            Type type = typeof(T);
-            var activityName = GetActivityName(type.Name);
+            var activityName = GetActivityName(typeof(T).Name);
 
             return $"{activityName}_execute";
         }
@@ -49,8 +46,7 @@ namespace MassTransit.Definition
             where TArguments : class
             where TLog : class
         {
-            Type type = typeof(T);
-            var activityName = GetActivityName(type.Name);
+            var activityName = GetActivityName(typeof(T).Name);
 
             return ($"{activityName}_execute", $"{activityName}_compensate");
         }

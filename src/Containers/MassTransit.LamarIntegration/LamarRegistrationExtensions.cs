@@ -43,25 +43,27 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="container"></param>
-        public static void ConfigureEndpoints<T>(this T configurator, IContainer container)
+        /// <param name="endpointNameFormatter">Specify a name formatter to override the default endpoint naming conventions</param>
+        public static void ConfigureEndpoints<T>(this T configurator, IContainer container, IEndpointNameFormatter endpointNameFormatter = null)
             where T : IBusFactoryConfigurator
         {
             var registration = container.GetInstance<IRegistration>();
 
-            registration.ConfigureEndpoints(configurator);
+            registration.ConfigureEndpoints(configurator, endpointNameFormatter);
         }
-        
+
         /// <summary>
         /// Configure all defined consumer types on their respective endpoints
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="context"></param>
-        public static void ConfigureEndpoints<T>(this T configurator, IServiceContext context)
+        /// <param name="endpointNameFormatter">Specify a name formatter to override the default endpoint naming conventions</param>
+        public static void ConfigureEndpoints<T>(this T configurator, IServiceContext context, IEndpointNameFormatter endpointNameFormatter = null)
             where T : IBusFactoryConfigurator
         {
             var registration = context.GetInstance<IRegistration>();
 
-            registration.ConfigureEndpoints(configurator);
+            registration.ConfigureEndpoints(configurator, endpointNameFormatter);
         }
 
         /// <summary>

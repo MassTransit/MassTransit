@@ -14,7 +14,6 @@ namespace MassTransit
 {
     using System;
     using ConsumeConfigurators;
-    using Definition;
     using Saga;
 
 
@@ -109,7 +108,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="endpointNameFormatter"></param>
         /// <typeparam name="T"></typeparam>
-        void ConfigureEndpoints<T>(T configurator, IEndpointNameFormatter endpointNameFormatter = null)
+        void ConfigureEndpoints<T>(T configurator, IEndpointNameFormatter endpointNameFormatter)
             where T : IBusFactoryConfigurator;
     }
 }
