@@ -59,11 +59,13 @@ namespace MassTransit.AzureServiceBusTransport.Builders
             return new ServiceBusEntityReceiveEndpointContext(_configuration, topologyLayout);
         }
 
+        static readonly char[] Separator = {'/'};
+
         string GenerateSubscriptionName()
         {
-            var subscriptionName = _configuration.Settings.Name;
+            var subscriptionName = _configuration.Settings.Name.Split(Separator, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
 
-            var suffix = _configuration.HostAddress.AbsolutePath.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+            var suffix = _configuration.HostAddress.AbsolutePath.Split(Separator, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
             if (!string.IsNullOrWhiteSpace(suffix))
                 subscriptionName += $"-{suffix}";
 
