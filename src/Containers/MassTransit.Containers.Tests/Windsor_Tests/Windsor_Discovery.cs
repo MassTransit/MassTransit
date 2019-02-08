@@ -34,6 +34,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
                 x.AddConsumersFromNamespaceContaining(typeof(DiscoveryTypes));
                 x.AddSagaStateMachinesFromNamespaceContaining(typeof(DiscoveryTypes));
                 x.AddSagasFromNamespaceContaining(typeof(DiscoveryTypes));
+                x.AddActivitiesFromNamespaceContaining(typeof(DiscoveryTypes));
 
                 x.AddBus(provider => BusControl);
                 x.AddRequestClient<PingMessage>(new Uri("loopback://localhost/ping-queue"));

@@ -46,6 +46,6 @@ namespace MassTransit
             where TLog : class
             where TArguments : class;
 
-        void AddActivity(Type activityType);
+        void AddActivity(Type activityType, Type activityDefinitionType = null);
     }
 }

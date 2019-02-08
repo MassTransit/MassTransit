@@ -123,11 +123,8 @@ namespace MassTransit.Registration
             _executeActivityRegistrations.GetOrAdd(activityType, type => ExecuteActivityRegistrationCache.CreateRegistration(type, _containerRegistrar));
         }
 
-        public void AddActivity<TActivity, TArguments, TLog>(Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute = null,
-            Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate = null)
-            where TActivity : class, Activity<TArguments, TLog>
-            where TLog : class
-            where TArguments : class
+        void IRegistrationConfigurator.AddActivity<TActivity, TArguments, TLog>(Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute,
+            Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate)
         {
             IActivityRegistration ValueFactory(Type type)
             {
@@ -142,9 +139,10 @@ namespace MassTransit.Registration
             registration.AddConfigureAction(configureCompensate);
         }
 
-        public void AddActivity(Type activityType)
+        public void AddActivity(Type activityType, Type activityDefinitionType)
         {
-            _activityRegistrations.GetOrAdd(activityType, type => ActivityRegistrationCache.CreateRegistration(type, _containerRegistrar));
+            _activityRegistrations.GetOrAdd(activityType,
+                type => ActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, _containerRegistrar));
         }
 
         public IRegistration CreateRegistration(IConfigurationServiceProvider configurationServiceProvider)

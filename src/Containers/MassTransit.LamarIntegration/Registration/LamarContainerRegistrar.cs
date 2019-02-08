@@ -69,6 +69,16 @@ namespace MassTransit.LamarIntegration.Registration
                 .Use(CreateExecuteActivityScopeProvider<TActivity, TArguments>);
         }
 
+        public void RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>()
+            where TDefinition : class, IActivityDefinition<TActivity, TArguments, TLog>
+            where TActivity : class, Activity<TArguments, TLog>
+            where TArguments : class
+            where TLog : class
+        {
+            _registry.For<IActivityDefinition<TActivity, TArguments, TLog>>()
+                .Use<TDefinition>();
+        }
+
         public void RegisterCompensateActivity<TActivity, TLog>()
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class

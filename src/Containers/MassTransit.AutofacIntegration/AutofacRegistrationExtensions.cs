@@ -47,9 +47,9 @@ namespace MassTransit
         public static void ConfigureEndpoints<T>(this T configurator, IComponentContext componentContext, IEndpointNameFormatter endpointNameFormatter = null)
             where T : IBusFactoryConfigurator
         {
-            var endpointRegistration = componentContext.Resolve<IRegistration>();
+            var registration = componentContext.Resolve<IRegistration>();
 
-            endpointRegistration.ConfigureEndpoints(configurator, endpointNameFormatter);
+            registration.ConfigureEndpoints(configurator, endpointNameFormatter);
         }
 
         /// <summary>

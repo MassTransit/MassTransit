@@ -120,7 +120,7 @@ namespace MassTransit.Registration
             }
         }
 
-        void IRegistration.ConfigureExecuteActivity(Type activityType, IReceiveEndpointConfigurator configurator)
+        public void ConfigureExecuteActivity(Type activityType, IReceiveEndpointConfigurator configurator)
         {
             if (_executeActivities.TryGetValue(activityType, out var activity))
             {
@@ -130,7 +130,7 @@ namespace MassTransit.Registration
                 throw new ArgumentException($"The activity type was not found: {TypeMetadataCache.GetShortName(activityType)}", nameof(activityType));
         }
 
-        void IRegistration.ConfigureActivity(Type activityType, IReceiveEndpointConfigurator executeEndpointConfigurator,
+        public void ConfigureActivity(Type activityType, IReceiveEndpointConfigurator executeEndpointConfigurator,
             IReceiveEndpointConfigurator compensateEndpointConfigurator)
         {
             if (_activities.TryGetValue(activityType, out var activity))
@@ -158,7 +158,13 @@ namespace MassTransit.Registration
                 .Select(x => x.GetDefinition(_configurationServiceProvider))
                 .GroupBy(x => x.GetEndpointName(endpointNameFormatter));
 
-            var endpointNames = consumersByEndpoint.Select(x => x.Key).Union(sagasByEndpoint.Select(x => x.Key));
+            var activitiesByExecuteEndpoint = _activities.Values
+                .Select(x => x.GetDefinition(_configurationServiceProvider))
+                .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter));
+
+            var endpointNames = consumersByEndpoint.Select(x => x.Key)
+                .Union(sagasByEndpoint.Select(x => x.Key))
+                .Union(activitiesByExecuteEndpoint.Select(x => x.Key));
 
             var endpoints =
                 from e in endpointNames
@@ -166,7 +172,9 @@ namespace MassTransit.Registration
                 from c in cs.DefaultIfEmpty()
                 join s in sagasByEndpoint on e equals s.Key into ss
                 from s in ss.DefaultIfEmpty()
-                select new {Name = e, Consumers = c, Sagas = s};
+                join a in activitiesByExecuteEndpoint on e equals a.Key into aes
+                from a in aes.DefaultIfEmpty()
+                select new {Name = e, Consumers = c, Sagas = s, Activities = a};
 
             foreach (var endpoint in endpoints)
             {
@@ -176,21 +184,30 @@ namespace MassTransit.Registration
                 configurator.ReceiveEndpoint(endpoint.Name, cfg =>
                 {
                     if (endpoint.Consumers != null)
-                        foreach (var definition in endpoint.Consumers)
+                        foreach (var consumer in endpoint.Consumers)
                         {
                             if (_log.IsDebugEnabled)
-                                _log.DebugFormat("Configuring consumer {0} on {1}", TypeMetadataCache.GetShortName(definition.ConsumerType), endpoint.Name);
+                                _log.DebugFormat("Configuring consumer {0} on {1}", TypeMetadataCache.GetShortName(consumer.ConsumerType), endpoint.Name);
 
-                            ConfigureConsumer(definition.ConsumerType, cfg);
+                            ConfigureConsumer(consumer.ConsumerType, cfg);
                         }
 
                     if (endpoint.Sagas != null)
-                        foreach (var definition in endpoint.Sagas)
+                        foreach (var saga in endpoint.Sagas)
                         {
                             if (_log.IsDebugEnabled)
-                                _log.DebugFormat("Configuring saga {0} on {1}", TypeMetadataCache.GetShortName(definition.SagaType), endpoint.Name);
+                                _log.DebugFormat("Configuring saga {0} on {1}", TypeMetadataCache.GetShortName(saga.SagaType), endpoint.Name);
 
-                            ConfigureSaga(definition.SagaType, cfg);
+                            ConfigureSaga(saga.SagaType, cfg);
+                        }
+
+                    if (endpoint.Activities != null)
+                        foreach (var activity in endpoint.Activities)
+                        {
+                            configurator.ReceiveEndpoint(activity.GetCompensateEndpointName(endpointNameFormatter), compensateEndpointConfigurator =>
+                            {
+                                ConfigureActivity(activity.ActivityType, cfg, compensateEndpointConfigurator);
+                            });
                         }
                 });
             }

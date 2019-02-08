@@ -68,6 +68,16 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IExecuteActivityScopeProvider<TActivity, TArguments>>();
         }
 
+        public void RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>()
+            where TDefinition : class, IActivityDefinition<TActivity, TArguments, TLog>
+            where TActivity : class, Activity<TArguments, TLog>
+            where TArguments : class
+            where TLog : class
+        {
+            _builder.RegisterType<TDefinition>()
+                .As<IActivityDefinition<TActivity, TArguments, TLog>>();
+        }
+
         public void RegisterCompensateActivity<TActivity, TLog>()
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class

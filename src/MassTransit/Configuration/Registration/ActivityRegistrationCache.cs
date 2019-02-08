@@ -38,9 +38,9 @@ namespace MassTransit.Registration
             GetOrAdd(activityType).Register(registrar);
         }
 
-        public static IActivityRegistration CreateRegistration(Type activityType, IContainerRegistrar registrar)
+        public static IActivityRegistration CreateRegistration(Type activityType, Type activityDefinitionType, IContainerRegistrar registrar)
         {
-            return GetOrAdd(activityType).CreateRegistration(registrar);
+            return GetOrAdd(activityType).CreateRegistration(activityDefinitionType, registrar);
         }
 
 
@@ -53,15 +53,15 @@ namespace MassTransit.Registration
         interface CachedRegistration
         {
             void Register(IContainerRegistrar registrar);
-            IActivityRegistration CreateRegistration(IContainerRegistrar registrar);
+            IActivityRegistration CreateRegistration(Type activityDefinitionType, IContainerRegistrar registrar);
         }
 
 
         class CachedRegistration<TActivity, TArguments, TLog> :
             CachedRegistration
             where TActivity : class, Activity<TArguments, TLog>
-            where TLog : class
             where TArguments : class
+            where TLog : class
         {
             public void Register(IContainerRegistrar registrar)
             {
@@ -69,9 +69,12 @@ namespace MassTransit.Registration
                 registrar.RegisterCompensateActivity<TActivity, TLog>();
             }
 
-            public IActivityRegistration CreateRegistration(IContainerRegistrar registrar)
+            public IActivityRegistration CreateRegistration(Type activityDefinitionType, IContainerRegistrar registrar)
             {
                 Register(registrar);
+
+                if (activityDefinitionType != null)
+                    ActivityDefinitionRegistrationCache.Register(activityDefinitionType, registrar);
 
                 return new ActivityRegistration<TActivity, TArguments, TLog>();
             }

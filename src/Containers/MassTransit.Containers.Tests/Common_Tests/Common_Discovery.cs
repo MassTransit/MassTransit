@@ -12,7 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Common_Tests
 {
+    using System;
     using System.Threading.Tasks;
+    using Courier;
+    using Courier.Contracts;
     using Discovery;
     using NUnit.Framework;
     using TestFramework;
@@ -25,10 +28,12 @@ namespace MassTransit.Containers.Tests.Common_Tests
         using System.Threading.Tasks;
         using Automatonymous;
         using ConsumeConfigurators;
+        using Courier;
         using Definition;
         using GreenPipes;
         using Saga;
         using TestFramework.Messages;
+        using Util;
 
 
         public class DiscoveryTypes
@@ -175,6 +180,33 @@ namespace MassTransit.Containers.Tests.Common_Tests
             {
             }
         }
+
+
+        public interface PingArguments
+        {
+            Guid CorrelationId { get; }
+        }
+
+
+        public interface PingLog
+        {
+            Guid CorrelationId { get; }
+        }
+
+
+        public class PingActivity :
+            Courier.Activity<PingArguments, PingLog>
+        {
+            public async Task<ExecutionResult> Execute(ExecuteContext<PingArguments> context)
+            {
+                return context.Completed(TypeMetadataCache<PingLog>.InitializeFromObject(new {context.Arguments.CorrelationId}));
+            }
+
+            public async Task<CompensationResult> Compensate(CompensateContext<PingLog> context)
+            {
+                return context.Compensated();
+            }
+        }
     }
 
 
@@ -200,6 +232,21 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             var pingCompleted = await completed;
             Assert.That(pingCompleted.Message.CorrelationId, Is.EqualTo(pingMessage.CorrelationId));
+        }
+
+        [Test]
+        public async Task Should_complete_the_routing_slip()
+        {
+            var completed = SubscribeHandler<RoutingSlipCompleted>();
+
+            var builder = new RoutingSlipBuilder(NewId.NextGuid());
+            builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
+            builder.AddActivity("Ping", new Uri("loopback://localhost/Ping_execute"));
+
+            await Bus.Execute(builder.Build());
+
+            var routingSlipCompleted = await completed;
+            Assert.That(routingSlipCompleted.Message.TrackingNumber, Is.EqualTo(builder.TrackingNumber));
         }
 
         protected abstract IRequestClient<PingMessage> GetRequestClient();

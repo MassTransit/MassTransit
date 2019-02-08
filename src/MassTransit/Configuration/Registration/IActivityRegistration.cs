@@ -14,6 +14,7 @@ namespace MassTransit.Registration
 {
     using System;
     using Courier;
+    using Definition;
 
 
     /// <summary>
@@ -31,5 +32,7 @@ namespace MassTransit.Registration
 
         void Configure(IReceiveEndpointConfigurator executeEndpointConfigurator,
             IReceiveEndpointConfigurator compensateEndpointConfigurator, IConfigurationServiceProvider scopeProvider);
+
+        IActivityDefinition GetDefinition(IConfigurationServiceProvider provider);
     }
 }

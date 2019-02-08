@@ -41,14 +41,13 @@ namespace MassTransit.Definition
             return $"{activityName}_execute";
         }
 
-        public (string execute, string compensate) Activity<T, TArguments, TLog>()
-            where T : class, Activity<TArguments, TLog>
-            where TArguments : class
+        public string CompensateActivity<T, TLog>()
+            where T : class, CompensateActivity<TLog>
             where TLog : class
         {
             var activityName = GetActivityName(typeof(T).Name);
 
-            return ($"{activityName}_execute", $"{activityName}_compensate");
+            return $"{activityName}_compensate";
         }
 
         static string GetConsumerName(string typeName)

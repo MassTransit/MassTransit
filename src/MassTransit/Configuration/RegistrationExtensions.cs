@@ -108,12 +108,6 @@ namespace MassTransit
             AddSagas(configurator, types.FindTypes(TypeClassification.Concrete).ToArray());
         }
 
-        static bool IsSagaTypeOrDefinition(Type type)
-        {
-            return TypeMetadataCache.HasSagaInterfaces(type)
-                || type.HasInterface(typeof(ISagaDefinition<>));
-        }
-
         /// <summary>
         /// Adds all sagas in the specified assemblies matching the namespace. If you are using both state machine and regular sagas, be
         /// sure to call AddSagaStateMachinesFromNamespaceContaining prior to calling this one.
@@ -131,6 +125,12 @@ namespace MassTransit
             IEnumerable<Type> types = FindTypesInNamespace(type, IsSagaTypeOrDefinition);
 
             AddSagas(configurator, types.ToArray());
+        }
+
+        static bool IsSagaTypeOrDefinition(Type type)
+        {
+            return TypeMetadataCache.HasSagaInterfaces(type)
+                || type.HasInterface(typeof(ISagaDefinition<>));
         }
 
         /// <summary>
@@ -153,21 +153,43 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Adds all activities (including execute-only activities) in the specified assemblies. If using state machine sagas, they should be
-        /// added first using AddSagaStateMachines.
+        /// Adds all activities (including execute-only activities) in the specified assemblies.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="ns">The namespace to filter</param>
         /// <param name="assemblies">The assemblies to scan for consumers</param>
-        public static void AddActivities(this IRegistrationConfigurator configurator, string ns, params Assembly[] assemblies)
+        public static void AddActivities(this IRegistrationConfigurator configurator, params Assembly[] assemblies)
         {
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            var types = AssemblyTypeCache.FindTypes(assemblies, x => x.HasInterface(typeof(Activity<,>))
-                && x.Namespace != null && x.Namespace.StartsWith(ns, StringComparison.OrdinalIgnoreCase)).GetAwaiter().GetResult();
+            var types = AssemblyTypeCache.FindTypes(assemblies, IsActivityTypeOrDefinition).GetAwaiter().GetResult();
 
-            AddConsumers(configurator, types.FindTypes(TypeClassification.Concrete).ToArray());
+            AddActivities(configurator, types.FindTypes(TypeClassification.Concrete).ToArray());
+        }
+
+        /// <summary>
+        /// Adds all activities (including execute-only activities) in the specified assemblies matching the namespace.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="type">The type to use to identify the assembly and namespace to scan</param>
+        public static void AddActivitiesFromNamespaceContaining(this IRegistrationConfigurator configurator, Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            if (type.Assembly == null || type.Namespace == null)
+                throw new ArgumentException($"The type {TypeMetadataCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
+
+            IEnumerable<Type> types = FindTypesInNamespace(type, IsActivityTypeOrDefinition);
+
+            AddActivities(configurator, types.ToArray());
+        }
+
+        static bool IsActivityTypeOrDefinition(Type type)
+        {
+            return type.HasInterface(typeof(ExecuteActivity<>))
+                || type.HasInterface(typeof(IActivityDefinition<,,>))
+                || type.HasInterface(typeof(CompensateActivity<>));
         }
 
         /// <summary>
@@ -177,10 +199,22 @@ namespace MassTransit
         /// <param name="types">The state machine types to add</param>
         public static void AddActivities(this IRegistrationConfigurator configurator, params Type[] types)
         {
+            IEnumerable<Type> activityTypes = types.Where(x => x.HasInterface(typeof(Activity<,>)));
+            IEnumerable<Type> activityDefinitionTypes = types.Where(x => x.HasInterface(typeof(IActivityDefinition<,,>)));
+
+            var activities = from c in activityTypes
+                join d in activityDefinitionTypes on c equals d.GetClosingArguments(typeof(IActivityDefinition<,,>)).First() into dc
+                from d in dc.DefaultIfEmpty()
+                select new {ActivityType = c, DefinitionType = d};
+
+            foreach (var activity in activities)
+                configurator.AddActivity(activity.ActivityType, activity.DefinitionType);
+
             foreach (var type in types)
             {
                 if (type.HasInterface(typeof(Activity<,>)))
-                    configurator.AddActivity(type);
+                {
+                }
                 else if (type.HasInterface(typeof(ExecuteActivity<>)))
                     configurator.AddExecuteActivity(type);
                 else

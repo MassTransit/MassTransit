@@ -15,6 +15,7 @@ namespace MassTransit.Registration
     using System;
     using System.Collections.Generic;
     using Courier;
+    using Definition;
     using PipeConfigurators;
     using Scoping;
 
@@ -27,6 +28,7 @@ namespace MassTransit.Registration
     {
         readonly List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>> _executeActions;
         readonly List<Action<ICompensateActivityConfigurator<TActivity, TLog>>> _compensateActions;
+        IActivityDefinition<TActivity, TArguments, TLog> _definition;
 
         public ActivityRegistration()
         {
@@ -58,6 +60,17 @@ namespace MassTransit.Registration
             ConfigureExecute(executeEndpointConfigurator, scopeProvider, compensateEndpointConfigurator.InputAddress);
         }
 
+        IActivityDefinition IActivityRegistration.GetDefinition(IConfigurationServiceProvider provider)
+        {
+            return GetActivityDefinition(provider);
+        }
+
+        IActivityDefinition<TActivity, TArguments, TLog> GetActivityDefinition(IConfigurationServiceProvider provider)
+        {
+            return _definition ?? (_definition = provider.GetService<IActivityDefinition<TActivity, TArguments, TLog>>()
+                ?? new DefaultActivityDefinition<TActivity, TArguments, TLog>());
+        }
+
         void ConfigureCompensate(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
         {
             var activityScopeProvider = configurationServiceProvider.GetRequiredService<ICompensateActivityScopeProvider<TActivity, TLog>>();
@@ -65,6 +78,9 @@ namespace MassTransit.Registration
             var activityFactory = new ScopeCompensateActivityFactory<TActivity, TLog>(activityScopeProvider);
 
             var specification = new CompensateActivityHostSpecification<TActivity, TLog>(activityFactory);
+
+            GetActivityDefinition(configurationServiceProvider)
+                .Configure(configurator, specification);
 
             foreach (var action in _compensateActions)
                 action(specification);
@@ -79,6 +95,9 @@ namespace MassTransit.Registration
             var activityFactory = new ScopeExecuteActivityFactory<TActivity, TArguments>(activityScopeProvider);
 
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(activityFactory, compensateAddress);
+
+            GetActivityDefinition(configurationServiceProvider)
+                .Configure(configurator, specification);
 
             foreach (var action in _executeActions)
                 action(specification);

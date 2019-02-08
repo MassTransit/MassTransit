@@ -10,26 +10,16 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Definition
 {
     using Courier;
-    using Saga;
 
 
-    public interface IEndpointNameFormatter
+    public class DefaultActivityDefinition<TActivity, TArguments, TLog> :
+        ActivityDefinition<TActivity, TArguments, TLog>
+        where TActivity : class, Activity<TArguments, TLog>
+        where TArguments : class
+        where TLog : class
     {
-        string Consumer<T>()
-            where T : class, IConsumer;
-
-        string Saga<T>()
-            where T : class, ISaga;
-
-        string ExecuteActivity<T, TArguments>()
-            where T : class, ExecuteActivity<TArguments>
-            where TArguments : class;
-
-        string CompensateActivity<T, TLog>()
-            where T : class, CompensateActivity<TLog>
-            where TLog : class;
     }
 }
