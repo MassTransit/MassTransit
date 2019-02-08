@@ -18,6 +18,8 @@ namespace MassTransit.Containers.Tests
     using NUnit.Framework;
     using Saga;
     using Scenarios;
+    using TestFramework.Messages;
+
 
     [TestFixture]
     public class AutofacContainer_RegistrationExtension
@@ -62,7 +64,11 @@ namespace MassTransit.Containers.Tests
     }
 
 
-    public class TestConsumer : IConsumer
+    public class TestConsumer :
+        IConsumer<PingMessage>
     {
+        public async Task Consume(ConsumeContext<PingMessage> context)
+        {
+        }
     }
 }
