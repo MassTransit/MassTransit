@@ -80,7 +80,7 @@ namespace MassTransit.Tests.Configuration
                 });
 
             var endpointSpecification = new SendPipeSpecification();
-            endpointSpecification.Connect(new ParentSendPipeSpecificationObserver(specification));
+            endpointSpecification.ConnectSendPipeSpecificationObserver(new ParentSendPipeSpecificationObserver(specification));
 
             IPipe<SendContext<MyMessage>> pipe = endpointSpecification.GetMessageSpecification<MyMessage>().BuildMessagePipe();
 
@@ -103,7 +103,7 @@ namespace MassTransit.Tests.Configuration
                 });
 
             var endpointSpecification = new SendPipeSpecification();
-            endpointSpecification.Connect(new ParentSendPipeSpecificationObserver(specification));
+            endpointSpecification.ConnectSendPipeSpecificationObserver(new ParentSendPipeSpecificationObserver(specification));
 
             endpointSpecification.GetMessageSpecification<IMyMessage>()
                 .UseConcurrencyLimit(1);
@@ -127,7 +127,7 @@ namespace MassTransit.Tests.Configuration
                 .Add(new TestMessageSendTopology<MyMessage>());
 
             var specification = new SendPipeSpecification();
-            specification.Connect(new TopologySendPipeSpecificationObserver(sendTopology));
+            specification.ConnectSendPipeSpecificationObserver(new TopologySendPipeSpecificationObserver(sendTopology));
 
             specification.GetMessageSpecification<MyMessage>()
                 .UseConsoleLog(context => Task.FromResult("Hello, World."));
@@ -138,7 +138,7 @@ namespace MassTransit.Tests.Configuration
                 });
 
             var endpointSpecification = new SendPipeSpecification();
-            endpointSpecification.Connect(new ParentSendPipeSpecificationObserver(specification));
+            endpointSpecification.ConnectSendPipeSpecificationObserver(new ParentSendPipeSpecificationObserver(specification));
 
             endpointSpecification.GetMessageSpecification<IMyMessage>()
                 .UseConcurrencyLimit(1);
@@ -161,7 +161,7 @@ namespace MassTransit.Tests.Configuration
                 .Add(new TestMessageSendTopology<IMyMessage>());
 
             var specification = new SendPipeSpecification();
-            specification.Connect(new TopologySendPipeSpecificationObserver(sendTopology));
+            specification.ConnectSendPipeSpecificationObserver(new TopologySendPipeSpecificationObserver(sendTopology));
 
             specification.GetMessageSpecification<MyMessage>()
                 .UseConsoleLog(context => Task.FromResult("Hello, World."));
@@ -172,7 +172,7 @@ namespace MassTransit.Tests.Configuration
                 });
 
             var endpointSpecification = new SendPipeSpecification();
-            endpointSpecification.Connect(new ParentSendPipeSpecificationObserver(specification));
+            endpointSpecification.ConnectSendPipeSpecificationObserver(new ParentSendPipeSpecificationObserver(specification));
 
             endpointSpecification.GetMessageSpecification<IMyMessage>()
                 .UseConcurrencyLimit(1);

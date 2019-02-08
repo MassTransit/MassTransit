@@ -114,6 +114,11 @@ namespace MassTransit.Configuration
             _configuration.HandlerConfigured(configurator);
         }
 
+        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return EndpointObservers.Connect(observer);
+        }
+
         public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
             where T : class
         {

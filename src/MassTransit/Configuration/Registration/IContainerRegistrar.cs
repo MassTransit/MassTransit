@@ -13,6 +13,7 @@
 namespace MassTransit.Registration
 {
     using Courier;
+    using Definition;
     using Saga;
 
 
@@ -21,8 +22,16 @@ namespace MassTransit.Registration
         void RegisterConsumer<T>()
             where T : class, IConsumer;
 
+        void RegisterConsumerDefinition<TDefinition, TConsumer>()
+            where TDefinition : class, IConsumerDefinition<TConsumer>
+            where TConsumer : class, IConsumer;
+
         void RegisterSaga<T>()
             where T : class, ISaga;
+
+        void RegisterSagaDefinition<TDefinition, TSaga>()
+            where TDefinition : class, ISagaDefinition<TSaga>
+            where TSaga : class, ISaga;
 
         void RegisterExecuteActivity<TActivity, TArguments>()
             where TActivity : class, ExecuteActivity<TArguments>

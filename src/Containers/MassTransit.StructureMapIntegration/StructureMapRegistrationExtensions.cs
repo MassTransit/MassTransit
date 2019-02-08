@@ -39,6 +39,32 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure all defined consumer types on their respective endpoints
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="container"></param>
+        public static void ConfigureEndpoints<T>(this T configurator, IContainer container)
+            where T : IBusFactoryConfigurator
+        {
+            var registration = container.GetInstance<IRegistration>();
+
+            registration.ConfigureEndpoints(configurator);
+        }
+
+        /// <summary>
+        /// Configure all defined consumer types on their respective endpoints
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        public static void ConfigureEndpoints<T>(this T configurator, IContext context)
+            where T : IBusFactoryConfigurator
+        {
+            var registration = context.GetInstance<IRegistration>();
+
+            registration.ConfigureEndpoints(configurator);
+        }
+
+        /// <summary>
         /// Configure a consumer (or consumers) on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
@@ -46,11 +72,11 @@ namespace MassTransit
         /// <param name="consumerTypes">The consumer type(s) to configure</param>
         public static void ConfigureConsumer(this IReceiveEndpointConfigurator configurator, IContainer container, params Type[] consumerTypes)
         {
-            var registryConfigurator = container.GetInstance<IRegistration>();
+            var registration = container.GetInstance<IRegistration>();
 
             foreach (var consumerType in consumerTypes)
             {
-                registryConfigurator.ConfigureConsumer(consumerType, configurator);
+                registration.ConfigureConsumer(consumerType, configurator);
             }
         }
 
@@ -62,11 +88,11 @@ namespace MassTransit
         /// <param name="consumerTypes">The consumer type(s) to configure</param>
         public static void ConfigureConsumer(this IReceiveEndpointConfigurator configurator, IContext context, params Type[] consumerTypes)
         {
-            var registryConfigurator = context.GetInstance<IRegistration>();
+            var registration = context.GetInstance<IRegistration>();
 
             foreach (var consumerType in consumerTypes)
             {
-                registryConfigurator.ConfigureConsumer(consumerType, configurator);
+                registration.ConfigureConsumer(consumerType, configurator);
             }
         }
 
@@ -80,9 +106,9 @@ namespace MassTransit
             Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
-            var registryConfigurator = container.GetInstance<IRegistration>();
+            var registration = container.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureConsumer(configurator, configure);
+            registration.ConfigureConsumer(configurator, configure);
         }
 
         /// <summary>
@@ -95,9 +121,9 @@ namespace MassTransit
             Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
-            var registryConfigurator = context.GetInstance<IRegistration>();
+            var registration = context.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureConsumer(configurator, configure);
+            registration.ConfigureConsumer(configurator, configure);
         }
 
         /// <summary>
@@ -107,9 +133,9 @@ namespace MassTransit
         /// <param name="container"></param>
         public static void ConfigureConsumers(this IReceiveEndpointConfigurator configurator, IContainer container)
         {
-            var registryConfigurator = container.GetInstance<IRegistration>();
+            var registration = container.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureConsumers(configurator);
+            registration.ConfigureConsumers(configurator);
         }
 
         /// <summary>
@@ -119,9 +145,9 @@ namespace MassTransit
         /// <param name="context"></param>
         public static void ConfigureConsumers(this IReceiveEndpointConfigurator configurator, IContext context)
         {
-            var registryConfigurator = context.GetInstance<IRegistration>();
+            var registration = context.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureConsumers(configurator);
+            registration.ConfigureConsumers(configurator);
         }
 
         /// <summary>
@@ -132,11 +158,11 @@ namespace MassTransit
         /// <param name="sagaTypes">The saga type(s) to configure</param>
         public static void ConfigureSaga(this IReceiveEndpointConfigurator configurator, IContainer container, params Type[] sagaTypes)
         {
-            var registryConfigurator = container.GetInstance<IRegistration>();
+            var registration = container.GetInstance<IRegistration>();
 
             foreach (var sagaType in sagaTypes)
             {
-                registryConfigurator.ConfigureSaga(sagaType, configurator);
+                registration.ConfigureSaga(sagaType, configurator);
             }
         }
 
@@ -148,11 +174,11 @@ namespace MassTransit
         /// <param name="sagaTypes">The saga type(s) to configure</param>
         public static void ConfigureSaga(this IReceiveEndpointConfigurator configurator, IContext context, params Type[] sagaTypes)
         {
-            var registryConfigurator = context.GetInstance<IRegistration>();
+            var registration = context.GetInstance<IRegistration>();
 
             foreach (var sagaType in sagaTypes)
             {
-                registryConfigurator.ConfigureSaga(sagaType, configurator);
+                registration.ConfigureSaga(sagaType, configurator);
             }
         }
 
@@ -166,9 +192,9 @@ namespace MassTransit
             Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var registryConfigurator = container.GetInstance<IRegistration>();
+            var registration = container.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureSaga(configurator, configure);
+            registration.ConfigureSaga(configurator, configure);
         }
 
         /// <summary>
@@ -181,9 +207,9 @@ namespace MassTransit
             Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var registryConfigurator = context.GetInstance<IRegistration>();
+            var registration = context.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureSaga(configurator, configure);
+            registration.ConfigureSaga(configurator, configure);
         }
 
         /// <summary>
@@ -193,9 +219,9 @@ namespace MassTransit
         /// <param name="container"></param>
         public static void ConfigureSagas(this IReceiveEndpointConfigurator configurator, IContainer container)
         {
-            var registryConfigurator = container.GetInstance<IRegistration>();
+            var registration = container.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureSagas(configurator);
+            registration.ConfigureSagas(configurator);
         }
 
         /// <summary>
@@ -205,9 +231,9 @@ namespace MassTransit
         /// <param name="context"></param>
         public static void ConfigureSagas(this IReceiveEndpointConfigurator configurator, IContext context)
         {
-            var registryConfigurator = context.GetInstance<IRegistration>();
+            var registration = context.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureSagas(configurator);
+            registration.ConfigureSagas(configurator);
         }
 
         /// <summary>
@@ -218,9 +244,9 @@ namespace MassTransit
         /// <param name="activityType"></param>
         public static void ConfigureExecuteActivity(this IReceiveEndpointConfigurator configurator, IContainer container, Type activityType)
         {
-            var registryConfigurator = container.GetInstance<IRegistration>();
+            var registration = container.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureExecuteActivity(activityType, configurator);
+            registration.ConfigureExecuteActivity(activityType, configurator);
         }
 
         /// <summary>
@@ -231,9 +257,9 @@ namespace MassTransit
         /// <param name="activityType"></param>
         public static void ConfigureExecuteActivity(this IReceiveEndpointConfigurator configurator, IContext context, Type activityType)
         {
-            var registryConfigurator = context.GetInstance<IRegistration>();
+            var registration = context.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureExecuteActivity(activityType, configurator);
+            registration.ConfigureExecuteActivity(activityType, configurator);
         }
 
         /// <summary>
@@ -246,9 +272,9 @@ namespace MassTransit
         public static void ConfigureActivity(this IReceiveEndpointConfigurator executeEndpointConfigurator,
             IReceiveEndpointConfigurator compensateEndpointConfigurator, IContainer container, Type activityType)
         {
-            var registryConfigurator = container.GetInstance<IRegistration>();
+            var registration = container.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureActivity(activityType, executeEndpointConfigurator, compensateEndpointConfigurator);
+            registration.ConfigureActivity(activityType, executeEndpointConfigurator, compensateEndpointConfigurator);
         }
 
         /// <summary>
@@ -261,9 +287,9 @@ namespace MassTransit
         public static void ConfigureActivity(this IReceiveEndpointConfigurator executeEndpointConfigurator,
             IReceiveEndpointConfigurator compensateEndpointConfigurator, IContext context, Type activityType)
         {
-            var registryConfigurator = context.GetInstance<IRegistration>();
+            var registration = context.GetInstance<IRegistration>();
 
-            registryConfigurator.ConfigureActivity(activityType, executeEndpointConfigurator, compensateEndpointConfigurator);
+            registration.ConfigureActivity(activityType, executeEndpointConfigurator, compensateEndpointConfigurator);
         }
     }
 }

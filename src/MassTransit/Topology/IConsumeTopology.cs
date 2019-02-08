@@ -13,7 +13,7 @@
 namespace MassTransit.Topology
 {
     public interface IConsumeTopology :
-        IConnectConsumeTopologyConfigurationObserver
+        IConsumeTopologyConfigurationObserverConnector
     {
         /// <summary>
         /// Returns the specification for the message type

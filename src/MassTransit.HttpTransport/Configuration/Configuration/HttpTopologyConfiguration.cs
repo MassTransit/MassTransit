@@ -36,13 +36,13 @@ namespace MassTransit.HttpTransport.Configuration
             _messageTopology = messageTopology;
 
             _sendTopology = new SendTopology();
-            _sendTopology.Connect(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
+            _sendTopology.ConnectSendTopologyConfigurationObserver(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
 
             _publishTopology = new InMemoryPublishTopology(messageTopology);
-            _publishTopology.Connect(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
+            _publishTopology.ConnectPublishTopologyConfigurationObserver(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
 
             var observer = new PublishToSendTopologyConfigurationObserver(_sendTopology);
-            _publishTopology.Connect(observer);
+            _publishTopology.ConnectPublishTopologyConfigurationObserver(observer);
 
             _consumeTopology = new InMemoryConsumeTopology(messageTopology);
         }

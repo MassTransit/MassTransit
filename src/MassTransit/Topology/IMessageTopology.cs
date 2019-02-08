@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology
 {
+    using System.Reflection;
+
+
     public interface IMessageTopology<in TMessage>
         where TMessage : class
     {
@@ -24,11 +27,13 @@ namespace MassTransit.Topology
         /// The formatted entity name for this message type
         /// </summary>
         string EntityName { get; }
+
+        IMessagePropertyTopology<TMessage, T> GetProperty<T>(PropertyInfo propertyInfo);
     }
 
 
     public interface IMessageTopology :
-        IConnectMessageTopologyConfigurationObserver
+        IMessageTopologyConfigurationObserverConnector
     {
         /// <summary>
         /// The entity name formatter used to format message names

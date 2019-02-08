@@ -40,6 +40,8 @@ namespace MassTransit.Containers.Tests
             var builder = new ContainerBuilder();
 
             builder.RegisterConsumers(typeof(AutofacContainer_RegistrationExtension).GetTypeInfo().Assembly);
+
+            builder.RegisterInMemorySagaRepository();
             builder.RegisterType<InMemorySagaRepository<SimpleSaga>>()
                 .As<ISagaRepository<SimpleSaga>>()
                 .SingleInstance();

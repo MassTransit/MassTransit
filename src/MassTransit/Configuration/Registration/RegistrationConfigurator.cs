@@ -17,6 +17,7 @@ namespace MassTransit.Registration
     using System.Linq;
     using ConsumeConfigurators;
     using Courier;
+    using Util;
 
 
     /// <summary>
@@ -43,6 +44,9 @@ namespace MassTransit.Registration
 
         void IRegistrationConfigurator.AddConsumer<T>(Action<IConsumerConfigurator<T>> configure)
         {
+            if (TypeMetadataCache<T>.HasSagaInterfaces)
+                throw new ArgumentException($"{TypeMetadataCache<T>.ShortName} is a saga, and cannot be registered as a consumer", nameof(T));
+
             IConsumerRegistration ValueFactory(Type type)
             {
                 ConsumerRegistrationCache.Register(type, _containerRegistrar);
@@ -55,11 +59,18 @@ namespace MassTransit.Registration
             configurator.AddConfigureAction(configure);
         }
 
-        void IRegistrationConfigurator.AddConsumer(Type consumerType)
+        void IRegistrationConfigurator.AddConsumer(Type consumerType, Type consumerDefinitionType)
         {
+            if (TypeMetadataCache.HasSagaInterfaces(consumerType))
+                throw new ArgumentException($"{TypeMetadataCache.GetShortName(consumerType)} is a saga, and cannot be registered as a consumer",
+                    nameof(consumerType));
+
             IConsumerRegistration ValueFactory(Type type)
             {
                 ConsumerRegistrationCache.Register(type, _containerRegistrar);
+
+                if (consumerDefinitionType != null)
+                    ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, _containerRegistrar);
 
                 return (IConsumerRegistration)Activator.CreateInstance(typeof(ConsumerRegistration<>).MakeGenericType(type));
             }
@@ -83,14 +94,14 @@ namespace MassTransit.Registration
 
         void IRegistrationConfigurator.AddSaga<T>(SagaRegistrationFactory<T> factory, Action<ISagaConfigurator<T>> configure)
         {
-            var configurator = _sagaConfigurations.GetOrAdd(typeof(T), _ => factory());
+            var configurator = _sagaConfigurations.GetOrAdd(typeof(T), _ => factory(_containerRegistrar));
 
             configurator.AddConfigureAction(configure);
         }
 
-        void IRegistrationConfigurator.AddSaga(Type sagaType)
+        void IRegistrationConfigurator.AddSaga(Type sagaType, Type sagaDefinitionType)
         {
-            _sagaConfigurations.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, _containerRegistrar));
+            _sagaConfigurations.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, sagaDefinitionType, _containerRegistrar));
         }
 
         void IRegistrationConfigurator.AddExecuteActivity<TActivity, TArguments>(Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure)

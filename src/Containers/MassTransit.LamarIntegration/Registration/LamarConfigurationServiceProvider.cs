@@ -26,10 +26,16 @@ namespace MassTransit.LamarIntegration.Registration
             _container = container;
         }
 
-        public T GetService<T>()
+        public T GetRequiredService<T>()
             where T : class
         {
             return _container.GetInstance<T>();
+        }
+
+        public T GetService<T>()
+            where T : class
+        {
+            return _container.TryGetInstance<T>();
         }
     }
 }

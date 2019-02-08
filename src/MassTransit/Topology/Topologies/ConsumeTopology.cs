@@ -55,7 +55,7 @@ namespace MassTransit.Topology.Topologies
             return GetMessageTopology<T>();
         }
 
-        public ConnectHandle Connect(IConsumeTopologyConfigurationObserver observer)
+        public ConnectHandle ConnectConsumeTopologyConfigurationObserver(IConsumeTopologyConfigurationObserver observer)
         {
             return _observers.Connect(observer);
         }

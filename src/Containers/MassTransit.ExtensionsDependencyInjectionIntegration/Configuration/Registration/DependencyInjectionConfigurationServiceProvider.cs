@@ -27,10 +27,16 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
             _provider = provider;
         }
 
-        public T GetService<T>()
+        public T GetRequiredService<T>()
             where T : class
         {
             return _provider.GetRequiredService<T>();
+        }
+
+        public T GetService<T>()
+            where T : class
+        {
+            return _provider.GetService<T>();
         }
     }
 }

@@ -39,7 +39,7 @@ namespace MassTransit.Registration
 
         public void Configure(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
         {
-            var executeActivityScopeProvider = configurationServiceProvider.GetService<IExecuteActivityScopeProvider<TActivity, TArguments>>();
+            var executeActivityScopeProvider = configurationServiceProvider.GetRequiredService<IExecuteActivityScopeProvider<TActivity, TArguments>>();
 
             var executeActivityFactory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 

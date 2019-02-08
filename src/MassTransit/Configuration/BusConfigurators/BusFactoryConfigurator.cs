@@ -19,6 +19,8 @@ namespace MassTransit.BusConfigurators
     using Builders;
     using Configuration;
     using ConsumeConfigurators;
+    using EndpointConfigurators;
+    using EndpointSpecifications;
     using GreenPipes;
     using Pipeline.Observables;
     using Saga;
@@ -39,11 +41,14 @@ namespace MassTransit.BusConfigurators
             _busEndpointConfiguration = busEndpointConfiguration;
 
             BusObservable = new BusObservable();
+            EndpointObservable = new EndpointConfigurationObservable();
+
             _specifications = new List<IBusFactorySpecification>();
             _endpointSpecifications = new List<IReceiveEndpointSpecification<IBusBuilder>>();
         }
 
         protected BusObservable BusObservable { get; }
+        protected EndpointConfigurationObservable EndpointObservable { get; }
 
         public IMessageTopologyConfigurator MessageTopology => _configuration.Topology.Message;
         public ISendTopologyConfigurator SendTopology => _configuration.Topology.Send;
@@ -52,6 +57,11 @@ namespace MassTransit.BusConfigurators
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
             return BusObservable.Connect(observer);
+        }
+
+        public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
+        {
+            return EndpointObservable.Connect(observer);
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)

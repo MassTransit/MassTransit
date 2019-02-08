@@ -54,11 +54,10 @@ namespace MassTransit.SagaSpecifications
 
         ISagaMessageSpecification<TSaga, T> ISagaMessageSpecification<TSaga>.GetMessageSpecification<T>()
         {
-            var result = this as ISagaMessageSpecification<TSaga, T>;
-            if (result == null)
-                throw new ArgumentException($"The message type was invalid: {TypeMetadataCache<T>.ShortName}");
+            if (this is ISagaMessageSpecification<TSaga, T> result)
+                return result;
 
-            return result;
+            throw new ArgumentException($"The message type was invalid: {TypeMetadataCache<T>.ShortName}");
         }
 
         public void AddPipeSpecification(IPipeSpecification<SagaConsumeContext<TSaga, TMessage>> specification)

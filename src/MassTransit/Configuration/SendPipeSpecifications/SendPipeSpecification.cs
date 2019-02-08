@@ -70,7 +70,7 @@ namespace MassTransit.SendPipeSpecifications
             return specification.GetMessageSpecification<T>();
         }
 
-        public ConnectHandle Connect(ISendPipeSpecificationObserver observer)
+        public ConnectHandle ConnectSendPipeSpecificationObserver(ISendPipeSpecificationObserver observer)
         {
             return _observers.Connect(observer);
         }

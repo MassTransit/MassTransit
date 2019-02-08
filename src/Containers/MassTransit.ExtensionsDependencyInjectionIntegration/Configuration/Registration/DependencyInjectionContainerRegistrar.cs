@@ -13,6 +13,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Registration
 {
     using Courier;
+    using Definition;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -37,9 +38,23 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
             _collection.AddScoped<T>();
         }
 
+        public void RegisterConsumerDefinition<TDefinition, TConsumer>()
+            where TDefinition : class, IConsumerDefinition<TConsumer>
+            where TConsumer : class, IConsumer
+        {
+            _collection.AddTransient<IConsumerDefinition<TConsumer>, TDefinition>();
+        }
+
         public void RegisterSaga<T>()
             where T : class, ISaga
         {
+        }
+
+        public void RegisterSagaDefinition<TDefinition, TSaga>()
+            where TDefinition : class, ISagaDefinition<TSaga>
+            where TSaga : class, ISaga
+        {
+            _collection.AddTransient<ISagaDefinition<TSaga>, TDefinition>();
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()

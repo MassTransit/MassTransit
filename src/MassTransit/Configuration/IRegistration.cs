@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using ConsumeConfigurators;
+    using Definition;
     using Saga;
 
 
@@ -101,5 +102,14 @@ namespace MassTransit
         /// <param name="compensateEndpointConfigurator">The configurator for the compensate activity endpoint</param>
         void ConfigureActivity(Type activityType, IReceiveEndpointConfigurator executeEndpointConfigurator,
             IReceiveEndpointConfigurator compensateEndpointConfigurator);
+
+        /// <summary>
+        /// Configure the endpoints for all defined types
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="endpointNameFormatter"></param>
+        /// <typeparam name="T"></typeparam>
+        void ConfigureEndpoints<T>(T configurator, IEndpointNameFormatter endpointNameFormatter = null)
+            where T : IBusFactoryConfigurator;
     }
 }

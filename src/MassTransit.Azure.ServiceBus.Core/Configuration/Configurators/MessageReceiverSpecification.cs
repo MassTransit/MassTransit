@@ -23,6 +23,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
     using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Pipes;
     using Transport;
+    using Transports;
 
 
     public abstract class MessageReceiverSpecification :
@@ -67,6 +68,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
             IPipe<ReceiveContext> receivePipe = ReceivePipeConfigurator.Build();
 
             return new ReceivePipe(receivePipe, _configuration.ConsumePipe);
+        }
+
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _configuration.ConnectReceiveEndpointObserver(observer);
         }
     }
 }

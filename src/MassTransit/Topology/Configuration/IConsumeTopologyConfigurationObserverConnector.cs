@@ -15,8 +15,8 @@ namespace MassTransit.Topology
     using GreenPipes;
 
 
-    public interface IConnectMessageTopologyConfigurationObserver
+    public interface IConsumeTopologyConfigurationObserverConnector
     {
-        ConnectHandle Connect(IMessageTopologyConfigurationObserver observer);
+        ConnectHandle ConnectConsumeTopologyConfigurationObserver(IConsumeTopologyConfigurationObserver observer);
     }
 }

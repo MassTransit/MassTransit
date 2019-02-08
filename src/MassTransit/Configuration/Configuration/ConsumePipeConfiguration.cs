@@ -29,7 +29,7 @@ namespace MassTransit.Configuration
         public ConsumePipeConfiguration(IConsumePipeSpecification parentSpecification)
             : this()
         {
-            _specification.Connect(new ParentConsumePipeSpecificationObserver(parentSpecification));
+            _specification.ConnectConsumePipeSpecificationObserver(new ParentConsumePipeSpecificationObserver(parentSpecification));
         }
 
         public IConsumePipeSpecification Specification => _specification;

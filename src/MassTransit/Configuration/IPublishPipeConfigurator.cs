@@ -19,7 +19,7 @@ namespace MassTransit
 
     public interface IPublishPipeConfigurator :
         IPipeConfigurator<PublishContext>,
-        IConnectPublishPipeSpecificationObserver
+        IPublishPipeSpecificationObserverConnector
     {
         /// <summary>
         /// Adds a type-specific pipe specification to the consume pipe

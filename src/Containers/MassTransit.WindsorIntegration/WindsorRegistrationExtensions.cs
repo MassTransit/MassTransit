@@ -39,6 +39,21 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure all defined consumer types on their respective endpoints
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="container"></param>
+        public static void ConfigureEndpoints<T>(this T configurator, IWindsorContainer container)
+            where T : IBusFactoryConfigurator
+        {
+            var registration = container.Resolve<IRegistration>();
+
+            registration.ConfigureEndpoints(configurator);
+
+            container.Release(registration);
+        }
+
+        /// <summary>
         /// Configure a consumer (or consumers) on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
@@ -46,12 +61,14 @@ namespace MassTransit
         /// <param name="consumerTypes">The consumer type(s) to configure</param>
         public static void ConfigureConsumer(this IReceiveEndpointConfigurator configurator, IWindsorContainer container, params Type[] consumerTypes)
         {
-            var registryConfigurator = container.Resolve<IRegistration>();
+            var registration = container.Resolve<IRegistration>();
 
             foreach (var consumerType in consumerTypes)
             {
-                registryConfigurator.ConfigureConsumer(consumerType, configurator);
+                registration.ConfigureConsumer(consumerType, configurator);
             }
+
+            container.Release(registration);
         }
 
         /// <summary>
@@ -64,9 +81,11 @@ namespace MassTransit
             Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
-            var registryConfigurator = container.Resolve<IRegistration>();
+            var registration = container.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureConsumer(configurator, configure);
+            registration.ConfigureConsumer(configurator, configure);
+
+            container.Release(registration);
         }
 
         /// <summary>
@@ -76,9 +95,11 @@ namespace MassTransit
         /// <param name="container"></param>
         public static void ConfigureConsumers(this IReceiveEndpointConfigurator configurator, IWindsorContainer container)
         {
-            var registryConfigurator = container.Resolve<IRegistration>();
+            var registration = container.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureConsumers(configurator);
+            registration.ConfigureConsumers(configurator);
+
+            container.Release(registration);
         }
 
         /// <summary>
@@ -89,12 +110,14 @@ namespace MassTransit
         /// <param name="sagaTypes">The saga type(s) to configure</param>
         public static void ConfigureSaga(this IReceiveEndpointConfigurator configurator, IWindsorContainer container, params Type[] sagaTypes)
         {
-            var registryConfigurator = container.Resolve<IRegistration>();
+            var registration = container.Resolve<IRegistration>();
 
             foreach (var sagaType in sagaTypes)
             {
-                registryConfigurator.ConfigureSaga(sagaType, configurator);
+                registration.ConfigureSaga(sagaType, configurator);
             }
+
+            container.Release(registration);
         }
 
         /// <summary>
@@ -107,9 +130,11 @@ namespace MassTransit
             Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var registryConfigurator = container.Resolve<IRegistration>();
+            var registration = container.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureSaga(configurator, configure);
+            registration.ConfigureSaga(configurator, configure);
+
+            container.Release(registration);
         }
 
         /// <summary>
@@ -119,9 +144,11 @@ namespace MassTransit
         /// <param name="container"></param>
         public static void ConfigureSagas(this IReceiveEndpointConfigurator configurator, IWindsorContainer container)
         {
-            var registryConfigurator = container.Resolve<IRegistration>();
+            var registration = container.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureSagas(configurator);
+            registration.ConfigureSagas(configurator);
+
+            container.Release(registration);
         }
 
         /// <summary>
@@ -132,9 +159,11 @@ namespace MassTransit
         /// <param name="activityType"></param>
         public static void ConfigureExecuteActivity(this IReceiveEndpointConfigurator configurator, IWindsorContainer container, Type activityType)
         {
-            var registryConfigurator = container.Resolve<IRegistration>();
+            var registration = container.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureExecuteActivity(activityType, configurator);
+            registration.ConfigureExecuteActivity(activityType, configurator);
+
+            container.Release(registration);
         }
 
         /// <summary>
@@ -147,9 +176,11 @@ namespace MassTransit
         public static void ConfigureActivity(this IReceiveEndpointConfigurator executeEndpointConfigurator,
             IReceiveEndpointConfigurator compensateEndpointConfigurator, IWindsorContainer container, Type activityType)
         {
-            var registryConfigurator = container.Resolve<IRegistration>();
+            var registration = container.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureActivity(activityType, executeEndpointConfigurator, compensateEndpointConfigurator);
+            registration.ConfigureActivity(activityType, executeEndpointConfigurator, compensateEndpointConfigurator);
+
+            container.Release(registration);
         }
     }
 }

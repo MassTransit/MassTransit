@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology
 {
+    using Topologies;
+
+
     /// <summary>
     /// Observes the configuration of message-specific topology
     /// </summary>
@@ -19,5 +22,8 @@ namespace MassTransit.Topology
     {
         void MessageTopologyCreated<T>(IMessageTopologyConfigurator<T> configuration)
             where T : class;
+
+        void MessagePropertyTopologyCreated<TMessage, T>(IMessagePropertyTopologyConfigurator<TMessage, T> configuration)
+            where TMessage : class;
     }
 }

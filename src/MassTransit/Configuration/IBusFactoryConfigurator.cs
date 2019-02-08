@@ -16,6 +16,7 @@ namespace MassTransit
     using System.ComponentModel;
     using System.Net.Mime;
     using Builders;
+    using EndpointConfigurators;
     using GreenPipes;
     using Topology;
 
@@ -23,7 +24,8 @@ namespace MassTransit
     public interface IBusFactoryConfigurator :
         IConsumePipeConfigurator,
         ISendPipelineConfigurator,
-        IPublishPipelineConfigurator
+        IPublishPipelineConfigurator,
+        IEndpointConfigurationObserverConnector
     {
         /// <summary>
         /// Connects a bus observer to the bus to observe lifecycle events on the bus

@@ -43,7 +43,7 @@ namespace MassTransit.Topology.Topologies
             _publish = new PublishTopology();
 
             var observer = new PublishToSendTopologyConfigurationObserver(_send);
-            _publishToSendHandle = _publish.Connect(observer);
+            _publishToSendHandle = _publish.ConnectPublishTopologyConfigurationObserver(observer);
         }
 
         public static ISendTopologyConfigurator Send => Cached.Metadata.Value.Send;

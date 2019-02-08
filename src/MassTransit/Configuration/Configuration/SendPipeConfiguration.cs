@@ -27,13 +27,13 @@ namespace MassTransit.Configuration
         public SendPipeConfiguration(ISendTopology sendTopology)
         {
             _specification = new SendPipeSpecification();
-            _specification.Connect(new TopologySendPipeSpecificationObserver(sendTopology));
+            _specification.ConnectSendPipeSpecificationObserver(new TopologySendPipeSpecificationObserver(sendTopology));
         }
 
         public SendPipeConfiguration(ISendPipeSpecification parentSpecification)
         {
             _specification = new SendPipeSpecification();
-            _specification.Connect(new ParentSendPipeSpecificationObserver(parentSpecification));
+            _specification.ConnectSendPipeSpecificationObserver(new ParentSendPipeSpecificationObserver(parentSpecification));
         }
 
         public ISendPipeSpecification Specification => _specification;

@@ -26,10 +26,10 @@ namespace MassTransit
             string activityCorrelationContextKey = DiagnosticHeaders.ActivityCorrelationContext)
         {
             configurator.ConfigureSend(x =>
-                x.Connect(new ActivitySendPipeSpecificationObserver(diagnosticSource, activityIdKey, activityCorrelationContextKey)));
+                x.ConnectSendPipeSpecificationObserver(new ActivitySendPipeSpecificationObserver(diagnosticSource, activityIdKey, activityCorrelationContextKey)));
 
             configurator.ConfigurePublish(x =>
-                x.Connect(new ActivityPublishPipeSpecificationObserver(diagnosticSource, activityIdKey, activityCorrelationContextKey)));
+                x.ConnectPublishPipeSpecificationObserver(new ActivityPublishPipeSpecificationObserver(diagnosticSource, activityIdKey, activityCorrelationContextKey)));
 
             var observer = new ActivityConsumePipeSpecificationObserver(configurator, diagnosticSource, activityIdKey, activityCorrelationContextKey);
         }

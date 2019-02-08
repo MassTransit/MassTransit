@@ -48,6 +48,16 @@ namespace MassTransit.Util
             return GetOrAdd(type).IsTemporaryMessageType;
         }
 
+        public static bool HasConsumerInterfaces(Type type)
+        {
+            return GetOrAdd(type).HasConsumerInterfaces;
+        }
+
+        public static bool HasSagaInterfaces(Type type)
+        {
+            return GetOrAdd(type).HasSagaInterfaces;
+        }
+
         public static Type[] GetMessageTypes(Type type)
         {
             return GetOrAdd(type).MessageTypes;
@@ -62,20 +72,24 @@ namespace MassTransit.Util
 
         interface CachedType
         {
-            bool IsValidMessageType { get; }
+            bool HasConsumerInterfaces { get; }
+            bool HasSagaInterfaces { get; }
             bool IsTemporaryMessageType { get; }
-            string ShortName { get; }
+            bool IsValidMessageType { get; }
             Type[] MessageTypes { get; }
+            string ShortName { get; }
         }
 
 
         class CachedType<T> :
             CachedType
         {
-            public bool IsValidMessageType => TypeMetadataCache<T>.IsValidMessageType;
+            public bool HasConsumerInterfaces => TypeMetadataCache<T>.HasConsumerInterfaces;
+            public bool HasSagaInterfaces => TypeMetadataCache<T>.HasSagaInterfaces;
             public bool IsTemporaryMessageType => TypeMetadataCache<T>.IsTemporaryMessageType;
-            public string ShortName => TypeMetadataCache<T>.ShortName;
+            public bool IsValidMessageType => TypeMetadataCache<T>.IsValidMessageType;
             public Type[] MessageTypes => TypeMetadataCache<T>.MessageTypes;
+            public string ShortName => TypeMetadataCache<T>.ShortName;
         }
     }
 
@@ -83,6 +97,7 @@ namespace MassTransit.Util
     public class TypeMetadataCache<T> :
         ITypeMetadataCache<T>
     {
+        readonly Lazy<bool> _hasConsumerInterfaces;
         readonly Lazy<bool> _hasSagaInterfaces;
         readonly Lazy<Type> _implementationType;
         readonly Lazy<bool> _isTemporaryMessageType;
@@ -98,6 +113,7 @@ namespace MassTransit.Util
             _shortName = Internals.Extensions.TypeExtensions.GetTypeName(typeof(T));
 
             _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
+            _hasConsumerInterfaces = new Lazy<bool>(() => !_hasSagaInterfaces.Value && ScanForConsumerInterfaces(), LazyThreadSafetyMode.PublicationOnly);
 
             _properties = new Lazy<List<PropertyInfo>>(() => Internals.Extensions.TypeExtensions.GetAllProperties(typeof(T)).ToList());
 
@@ -110,6 +126,7 @@ namespace MassTransit.Util
 
         public static string ShortName => Cached.Metadata.Value.ShortName;
         public static bool HasSagaInterfaces => Cached.Metadata.Value.HasSagaInterfaces;
+        public static bool HasConsumerInterfaces => Cached.Metadata.Value.HasConsumerInterfaces;
         public static IEnumerable<PropertyInfo> Properties => Cached.Metadata.Value.Properties;
         public static Type ImplementationType => Cached.Metadata.Value.ImplementationType;
         public static bool IsValidMessageType => Cached.Metadata.Value.IsValidMessageType;
@@ -125,7 +142,6 @@ namespace MassTransit.Util
         Type[] ITypeMetadataCache<T>.MessageTypes => _messageTypes.Value;
         Type ITypeMetadataCache<T>.ImplementationType => _implementationType.Value;
 
-
         T ITypeMetadataCache<T>.InitializeFromObject(object values)
         {
             if (values == null)
@@ -136,6 +152,7 @@ namespace MassTransit.Util
             return objValues.ToObject<T>(JsonMessageSerializer.Deserializer);
         }
 
+        bool ITypeMetadataCache<T>.HasConsumerInterfaces => _hasConsumerInterfaces.Value;
         bool ITypeMetadataCache<T>.HasSagaInterfaces => _hasSagaInterfaces.Value;
         string ITypeMetadataCache<T>.ShortName => _shortName;
 
@@ -185,19 +202,28 @@ namespace MassTransit.Util
                 var typeDefinition = typeInfo.GetGenericTypeDefinition();
                 if (typeDefinition == typeof(CorrelatedBy<>))
                 {
-                    _invalidMessageTypeReason = $"CorrelatedBy<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(CorrelatedBy<>)).First().Name} is not a valid message type";
+                    _invalidMessageTypeReason =
+                        $"CorrelatedBy<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(CorrelatedBy<>)).First().Name} is not a valid message type";
+
                     return false;
                 }
+
                 if (typeDefinition == typeof(Orchestrates<>))
                 {
-                    _invalidMessageTypeReason = $"Orchestrates<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(Orchestrates<>)).First().Name} is not a valid message type";
+                    _invalidMessageTypeReason =
+                        $"Orchestrates<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(Orchestrates<>)).First().Name} is not a valid message type";
+
                     return false;
                 }
+
                 if (typeDefinition == typeof(InitiatedBy<>))
                 {
-                    _invalidMessageTypeReason = $"InitiatedBy<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(InitiatedBy<>)).First().Name} is not a valid message type";
+                    _invalidMessageTypeReason =
+                        $"InitiatedBy<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(InitiatedBy<>)).First().Name} is not a valid message type";
+
                     return false;
                 }
+
                 if (typeDefinition == typeof(Observes<,>))
                 {
                     var closingArguments = Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(Observes<,>)).ToArray();
@@ -257,6 +283,13 @@ namespace MassTransit.Util
         public static T InitializeFromObject(object values)
         {
             return Cached.Metadata.Value.InitializeFromObject(values);
+        }
+
+        static bool ScanForConsumerInterfaces()
+        {
+            Type[] interfaces = typeof(T).GetTypeInfo().GetInterfaces();
+
+            return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IConsumer<>)));
         }
 
         static bool ScanForSagaInterfaces()

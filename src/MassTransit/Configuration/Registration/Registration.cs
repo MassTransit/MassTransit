@@ -14,7 +14,10 @@ namespace MassTransit.Registration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using ConsumeConfigurators;
+    using Definition;
+    using Logging;
     using Saga;
     using Util;
 
@@ -22,6 +25,8 @@ namespace MassTransit.Registration
     public class Registration :
         IRegistration
     {
+        static readonly ILog _log = Logger.Get<Registration>();
+
         readonly IConfigurationServiceProvider _configurationServiceProvider;
         readonly IDictionary<Type, IConsumerRegistration> _consumers;
         readonly IDictionary<Type, ISagaRegistration> _sagas;
@@ -134,6 +139,61 @@ namespace MassTransit.Registration
             }
             else
                 throw new ArgumentException($"The activity type was not found: {TypeMetadataCache.GetShortName(activityType)}", nameof(activityType));
+        }
+
+        public void ConfigureEndpoints<T>(T configurator, IEndpointNameFormatter endpointNameFormatter)
+            where T : IBusFactoryConfigurator
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            if (endpointNameFormatter == null)
+                endpointNameFormatter = new DefaultEndpointNameFormatter();
+
+            var consumersByEndpoint = _consumers.Values
+                .Select(x => x.GetDefinition(_configurationServiceProvider))
+                .GroupBy(x => x.GetEndpointName(endpointNameFormatter));
+
+            var sagasByEndpoint = _sagas.Values
+                .Select(x => x.GetDefinition(_configurationServiceProvider))
+                .GroupBy(x => x.GetEndpointName(endpointNameFormatter));
+
+            var endpointNames = consumersByEndpoint.Select(x => x.Key).Union(sagasByEndpoint.Select(x => x.Key));
+
+            var endpoints =
+                from e in endpointNames
+                join c in consumersByEndpoint on e equals c.Key into cs
+                from c in cs.DefaultIfEmpty()
+                join s in sagasByEndpoint on e equals s.Key into ss
+                from s in ss.DefaultIfEmpty()
+                select new {Name = e, Consumers = c, Sagas = s};
+
+            foreach (var endpoint in endpoints)
+            {
+                if (_log.IsDebugEnabled)
+                    _log.DebugFormat("Configuring receive endpoint: {0}", endpoint.Name);
+
+                configurator.ReceiveEndpoint(endpoint.Name, cfg =>
+                {
+                    if (endpoint.Consumers != null)
+                        foreach (var definition in endpoint.Consumers)
+                        {
+                            if (_log.IsDebugEnabled)
+                                _log.DebugFormat("Configuring consumer {0} on {1}", TypeMetadataCache.GetShortName(definition.ConsumerType), endpoint.Name);
+
+                            ConfigureConsumer(definition.ConsumerType, cfg);
+                        }
+
+                    if (endpoint.Sagas != null)
+                        foreach (var definition in endpoint.Sagas)
+                        {
+                            if (_log.IsDebugEnabled)
+                                _log.DebugFormat("Configuring saga {0} on {1}", TypeMetadataCache.GetShortName(definition.SagaType), endpoint.Name);
+
+                            ConfigureSaga(definition.SagaType, cfg);
+                        }
+                });
+            }
         }
     }
 }

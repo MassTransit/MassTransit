@@ -39,9 +39,10 @@ namespace Automatonymous.Registration
             GetOrAdd(stateMachineType).Register(registrar);
         }
 
-        public static void AddSagaStateMachine(this IRegistrationConfigurator configurator, Type stateMachineType, ISagaStateMachineRegistrar registrar)
+        public static void AddSagaStateMachine(IRegistrationConfigurator configurator, Type stateMachineType, Type sagaDefinitionType = null,
+            ISagaStateMachineRegistrar registrar = null)
         {
-            GetOrAdd(stateMachineType).AddSaga(configurator, registrar);
+            GetOrAdd(stateMachineType).AddSaga(configurator, sagaDefinitionType, registrar ?? new NullSagaStateMachineRegistrar());
         }
 
 
@@ -54,7 +55,7 @@ namespace Automatonymous.Registration
         interface CachedRegistration
         {
             void Register(ISagaStateMachineRegistrar registrar);
-            void AddSaga(IRegistrationConfigurator registry, ISagaStateMachineRegistrar registrar);
+            void AddSaga(IRegistrationConfigurator registry, Type sagaDefinitionType, ISagaStateMachineRegistrar registrar);
         }
 
 
@@ -70,9 +71,9 @@ namespace Automatonymous.Registration
                 SagaRegistrationCache.DoNotRegister(typeof(TInstance));
             }
 
-            public void AddSaga(IRegistrationConfigurator registry, ISagaStateMachineRegistrar registrar)
+            public void AddSaga(IRegistrationConfigurator registry, Type sagaDefinitionType, ISagaStateMachineRegistrar registrar)
             {
-                registry.AddSagaStateMachine<TStateMachine, TInstance>(registrar);
+                registry.AddSagaStateMachine<TStateMachine, TInstance>(registrar, sagaDefinitionType);
             }
         }
     }

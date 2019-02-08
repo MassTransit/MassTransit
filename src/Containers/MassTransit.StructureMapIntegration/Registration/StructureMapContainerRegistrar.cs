@@ -13,6 +13,7 @@
 namespace MassTransit.StructureMapIntegration.Registration
 {
     using Courier;
+    using Definition;
     using StructureMap;
     using MassTransit.Registration;
     using Saga;
@@ -36,9 +37,25 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.ForConcreteType<T>();
         }
 
+        public void RegisterConsumerDefinition<TDefinition, TConsumer>()
+            where TDefinition : class, IConsumerDefinition<TConsumer>
+            where TConsumer : class, IConsumer
+        {
+            _expression.For<IConsumerDefinition<TConsumer>>()
+                .Use<TDefinition>();
+        }
+
         public void RegisterSaga<T>()
             where T : class, ISaga
         {
+        }
+
+        public void RegisterSagaDefinition<TDefinition, TSaga>()
+            where TDefinition : class, ISagaDefinition<TSaga>
+            where TSaga : class, ISaga
+        {
+            _expression.For<ISagaDefinition<TSaga>>()
+                .Use<TDefinition>();
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()

@@ -61,6 +61,30 @@ namespace MassTransit
             configurator.LoadFrom(container);
         }
 
+        /// <summary>
+        /// Registers the InMemory saga repository for all saga types (generic, can be overridden)
+        /// </summary>
+        /// <param name="registry"></param>
+        public static void RegisterInMemorySagaRepository(this ConfigurationExpression registry)
+        {
+            registry.For(typeof(ISagaRepository<>))
+                .Use(typeof(InMemorySagaRepository<>))
+                .Singleton();
+        }
+
+        /// <summary>
+        /// Register the InMemory saga repository for the specified saga type
+        /// </summary>
+        /// <param name="registry"></param>
+        /// <typeparam name="T"></typeparam>
+        public static void RegisterInMemorySagaRepository<T>(this ConfigurationExpression registry)
+            where T : class, ISaga
+        {
+            registry.For<ISagaRepository<T>>()
+                .Use<InMemorySagaRepository<T>>()
+                .Singleton();
+        }
+
         static IList<Type> FindTypes<T>(IContainer container, Func<Type, bool> filter)
         {
             return container

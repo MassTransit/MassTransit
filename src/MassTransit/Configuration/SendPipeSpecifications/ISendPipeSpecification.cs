@@ -16,7 +16,7 @@ namespace MassTransit.SendPipeSpecifications
 
 
     public interface ISendPipeSpecification :
-        IConnectSendPipeSpecificationObserver,
+        ISendPipeSpecificationObserverConnector,
         ISpecification
     {
         /// <summary>

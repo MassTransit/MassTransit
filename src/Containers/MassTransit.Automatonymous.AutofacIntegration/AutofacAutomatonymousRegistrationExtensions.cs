@@ -51,6 +51,32 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Adds all sagas in the specified assemblies matching the namespace. If you are using both state machine and regular sagas, be
+        /// sure to call AddSagaStateMachinesFromNamespaceContaining prior to calling this one.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <typeparam name="T">The anchor type</typeparam>
+        public static void AddSagaStateMachinesFromNamespaceContaining<T>(this IContainerBuilderConfigurator configurator)
+        {
+            var registrar = new AutofacSagaStateMachineRegistrar(configurator.Builder);
+
+            configurator.AddSagaStateMachinesFromNamespaceContaining(registrar, typeof(T));
+        }
+
+        /// <summary>
+        /// Adds all sagas in the specified assemblies matching the namespace. If you are using both state machine and regular sagas, be
+        /// sure to call AddSagaStateMachinesFromNamespaceContaining prior to calling this one.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="type">The type to use to identify the assembly and namespace to scan</param>
+        public static void AddSagaStateMachinesFromNamespaceContaining(this IContainerBuilderConfigurator configurator, Type type)
+        {
+            var registrar = new AutofacSagaStateMachineRegistrar(configurator.Builder);
+
+            configurator.AddSagaStateMachinesFromNamespaceContaining(registrar, type);
+        }
+
+        /// <summary>
         /// Adds SagaStateMachines to the registry, using the factory method, and updates the registrar prior to registering so that the default
         /// saga registrar isn't notified.
         /// </summary>

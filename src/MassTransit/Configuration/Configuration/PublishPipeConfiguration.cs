@@ -27,13 +27,13 @@ namespace MassTransit.Configuration
         public PublishPipeConfiguration(IPublishTopology publishTopology)
         {
             _specification = new PublishPipeSpecification();
-            _specification.Connect(new TopologyPublishPipeSpecificationObserver(publishTopology));
+            _specification.ConnectPublishPipeSpecificationObserver(new TopologyPublishPipeSpecificationObserver(publishTopology));
         }
 
         public PublishPipeConfiguration(IPublishPipeSpecification parentSpecification)
         {
             _specification = new PublishPipeSpecification();
-            _specification.Connect(new ParentPublishPipeSpecificationObserver(parentSpecification));
+            _specification.ConnectPublishPipeSpecificationObserver(new ParentPublishPipeSpecificationObserver(parentSpecification));
         }
 
         public IPublishPipeSpecification Specification => _specification;

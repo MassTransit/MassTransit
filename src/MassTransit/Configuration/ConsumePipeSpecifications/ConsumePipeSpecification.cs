@@ -138,7 +138,7 @@ namespace MassTransit.ConsumePipeSpecifications
             return specification.GetMessageSpecification<T>();
         }
 
-        public ConnectHandle Connect(IConsumePipeSpecificationObserver observer)
+        public ConnectHandle ConnectConsumePipeSpecificationObserver(IConsumePipeSpecificationObserver observer)
         {
             return _observers.Connect(observer);
         }

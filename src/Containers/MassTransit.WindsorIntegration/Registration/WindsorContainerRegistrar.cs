@@ -15,6 +15,7 @@ namespace MassTransit.WindsorIntegration.Registration
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using Courier;
+    using Definition;
     using MassTransit.Registration;
     using Saga;
     using ScopeProviders;
@@ -39,9 +40,27 @@ namespace MassTransit.WindsorIntegration.Registration
                     .LifestyleScoped());
         }
 
+        public void RegisterConsumerDefinition<TDefinition, TConsumer>()
+            where TDefinition : class, IConsumerDefinition<TConsumer>
+            where TConsumer : class, IConsumer
+        {
+            _container.Register(
+                Component.For<IConsumerDefinition<TConsumer>>()
+                    .ImplementedBy<TDefinition>());
+        }
+
         public void RegisterSaga<T>()
             where T : class, ISaga
         {
+        }
+
+        public void RegisterSagaDefinition<TDefinition, TSaga>()
+            where TDefinition : class, ISagaDefinition<TSaga>
+            where TSaga : class, ISaga
+        {
+            _container.Register(
+                Component.For<ISagaDefinition<TSaga>>()
+                    .ImplementedBy<TDefinition>());
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()

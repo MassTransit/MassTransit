@@ -65,7 +65,7 @@ namespace MassTransit.Topology.Topologies
                 .TryGetPublishAddress(baseAddress, out publishAddress);
         }
 
-        public ConnectHandle Connect(IPublishTopologyConfigurationObserver observer)
+        public ConnectHandle ConnectPublishTopologyConfigurationObserver(IPublishTopologyConfigurationObserver observer)
         {
             return _observers.Connect(observer);
         }

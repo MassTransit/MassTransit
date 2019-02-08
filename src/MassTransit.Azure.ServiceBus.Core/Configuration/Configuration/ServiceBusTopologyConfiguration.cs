@@ -38,15 +38,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
             _messageTopology = messageTopology;
 
             _sendTopology = new ServiceBusSendTopology();
-            _sendTopology.Connect(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
+            _sendTopology.ConnectSendTopologyConfigurationObserver(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
             _sendTopology.AddConvention(new SessionIdSendTopologyConvention());
             _sendTopology.AddConvention(new PartitionKeySendTopologyConvention());
 
             _publishTopology = new ServiceBusPublishTopology(messageTopology);
-            _publishTopology.Connect(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
+            _publishTopology.ConnectPublishTopologyConfigurationObserver(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
 
             var observer = new PublishToSendTopologyConfigurationObserver(_sendTopology);
-            _publishTopology.Connect(observer);
+            _publishTopology.ConnectPublishTopologyConfigurationObserver(observer);
 
             _consumeTopology = new ServiceBusConsumeTopology(messageTopology, _publishTopology);
         }

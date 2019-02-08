@@ -16,7 +16,7 @@ namespace MassTransit.PublishPipeSpecifications
 
 
     public interface IPublishPipeSpecification :
-        IConnectPublishPipeSpecificationObserver,
+        IPublishPipeSpecificationObserverConnector,
         ISpecification
     {
         /// <summary>

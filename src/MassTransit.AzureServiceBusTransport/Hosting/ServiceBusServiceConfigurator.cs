@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
     using System;
     using System.Net.Mime;
     using ConsumeConfigurators;
+    using EndpointConfigurators;
     using GreenPipes;
     using MassTransit.Builders;
     using MassTransit.Hosting;
@@ -174,6 +175,11 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             where TMessage : class
         {
             _configurator.HandlerConfigured(configurator);
+        }
+
+        ConnectHandle IEndpointConfigurationObserverConnector.ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
+        {
+            return _configurator.ConnectEndpointConfigurationObserver(observer);
         }
     }
 }

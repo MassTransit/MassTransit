@@ -15,8 +15,8 @@ namespace MassTransit.SendPipeSpecifications
     using GreenPipes;
 
 
-    public interface IConnectSendPipeSpecificationObserver
+    public interface ISendPipeSpecificationObserverConnector
     {
-        ConnectHandle Connect(ISendPipeSpecificationObserver observer);
+        ConnectHandle ConnectSendPipeSpecificationObserver(ISendPipeSpecificationObserver observer);
     }
 }

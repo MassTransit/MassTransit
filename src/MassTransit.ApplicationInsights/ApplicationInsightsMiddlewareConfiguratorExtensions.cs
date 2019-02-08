@@ -48,7 +48,7 @@ namespace MassTransit
             string telemetryHeaderRootKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderRootKey,
             string telemetryHeaderParentKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderParentKey)
         {
-            configurator.ConfigureSend(x => x.Connect(new TelemetrySendPipeSpecificationObserver(telemetryClient, telemetryHeaderRootKey,
+            configurator.ConfigureSend(x => x.ConnectSendPipeSpecificationObserver(new TelemetrySendPipeSpecificationObserver(telemetryClient, telemetryHeaderRootKey,
                 telemetryHeaderParentKey, configureOperation)));
         }
 
@@ -61,7 +61,7 @@ namespace MassTransit
             string telemetryHeaderRootKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderRootKey,
             string telemetryHeaderParentKey = ApplicationInsightsDefaultConfiguration.DefaultTelemetryHeaderParentKey)
         {
-            configurator.ConfigurePublish(x => x.Connect(new TelemetryPublishPipeSpecificationObserver(telemetryClient, telemetryHeaderRootKey,
+            configurator.ConfigurePublish(x => x.ConnectPublishPipeSpecificationObserver(new TelemetryPublishPipeSpecificationObserver(telemetryClient, telemetryHeaderRootKey,
                 telemetryHeaderParentKey, configureOperation)));
         }
     }

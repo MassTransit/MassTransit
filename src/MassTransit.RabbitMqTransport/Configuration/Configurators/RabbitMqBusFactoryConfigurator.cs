@@ -201,6 +201,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             configure?.Invoke(configuration.Configurator);
 
+            EndpointObservable.EndpointConfigured(configuration.Configurator);
+
             var specification = new ConfigurationReceiveEndpointSpecification(configuration);
 
             AddReceiveEndpointSpecification(specification);

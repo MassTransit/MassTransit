@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using Castle.MicroKernel;
+    using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using Internals.Extensions;
     using Registration;
@@ -62,7 +63,7 @@ namespace MassTransit
             if (consumerTypes.Count > 0)
             {
                 var scopeProvider = new WindsorConsumerScopeProvider(kernel);
-                
+
                 foreach (var type in consumerTypes)
                     ConsumerConfiguratorCache.Configure(type, configurator, scopeProvider);
             }
@@ -71,10 +72,30 @@ namespace MassTransit
             if (sagaTypes.Count > 0)
             {
                 var repositoryFactory = new WindsorSagaRepositoryFactory(kernel);
-                
+
                 foreach (var sagaType in sagaTypes)
                     SagaConfiguratorCache.Configure(sagaType, configurator, repositoryFactory);
             }
+        }
+
+        /// <summary>
+        /// Registers the InMemory saga repository for all saga types (generic, can be overridden)
+        /// </summary>
+        /// <param name="container"></param>
+        public static void RegisterInMemorySagaRepository(this IWindsorContainer container)
+        {
+            container.Register(Component.For(typeof(ISagaRepository<>)).ImplementedBy(typeof(InMemorySagaRepository<>)).LifestyleSingleton());
+        }
+
+        /// <summary>
+        /// Register the InMemory saga repository for the specified saga type
+        /// </summary>
+        /// <param name="container"></param>
+        /// <typeparam name="T"></typeparam>
+        public static void RegisterInMemorySagaRepository<T>(this IWindsorContainer container)
+            where T : class, ISaga
+        {
+            container.Register(Component.For<ISagaRepository<T>>().ImplementedBy<InMemorySagaRepository<T>>().LifestyleSingleton());
         }
 
         /// <summary>

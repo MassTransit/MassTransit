@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.ComponentModel;
     using System.Net.Mime;
+    using Transports;
 
 
     /// <summary>
@@ -23,7 +24,8 @@ namespace MassTransit
     public interface IReceiveEndpointConfigurator :
         IConsumePipeConfigurator,
         ISendPipelineConfigurator,
-        IPublishPipelineConfigurator
+        IPublishPipelineConfigurator,
+        IReceiveEndpointObserverConnector
     {
         /// <summary>
         /// Returns the input address of the receive endpoint

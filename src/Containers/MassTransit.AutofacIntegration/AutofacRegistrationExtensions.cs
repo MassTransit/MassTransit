@@ -39,6 +39,19 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure all defined consumer types on their respective endpoints
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="componentContext"></param>
+        public static void ConfigureEndpoints<T>(this T configurator, IComponentContext componentContext)
+            where T : IBusFactoryConfigurator
+        {
+            var endpointRegistration = componentContext.Resolve<IRegistration>();
+
+            endpointRegistration.ConfigureEndpoints(configurator);
+        }
+
+        /// <summary>
         /// Configure a consumer on the receive endpoint, with an optional configuration action
         /// </summary>
         /// <param name="configurator"></param>
@@ -48,9 +61,9 @@ namespace MassTransit
             Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
-            var registryConfigurator = componentContext.Resolve<IRegistration>();
+            var registration = componentContext.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureConsumer<T>(configurator, configure);
+            registration.ConfigureConsumer<T>(configurator, configure);
         }
 
         /// <summary>
@@ -60,9 +73,9 @@ namespace MassTransit
         /// <param name="componentContext"></param>
         public static void ConfigureConsumers(this IReceiveEndpointConfigurator configurator, IComponentContext componentContext)
         {
-            var registryConfigurator = componentContext.Resolve<IRegistration>();
+            var registration = componentContext.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureConsumers(configurator);
+            registration.ConfigureConsumers(configurator);
         }
 
         /// <summary>
@@ -73,11 +86,11 @@ namespace MassTransit
         /// <param name="sagaTypes">The saga type(s) to configure</param>
         public static void ConfigureSaga(this IReceiveEndpointConfigurator configurator, IComponentContext componentContext, params Type[] sagaTypes)
         {
-            var registryConfigurator = componentContext.Resolve<IRegistration>();
+            var registration = componentContext.Resolve<IRegistration>();
 
             foreach (var sagaType in sagaTypes)
             {
-                registryConfigurator.ConfigureSaga(sagaType, configurator);
+                registration.ConfigureSaga(sagaType, configurator);
             }
         }
 
@@ -91,9 +104,9 @@ namespace MassTransit
             Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var registryConfigurator = componentContext.Resolve<IRegistration>();
+            var registration = componentContext.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureSaga<T>(configurator, configure);
+            registration.ConfigureSaga<T>(configurator, configure);
         }
 
         /// <summary>
@@ -103,9 +116,9 @@ namespace MassTransit
         /// <param name="componentContext"></param>
         public static void ConfigureSagas(this IReceiveEndpointConfigurator configurator, IComponentContext componentContext)
         {
-            var registryConfigurator = componentContext.Resolve<IRegistration>();
+            var registration = componentContext.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureSagas(configurator);
+            registration.ConfigureSagas(configurator);
         }
 
         /// <summary>
@@ -116,9 +129,9 @@ namespace MassTransit
         /// <param name="activityType"></param>
         public static void ConfigureExecuteActivity(this IReceiveEndpointConfigurator configurator, IComponentContext componentContext, Type activityType)
         {
-            var registryConfigurator = componentContext.Resolve<IRegistration>();
+            var registration = componentContext.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureExecuteActivity(activityType, configurator);
+            registration.ConfigureExecuteActivity(activityType, configurator);
         }
 
         /// <summary>
@@ -131,9 +144,9 @@ namespace MassTransit
         public static void ConfigureActivity(this IReceiveEndpointConfigurator executeEndpointConfigurator,
             IReceiveEndpointConfigurator compensateEndpointConfigurator, IComponentContext componentContext, Type activityType)
         {
-            var registryConfigurator = componentContext.Resolve<IRegistration>();
+            var registration = componentContext.Resolve<IRegistration>();
 
-            registryConfigurator.ConfigureActivity(activityType, executeEndpointConfigurator, compensateEndpointConfigurator);
+            registration.ConfigureActivity(activityType, executeEndpointConfigurator, compensateEndpointConfigurator);
         }
     }
 }

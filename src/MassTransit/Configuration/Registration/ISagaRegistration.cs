@@ -13,6 +13,7 @@
 namespace MassTransit.Registration
 {
     using System;
+    using Definition;
     using Saga;
 
 
@@ -22,5 +23,7 @@ namespace MassTransit.Registration
             where T : class, ISaga;
 
         void Configure(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider repositoryFactory);
+
+        ISagaDefinition GetDefinition(IConfigurationServiceProvider provider);
     }
 }

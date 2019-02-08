@@ -17,7 +17,7 @@ namespace MassTransit.ConsumePipeSpecifications
 
 
     public interface IConsumePipeSpecification :
-        IConnectConsumePipeSpecificationObserver,
+        IConsumePipeSpecificationObserverConnector,
         ISpecification
     {
         /// <summary>

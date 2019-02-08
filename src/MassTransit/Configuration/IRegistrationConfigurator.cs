@@ -24,7 +24,7 @@ namespace MassTransit
         void AddConsumer<T>(Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer;
 
-        void AddConsumer(Type consumerType);
+        void AddConsumer(Type consumerType, Type consumerDefinitionType = null);
 
         void AddSaga<T>(Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga;
@@ -32,7 +32,7 @@ namespace MassTransit
         void AddSaga<T>(SagaRegistrationFactory<T> factory, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga;
 
-        void AddSaga(Type sagaType);
+        void AddSaga(Type sagaType, Type sagaDefinitionType = null);
 
         void AddExecuteActivity<TActivity, TArguments>(Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, ExecuteActivity<TArguments>

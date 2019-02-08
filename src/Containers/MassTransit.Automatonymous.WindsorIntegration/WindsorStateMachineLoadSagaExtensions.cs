@@ -63,7 +63,7 @@ namespace MassTransit
 
             IEnumerable<Type> sagaTypes = FindStateMachineSagaTypes(container);
             foreach (var sagaType in sagaTypes)
-                registrationConfigurator.AddSagaStateMachine(sagaType, new NullSagaStateMachineRegistrar());
+                SagaStateMachineRegistrationCache.AddSagaStateMachine(registrationConfigurator, sagaType);
 
             var registration = registrationConfigurator.CreateRegistration(new WindsorConfigurationServiceProvider(container));
 

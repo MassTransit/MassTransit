@@ -13,7 +13,7 @@
 namespace MassTransit.Topology
 {
     public interface ISendTopology :
-        IConnectSendTopologyConfigurationObserver
+        ISendTopologyConfigurationObserverConnector
     {
         /// <summary>
         /// Returns the specification for the message type

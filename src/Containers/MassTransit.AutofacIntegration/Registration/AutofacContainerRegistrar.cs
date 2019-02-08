@@ -14,6 +14,7 @@ namespace MassTransit.AutofacIntegration.Registration
 {
     using Autofac;
     using Courier;
+    using Definition;
     using MassTransit.Registration;
     using Saga;
     using ScopeProviders;
@@ -36,9 +37,25 @@ namespace MassTransit.AutofacIntegration.Registration
             _builder.RegisterType<T>();
         }
 
+        public void RegisterConsumerDefinition<TDefinition, TConsumer>()
+            where TDefinition : class, IConsumerDefinition<TConsumer>
+            where TConsumer : class, IConsumer
+        {
+            _builder.RegisterType<TDefinition>()
+                .As<IConsumerDefinition<TConsumer>>();
+        }
+
         public void RegisterSaga<T>()
             where T : class, ISaga
         {
+        }
+
+        public void RegisterSagaDefinition<TDefinition, TSaga>()
+            where TDefinition : class, ISagaDefinition<TSaga>
+            where TSaga : class, ISaga
+        {
+            _builder.RegisterType<TDefinition>()
+                .As<ISagaDefinition<TSaga>>();
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()

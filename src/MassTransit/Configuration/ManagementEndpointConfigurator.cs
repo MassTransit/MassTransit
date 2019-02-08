@@ -17,11 +17,12 @@ namespace MassTransit
     using ConsumeConfigurators;
     using GreenPipes;
     using SagaConfigurators;
+    using Transports;
 
 
     /// <summary>
     /// This is simply a delegate to the endpoint configurator for a management endpoint.
-    /// A management endpoint is just a type of recieve endpoint that can be used to communicate
+    /// A management endpoint is just a type of receive endpoint that can be used to communicate
     /// with middleware, etc.
     /// </summary>
     public class ManagementEndpointConfigurator :
@@ -119,6 +120,11 @@ namespace MassTransit
         void IHandlerConfigurationObserver.HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
         {
             _configurator.HandlerConfigured(configurator);
+        }
+
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _configurator.ConnectReceiveEndpointObserver(observer);
         }
     }
 }

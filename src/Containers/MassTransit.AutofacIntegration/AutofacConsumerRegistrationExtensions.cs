@@ -17,6 +17,7 @@ namespace MassTransit
     using Autofac.Features.Scanning;
     using Autofac;
     using Saga;
+    using Util;
 
 
     /// <summary>
@@ -34,9 +35,21 @@ namespace MassTransit
             RegisterConsumers(this ContainerBuilder builder, params Assembly[] consumerAssemblies)
         {
             return builder.RegisterAssemblyTypes(consumerAssemblies)
-                .Where(t => typeof(IConsumer).IsAssignableFrom(t));
+                .Where(TypeMetadataCache.HasConsumerInterfaces);
         }
 
+        /// <summary>
+        /// Register types that implement <see cref="IConsumer"/> in the provided assemblies.
+        /// </summary>
+        /// <param name="builder">The container builder.</param>
+        /// <param name="consumerAssemblies">Assemblies to scan for consumers.</param>
+        /// <returns>Registration builder allowing the consumer components to be customised.</returns>
+        public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle>
+            RegisterSagas(this ContainerBuilder builder, params Assembly[] consumerAssemblies)
+        {
+            return builder.RegisterAssemblyTypes(consumerAssemblies)
+                .Where(TypeMetadataCache.HasSagaInterfaces);
+        }
 
         /// <summary>
         /// Registers the InMemory saga repository for all saga types (generic, can be overridden)

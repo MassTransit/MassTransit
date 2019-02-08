@@ -13,6 +13,7 @@
 namespace MassTransit.LamarIntegration.Registration
 {
     using Courier;
+    using Definition;
     using Lamar;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
@@ -37,9 +38,25 @@ namespace MassTransit.LamarIntegration.Registration
             _registry.ForConcreteType<T>();
         }
 
+        public void RegisterConsumerDefinition<TDefinition, TConsumer>()
+            where TDefinition : class, IConsumerDefinition<TConsumer>
+            where TConsumer : class, IConsumer
+        {
+            _registry.For<IConsumerDefinition<TConsumer>>()
+                .Use<TDefinition>();
+        }
+
         public void RegisterSaga<T>()
             where T : class, ISaga
         {
+        }
+
+        public void RegisterSagaDefinition<TDefinition, TSaga>()
+            where TDefinition : class, ISagaDefinition<TSaga>
+            where TSaga : class, ISaga
+        {
+            _registry.For<ISagaDefinition<TSaga>>()
+                .Use<TDefinition>();
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()

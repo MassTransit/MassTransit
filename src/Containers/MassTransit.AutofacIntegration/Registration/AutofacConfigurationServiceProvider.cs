@@ -26,10 +26,16 @@ namespace MassTransit.AutofacIntegration.Registration
             _lifetimeScope = lifetimeScope;
         }
 
-        public T GetService<T>()
+        public T GetRequiredService<T>()
             where T : class
         {
             return _lifetimeScope.Resolve<T>();
+        }
+
+        public T GetService<T>()
+            where T : class
+        {
+            return _lifetimeScope.ResolveOptional<T>();
         }
     }
 }

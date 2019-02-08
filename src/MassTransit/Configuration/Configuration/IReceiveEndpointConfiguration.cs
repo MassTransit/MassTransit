@@ -15,10 +15,12 @@ namespace MassTransit.Configuration
     using System;
     using Pipeline;
     using Pipeline.Observables;
+    using Transports;
 
 
     public interface IReceiveEndpointConfiguration :
-        IEndpointConfiguration
+        IEndpointConfiguration,
+        IReceiveEndpointObserverConnector
     {
         IConsumePipe ConsumePipe { get; }
 

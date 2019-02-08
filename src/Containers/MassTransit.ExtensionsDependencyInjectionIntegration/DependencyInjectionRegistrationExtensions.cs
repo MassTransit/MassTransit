@@ -39,6 +39,19 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure all defined consumer types on their respective endpoints
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="provider"></param>
+        public static void ConfigureEndpoints<T>(this T configurator, IServiceProvider provider)
+            where T : IBusFactoryConfigurator
+        {
+            var registration = provider.GetRequiredService<IRegistration>();
+
+            registration.ConfigureEndpoints(configurator);
+        }
+
+        /// <summary>
         /// Configure a consumer (or consumers) on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>

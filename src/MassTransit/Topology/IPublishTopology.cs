@@ -16,7 +16,7 @@ namespace MassTransit.Topology
 
 
     public interface IPublishTopology :
-        IConnectPublishTopologyConfigurationObserver
+        IPublishTopologyConfigurationObserverConnector
     {
         /// <summary>
         /// Returns the specification for the message type

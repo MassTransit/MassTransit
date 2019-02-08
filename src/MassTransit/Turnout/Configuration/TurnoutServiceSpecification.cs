@@ -20,6 +20,7 @@ namespace MassTransit.Turnout.Configuration
     using GreenPipes;
     using Saga;
     using SagaConfigurators;
+    using Transports;
 
 
     public class TurnoutServiceSpecification<TCommand> :
@@ -170,6 +171,11 @@ namespace MassTransit.Turnout.Configuration
             where TMessage : class
         {
             _configurator.HandlerConfigured(configurator);
+        }
+
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _configurator.ConnectReceiveEndpointObserver(observer);
         }
     }
 }

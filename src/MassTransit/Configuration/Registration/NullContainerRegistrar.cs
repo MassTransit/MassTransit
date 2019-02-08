@@ -13,6 +13,7 @@
 namespace MassTransit.Registration
 {
     using Courier;
+    using Definition;
     using Saga;
 
 
@@ -24,8 +25,20 @@ namespace MassTransit.Registration
         {
         }
 
+        public void RegisterConsumerDefinition<TDefinition, TConsumer>()
+            where TDefinition : class, IConsumerDefinition<TConsumer>
+            where TConsumer : class, IConsumer
+        {
+        }
+
         public void RegisterSaga<T>()
             where T : class, ISaga
+        {
+        }
+
+        public void RegisterSagaDefinition<TDefinition, TSaga>()
+            where TDefinition : class, ISagaDefinition<TSaga>
+            where TSaga : class, ISaga
         {
         }
 

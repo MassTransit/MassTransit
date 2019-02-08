@@ -19,7 +19,7 @@ namespace MassTransit
 
     public interface ISendPipeConfigurator :
         IPipeConfigurator<SendContext>,
-        IConnectSendPipeSpecificationObserver
+        ISendPipeSpecificationObserverConnector
     {
         /// <summary>
         /// Adds a type-specific pipe specification to the consume pipe

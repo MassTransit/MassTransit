@@ -37,14 +37,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _messageTopology = messageTopology;
 
             _sendTopology = new RabbitMqSendTopology(RabbitMqEntityNameValidator.Validator);
-            _sendTopology.Connect(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
+            _sendTopology.ConnectSendTopologyConfigurationObserver(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
             _sendTopology.AddConvention(new RoutingKeySendTopologyConvention());
 
             _publishTopology = new RabbitMqPublishTopology(messageTopology);
-            _publishTopology.Connect(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
+            _publishTopology.ConnectPublishTopologyConfigurationObserver(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
 
             var observer = new PublishToSendTopologyConfigurationObserver(_sendTopology);
-            _publishTopology.Connect(observer);
+            _publishTopology.ConnectPublishTopologyConfigurationObserver(observer);
 
             _consumeTopology = new RabbitMqConsumeTopology(messageTopology, _publishTopology);
         }

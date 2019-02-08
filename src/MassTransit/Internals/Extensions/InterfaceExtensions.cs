@@ -37,6 +37,7 @@ namespace MassTransit.Internals.Extensions
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
+
             if (interfaceType == null)
                 throw new ArgumentNullException(nameof(interfaceType));
 
@@ -59,6 +60,7 @@ namespace MassTransit.Internals.Extensions
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
+
             if (interfaceType == null)
                 throw new ArgumentNullException(nameof(interfaceType));
 
@@ -73,6 +75,7 @@ namespace MassTransit.Internals.Extensions
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
+
             if (openType == null)
                 throw new ArgumentNullException(nameof(openType));
 
@@ -108,10 +111,16 @@ namespace MassTransit.Internals.Extensions
             return false;
         }
 
+        public static Type GetClosingArgument(this Type type, Type openType)
+        {
+            return GetClosingArguments(type, openType).Single();
+        }
+
         public static IEnumerable<Type> GetClosingArguments(this Type type, Type openType)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
+
             if (openType == null)
                 throw new ArgumentNullException(nameof(openType));
 
@@ -145,6 +154,5 @@ namespace MassTransit.Internals.Extensions
 
             throw new ArgumentException("Could not find open type in type: " + type.Name);
         }
-
     }
 }

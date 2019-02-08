@@ -87,7 +87,7 @@ namespace MassTransit.PublishPipeSpecifications
             return specification.GetMessageSpecification<T>();
         }
 
-        public ConnectHandle Connect(IPublishPipeSpecificationObserver observer)
+        public ConnectHandle ConnectPublishPipeSpecificationObserver(IPublishPipeSpecificationObserver observer)
         {
             return _observers.Connect(observer);
         }

@@ -24,6 +24,11 @@ namespace MassTransit.Util
         /// <summary>
         /// True if the type implements any known saga interfaces
         /// </summary>
+        bool HasConsumerInterfaces { get; }
+
+        /// <summary>
+        /// True if the type implements any known saga interfaces
+        /// </summary>
         bool HasSagaInterfaces { get; }
 
         /// <summary>

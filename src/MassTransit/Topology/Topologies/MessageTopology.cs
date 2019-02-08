@@ -14,8 +14,11 @@ namespace MassTransit.Topology.Topologies
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Linq.Expressions;
+    using System.Reflection;
     using EntityNameFormatters;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using Observers;
     using Util;
 
@@ -46,7 +49,7 @@ namespace MassTransit.Topology.Topologies
             return GetMessageTopology<T>();
         }
 
-        public ConnectHandle Connect(IMessageTopologyConfigurationObserver observer)
+        public ConnectHandle ConnectMessageTopologyConfigurationObserver(IMessageTopologyConfigurationObserver observer)
         {
             return _observers.Connect(observer);
         }
@@ -70,7 +73,7 @@ namespace MassTransit.Topology.Topologies
         protected virtual IMessageTypeTopologyConfigurator CreateMessageTopology<T>(Type type)
             where T : class
         {
-            var messageTopology = new MessageTopology<T>(new MessageEntityNameFormatter<T>(EntityNameFormatter));
+            var messageTopology = new MessageTopology<T>(new MessageEntityNameFormatter<T>(EntityNameFormatter), _observers);
 
             OnMessageTopologyCreated(messageTopology);
 
@@ -89,11 +92,16 @@ namespace MassTransit.Topology.Topologies
         IMessageTopologyConfigurator<TMessage>
         where TMessage : class
     {
+        readonly MessageTopologyConfigurationObservable _observers;
         readonly Lazy<string> _entityName;
+        readonly ConcurrentDictionary<string, IMessagePropertyTopologyConfigurator<TMessage>> _properties;
 
-        public MessageTopology(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
+        public MessageTopology(IMessageEntityNameFormatter<TMessage> entityNameFormatter, MessageTopologyConfigurationObservable observers)
         {
+            _observers = observers;
             EntityNameFormatter = entityNameFormatter;
+
+            _properties = new ConcurrentDictionary<string, IMessagePropertyTopologyConfigurator<TMessage>>(StringComparer.OrdinalIgnoreCase);
 
             _entityName = new Lazy<string>(() => EntityNameFormatter.FormatEntityName());
         }
@@ -114,6 +122,44 @@ namespace MassTransit.Topology.Topologies
         public void SetEntityName(string entityName)
         {
             SetEntityNameFormatter(new StaticEntityNameFormatter<TMessage>(entityName));
+        }
+
+        public void CorrelateBy(Expression<Func<TMessage, Guid>> propertyExpression)
+        {
+            var propertyTopology = GetPropertyTopology<Guid>(propertyExpression.GetPropertyInfo());
+
+            propertyTopology.IsCorrelationId = true;
+        }
+
+        public IMessagePropertyTopologyConfigurator<TMessage, T> GetProperty<T>(Expression<Func<TMessage, T>> propertyExpression)
+        {
+            return GetPropertyTopology<T>(propertyExpression.GetPropertyInfo());
+        }
+
+        IMessagePropertyTopology<TMessage, T> IMessageTopology<TMessage>.GetProperty<T>(PropertyInfo propertyInfo)
+        {
+            return GetPropertyTopology<T>(propertyInfo);
+        }
+
+        IMessagePropertyTopologyConfigurator<TMessage, T> GetPropertyTopology<T>(PropertyInfo propertyInfo)
+        {
+            var specification = _properties.GetOrAdd(propertyInfo.Name, _ => CreatePropertyTopology<T>(propertyInfo));
+
+            return specification as IMessagePropertyTopologyConfigurator<TMessage, T>;
+        }
+
+        protected virtual IMessagePropertyTopologyConfigurator<TMessage> CreatePropertyTopology<T>(PropertyInfo propertyInfo)
+        {
+            var messageTopology = new MessagePropertyTopology<TMessage, T>(propertyInfo);
+
+            OnMessagePropertyTopologyCreated(messageTopology);
+
+            return messageTopology;
+        }
+
+        void OnMessagePropertyTopologyCreated<T>(IMessagePropertyTopologyConfigurator<TMessage, T> propertyTopology)
+        {
+            _observers.MessagePropertyTopologyCreated(propertyTopology);
         }
     }
 }

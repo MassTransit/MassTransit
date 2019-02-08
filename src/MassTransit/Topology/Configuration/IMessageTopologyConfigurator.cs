@@ -12,6 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Topology
 {
+    using System;
+    using System.Linq.Expressions;
+
+
     public interface IMessageTopologyConfigurator<TMessage> :
         IMessageTypeTopologyConfigurator,
         IMessageTopology<TMessage>
@@ -28,6 +32,14 @@ namespace MassTransit.Topology
         /// </summary>
         /// <param name="entityName">The entity name</param>
         void SetEntityName(string entityName);
+
+        /// <summary>
+        /// Specify the property which should be used for the message CorrelationId
+        /// </summary>
+        /// <param name="propertyExpression"></param>
+        void CorrelateBy(Expression<Func<TMessage, Guid>> propertyExpression);
+
+        IMessagePropertyTopologyConfigurator<TMessage, T> GetProperty<T>(Expression<Func<TMessage, T>> propertyExpression);
     }
 
 

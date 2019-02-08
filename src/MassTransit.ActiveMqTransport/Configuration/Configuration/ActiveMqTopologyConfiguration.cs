@@ -36,13 +36,13 @@ namespace MassTransit.ActiveMqTransport.Configuration
             _messageTopology = messageTopology;
 
             _sendTopology = new ActiveMqSendTopology(ActiveMqEntityNameValidator.Validator);
-            _sendTopology.Connect(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
+            _sendTopology.ConnectSendTopologyConfigurationObserver(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
 
             _publishTopology = new ActiveMqPublishTopology(messageTopology);
-            _publishTopology.Connect(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
+            _publishTopology.ConnectPublishTopologyConfigurationObserver(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
 
             var observer = new PublishToSendTopologyConfigurationObserver(_sendTopology);
-            _publishTopology.Connect(observer);
+            _publishTopology.ConnectPublishTopologyConfigurationObserver(observer);
 
             _consumeTopology = new ActiveMqConsumeTopology(messageTopology, _publishTopology);
         }

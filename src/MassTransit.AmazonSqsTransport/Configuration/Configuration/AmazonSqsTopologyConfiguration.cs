@@ -37,13 +37,13 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
             _messageTopology = messageTopology;
 
             _sendTopology = new AmazonSqsSendTopology(AmazonSqsEntityNameValidator.Validator);
-            _sendTopology.Connect(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
+            _sendTopology.ConnectSendTopologyConfigurationObserver(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
 
             _publishTopology = new AmazonSqsPublishTopology(messageTopology);
-            _publishTopology.Connect(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
+            _publishTopology.ConnectPublishTopologyConfigurationObserver(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
 
             var observer = new PublishToSendTopologyConfigurationObserver(_sendTopology);
-            _publishTopology.Connect(observer);
+            _publishTopology.ConnectPublishTopologyConfigurationObserver(observer);
 
             _consumeTopology = new AmazonSqsConsumeTopology(messageTopology, _publishTopology);
         }
