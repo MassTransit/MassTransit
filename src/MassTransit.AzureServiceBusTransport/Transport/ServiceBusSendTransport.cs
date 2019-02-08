@@ -92,9 +92,9 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
                 try
                 {
-                    CopyIncomingIdentifiersIfPresent(context);
-
                     await _pipe.Send(context).ConfigureAwait(false);
+
+                    CopyIncomingIdentifiersIfPresent(context);
 
                     if (IsCancelScheduledSend(context, out var sequenceNumber))
                     {

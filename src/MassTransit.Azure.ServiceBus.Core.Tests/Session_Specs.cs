@@ -95,7 +95,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             await InputQueueSendEndpoint.Send(message, context =>
             {
-                context.SetSessionId(message.CorrelationId.ToString());
+                context.SetSessionId(message.CorrelationId.ToString("D"));
             });
         }
 

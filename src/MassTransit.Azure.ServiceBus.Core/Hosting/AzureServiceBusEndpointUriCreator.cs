@@ -5,12 +5,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
 
     public static class AzureServiceBusEndpointUriCreator
     {
-        public static Uri Create(string serviceBusNamespace, string entityPath, string azureEndPoint = "servicebus.windows.net")
+        public static Uri Create(string serviceBusNamespace, string entityPath = null, string azureEndPoint = "servicebus.windows.net")
         {
             var endpoint = $"sb://{serviceBusNamespace}.{azureEndPoint}/{entityPath}";
 
             return new Uri(endpoint);
         }
-
     }
 }

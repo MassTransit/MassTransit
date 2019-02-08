@@ -16,10 +16,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Introspection;
+    using Hosting;
     using NUnit.Framework;
     using Serialization;
     using TestFramework;
     using TestFramework.Messages;
+    using Testing;
 
 
     [TestFixture]
@@ -39,6 +41,35 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             ProbeResult result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
+        }
+
+        [Test]
+        public async Task Should_succeed()
+        {
+            await Bus.Publish(new PingMessage());
+
+            await _handler;
+        }
+    }
+
+
+    [TestFixture]
+    public class Publishing_a_message_to_an_endpoint_with_a_slash :
+        AzureServiceBusTestFixture
+    {
+        public Publishing_a_message_to_an_endpoint_with_a_slash()
+            : base(serviceUri: AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace))
+        {
+        }
+
+        Task<ConsumeContext<PingMessage>> _handler;
+
+        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        {
+            configurator.ReceiveEndpoint(host, "test_endpoint_scope/input_queue", e =>
+            {
+                _handler = Handled<PingMessage>(e);
+            });
         }
 
         [Test]
