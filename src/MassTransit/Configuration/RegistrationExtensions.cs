@@ -44,10 +44,11 @@ namespace MassTransit
         /// Adds all consumers from the assembly containing the specified type that are in the same (or deeper) namespace.
         /// </summary>
         /// <param name="configurator"></param>
+        /// <param name="filter"></param>
         /// <typeparam name="T">The anchor type</typeparam>
-        public static void AddConsumersFromNamespaceContaining<T>(this IRegistrationConfigurator configurator)
+        public static void AddConsumersFromNamespaceContaining<T>(this IRegistrationConfigurator configurator, Func<Type, bool> filter = null)
         {
-            AddConsumersFromNamespaceContaining(configurator, typeof(T));
+            AddConsumersFromNamespaceContaining(configurator, typeof(T), filter);
         }
 
         /// <summary>
@@ -55,7 +56,8 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="type">The type to use to identify the assembly and namespace to scan</param>
-        public static void AddConsumersFromNamespaceContaining(this IRegistrationConfigurator configurator, Type type)
+        /// <param name="filter"></param>
+        public static void AddConsumersFromNamespaceContaining(this IRegistrationConfigurator configurator, Type type, Func<Type, bool> filter = null)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
@@ -63,7 +65,15 @@ namespace MassTransit
             if (type.Assembly == null || type.Namespace == null)
                 throw new ArgumentException($"The type {TypeMetadataCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
 
-            IEnumerable<Type> types = FindTypesInNamespace(type, IsConsumerOrDefinition);
+            IEnumerable<Type> types;
+            if (filter != null)
+            {
+                bool IsAllowed(Type candidate) => IsConsumerOrDefinition(candidate) && filter(candidate);
+
+                types = FindTypesInNamespace(type, IsAllowed);
+            }
+            else
+                types = FindTypesInNamespace(type, IsConsumerOrDefinition);
 
             AddConsumers(configurator, types.ToArray());
         }
@@ -77,7 +87,7 @@ namespace MassTransit
         /// <summary>
         /// Adds the specified consumer types
         /// </summary>
-        /// <param name="configurator"></param>
+        /// <param name="configurator"></param>ˆ
         /// <param name="types">The state machine types to add</param>
         public static void AddConsumers(this IRegistrationConfigurator configurator, params Type[] types)
         {
@@ -113,8 +123,20 @@ namespace MassTransit
         /// sure to call AddSagaStateMachinesFromNamespaceContaining prior to calling this one.
         /// </summary>
         /// <param name="configurator"></param>
+        /// <param name="filter"></param>
+        public static void AddSagasFromNamespaceContaining<T>(this IRegistrationConfigurator configurator, Func<Type, bool> filter = null)
+        {
+            AddSagasFromNamespaceContaining(configurator, typeof(T), filter);
+        }
+
+        /// <summary>
+        /// Adds all sagas in the specified assemblies matching the namespace. If you are using both state machine and regular sagas, be
+        /// sure to call AddSagaStateMachinesFromNamespaceContaining prior to calling this one.
+        /// </summary>
+        /// <param name="configurator"></param>
         /// <param name="type">The type to use to identify the assembly and namespace to scan</param>
-        public static void AddSagasFromNamespaceContaining(this IRegistrationConfigurator configurator, Type type)
+        /// <param name="filter"></param>
+        public static void AddSagasFromNamespaceContaining(this IRegistrationConfigurator configurator, Type type, Func<Type, bool> filter = null)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
@@ -122,7 +144,15 @@ namespace MassTransit
             if (type.Assembly == null || type.Namespace == null)
                 throw new ArgumentException($"The type {TypeMetadataCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
 
-            IEnumerable<Type> types = FindTypesInNamespace(type, IsSagaTypeOrDefinition);
+            IEnumerable<Type> types;
+            if (filter != null)
+            {
+                bool IsAllowed(Type candidate) => IsSagaTypeOrDefinition(candidate) && filter(candidate);
+
+                types = FindTypesInNamespace(type, IsAllowed);
+            }
+            else
+                types = FindTypesInNamespace(type, IsSagaTypeOrDefinition);
 
             AddSagas(configurator, types.ToArray());
         }
@@ -171,8 +201,19 @@ namespace MassTransit
         /// Adds all activities (including execute-only activities) in the specified assemblies matching the namespace.
         /// </summary>
         /// <param name="configurator"></param>
+        /// <param name="filter"></param>
+        public static void AddActivitiesFromNamespaceContaining<T>(this IRegistrationConfigurator configurator, Func<Type, bool> filter = null)
+        {
+            AddActivitiesFromNamespaceContaining(configurator, typeof(T), filter);
+        }
+
+        /// <summary>
+        /// Adds all activities (including execute-only activities) in the specified assemblies matching the namespace.
+        /// </summary>
+        /// <param name="configurator"></param>
         /// <param name="type">The type to use to identify the assembly and namespace to scan</param>
-        public static void AddActivitiesFromNamespaceContaining(this IRegistrationConfigurator configurator, Type type)
+        /// <param name="filter"></param>
+        public static void AddActivitiesFromNamespaceContaining(this IRegistrationConfigurator configurator, Type type, Func<Type, bool> filter = null)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
@@ -180,7 +221,15 @@ namespace MassTransit
             if (type.Assembly == null || type.Namespace == null)
                 throw new ArgumentException($"The type {TypeMetadataCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
 
-            IEnumerable<Type> types = FindTypesInNamespace(type, IsActivityTypeOrDefinition);
+            IEnumerable<Type> types;
+            if (filter != null)
+            {
+                bool IsAllowed(Type candidate) => IsActivityTypeOrDefinition(candidate) && filter(candidate);
+
+                types = FindTypesInNamespace(type, IsAllowed);
+            }
+            else
+                types = FindTypesInNamespace(type, IsActivityTypeOrDefinition);
 
             AddActivities(configurator, types.ToArray());
         }

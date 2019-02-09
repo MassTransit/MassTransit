@@ -1,14 +1,14 @@
 // Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
+//  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
@@ -65,7 +65,7 @@ namespace MassTransit
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            TypeSet types = AssemblyTypeCache.FindTypes(assemblies, IsSagaStateMachineOrDefinition).GetAwaiter().GetResult();
+            var types = AssemblyTypeCache.FindTypes(assemblies, IsSagaStateMachineOrDefinition).GetAwaiter().GetResult();
 
             configurator.AddSagaStateMachines(registrar, types.FindTypes(TypeClassification.Concrete).ToArray());
         }
@@ -77,8 +77,9 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="registrar"></param>
         /// <param name="type">The type to use to identify the assembly and namespace to scan</param>
+        /// <param name="filter"></param>
         public static void AddSagaStateMachinesFromNamespaceContaining(this IRegistrationConfigurator configurator, ISagaStateMachineRegistrar registrar,
-            Type type)
+            Type type, Func<Type, bool> filter)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
@@ -86,14 +87,25 @@ namespace MassTransit
             if (type.Assembly == null || type.Namespace == null)
                 throw new ArgumentException($"The type {TypeMetadataCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
 
-            IEnumerable<Type> types = FindTypesInNamespace(type, IsSagaStateMachineOrDefinition);
+            IEnumerable<Type> types;
+            if (filter != null)
+            {
+                bool IsAllowed(Type candidate)
+                {
+                    return IsSagaStateMachineOrDefinition(candidate) && filter(candidate);
+                }
+
+                types = FindTypesInNamespace(type, IsAllowed);
+            }
+            else
+                types = FindTypesInNamespace(type, IsSagaStateMachineOrDefinition);
 
             AddSagaStateMachines(configurator, registrar, types.ToArray());
         }
 
         static bool IsSagaStateMachineOrDefinition(Type type)
         {
-            return (type.HasInterface(typeof(SagaStateMachine<>)))
+            return type.HasInterface(typeof(SagaStateMachine<>))
                 || type.HasInterface(typeof(ISagaDefinition<>));
         }
 
@@ -136,7 +148,7 @@ namespace MassTransit
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            TypeSet types = AssemblyTypeCache.FindTypes(assemblies, x => x.HasInterface(typeof(SagaStateMachine<>))).GetAwaiter().GetResult();
+            var types = AssemblyTypeCache.FindTypes(assemblies, x => x.HasInterface(typeof(SagaStateMachine<>))).GetAwaiter().GetResult();
 
             registrar.RegisterSagaStateMachines(types.FindTypes(TypeClassification.Concrete).ToArray());
         }
