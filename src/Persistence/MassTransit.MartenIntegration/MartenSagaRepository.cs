@@ -43,7 +43,7 @@ namespace MassTransit.MartenIntegration
                 return await session.Query<TSaga>()
                     .Where(query.FilterExpression)
                     .Select(x => x.CorrelationId)
-                    .ToListAsync();
+                    .ToListAsync().ConfigureAwait(false);
             }
         }
 

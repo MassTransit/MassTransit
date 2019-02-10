@@ -63,14 +63,14 @@ namespace MassTransit.Transports.InMemory.Fabric
 
         async Task DispatchMessage(InMemoryTransportMessage message)
         {
-            var consumer = await _consumer.Task;
+            var consumer = await _consumer.Task.ConfigureAwait(false);
 
             if (_cancellationToken.IsCancellationRequested)
                 return;
 
             try
             {
-                await consumer.Consume(message, _cancellationToken.Token);
+                await consumer.Consume(message, _cancellationToken.Token).ConfigureAwait(false);
             }
             catch
             {

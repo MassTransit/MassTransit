@@ -108,7 +108,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
                         {
                             throw await ConvertToAmazonSqsConnectionException(ex, "ReceiveTransport Faulted, Restarting ").ConfigureAwait(false);
                         }
-                    }, Stopping);
+                    }, Stopping).ConfigureAwait(false);
                 }
                 catch
                 {
@@ -124,7 +124,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
             var exception = new AmazonSqsConnectException(message + _host.ConnectionContextSupervisor, ex);
 
-            await NotifyFaulted(exception);
+            await NotifyFaulted(exception).ConfigureAwait(false);
 
             return exception;
         }

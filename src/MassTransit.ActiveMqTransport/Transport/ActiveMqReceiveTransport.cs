@@ -112,7 +112,7 @@ namespace MassTransit.ActiveMqTransport.Transport
                         {
                             throw await ConvertToActiveMqConnectionException(ex, "ReceiveTranport Faulted, Restarting").ConfigureAwait(false);
                         }
-                    }, Stopping);
+                    }, Stopping).ConfigureAwait(false);
                 }
                 catch
                 {
@@ -128,7 +128,7 @@ namespace MassTransit.ActiveMqTransport.Transport
 
             var exception = new ActiveMqConnectException(message + _host.ConnectionContextSupervisor, ex);
 
-            await NotifyFaulted(exception);
+            await NotifyFaulted(exception).ConfigureAwait(false);
 
             return exception;
         }

@@ -67,7 +67,7 @@ namespace MassTransit.Azure.ServiceBus.Core
         {
             if (ServiceBusConnection.IsValueCreated)
             {
-                await ServiceBusConnection.Value.CloseAsync();
+                await ServiceBusConnection.Value.CloseAsync().ConfigureAwait(false);
             }
         }
 

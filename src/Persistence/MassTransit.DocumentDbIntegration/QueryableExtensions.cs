@@ -15,7 +15,7 @@
 
             do
             {
-                var batch = await docQuery.ExecuteNextAsync<T>();
+                var batch = await docQuery.ExecuteNextAsync<T>().ConfigureAwait(false);
                 batches.Add(batch);
             }
             while (docQuery.HasMoreResults);

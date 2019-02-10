@@ -47,7 +47,7 @@ namespace MassTransit.RedisIntegration
                     return result;
 
                 var waitFor = _random.Next((int)Math.Pow(i, 2), (int)Math.Pow(i + 1, 2) + 1);
-                await Task.Delay(waitFor);
+                await Task.Delay(waitFor).ConfigureAwait(false);
             }
 
             throw new TimeoutException($"Exceeded timeout of {retryTimeout.Value}");

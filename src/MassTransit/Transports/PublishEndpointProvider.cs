@@ -73,7 +73,7 @@ namespace MassTransit.Transports
             if (!messageTopology.TryGetPublishAddress(_hostAddress, out var publishAddress))
                 throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
 
-            var sendTransport = await _transportProvider.GetPublishTransport<T>(publishAddress);
+            var sendTransport = await _transportProvider.GetPublishTransport<T>(publishAddress).ConfigureAwait(false);
 
             return new SendEndpoint(sendTransport, _serializer, publishAddress, _sourceAddress, SendPipe.Empty);
         }

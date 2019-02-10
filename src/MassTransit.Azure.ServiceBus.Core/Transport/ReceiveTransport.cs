@@ -120,7 +120,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
                             throw;
                         }
-                    }, Stopping);
+                    }, Stopping).ConfigureAwait(false);
                 }
                 catch
                 {

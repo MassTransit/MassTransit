@@ -53,7 +53,10 @@ namespace MassTransit.Initializers
             InitializeMessageContext<TMessage, TInput> messageContext = await InitializeMessage(input, cancellationToken).ConfigureAwait(false);
 
             await endpoint.Send(messageContext.Message,
-                _headerInitializers.Length > 0 ? new InitializerSendContextPipe(_headerInitializers, messageContext, pipe) : pipe, cancellationToken);
+                    _headerInitializers.Length > 0
+                        ? new InitializerSendContextPipe(_headerInitializers, messageContext, pipe)
+                        : pipe, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         public async Task Send(ISendEndpoint endpoint, TInput input, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -72,7 +75,8 @@ namespace MassTransit.Initializers
             InitializeMessageContext<TMessage, TInput> messageContext = await InitializeMessage(input, cancellationToken).ConfigureAwait(false);
 
             await endpoint.Publish(messageContext.Message,
-                _headerInitializers.Length > 0 ? new InitializerPublishContextPipe(_headerInitializers, messageContext, pipe) : pipe, cancellationToken);
+                    _headerInitializers.Length > 0 ? new InitializerPublishContextPipe(_headerInitializers, messageContext, pipe) : pipe, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         public async Task Publish(IPublishEndpoint endpoint, TInput input, IPipe<PublishContext> pipe, CancellationToken cancellationToken)

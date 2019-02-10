@@ -1,19 +1,21 @@
 ﻿namespace MassTransit.SignalR.Consumers
 {
-    using MassTransit.Logging;
-    using MassTransit.SignalR.Contracts;
-    using MassTransit.SignalR.Utils;
+    using Logging;
+    using Contracts;
+    using Utils;
     using Microsoft.AspNetCore.SignalR;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
 
-    public class AllConsumer<THub> : IConsumer<All<THub>> where THub : Hub
+    public class AllConsumer<THub> :
+        IConsumer<All<THub>>
+        where THub : Hub
     {
         static readonly ILog _logger = Logger.Get<AllConsumer<THub>>();
 
-        private readonly MassTransitHubLifetimeManager<THub> _hubLifetimeManager;
+        readonly MassTransitHubLifetimeManager<THub> _hubLifetimeManager;
 
         public AllConsumer(HubLifetimeManager<THub> hubLifetimeManager)
         {
@@ -36,7 +38,7 @@
 
             try
             {
-                await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
             catch(Exception e)
             {

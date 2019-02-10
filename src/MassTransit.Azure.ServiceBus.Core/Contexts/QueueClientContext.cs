@@ -46,7 +46,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         {
             _queueClient.RegisterMessageHandler(async (message, token) =>
             {
-                await callback(_queueClient, message, token);
+                await callback(_queueClient, message, token).ConfigureAwait(false);
             }, _settings.GetOnMessageOptions(exceptionHandler));
         }
 

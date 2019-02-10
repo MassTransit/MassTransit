@@ -1,22 +1,26 @@
 ﻿namespace MassTransit.SignalR.Consumers
 {
-    using MassTransit.Logging;
-    using MassTransit.SignalR.Contracts;
-    using MassTransit.SignalR.Utils;
-    using Microsoft.AspNetCore.SignalR;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Contracts;
+    using Logging;
+    using Microsoft.AspNetCore.SignalR;
+    using Utils;
 
-    public class UserConsumer<THub> : IConsumer<User<THub>> where THub : Hub
+
+    public class UserConsumer<THub> :
+        IConsumer<User<THub>>
+        where THub : Hub
     {
         static readonly ILog _logger = Logger.Get<UserConsumer<THub>>();
 
-        private readonly MassTransitHubLifetimeManager<THub> _hubLifetimeManager;
+        readonly MassTransitHubLifetimeManager<THub> _hubLifetimeManager;
 
         public UserConsumer(HubLifetimeManager<THub> hubLifetimeManager)
         {
-            _hubLifetimeManager = hubLifetimeManager as MassTransitHubLifetimeManager<THub> ?? throw new ArgumentNullException(nameof(hubLifetimeManager), "HubLifetimeManager<> must be of type MassTransitHubLifetimeManager<>");
+            _hubLifetimeManager = hubLifetimeManager as MassTransitHubLifetimeManager<THub> ?? throw new ArgumentNullException(nameof(hubLifetimeManager),
+                "HubLifetimeManager<> must be of type MassTransitHubLifetimeManager<>");
         }
 
         public async Task Consume(ConsumeContext<User<THub>> context)
@@ -25,7 +29,8 @@
 
             var userStore = _hubLifetimeManager.Users[context.Message.UserId];
 
-            if (userStore == null || userStore.Count <= 0) return;
+            if (userStore == null || userStore.Count <= 0)
+                return;
 
             var tasks = new List<Task>();
             foreach (var connection in userStore)
@@ -35,7 +40,7 @@
 
             try
             {
-                await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
             catch (Exception e)
             {

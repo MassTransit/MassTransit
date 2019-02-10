@@ -46,7 +46,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         {
             _subscriptionClient.RegisterMessageHandler(async (message, token) =>
             {
-                await callback(_subscriptionClient, message, token);
+                await callback(_subscriptionClient, message, token).ConfigureAwait(false);
             }, _settings.GetOnMessageOptions(exceptionHandler));
         }
 
@@ -54,7 +54,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         {
             _subscriptionClient.RegisterSessionHandler(async (session, message, token) =>
             {
-                await callback(session, message, token);
+                await callback(session, message, token).ConfigureAwait(false);
             }, _settings.GetSessionHandlerOptions(exceptionHandler));
         }
 

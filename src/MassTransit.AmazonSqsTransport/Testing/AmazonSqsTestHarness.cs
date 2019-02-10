@@ -174,9 +174,9 @@ namespace MassTransit.AmazonSqsTransport.Testing
             {
                 try
                 {
-                    var queueUrl = (await amazonSqs.GetQueueUrlAsync(queue)).QueueUrl;
+                    var queueUrl = (await amazonSqs.GetQueueUrlAsync(queue).ConfigureAwait(false)).QueueUrl;
 
-                    await amazonSqs.PurgeQueueAsync(queueUrl);
+                    await amazonSqs.PurgeQueueAsync(queueUrl).ConfigureAwait(false);
                 }
                 catch (QueueDoesNotExistException)
                 {

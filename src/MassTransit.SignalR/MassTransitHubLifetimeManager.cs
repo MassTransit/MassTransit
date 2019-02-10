@@ -229,7 +229,7 @@ namespace MassTransit.SignalR
                     _groupManagementRequestClient.Create(new {ConnectionId = connectionId, GroupName = groupName, ServerName, Action = GroupAction.Add},
                         cancellationToken);
 
-                Response<Ack<THub>> ack = await request.GetResponse<Ack<THub>>();
+                Response<Ack<THub>> ack = await request.GetResponse<Ack<THub>>().ConfigureAwait(false);
                 _logger.Info($"Request Received for add GroupManagement<THub> from {ack.Message.ServerName}.");
             }
             catch (RequestTimeoutException e)
@@ -264,7 +264,7 @@ namespace MassTransit.SignalR
                     _groupManagementRequestClient.Create(new {ConnectionId = connectionId, GroupName = groupName, ServerName, Action = GroupAction.Remove},
                         cancellationToken);
 
-                Response<Ack<THub>> ack = await request.GetResponse<Ack<THub>>();
+                Response<Ack<THub>> ack = await request.GetResponse<Ack<THub>>().ConfigureAwait(false);
                 _logger.Info($"Request Received for remove GroupManagement<THub> from {ack.Message.ServerName}.");
             }
             catch (RequestTimeoutException e)

@@ -93,7 +93,7 @@ namespace MassTransit.DapperIntegration
                     {
                         var missingSagaPipe = new MissingPipe<T>(connection, tableName, next, InsertSagaInstance);
 
-                        await policy.Missing(context, missingSagaPipe);
+                        await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
                     }
                     else
                     {
@@ -168,7 +168,7 @@ namespace MassTransit.DapperIntegration
                     {
                         var missingSagaPipe = new MissingPipe<T>(connection, tableName, next, InsertSagaInstance);
 
-                        await policy.Missing(context, missingSagaPipe);
+                        await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
                     }
 
                     transaction.Complete();

@@ -145,7 +145,7 @@ namespace MassTransit.Transports
 
             await Task.WhenAll(handles.Select(x => x.StopAsync(context.CancellationToken))).ConfigureAwait(false);
 
-            await base.StopAgent(context);
+            await base.StopAgent(context).ConfigureAwait(false);
         }
 
         HostReceiveEndpointHandle StartEndpoint(string endpointName, IReceiveEndpointControl endpoint)

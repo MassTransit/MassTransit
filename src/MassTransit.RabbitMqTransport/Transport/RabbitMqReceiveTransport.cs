@@ -124,7 +124,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                         {
                             throw await ConvertToRabbitMqConnectionException(ex, "ReceiveTransport Faulted, Restarting").ConfigureAwait(false);
                         }
-                    }, Stopping);
+                    }, Stopping).ConfigureAwait(false);
                 }
                 catch
                 {
@@ -140,7 +140,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             var exception = new RabbitMqConnectionException(message + _host.ConnectionContextSupervisor, ex);
 
-            await NotifyFaulted(exception);
+            await NotifyFaulted(exception).ConfigureAwait(false);
 
             return exception;
         }

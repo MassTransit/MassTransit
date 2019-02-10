@@ -20,7 +20,8 @@ namespace MassTransit.AspNetCoreIntegration
     using Microsoft.Extensions.Logging;
 
 
-    public class MassTransitHostedService : IHostedService
+    public class MassTransitHostedService :
+        IHostedService
     {
         readonly IBusControl _bus;
         readonly SimplifiedBusHealthCheck _simplifiedBusCheck;
@@ -40,7 +41,7 @@ namespace MassTransit.AspNetCoreIntegration
         {
             _bus.ConnectReceiveEndpointObserver(_receiveEndpointCheck);
 
-            await _bus.StartAsync(cancellationToken);
+            await _bus.StartAsync(cancellationToken).ConfigureAwait(false);
 
             _simplifiedBusCheck.ReportBusStarted();
         }

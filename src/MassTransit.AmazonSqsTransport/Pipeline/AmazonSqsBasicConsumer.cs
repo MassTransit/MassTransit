@@ -105,7 +105,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
                     await context.ReceiveCompleted.ConfigureAwait(false);
 
-                    await _client.DeleteMessage(_receiveSettings.EntityName, message.ReceiptHandle);
+                    await _client.DeleteMessage(_receiveSettings.EntityName, message.ReceiptHandle).ConfigureAwait(false);
 
                     await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
                 }

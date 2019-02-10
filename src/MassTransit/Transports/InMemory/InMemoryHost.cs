@@ -98,7 +98,7 @@ namespace MassTransit.Transports.InMemory
                 var transport = new InMemorySendTransport(exchange);
 
                 return transport;
-            });
+            }).ConfigureAwait(false);
         }
 
         public int TransportConcurrencyLimit
