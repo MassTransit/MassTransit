@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using Castle.Windsor;
     using ConsumeConfigurators;
+    using Definition;
     using Saga;
     using WindsorIntegration;
     using WindsorIntegration.Registration;
@@ -39,11 +40,15 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configure all defined consumer types on their respective endpoints
+        /// Configure the endpoints for all defined consumer, saga, and activity types using an optional
+        /// endpoint name formatter. If no endpoint name formatter is specified and an <see cref="IEndpointNameFormatter"/>
+        /// is registered in the container, it is resolved from the container. Otherwise, the <see cref="DefaultEndpointNameFormatter"/>
+        /// is used.
         /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="container"></param>
-        /// <param name="endpointNameFormatter">Specify a name formatter to override the default endpoint naming conventions</param>
+        /// <param name="configurator">The <see cref="IBusFactoryConfigurator"/> for the bus being configured</param>
+        /// <param name="container">The container reference</param>
+        /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
+        /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
         public static void ConfigureEndpoints<T>(this T configurator, IWindsorContainer container, IEndpointNameFormatter endpointNameFormatter = null)
             where T : IBusFactoryConfigurator
         {

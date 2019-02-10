@@ -113,7 +113,10 @@ namespace MassTransit.Registration
                 throw new ArgumentNullException(nameof(configurator));
 
             if (endpointNameFormatter == null)
-                endpointNameFormatter = new DefaultEndpointNameFormatter();
+            {
+                endpointNameFormatter = _configurationServiceProvider.GetService<IEndpointNameFormatter>()
+                    ?? new DefaultEndpointNameFormatter();
+            }
 
             var consumersByEndpoint = _consumers.Values
                 .Select(x => x.GetDefinition(_configurationServiceProvider))

@@ -17,6 +17,11 @@ namespace MassTransit.Definition
     using Saga;
 
 
+    /// <summary>
+    /// The default endpoint name formatter, which simply trims the words Consumer, Activity, and Saga
+    /// from the type name. If you need something more readable, consider the <see cref="SnakeCaseEndpointNameFormatter"/>
+    /// or the <see cref="KebabCaseEndpointNameFormatter"/>.
+    /// </summary>
     public class DefaultEndpointNameFormatter :
         IEndpointNameFormatter
     {
@@ -50,7 +55,7 @@ namespace MassTransit.Definition
             return $"{activityName}_compensate";
         }
 
-        static string GetConsumerName(string typeName)
+        string GetConsumerName(string typeName)
         {
             const string consumer = "Consumer";
 
@@ -58,10 +63,10 @@ namespace MassTransit.Definition
             if (consumerName.EndsWith(consumer, StringComparison.InvariantCultureIgnoreCase))
                 consumerName = consumerName.Substring(0, consumerName.Length - consumer.Length);
 
-            return consumerName;
+            return SanitizeName(consumerName);
         }
 
-        static string GetSagaName(string typeName)
+        string GetSagaName(string typeName)
         {
             const string saga = "Saga";
 
@@ -69,10 +74,10 @@ namespace MassTransit.Definition
             if (sagaName.EndsWith(saga, StringComparison.InvariantCultureIgnoreCase))
                 sagaName = sagaName.Substring(0, sagaName.Length - saga.Length);
 
-            return sagaName;
+            return SanitizeName(sagaName);
         }
 
-        static string GetActivityName(string typeName)
+        string GetActivityName(string typeName)
         {
             const string activity = "Activity";
 
@@ -80,7 +85,12 @@ namespace MassTransit.Definition
             if (activityName.EndsWith(activity, StringComparison.InvariantCultureIgnoreCase))
                 activityName = activityName.Substring(0, activityName.Length - activity.Length);
 
-            return activityName;
+            return SanitizeName(activityName);
+        }
+
+        protected virtual string SanitizeName(string name)
+        {
+            return name;
         }
     }
 }
