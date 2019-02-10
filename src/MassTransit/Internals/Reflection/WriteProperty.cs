@@ -7,6 +7,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using MassTransit;
+    using FastExpressionCompiler;
 
 
     public class WriteProperty<T, TProperty> :
@@ -86,7 +87,7 @@
 
                 var lambdaExpression = Expression.Lambda<Action<T, TProperty>>(call, instance, value);
 
-                return ExpressionCompiler.Compile<Action<T, TProperty>>(lambdaExpression);
+                return lambdaExpression.CompileFast<Action<T, TProperty>>();
             }
             catch (Exception ex)
             {

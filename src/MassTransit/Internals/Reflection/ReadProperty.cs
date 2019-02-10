@@ -6,6 +6,7 @@
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
+    using FastExpressionCompiler;
     using MassTransit;
 
 
@@ -87,7 +88,7 @@
 
                 var lambdaExpression = Expression.Lambda<Func<T, TProperty>>(call, instance);
 
-                return ExpressionCompiler.Compile<Func<T, TProperty>>(lambdaExpression);
+                return lambdaExpression.CompileFast<Func<T, TProperty>>();
             }
             catch (Exception ex)
             {
