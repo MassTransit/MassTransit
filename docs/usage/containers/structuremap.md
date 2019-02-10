@@ -3,6 +3,8 @@
 The following example shows how to configure a simple StructureMap container, and include the bus in the
 container. The two bus interfaces, `IBus` and `IBusControl`, are included.
 
+A sample project for the container registration code is available on [GitHub](https://github.com/MassTransit/Sample-Containers).
+
 <div class="alert alert-info">
 <b>Note:</b>
     Consumers should not typically depend upon <i>IBus</i> or <i>IBusControl</i>. A consumer should use the <i>ConsumeContext</i>
@@ -10,7 +12,7 @@ container. The two bus interfaces, `IBus` and `IBusControl`, are included.
     messages can be tracked between consumers, and are sent from the proper address.
 </div>
 
-```csharp
+ ```csharp
 public static void Main(string[] args)
 {
     var container = new Container(cfg =>
@@ -32,7 +34,7 @@ public static void Main(string[] args)
                 var host = cfg.Host("localhost/");
 
                 cfg.ReceiveEndpoint("customer_update", ec =>
-                {
+               {
                     // Configure a single consumer
                     ec.ConfigureConsumer<UpdateCustomerConsumer>(context);
 
@@ -42,6 +44,9 @@ public static void Main(string[] args)
                     // configure consumer by type
                     ec.ConsumerConsumer(typeof(ConsumerOne), context);
                 });
+
+                // or, configure the endpoints by convention
+                cfg.ConfigureEndpoints(context);
             });
         });
     });

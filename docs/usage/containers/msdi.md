@@ -8,6 +8,8 @@ MassTransit supports the default dependency injection framework used by ASP.NET.
 
 > Support requires an additional NuGet package, `MassTransit.Extensions.DependencyInjection`, which is available using [NuGet](https://www.nuget.org/packages/MassTransit.Extensions.DependencyInjection/).
 
+A sample project for the container registration code is available on [GitHub](https://github.com/MassTransit/Sample-Containers).
+
 A working example is available on GitHub as well, visit the [repository](https://github.com/phatboyg/Sample-DotNetCore-DI/).
 
 To configure the bus for use by ASP.NET, modify the `Startup.cs` file as shown.
@@ -19,8 +21,6 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddScoped<OrderConsumer>();
-
         services.AddMassTransit(x =>
         {
             x.AddConsumer<OrderConsumer>();
@@ -38,6 +38,9 @@ public class Startup
                     
                     EndpointConvention.Map<SubmitOrder>(e.InputAddress);
                 });
+
+                // or, configure the endpoints by convention
+                cfg.ConfigureEndpoints(provider);
             }));
 
             x.AddRequestClient<SubmitOrder>();

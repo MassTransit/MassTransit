@@ -43,6 +43,7 @@
     * [Autofac](usage/containers/autofac.md)
     * [Ninject](usage/containers/ninject.md)
     * [StructureMap](usage/containers/structuremap.md)
+    * [Lamar](usage/containers/lamar.md)
     * [Unity](usage/containers/unity.md)
     * [Castle Windsor](usage/containers/castlewindsor.md)
     * [Microsoft Dependency Injection](usage/containers/msdi.md)

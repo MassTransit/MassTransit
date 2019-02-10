@@ -2,6 +2,8 @@
 
 Autofac is a powerful and fast container, and is well supported by MassTransit. Nested lifetime scopes are used extensively to encapsulate dependencies and ensure clean object lifetime management. The following examples show the various ways that MassTransit can be configured, including the appropriate interfaces necessary.
 
+A sample project for the container registration code is available on [GitHub](https://github.com/MassTransit/Sample-Containers).
+
 > Requires NuGets `MassTransit`, `MassTransit.AutoFac`, and `MassTransit.RabbitMQ`
 
 <div class="alert alert-info">
@@ -59,6 +61,9 @@ namespace Example
                         // configure consumer by type
                         ec.ConsumerConsumer(typeof(ConsumerOne));
                     });
+
+                    // or, configure the endpoints by convention
+                    cfg.ConfigureEndpoints(context);
                 });
             });
             var container = builder.Build();

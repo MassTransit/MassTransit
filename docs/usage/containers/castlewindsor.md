@@ -3,6 +3,8 @@
 Add reference to MassTransit CastleWindsor NuGet package. The following example shows how to configure a simple Castle Windsor container, and include the bus in the
 container. The two bus interfaces, `IBus` and `IBusControl`, are included.
 
+A sample project for the container registration code is available on [GitHub](https://github.com/MassTransit/Sample-Containers).
+
 <div class="alert alert-info">
 <b>Note:</b>
     Consumers should not typically depend upon <i>IBus</i> or <i>IBusControl</i>. A consumer should use the <i>ConsumeContext</i>
@@ -45,6 +47,9 @@ public static void Main(string[] args)
                 // configure consumer by type
                 ec.ConsumerConsumer(typeof(ConsumerOne), context);
             });
+
+            // or, configure the endpoints by convention
+            cfg.ConfigureEndpoints(context);
         });
     });
 
