@@ -20,6 +20,7 @@ namespace MassTransit.Util
     using System.Threading;
     using System.Threading.Tasks;
     using Internals.Extensions;
+    using Internals.Reflection;
     using Saga;
 
 
@@ -43,8 +44,10 @@ namespace MassTransit.Util
         {
             if (ReferenceEquals(null, other))
                 return false;
+
             if (ReferenceEquals(this, other))
                 return true;
+
             return EqualityComparer<TSaga>.Default.Equals(_instance, other._instance);
         }
 
@@ -52,10 +55,13 @@ namespace MassTransit.Util
         {
             if (ReferenceEquals(null, obj))
                 return false;
+
             if (ReferenceEquals(this, obj))
                 return true;
+
             if (obj.GetType() != GetType())
                 return false;
+
             return Equals((SagaInstance<TSaga>)obj);
         }
 
@@ -170,8 +176,7 @@ namespace MassTransit.Util
                 if (propertyInfo == null)
                     return null;
 
-                IndexedSagaProperty<TSaga> result;
-                if (_indices.TryGetValue(propertyInfo.Name, out result))
+                if (_indices.TryGetValue(propertyInfo.Name, out IndexedSagaProperty<TSaga> result))
                     return result;
             }
 
@@ -198,7 +203,7 @@ namespace MassTransit.Util
                     return ((ConstantExpression)right.Body).Value;
 
                 default:
-                    return right.Compile().DynamicInvoke(null);
+                    return right.CompileFast().DynamicInvoke(null);
             }
         }
     }

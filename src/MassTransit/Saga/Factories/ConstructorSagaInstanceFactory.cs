@@ -15,6 +15,7 @@ namespace MassTransit.Saga.Factories
     using System;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Internals.Reflection;
     using Util;
 
 
@@ -38,7 +39,7 @@ namespace MassTransit.Saga.Factories
             ParameterExpression correlationId = Expression.Parameter(typeof(Guid), "correlationId");
             NewExpression @new = Expression.New(constructorInfo, correlationId);
 
-            FactoryMethod = Expression.Lambda<SagaInstanceFactoryMethod<TSaga>>(@new, correlationId).Compile();
+            FactoryMethod = Expression.Lambda<SagaInstanceFactoryMethod<TSaga>>(@new, correlationId).CompileFast();
         }
 
         public SagaInstanceFactoryMethod<TSaga> FactoryMethod { get; }

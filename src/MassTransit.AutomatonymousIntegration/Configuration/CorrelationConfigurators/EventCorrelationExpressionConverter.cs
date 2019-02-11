@@ -15,6 +15,7 @@ namespace Automatonymous.CorrelationConfigurators
     using System;
     using System.Linq.Expressions;
     using MassTransit;
+    using MassTransit.Internals.Reflection;
 
 
     public class EventCorrelationExpressionConverter<TInstance, TMessage> :
@@ -59,7 +60,7 @@ namespace Automatonymous.CorrelationConfigurators
             var parameter = exp.Expression as ParameterExpression;
 
             Delegate fn = Expression.Lambda(typeof(Func<,>).MakeGenericType(typeof(ConsumeContext<TMessage>), exp.Type), exp, parameter)
-                .Compile();
+                .CompileFast();
 
             return Expression.Constant(fn.DynamicInvoke(_context), exp.Type);
         }

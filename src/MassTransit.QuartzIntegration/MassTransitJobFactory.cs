@@ -15,14 +15,15 @@ namespace MassTransit.QuartzIntegration
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
+    using GreenPipes.Internals.Extensions;
     using GreenPipes.Internals.Reflection;
-    using Internals.Extensions;
+    using Internals.Reflection;
     using Newtonsoft.Json;
     using Quartz;
     using Quartz.Spi;
+    using Util;
 
 
     public class MassTransitJobFactory :
@@ -68,14 +69,11 @@ namespace MassTransit.QuartzIntegration
     {
         readonly IBus _bus;
         readonly Func<IBus, T> _factory;
-        readonly ReadWritePropertyCache<T> _propertyCache;
 
         public MassTransitJobFactory(IBus bus)
         {
             _bus = bus;
             _factory = CreateConstructor();
-
-            _propertyCache = new ReadWritePropertyCache<T>(true);
         }
 
         public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
@@ -96,9 +94,7 @@ namespace MassTransit.QuartzIntegration
             }
             catch (Exception ex)
             {
-                var sex = new SchedulerException(string.Format(CultureInfo.InvariantCulture,
-                    "Problem instantiating class '{0}'", bundle.JobDetail.JobType.FullName), ex);
-                throw sex;
+                throw new SchedulerException($"Problem instantiating class '{TypeMetadataCache.GetShortName(bundle.JobDetail.JobType)}'", ex);
             }
         }
 
@@ -110,8 +106,7 @@ namespace MassTransit.QuartzIntegration
         {
             foreach (var key in jobData.Keys)
             {
-                ReadWriteProperty<T> property;
-                if (_propertyCache.TryGetProperty(key, out property))
+                if (TypeCache<T>.ReadWritePropertyCache.TryGetProperty(key, out ReadWriteProperty<T> property))
                 {
                     var value = jobData[key];
 
@@ -133,8 +128,7 @@ namespace MassTransit.QuartzIntegration
             if (ctor != null)
                 return CreateDefaultConstructor(ctor);
 
-            throw new SchedulerException(string.Format(CultureInfo.InvariantCulture,
-                "The job class does not have a supported constructor: {0}", typeof(T).GetTypeName()));
+            throw new SchedulerException($"The job class does not have a supported constructor: {TypeMetadataCache<T>.ShortName}");
         }
 
         Func<IBus, T> CreateDefaultConstructor(ConstructorInfo constructorInfo)
@@ -142,7 +136,7 @@ namespace MassTransit.QuartzIntegration
             var bus = Expression.Parameter(typeof(IBus), "bus");
             var @new = Expression.New(constructorInfo);
 
-            return Expression.Lambda<Func<IBus, T>>(@new, bus).Compile();
+            return Expression.Lambda<Func<IBus, T>>(@new, bus).CompileFast();
         }
 
         Func<IBus, T> CreateServiceBusConstructor(ConstructorInfo constructorInfo)
@@ -150,7 +144,7 @@ namespace MassTransit.QuartzIntegration
             var bus = Expression.Parameter(typeof(IBus), "bus");
             var @new = Expression.New(constructorInfo, bus);
 
-            return Expression.Lambda<Func<IBus, T>>(@new, bus).Compile();
+            return Expression.Lambda<Func<IBus, T>>(@new, bus).CompileFast();
         }
 
         /// <summary>
@@ -165,8 +159,10 @@ namespace MassTransit.QuartzIntegration
             timeHeaders.Add(MessageHeaders.Quartz.Sent, bundle.FireTimeUtc);
             if (bundle.ScheduledFireTimeUtc.HasValue)
                 timeHeaders.Add(MessageHeaders.Quartz.Scheduled, bundle.ScheduledFireTimeUtc);
+
             if (bundle.NextFireTimeUtc.HasValue)
                 timeHeaders.Add(MessageHeaders.Quartz.NextScheduled, bundle.NextFireTimeUtc);
+
             if (bundle.PrevFireTimeUtc.HasValue)
                 timeHeaders.Add(MessageHeaders.Quartz.PreviousSent, bundle.PrevFireTimeUtc);
 

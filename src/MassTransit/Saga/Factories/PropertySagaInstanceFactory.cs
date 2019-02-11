@@ -16,6 +16,7 @@ namespace MassTransit.Saga.Factories
     using System.Linq.Expressions;
     using GreenPipes.Internals.Extensions;
     using GreenPipes.Internals.Reflection;
+    using Internals.Reflection;
     using Util;
 
 
@@ -34,7 +35,7 @@ namespace MassTransit.Saga.Factories
                 throw new ArgumentException($"The saga {TypeMetadataCache<TSaga>.ShortName} does not have a default public constructor");
 
             if (!TypeCache<TSaga>.ReadWritePropertyCache.TryGetValue("CorrelationId", out ReadWriteProperty<TSaga> property))
-                throw new ArgumentException($"The saga {TypeMetadataCache<TSaga>.ShortName} does not have a writeable CorrelationId property");
+                throw new ArgumentException($"The saga {TypeMetadataCache<TSaga>.ShortName} does not have a writable CorrelationId property");
 
             ParameterExpression correlationId = Expression.Parameter(typeof(Guid), "correlationId");
 
@@ -59,7 +60,7 @@ namespace MassTransit.Saga.Factories
                 returnExpression,
                 returnLabel);
 
-            FactoryMethod = Expression.Lambda<SagaInstanceFactoryMethod<TSaga>>(block, correlationId).Compile();
+            FactoryMethod = Expression.Lambda<SagaInstanceFactoryMethod<TSaga>>(block, correlationId).CompileFast();
         }
 
         public SagaInstanceFactoryMethod<TSaga> FactoryMethod { get; }

@@ -15,6 +15,7 @@ namespace MassTransit.DapperIntegration.Sql
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
+    using Internals.Reflection;
 
 
     public static class SqlExpressionVisitor
@@ -67,7 +68,7 @@ namespace MassTransit.DapperIntegration.Sql
             else
             {
                 value = Expression.Lambda<Func<object>>(
-                    Expression.Convert(node.Right, typeof(object))).Compile().Invoke();
+                    Expression.Convert(node.Right, typeof(object))).CompileFast().Invoke();
             }
 
             return new List<(string, object)> {(name, value)};
