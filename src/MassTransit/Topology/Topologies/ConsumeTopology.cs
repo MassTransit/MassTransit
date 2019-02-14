@@ -16,6 +16,7 @@ namespace MassTransit.Topology.Topologies
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using GreenPipes;
     using Observers;
     using Util;
@@ -48,6 +49,32 @@ namespace MassTransit.Topology.Topologies
         IMessageConsumeTopology<T> IConsumeTopology.GetMessageTopology<T>()
         {
             return GetMessageTopology<T>();
+        }
+
+        public virtual string CreateTemporaryQueueName(string tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag))
+                tag = "endpoint";
+
+            var host = HostMetadataCache.Host;
+
+            var sb = new StringBuilder(host.MachineName.Length + host.ProcessName.Length + tag.Length + 35);
+
+            foreach (var c in host.MachineName)
+                if (char.IsLetterOrDigit(c) || c == '_')
+                    sb.Append(c);
+
+            sb.Append('_');
+            foreach (var c in host.ProcessName)
+                if (char.IsLetterOrDigit(c) || c == '_')
+                    sb.Append(c);
+
+            sb.Append('_');
+            sb.Append(tag);
+            sb.Append('_');
+            sb.Append(NewId.Next().ToString(FormatUtil.Formatter));
+
+            return sb.ToString();
         }
 
         IMessageConsumeTopologyConfigurator<T> IConsumeTopologyConfigurator.GetMessageTopology<T>()
@@ -145,6 +172,7 @@ namespace MassTransit.Topology.Topologies
                 default:
                     foreach (var configurator in configurators.Cast<T>())
                         callback(configurator);
+
                     break;
             }
         }

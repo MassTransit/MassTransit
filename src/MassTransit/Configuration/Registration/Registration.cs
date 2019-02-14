@@ -115,7 +115,7 @@ namespace MassTransit.Registration
             if (endpointNameFormatter == null)
             {
                 endpointNameFormatter = _configurationServiceProvider.GetService<IEndpointNameFormatter>()
-                    ?? new DefaultEndpointNameFormatter();
+                    ?? DefaultEndpointNameFormatter.Instance;
             }
 
             var consumersByEndpoint = _consumers.Values

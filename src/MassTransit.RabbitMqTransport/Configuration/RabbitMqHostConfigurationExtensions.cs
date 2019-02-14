@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using System;
+    using Definition;
     using RabbitMqTransport;
     using RabbitMqTransport.Configurators;
 
@@ -39,11 +40,11 @@ namespace MassTransit
         /// <param name="connectionName">The client-provided connection name</param>
         /// <param name="configure"></param>
         public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, Uri hostAddress,
-            string connectionName, Action<IRabbitMqHostConfigurator> configure)
+            string connectionName, Action<IRabbitMqHostConfigurator> configure = null)
         {
             var hostConfigurator = new RabbitMqHostConfigurator(hostAddress, connectionName);
 
-            configure(hostConfigurator);
+            configure?.Invoke(hostConfigurator);
 
             return configurator.Host(hostConfigurator.Settings);
         }
@@ -56,7 +57,7 @@ namespace MassTransit
         /// <param name="virtualHost">The virtual host to use</param>
         /// <param name="configure">The configuration callback</param>
         public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, string host, string virtualHost,
-            Action<IRabbitMqHostConfigurator> configure)
+            Action<IRabbitMqHostConfigurator> configure = null)
         {
             return configurator.Host(host, virtualHost, null, configure);
         }
@@ -70,16 +71,17 @@ namespace MassTransit
         /// <param name="connectionName">The client-provided connection name</param>
         /// <param name="configure">The configuration callback</param>
         public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, string host, string virtualHost,
-            string connectionName, Action<IRabbitMqHostConfigurator> configure)
+            string connectionName, Action<IRabbitMqHostConfigurator> configure = null)
         {
             if (host == null)
                 throw new ArgumentNullException(nameof(host));
+
             if (virtualHost == null)
                 throw new ArgumentNullException(nameof(virtualHost));
 
             var hostConfigurator = new RabbitMqHostConfigurator(host, virtualHost, connectionName: connectionName);
 
-            configure(hostConfigurator);
+            configure?.Invoke(hostConfigurator);
 
             return configurator.Host(hostConfigurator.Settings);
         }
@@ -108,16 +110,17 @@ namespace MassTransit
         /// <param name="connectionName">The client-provided connection name</param>
         /// <param name="configure">The configuration callback</param>
         public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, string host, ushort port, string virtualHost,
-            string connectionName, Action<IRabbitMqHostConfigurator> configure)
+            string connectionName, Action<IRabbitMqHostConfigurator> configure = null)
         {
             if (host == null)
                 throw new ArgumentNullException(nameof(host));
+
             if (virtualHost == null)
                 throw new ArgumentNullException(nameof(virtualHost));
 
             var hostConfigurator = new RabbitMqHostConfigurator(host, virtualHost, port, connectionName);
 
-            configure(hostConfigurator);
+            configure?.Invoke(hostConfigurator);
 
             return configurator.Host(hostConfigurator.Settings);
         }
@@ -131,52 +134,24 @@ namespace MassTransit
         /// <param name="host"></param>
         /// <param name="configure"></param>
         public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host,
-            Action<IRabbitMqReceiveEndpointConfigurator> configure)
+            Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
         {
-            var queueName = host.Topology.CreateTemporaryQueueName("endpoint-");
-
-            configurator.ReceiveEndpoint(host, queueName, x =>
-            {
-                x.AutoDelete = true;
-                x.Durable = false;
-
-                configure(x);
-            });
+            configurator.ReceiveEndpoint(host, new TemporaryEndpointDefinition(), DefaultEndpointNameFormatter.Instance, configure);
         }
 
         /// <summary>
-        /// Registers a management endpoint on the bus, which can be used to control
-        /// filters and other management control points on the bus.
+        /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
+        /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
+        /// of this type (created automatically upon the first receiver binding).
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="host">The host where the endpoint is to be created</param>
-        /// <param name="configure">Configure additional values of the underlying receive endpoint</param>
-        /// <returns></returns>
-        public static IManagementEndpointConfigurator ManagementEndpoint(this IRabbitMqBusFactoryConfigurator configurator,
-            IRabbitMqHost host, Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
+        /// <param name="host"></param>
+        /// <param name="definition"></param>
+        /// <param name="configure"></param>
+        public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host, IEndpointDefinition definition,
+            Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
         {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-            if (host == null)
-                throw new ArgumentNullException(nameof(host));
-
-            var queueName = host.Topology.CreateTemporaryQueueName("manage-");
-
-            IRabbitMqReceiveEndpointConfigurator specification = null;
-
-            configurator.ReceiveEndpoint(host, queueName, x =>
-            {
-                x.AutoDelete = true;
-                x.Durable = false;
-
-                configure?.Invoke(x);
-
-                specification = x;
-            });
-
-            var managementEndpointConfigurator = new ManagementEndpointConfigurator(specification);
-
-            return managementEndpointConfigurator;
+            configurator.ReceiveEndpoint(host, definition, DefaultEndpointNameFormatter.Instance, configure);
         }
     }
 }

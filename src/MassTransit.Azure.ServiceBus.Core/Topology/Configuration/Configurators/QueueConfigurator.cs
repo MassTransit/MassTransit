@@ -25,7 +25,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Configuration.Configurators
             : base(path)
         {
             EnableDeadLetteringOnMessageExpiration = true;
-            LockDuration = TimeSpan.FromMinutes(5);
+            LockDuration = Defaults.LockDuration;
             MaxDeliveryCount = 5;
         }
 

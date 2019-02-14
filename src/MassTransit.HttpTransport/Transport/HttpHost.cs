@@ -43,6 +43,16 @@ namespace MassTransit.HttpTransport.Transport
             _httpHostContextSupervisor = new HttpHostContextSupervisor(hostConfiguration);
         }
 
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            throw new NotImplementedException();
+        }
+
         public override async Task<HostHandle> Start()
         {
             var handlesReady = new TaskCompletionSource<HostReceiveEndpointHandle[]>();

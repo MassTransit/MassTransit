@@ -15,6 +15,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using Builders;
     using Configuration;
     using Configuration.Configurators;
@@ -22,6 +23,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
+    using Util;
 
 
     public class ServiceBusConsumeTopology :
@@ -71,7 +73,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
             callback?.Invoke(subscriptionConfigurator);
 
-            var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription(), subscriptionConfigurator.Rule,
+            var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription(),
+                subscriptionConfigurator.Rule,
                 subscriptionConfigurator.Filter);
 
             _specifications.Add(specification);

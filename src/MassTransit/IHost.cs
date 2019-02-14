@@ -37,5 +37,21 @@ namespace MassTransit
         Uri Address { get; }
 
         IHostTopology Topology { get; }
+
+        /// <summary>
+        /// Connect a receive endpoint for the host, using an endpoint definition
+        /// </summary>
+        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
+        /// <param name="endpointNameFormatter"></param>
+        /// <param name="configureEndpoint">The configuration callback</param>
+        HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null);
+
+        /// <summary>
+        /// Connect a receive endpoint to the host, with the specified queue name
+        /// </summary>
+        /// <param name="queueName">The queue name for the receiving endpoint</param>
+        /// <param name="configureEndpoint">The configuration callback</param>
+        HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null);
     }
 }

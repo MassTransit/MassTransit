@@ -37,13 +37,23 @@
         {
             var partitioner = configurator.CreatePartitioner(Environment.ProcessorCount * 4);
 
-            configurator.ReceiveEndpoint(configurator.Host.Topology.CreateTemporaryQueueName("steward-"), cfg =>
+            configurator.ReceiveEndpoint(new StewardEndpointDefinition(), null, cfg =>
             {
                 //                cfg.UsePartitioner();
             });
         }
 
         static void ConfigureSmartEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+        }
+    }
+
+
+    public class StewardEndpointDefinition :
+        TemporaryEndpointDefinition
+    {
+        public StewardEndpointDefinition()
+            : base("steward")
         {
         }
     }

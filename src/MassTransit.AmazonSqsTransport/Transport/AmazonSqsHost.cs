@@ -16,6 +16,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
     using Configuration;
     using Configuration.Configuration;
     using Configurators;
+    using Definition;
     using Exceptions;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -62,9 +63,23 @@ namespace MassTransit.AmazonSqsTransport.Transport
             ConnectionContextSupervisor.Probe(context);
         }
 
-        public HostReceiveEndpointHandle ConnectReceiveEndpoint(Action<IAmazonSqsReceiveEndpointConfigurator> configure = null)
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            return ConnectReceiveEndpoint(_hostConfiguration.Topology.CreateTemporaryQueueName("endpoint-"), configure);
+            return ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
+
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            return ConnectReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
+            Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            return ConnectReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
         }
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IAmazonSqsReceiveEndpointConfigurator> configure = null)

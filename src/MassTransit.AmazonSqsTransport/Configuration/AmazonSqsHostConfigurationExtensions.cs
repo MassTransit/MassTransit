@@ -14,6 +14,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using System;
     using Configurators;
+    using Definition;
 
 
     public static class AmazonSqsHostConfigurationExtensions
@@ -56,53 +57,24 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// <param name="host"></param>
         /// <param name="configure"></param>
         public static void ReceiveEndpoint(this IAmazonSqsBusFactoryConfigurator configurator, IAmazonSqsHost host,
-            Action<IAmazonSqsReceiveEndpointConfigurator> configure)
+            Action<IAmazonSqsReceiveEndpointConfigurator> configure = null)
         {
-            var queueName = host.Topology.CreateTemporaryQueueName("receiveEndpoint-");
-
-            configurator.ReceiveEndpoint(host, queueName, x =>
-            {
-                x.AutoDelete = true;
-                x.Durable = false;
-
-                configure(x);
-            });
+            configurator.ReceiveEndpoint(host, new TemporaryEndpointDefinition(), DefaultEndpointNameFormatter.Instance, configure);
         }
 
         /// <summary>
-        /// Registers a management endpoint on the bus, which can be used to control
-        /// filters and other management control points on the bus.
+        /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
+        /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
+        /// of this type (created automatically upon the first receiver binding).
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="host">The host where the endpoint is to be created</param>
-        /// <param name="configure">Configure additional values of the underlying receive endpoint</param>
-        /// <returns></returns>
-        public static IManagementEndpointConfigurator ManagementEndpoint(this IAmazonSqsBusFactoryConfigurator configurator,
-            IAmazonSqsHost host, Action<IAmazonSqsReceiveEndpointConfigurator> configure = null)
+        /// <param name="host"></param>
+        /// <param name="definition"></param>
+        /// <param name="configure"></param>
+        public static void ReceiveEndpoint(this IAmazonSqsBusFactoryConfigurator configurator, IAmazonSqsHost host, IEndpointDefinition definition,
+            Action<IAmazonSqsReceiveEndpointConfigurator> configure = null)
         {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            if (host == null)
-                throw new ArgumentNullException(nameof(host));
-
-            var queueName = host.Topology.CreateTemporaryQueueName("manage-");
-
-            IAmazonSqsReceiveEndpointConfigurator specification = null;
-
-            configurator.ReceiveEndpoint(host, queueName, x =>
-            {
-                x.AutoDelete = true;
-                x.Durable = false;
-
-                configure?.Invoke(x);
-
-                specification = x;
-            });
-
-            var managementEndpointConfigurator = new ManagementEndpointConfigurator(specification);
-
-            return managementEndpointConfigurator;
+            configurator.ReceiveEndpoint(host, definition, DefaultEndpointNameFormatter.Instance, configure);
         }
     }
 }

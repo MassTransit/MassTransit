@@ -18,6 +18,7 @@ namespace MassTransit.Transports.InMemory
     using Builders;
     using Configuration;
     using Context;
+    using Definition;
     using Fabric;
     using GreenPipes;
     using GreenPipes.Caching;
@@ -69,6 +70,19 @@ namespace MassTransit.Transports.InMemory
             Add(transport);
 
             return transport;
+        }
+
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            return ConnectReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+        }
+
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            return ConnectReceiveEndpoint(queueName, configureEndpoint);
         }
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure = null)

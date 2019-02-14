@@ -77,7 +77,7 @@ namespace MassTransit.Tests
             var endpointId = NewId.NextGuid();
             DateTime started = DateTime.UtcNow;
 
-            configurator.ReceiveEndpoint(Host.Topology.CreateTemporaryQueueName("endpoint-"), e =>
+            configurator.ReceiveEndpoint(new TemporaryEndpointDefinition(), e =>
             {
                 var endpointAddress = e.InputAddress;
 
@@ -85,7 +85,7 @@ namespace MassTransit.Tests
                 {
                     var serviceAddress = s.InputAddress;
 
-                    configurator.ReceiveEndpoint(Host.Topology.CreateTemporaryQueueName("control-"), c =>
+                    configurator.ReceiveEndpoint(new ControlEndpointDefinition(), c =>
                     {
                         var controlAddress = c.InputAddress;
 

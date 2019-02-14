@@ -15,7 +15,7 @@ namespace MassTransit.Transports.InMemory.Configurators
     using System;
     using BusConfigurators;
     using Configuration;
-    using EndpointSpecifications;
+    using Definition;
     using MassTransit.Builders;
     using Topology.Configurators;
 
@@ -41,7 +41,7 @@ namespace MassTransit.Transports.InMemory.Configurators
 
         public IBusControl CreateBus()
         {
-            var busQueueName = _inMemoryHostConfiguration.Topology.CreateTemporaryQueueName("bus-");
+            var busQueueName = _configuration.Topology.Consume.CreateTemporaryQueueName("bus");
 
             var busReceiveEndpointConfiguration = _configuration.CreateReceiveEndpointConfiguration(busQueueName, _busEndpointConfiguration);
 
@@ -66,18 +66,24 @@ namespace MassTransit.Transports.InMemory.Configurators
         {
             var configuration = _inMemoryHostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
-            configuration.ConnectConsumerConfigurationObserver(this);
-            configuration.ConnectSagaConfigurationObserver(this);
-            configuration.ConnectHandlerConfigurationObserver(this);
-
-            configureEndpoint?.Invoke(configuration.Configurator);
-
-            var specification = new ConfigurationReceiveEndpointSpecification(configuration);
-
-            AddReceiveEndpointSpecification(specification);
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, configureEndpoint);
         }
 
-        void IBusFactoryConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            ReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+        }
+
+        public override void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
+
+        public override void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             ReceiveEndpoint(queueName, configureEndpoint);
         }

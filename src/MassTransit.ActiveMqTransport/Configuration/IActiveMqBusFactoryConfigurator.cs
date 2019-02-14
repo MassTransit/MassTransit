@@ -13,8 +13,6 @@
 namespace MassTransit.ActiveMqTransport
 {
     using System;
-    using System.ComponentModel;
-    using MassTransit.Builders;
     using Topology;
 
 
@@ -47,9 +45,6 @@ namespace MassTransit.ActiveMqTransport
         void Publish<T>(Action<IActiveMqMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class;
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
-
         /// <summary>
         /// Configure a Host that can be connected. If only one host is specified, it is used as the default
         /// host for receive endpoints.
@@ -57,6 +52,16 @@ namespace MassTransit.ActiveMqTransport
         /// <param name="settings"></param>
         /// <returns></returns>
         IActiveMqHost Host(ActiveMqHostSettings settings);
+
+        /// <summary>
+        /// Specify a receive endpoint for the bus, using an endpoint definition
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
+        /// <param name="endpointNameFormatter"></param>
+        /// <param name="configureEndpoint">The configuration callback</param>
+        void ReceiveEndpoint(IActiveMqHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
+            Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint = null);
 
         /// <summary>
         /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.

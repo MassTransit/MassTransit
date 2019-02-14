@@ -18,6 +18,13 @@ namespace MassTransit
 
     public interface IEndpointNameFormatter
     {
+        /// <summary>
+        /// Generate a temporary endpoint name, containing the specified tag
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        string TemporaryEndpoint(string tag);
+
         string Consumer<T>()
             where T : class, IConsumer;
 

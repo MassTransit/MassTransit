@@ -1,4 +1,4 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -79,34 +79,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
                 _specifications.Add(specification);
             }
             else
-            {
                 _specifications.Add(new InvalidActiveMqConsumeTopologySpecification("Bind", $"Only virtual topics can be bound: {topicName}"));
-            }
-        }
-
-        public string CreateTemporaryQueueName(string prefix)
-        {
-            var sb = new StringBuilder(prefix);
-
-            var host = HostMetadataCache.Host;
-
-            foreach (var c in host.MachineName)
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else if (c == '.' || c == '_' || c == '-' || c == ':')
-                    sb.Append(c);
-
-            sb.Append('-');
-            foreach (var c in host.ProcessName)
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else if (c == '.' || c == '_' || c == '-' || c == ':')
-                    sb.Append(c);
-
-            sb.Append('-');
-            sb.Append(NewId.Next().ToString(FormatUtil.Formatter));
-
-            return sb.ToString();
         }
 
         public override IEnumerable<ValidationResult> Validate()

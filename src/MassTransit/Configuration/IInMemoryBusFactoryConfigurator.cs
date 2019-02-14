@@ -13,8 +13,6 @@
 namespace MassTransit
 {
     using System;
-    using System.ComponentModel;
-    using Builders;
     using Transports.InMemory;
     using Transports.InMemory.Topology.Configurators;
 
@@ -41,8 +39,14 @@ namespace MassTransit
         void Publish<T>(Action<IInMemoryMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class;
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
+        /// <summary>
+        /// Specify a receive endpoint for the bus, using an endpoint definition
+        /// </summary>
+        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
+        /// <param name="endpointNameFormatter"></param>
+        /// <param name="configureEndpoint">The configuration callback</param>
+        void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
+            Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint = null);
 
         /// <summary>
         /// Specify a receive endpoint for the bus, with the specified queue name

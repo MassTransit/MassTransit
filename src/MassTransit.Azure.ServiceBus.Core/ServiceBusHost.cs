@@ -14,6 +14,7 @@ namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
     using Configuration;
+    using Definition;
     using GreenPipes;
     using GreenPipes.Agents;
     using MassTransit.Configurators;
@@ -80,11 +81,23 @@ namespace MassTransit.Azure.ServiceBus.Core
             MessagingFactoryContextSupervisor.Probe(context);
         }
 
-        public HostReceiveEndpointHandle ConnectReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure = null)
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            var queueName = Topology.CreateTemporaryQueueName("endpoint-");
+            return ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
 
-            return ConnectReceiveEndpoint(queueName, configure);
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            return ConnectReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
+            Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            return ConnectReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
         }
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure = null)

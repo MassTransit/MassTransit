@@ -13,8 +13,10 @@
 namespace MassTransit.Definition
 {
     using System;
+    using System.Text;
     using Courier;
     using Saga;
+    using Util;
 
 
     /// <summary>
@@ -25,6 +27,38 @@ namespace MassTransit.Definition
     public class DefaultEndpointNameFormatter :
         IEndpointNameFormatter
     {
+        protected DefaultEndpointNameFormatter()
+        {
+        }
+
+        public static IEndpointNameFormatter Instance { get; } = new DefaultEndpointNameFormatter();
+
+        public string TemporaryEndpoint(string tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag))
+                tag = "endpoint";
+
+            var host = HostMetadataCache.Host;
+
+            var sb = new StringBuilder(host.MachineName.Length + host.ProcessName.Length + tag.Length + 35);
+
+            foreach (var c in host.MachineName)
+                if (char.IsLetterOrDigit(c) || c == '_')
+                    sb.Append(c);
+
+            sb.Append('_');
+            foreach (var c in host.ProcessName)
+                if (char.IsLetterOrDigit(c) || c == '_')
+                    sb.Append(c);
+
+            sb.Append('_');
+            sb.Append(tag);
+            sb.Append('_');
+            sb.Append(NewId.Next().ToString(FormatUtil.Formatter));
+
+            return sb.ToString();
+        }
+
         public string Consumer<T>()
             where T : class, IConsumer
         {

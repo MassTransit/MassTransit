@@ -34,5 +34,15 @@ namespace MassTransit.HttpTransport
         /// <param name="pathMatch">The path to match for this handler</param>
         /// <param name="configure">Configures the receive endpoint on this path</param>
         void ReceiveEndpoint(IHttpHost host, string pathMatch, Action<IHttpReceiveEndpointConfigurator> configure = null);
+
+        /// <summary>
+        /// Specify a receive endpoint for the bus, using an endpoint definition
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
+        /// <param name="endpointNameFormatter"></param>
+        /// <param name="configureEndpoint">The configuration callback</param>
+        void ReceiveEndpoint(IHttpHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IHttpReceiveEndpointConfigurator> configureEndpoint = null);
     }
 }

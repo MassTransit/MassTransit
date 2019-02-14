@@ -16,7 +16,7 @@ namespace MassTransit.HttpTransport.Specifications
     using System.Collections.Generic;
     using BusConfigurators;
     using Configuration;
-    using EndpointSpecifications;
+    using Definition;
     using GreenPipes;
     using Hosting;
     using MassTransit.Builders;
@@ -63,11 +63,48 @@ namespace MassTransit.HttpTransport.Specifications
             return hostConfiguration.Host;
         }
 
-        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        public override void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            var configuration = _configuration.CreateReceiveEndpointConfiguration(queueName, _configuration.CreateEndpointConfiguration());
+
+            void Configure(IHttpReceiveEndpointConfigurator configurator)
+            {
+                definition.Configure(configurator);
+
+                configureEndpoint?.Invoke(configurator);
+            }
+
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, Configure);
+        }
+
+        public override void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             var configuration = _configuration.CreateReceiveEndpointConfiguration(queueName, _configuration.CreateEndpointConfiguration());
 
-            ConfigureReceiveEndpoint(configuration, configureEndpoint);
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, configureEndpoint);
+        }
+
+        public void ReceiveEndpoint(IHttpHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IHttpReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
+                throw new ArgumentException("The host was not configured on this bus", nameof(host));
+
+            var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
+
+            void Configure(IHttpReceiveEndpointConfigurator configurator)
+            {
+                definition.Configure(configurator);
+
+                configureEndpoint?.Invoke(configurator);
+            }
+
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, Configure);
         }
 
         public void ReceiveEndpoint(IHttpHost host, string queueName, Action<IHttpReceiveEndpointConfigurator> configure)
@@ -77,27 +114,14 @@ namespace MassTransit.HttpTransport.Specifications
 
             var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
-            ConfigureReceiveEndpoint(configuration, configure);
-        }
-
-        void ConfigureReceiveEndpoint(IHttpReceiveEndpointConfiguration configuration, Action<IHttpReceiveEndpointConfigurator> configure)
-        {
-            configuration.ConnectConsumerConfigurationObserver(this);
-            configuration.ConnectSagaConfigurationObserver(this);
-            configuration.ConnectHandlerConfigurationObserver(this);
-
-            configure?.Invoke(configuration.Configurator);
-
-            var specification = new ConfigurationReceiveEndpointSpecification(configuration);
-
-            AddReceiveEndpointSpecification(specification);
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, configure);
         }
 
         public void ReceiveEndpoint(Action<IHttpReceiveEndpointConfigurator> configure = null)
         {
             var configuration = _configuration.CreateReceiveEndpointConfiguration("", _configuration.CreateEndpointConfiguration());
 
-            ConfigureReceiveEndpoint(configuration, configure);
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, configure);
         }
     }
 }

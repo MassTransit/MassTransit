@@ -50,7 +50,7 @@ namespace MassTransit.Transports.InMemory.Builders
             var queueName = _configuration.InputAddress.AbsolutePath.Split('/').Last();
 
             builder.Queue = queueName;
-            builder.QueueDeclare(queueName);
+            builder.QueueDeclare(queueName, _configuration.ConcurrencyLimit);
             builder.Exchange = queueName;
             builder.QueueBind(builder.Exchange, builder.Queue);
 

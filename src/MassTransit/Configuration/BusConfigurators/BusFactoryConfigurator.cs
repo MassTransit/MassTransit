@@ -28,7 +28,11 @@ namespace MassTransit.BusConfigurators
     using Topology;
 
 
-    public abstract class BusFactoryConfigurator
+    public abstract class BusFactoryConfigurator :
+        IConsumePipeConfigurator,
+        ISendPipelineConfigurator,
+        IPublishPipelineConfigurator,
+        IEndpointConfigurationObserverConnector
     {
         readonly IEndpointConfiguration _busEndpointConfiguration;
         readonly IBusConfiguration _configuration;
@@ -125,11 +129,6 @@ namespace MassTransit.BusConfigurators
             _specifications.Add(specification);
         }
 
-        public void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification)
-        {
-            _endpointSpecifications.Add(specification);
-        }
-
         public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
             return _busEndpointConfiguration.Consume.Configurator.ConnectConsumerConfigurationObserver(observer);
@@ -139,6 +138,11 @@ namespace MassTransit.BusConfigurators
         {
             return _busEndpointConfiguration.Consume.Configurator.ConnectSagaConfigurationObserver(observer);
         }
+
+        public abstract void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null);
+
+        public abstract void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint);
 
         public virtual IEnumerable<ValidationResult> Validate()
         {
@@ -207,6 +211,23 @@ namespace MassTransit.BusConfigurators
             where TMessage : class
         {
             _busEndpointConfiguration.Consume.Configurator.HandlerConfigured(configurator);
+        }
+
+        protected void ConfigureReceiveEndpoint<T>(IReceiveEndpointConfiguration configuration, T configurator,
+            Action<T> configure)
+            where T : IReceiveEndpointConfigurator
+        {
+            configuration.ConnectConsumerConfigurationObserver(this);
+            configuration.ConnectSagaConfigurationObserver(this);
+            configuration.ConnectHandlerConfigurationObserver(this);
+
+            configure?.Invoke(configurator);
+
+            EndpointObservable.EndpointConfigured(configurator);
+
+            var specification = new ConfigurationReceiveEndpointSpecification(configuration);
+
+            _endpointSpecifications.Add(specification);
         }
     }
 }

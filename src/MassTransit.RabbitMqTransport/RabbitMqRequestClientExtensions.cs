@@ -82,7 +82,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var receiveEndpointHandle = ConnectResponseEndpoint(host);
+            var receiveEndpointHandle = host.ConnectResponseEndpoint();
 
             var ready = await receiveEndpointHandle.Ready.ConfigureAwait(false);
 
@@ -108,7 +108,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var receiveEndpointHandle = ConnectResponseEndpoint(host);
+            var receiveEndpointHandle = host.ConnectResponseEndpoint();
 
             var ready = await receiveEndpointHandle.Ready.ConfigureAwait(false);
 
@@ -117,57 +117,6 @@ namespace MassTransit
             IClientFactory clientFactory = new ClientFactory(context);
 
             return new MessageRequestClientFactory<TRequest, TResponse>(context, clientFactory, null, timeToLive, callback);
-        }
-
-        /// <summary>
-        /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory"/>.
-        /// </summary>
-        /// <param name="host">The host to connect the new receive endpoint</param>
-        /// <param name="timeout">The default request timeout</param>
-        /// <returns></returns>
-        public static Task<IClientFactory> CreateClientFactory(this IRabbitMqHost host, RequestTimeout timeout = default)
-        {
-            var receiveEndpointHandle = ConnectResponseEndpoint(host);
-
-            return receiveEndpointHandle.CreateClientFactory(timeout);
-        }
-
-        /// <summary>
-        /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory"/>.
-        /// </summary>
-        /// <param name="host">The host to connect the new receive endpoint</param>
-        /// <param name="destinationAddress">The request service address</param>
-        /// <param name="timeout">The default request timeout</param>
-        /// <returns></returns>
-        public static async Task<IRequestClient<T>> CreateRequestClient<T>(this IRabbitMqHost host, Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class
-        {
-            var clientFactory = await CreateClientFactory(host, timeout).ConfigureAwait(false);
-
-            return clientFactory.CreateRequestClient<T>(destinationAddress);
-        }
-
-        /// <summary>
-        /// Create a request client from the bus, creating a response endpoint, and publishing the request versus sending it.
-        /// </summary>
-        /// <param name="host">The host to connect the new receive endpoint</param>
-        /// <param name="timeout">The default request timeout</param>
-        /// <returns></returns>
-        public static async Task<IRequestClient<T>> CreateRequestClient<T>(this IRabbitMqHost host, RequestTimeout timeout = default)
-            where T : class
-        {
-            var clientFactory = await CreateClientFactory(host, timeout).ConfigureAwait(false);
-
-            return clientFactory.CreateRequestClient<T>();
-        }
-
-        static HostReceiveEndpointHandle ConnectResponseEndpoint(IRabbitMqHost host)
-        {
-            return host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryResponseQueueName(), x =>
-            {
-                x.Durable = false;
-                x.AutoDelete = true;
-            });
         }
     }
 }

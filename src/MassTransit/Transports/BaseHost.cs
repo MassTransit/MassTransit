@@ -42,6 +42,11 @@ namespace MassTransit.Transports
         Uri IHost.Address => _hostConfiguration.HostAddress;
         IHostTopology IHost.Topology => _hostConfiguration.Topology;
 
+        public abstract HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null);
+
+        public abstract HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null);
+
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
             return _receiveEndpoints.ConnectConsumeMessageObserver(observer);

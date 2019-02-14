@@ -16,7 +16,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
     using System.Collections.Generic;
     using BusConfigurators;
     using Configuration;
-    using EndpointSpecifications;
+    using Definition;
     using GreenPipes;
     using MassTransit.Builders;
     using Topology.Configuration;
@@ -38,8 +38,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             _configuration = configuration;
             _busEndpointConfiguration = busEndpointConfiguration;
 
-            var queueName = _configuration.Topology.Consume.CreateTemporaryQueueName("bus-");
-            _settings = new QueueReceiveSettings(queueName, false, true);
+            var busQueueName = _configuration.Topology.Consume.CreateTemporaryQueueName("bus");
+            _settings = new QueueReceiveSettings(busQueueName, false, true);
         }
 
         public IBusControl CreateBus()
@@ -118,34 +118,46 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             set => _configuration.DeployTopologyOnly = value;
         }
 
-        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        public override void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            var configuration = _configuration.CreateReceiveEndpointConfiguration(queueName, _configuration.CreateEndpointConfiguration());
+
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, x => x.Apply(definition, configureEndpoint));
+        }
+
+        public override void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             var configuration = _configuration.CreateReceiveEndpointConfiguration(queueName, _configuration.CreateEndpointConfiguration());
 
-            ConfigureReceiveEndpoint(configuration, configureEndpoint);
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, configureEndpoint);
+        }
+
+        public void ReceiveEndpoint(IAmazonSqsHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
+            Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            var configuration = CreateConfiguration(host, queueName);
+
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, x => x.Apply(definition, configureEndpoint));
         }
 
         public void ReceiveEndpoint(IAmazonSqsHost host, string queueName, Action<IAmazonSqsReceiveEndpointConfigurator> configure)
         {
+            var configuration = CreateConfiguration(host, queueName);
+
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, configure);
+        }
+
+        IAmazonSqsReceiveEndpointConfiguration CreateConfiguration(IAmazonSqsHost host, string queueName)
+        {
             if (!_configuration.TryGetHost(host, out var hostConfiguration))
                 throw new ArgumentException("The host was not configured on this bus", nameof(host));
 
-            var configuration = hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
-
-            ConfigureReceiveEndpoint(configuration, configure);
-        }
-
-        void ConfigureReceiveEndpoint(IAmazonSqsReceiveEndpointConfiguration configuration, Action<IAmazonSqsReceiveEndpointConfigurator> configure)
-        {
-            configuration.ConnectConsumerConfigurationObserver(this);
-            configuration.ConnectSagaConfigurationObserver(this);
-            configuration.ConnectHandlerConfigurationObserver(this);
-
-            configure?.Invoke(configuration.Configurator);
-
-            var specification = new ConfigurationReceiveEndpointSpecification(configuration);
-
-            AddReceiveEndpointSpecification(specification);
+            return hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
         }
     }
 }

@@ -20,6 +20,6 @@ namespace MassTransit.Transports.InMemory.Topology.Builders
 
         void ExchangeDeclare(string name);
 
-        void QueueDeclare(string name);
+        void QueueDeclare(string name, int concurrencyLimit);
     }
 }

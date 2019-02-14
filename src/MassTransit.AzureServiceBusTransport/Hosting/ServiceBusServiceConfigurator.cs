@@ -118,6 +118,11 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             _configurator.ClearMessageDeserializers();
         }
 
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            _configurator.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
+
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             ReceiveEndpoint(queueName, _defaultConsumerLimit, configureEndpoint);

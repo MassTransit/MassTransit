@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using System;
     using System.Threading.Tasks;
     using Configuration;
+    using Definition;
     using GreenPipes;
     using GreenPipes.Agents;
     using Integration;
@@ -74,9 +75,23 @@ namespace MassTransit.RabbitMqTransport.Transport
         public RabbitMqHostSettings Settings => _hostConfiguration.Settings;
         IRabbitMqHostTopology IRabbitMqHost.Topology => _hostConfiguration.Topology;
 
-        public HostReceiveEndpointHandle ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            return ConnectReceiveEndpoint(_hostConfiguration.Topology.CreateTemporaryQueueName("endpoint-"), configure);
+            return ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
+
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            return ConnectReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
+            Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            return ConnectReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
         }
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure = null)

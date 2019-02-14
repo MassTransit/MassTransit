@@ -51,7 +51,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 
         public override void SelectBasicTier()
         {
-            _queueConfigurator.AutoDeleteOnIdle = default(TimeSpan?);
+            _queueConfigurator.AutoDeleteOnIdle = default;
             _queueConfigurator.DefaultMessageTimeToLive = Defaults.BasicMessageTimeToLive;
         }
 

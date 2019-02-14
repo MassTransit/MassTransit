@@ -48,9 +48,9 @@ namespace MassTransit.Transports.InMemory.Fabric
             _exchanges.GetOrAdd(name, x => new InMemoryExchange(x));
         }
 
-        public void QueueDeclare(string name)
+        public void QueueDeclare(string name, int concurrencyLimit)
         {
-            _queues.GetOrAdd(name, x => new InMemoryQueue(x, _concurrencyLimit));
+            _queues.GetOrAdd(name, x => new InMemoryQueue(x, concurrencyLimit == 0 ? _concurrencyLimit : concurrencyLimit));
         }
 
         public void ExchangeBind(string source, string destination)

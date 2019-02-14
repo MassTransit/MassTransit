@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using AzureServiceBusTransport;
     using AzureServiceBusTransport.Configurators;
+    using Definition;
     using Microsoft.ServiceBus;
 
 
@@ -90,17 +91,24 @@ namespace MassTransit
         /// <param name="host"></param>
         /// <param name="configure"></param>
         public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host,
-            Action<IServiceBusReceiveEndpointConfigurator> configure)
+            Action<IServiceBusReceiveEndpointConfigurator> configure = null)
         {
-            var queueName = host.Topology.CreateTemporaryQueueName("endpoint");
+            configurator.ReceiveEndpoint(host, new TemporaryEndpointDefinition(), DefaultEndpointNameFormatter.Instance, configure);
+        }
 
-            configurator.ReceiveEndpoint(host, queueName, x =>
-            {
-                x.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle;
-                x.EnableExpress = true;
-
-                configure(x);
-            });
+        /// <summary>
+        /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
+        /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
+        /// of this type (created automatically upon the first receiver binding).
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="host"></param>
+        /// <param name="definition"></param>
+        /// <param name="configure"></param>
+        public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host, IEndpointDefinition definition,
+            Action<IServiceBusReceiveEndpointConfigurator> configure = null)
+        {
+            configurator.ReceiveEndpoint(host, definition, DefaultEndpointNameFormatter.Instance, configure);
         }
     }
 }

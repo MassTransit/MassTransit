@@ -23,6 +23,8 @@ namespace MassTransit.Definition
     public class KebabCaseEndpointNameFormatter :
         SnakeCaseEndpointNameFormatter
     {
+        public new static IEndpointNameFormatter Instance { get; } = new KebabCaseEndpointNameFormatter();
+
         public KebabCaseEndpointNameFormatter()
             : base("-")
         {

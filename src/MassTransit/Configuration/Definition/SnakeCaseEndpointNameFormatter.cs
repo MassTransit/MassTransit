@@ -29,6 +29,8 @@ namespace MassTransit.Definition
         static readonly Regex _pattern = new Regex("(?<=[a-z0-9])[A-Z]", RegexOptions.Compiled);
         readonly string _separator;
 
+        public new static IEndpointNameFormatter Instance { get; } = new SnakeCaseEndpointNameFormatter();
+
         public SnakeCaseEndpointNameFormatter()
         {
             _separator = "_";

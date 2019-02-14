@@ -28,7 +28,7 @@ namespace MassTransit.AzureServiceBusTransport
                 DefaultMessageTimeToLive = DefaultMessageTimeToLive,
                 EnableBatchedOperations = true,
                 EnableDeadLetteringOnMessageExpiration = true,
-                LockDuration = TimeSpan.FromMinutes(5),
+                LockDuration = LockDuration,
                 MaxDeliveryCount = 5
             };
         }
@@ -76,8 +76,12 @@ namespace MassTransit.AzureServiceBusTransport
 
         public static TimeSpan AutoDeleteOnIdle => TimeSpan.FromDays(427);
         public static TimeSpan TemporaryAutoDeleteOnIdle => TimeSpan.FromMinutes(5);
+        public static TimeSpan MaxAutoRenewDuration => TimeSpan.FromMinutes(5);
+        public static TimeSpan MessageWaitTimeout => TimeSpan.FromSeconds(10);
         public static TimeSpan LockDuration = TimeSpan.FromMinutes(5);
         public static TimeSpan DefaultMessageTimeToLive = TimeSpan.FromDays(365 + 1);
         public static TimeSpan BasicMessageTimeToLive = TimeSpan.FromDays(14);
+        public static int MaxConcurrentCalls => Math.Max(Environment.ProcessorCount, 8);
+        public static int PrefetchCount => Math.Max(MaxConcurrentCalls, 32);
     }
 }

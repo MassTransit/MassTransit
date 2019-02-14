@@ -31,9 +31,9 @@ namespace MassTransit.Transports.InMemory.Builders
             _messageFabric.ExchangeDeclare(name);
         }
 
-        public void QueueDeclare(string name)
+        public void QueueDeclare(string name, int concurrencyLimit)
         {
-            _messageFabric.QueueDeclare(name);
+            _messageFabric.QueueDeclare(name, concurrencyLimit);
         }
     }
 }

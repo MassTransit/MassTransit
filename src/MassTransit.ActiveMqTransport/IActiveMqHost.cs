@@ -30,11 +30,13 @@ namespace MassTransit.ActiveMqTransport
         new IActiveMqHostTopology Topology { get; }
 
         /// <summary>
-        /// Create a temporary receive endpoint on the host, with a separate handle for stopping/removing the endpoint
+        /// Connect a receive endpoint for the host, using an endpoint definition
         /// </summary>
-        /// <param name="configure"></param>
-        /// <returns></returns>
-        HostReceiveEndpointHandle ConnectReceiveEndpoint(Action<IActiveMqReceiveEndpointConfigurator> configure = null);
+        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
+        /// <param name="endpointNameFormatter"></param>
+        /// <param name="configureEndpoint">The configuration callback</param>
+        HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
+            Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint = null);
 
         /// <summary>
         /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint

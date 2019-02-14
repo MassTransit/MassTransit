@@ -7,6 +7,7 @@
     using Microsoft.AspNetCore.SignalR;
     using System;
 
+
     public static class MassTransitSignalRConfigurationExtensions
     {
         public static void AddSignalRHubConsumers<THub>(this IServiceCollectionConfigurator configurator)
@@ -41,12 +42,28 @@
                 if (index > 0)
                     name = name.Remove(index);
 
-                configurator.ReceiveEndpoint($"{queueNameBase}{name}-", e =>
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
                 {
                     configureEndpoint?.Invoke((TEndpointConfigurator)e);
 
                     e.ConfigureConsumer(serviceProvider, consumerType);
                 });
+            }
+        }
+
+
+        class HubEndpointDefinition<THub> :
+            DefaultEndpointDefinition
+            where THub : Hub
+        {
+            public HubEndpointDefinition()
+                : base(true)
+            {
+            }
+
+            public override string GetEndpointName(IEndpointNameFormatter formatter)
+            {
+                return formatter.TemporaryEndpoint($"signalr_{typeof(THub).Name}");
             }
         }
     }

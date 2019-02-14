@@ -63,9 +63,9 @@ namespace MassTransit.Transports.InMemory.Topology.Builders
             _messageFabric.ExchangeDeclare(name);
         }
 
-        public void QueueDeclare(string name)
+        public void QueueDeclare(string name, int concurrencyLimit)
         {
-            _messageFabric.QueueDeclare(name);
+            _messageFabric.QueueDeclare(name, concurrencyLimit);
         }
 
 
@@ -110,9 +110,9 @@ namespace MassTransit.Transports.InMemory.Topology.Builders
                 _builder.ExchangeDeclare(name);
             }
 
-            public void QueueDeclare(string name)
+            public void QueueDeclare(string name, int concurrencyLimit)
             {
-                _builder.QueueDeclare(name);
+                _builder.QueueDeclare(name, concurrencyLimit);
             }
 
             public IInMemoryPublishTopologyBuilder CreateImplementedBuilder()

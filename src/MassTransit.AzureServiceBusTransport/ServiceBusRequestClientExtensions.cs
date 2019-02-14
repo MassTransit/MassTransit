@@ -84,7 +84,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var receiveEndpointHandle = ConnectResponseEndpoint(host);
+            var receiveEndpointHandle = host.ConnectResponseEndpoint();
 
             var ready = await receiveEndpointHandle.Ready.ConfigureAwait(false);
 
@@ -110,7 +110,7 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var receiveEndpointHandle = ConnectResponseEndpoint(host);
+            var receiveEndpointHandle = host.ConnectResponseEndpoint();
 
             var ready = await receiveEndpointHandle.Ready.ConfigureAwait(false);
 
@@ -129,7 +129,7 @@ namespace MassTransit
         /// <returns></returns>
         public static Task<IClientFactory> CreateClientFactory(this IServiceBusHost host, RequestTimeout timeout = default)
         {
-            var receiveEndpointHandle = ConnectResponseEndpoint(host);
+            var receiveEndpointHandle = host.ConnectResponseEndpoint();
 
             return receiveEndpointHandle.CreateClientFactory(timeout);
         }
@@ -161,15 +161,6 @@ namespace MassTransit
             var clientFactory = await CreateClientFactory(host, timeout).ConfigureAwait(false);
 
             return clientFactory.CreateRequestClient<T>();
-        }
-
-        static HostReceiveEndpointHandle ConnectResponseEndpoint(IServiceBusHost host)
-        {
-            return host.ConnectReceiveEndpoint(host.Topology.CreateTemporaryResponseQueueName(), x =>
-            {
-                x.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle;
-                x.EnableExpress = true;
-            });
         }
     }
 }

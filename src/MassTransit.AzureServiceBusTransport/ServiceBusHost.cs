@@ -14,6 +14,7 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using Configuration;
+    using Definition;
     using GreenPipes;
     using GreenPipes.Agents;
     using MassTransit.Configurators;
@@ -65,11 +66,23 @@ namespace MassTransit.AzureServiceBusTransport
 
         public INamespaceContextSupervisor NamespaceContextSupervisor { get; }
 
-        public HostReceiveEndpointHandle ConnectReceiveEndpoint(Action<IServiceBusReceiveEndpointConfigurator> configure = null)
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            var queueName = Topology.CreateTemporaryQueueName("endpoint-");
+            return ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
 
-            return ConnectReceiveEndpoint(queueName, configure);
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            return ConnectReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
+            Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            return ConnectReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
         }
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure = null)
@@ -82,8 +95,9 @@ namespace MassTransit.AzureServiceBusTransport
 
             configuration.Build();
 
-            return ReceiveEndpoints.Start(queueName);
+            return ReceiveEndpoints.Start(configuration.Settings.Path);
         }
+
 
         public HostReceiveEndpointHandle ConnectSubscriptionEndpoint<T>(string subscriptionName,
             Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)

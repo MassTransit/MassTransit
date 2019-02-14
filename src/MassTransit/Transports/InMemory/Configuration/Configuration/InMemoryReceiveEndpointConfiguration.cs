@@ -40,6 +40,8 @@ namespace MassTransit.Transports.InMemory.Configuration
 
         IInMemoryReceiveEndpointConfigurator IInMemoryReceiveEndpointConfiguration.Configurator => this;
 
+        public int ConcurrencyLimit { get; set; }
+
         IInMemoryTopologyConfiguration IInMemoryEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
         public override Uri HostAddress { get; }

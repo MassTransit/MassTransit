@@ -24,11 +24,11 @@ namespace MassTransit.AzureServiceBusTransport.Settings
         protected BaseClientSettings(IEndpointEntityConfigurator configurator)
         {
             Configurator = configurator;
-            MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
-            PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
 
-            AutoRenewTimeout = TimeSpan.FromSeconds(60);
-            MessageWaitTimeout = TimeSpan.FromDays(1);
+            MaxConcurrentCalls = Defaults.MaxConcurrentCalls;
+            PrefetchCount = Defaults.PrefetchCount;
+            AutoRenewTimeout = Defaults.MaxAutoRenewDuration;
+            MessageWaitTimeout = Defaults.MessageWaitTimeout;
         }
 
         public IEndpointEntityConfigurator Configurator { get; }

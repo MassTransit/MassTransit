@@ -14,6 +14,7 @@ namespace MassTransit.ActiveMqTransport
 {
     using System;
     using Configurators;
+    using Definition;
 
 
     public static class ActiveMqHostConfigurationExtensions
@@ -54,7 +55,8 @@ namespace MassTransit.ActiveMqTransport
         /// <param name="hostName">The host name of the broker</param>
         /// <param name="port">The port to connect to the broker</param>
         /// <param name="configure">The configuration callback</param>
-        public static IActiveMqHost Host(this IActiveMqBusFactoryConfigurator configurator, string hostName, int port, Action<IActiveMqHostConfigurator> configure)
+        public static IActiveMqHost Host(this IActiveMqBusFactoryConfigurator configurator, string hostName, int port,
+            Action<IActiveMqHostConfigurator> configure)
         {
             return configurator.Host(new UriBuilder("activemq", hostName, port).Uri, configure);
         }
@@ -68,53 +70,24 @@ namespace MassTransit.ActiveMqTransport
         /// <param name="host"></param>
         /// <param name="configure"></param>
         public static void ReceiveEndpoint(this IActiveMqBusFactoryConfigurator configurator, IActiveMqHost host,
-            Action<IActiveMqReceiveEndpointConfigurator> configure)
+            Action<IActiveMqReceiveEndpointConfigurator> configure = null)
         {
-            var queueName = host.Topology.CreateTemporaryQueueName("endpoint-");
-
-            configurator.ReceiveEndpoint(host, queueName, x =>
-            {
-                x.AutoDelete = true;
-                x.Durable = false;
-
-                configure(x);
-            });
+            configurator.ReceiveEndpoint(host, new TemporaryEndpointDefinition(), DefaultEndpointNameFormatter.Instance, configure);
         }
 
         /// <summary>
-        /// Registers a management endpoint on the bus, which can be used to control
-        /// filters and other management control points on the bus.
+        /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
+        /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
+        /// of this type (created automatically upon the first receiver binding).
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="host">The host where the endpoint is to be created</param>
-        /// <param name="configure">Configure additional values of the underlying receive endpoint</param>
-        /// <returns></returns>
-        public static IManagementEndpointConfigurator ManagementEndpoint(this IActiveMqBusFactoryConfigurator configurator,
-            IActiveMqHost host, Action<IActiveMqReceiveEndpointConfigurator> configure = null)
+        /// <param name="host"></param>
+        /// <param name="definition"></param>
+        /// <param name="configure"></param>
+        public static void ReceiveEndpoint(this IActiveMqBusFactoryConfigurator configurator, IActiveMqHost host, IEndpointDefinition definition,
+            Action<IActiveMqReceiveEndpointConfigurator> configure = null)
         {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            if (host == null)
-                throw new ArgumentNullException(nameof(host));
-
-            var queueName = host.Topology.CreateTemporaryQueueName("manage-");
-
-            IActiveMqReceiveEndpointConfigurator specification = null;
-
-            configurator.ReceiveEndpoint(host, queueName, x =>
-            {
-                x.AutoDelete = true;
-                x.Durable = false;
-
-                configure?.Invoke(x);
-
-                specification = x;
-            });
-
-            var managementEndpointConfigurator = new ManagementEndpointConfigurator(specification);
-
-            return managementEndpointConfigurator;
+            configurator.ReceiveEndpoint(host, definition, DefaultEndpointNameFormatter.Instance, configure);
         }
     }
 }

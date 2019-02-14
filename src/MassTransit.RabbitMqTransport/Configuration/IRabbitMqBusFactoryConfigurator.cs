@@ -13,8 +13,6 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using System.ComponentModel;
-    using MassTransit.Builders;
     using Topology;
 
 
@@ -47,9 +45,6 @@ namespace MassTransit.RabbitMqTransport
         void Publish<T>(Action<IRabbitMqMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class;
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
-
         /// <summary>
         /// In most cases, this is not needed and should not be used. However, if for any reason the default bus
         /// endpoint queue name needs to be changed, this will do it. Do NOT set it to the same name as a receive
@@ -64,6 +59,16 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="settings"></param>
         /// <returns></returns>
         IRabbitMqHost Host(RabbitMqHostSettings settings);
+
+        /// <summary>
+        /// Specify a receive endpoint for the bus, using an endpoint definition
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
+        /// <param name="endpointNameFormatter"></param>
+        /// <param name="configureEndpoint">The configuration callback</param>
+        void ReceiveEndpoint(IRabbitMqHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null);
 
         /// <summary>
         /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.

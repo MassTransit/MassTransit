@@ -13,8 +13,6 @@
 namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using System;
-    using System.ComponentModel;
-    using MassTransit.Builders;
     using Topology.Configuration;
 
 
@@ -47,9 +45,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         void Publish<T>(Action<IAmazonSqsMessagePublishTopologyConfigurator<T>> configureTopology)
             where T : class;
 
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        void AddReceiveEndpointSpecification(IReceiveEndpointSpecification<IBusBuilder> specification);
-
         /// <summary>
         /// Configure a Host that can be connected. If only one host is specified, it is used as the default
         /// host for receive endpoints.
@@ -57,6 +52,16 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// <param name="settings"></param>
         /// <returns></returns>
         IAmazonSqsHost Host(AmazonSqsHostSettings settings);
+
+        /// <summary>
+        /// Specify a receive endpoint for the bus, using an endpoint definition
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
+        /// <param name="endpointNameFormatter"></param>
+        /// <param name="configureEndpoint">The configuration callback</param>
+        void ReceiveEndpoint(IAmazonSqsHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
+            Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint = null);
 
         /// <summary>
         /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.

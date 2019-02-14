@@ -41,8 +41,8 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 
             Name = Path = EntityNameFormatter.FormatSubscriptionPath(_subscriptionConfigurator.TopicPath, _subscriptionConfigurator.SubscriptionName);
 
-            MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
-            PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
+            MaxConcurrentCalls = Defaults.MaxConcurrentCalls;
+            PrefetchCount = Defaults.PrefetchCount;
         }
 
         SubscriptionEndpointSettings(TopicDescription topicDescription, SubscriptionConfigurator configurator)
@@ -53,8 +53,8 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 
             Name = Path = EntityNameFormatter.FormatSubscriptionPath(_subscriptionConfigurator.TopicPath, _subscriptionConfigurator.SubscriptionName);
 
-            MaxConcurrentCalls = Math.Max(Environment.ProcessorCount, 8);
-            PrefetchCount = Math.Max(MaxConcurrentCalls, 32);
+            MaxConcurrentCalls = Defaults.MaxConcurrentCalls;
+            PrefetchCount = Defaults.PrefetchCount;
         }
 
         public ISubscriptionConfigurator SubscriptionConfigurator => _subscriptionConfigurator;
@@ -82,7 +82,7 @@ namespace MassTransit.AzureServiceBusTransport.Settings
 
         public override void SelectBasicTier()
         {
-            _subscriptionConfigurator.AutoDeleteOnIdle = default(TimeSpan?);
+            _subscriptionConfigurator.AutoDeleteOnIdle = default;
             _subscriptionConfigurator.DefaultMessageTimeToLive = Defaults.BasicMessageTimeToLive;
         }
     }

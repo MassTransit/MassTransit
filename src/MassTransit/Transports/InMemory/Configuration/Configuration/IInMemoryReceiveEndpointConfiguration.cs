@@ -20,5 +20,7 @@ namespace MassTransit.Transports.InMemory.Configuration
         IInMemoryEndpointConfiguration
     {
         IInMemoryReceiveEndpointConfigurator Configurator { get; }
+
+        int ConcurrencyLimit { get; }
     }
 }

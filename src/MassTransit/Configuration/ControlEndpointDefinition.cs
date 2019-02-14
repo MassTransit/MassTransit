@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the
@@ -12,14 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
-    using Topology;
-
-
-    public static class HostTopologyExtensions
+    /// <summary>
+    /// Specifies a temporary endpoint, with the prefix "response"
+    /// </summary>
+    public class ControlEndpointDefinition :
+        TemporaryEndpointDefinition
     {
-        public static string CreateTemporaryResponseQueueName(this IHostTopology topology)
+        public ControlEndpointDefinition()
+            : base("control")
         {
-            return topology.CreateTemporaryQueueName("response-");
         }
     }
 }

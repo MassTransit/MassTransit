@@ -1,4 +1,4 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using Builders;
     using Configuration;
     using Configuration.Configurators;
@@ -22,6 +23,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
+    using Util;
 
 
     public class ServiceBusConsumeTopology :
@@ -71,7 +73,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 
             callback?.Invoke(subscriptionConfigurator);
 
-            var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription(), subscriptionConfigurator.Rule,
+            var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription(),
+                subscriptionConfigurator.Rule,
                 subscriptionConfigurator.Filter);
 
             _specifications.Add(specification);
