@@ -29,28 +29,16 @@ namespace MassTransit.Registration
             GetOrAdd(consumerType).Register(registrar);
         }
 
-        /// <summary>
-        /// Sets a saga type so that it will not be registered. This is used to allow state machines to register without a conflicting
-        /// standard saga from also being registered.
-        /// </summary>
-        /// <param name="sagaType"></param>
-        public static void DoNotRegister(Type sagaType)
-        {
-            GetOrAdd(sagaType).DoNotRegister();
-        }
-
 
         static class Cached
         {
-            internal static readonly ConcurrentDictionary<Type, CachedRegistration> Instance =
-                new ConcurrentDictionary<Type, CachedRegistration>();
+            internal static readonly ConcurrentDictionary<Type, CachedRegistration> Instance = new ConcurrentDictionary<Type, CachedRegistration>();
         }
 
 
         interface CachedRegistration
         {
             void Register(IContainerRegistrar registrar);
-            void DoNotRegister();
         }
 
 
@@ -58,19 +46,9 @@ namespace MassTransit.Registration
             CachedRegistration
             where T : class, IConsumer
         {
-            bool _doNotRegister;
-
             public void Register(IContainerRegistrar registrar)
             {
-                if (_doNotRegister)
-                    return;
-
                 registrar.RegisterConsumer<T>();
-            }
-
-            public void DoNotRegister()
-            {
-                _doNotRegister = true;
             }
         }
     }

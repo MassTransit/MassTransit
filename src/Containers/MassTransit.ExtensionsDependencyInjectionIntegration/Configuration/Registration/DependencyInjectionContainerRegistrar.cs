@@ -84,6 +84,16 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
             _collection.AddTransient<IExecuteActivityDefinition<TActivity, TArguments>, TDefinition>();
         }
 
+        public void RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
+            where TDefinition : class, IEndpointDefinition<T>
+            where T : class
+        {
+            _collection.AddTransient<IEndpointDefinition<T>, TDefinition>();
+
+            if (settings != null)
+                _collection.AddSingleton(settings);
+        }
+
         public void RegisterCompensateActivity<TActivity, TLog>()
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class

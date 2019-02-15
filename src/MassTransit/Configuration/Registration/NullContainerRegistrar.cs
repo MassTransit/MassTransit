@@ -63,6 +63,12 @@ namespace MassTransit.Registration
         {
         }
 
+        public void RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
+            where TDefinition : class, IEndpointDefinition<T>
+            where T : class
+        {
+        }
+
         public void RegisterCompensateActivity<TActivity, TLog>()
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class

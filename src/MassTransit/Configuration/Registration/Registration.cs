@@ -31,16 +31,18 @@ namespace MassTransit.Registration
         readonly IDictionary<Type, ISagaRegistration> _sagas;
         readonly IDictionary<Type, IExecuteActivityRegistration> _executeActivities;
         readonly IDictionary<Type, IActivityRegistration> _activities;
+        readonly IDictionary<Type, IEndpointRegistration> _endpoints;
 
         public Registration(IConfigurationServiceProvider configurationServiceProvider, IDictionary<Type, IConsumerRegistration> consumers,
             IDictionary<Type, ISagaRegistration> sagas, IDictionary<Type, IExecuteActivityRegistration> executeActivities,
-            IDictionary<Type, IActivityRegistration> activities)
+            IDictionary<Type, IActivityRegistration> activities, IDictionary<Type, IEndpointRegistration> endpoints)
         {
             _configurationServiceProvider = configurationServiceProvider;
             _consumers = consumers;
             _sagas = sagas;
             _executeActivities = executeActivities;
             _activities = activities;
+            _endpoints = endpoints;
         }
 
         public void ConfigureConsumer(Type consumerType, IReceiveEndpointConfigurator configurator)
@@ -134,10 +136,19 @@ namespace MassTransit.Registration
                 .Select(x => x.GetDefinition(_configurationServiceProvider))
                 .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter));
 
+            var endpointsWithName = _endpoints.Values
+                .Select(x => x.GetDefinition(_configurationServiceProvider))
+                .Select(x => new
+                {
+                    Definition = x,
+                    Name = x.GetEndpointName(endpointNameFormatter)
+                });
+
             var endpointNames = consumersByEndpoint.Select(x => x.Key)
                 .Union(sagasByEndpoint.Select(x => x.Key))
                 .Union(activitiesByExecuteEndpoint.Select(x => x.Key))
-                .Union(executeActivitiesByEndpoint.Select(x => x.Key));
+                .Union(executeActivitiesByEndpoint.Select(x => x.Key))
+                .Union(endpointsWithName.Select(x => x.Name));
 
             var endpoints =
                 from e in endpointNames
@@ -149,14 +160,27 @@ namespace MassTransit.Registration
                 from a in aes.DefaultIfEmpty()
                 join ea in executeActivitiesByEndpoint on e equals ea.Key into eas
                 from ea in eas.DefaultIfEmpty()
-                select new {Name = e, Consumers = c, Sagas = s, Activities = a, ExecuteActivities = ea};
+                join ep in endpointsWithName on e equals ep.Name into eps
+                from ep in eps.Select(x => x.Definition).DefaultIfEmpty(new NamedEndpointDefinition(e))
+                select new {Name = e, Definition = ep, Consumers = c, Sagas = s, Activities = a, ExecuteActivities = ea};
 
             foreach (var endpoint in endpoints)
             {
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Configuring receive endpoint: {0}", endpoint.Name);
+                    _log.DebugFormat("Configuring receive endpoint ({0})",
+                        string.Join(", ", new[]
+                        {
+                            $"name: {endpoint.Name}",
+                            endpoint.Definition.IsTemporary ? "temporary" : "",
+                            endpoint.Definition.ConcurrentMessageLimit.HasValue
+                                ? $"concurrent-message-limit: {endpoint.Definition.ConcurrentMessageLimit}"
+                                : "",
+                            endpoint.Definition.PrefetchCount.HasValue
+                                ? $"prefect-count: {endpoint.Definition.PrefetchCount}"
+                                : "",
+                        }.Where(x => !string.IsNullOrWhiteSpace(x))));
 
-                configurator.ReceiveEndpoint(endpoint.Name, cfg =>
+                configurator.ReceiveEndpoint(endpoint.Definition, endpointNameFormatter, cfg =>
                 {
                     if (endpoint.Consumers != null)
                         foreach (var consumer in endpoint.Consumers)

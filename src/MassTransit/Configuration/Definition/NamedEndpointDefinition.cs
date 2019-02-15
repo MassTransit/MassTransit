@@ -10,30 +10,21 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace MassTransit
+namespace MassTransit.Definition
 {
-    /// <summary>
-    /// Specifies a temporary endpoint, with the prefix "response"
-    /// </summary>
-    public abstract class DefaultEndpointDefinition :
-        IEndpointDefinition
+    public class NamedEndpointDefinition :
+        DefaultEndpointDefinition
     {
-        protected DefaultEndpointDefinition(bool isTemporary = false)
+        readonly string _name;
+
+        public NamedEndpointDefinition(string name)
         {
-            IsTemporary = isTemporary;
+            _name = name;
         }
 
-        public abstract string GetEndpointName(IEndpointNameFormatter formatter);
-
-        public virtual bool IsTemporary { get; }
-
-        public virtual int? PrefetchCount => default;
-
-        public virtual int? ConcurrentMessageLimit => default;
-
-        public void Configure<T>(T configurator)
-            where T : IReceiveEndpointConfigurator
+        public override string GetEndpointName(IEndpointNameFormatter formatter)
         {
+            return _name;
         }
     }
 }

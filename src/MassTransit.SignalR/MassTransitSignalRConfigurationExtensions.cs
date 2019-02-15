@@ -6,6 +6,7 @@
     using MassTransit.SignalR.Utils;
     using Microsoft.AspNetCore.SignalR;
     using System;
+    using Definition;
 
 
     public static class MassTransitSignalRConfigurationExtensions

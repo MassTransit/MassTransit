@@ -87,6 +87,17 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IExecuteActivityDefinition<TActivity, TArguments>>();
         }
 
+        public void RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
+            where TDefinition : class, IEndpointDefinition<T>
+            where T : class
+        {
+            _builder.RegisterType<TDefinition>()
+                .As<IEndpointDefinition<T>>();
+
+            if (settings != null)
+                _builder.RegisterInstance(settings);
+        }
+
         public void RegisterCompensateActivity<TActivity, TLog>()
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class

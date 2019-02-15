@@ -51,5 +51,9 @@ namespace MassTransit.Registration
             where TDefinition : class, IExecuteActivityDefinition<TActivity, TArguments>
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class;
+
+        void RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings = null)
+            where TDefinition : class, IEndpointDefinition<T>
+            where T : class;
     }
 }

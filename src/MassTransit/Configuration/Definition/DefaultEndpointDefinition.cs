@@ -13,12 +13,27 @@
 namespace MassTransit.Definition
 {
     /// <summary>
-    /// A default consumer definition, used if no definition is found for the consumer type
+    /// Base/Default endpoint definition, not used apparently
     /// </summary>
-    /// <typeparam name="TConsumer"></typeparam>
-    public class DefaultConsumerDefinition<TConsumer> :
-        ConsumerDefinition<TConsumer>
-        where TConsumer : class, IConsumer
+    public abstract class DefaultEndpointDefinition :
+        IEndpointDefinition
     {
+        protected DefaultEndpointDefinition(bool isTemporary = false)
+        {
+            IsTemporary = isTemporary;
+        }
+
+        public abstract string GetEndpointName(IEndpointNameFormatter formatter);
+
+        public virtual bool IsTemporary { get; }
+
+        public virtual int? PrefetchCount => default;
+
+        public virtual int? ConcurrentMessageLimit => default;
+
+        public void Configure<T>(T configurator)
+            where T : IReceiveEndpointConfigurator
+        {
+        }
     }
 }

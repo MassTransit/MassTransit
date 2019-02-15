@@ -87,6 +87,16 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Use<TDefinition>();
         }
 
+        public void RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
+            where TDefinition : class, IEndpointDefinition<T>
+            where T : class
+        {
+            _expression.For<IEndpointDefinition<T>>().Use<TDefinition>();
+
+            if (settings != null)
+                _expression.ForSingletonOf<IEndpointSettings<IEndpointDefinition<T>>>().Use(settings);
+        }
+
         public void RegisterCompensateActivity<TActivity, TLog>()
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class

@@ -47,4 +47,37 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             configurator.ConfigureConsumer<SimpleConsumer>(_container);
         }
     }
+
+
+    [TestFixture]
+    public class StructureMap_Consumer_Endpoint :
+        Common_Consumer_Endpoint
+    {
+        readonly IContainer _container;
+
+        public StructureMap_Consumer_Endpoint()
+        {
+            _container = new Container(expression =>
+            {
+                expression.AddMassTransit(cfg =>
+                {
+                    cfg.AddConsumer<SimplerConsumer>()
+                        .Endpoint(e => e.Name = "custom-endpoint-name");
+
+                    cfg.AddBus(context => BusControl);
+                });
+
+                expression.For<ISimpleConsumerDependency>()
+                    .Use<SimpleConsumerDependency>();
+
+                expression.For<AnotherMessageConsumer>()
+                    .Use<AnotherMessageConsumerImpl>();
+            });
+        }
+
+        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigureEndpoints(_container);
+        }
+    }
 }

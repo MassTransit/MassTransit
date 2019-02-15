@@ -52,4 +52,41 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             configurator.ConfigureConsumer<SimpleConsumer>(_container);
         }
     }
+
+
+    [TestFixture]
+    public class Windsor_Consumer_Endpoint :
+        Common_Consumer_Endpoint
+    {
+        readonly IWindsorContainer _container;
+
+        public Windsor_Consumer_Endpoint()
+        {
+            var container = new WindsorContainer();
+            container.AddMassTransit(x =>
+            {
+                x.AddConsumer<SimplerConsumer>()
+                    .Endpoint(e => e.Name = "custom-endpoint-name");
+
+                x.AddBus(provider => BusControl);
+            });
+
+            container.Register(Component.For<ISimpleConsumerDependency>().ImplementedBy<SimpleConsumerDependency>().LifestyleScoped(),
+                Component.For<AnotherMessageConsumer>().ImplementedBy<AnotherMessageConsumerImpl>().LifestyleScoped()
+            );
+
+            _container = container;
+        }
+
+        [OneTimeTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigureEndpoints(_container);
+        }
+    }
 }

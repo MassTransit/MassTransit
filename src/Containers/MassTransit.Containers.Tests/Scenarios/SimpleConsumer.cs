@@ -56,4 +56,35 @@ namespace MassTransit.Containers.Tests.Scenarios
             _received.TrySetResult(message.Message);
         }
     }
+
+
+    public class SimplerConsumer :
+        IConsumer<SimpleMessageInterface>
+    {
+        static readonly TaskCompletionSource<SimplerConsumer> _consumerCreated = new TaskCompletionSource<SimplerConsumer>();
+
+        readonly TaskCompletionSource<SimpleMessageInterface> _received;
+
+        public SimplerConsumer()
+        {
+            _received = new TaskCompletionSource<SimpleMessageInterface>();
+
+            _consumerCreated.TrySetResult(this);
+        }
+
+        public Task<SimpleMessageInterface> Last
+        {
+            get { return _received.Task; }
+        }
+
+        public static Task<SimplerConsumer> LastConsumer
+        {
+            get { return _consumerCreated.Task; }
+        }
+
+        public async Task Consume(ConsumeContext<SimpleMessageInterface> message)
+        {
+            _received.TrySetResult(message.Message);
+        }
+    }
 }

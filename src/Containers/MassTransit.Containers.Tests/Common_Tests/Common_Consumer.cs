@@ -12,7 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Common_Tests
 {
+    using System;
     using System.Threading.Tasks;
+    using GreenPipes.Internals.Extensions;
     using NUnit.Framework;
     using Scenarios;
     using Shouldly;
@@ -50,5 +52,32 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         protected abstract void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator);
+    }
+
+
+    public abstract class Common_Consumer_Endpoint :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_receive_on_the_custom_endpoint()
+        {
+            const string name = "Joe";
+
+            var sendEndpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/custom-endpoint-name"));
+
+            await sendEndpoint.Send(new SimpleMessageClass(name));
+
+            SimplerConsumer lastConsumer = await SimplerConsumer.LastConsumer.UntilCompletedOrCanceled(TestCancellationToken);
+            lastConsumer.ShouldNotBe(null);
+
+            SimpleMessageInterface last = await lastConsumer.Last.UntilCompletedOrCanceled(TestCancellationToken);
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            ConfigureEndpoints(configurator);
+        }
+
+        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
     }
 }

@@ -53,4 +53,43 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             configurator.ConfigureConsumer<SimpleConsumer>(_container);
         }
     }
+
+
+    [TestFixture]
+    public class Lamar_Consumer_Endpoint :
+        Common_Consumer_Endpoint
+    {
+        readonly IContainer _container;
+
+        public Lamar_Consumer_Endpoint()
+        {
+            _container = new Container(registry =>
+            {
+                registry.AddMassTransit(cfg =>
+                {
+                    cfg.AddConsumer<SimpleConsumer>()
+                        .Endpoint(e => e.Name = "custom-endpoint-name");
+
+                    cfg.AddBus(context => BusControl);
+                });
+
+                registry.For<ISimpleConsumerDependency>()
+                    .Use<SimpleConsumerDependency>();
+
+                registry.For<AnotherMessageConsumer>()
+                    .Use<AnotherMessageConsumerImpl>();
+            });
+        }
+
+        [TearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigureEndpoints(_container);
+        }
+    }
 }

@@ -95,6 +95,16 @@ namespace MassTransit.WindsorIntegration.Registration
                     .ImplementedBy<TDefinition>());
         }
 
+        public void RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
+            where TDefinition : class, IEndpointDefinition<T>
+            where T : class
+        {
+            _container.Register(
+                Component.For<IEndpointDefinition<T>>()
+                    .ImplementedBy<TDefinition>(),
+                Component.For<IEndpointSettings<IEndpointDefinition<T>>>().Instance(settings));
+        }
+
         public void RegisterCompensateActivity<TActivity, TLog>()
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class

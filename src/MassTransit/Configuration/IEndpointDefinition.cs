@@ -51,4 +51,11 @@ namespace MassTransit
         void Configure<T>(T configurator)
             where T : IReceiveEndpointConfigurator;
     }
+
+
+    public interface IEndpointDefinition<T> :
+        IEndpointDefinition
+        where T : class
+    {
+    }
 }

@@ -10,15 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Definition
+namespace MassTransit.Registration
 {
-    /// <summary>
-    /// A default consumer definition, used if no definition is found for the consumer type
-    /// </summary>
-    /// <typeparam name="TConsumer"></typeparam>
-    public class DefaultConsumerDefinition<TConsumer> :
-        ConsumerDefinition<TConsumer>
+    using System;
+
+
+    public interface IConsumerRegistrationConfigurator<TConsumer>
         where TConsumer : class, IConsumer
     {
+        void Endpoint(Action<IConsumerEndpointRegistrationConfigurator<TConsumer>> configure);
     }
 }

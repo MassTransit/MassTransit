@@ -12,13 +12,15 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Definition
 {
-    /// <summary>
-    /// A default consumer definition, used if no definition is found for the consumer type
-    /// </summary>
-    /// <typeparam name="TConsumer"></typeparam>
-    public class DefaultConsumerDefinition<TConsumer> :
-        ConsumerDefinition<TConsumer>
-        where TConsumer : class, IConsumer
+    public interface IEndpointSettings<T>
+        where T : class
     {
+        string Name { get; }
+
+        bool IsTemporary { get; }
+
+        int? PrefetchCount { get; }
+
+        int? ConcurrentMessageLimit { get; }
     }
 }

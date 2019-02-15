@@ -16,7 +16,7 @@ namespace MassTransit.Registration
     using System.Collections.Concurrent;
     using System.Linq;
     using ConsumeConfigurators;
-    using Courier;
+    using Definition;
     using Util;
 
 
@@ -27,22 +27,24 @@ namespace MassTransit.Registration
         IRegistrationConfigurator
     {
         readonly IContainerRegistrar _containerRegistrar;
-        readonly ConcurrentDictionary<Type, IConsumerRegistration> _consumerConfigurations;
+        readonly ConcurrentDictionary<Type, IConsumerRegistration> _consumerRegistrations;
         readonly ConcurrentDictionary<Type, IExecuteActivityRegistration> _executeActivityRegistrations;
         readonly ConcurrentDictionary<Type, IActivityRegistration> _activityRegistrations;
-        readonly ConcurrentDictionary<Type, ISagaRegistration> _sagaConfigurations;
+        readonly ConcurrentDictionary<Type, ISagaRegistration> _sagaRegistrations;
+        readonly ConcurrentDictionary<Type, IEndpointRegistration> _endpointRegistrations;
 
         public RegistrationConfigurator(IContainerRegistrar containerRegistrar = null)
         {
             _containerRegistrar = containerRegistrar ?? new NullContainerRegistrar();
 
-            _consumerConfigurations = new ConcurrentDictionary<Type, IConsumerRegistration>();
-            _sagaConfigurations = new ConcurrentDictionary<Type, ISagaRegistration>();
+            _consumerRegistrations = new ConcurrentDictionary<Type, IConsumerRegistration>();
+            _sagaRegistrations = new ConcurrentDictionary<Type, ISagaRegistration>();
             _executeActivityRegistrations = new ConcurrentDictionary<Type, IExecuteActivityRegistration>();
             _activityRegistrations = new ConcurrentDictionary<Type, IActivityRegistration>();
+            _endpointRegistrations = new ConcurrentDictionary<Type, IEndpointRegistration>();
         }
 
-        void IRegistrationConfigurator.AddConsumer<T>(Action<IConsumerConfigurator<T>> configure)
+        IConsumerRegistrationConfigurator<T> IRegistrationConfigurator.AddConsumer<T>(Action<IConsumerConfigurator<T>> configure)
         {
             if (TypeMetadataCache<T>.HasSagaInterfaces)
                 throw new ArgumentException($"{TypeMetadataCache<T>.ShortName} is a saga, and cannot be registered as a consumer", nameof(T));
@@ -54,9 +56,11 @@ namespace MassTransit.Registration
                 return new ConsumerRegistration<T>();
             }
 
-            var configurator = _consumerConfigurations.GetOrAdd(typeof(T), ValueFactory);
+            var registration = _consumerRegistrations.GetOrAdd(typeof(T), ValueFactory);
 
-            configurator.AddConfigureAction(configure);
+            registration.AddConfigureAction(configure);
+
+            return new ConsumerRegistrationConfigurator<T>(this, registration, _containerRegistrar);
         }
 
         void IRegistrationConfigurator.AddConsumer(Type consumerType, Type consumerDefinitionType)
@@ -75,7 +79,7 @@ namespace MassTransit.Registration
                 return (IConsumerRegistration)Activator.CreateInstance(typeof(ConsumerRegistration<>).MakeGenericType(type));
             }
 
-            _consumerConfigurations.GetOrAdd(consumerType, ValueFactory);
+            _consumerRegistrations.GetOrAdd(consumerType, ValueFactory);
         }
 
         void IRegistrationConfigurator.AddSaga<T>(Action<ISagaConfigurator<T>> configure)
@@ -87,21 +91,21 @@ namespace MassTransit.Registration
                 return new SagaRegistration<T>();
             }
 
-            var configurator = _sagaConfigurations.GetOrAdd(typeof(T), ValueFactory);
+            var configurator = _sagaRegistrations.GetOrAdd(typeof(T), ValueFactory);
 
             configurator.AddConfigureAction(configure);
         }
 
         void IRegistrationConfigurator.AddSaga<T>(SagaRegistrationFactory<T> factory, Action<ISagaConfigurator<T>> configure)
         {
-            var configurator = _sagaConfigurations.GetOrAdd(typeof(T), _ => factory(_containerRegistrar));
+            var configurator = _sagaRegistrations.GetOrAdd(typeof(T), _ => factory(_containerRegistrar));
 
             configurator.AddConfigureAction(configure);
         }
 
         void IRegistrationConfigurator.AddSaga(Type sagaType, Type sagaDefinitionType)
         {
-            _sagaConfigurations.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, sagaDefinitionType, _containerRegistrar));
+            _sagaRegistrations.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, sagaDefinitionType, _containerRegistrar));
         }
 
         void IRegistrationConfigurator.AddExecuteActivity<TActivity, TArguments>(Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure)
@@ -146,11 +150,30 @@ namespace MassTransit.Registration
                 type => ActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, _containerRegistrar));
         }
 
+        public void AddEndpoint(Type definitionType)
+        {
+            _endpointRegistrations.GetOrAdd(definitionType, type => EndpointRegistrationCache.CreateRegistration(definitionType, _containerRegistrar));
+        }
+
+        public void AddEndpoint<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
+            where TDefinition : class, IEndpointDefinition<T>
+            where T : class
+        {
+            IEndpointRegistration ValueFactory(Type type)
+            {
+                _containerRegistrar.RegisterEndpointDefinition<TDefinition, T>(settings);
+
+                return new EndpointRegistration<T>();
+            }
+
+            _endpointRegistrations.GetOrAdd(typeof(TDefinition), ValueFactory);
+        }
+
         public IRegistration CreateRegistration(IConfigurationServiceProvider configurationServiceProvider)
         {
-            return new Registration(configurationServiceProvider, _consumerConfigurations.ToDictionary(x => x.Key, x => x.Value),
-                _sagaConfigurations.ToDictionary(x => x.Key, x => x.Value), _executeActivityRegistrations.ToDictionary(x => x.Key, x => x.Value),
-                _activityRegistrations.ToDictionary(x => x.Key, x => x.Value));
+            return new Registration(configurationServiceProvider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),
+                _sagaRegistrations.ToDictionary(x => x.Key, x => x.Value), _executeActivityRegistrations.ToDictionary(x => x.Key, x => x.Value),
+                _activityRegistrations.ToDictionary(x => x.Key, x => x.Value), _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value));
         }
     }
 }
