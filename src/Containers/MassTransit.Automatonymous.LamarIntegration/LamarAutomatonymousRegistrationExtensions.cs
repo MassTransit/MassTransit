@@ -28,13 +28,13 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <typeparam name="TStateMachine"></typeparam>
         /// <typeparam name="TInstance"></typeparam>
-        public static void AddSagaStateMachine<TStateMachine, TInstance>(this IServiceRegistryConfigurator configurator)
+        public static ISagaRegistrationConfigurator<TInstance> AddSagaStateMachine<TStateMachine, TInstance>(this IServiceRegistryConfigurator configurator)
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
             var registrar = new LamarSagaStateMachineRegistrar(configurator.Builder);
 
-            configurator.AddSagaStateMachine<TStateMachine, TInstance>(registrar);
+            return configurator.AddSagaStateMachine<TStateMachine, TInstance>(registrar);
         }
 
         /// <summary>

@@ -12,9 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Registration
 {
-    public interface IConsumerEndpointRegistrationConfigurator<TConsumer> :
-        IEndpointRegistrationConfigurator
-        where TConsumer : class, IConsumer
+    using Saga;
+
+
+    public class SagaEndpointRegistrationConfigurator<TSaga> :
+        EndpointRegistrationConfigurator<TSaga>,
+        ISagaEndpointRegistrationConfigurator<TSaga>
+        where TSaga : class, ISaga
     {
     }
 }

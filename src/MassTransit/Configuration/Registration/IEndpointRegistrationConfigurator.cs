@@ -10,20 +10,13 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Definition
+namespace MassTransit.Registration
 {
-    public class ConsumerEndpointDefinition<TConsumer> :
-        SettingsEndpointDefinition<TConsumer>
-        where TConsumer : class, IConsumer
+    public interface IEndpointRegistrationConfigurator
     {
-        public ConsumerEndpointDefinition(IEndpointSettings<IEndpointDefinition<TConsumer>> settings)
-            : base(settings)
-        {
-        }
-
-        protected override string FormatEndpointName(IEndpointNameFormatter formatter)
-        {
-            return formatter.Consumer<TConsumer>();
-        }
+        string Name { set; }
+        bool Temporary { set; }
+        int? PrefetchCount { set; }
+        int? ConcurrentMessageLimit { set; }
     }
 }

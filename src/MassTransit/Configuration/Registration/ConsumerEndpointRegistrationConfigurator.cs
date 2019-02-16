@@ -12,40 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Registration
 {
-    using Definition;
-
-
     public class ConsumerEndpointRegistrationConfigurator<TConsumer> :
+        EndpointRegistrationConfigurator<TConsumer>,
         IConsumerEndpointRegistrationConfigurator<TConsumer>
         where TConsumer : class, IConsumer
     {
-        readonly EndpointSettings<IEndpointDefinition<TConsumer>> _settings;
-
-        public ConsumerEndpointRegistrationConfigurator()
-        {
-            _settings = new EndpointSettings<IEndpointDefinition<TConsumer>>();
-        }
-
-        public string Name
-        {
-            set => _settings.Name = value;
-        }
-
-        public bool Temporary
-        {
-            set => _settings.IsTemporary = value;
-        }
-
-        public int? PrefetchCount
-        {
-            set => _settings.PrefetchCount = value;
-        }
-
-        public int? ConcurrentMessageLimit
-        {
-            set => _settings.ConcurrentMessageLimit = value;
-        }
-
-        public IEndpointSettings<IEndpointDefinition<TConsumer>> Settings => _settings;
     }
 }

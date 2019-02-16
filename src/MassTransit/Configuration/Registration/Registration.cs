@@ -128,9 +128,15 @@ namespace MassTransit.Registration
                 .Select(x => x.GetDefinition(_configurationServiceProvider))
                 .GroupBy(x => x.GetEndpointName(endpointNameFormatter));
 
-            var activitiesByExecuteEndpoint = _activities.Values
+            var activities = _activities.Values
                 .Select(x => x.GetDefinition(_configurationServiceProvider))
+                .ToArray();
+
+            var activitiesByExecuteEndpoint = activities
                 .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter));
+
+            var activitiesByCompensateEndpoint = activities
+                .GroupBy(x => x.GetCompensateEndpointName(endpointNameFormatter));
 
             var executeActivitiesByEndpoint = _executeActivities.Values
                 .Select(x => x.GetDefinition(_configurationServiceProvider))
@@ -148,7 +154,8 @@ namespace MassTransit.Registration
                 .Union(sagasByEndpoint.Select(x => x.Key))
                 .Union(activitiesByExecuteEndpoint.Select(x => x.Key))
                 .Union(executeActivitiesByEndpoint.Select(x => x.Key))
-                .Union(endpointsWithName.Select(x => x.Name));
+                .Union(endpointsWithName.Select(x => x.Name))
+                .Except(activitiesByCompensateEndpoint.Select(x => x.Key));
 
             var endpoints =
                 from e in endpointNames
@@ -167,18 +174,7 @@ namespace MassTransit.Registration
             foreach (var endpoint in endpoints)
             {
                 if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Configuring receive endpoint ({0})",
-                        string.Join(", ", new[]
-                        {
-                            $"name: {endpoint.Name}",
-                            endpoint.Definition.IsTemporary ? "temporary" : "",
-                            endpoint.Definition.ConcurrentMessageLimit.HasValue
-                                ? $"concurrent-message-limit: {endpoint.Definition.ConcurrentMessageLimit}"
-                                : "",
-                            endpoint.Definition.PrefetchCount.HasValue
-                                ? $"prefect-count: {endpoint.Definition.PrefetchCount}"
-                                : "",
-                        }.Where(x => !string.IsNullOrWhiteSpace(x))));
+                    _log.DebugFormat("Configuring receive endpoint ({0})", ToEndpointString(endpoint.Name, endpoint.Definition));
 
                 configurator.ReceiveEndpoint(endpoint.Definition, endpointNameFormatter, cfg =>
                 {
@@ -205,14 +201,32 @@ namespace MassTransit.Registration
                         {
                             var compensateEndpointName = activity.GetCompensateEndpointName(endpointNameFormatter);
 
-                            configurator.ReceiveEndpoint(compensateEndpointName, compensateEndpointConfigurator =>
+                            var compensateDefinition = endpointsWithName.SingleOrDefault(x => x.Name == compensateEndpointName)?.Definition;
+                            if (compensateDefinition != null)
                             {
-                                if (_log.IsDebugEnabled)
-                                    _log.DebugFormat("Configuring activity {0} on {1}/{2}", TypeMetadataCache.GetShortName(activity.ActivityType),
-                                        endpoint.Name, compensateEndpointName);
+                                configurator.ReceiveEndpoint(compensateDefinition, endpointNameFormatter, compensateEndpointConfigurator =>
+                                {
+                                    if (_log.IsDebugEnabled)
+                                        _log.DebugFormat("Configuring receive endpoint ({0})", ToEndpointString(compensateEndpointName, compensateDefinition));
 
-                                ConfigureActivity(activity.ActivityType, cfg, compensateEndpointConfigurator);
-                            });
+                                    if (_log.IsDebugEnabled)
+                                        _log.DebugFormat("Configuring activity {0} on {1}/{2}", TypeMetadataCache.GetShortName(activity.ActivityType),
+                                            endpoint.Name, compensateEndpointName);
+
+                                    ConfigureActivity(activity.ActivityType, cfg, compensateEndpointConfigurator);
+                                });
+                            }
+                            else
+                            {
+                                configurator.ReceiveEndpoint(compensateEndpointName, compensateEndpointConfigurator =>
+                                {
+                                    if (_log.IsDebugEnabled)
+                                        _log.DebugFormat("Configuring activity {0} on {1}/{2}", TypeMetadataCache.GetShortName(activity.ActivityType),
+                                            endpoint.Name, compensateEndpointName);
+
+                                    ConfigureActivity(activity.ActivityType, cfg, compensateEndpointConfigurator);
+                                });
+                            }
                         }
 
                     if (endpoint.ExecuteActivities != null)
@@ -225,6 +239,21 @@ namespace MassTransit.Registration
                         }
                 });
             }
+        }
+
+        string ToEndpointString(string name, IEndpointDefinition definition)
+        {
+            return string.Join(", ", new[]
+            {
+                $"name: {name}",
+                definition.IsTemporary ? "temporary" : "",
+                definition.ConcurrentMessageLimit.HasValue
+                    ? $"concurrent-message-limit: {definition.ConcurrentMessageLimit}"
+                    : "",
+                definition.PrefetchCount.HasValue
+                    ? $"prefect-count: {definition.PrefetchCount}"
+                    : "",
+            }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
     }
 }

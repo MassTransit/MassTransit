@@ -35,8 +35,8 @@ namespace MassTransit
         /// <param name="sagaDefinitionType"></param>
         /// <typeparam name="TStateMachine"></typeparam>
         /// <typeparam name="TInstance"></typeparam>
-        public static void AddSagaStateMachine<TStateMachine, TInstance>(this IRegistrationConfigurator configurator, ISagaStateMachineRegistrar registrar,
-            Type sagaDefinitionType = null)
+        public static ISagaRegistrationConfigurator<TInstance> AddSagaStateMachine<TStateMachine, TInstance>(this IRegistrationConfigurator configurator,
+            ISagaStateMachineRegistrar registrar, Type sagaDefinitionType = null)
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
@@ -50,7 +50,7 @@ namespace MassTransit
                 return new SagaStateMachineRegistration<TInstance>();
             }
 
-            configurator.AddSaga<TInstance>(Factory);
+            return configurator.AddSaga<TInstance>(Factory);
         }
 
         /// <summary>

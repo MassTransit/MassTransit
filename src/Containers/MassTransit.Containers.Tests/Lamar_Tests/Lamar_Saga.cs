@@ -19,6 +19,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
     using Scenarios;
 
 
+    [TestFixture]
     public class Lamar_Saga :
         Common_Saga
     {
@@ -49,6 +50,48 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
         protected override void ConfigureSaga(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.ConfigureSaga<SimpleSaga>(_container);
+        }
+
+        protected override ISagaRepository<T> GetSagaRepository<T>()
+        {
+            return _container.GetInstance<ISagaRepository<T>>();
+        }
+    }
+
+
+    [TestFixture]
+    public class Lamar_Saga_Endpoint :
+        Common_Saga_Endpoint
+    {
+        readonly IContainer _container;
+
+        public Lamar_Saga_Endpoint()
+        {
+            _container = new Container(registry =>
+            {
+                registry.AddMassTransit(cfg =>
+                {
+                    cfg.AddSaga<SimpleSaga>()
+                        .Endpoint(e => e.Name = "custom-endpoint-name");
+
+                    cfg.AddBus(context => BusControl);
+                });
+
+                registry.For(typeof(ISagaRepository<>))
+                    .Use(typeof(InMemorySagaRepository<>))
+                    .Singleton();
+            });
+        }
+
+        [OneTimeTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigureEndpoints(_container);
         }
 
         protected override ISagaRepository<T> GetSagaRepository<T>()

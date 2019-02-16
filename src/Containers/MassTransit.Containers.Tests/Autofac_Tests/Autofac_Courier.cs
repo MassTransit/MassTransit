@@ -50,6 +50,39 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
 
     [TestFixture]
+    public class AutofacCourier_ExecuteActivity_Endpoint :
+        Courier_ExecuteActivity_Endpoint
+    {
+        readonly IContainer _container;
+
+        public AutofacCourier_ExecuteActivity_Endpoint()
+        {
+            var builder = new ContainerBuilder();
+            builder.AddMassTransit(cfg =>
+            {
+                cfg.AddExecuteActivity<SetVariableActivity, SetVariableArguments>()
+                    .Endpoint(e => e.Name = "custom-setvariable-execute");
+
+                cfg.AddBus(context => BusControl);
+            });
+
+            _container = builder.Build();
+        }
+
+        [OneTimeTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigureEndpoints(_container);
+        }
+    }
+
+
+    [TestFixture]
     public class AutofacCourier_Activity :
         Courier_Activity
     {
@@ -77,6 +110,39 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             IReceiveEndpointConfigurator compensateEndpointConfigurator)
         {
             executeEndpointConfigurator.ConfigureActivity(compensateEndpointConfigurator, _container, typeof(TestActivity));
+        }
+    }
+
+
+    [TestFixture]
+    public class AutofacCourier_Activity_Endpoint :
+        Courier_Activity_Endpoint
+    {
+        readonly IContainer _container;
+
+        public AutofacCourier_Activity_Endpoint()
+        {
+            var builder = new ContainerBuilder();
+            builder.AddMassTransit(cfg =>
+            {
+                cfg.AddActivity<TestActivity, TestArguments, TestLog>()
+                    .Endpoints(e => e.Name = "custom-testactivity-execute", e => e.Name = "custom-testactivity-compensate");
+
+                cfg.AddBus(context => BusControl);
+            });
+
+            _container = builder.Build();
+        }
+
+        [OneTimeTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigureEndpoints(_container);
         }
     }
 }

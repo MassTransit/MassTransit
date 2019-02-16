@@ -28,13 +28,13 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <typeparam name="TStateMachine"></typeparam>
         /// <typeparam name="TInstance"></typeparam>
-        public static void AddSagaStateMachine<TStateMachine, TInstance>(this IServiceCollectionConfigurator configurator)
+        public static ISagaRegistrationConfigurator<TInstance> AddSagaStateMachine<TStateMachine, TInstance>(this IServiceCollectionConfigurator configurator)
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
             var registrar = new DependencyInjectionSagaStateMachineRegistrar(configurator.Collection);
 
-            configurator.AddSagaStateMachine<TStateMachine, TInstance>(registrar);
+            return configurator.AddSagaStateMachine<TStateMachine, TInstance>(registrar);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace MassTransit
         /// <param name="type">The type to use to identify the assembly and namespace to scan</param>
         /// <param name="filter"></param>
         public static void AddSagaStateMachinesFromNamespaceContaining(this IServiceCollectionConfigurator configurator, Type type, Func<Type, bool> filter =
-         null)
+            null)
         {
             var registrar = new DependencyInjectionSagaStateMachineRegistrar(configurator.Collection);
 

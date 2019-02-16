@@ -46,10 +46,50 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             _container.Dispose();
         }
 
-
         protected override void ConfigureSaga(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.ConfigureSaga<SimpleSaga>(_container);
+        }
+
+        protected override ISagaRepository<T> GetSagaRepository<T>()
+        {
+            return _container.Resolve<ISagaRepository<T>>();
+        }
+    }
+
+
+    public class Autofac_Saga_Endpoint :
+        Common_Saga_Endpoint
+    {
+        readonly IContainer _container;
+
+        public Autofac_Saga_Endpoint()
+        {
+            var builder = new ContainerBuilder();
+            builder.AddMassTransit(x =>
+            {
+                x.AddSaga<SimpleSaga>()
+                    .Endpoint(e => e.Name = "custom-endpoint-name");
+
+                x.AddBus(provider => BusControl);
+            });
+
+            builder.RegisterGeneric(typeof(InMemorySagaRepository<>))
+                .As(typeof(ISagaRepository<>))
+                .SingleInstance();
+
+            _container = builder.Build();
+        }
+
+        [OneTimeTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigureEndpoints(_container);
         }
 
         protected override ISagaRepository<T> GetSagaRepository<T>()

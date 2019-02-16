@@ -93,4 +93,35 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected abstract void ConfigureSaga(IInMemoryReceiveEndpointConfigurator configurator);
     }
+
+
+    public abstract class Common_Saga_Endpoint :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_handle_the_message()
+        {
+            Guid sagaId = NewId.NextGuid();
+
+            var message = new FirstSagaMessage {CorrelationId = sagaId};
+
+            var sendEndpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/custom-endpoint-name"));
+
+            await sendEndpoint.Send(message);
+
+            Guid? foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(message.CorrelationId, TestTimeout);
+
+            foundId.HasValue.ShouldBe(true);
+        }
+
+        protected abstract ISagaRepository<T> GetSagaRepository<T>()
+            where T : class, ISaga;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            ConfigureEndpoints(configurator);
+        }
+
+        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
+    }
 }

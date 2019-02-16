@@ -10,14 +10,24 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Registration
+namespace MassTransit.Definition
 {
-    using System;
+    using Courier;
 
 
-    public interface IConsumerRegistrationConfigurator<TConsumer>
-        where TConsumer : class, IConsumer
+    public class CompensateActivityEndpointDefinition<TActivity, TLog> :
+        SettingsEndpointDefinition<CompensateActivity<TLog>>
+        where TActivity : class, CompensateActivity<TLog>
+        where TLog : class
     {
-        void Endpoint(Action<IConsumerEndpointRegistrationConfigurator<TConsumer>> configure);
+        public CompensateActivityEndpointDefinition(IEndpointSettings<IEndpointDefinition<CompensateActivity<TLog>>> settings)
+            : base(settings)
+        {
+        }
+
+        protected override string FormatEndpointName(IEndpointNameFormatter formatter)
+        {
+            return formatter.CompensateActivity<TActivity, TLog>();
+        }
     }
 }

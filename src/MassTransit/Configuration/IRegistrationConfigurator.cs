@@ -16,7 +16,6 @@ namespace MassTransit
     using ConsumeConfigurators;
     using Courier;
     using Definition;
-    using Registration;
     using Saga;
 
 
@@ -43,7 +42,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configure"></param>
         /// <typeparam name="T">The saga type</typeparam>
-        void AddSaga<T>(Action<ISagaConfigurator<T>> configure = null)
+        ISagaRegistrationConfigurator<T> AddSaga<T>(Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga;
 
         /// <summary>
@@ -53,7 +52,7 @@ namespace MassTransit
         /// <param name="factory">The saga registration factory</param>
         /// <param name="configure"></param>
         /// <typeparam name="T">The saga type (or instance type, if it's a state machine)</typeparam>
-        void AddSaga<T>(SagaRegistrationFactory<T> factory, Action<ISagaConfigurator<T>> configure = null)
+        ISagaRegistrationConfigurator<T> AddSaga<T>(SagaRegistrationFactory<T> factory, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga;
 
         /// <summary>
@@ -69,7 +68,8 @@ namespace MassTransit
         /// <param name="configure"></param>
         /// <typeparam name="TActivity">The activity type</typeparam>
         /// <typeparam name="TArguments">The argument type</typeparam>
-        void AddExecuteActivity<TActivity, TArguments>(Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
+        IExecuteActivityRegistrationConfigurator<TActivity, TArguments> AddExecuteActivity<TActivity, TArguments>(
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class;
 
@@ -88,7 +88,8 @@ namespace MassTransit
         /// <typeparam name="TActivity">The activity type</typeparam>
         /// <typeparam name="TArguments">The argument type</typeparam>
         /// <typeparam name="TLog">The log type</typeparam>
-        void AddActivity<TActivity, TArguments, TLog>(Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute = null,
+        IActivityRegistrationConfigurator<TActivity, TArguments, TLog> AddActivity<TActivity, TArguments, TLog>(
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute = null,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate = null)
             where TActivity : class, Activity<TArguments, TLog>
             where TLog : class

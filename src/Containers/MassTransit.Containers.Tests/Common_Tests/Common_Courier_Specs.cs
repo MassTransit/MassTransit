@@ -64,6 +64,44 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
+    public abstract class Courier_ExecuteActivity_Endpoint :
+        InMemoryTestFixture
+    {
+        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        Guid _trackingNumber;
+
+        [Test]
+        public async Task Should_register_and_execute_the_activity()
+        {
+            _completed = SubscribeHandler<RoutingSlipCompleted>();
+            _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
+
+            _trackingNumber = NewId.NextGuid();
+            var builder = new RoutingSlipBuilder(_trackingNumber);
+            builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
+
+            builder.AddActivity("SetVariableActivity", new Uri("loopback://localhost/custom-setvariable-execute"), new
+            {
+                Key = "Hello",
+                Value = "Hello"
+            });
+
+            await Bus.Execute(builder.Build());
+
+            await _completed;
+            await _activityCompleted;
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            ConfigureEndpoints(configurator);
+        }
+
+        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
+    }
+
+
     public abstract class Courier_Activity :
         InMemoryTestFixture
     {
@@ -108,5 +146,42 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected abstract void ConfigureActivity(IReceiveEndpointConfigurator executeEndpointConfigurator,
             IReceiveEndpointConfigurator compensateEndpointConfigurator);
+    }
+
+
+    public abstract class Courier_Activity_Endpoint :
+        InMemoryTestFixture
+    {
+        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        Guid _trackingNumber;
+
+        [Test]
+        public async Task Should_register_and_execute_the_activity()
+        {
+            _completed = SubscribeHandler<RoutingSlipCompleted>();
+            _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
+
+            _trackingNumber = NewId.NextGuid();
+            var builder = new RoutingSlipBuilder(_trackingNumber);
+            builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
+
+            builder.AddActivity("TestActivity", new Uri("loopback://localhost/custom-testactivity-execute"), new
+            {
+                Value = "Hello"
+            });
+
+            await Bus.Execute(builder.Build());
+
+            await _completed;
+            await _activityCompleted;
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            ConfigureEndpoints(configurator);
+        }
+
+        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
     }
 }

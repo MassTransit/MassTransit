@@ -15,6 +15,9 @@ namespace MassTransit.Registration
     using Saga;
 
 
-    public delegate ISagaRegistration SagaRegistrationFactory<TSaga>(IContainerRegistrar registrar)
-        where TSaga : class, ISaga;
+    public interface ISagaEndpointRegistrationConfigurator<TSaga> :
+        IEndpointRegistrationConfigurator
+        where TSaga : class, ISaga
+    {
+    }
 }

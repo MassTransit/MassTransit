@@ -82,7 +82,7 @@ namespace MassTransit.Registration
             _consumerRegistrations.GetOrAdd(consumerType, ValueFactory);
         }
 
-        void IRegistrationConfigurator.AddSaga<T>(Action<ISagaConfigurator<T>> configure)
+        ISagaRegistrationConfigurator<T> IRegistrationConfigurator.AddSaga<T>(Action<ISagaConfigurator<T>> configure)
         {
             ISagaRegistration ValueFactory(Type type)
             {
@@ -91,16 +91,20 @@ namespace MassTransit.Registration
                 return new SagaRegistration<T>();
             }
 
-            var configurator = _sagaRegistrations.GetOrAdd(typeof(T), ValueFactory);
+            var registration = _sagaRegistrations.GetOrAdd(typeof(T), ValueFactory);
 
-            configurator.AddConfigureAction(configure);
+            registration.AddConfigureAction(configure);
+
+            return new SagaRegistrationConfigurator<T>(this, registration, _containerRegistrar);
         }
 
-        void IRegistrationConfigurator.AddSaga<T>(SagaRegistrationFactory<T> factory, Action<ISagaConfigurator<T>> configure)
+        ISagaRegistrationConfigurator<T> IRegistrationConfigurator.AddSaga<T>(SagaRegistrationFactory<T> factory, Action<ISagaConfigurator<T>> configure)
         {
-            var configurator = _sagaRegistrations.GetOrAdd(typeof(T), _ => factory(_containerRegistrar));
+            var registration = _sagaRegistrations.GetOrAdd(typeof(T), _ => factory(_containerRegistrar));
 
-            configurator.AddConfigureAction(configure);
+            registration.AddConfigureAction(configure);
+
+            return new SagaRegistrationConfigurator<T>(this, registration, _containerRegistrar);
         }
 
         void IRegistrationConfigurator.AddSaga(Type sagaType, Type sagaDefinitionType)
@@ -108,7 +112,8 @@ namespace MassTransit.Registration
             _sagaRegistrations.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, sagaDefinitionType, _containerRegistrar));
         }
 
-        void IRegistrationConfigurator.AddExecuteActivity<TActivity, TArguments>(Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure)
+        IExecuteActivityRegistrationConfigurator<TActivity, TArguments> IRegistrationConfigurator.AddExecuteActivity<TActivity, TArguments>(
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure)
         {
             IExecuteActivityRegistration ValueFactory(Type type)
             {
@@ -117,9 +122,11 @@ namespace MassTransit.Registration
                 return new ExecuteActivityRegistration<TActivity, TArguments>();
             }
 
-            var configurator = _executeActivityRegistrations.GetOrAdd(typeof(TActivity), ValueFactory);
+            var registration = _executeActivityRegistrations.GetOrAdd(typeof(TActivity), ValueFactory);
 
-            configurator.AddConfigureAction(configure);
+            registration.AddConfigureAction(configure);
+
+            return new ExecuteActivityRegistrationConfigurator<TActivity, TArguments>(this, registration, _containerRegistrar);
         }
 
         void IRegistrationConfigurator.AddExecuteActivity(Type activityType, Type activityDefinitionType)
@@ -128,7 +135,8 @@ namespace MassTransit.Registration
                 type => ExecuteActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, _containerRegistrar));
         }
 
-        void IRegistrationConfigurator.AddActivity<TActivity, TArguments, TLog>(Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute,
+        IActivityRegistrationConfigurator<TActivity, TArguments, TLog> IRegistrationConfigurator.AddActivity<TActivity, TArguments, TLog>(
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate)
         {
             IActivityRegistration ValueFactory(Type type)
@@ -142,6 +150,8 @@ namespace MassTransit.Registration
 
             registration.AddConfigureAction(configureExecute);
             registration.AddConfigureAction(configureCompensate);
+
+            return new ActivityRegistrationConfigurator<TActivity, TArguments, TLog>(this, registration, _containerRegistrar);
         }
 
         public void AddActivity(Type activityType, Type activityDefinitionType)
