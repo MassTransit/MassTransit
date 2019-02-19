@@ -7,8 +7,8 @@
 
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
-    <PackageReference Include="Automatonymous" Version="4.1.3" />
-    <PackageReference Include="GreenPipes" Version="2.1.3" />
+    <PackageReference Include="Automatonymous" Version="4.1.5" />
+    <PackageReference Include="GreenPipes" Version="2.1.4" />
     <PackageReference Include="Iesi.Collections" Version="4.0.4" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />

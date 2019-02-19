@@ -13,15 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <PackageReference Include="dapper.contrib" Version="1.50.5"/>
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+      <PackageReference Include="dapper.contrib" Version="1.50.7" />
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-      <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+      <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-      <Reference Include="System.Transactions"/>
+      <Reference Include="System.Transactions" />
   </ItemGroup>
 </Project>
