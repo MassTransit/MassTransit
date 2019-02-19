@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System.Threading;
     using GreenPipes;
     using GreenPipes.Agents;
     using Pipeline;
@@ -38,14 +39,16 @@ namespace MassTransit.Transports
         /// Start all endpoints in the collection which have not been started, and return the handles
         /// for those endpoints.
         /// </summary>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        HostReceiveEndpointHandle[] StartEndpoints();
+        HostReceiveEndpointHandle[] StartEndpoints(CancellationToken cancellationToken);
 
         /// <summary>
         /// Start a new receive endpoint
         /// </summary>
         /// <param name="endpointName"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        HostReceiveEndpointHandle Start(string endpointName);
+        HostReceiveEndpointHandle Start(string endpointName, CancellationToken cancellationToken = default);
     }
 }

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes.Agents;
 
@@ -24,7 +25,7 @@ namespace MassTransit.Transports
         /// Starts the Host, which begins the connection asynchronously.
         /// </summary>
         /// <returns></returns>
-        Task<HostHandle> Start();
+        Task<HostHandle> Start(CancellationToken cancellationToken);
 
         void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint);
     }

@@ -53,7 +53,7 @@ namespace MassTransit.HttpTransport.Transport
             throw new NotImplementedException();
         }
 
-        public override async Task<HostHandle> Start()
+        public override async Task<HostHandle> Start(CancellationToken cancellationToken)
         {
             var handlesReady = new TaskCompletionSource<HostReceiveEndpointHandle[]>();
             var hostStarted = new TaskCompletionSource<bool>();
@@ -89,7 +89,7 @@ namespace MassTransit.HttpTransport.Transport
 
             var connectionTask = HttpHostContextSupervisor.Send(connectionPipe, Stopping);
 
-            HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints();
+            HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints(cancellationToken);
 
             var hostHandle = new Handle(handles, this, _httpHostContextSupervisor, connectionTask);
 

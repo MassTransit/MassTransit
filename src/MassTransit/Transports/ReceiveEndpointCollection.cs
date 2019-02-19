@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports
+﻿namespace MassTransit.Transports
 {
     using System;
     using System.Collections.Generic;
@@ -64,18 +52,16 @@ namespace MassTransit.Transports
             }
         }
 
-        public HostReceiveEndpointHandle[] StartEndpoints()
+        public HostReceiveEndpointHandle[] StartEndpoints(CancellationToken cancellationToken)
         {
             KeyValuePair<string, IReceiveEndpointControl>[] startable;
             lock (_mutateLock)
-            {
                 startable = _endpoints.Where(x => !_handles.ContainsKey(x.Key)).ToArray();
-            }
 
-            return startable.Select(x => StartEndpoint(x.Key, x.Value)).ToArray();
+            return startable.Select(x => StartEndpoint(x.Key, x.Value, cancellationToken)).ToArray();
         }
 
-        public HostReceiveEndpointHandle Start(string endpointName)
+        public HostReceiveEndpointHandle Start(string endpointName, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(endpointName))
                 throw new ArgumentException($"The {nameof(endpointName)} must not be null or empty", nameof(endpointName));
@@ -90,7 +76,7 @@ namespace MassTransit.Transports
                     throw new ArgumentException($"The specified endpoint has already been started: {endpointName}", nameof(endpointName));
             }
 
-            return StartEndpoint(endpointName, endpoint);
+            return StartEndpoint(endpointName, endpoint, cancellationToken);
         }
 
         public void Probe(ProbeContext context)
@@ -148,11 +134,11 @@ namespace MassTransit.Transports
             await base.StopAgent(context).ConfigureAwait(false);
         }
 
-        HostReceiveEndpointHandle StartEndpoint(string endpointName, IReceiveEndpointControl endpoint)
+        HostReceiveEndpointHandle StartEndpoint(string endpointName, IReceiveEndpointControl endpoint, CancellationToken cancellationToken)
         {
             try
             {
-                var endpointReady = new ReceiveEndpointReadyObserver(endpoint);
+                var endpointReady = new ReceiveEndpointReadyObserver(endpoint, cancellationToken);
 
                 var consumeObserver = endpoint.ConnectConsumeObserver(_consumeObservers);
                 var receiveObserver = endpoint.ConnectReceiveObserver(_receiveObservers);
@@ -165,18 +151,14 @@ namespace MassTransit.Transports
                     receiveObserver, receiveEndpointObserver, consumeObserver, publishObserver, sendObserver);
 
                 lock (_mutateLock)
-                {
                     _handles.Add(endpointName, handle);
-                }
 
                 return handle;
             }
             catch
             {
                 lock (_mutateLock)
-                {
                     _endpoints.Remove(endpointName);
-                }
 
                 throw;
             }
@@ -238,9 +220,9 @@ namespace MassTransit.Transports
         {
             readonly Observer _observer;
 
-            public ReceiveEndpointReadyObserver(IReceiveEndpoint receiveEndpoint)
+            public ReceiveEndpointReadyObserver(IReceiveEndpoint receiveEndpoint, CancellationToken cancellationToken)
             {
-                _observer = new Observer(receiveEndpoint);
+                _observer = new Observer(receiveEndpoint, cancellationToken);
             }
 
             public Task<ReceiveEndpointReady> Ready => _observer.Ready;
@@ -249,12 +231,15 @@ namespace MassTransit.Transports
             class Observer :
                 IReceiveEndpointObserver
             {
+                readonly CancellationToken _cancellationToken;
                 readonly ConnectHandle _handle;
                 readonly TaskCompletionSource<ReceiveEndpointReady> _ready;
 
-                public Observer(IReceiveEndpoint endpoint)
+                public Observer(IReceiveEndpoint endpoint, CancellationToken cancellationToken)
                 {
+                    _cancellationToken = cancellationToken;
                     _ready = new TaskCompletionSource<ReceiveEndpointReady>();
+
                     _handle = endpoint.ConnectReceiveEndpointObserver(this);
                 }
 
@@ -276,9 +261,12 @@ namespace MassTransit.Transports
 
                 Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
                 {
-                    _ready.TrySetExceptionWithBackgroundContinuations(faulted.Exception);
+                    if (_cancellationToken.IsCancellationRequested)
+                    {
+                        _ready.TrySetExceptionWithBackgroundContinuations(faulted.Exception);
 
-                    _handle.Disconnect();
+                        _handle.Disconnect();
+                    }
 
                     return TaskUtil.Completed;
                 }

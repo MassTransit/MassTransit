@@ -21,7 +21,6 @@ namespace MassTransit
     using Context.Converters;
     using Events;
     using GreenPipes;
-    using GreenPipes.Internals.Extensions;
     using Logging;
     using Pipeline;
     using Topology;
@@ -135,22 +134,29 @@ namespace MassTransit
 
             Handle busHandle = null;
 
+            CancellationTokenSource tokenSource = null;
             var hosts = new List<HostHandle>();
             try
             {
                 if (_log.IsDebugEnabled)
                     _log.DebugFormat("Starting bus hosts...");
 
+                if (cancellationToken == default)
+                {
+                    tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+                    cancellationToken = tokenSource.Token;
+                }
+
                 foreach (var host in _hosts)
                 {
-                    var hostHandle = await host.Start().ConfigureAwait(false);
+                    var hostHandle = await host.Start(cancellationToken).ConfigureAwait(false);
 
                     hosts.Add(hostHandle);
                 }
 
                 busHandle = new Handle(hosts, this, _busObservable);
 
-                await busHandle.Ready.UntilCompletedOrCanceled(cancellationToken).ConfigureAwait(false);
+                await busHandle.Ready.ConfigureAwait(false);
 
                 await _busObservable.PostStart(this, busHandle.Ready).ConfigureAwait(false);
 
@@ -184,6 +190,10 @@ namespace MassTransit
                 await _busObservable.StartFaulted(this, ex).ConfigureAwait(false);
 
                 throw;
+            }
+            finally
+            {
+                tokenSource?.Dispose();
             }
         }
 
@@ -255,8 +265,6 @@ namespace MassTransit
                 _busObserver = busObserver;
                 _hostHandles = hostHandles.ToArray();
             }
-
-            public bool Stopped => _stopped;
 
             public Task<BusReady> Ready => ReadyOrNot(_hostHandles.Select(x => x.Ready));
 

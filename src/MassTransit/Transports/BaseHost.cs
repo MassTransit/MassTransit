@@ -13,6 +13,7 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
     using GreenPipes;
@@ -77,12 +78,12 @@ namespace MassTransit.Transports
             return _receiveEndpoints.ConnectSendObserver(observer);
         }
 
-        public virtual Task<HostHandle> Start()
+        public virtual Task<HostHandle> Start(CancellationToken cancellationToken)
         {
             if (_handle != null)
                 throw new MassTransitException($"The host was already started: {_hostConfiguration.HostAddress}");
 
-            HostReceiveEndpointHandle[] handles = _receiveEndpoints.StartEndpoints();
+            HostReceiveEndpointHandle[] handles = _receiveEndpoints.StartEndpoints(cancellationToken);
 
             _handle = new StartHostHandle(this, handles, GetAgentHandles());
 
