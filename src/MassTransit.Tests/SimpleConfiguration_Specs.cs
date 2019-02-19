@@ -42,13 +42,13 @@ namespace MassTransit.Tests
                 {
                     e.Saga(new InMemorySagaRepository<SimpleSaga>(), s =>
                     {
-                        s.UseConcurrencyLimit(1);
+                        s.UseConcurrentMessageLimit(1);
                         s.UseRateLimit(1000);
                     });
 
                     e.Consumer<MyConsumer>(c =>
                     {
-                        c.UseConcurrencyLimit(1);
+                        c.UseConcurrentMessageLimit(1);
                         c.UseRateLimit(100);
                     });
 

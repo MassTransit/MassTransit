@@ -15,6 +15,8 @@ namespace MassTransit.Tests.Conventional
     using System;
     using System.Threading.Tasks;
     using ConsumeConnectors;
+    using GreenPipes;
+    using GreenPipes.Introspection;
     using Internals.Extensions;
     using NUnit.Framework;
     using TestFramework;
@@ -28,7 +30,6 @@ namespace MassTransit.Tests.Conventional
         TaskCompletionSource<MessageA> _receivedA;
         TaskCompletionSource<MessageB> _receivedB;
 
-
         [TearDown]
         public Task TearDown()
         {
@@ -36,13 +37,14 @@ namespace MassTransit.Tests.Conventional
             return TaskUtil.Completed;
         }
 
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             base.ConfigureInMemoryReceiveEndpoint(configurator);
 
             _receivedA = GetTask<MessageA>();
             _receivedB = GetTask<MessageB>();
+
+            configurator.UseMessageRetry(r => r.Interval(1, 100));
 
             ConsumerConvention.Register<CustomConsumerConvention>();
 
@@ -87,10 +89,17 @@ namespace MassTransit.Tests.Conventional
         }
 
 
+        [Test, Explicit]
+        public void Should_wonderful_display()
+        {
+            ProbeResult result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
         [Test]
         public async Task Should_find_the_message_handlers()
         {
-
             await Bus.Publish<MessageA>(new {Value = "Hello"});
             await Bus.Publish<MessageB>(new {Name = "World"});
 
@@ -99,9 +108,10 @@ namespace MassTransit.Tests.Conventional
         }
     }
 
+
     [TestFixture]
     public class Configuring_a_consumer_by_default_conventions :
-    InMemoryTestFixture
+        InMemoryTestFixture
     {
         TaskCompletionSource<MessageA> _receivedA;
         TaskCompletionSource<MessageB> _receivedB;
@@ -134,7 +144,6 @@ namespace MassTransit.Tests.Conventional
             {
                 _receivedA.TrySetResult(context.Message);
                 return Task.FromResult(0);
-
             }
 
             public void Consume(MessageB message)
@@ -159,22 +168,21 @@ namespace MassTransit.Tests.Conventional
         [Test]
         public async Task Should_find_the_message_handlers()
         {
-
-            await Bus.Publish<MessageA>(new { Value = "Hello" });
-            await Bus.Publish<MessageB>(new { Name = "World" });
+            await Bus.Publish<MessageA>(new {Value = "Hello"});
+            await Bus.Publish<MessageB>(new {Name = "World"});
 
             await _receivedA.Task;
             await _receivedB.Task;
         }
     }
 
+
     [TestFixture]
     public class Configuring_a_consumer_without_a_matching_convention :
-    InMemoryTestFixture
+        InMemoryTestFixture
     {
         TaskCompletionSource<MessageA> _receivedA;
         TaskCompletionSource<MessageB> _receivedB;
-
 
         [TearDown]
         public Task TearDown()
@@ -183,7 +191,6 @@ namespace MassTransit.Tests.Conventional
             ConsumerConvention.Register<LegacyConsumerConvention>();
             return TaskUtil.Completed;
         }
-
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -216,7 +223,6 @@ namespace MassTransit.Tests.Conventional
             {
                 _receivedA.TrySetResult(context.Message);
                 return Task.FromResult(0);
-
             }
 
             public void Consume(MessageB message)
@@ -241,8 +247,8 @@ namespace MassTransit.Tests.Conventional
         [Test]
         public async Task Should_not_find_the_message_handlers()
         {
-            await Bus.Publish<MessageA>(new { Value = "Hello" });
-            await Bus.Publish<MessageB>(new { Name = "World" });
+            await Bus.Publish<MessageA>(new {Value = "Hello"});
+            await Bus.Publish<MessageB>(new {Name = "World"});
 
             Assert.That(async () => await _receivedA.Task.WithTimeout(TimeSpan.FromSeconds(3)), Throws.TypeOf<OperationCanceledException>());
             Assert.That(async () => await _receivedB.Task.WithTimeout(TimeSpan.FromSeconds(3)), Throws.TypeOf<OperationCanceledException>());

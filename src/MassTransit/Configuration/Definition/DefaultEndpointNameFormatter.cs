@@ -1,15 +1,3 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Definition
 {
     using System;
@@ -43,13 +31,17 @@ namespace MassTransit.Definition
             var sb = new StringBuilder(host.MachineName.Length + host.ProcessName.Length + tag.Length + 35);
 
             foreach (var c in host.MachineName)
+            {
                 if (char.IsLetterOrDigit(c) || c == '_')
                     sb.Append(c);
+            }
 
             sb.Append('_');
             foreach (var c in host.ProcessName)
+            {
                 if (char.IsLetterOrDigit(c) || c == '_')
                     sb.Append(c);
+            }
 
             sb.Append('_');
             sb.Append(tag);
@@ -93,7 +85,7 @@ namespace MassTransit.Definition
         {
             const string consumer = "Consumer";
 
-            string consumerName = typeName;
+            var consumerName = typeName;
             if (consumerName.EndsWith(consumer, StringComparison.InvariantCultureIgnoreCase))
                 consumerName = consumerName.Substring(0, consumerName.Length - consumer.Length);
 
@@ -104,7 +96,7 @@ namespace MassTransit.Definition
         {
             const string saga = "Saga";
 
-            string sagaName = typeName;
+            var sagaName = typeName;
             if (sagaName.EndsWith(saga, StringComparison.InvariantCultureIgnoreCase))
                 sagaName = sagaName.Substring(0, sagaName.Length - saga.Length);
 
@@ -115,7 +107,7 @@ namespace MassTransit.Definition
         {
             const string activity = "Activity";
 
-            string activityName = typeName;
+            var activityName = typeName;
             if (activityName.EndsWith(activity, StringComparison.InvariantCultureIgnoreCase))
                 activityName = activityName.Substring(0, activityName.Length - activity.Length);
 

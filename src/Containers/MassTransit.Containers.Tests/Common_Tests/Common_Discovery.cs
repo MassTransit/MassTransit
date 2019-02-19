@@ -167,7 +167,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             {
                 EndpointName = "ping-queue";
 
-                ConcurrencyLimit = 1;
+                ConcurrentMessageLimit = 1;
 
                 Request<PingMessage>(x =>
                 {

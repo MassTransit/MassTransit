@@ -1,35 +1,23 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Definition
 {
     using System;
-    using GreenPipes;
-    using GreenPipes.Filters;
     using Saga;
 
 
+    /// <summary>
+    /// A saga definition defines the configuration for a saga, which can be used by the automatic registration code to
+    /// configure the consumer on a receive endpoint.
+    /// </summary>
+    /// <typeparam name="TSaga"></typeparam>
     public class SagaDefinition<TSaga> :
         ISagaDefinition<TSaga>
         where TSaga : class, ISaga
     {
-        readonly Lazy<IFilter<SagaConsumeContext<TSaga>>> _filter;
-        int? _concurrencyLimit;
+        int? _concurrentMessageLimit;
         string _endpointName;
 
         protected SagaDefinition()
         {
-            _filter = new Lazy<IFilter<SagaConsumeContext<TSaga>>>(() =>
-                new ConcurrencyLimitFilter<SagaConsumeContext<TSaga>>(_concurrencyLimit.Value));
         }
 
         /// <summary>
@@ -41,26 +29,30 @@ namespace MassTransit.Definition
             set => _endpointName = value;
         }
 
-        protected int ConcurrencyLimit
+        /// <summary>
+        /// Set the concurrent message limit for the saga, which limits how many saga instances are able to concurrently
+        /// consume messages.
+        /// </summary>
+        protected int ConcurrentMessageLimit
         {
-            set => _concurrencyLimit = value;
+            set => _concurrentMessageLimit = value;
         }
 
-        public void Configure(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<TSaga> sagaConfigurator)
+        void ISagaDefinition<TSaga>.Configure(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<TSaga> sagaConfigurator)
         {
-            if (_concurrencyLimit.HasValue)
-                sagaConfigurator.UseFilter(_filter.Value);
+            if (_concurrentMessageLimit.HasValue)
+                sagaConfigurator.UseConcurrentMessageLimit(_concurrentMessageLimit.Value);
 
             ConfigureSaga(endpointConfigurator, sagaConfigurator);
         }
 
-        public Type SagaType => typeof(TSaga);
+        Type ISagaDefinition.SagaType => typeof(TSaga);
 
-        public string GetEndpointName(IEndpointNameFormatter formatter)
+        string ISagaDefinition.GetEndpointName(IEndpointNameFormatter formatter)
         {
-            return !string.IsNullOrWhiteSpace(_endpointName)
-                ? _endpointName
-                : formatter.Saga<TSaga>();
+            return string.IsNullOrWhiteSpace(_endpointName)
+                ? _endpointName = formatter.Saga<TSaga>()
+                : _endpointName;
         }
 
         /// <summary>

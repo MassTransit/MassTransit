@@ -31,7 +31,8 @@ namespace Automatonymous.SagaConfigurators
         readonly ISagaSpecification<TInstance> _specification;
         readonly SagaStateMachine<TInstance> _stateMachine;
 
-        public StateMachineSagaConfigurator(SagaStateMachine<TInstance> stateMachine, ISagaRepository<TInstance> repository, ISagaConfigurationObserver observer)
+        public StateMachineSagaConfigurator(SagaStateMachine<TInstance> stateMachine, ISagaRepository<TInstance> repository,
+            ISagaConfigurationObserver observer)
         {
             _stateMachine = stateMachine;
             _repository = repository;
@@ -47,6 +48,7 @@ namespace Automatonymous.SagaConfigurators
         {
             if (_stateMachine == null)
                 yield return this.Failure("StateMachine", "must not be null");
+
             if (_repository == null)
                 yield return this.Failure("Repository", "must not be null");
 
@@ -80,6 +82,11 @@ namespace Automatonymous.SagaConfigurators
         public void AddPipeSpecification(IPipeSpecification<SagaConsumeContext<TInstance>> specification)
         {
             _specification.AddPipeSpecification(specification);
+        }
+
+        public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
+        {
+            return _specification.ConnectSagaConfigurationObserver(observer);
         }
     }
 }

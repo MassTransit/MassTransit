@@ -47,11 +47,6 @@ namespace MassTransit.ConsumeConfigurators
             return _specification.ConnectConsumerConfigurationObserver(observer);
         }
 
-        void IConsumerConfigurator<TConsumer>.ConfigureMessage<T>(Action<IConsumerMessageConfigurator<T>> configure)
-        {
-            _specification.Message(configure);
-        }
-
         void IConsumerConfigurator<TConsumer>.Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
         {
             _specification.Message(configure);

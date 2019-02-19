@@ -56,12 +56,14 @@ namespace MassTransit.SagaConfigurators
             _specification.Message(configure);
         }
 
-        public void Message<T>(Action<ISagaMessageConfigurator<T>> configure) where T : class
+        public void Message<T>(Action<ISagaMessageConfigurator<T>> configure)
+            where T : class
         {
             _specification.Message(configure);
         }
 
-        public void SagaMessage<T>(Action<ISagaMessageConfigurator<TSaga, T>> configure) where T : class
+        public void SagaMessage<T>(Action<ISagaMessageConfigurator<TSaga, T>> configure)
+            where T : class
         {
             _specification.SagaMessage(configure);
         }
@@ -69,6 +71,11 @@ namespace MassTransit.SagaConfigurators
         public void AddPipeSpecification(IPipeSpecification<SagaConsumeContext<TSaga>> specification)
         {
             _specification.AddPipeSpecification(specification);
+        }
+
+        public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
+        {
+            return _specification.ConnectSagaConfigurationObserver(observer);
         }
     }
 }

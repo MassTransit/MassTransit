@@ -100,5 +100,10 @@ namespace MassTransit.ConsumeConfigurators
         {
             InstanceConnectorCache<TInstance>.Connector.ConnectInstance(builder, _instance, _specification);
         }
+
+        public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
+        {
+            return _specification.ConnectConsumerConfigurationObserver(observer);
+        }
     }
 }

@@ -15,13 +15,11 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using Builders;
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Specifications;
-    using Util;
 
 
     public class RabbitMqConsumeTopology :

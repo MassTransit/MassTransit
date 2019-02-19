@@ -29,18 +29,13 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_allow_reconfiguration()
         {
-            var updated = ConnectPublishHandler<ConcurrencyLimitUpdated>();
-            var faulted = ConnectPublishHandler<Fault<SetConcurrencyLimit>>();
+            var client = Bus.CreateRequestClient<SetConcurrencyLimit>();
 
-            await Bus.Publish<SetConcurrencyLimit>(new
+            var response = await client.GetResponse<ConcurrencyLimitUpdated>(new
             {
                 ConcurrencyLimit = 16,
                 Timestamp = DateTime.UtcNow
             });
-
-            await Task.WhenAny(updated, faulted);
-
-            Assert.AreEqual(TaskStatus.RanToCompletion, updated.Status);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

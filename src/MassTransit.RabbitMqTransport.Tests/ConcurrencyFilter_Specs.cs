@@ -14,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
 
 
@@ -29,12 +28,13 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             for (var i = 0; i < _messageCount; i++)
             {
-                var task = Bus.Publish(new A());
+                Bus.Publish(new A());
+                Bus.Publish(new B());
             }
 
             await _complete.Task;
 
-            Assert.AreEqual(1, _consumer.MaxDeliveryCount);
+            Assert.AreEqual(2, _consumer.MaxDeliveryCount);
         }
 
         Consumer _consumer;
@@ -47,23 +47,31 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             _consumer = new Consumer();
 
-            configurator.Consumer(() => _consumer, x => x.UseConcurrencyLimit(1));
+            configurator.Instance(_consumer, x => x.UseConcurrentMessageLimit(2));
         }
 
 
         class Consumer :
-            IConsumer<A>
+            IConsumer<A>,
+            IConsumer<B>
         {
             int _currentPendingDeliveryCount;
             long _deliveryCount;
             int _maxPendingDeliveryCount;
 
-            public int MaxDeliveryCount
+            public int MaxDeliveryCount => _maxPendingDeliveryCount;
+
+            public Task Consume(ConsumeContext<A> context)
             {
-                get { return _maxPendingDeliveryCount; }
+                return OnConsume();
             }
 
-            public async Task Consume(ConsumeContext<A> context)
+            public Task Consume(ConsumeContext<B> context)
+            {
+                return OnConsume();
+            }
+
+            async Task OnConsume()
             {
                 Interlocked.Increment(ref _deliveryCount);
 
@@ -82,6 +90,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
         class A
+        {
+        }
+
+
+        class B
         {
         }
     }

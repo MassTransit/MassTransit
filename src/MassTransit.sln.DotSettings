@@ -197,18 +197,6 @@
 	<s:Boolean x:Key="/Default/CodeStyle/CSharpUsing/AllowAlias/@EntryValue">False</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeStyle/CSharpUsing/CanUseGlobalAlias/@EntryValue">False</s:Boolean>
 	<s:String x:Key="/Default/CodeStyle/CSharpVarKeywordUsage/ForOtherTypes/@EntryValue">UseVarWhenEvident</s:String>
-	<s:String x:Key="/Default/CodeStyle/FileHeader/FileHeaderText/@EntryValue">Copyright 2007-$CURRENT_YEAR$ Chris Patterson, Dru Sellers, Travis Smith, et. al.&#xD;
- &#xD;
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use&#xD;
-this file except in compliance with the License. You may obtain a copy of the &#xD;
-License at &#xD;
-&#xD;
-    http://www.apache.org/licenses/LICENSE-2.0 &#xD;
-&#xD;
-Unless required by applicable law or agreed to in writing, software distributed&#xD;
-under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR &#xD;
-CONDITIONS OF ANY KIND, either express or implied. See the License for the &#xD;
-specific language governing permissions and limitations under the License.</s:String>
 	<s:Boolean x:Key="/Default/CodeStyle/Naming/CSharpNaming/ApplyAutoDetectedRules/@EntryValue">False</s:Boolean>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/PredefinedNamingRules/=Interfaces/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="I" Suffix="" Style="AaBb"&gt;&lt;ExtraRule Prefix="" Suffix="" Style="AaBb" /&gt;&lt;/Policy&gt;</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/PredefinedNamingRules/=PrivateInstanceFields/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="_" Suffix="" Style="aaBb" /&gt;</s:String>

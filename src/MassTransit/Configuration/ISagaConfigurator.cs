@@ -16,10 +16,12 @@ namespace MassTransit
     using ConsumeConfigurators;
     using GreenPipes;
     using Saga;
+    using SagaConfigurators;
 
 
     public interface ISagaConfigurator<TSaga> :
         IPipeConfigurator<SagaConsumeContext<TSaga>>,
+        ISagaConfigurationObserverConnector,
         IConsumeConfigurator
         where TSaga : class, ISaga
     {

@@ -36,11 +36,6 @@ namespace MassTransit.ConsumerSpecifications
             _handles = _messageTypes.Values.Select(x => x.ConnectConsumerConfigurationObserver(_observers)).ToArray();
         }
 
-        void IConsumerConfigurator<TConsumer>.ConfigureMessage<T>(Action<IConsumerMessageConfigurator<T>> configure)
-        {
-            Message(configure);
-        }
-
         public void Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
             where T : class
         {

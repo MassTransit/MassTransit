@@ -81,6 +81,7 @@
   * [Subscriptions](advanced/courier/subscriptions.md)
 * [Middleware](advanced/middleware/README.md)
   * [Receive Pipeline](advanced/middleware/receive.md)
+  * [Concurrent Message Limit](advanced/middleware/concurrency-limit.md)
   * [Circuit breaker](advanced/middleware/circuit-breaker.md)
   * [Rate limiter](advanced/middleware/rate-limiter.md)
   * [Latest](advanced/middleware/latest.md)
