@@ -23,25 +23,27 @@ namespace MassTransit.Policies
             Func<ConsumeContext<T>, Task> retryMethod)
             where T : class
         {
-            RetryPolicyContext<ConsumeContext<T>> policyContext = retryPolicy.CreatePolicyContext(context);
-
-            try
+            using (RetryPolicyContext<ConsumeContext<T>> policyContext = retryPolicy.CreatePolicyContext(context))
             {
-                await retryMethod(policyContext.Context).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                RetryContext<ConsumeContext<T>> retryContext;
-                if (context.TryGetPayload(out retryContext))
-                    throw;
 
-                if (!policyContext.CanRetry(exception, out retryContext))
+                try
                 {
-                    context.GetOrAddPayload(() => retryContext);
-                    throw;
+                    await retryMethod(policyContext.Context).ConfigureAwait(false);
                 }
+                catch (Exception exception)
+                {
+                    RetryContext<ConsumeContext<T>> retryContext;
+                    if (context.TryGetPayload(out retryContext))
+                        throw;
 
-                await Attempt(retryContext, retryMethod).ConfigureAwait(false);
+                    if (!policyContext.CanRetry(exception, out retryContext))
+                    {
+                        context.GetOrAddPayload(() => retryContext);
+                        throw;
+                    }
+
+                    await Attempt(retryContext, retryMethod).ConfigureAwait(false);
+                }
             }
         }
 

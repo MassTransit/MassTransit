@@ -48,39 +48,24 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
-            RetryPolicyContext<ConsumeContext<T>> policyContext = _retryPolicy.CreatePolicyContext(context);
-
-            await _observers.PostCreate(policyContext).ConfigureAwait(false);
-
-            try
+            using (RetryPolicyContext<ConsumeContext<T>> policyContext = _retryPolicy.CreatePolicyContext(context))
             {
-                await next.Send(policyContext.Context).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException exception) when (exception.CancellationToken == context.CancellationToken)
-            {
-                throw;
-            }
-            catch (Exception exception)
-            {
-                if (context.CancellationToken.IsCancellationRequested)
-                    context.CancellationToken.ThrowIfCancellationRequested();
+                await _observers.PostCreate(policyContext).ConfigureAwait(false);
 
-                if (!policyContext.CanRetry(exception, out RetryContext<ConsumeContext<T>> retryContext))
+                try
                 {
-                    await retryContext.RetryFaulted(exception).ConfigureAwait(false);
-
-                    await _observers.RetryFault(retryContext).ConfigureAwait(false);
-
-                    if (_retryPolicy.IsHandled(exception))
-                        context.GetOrAddPayload(() => retryContext);
-
+                    await next.Send(policyContext.Context).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException exception) when (exception.CancellationToken == context.CancellationToken)
+                {
                     throw;
                 }
-
-                int previousDeliveryCount = context.GetRedeliveryCount();
-                for (int retryIndex = 0; retryIndex < previousDeliveryCount; retryIndex++)
+                catch (Exception exception)
                 {
-                    if (!retryContext.CanRetry(exception, out retryContext))
+                    if (context.CancellationToken.IsCancellationRequested)
+                        context.CancellationToken.ThrowIfCancellationRequested();
+
+                    if (!policyContext.CanRetry(exception, out RetryContext<ConsumeContext<T>> retryContext))
                     {
                         await retryContext.RetryFaulted(exception).ConfigureAwait(false);
 
@@ -91,25 +76,44 @@ namespace MassTransit.Pipeline.Filters
 
                         throw;
                     }
-                }
 
-                await _observers.PostFault(retryContext).ConfigureAwait(false);
+                    int previousDeliveryCount = context.GetRedeliveryCount();
+                    for (int retryIndex = 0; retryIndex < previousDeliveryCount; retryIndex++)
+                    {
+                        if (!retryContext.CanRetry(exception, out retryContext))
+                        {
+                            await retryContext.RetryFaulted(exception).ConfigureAwait(false);
 
-                try
-                {
-                    if (!context.TryGetPayload(out MessageRedeliveryContext redeliveryContext))
-                        throw new ContextException("The message redelivery context was not available to delay the message", exception);
+                            await _observers.RetryFault(retryContext).ConfigureAwait(false);
 
-                    var delay = retryContext.Delay ?? TimeSpan.Zero;
+                            if (_retryPolicy.IsHandled(exception))
+                                context.GetOrAddPayload(() => retryContext);
 
-                    await redeliveryContext.ScheduleRedelivery(delay).ConfigureAwait(false);
+                            throw;
+                        }
+                    }
 
-                    await context.NotifyConsumed(context, context.ReceiveContext.ElapsedTime, TypeMetadataCache<RedeliveryRetryFilter<T>>.ShortName)
-                        .ConfigureAwait(false);
-                }
-                catch (Exception redeliveryException)
-                {
-                    throw new ContextException("The message delivery could not be rescheduled", new AggregateException(redeliveryException, exception));
+                    await _observers.PostFault(retryContext).ConfigureAwait(false);
+
+                    try
+                    {
+                        if (!context.TryGetPayload(out MessageRedeliveryContext redeliveryContext))
+                            throw new ContextException(
+                                "The message redelivery context was not available to delay the message", exception);
+
+                        var delay = retryContext.Delay ?? TimeSpan.Zero;
+
+                        await redeliveryContext.ScheduleRedelivery(delay).ConfigureAwait(false);
+
+                        await context.NotifyConsumed(context, context.ReceiveContext.ElapsedTime,
+                                TypeMetadataCache<RedeliveryRetryFilter<T>>.ShortName)
+                            .ConfigureAwait(false);
+                    }
+                    catch (Exception redeliveryException)
+                    {
+                        throw new ContextException("The message delivery could not be rescheduled",
+                            new AggregateException(redeliveryException, exception));
+                    }
                 }
             }
         }
