@@ -27,26 +27,27 @@ namespace MassTransit.Policies
         public static async Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod, CancellationToken cancellationToken = default(CancellationToken))
         {
             var inlinePipeContext = new InlinePipeContext(cancellationToken);
-            RetryPolicyContext<InlinePipeContext> policyContext = retryPolicy.CreatePolicyContext(inlinePipeContext);
-
-            try
+            using (RetryPolicyContext<InlinePipeContext> policyContext = retryPolicy.CreatePolicyContext(inlinePipeContext))
             {
-                await retryMethod().ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                if (cancellationToken.IsCancellationRequested)
+                try
                 {
-                    if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == cancellationToken)
+                    await retryMethod().ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == cancellationToken)
+                            throw;
+
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+
+                    if (!policyContext.CanRetry(exception, out RetryContext<InlinePipeContext> retryContext))
                         throw;
 
-                    cancellationToken.ThrowIfCancellationRequested();
+                    await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
                 }
-
-                if (!policyContext.CanRetry(exception, out RetryContext<InlinePipeContext> retryContext))
-                    throw;
-
-                await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
             }
         }
 
@@ -54,26 +55,28 @@ namespace MassTransit.Policies
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var inlinePipeContext = new InlinePipeContext(cancellationToken);
-            RetryPolicyContext<InlinePipeContext> policyContext = retryPolicy.CreatePolicyContext(inlinePipeContext);
-
-            try
+            using (RetryPolicyContext<InlinePipeContext> policyContext = retryPolicy.CreatePolicyContext(inlinePipeContext))
             {
-                return await retryMethod().ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                if (cancellationToken.IsCancellationRequested)
+                try
                 {
-                    if (exception is OperationCanceledException canceledException && canceledException.CancellationToken == cancellationToken)
+                    return await retryMethod().ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        if (exception is OperationCanceledException canceledException &&
+                            canceledException.CancellationToken == cancellationToken)
+                            throw;
+
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+
+                    if (!policyContext.CanRetry(exception, out RetryContext<InlinePipeContext> retryContext))
                         throw;
 
-                    cancellationToken.ThrowIfCancellationRequested();
+                    return await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
                 }
-
-                if (!policyContext.CanRetry(exception, out RetryContext<InlinePipeContext> retryContext))
-                    throw;
-
-                return await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
             }
         }
 
