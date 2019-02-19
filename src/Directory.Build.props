@@ -3,8 +3,8 @@
 
   <PropertyGroup>
     <Product>MassTransit</Product>
-    <Copyright>Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.</Copyright>
-    <Authors>Chris Patterson;Dru Sellers;Travis Smith</Authors>
+    <Copyright>Copyright 2007-2019 Chris Patterson</Copyright>
+    <Authors>Chris Patterson</Authors>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

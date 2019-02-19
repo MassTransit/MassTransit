@@ -1,17 +1,22 @@
 # What is MassTransit?
 
-MassTransit is a free, open source, lightweight message bus for creating distributed applications using the .NET framework. MassTransit provides an [extensive set of features](http://docs.masstransit-project.com/en/latest/overview/valueadd.html) on top of existing message transports, resulting in a developer friendly way to asynchronously connect services using message-based conversation patterns. Message-based communication is a reliable and scalable way to implement a service oriented architecture.
+MassTransit is a free, open-source distributed application framework for .NET. MassTransit makes it easy to create applications and services that leverage message-based, loosely-coupled asynchronous communication for higher availability, reliability, and scalability.
+
+MassTransit sits on top of several widely supported message transports and provides an [extensive set of features](understand/additions-to-transport.md) resulting in a developer-friendly approach to build asynchronous services using message-based conversation patterns. Message-based communication is a reliable and scalable way to implement a service oriented architecture.
 
 ## Getting help
 
-Please check the [Getting help](introduction/getting-help.md) page to find useful resources if
-you have questions, concerns or issues with MassTransit.
+MassTransit has a simple and approachable API, however, distributed application development is inherently complex. If you have questions, concerns, or issues using MassTransit, please visit the [Getting help](introduction/getting-help.md) page to find a list of useful resources.
+
+## Getting started
+
+To get started using MassTransit, check out the [Quick Start](quickstart.md).
 
 ## A bit of the back story? {#a-bit-of-the-backstory}
 
 We are often asked why MassTransit was created, well here’s the story. :\)
 
-In 2007, Chris Patterson \(@phatboyg\) and Dru Sellers \(@drusellers\) met, for what Dru thinks is the first time, at the first ALT.NET conference in Austin, TX. It was at this conference that Chris and Dru not only realized that they had a lot of the same problems to solve, but also how much the standard tooling provided by Microsoft just didn't fit their needs. Surrounded by the best and brightest in .NET, the energy was there to build better tooling that supported testable processes. Combined with an awareness of the latest advances in tooling, libraries, and coding practices; they decided that a better option must exist. After searching the .NET ecosystem for a tool that would help them achieve their goals, the only real option was the venerable NServiceBus. After reviewing NServiceBus, it was determined that the only real dependency injection container supported was Spring.NET. It also became obvious that NServiceBus wasn't quite ready for external contributors to come onboard. For these reasons, they decided to embark on the quixotic trek of building their own service bus \(seriously, how hard could it be?? LOL\).
+In 2007, Chris Patterson \(@phatboyg\) and Dru Sellers \(@drusellers\) met at the first ALT.NET conference in Austin, TX. It was at this conference that Chris and Dru not only realized that they had a lot of the same problems to solve, but also how much the standard tooling provided by Microsoft just didn't fit their needs. Surrounded by the best and brightest in .NET, the energy was there to build better tooling that supported testable processes. Combined with an awareness of the latest advances in tooling, libraries, and coding practices; they decided that a better option must exist. After searching the .NET ecosystem for a tool that would help them achieve their goals, the only real option was the venerable NServiceBus. After reviewing NServiceBus, it was determined that the only real dependency injection container supported was Spring.NET. It also became obvious that NServiceBus wasn't quite ready for external contributors to come onboard. For these reasons, they decided to embark on the quixotic trek of building their own service bus \(seriously, how hard could it be?? LOL\).
 
 Initially the goals were as much about learning distributed message based systems, as well as building something both of their companies could use. The first commit was pushed to GoogleCode on 12/26/2007, and shortly there after both Dru and Chris went to production with MassTransit and both of their companies have had success in getting value out of their efforts.
 
@@ -27,6 +32,6 @@ First and foremost, we are not an Enterprise Service Bus \(ESB\). While MassTran
 
 We don’t do doodleware, you won’t find a designer, we are all about the keyboard samurais, the true in-the-trenches coder. That’s who we are, and those are our friends. If you want to draw, use a whiteboard.
 
-We don’t do FTP-&gt;WS-deathstar-&gt;BS \(not that you can’t, its just not in the box\). We focus on the experience of using one transport in a given environment, and we try to make it as smooth as possible.
+We don’t do FTP-&gt;WS-deathstar-&gt;BS \(not that you can’t, it just isn't in the box\). We focus on the experience of using one transport in a given environment, and we try to make it as smooth as possible.
 
-MassTransit is built to be used inside the firewall, its not built to be used as a means to communicate with external vendors \(it can be, again its just not in the box\), its meant to be used for getting your corporate services talking to each other and making building internal software easier.
+MassTransit is built to be used inside the firewall, it isn't built to be used as a means to communicate with external vendors \(it can be, again it just isn't in the box\), it's meant to be used for getting your corporate services talking to each other and making building internal software easier.
