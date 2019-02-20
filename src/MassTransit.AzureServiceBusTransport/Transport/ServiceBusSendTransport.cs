@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
@@ -27,7 +27,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
     /// <summary>
     /// Send messages to an azure transport using the message sender.
-    /// 
+    ///
     /// May be sensible to create a IBatchSendTransport that allows multiple
     /// messages to be sent as a single batch (perhaps using Tx support?)
     /// </summary>
@@ -197,7 +197,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
             static BrokeredMessage CreateBrokeredMessage(AzureServiceBusSendContext<T> context)
             {
-                var brokeredMessage = new BrokeredMessage(context.Body)
+                var brokeredMessage = new BrokeredMessage(context.GetBodyStream())
                 {
                     ContentType = context.ContentType.MediaType,
                     ForcePersistence = context.Durable
