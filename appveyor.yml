@@ -9,7 +9,7 @@ skip_tags: true
 
 skip_commits:
   files:
-    - docs/*
+    - docs/**/*
     - '**/*.html'
 
 image:
