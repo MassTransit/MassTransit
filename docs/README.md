@@ -4,13 +4,13 @@ MassTransit is a free, open-source distributed application framework for .NET. M
 
 MassTransit sits on top of several widely supported message transports and provides an [extensive set of features](understand/additions-to-transport.md) resulting in a developer-friendly approach to build asynchronous services using message-based conversation patterns. Message-based communication is a reliable and scalable way to implement a service oriented architecture.
 
-## Getting help
-
-MassTransit has a simple and approachable API, however, distributed application development is inherently complex. If you have questions, concerns, or issues using MassTransit, please visit the [Getting help](introduction/getting-help.md) page to find a list of useful resources.
-
 ## Getting started
 
 To get started using MassTransit, check out the [Quick Start](quickstart.md).
+
+## Getting help
+
+MassTransit has a simple and approachable API, however, distributed application development is inherently complex. If you have questions, concerns, or issues using MassTransit, please visit the [Getting help](introduction/getting-help.md) page to find a list of useful resources.
 
 ## A bit of the back story? {#a-bit-of-the-backstory}
 
