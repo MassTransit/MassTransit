@@ -87,6 +87,15 @@ namespace MassTransit.Courier
             where TLog : class;
 
         /// <summary>
+        /// Completes the activity, passing a compensation log entry
+        /// </summary>
+        /// <typeparam name="TLog"></typeparam>
+        /// <param name="logValues">An object to initialize the log properties</param>
+        /// <returns></returns>
+        ExecutionResult Completed<TLog>(object logValues)
+            where TLog : class;
+
+        /// <summary>
         /// Completes the activity, passing a compensation log entry and additional variables to set on 
         /// the routing slip
         /// </summary>
@@ -95,6 +104,17 @@ namespace MassTransit.Courier
         /// <param name="variables">An anonymous object of values to add/set as variables on the routing slip</param>
         /// <returns></returns>
         ExecutionResult CompletedWithVariables<TLog>(TLog log, object variables)
+            where TLog : class;
+
+        /// <summary>
+        /// Completes the activity, passing a compensation log entry and additional variables to set on
+        /// the routing slip
+        /// </summary>
+        /// <typeparam name="TLog"></typeparam>
+        /// <param name="logValues"></param>
+        /// <param name="variables">An anonymous object of values to add/set as variables on the routing slip</param>
+        /// <returns></returns>
+        ExecutionResult CompletedWithVariables<TLog>(object logValues, object variables)
             where TLog : class;
 
         /// <summary>

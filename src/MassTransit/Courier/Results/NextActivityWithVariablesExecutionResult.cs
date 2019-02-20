@@ -48,6 +48,14 @@ namespace MassTransit.Courier.Results
         readonly IDictionary<string, object> _variables;
 
         public NextActivityWithVariablesExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
+            RoutingSlip routingSlip, Uri compensationAddress, IDictionary<string,object> data, IDictionary<string, object> variables)
+            : base(context, publisher, activity, routingSlip, data)
+        {
+            _compensationAddress = compensationAddress;
+            _variables = variables;
+        }
+
+        public NextActivityWithVariablesExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
             RoutingSlip routingSlip, Uri compensationAddress, TLog log, IDictionary<string, object> variables)
             : base(context, publisher, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log))
         {

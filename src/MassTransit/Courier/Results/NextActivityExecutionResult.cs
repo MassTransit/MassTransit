@@ -13,6 +13,7 @@
 namespace MassTransit.Courier.Results
 {
     using System;
+    using System.Collections.Generic;
     using Contracts;
 
 
@@ -37,6 +38,13 @@ namespace MassTransit.Courier.Results
         public NextActivityExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
             Uri compensationAddress, TLog log)
             : base(context, publisher, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log))
+        {
+            _compensationAddress = compensationAddress;
+        }
+
+        public NextActivityExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
+            Uri compensationAddress, IDictionary<string, object> data)
+            : base(context, publisher, activity, routingSlip, data)
         {
             _compensationAddress = compensationAddress;
         }

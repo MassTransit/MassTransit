@@ -54,9 +54,7 @@ namespace MassTransit.TestFramework.Courier
             if (_decimalValue != decimalValue)
                 throw new ArgumentException("dateTimeValue");
 
-            TestLog log = new TestLogImpl(stringValue);
-
-            return context.Completed(log);
+            return context.Completed<TestLog>(new {OriginalValue = stringValue});
         }
 
         public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)
@@ -64,18 +62,6 @@ namespace MassTransit.TestFramework.Courier
             Console.WriteLine("TestActivity: Compensate original value: {0}", context.Log.OriginalValue);
 
             return context.Compensated();
-        }
-
-
-        class TestLogImpl :
-            TestLog
-        {
-            public TestLogImpl(string originalValue)
-            {
-                OriginalValue = originalValue;
-            }
-
-            public string OriginalValue { get; private set; }
         }
     }
 }

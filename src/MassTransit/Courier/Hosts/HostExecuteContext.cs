@@ -144,6 +144,18 @@ namespace MassTransit.Courier.Hosts
             return new NextActivityExecutionResult<TArguments, TLog>(this, _publisher, _activity, _routingSlip, _compensationAddress, log);
         }
 
+        ExecutionResult ExecuteContext.Completed<TLog>(object logValues)
+        {
+            if (logValues == null)
+                throw new ArgumentNullException(nameof(logValues));
+
+            if (_compensationAddress == null)
+                throw new InvalidCompensationAddressException(_compensationAddress);
+
+            return new NextActivityExecutionResult<TArguments, TLog>(this, _publisher, _activity, _routingSlip, _compensationAddress,
+                RoutingSlipBuilder.GetObjectAsDictionary(logValues));
+        }
+
         ExecutionResult ExecuteContext.CompletedWithVariables(IEnumerable<KeyValuePair<string, object>> variables)
         {
             if (variables == null)
@@ -166,6 +178,7 @@ namespace MassTransit.Courier.Hosts
         {
             if (log == null)
                 throw new ArgumentNullException(nameof(log));
+
             if (variables == null)
                 throw new ArgumentNullException(nameof(variables));
 
@@ -176,10 +189,26 @@ namespace MassTransit.Courier.Hosts
                 RoutingSlipBuilder.GetObjectAsDictionary(variables));
         }
 
+        ExecutionResult ExecuteContext.CompletedWithVariables<TLog>(object logValues, object variables)
+        {
+            if (logValues == null)
+                throw new ArgumentNullException(nameof(logValues));
+
+            if (variables == null)
+                throw new ArgumentNullException(nameof(variables));
+
+            if (_compensationAddress == null)
+                throw new InvalidCompensationAddressException(_compensationAddress);
+
+            return new NextActivityWithVariablesExecutionResult<TArguments, TLog>(this, _publisher, _activity, _routingSlip, _compensationAddress,
+                RoutingSlipBuilder.GetObjectAsDictionary(logValues), RoutingSlipBuilder.GetObjectAsDictionary(variables));
+        }
+
         ExecutionResult ExecuteContext.CompletedWithVariables<TLog>(TLog log, IEnumerable<KeyValuePair<string, object>> variables)
         {
             if (log == null)
                 throw new ArgumentNullException(nameof(log));
+
             if (variables == null)
                 throw new ArgumentNullException(nameof(variables));
 
@@ -202,6 +231,7 @@ namespace MassTransit.Courier.Hosts
         {
             if (log == null)
                 throw new ArgumentNullException(nameof(log));
+
             if (buildItinerary == null)
                 throw new ArgumentNullException(nameof(buildItinerary));
 
@@ -216,8 +246,10 @@ namespace MassTransit.Courier.Hosts
         {
             if (log == null)
                 throw new ArgumentNullException(nameof(log));
+
             if (variables == null)
                 throw new ArgumentNullException(nameof(variables));
+
             if (buildItinerary == null)
                 throw new ArgumentNullException(nameof(buildItinerary));
 
@@ -233,8 +265,10 @@ namespace MassTransit.Courier.Hosts
         {
             if (log == null)
                 throw new ArgumentNullException(nameof(log));
+
             if (variables == null)
                 throw new ArgumentNullException(nameof(variables));
+
             if (buildItinerary == null)
                 throw new ArgumentNullException(nameof(buildItinerary));
 

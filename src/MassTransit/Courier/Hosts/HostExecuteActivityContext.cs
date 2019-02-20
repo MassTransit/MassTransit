@@ -63,9 +63,21 @@ namespace MassTransit.Courier.Hosts
             return _context.Completed(log);
         }
 
+        public ExecutionResult Completed<TLog>(object logValues)
+            where TLog : class
+        {
+            return _context.Completed<TLog>(logValues);
+        }
+
         ExecutionResult ExecuteContext.CompletedWithVariables<TLog>(TLog log, object variables)
         {
             return _context.CompletedWithVariables(log, variables);
+        }
+
+        public ExecutionResult CompletedWithVariables<TLog>(object logValues, object variables)
+            where TLog : class
+        {
+            return _context.CompletedWithVariables<TLog>(logValues, variables);
         }
 
         ExecutionResult ExecuteContext.CompletedWithVariables<TLog>(TLog log, IEnumerable<KeyValuePair<string, object>> variables)

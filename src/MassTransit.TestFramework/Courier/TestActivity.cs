@@ -25,13 +25,11 @@ namespace MassTransit.TestFramework.Courier
             if (context.Arguments.Value == null)
                 throw new ArgumentNullException("value");
 
-            TestLog log = new TestLogImpl(context.Arguments.Value);
-
-            return context.CompletedWithVariables(log, new
-                {
-                    Value = "Hello, World!",
-                    NullValue = (string)null,
-                });
+            return context.CompletedWithVariables<TestLog>(new {OriginalValue = context.Arguments.Value}, new
+            {
+                Value = "Hello, World!",
+                NullValue = (string)null,
+            });
         }
 
         public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)
@@ -39,18 +37,6 @@ namespace MassTransit.TestFramework.Courier
             Console.WriteLine("TestActivity: Compensate original value: {0}", context.Log.OriginalValue);
 
             return context.Compensated();
-        }
-
-
-        class TestLogImpl :
-            TestLog
-        {
-            public TestLogImpl(string originalValue)
-            {
-                OriginalValue = originalValue;
-            }
-
-            public string OriginalValue { get; private set; }
         }
     }
 }

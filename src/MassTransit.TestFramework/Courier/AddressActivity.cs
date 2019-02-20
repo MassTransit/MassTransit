@@ -24,24 +24,12 @@ namespace MassTransit.TestFramework.Courier
         {
             Console.WriteLine("Address: {0}", context.Arguments.Address);
 
-            return context.Completed(new Log(context.Arguments.Address));
+            return context.Completed<AddressLog>(new {UsedAddress = context.Arguments.Address});
         }
 
         public async Task<CompensationResult> Compensate(CompensateContext<AddressLog> context)
         {
             return context.Compensated();
-        }
-
-
-        class Log :
-            AddressLog
-        {
-            public Log(Uri usedAddress)
-            {
-                UsedAddress = usedAddress;
-            }
-
-            public Uri UsedAddress { get; private set; }
         }
     }
 }

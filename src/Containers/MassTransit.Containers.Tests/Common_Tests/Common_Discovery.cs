@@ -201,7 +201,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             public async Task<ExecutionResult> Execute(ExecuteContext<PingArguments> context)
             {
-                return context.Completed(TypeMetadataCache<PingLog>.InitializeFromObject(new {context.Arguments.CorrelationId}));
+                return context.Completed<PingLog>(new {context.Arguments.CorrelationId});
             }
 
             public async Task<CompensationResult> Compensate(CompensateContext<PingLog> context)

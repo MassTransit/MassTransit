@@ -24,9 +24,7 @@ namespace MassTransit.TestFramework.Courier
         {
             Console.WriteLine("FaultyCompensateActivity: Execute: {0}", context.Arguments.Value);
 
-            TestLog log = new TestLogImpl(context.Arguments.Value);
-
-            return context.Completed(log);
+            return context.Completed<TestLog>(new {OriginalValue = context.Arguments.Value});
         }
 
         public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)
@@ -34,18 +32,6 @@ namespace MassTransit.TestFramework.Courier
             Console.WriteLine("FaultyCompensateActivity: Compensate: {0}", context.Log.OriginalValue);
 
             return context.Failed();
-        }
-
-
-        class TestLogImpl :
-            TestLog
-        {
-            public TestLogImpl(string originalValue)
-            {
-                OriginalValue = originalValue;
-            }
-
-            public string OriginalValue { get; private set; }
         }
     }
 }
