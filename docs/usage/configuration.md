@@ -5,26 +5,21 @@
 <!-- code_chunk_output -->
 
 * [Configuring MassTransit](#configuring-masstransit)
-	* [MassTransit in a console application](#masstransit-in-a-console-application)
-	* [MassTransit and ASP.NET Core](#masstransit-and-aspnet-core)
-	* [MassTransit in a Windows service](#masstransit-in-a-windows-service)
-	* [MassTransit in a web application](#masstransit-in-a-web-application)
+	* [In a console application](#masstransit-in-a-console-application)
+	* [In ASP.NET Core](#masstransit-and-aspnet-core)
+	* [In a Windows service](#masstransit-in-a-windows-service)
+	* [In a web application](#masstransit-in-a-web-application)
 		* [ASP.NET (MVC/WebApi2)](#aspnet-mvcwebapi2)
 		* [OWIN Pipeline (WebApi2)](#owin-pipeline-webapi2)
 
 <!-- /code_chunk_output -->
 
 
-To configure MassTransit in your application, it depends upon the application type.
-There are several application types, which are covered below. In these examples, the
-use of a dependency injection framework is not included. Using a container (such as
-Autofac, StructureMap, etc.) with MassTransit is covered separately.
+To configure MassTransit in your application, it depends upon the application type. There are several application types, which are covered below. In these examples, the use of a dependency injection framework is not included. Using a container (such as Autofac, StructureMap, etc.) with MassTransit is covered separately.
 
 ## MassTransit in a console application
 
-A console application has a `Main` entry point, which is part of the `Program.cs` class
-by default. The example below configures a simple bus instance that publishes an event with
-a value entered.
+A console application has a `Main` entry point, which is part of the `Program.cs` class by default. The example below configures a simple bus instance that publishes an event with a value entered.
 
 ```csharp
 namespace EventPublisher
@@ -42,7 +37,6 @@ namespace EventPublisher
 
             // Important! The bus must be started before using it!
             busControl.Start();
-
             do
             {
                 Console.WriteLine("Enter message (or quit to exit)");
@@ -105,11 +99,13 @@ public class Startup
         
         // Register your consumers if the need dependencies
         services.AddScoped<SomeDependency>()
-        services.AddScoped<OrderConsumer>();
 
         // Register MassTransit
-        services.AddMassTransit(
-            provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+        services.AddMassTransit(x =>
+        {
+            x.AddConsumer<OrderConsumer>();
+
+            x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
                 var host = cfg.Host("localhost", host => 
                 { 
@@ -122,19 +118,17 @@ public class Startup
                     ep.PrefetchCount = 16;
                     ep.UseMessageRetry(x => x.Interval(2, 100));
 
-                    ep.Consumer<OrderConsumer>(provider);
+                    ep.ConfigureConsumer<OrderConsumer>(provider);
                 });
-            }),
-            x => x.AddConsumer<OrderConsumer>());
+            });
+        });
     }
 
     // everything else
 }
 ```
 
-Remember, however, that it is perfectly fine to set up all the required dependencies in the `Startup`, which serves as the bootstrap code
-for your application. By doing that you can avoid weird cases when you have two dependencies that implement the same interface and then
-you cannot properly register them both, since only the last one will count.
+Remember, however, that it is perfectly fine to set up all the required dependencies in the `Startup`, which serves as the bootstrap code for your application. By doing that you can avoid weird cases when you have two dependencies that implement the same interface and then you cannot properly register them both, since only the last one will count.
 
 Here is how you can avoid using the container:
 
@@ -210,33 +204,24 @@ Also, as an obvious requirement, you need to use .NET Core 2.2 (or higher) and h
 <PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
 ```
 
-Of course, health checks only work when you provide an endpoint that is accessible via http or https. That implies that
-you cannot do that using the `Microsoft.NET.Sdk`, so you need to ensure that your `csproj` file starts with this line:
+Of course, health checks only work when you provide an endpoint that is accessible via http or https. That implies that you cannot do that using the `Microsoft.NET.Sdk`, so you need to ensure that your `csproj` file starts with this line:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk.Web">
 ```
 
-The Web SDK is used by default if you are using the ASP.NET Core Web Application template, but you can also change it, if you used
-the Console Application template. In such a case you'd also need to add some more packages to be able to host the http endpoint
-using Kestrel. The easiest way to migrate a console application to the web application (that still runs as a console application)
-by creating a new web application with the type `Empty` and checking the differences.
+The Web SDK is used by default if you are using the ASP.NET Core Web Application template, but you can also change it, if you used the Console Application template. In such a case you'd also need to add some more packages to be able to host the http endpoint using Kestrel. The easiest way to migrate a console application to the web application (that still runs as a console application) by creating a new web application with the type `Empty` and checking the differences.
 
 ## MassTransit in a Windows service
 
-A Windows service is recommended for consuming commands and events as it provides an
-autonomous execution environment for message consumers. The service can be started and
-stopped using the service control manager, as well as monitored by operations tools.
+A Windows service is recommended for consuming commands and events as it provides an autonomous execution environment for message consumers. The service can be started and stopped using the service control manager, as well as monitored by operations tools.
 
 <div class="alert alert-info">
 <b>Note:</b>
-    To create a Windows service, we strongly recommend using Topshelf, as it was built
-    specifically for this purpose. Topshelf is easy to use, has zero dependencies, and
-    creates a service that can be self-installed without additional tools.
+    To create a Windows service, we strongly recommend using Topshelf, as it was built specifically for this purpose. Topshelf is easy to use, has zero dependencies, and creates a service that can be self-installed without additional tools.
 </div>
 
-The important aspect of configuring a bus in a Windows service is to ensure that the bus
-is only configured and started when the service is *started*.
+The important aspect of configuring a bus in a Windows service is to ensure that the bus is only configured and started when the service is *started*.
 
 ```csharp
 namespace EventService
@@ -294,19 +279,15 @@ namespace EventService
 
 ## MassTransit in a web application
 
-Configuring a bus in a web site is typically done to publish events, send commands,
-as well as engage in request/response conversations. Hosting receive endpoints and
-persistent consumers is not recommended (use a service as shown above).
+Configuring a bus in a web site is typically done to publish events, send commands, as well as engage in request/response conversations. Hosting receive endpoints and persistent consumers is not recommended (use a service as shown above).
 
 ### ASP.NET (MVC/WebApi2)
 
-In a web application, the `HttpApplication` class methods of `Application_Start` and
-`Application_End` are used to configure/start the bus and stop the bus respectively.
+In a web application, the `HttpApplication` class methods of `Application_Start` and `Application_End` are used to configure/start the bus and stop the bus respectively.
 
 <div class="alert alert-info">
 <b>Note:</b>
-    While many MassTransit samples use Topshelf, web applications are an exception
-    where the standard web application conventions are followed.
+    While many MassTransit samples use Topshelf, web applications are an exception where the standard web application conventions are followed.
 </div>
 
 ```csharp
@@ -373,23 +354,16 @@ public class CommandController : Controller
 }
 ```
 
-The above example is kept simple, providing a static `MvcApplication.Bus` property
-to access the bus instance (for publishing events, and sending commands to endpoints).
-Newer version of ASP.NET have built-in dependency resolution, in which case the `IBus`
-should be registered so that controllers can specify the dependency in the constructor.
-In fact, the inherited `IPublishEndpoint` and `ISendEndpointProvider` should also
-be registered.
+The above example is kept simple, providing a static `MvcApplication.Bus` property to access the bus instance (for publishing events, and sending commands to endpoints). Newer version of ASP.NET have built-in dependency resolution, in which case the `IBus` should be registered so that controllers can specify the dependency in the constructor. In fact, the inherited `IPublishEndpoint` and `ISendEndpointProvider` should also be registered.
 
 The example controllers show how to publish and send messages as well.
 
 
 ### OWIN Pipeline (WebApi2)
 
-WebApi2 can alternatively use the OWIN pipeline. But OWIN doesn't have `Application_End`
-and so it requires a different approach to ensure the bus is disposed properly.
+WebApi2 can alternatively use the OWIN pipeline. But OWIN doesn't have `Application_End` and so it requires a different approach to ensure the bus is disposed properly.
 
-This example shows an OWIN WebApi2 project using the Autofac Container. The concept should
-be similar if you aren't using WebApi2 or a different Container, but still OWIN.
+This example shows an OWIN WebApi2 project using the Autofac Container. The concept should be similar if you aren't using WebApi2 or a different Container, but still OWIN.
 
 ```csharp
 public class Startup
@@ -453,12 +427,9 @@ public class Startup
 }
 ```
 
-The important bit is the last several lines where we resolve the `IBusControl` and
-register an action to stop when the app disposes.
+The important bit is the last several lines where we resolve the `IBusControl` and register an action to stop when the app disposes.
 
-You'll also notice we registered the bus `.As<IPublishEndpoint>()`. That's because we are
-following the guidance above, where our websites should really only be Publishing to the
-service bus.
+You'll also notice we registered the bus `.As<IPublishEndpoint>()`. That's because we are following the guidance above, where our websites should really only be Publishing to the service bus.
 
 Now your controller might look like:
 

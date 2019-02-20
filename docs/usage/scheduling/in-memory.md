@@ -20,12 +20,9 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 });
 ```
 
-The `UseInMemoryScheduler` method initializes Quartz.NET for standalone in-memory operation, and adds
-a receive endpoint to the bus named `quartz`, which hosts the consumers for scheduling messages.
+The `UseInMemoryScheduler` method initializes Quartz.NET for standalone in-memory operation, and adds a receive endpoint to the bus named `quartz`, which hosts the consumers for scheduling messages.
 
 <div class="alert alert-warning">
 <b>Note:</b>
-Using the in-memory scheduler uses non-durable storage. If the process terminates, any scheduled messages
-will be lost, immediately, never to be found again. For any production system, using a standalone service
-is recommended with persistent storage.
+Using the in-memory scheduler uses non-durable storage. If the process terminates, any scheduled messages will be lost, immediately, never to be found again. For any production system, using a standalone service is recommended with persistent storage.
 </div>

@@ -103,7 +103,7 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var observer = new ConcurrencyLimitHandlerConfigurationObserver<TMessage>(configurator, concurrentMessageLimit);
+            var observer = new ConcurrencyLimitHandlerConfigurationObserver(concurrentMessageLimit);
             configurator.ConnectHandlerConfigurationObserver(observer);
         }
 
@@ -121,7 +121,7 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var observer = new ConcurrencyLimitHandlerConfigurationObserver<TMessage>(configurator, concurrentMessageLimit, id);
+            var observer = new ConcurrencyLimitHandlerConfigurationObserver(concurrentMessageLimit, id);
             configurator.ConnectHandlerConfigurationObserver(observer);
 
             managementEndpointConfigurator.Instance(observer.Limiter, x =>

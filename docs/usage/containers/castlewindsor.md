@@ -34,10 +34,6 @@ public static void Main(string[] args)
 
             cfg.ReceiveEndpoint("customer_update", ec =>
             {
-                // if a shared scope for multiple concurrent consumers
-                // is needed.
-                endpoint.EnableMessageScope();
-
                 // Configure a single consumer
                 ec.ConfigureConsumer<UpdateCustomerConsumer>(context);
 

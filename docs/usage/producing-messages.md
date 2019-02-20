@@ -8,35 +8,24 @@
 - [Publishing events](#publishing-events)
 
 <!-- /TOC -->
-An application or service can produce messages using two different methods. A message can be sent using `Send` or a 
-message can be published using `Publish`. The behavior of each method is very different, but it easy to understand
-by looking at the type of messages involved with each particular method.
+An application or service can produce messages using two different methods. A message can be sent using `Send` or a message can be published using `Publish`. The behavior of each method is very different, but it easy to understand by looking at the type of messages involved with each particular method.
 
-When a message is sent, it is delivered to a specific endpoint using a `DestinationAddress`. When a message is published,
-it is not sent to a specific endpoint, but is instead broadcasted to any consumers which have *subscribed* to the message type.
-For these two separate behavior, we describe messages sent as commands, and messages published as events.
+When a message is sent, it is delivered to a specific endpoint using a `DestinationAddress`. When a message is published, it is not sent to a specific endpoint, but is instead broadcasted to any consumers which have *subscribed* to the message type. For these two separate behavior, we describe messages sent as commands, and messages published as events.
 
 > These are discussed in depth in the *Creating a message contract* section of the documentation.
 
 ## Sending commands
 
-Sending a command to an endpoint requires an `ISendEndpoint` reference, which can be obtained from any send endpoint provider
-(an object that supports `ISendEndpointProvider`). The application should always use the object closest to it to obtain the send
-endpoint, and it should do it every time it needs it -- the application should not cache the send endpoint reference.
+Sending a command to an endpoint requires an `ISendEndpoint` reference, which can be obtained from any send endpoint provider (an object that supports `ISendEndpointProvider`). The application should always use the object closest to it to obtain the send endpoint, and it should do it every time it needs it -- the application should not cache the send endpoint reference.
 
-For instance, an `IBus` instance is a send endpoint provider, but it should *never* be used by a consumer to obtain
-an `ISendEndpoint`. `ConsumeContext` can also provide send endpoints, and should be used since it is *closer* to the consumer.
+For instance, an `IBus` instance is a send endpoint provider, but it should *never* be used by a consumer to obtain an `ISendEndpoint`. `ConsumeContext` can also provide send endpoints, and should be used since it is *closer* to the consumer.
 
 <div class="alert alert-info">
 <b>Note:</b>
-	This cannot be stressed enough -- always get send endpoints from the closest interface to the application code. There
-	is extensive logic to tie message flows together using conversation, correlation, and initiator identifiers. By skipping
-	a level and going outside the closest scope, that information can be lost which prevents the useful trace identifiers from
-	being properly handled.
+	This cannot be stressed enough -- always get send endpoints from the closest interface to the application code. There is extensive logic to tie message flows together using conversation, correlation, and initiator identifiers. By skipping a level and going outside the closest scope, that information can be lost which prevents the useful trace identifiers from being properly handled.
 </div>
 
-To obtain a send endpoint from a send endpoint provider, use the GetSendEndpoint() method as shown below. Once the send endpoint 
-is returned, it can be used to a send a message.
+To obtain a send endpoint from a send endpoint provider, use the GetSendEndpoint() method as shown below. Once the send endpoint is returned, it can be used to a send a message.
 
 ```csharp
 public async Task SendOrder(ISendEndpointProvider sendEndpointProvider)
@@ -103,9 +92,7 @@ It is better to configure send conventions before you start the bus.
 
 ### Sending via interfaces
 
-Since the general recommendation is to use interfaces, there are convenience methods to initialize the interface without
-requiring the creation of a message class underneath. While versioning of messages still requires a class which supports
-multiple interfaces, a simple approach to send an interface message is shown below.
+Since the general recommendation is to use interfaces, there are convenience methods to initialize the interface without requiring the creation of a message class underneath. While versioning of messages still requires a class which supports multiple interfaces, a simple approach to send an interface message is shown below.
 
 ```csharp
 public interface SubmitOrder

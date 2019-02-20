@@ -8,14 +8,14 @@
     using GreenPipes.Configurators;
 
 
-    public class RetryConfigurationObserver :
+    public class MessageRetryConfigurationObserver :
         ConfigurationObserver,
         IMessageConfigurationObserver
     {
         readonly CancellationToken _cancellationToken;
         readonly Action<IRetryConfigurator> _configure;
 
-        public RetryConfigurationObserver(IConsumePipeConfigurator receiveEndpointConfigurator, CancellationToken cancellationToken,
+        public MessageRetryConfigurationObserver(IConsumePipeConfigurator receiveEndpointConfigurator, CancellationToken cancellationToken,
             Action<IRetryConfigurator> configure)
             : base(receiveEndpointConfigurator)
         {

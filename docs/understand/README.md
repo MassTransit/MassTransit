@@ -13,5 +13,4 @@ Okay, not everything -- at least not yet. But we're working on getting it all do
 * [What we add to the transport](additions-to-transport.md)
 * [Publishing messages](publishing.md)
 * [Sending messages](sending.md)
-* [Message contract design](message-contracts.md)
 * [Performance counters](perfcounters.md)

@@ -1,8 +1,6 @@
 # Using MassTransit with Azure Functions
 
-Azure Functions is a consumption-based approach to compute which eliminates the need to have
-a service constantly running, particularly when there isn't any work to be done. Because of this,
-it's becoming popular for services with low utilization.
+Azure Functions is a consumption-based approach to compute which eliminates the need to have a service constantly running, particularly when there isn't any work to be done. Because of this, it's becoming popular for services with low utilization.
 
 MassTransit supports Azure Service Bus and Azure Event Hub when running from an Azure Function.
 

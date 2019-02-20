@@ -1,19 +1,16 @@
 # Observing messages
 
-MassTransit supports a number of message observes, making it possible to monitoring when messages are received, 
-consumed, sent, and published. Each type of observer is configured separately, keeping the interfaces lean and
+MassTransit supports a number of message observes, making it possible to monitoring when messages are received, consumed, sent, and published. Each type of observer is configured separately, keeping the interfaces lean and
 focused.
 
 <div class="alert alert-warning">
 <b>Warning:</b>
-    Observers should not be used to modify or intercept messages. To intercept messages (either to add headers,
-    or modify the message contents), create a new or use an existing middleware component.
+    Observers should not be used to modify or intercept messages. To intercept messages (either to add headers,or modify the message contents), create a new or use an existing middleware component.
 </div>
 
 ## Observing received messages
 
-To observe received messages immediately after they are delivered by the transport, create a class that implements
-the `IReceiveObserver` interface, and connect it to the bus as shown below.
+To observe received messages immediately after they are delivered by the transport, create a class that implements the `IReceiveObserver` interface, and connect it to the bus as shown below.
 
 ```csharp
 public class ReceiveObserver : IReceiveObserver
@@ -69,8 +66,7 @@ var handle = busControl.ConnectReceiveObserver(observer);
 
 ## Observing consumed messages
 
-If the receive context isn't super interesting, perhaps the actual consumption of messages might float your boat.
-A consume observer implements the `IConsumeObserver` interface, as shown below.
+If the receive context isn't super interesting, perhaps the actual consumption of messages might float your boat. A consume observer implements the `IConsumeObserver` interface, as shown below.
 
 ```csharp
 public class ConsumeObserver : IConsumeObserver
@@ -97,8 +93,7 @@ To connect the observer, use the `ConnectConsumeObserver` method before starting
 
 ## Observing specific consumed messages
 
-Okay, so it's obvious that if you've read this far you want a more specific observer, one that only is called
-when a specific message type is consumed. We have you covered there too, as shown below.
+Okay, so it's obvious that if you've read this far you want a more specific observer, one that only is called when a specific message type is consumed. We have you covered there too, as shown below.
 
 ```csharp
 public class ConsumeObserver<T> : IConsumeMessageObserver<T> where T : class
@@ -125,8 +120,7 @@ To connect the observer, use the `ConnectConsumeMessageObserver` method before s
 
 ## Observing sent messages
 
-Okay, so, incoming messages are not your thing. We get it, you're all about what goes out. It's cool. It's
-better to send than to receive. Or is that give? Anyway, a send observer is also available.
+Okay, so, incoming messages are not your thing. We get it, you're all about what goes out. It's cool. It's better to send than to receive. Or is that give? Anyway, a send observer is also available.
 
 ```csharp
 public class SendObserver : ISendObserver
@@ -155,9 +149,7 @@ To connect the observer, you already guessed it, use the `ConnectSendObserver` m
 
 ## Observing published messages
 
-In addition to send, publish is also observable. Because the semantics matter, absolutely. Using the MessageId to link
-them up as it's unique for each message. Remember that Publish and Send are two distinct operations so if you
-want to observe all messages that are leaving your service, you have to connect both Publish and Send observers.
+In addition to send, publish is also observable. Because the semantics matter, absolutely. Using the MessageId to link them up as it's unique for each message. Remember that Publish and Send are two distinct operations so if you want to observe all messages that are leaving your service, you have to connect both Publish and Send observers.
 
 ```csharp
 public class PublishObserver : IPublishObserver
@@ -184,6 +176,4 @@ public class PublishObserver : IPublishObserver
 
 Finally, to connect the observer, use the `ConnectPublishObserver` method before starting the bus.
 
-These are a ton of interfaces, and they offer a lot of information about how the system is behaving under the hood. So
-use them, abuse them, bend them, and break them. Just realize, they are immediate, so don't be slow or your messaging
-will be equally slow.
+These are a ton of interfaces, and they offer a lot of information about how the system is behaving under the hood. So use them, abuse them, bend them, and break them. Just realize, they are immediate, so don't be slow or your messaging will be equally slow.

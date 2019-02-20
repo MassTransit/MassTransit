@@ -180,6 +180,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
                 IConsumerConfigurator<DiscoveryPingConsumer> consumerConfigurator)
             {
+                consumerConfigurator.UseScheduledRedelivery(r => r.Interval(2, 10000));
+                consumerConfigurator.UseMessageRetry(r => r.None());
+                consumerConfigurator.UseInMemoryOutbox();
             }
         }
 

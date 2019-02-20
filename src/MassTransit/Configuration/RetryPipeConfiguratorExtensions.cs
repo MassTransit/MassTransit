@@ -13,7 +13,6 @@
 namespace GreenPipes
 {
     using System;
-    using System.Threading;
     using Configurators;
     using MassTransit;
     using MassTransit.Context;
@@ -231,45 +230,6 @@ namespace GreenPipes
             where TSaga : class, ISaga
         {
             return new RetrySagaConsumeContext<TSaga>(context, retryPolicy, retryContext);
-        }
-
-        /// <summary>
-        /// For all configured messages type (handlers, consumers, and sagas), configures message retry using the retry configuration specified.
-        /// Retry is configured once for each message type, and is added prior to the consumer factory or saga repository in the pipeline.
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="configureRetry"></param>
-        public static void UseMessageRetry(this IConsumePipeConfigurator configurator, Action<IRetryConfigurator> configureRetry)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            if (configureRetry == null)
-                throw new ArgumentNullException(nameof(configureRetry));
-
-            var observer = new RetryConfigurationObserver(configurator, CancellationToken.None, configureRetry);
-        }
-
-        /// <summary>
-        /// For all configured messages type (handlers, consumers, and sagas), configures message retry using the retry configuration specified.
-        /// Retry is configured once for each message type, and is added prior to the consumer factory or saga repository in the pipeline.
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="connector">The bus factory configurator, to connect the observer, to cancel retries if the bus is stopped</param>
-        /// <param name="configureRetry"></param>
-        public static void UseMessageRetry(this IConsumePipeConfigurator configurator, IBusFactoryConfigurator connector,
-            Action<IRetryConfigurator> configureRetry)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            if (configureRetry == null)
-                throw new ArgumentNullException(nameof(configureRetry));
-
-            var retryObserver = new RetryBusObserver();
-            connector.ConnectBusObserver(retryObserver);
-
-            var observer = new RetryConfigurationObserver(configurator, retryObserver.Stopping, configureRetry);
         }
     }
 }

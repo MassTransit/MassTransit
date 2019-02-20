@@ -53,6 +53,8 @@ _book
 .vscode
 **/.idea/
 appsettings.Development.json
+package-lock.json
+
 
 # Cake
 tools/**

@@ -1,13 +1,10 @@
 # Scheduling with Azure Service Bus
 
-Azure Service Bus allows the enqueue time of a message to be specified, making it possible to schedule 
-messages without the use of a separate message scheduler. MassTransit makes it easy to take advantage of 
-this feature by configuring the bus scheduler to specify the enqueue time for scheduled messages.
+Azure Service Bus allows the enqueue time of a message to be specified, making it possible to schedule messages without the use of a separate message scheduler. MassTransit makes it easy to take advantage of this feature by configuring the bus scheduler to specify the enqueue time for scheduled messages.
 
 ## Configuring the enqueue time scheduler
 
-To configure the bus (or a receive endpoint) to use the enqueue time for message scheduling, add the code 
-below to the configuration.
+To configure the bus (or a receive endpoint) to use the enqueue time for message scheduling, add the code below to the configuration.
 
 ```csharp
 var busControl = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
@@ -21,9 +18,7 @@ var busControl = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
 });
 ```
 
-This configures the bus scheduler, which is available via the MessageSchedulerContext interface. Once configured, 
-the message scheduling extensions can be used (which are available on the ConsumeContext). For example, to schedule 
-a message for future delivery from within a message consumer.
+This configures the bus scheduler, which is available via the MessageSchedulerContext interface. Once configured, the message scheduling extensions can be used (which are available on the ConsumeContext). For example, to schedule a message for future delivery from within a message consumer.
 
 ```csharp
 public class ScheduleNotificationConsumer :

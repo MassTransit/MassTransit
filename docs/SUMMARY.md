@@ -9,7 +9,6 @@
   * [What we add to the transport](understand/additions-to-transport.md)
   * [Publishing messages](understand/publishing.md)
   * [Sending messages](understand/sending.md)
-  * [Message contract design](understand/message-contracts.md)
   * [Performance counters](understand/perfcounters.md)
 * [Quick Start!](quickstart.md)
 * [I need help!](introduction/getting-help.md)
