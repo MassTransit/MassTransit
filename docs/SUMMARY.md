@@ -48,7 +48,7 @@
     * [Unity](usage/containers/unity.md)
     * [Castle Windsor](usage/containers/castlewindsor.md)
     * [Microsoft Dependency Injection](usage/containers/msdi.md)
-  * [Request/response](usage/request-response.md)
+  * [Request/Response](usage/request-response.md)
   * [Handle exceptions](usage/exceptions.md)
   * [Configure retries](usage/retries.md)
   * [Schedule messages](usage/scheduling/README.md)
