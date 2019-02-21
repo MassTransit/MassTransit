@@ -11,7 +11,6 @@
   * [What we add to the transport](understand/additions-to-transport.md)
   * [Publishing messages](understand/publishing.md)
   * [Sending messages](understand/sending.md)
-  * [Handling faults](understand/faults.md)
   * [Performance counters](understand/perfcounters.md)
 * [Learning MassTransit](learn/README.md)
   * [Samples](learn/samples/README.md)
