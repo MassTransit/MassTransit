@@ -64,7 +64,7 @@ Consumers are stateless by design, and MassTransit makes no effort to correlate 
 
 In MassTransit, a saga is a stateful consumer that allows multiple messages to be correlated to a single consumer instance. A saga, sometimes called a workflow, is typically used to orchestrate other consumers or services in a distributed system while maintaining state between messages. MassTransit persists a saga's state using a saga repository, and automatically creates a new or uses an existing state instance as messages are received.
 
-> Consider a saga a long-running transcation that is managed at the application layer instead of being handled inside a database or by a distributed transaction coordinator.
+> Consider a saga a long-running transaction that is managed at the application layer instead of being handled inside a database or by a distributed transaction coordinator.
 
 MassTransit supports simple class-based sagas and powerful, advanced state machine sagas using _Automatonymous_ - a declarative state machine library. In a class-based saga, messages are correlated using a `Guid CorrelationId` property and must implement the `CorrelatedBy<Guid>` interface. Class-based sagas can also _observe_ messages by specifying a correlation expression, but caution should be used to avoid matching a message to hundreds of saga instances which may cause performance issues. 
 
