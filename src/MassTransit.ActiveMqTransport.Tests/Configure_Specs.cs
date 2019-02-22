@@ -23,6 +23,7 @@ namespace MassTransit.ActiveMqTransport.Tests
     using NUnit.Framework;
     using TestFramework.Messages;
     using Testing;
+    using Topology.Topologies;
 
 
     [TestFixture]
@@ -222,6 +223,14 @@ namespace MassTransit.ActiveMqTransport.Tests
             await busControl.StartAsync(new CancellationTokenSource(10000).Token);
 
             await busControl.StopAsync(new CancellationTokenSource(10000).Token);
+        }
+
+        [Test]
+        public async Task Pub_Sub_Queue_Names_Should_Not_Contain_Periods()
+        {
+            var consumeTopology = new ActiveMqConsumeTopology(null, null);
+            var queueName = consumeTopology.CreateTemporaryQueueName("bus.test");
+            Assert.That(queueName, Does.Not.Contain('.'));
         }
 
         [Test]
