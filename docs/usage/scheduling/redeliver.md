@@ -1,15 +1,16 @@
 # Redelivering messages
 
-There are situations where a message cannot be processed, either due to an unavailable resource or a situation
-in which message ordering is important (you should try not to depend upon message order, but sometimes it is an
-easy workaround). In these situations, scheduling a message for redelivery is a powerful tool.
+> This page may be removed in the future, for more detail on handling exceptions is available at the [Handling exceptions](usage/exception.md) page.
 
-> Sometimes this behavior is referred to as a *Second Level Retry*.
+There are situations where a message cannot be processed, either due to an unavailable resource or a situation in which message ordering is important (you should try not to depend upon message order, but sometimes it is an easy workaround). In these situations, scheduling a message for redelivery is a powerful tool.
 
-## Explicitly specifying redelivery
+## Retry using scheduled redelivery
 
-MassTransit makes it easy to schedule messages for redelivery. In the example below, the Quartz service is running
-as a separate service on the */quartz* queue.
+Handling exceptions (described in detail on the page linked above) includes the ability to use scheduled redelivery for longer retry delays when immediate or short delay retries fail.
+
+## Explicit message redelivery
+
+MassTransit makes it easy to schedule messages for redelivery. In the example below, the Quartz service is running as a separate service on the */quartz* queue.
 
 ```csharp
 public class UpdateCustomerAddressConsumer :
@@ -47,12 +48,9 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 
 ### Redelivery with RabbitMQ
 
-It is also possible to use RabbitMQ Delayed Exchange to redeliver messages.
-You can even use it if the delayed exchange is not [configured](rabbitmq-delayed.md)
-as a default message scheduler.
+It is also possible to use RabbitMQ Delayed Exchange to redeliver messages. You can even use it if the delayed exchange is not [configured](rabbitmq-delayed.md) as a default message scheduler.
 
-You can schedule a message to be redelivered via RabbitMQ delayed exchange
-from a consumer by using the `Defer` extension method like this:
+You can schedule a message to be redelivered via RabbitMQ delayed exchange from a consumer by using the `Defer` extension method like this:
 
 ```csharp
 public async Task Consume(ConsumeContext<ScheduleNotification> context)
@@ -69,46 +67,6 @@ public async Task Consume(ConsumeContext<ScheduleNotification> context)
 }
 ```
 
-## Combining retries and redelivery
-
-MassTransit allows you to combine first-level retries (see [Retries](../retries.md))
-and second-level retries (Redelivery). In this case you do not have to explicitly
-instruct MassTransit to redeliver the message, instead you configure your consumers
-in a way that they apply extended retry policy to certain messages.
-
-At this moment, you have to configure this per handler or per consumer and message type.
-
-To use the default scheduler, the consumer pipeline needs to be configured like this:
-
-```csharp
-cfg.ReceiveEndpoint(host, "endpoint_queue", e =>
-{
-    e.Consumer<MyConsumerClass>(c =>
-    {
-        c.Message<MyMessage>(x => x.UseScheduledRedelivery(
-            Retry.Incremental(3, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10))));
-    });
-});
-```
-
-and to apply such configuration to handler delegates:
-
-```csharp
-cfg.ReceiveEndpoint(host, "endpoint_queue", e =>
-{
-    e.Handler<MyMessage>(c =>
-    {
-        // handling the message
-    }, x => x.UseScheduledRedelivery(
-        Retry.Incremental(3, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10))));
-});
-```
-
-`UseScheduledRedelivery` methods accepts a retry policy or a retry policy configuration delegate
-as the only parameter.
-
-Again, it is also possible to use RabbitMQ delayed exchange instead of the default scheduler.
-In such case, instead of using `UseScheduledRedelivery` you need to use `UseDelayedRedelivery`.
 
 The redelivered message includes two additional message headers:
 

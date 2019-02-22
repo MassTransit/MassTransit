@@ -1,5 +1,7 @@
 # Configuring Retry
 
+> More detail on handling exceptions is available at the [Handling exceptions](usage/exception.md) page.
+
 Errors happen, and when they do it's important to handle those errors gracefully. In a distributed system, transient errors can occur for a variety of reasons, such a network glitches, service restarts, etc. To handle those types of errors, MassTransit has the ability to retry messages.
 
 To configure message retry on a receive endpoint:

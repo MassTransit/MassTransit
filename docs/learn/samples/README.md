@@ -6,7 +6,7 @@ The new samples are standalone repositories, which use NuGet to pull dependencie
 
 The samples are described in the following sections.
 
-* [Courier](courier.md)
 * [Request/Response](request-response.md)
 * [Saga](saga.md)
+* [Courier](courier.md)
 * [Containers](containers.md)
