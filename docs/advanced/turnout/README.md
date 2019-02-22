@@ -28,8 +28,8 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 
     cfg.TurnoutEndpoint<AuditCustomerHistory>(host, "audit_consumer_history", e =>
     {
-        x.SuperviseInterval = TimeSpan.FromSeconds(30);
-        x.SetJobFactory(async context =>
+        e.SuperviseInterval = TimeSpan.FromSeconds(30);
+        e.SetJobFactory(async context =>
         {
             await Task.Delay(TimeSpan.FromMinutes(7), context.CancellationToken);
         })
