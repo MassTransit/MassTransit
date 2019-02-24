@@ -82,6 +82,12 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
                 _specifications.Add(new InvalidActiveMqConsumeTopologySpecification("Bind", $"Only virtual topics can be bound: {topicName}"));
         }
 
+        public override string CreateTemporaryQueueName(string tag)
+        {
+            var result = base.CreateTemporaryQueueName(tag);
+            return new string(result.Where(c => c != '.').ToArray());
+        }
+
         public override IEnumerable<ValidationResult> Validate()
         {
             return base.Validate().Concat(_specifications.SelectMany(x => x.Validate()));

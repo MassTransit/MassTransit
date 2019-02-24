@@ -23,7 +23,7 @@ namespace MassTransit.ActiveMqTransport
 
         public ActiveMqMessageNameFormatter()
         {
-            _formatter = new DefaultMessageNameFormatter("::", "--", "_", "-");
+            _formatter = new DefaultMessageNameFormatter("::", "--", ".", "-");
         }
 
         public MessageName GetMessageName(Type type)
