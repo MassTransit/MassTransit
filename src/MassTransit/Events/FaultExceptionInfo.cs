@@ -25,8 +25,6 @@ namespace MassTransit.Events
             if (exception == null)
                 throw new ArgumentNullException(nameof(exception));
 
-            exception = exception.GetBaseException() ?? exception;
-
             ExceptionType = TypeMetadataCache.GetShortName(exception.GetType());
             InnerException = exception.InnerException != null
                 ? new FaultExceptionInfo(exception.InnerException)
