@@ -16,6 +16,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Configuration;
@@ -283,7 +284,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
         }
 
         [Test]
-        public void Should_succeed_when_properly_configured()
+        public async Task Should_connect_with_accessKey_and_secretKey()
         {
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
@@ -293,6 +294,37 @@ namespace MassTransit.AmazonSqsTransport.Tests
                     h.SecretKey(AwsSecretKey);
                 });
             });
+
+            try
+            {
+                await busControl.StartAsync();
+            }
+            finally
+            {
+                await busControl.StopAsync();
+            }
+        }
+
+        [Test]
+        public async Task Should_connect_with_credentials()
+        {
+            var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
+            {
+                cfg.Host("ap-southeast-2", h =>
+                {
+                    var credentials = new BasicAWSCredentials(AwsAccessKey, AwsSecretKey);
+                    h.Credentials(credentials);
+                });
+            });
+
+            try
+            {
+                await busControl.StartAsync();
+            }
+            finally
+            {
+                await busControl.StopAsync();
+            }
         }
     }
 }

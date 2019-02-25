@@ -14,6 +14,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 {
     using System;
     using Amazon;
+    using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Transport;
@@ -30,8 +31,10 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         }
 
         public RegionEndpoint Region { get; set; }
-        public string AccessKey { get; set; }
-        public string SecretKey { get; set; }
+        public string AccessKey { get => GetImmutableCredentials().AccessKey; }
+        public string SecretKey { get => GetImmutableCredentials().SecretKey; }
+
+        public AWSCredentials Credentials { get; set; }
 
         public AmazonSQSConfig AmazonSqsConfig { get; set; }
 
@@ -41,7 +44,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 
         public IConnection CreateConnection()
         {
-            return new Connection(AccessKey, SecretKey, Region, AmazonSqsConfig, AmazonSnsConfig);
+            return new Connection(Credentials, Region, AmazonSqsConfig, AmazonSnsConfig);
         }
 
         Uri FormatHostAddress()
@@ -63,6 +66,12 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
                 Scheme = "https",
                 Host = Region.SystemName
             }.Uri.ToString();
+        }
+
+        private ImmutableCredentials GetImmutableCredentials()
+        {
+            if (Credentials == null) throw new ArgumentNullException(nameof(Credentials));
+            return Credentials.GetCredentials();
         }
     }
 }
