@@ -13,6 +13,7 @@
 namespace MassTransit.AmazonSqsTransport.Transport
 {
     using Amazon;
+    using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
 
@@ -20,28 +21,26 @@ namespace MassTransit.AmazonSqsTransport.Transport
     public class Connection :
         IConnection
     {
-        readonly string _accessKey;
+        readonly AWSCredentials _credentials;
         readonly AmazonSimpleNotificationServiceConfig _amazonSnsConfig;
         readonly AmazonSQSConfig _amazonSqsConfig;
-        readonly string _secretKey;
 
-        public Connection(string accessKey, string secretKey, RegionEndpoint regionEndpoint = null, AmazonSQSConfig amazonSqsConfig = null,
+        public Connection(AWSCredentials credentials, RegionEndpoint regionEndpoint = null, AmazonSQSConfig amazonSqsConfig = null,
             AmazonSimpleNotificationServiceConfig amazonSnsConfig = null)
         {
-            _accessKey = accessKey;
-            _secretKey = secretKey;
+            _credentials = credentials;            
             _amazonSqsConfig = amazonSqsConfig ?? new AmazonSQSConfig {RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1};
             _amazonSnsConfig = amazonSnsConfig ?? new AmazonSimpleNotificationServiceConfig {RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1};
         }
 
         public IAmazonSQS CreateAmazonSqsClient()
         {
-            return new AmazonSQSClient(_accessKey, _secretKey, _amazonSqsConfig);
+            return new AmazonSQSClient(_credentials, _amazonSqsConfig);
         }
 
         public IAmazonSimpleNotificationService CreateAmazonSnsClient()
         {
-            return new AmazonSimpleNotificationServiceClient(_accessKey, _secretKey, _amazonSnsConfig);
+            return new AmazonSimpleNotificationServiceClient(_credentials, _amazonSnsConfig);
         }
     }
 }

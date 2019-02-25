@@ -14,6 +14,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 {
     using System;
     using Amazon;
+    using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Exceptions;
@@ -34,8 +35,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             _settings = new ConfigurationHostSettings
             {
                 Region = regionEndpoint,
-                AccessKey = "",
-                SecretKey = "",
+                Credentials = null,
                 AmazonSqsConfig = new AmazonSQSConfig { RegionEndpoint = regionEndpoint },
                 AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig { RegionEndpoint = regionEndpoint },
             };
@@ -43,23 +43,36 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             if (!string.IsNullOrEmpty(address.UserInfo))
             {
                 string[] parts = address.UserInfo.Split(':');
-                _settings.AccessKey = parts[0];
+                _accessKey = parts[0];
 
                 if (parts.Length >= 2)
-                    _settings.SecretKey = parts[1];
+                {
+                    _secretKey = parts[1];
+                    SetBasicCredentials();
+                }
             }
         }
 
         public AmazonSqsHostSettings Settings => _settings;
 
+        private string _accessKey { get; set; }
+        private string _secretKey { get; set; }
+
         public void AccessKey(string accessKey)
         {
-            _settings.AccessKey = accessKey;
+            _accessKey = accessKey;
+            SetBasicCredentials();
         }
 
         public void SecretKey(string secretKey)
         {
-            _settings.SecretKey = secretKey;
+            _secretKey = secretKey;
+            SetBasicCredentials();
+        }
+
+        public void Credentials(AWSCredentials credentials)
+        {
+            _settings.Credentials = credentials;
         }
 
         public void Config(AmazonSQSConfig config)
@@ -70,6 +83,14 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public void Config(AmazonSimpleNotificationServiceConfig config)
         {
             _settings.AmazonSnsConfig = config;
+        }
+
+        private void SetBasicCredentials()
+        {
+            if (!string.IsNullOrEmpty(_accessKey) && !string.IsNullOrEmpty(_secretKey))
+            {
+                _settings.Credentials = new BasicAWSCredentials(_accessKey, _secretKey);
+            }
         }
     }
 }
