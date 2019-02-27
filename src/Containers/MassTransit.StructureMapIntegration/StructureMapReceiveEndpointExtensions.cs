@@ -51,6 +51,18 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Registers a consumer given the type of consumer
+        /// </summary>
+        /// <param name="configurator">The service bus configurator</param>
+        /// <param name="context">The LifetimeScope of the container</param>
+        /// <param name="consumerType">The consumer type</param>
+        public static void Consumer(this IReceiveEndpointConfigurator configurator, IContext context, Type consumerType)
+        {
+            var registration = context.GetInstance<IRegistration>();
+            registration.ConfigureConsumer(consumerType, configurator);
+        }
+
+        /// <summary>
         /// Registers a consumer given the lifetime scope specified
         /// </summary>
         /// <typeparam name="T">The consumer type</typeparam>

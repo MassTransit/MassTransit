@@ -58,6 +58,12 @@ namespace MassTransit
             configurator.Consumer(consumerFactory, configure);
         }
 
+        public static void Consumer(this IReceiveEndpointConfigurator configurator, IUnityContainer container, Type consumerType)
+        {
+            var registration = container.Resolve<IRegistration>();
+            registration.ConfigureConsumer(consumerType, configurator);
+        }
+
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IUnityContainer container, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {

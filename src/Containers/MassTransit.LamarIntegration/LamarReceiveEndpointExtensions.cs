@@ -56,6 +56,12 @@ namespace MassTransit
             configurator.Consumer(consumerFactory, configure);
         }
 
+        public static void Consumer(this IReceiveEndpointConfigurator configurator, IContainer container, Type consumerType)
+        {
+            var registration = container.GetInstance<IRegistration>();
+            registration.ConfigureConsumer(consumerType, configurator);
+        }
+
         /// <summary>
         /// Registers a saga using the container that has the repository resolved from the container
         /// </summary>

@@ -84,6 +84,12 @@ namespace MassTransit
             configure?.Invoke(configurator);
         }
 
+        public static void Consumer(this IReceiveEndpointConfigurator configurator, IKernel kernel, Type consumerType)
+        {
+            var registration = kernel.Get<IRegistration>();
+            registration.ConfigureConsumer(consumerType, configurator);
+        }
+
         public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IKernel kernel, Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {

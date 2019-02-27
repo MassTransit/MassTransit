@@ -41,7 +41,7 @@ namespace MassTransit
             var consumerFactory = new ScopeConsumerFactory<T>(scopeProvider);
 
             configurator.Consumer(consumerFactory, configure);
-        }
+        }        
 
         /// <summary>
         /// Registers a consumer given the lifetime scope specified
@@ -58,6 +58,18 @@ namespace MassTransit
             RegisterScopedContextProviderIfNotPresent(container);
 
             Consumer(configurator, container.Kernel, configure);
+        }
+
+        /// <summary>
+        /// Registers a consumer given the type of the consumer
+        /// </summary>
+        /// <param name="configurator">The service bus configureator</param>
+        /// <param name="kernel"></param>
+        /// <param name="consumerType">The consumer type</param>
+        public static void Consumer(this IReceiveEndpointConfigurator configurator, IKernel kernel, Type consumerType)
+        {
+            var registration = kernel.Resolve<IRegistration>();
+            registration.ConfigureConsumer(consumerType, configurator);
         }
 
         /// <summary>
