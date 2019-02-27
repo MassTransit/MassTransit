@@ -73,6 +73,19 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure a consumer on the receive endpoint, with the type of consumer.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="consumerType"></param>
+        /// <param name="context"></param>
+        public static void ConfigureConsumer(this IReceiveEndpointConfigurator configurator, Type consumerType,
+            IComponentContext context)
+        {
+            var registration = context.Resolve<IRegistration>();
+            registration.ConfigureConsumer(consumerType, configurator);
+        }
+
+        /// <summary>
         /// Configure all registered consumers on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
