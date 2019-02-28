@@ -20,6 +20,7 @@ namespace MassTransit.ApplicationInsights.Tests
     using System.Threading.Tasks;
     using Context;
     using Microsoft.ApplicationInsights.DataContracts;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Pipeline;
     using TestFramework.Messages;
     using Util;
@@ -136,6 +137,47 @@ namespace MassTransit.ApplicationInsights.Tests
             Assert.AreEqual(capturedTelemetry.Properties["CorrelationId"], correlationId.ToString());
             Assert.AreEqual(capturedTelemetry.Properties["DestinationAddress"], destinationAddress.ToString());
             Assert.AreEqual(capturedTelemetry.Properties["RequestId"], requestId.ToString());
+        }
+
+        [Test]
+        public async Task Should_not_fail_if_properties_are_already_defined()
+        {
+            var telemetryClient = new TelemetryClient();
+            // Arrange.
+            var messageId = Guid.NewGuid();
+            var conversationId = Guid.NewGuid();
+            var correlationId = Guid.NewGuid();
+            var requestId = Guid.NewGuid();
+            var inputAddress = new Uri("http://masstransit-project.com/");
+            var destinationAddress = new Uri("sb://my-organization.servicebus.windows.net/MyNamespace/MyMessage");
+
+            var mockReceiveContext = new Mock<ReceiveContext>();
+            mockReceiveContext.Setup(c => c.InputAddress).Returns(inputAddress);
+
+            var mockSendContext = new Mock<SendContext<PingMessage>>();
+            mockSendContext.Setup(c => c.Headers).Returns(_mockHeaders.Object);
+            mockSendContext.Setup(c => c.MessageId).Returns(messageId);
+            mockSendContext.Setup(c => c.ConversationId).Returns(conversationId);
+            mockSendContext.Setup(c => c.CorrelationId).Returns(correlationId);
+            mockSendContext.Setup(c => c.RequestId).Returns(requestId);
+            mockSendContext.Setup(c => c.DestinationAddress).Returns(destinationAddress);
+
+            var publishContextProxy = new PublishContextProxy<PingMessage>(mockSendContext.Object, new PingMessage());
+
+            var capturedTelemetry = default(DependencyTelemetry);
+
+            var filter = new ApplicationInsightsPublishFilter<PingMessage>(new TelemetryClient(), "", "", (holder, context) => capturedTelemetry = holder.Telemetry);
+
+            await filter.Send(publishContextProxy, new Mock<IPipe<PublishContext<PingMessage>>>().Object);
+
+            var configuration = TelemetryConfiguration.CreateDefault();
+            configuration.TelemetryInitializers.Add(new CopyPropertiesTelemetryInitializer(capturedTelemetry));
+
+            telemetryClient = new TelemetryClient(configuration);
+            filter = new ApplicationInsightsPublishFilter<PingMessage>(telemetryClient, "", "", (h, c) => { });
+
+            // Act, Assert
+            Assert.That(async () => await filter.Send(publishContextProxy, new Mock<IPipe<PublishContext<PingMessage>>>().Object), Throws.Nothing);
         }
     }
 }
