@@ -67,25 +67,25 @@ namespace MassTransit.ApplicationInsights.Pipeline
 
             using (IOperationHolder<RequestTelemetry> operation = _telemetryClient.StartOperation(requestTelemetry))
             {
-                operation.Telemetry.Properties.Add(MessageType, TypeMetadataCache<T>.ShortName);
+                operation.Telemetry.Properties[MessageType] = TypeMetadataCache<T>.ShortName;
 
                 if (context.MessageId.HasValue)
-                    operation.Telemetry.Properties.Add(MessageId, context.MessageId.Value.ToString());
+                    operation.Telemetry.Properties[MessageId] = context.MessageId.Value.ToString();
 
                 if (context.ConversationId.HasValue)
-                    operation.Telemetry.Properties.Add(ConversationId, context.ConversationId.Value.ToString());
+                    operation.Telemetry.Properties[ConversationId] = context.ConversationId.Value.ToString();
 
                 if (context.CorrelationId.HasValue)
-                    operation.Telemetry.Properties.Add(CorrelationId, context.CorrelationId.Value.ToString());
+                    operation.Telemetry.Properties[CorrelationId] = context.CorrelationId.Value.ToString();
 
                 if (context.DestinationAddress != null)
-                    operation.Telemetry.Properties.Add(DestinationAddress, context.DestinationAddress.ToString());
+                    operation.Telemetry.Properties[DestinationAddress] = context.DestinationAddress.ToString();
 
                 if (context.ReceiveContext.InputAddress != null)
-                    operation.Telemetry.Properties.Add(InputAddress, context.ReceiveContext.InputAddress.ToString());
+                    operation.Telemetry.Properties[InputAddress] = context.ReceiveContext.InputAddress.ToString();
 
                 if (context.RequestId.HasValue)
-                    operation.Telemetry.Properties.Add(RequestId, context.RequestId.Value.ToString());
+                    operation.Telemetry.Properties[RequestId] = context.RequestId.Value.ToString();
 
                 _configureOperation?.Invoke(operation, context);
 
