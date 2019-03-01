@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Topology.Entities
 {
+    using System.Collections.Generic;
+
+
     /// <summary>
     /// The exchange details used to declare the exchange to AmazonSQS
     /// </summary>
@@ -31,5 +34,15 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         /// True if the exchange should be deleted when the connection is closed
         /// </summary>
         bool AutoDelete { get; }
+
+        /// <summary>
+        /// Additional <see href="https://docs.aws.amazon.com/sns/latest/api/API_SetTopicAttributes.html">attributes</see> for the topic.
+        /// </summary>
+        IDictionary<string, object> TopicAttributes { get; }
+
+        /// <summary>
+        /// Additional <see href="https://docs.aws.amazon.com/sns/latest/api/API_SetSubscriptionAttributes.html">attributes</see> for the topic's subscription.
+        /// </summary>
+        IDictionary<string, object> TopicSubscriptionAttributes { get; }
     }
 }

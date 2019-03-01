@@ -20,13 +20,14 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         Queue,
         QueueHandle
     {
-        public QueueEntity(long id, string name, bool durable, bool autoDelete, IDictionary<string, object> attributes = null)
+        public QueueEntity(long id, string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null, IDictionary<string, object> queueSubscriptionAttributes = null)
         {
             Id = id;
             EntityName = name;
             Durable = durable;
             AutoDelete = autoDelete;
-            Attributes = attributes ?? new Dictionary<string, object>();
+            QueueAttributes = queueAttributes ?? new Dictionary<string, object>();
+            QueueSubscriptionAttributes = queueSubscriptionAttributes ?? new Dictionary<string, object>();
         }
 
         public static IEqualityComparer<QueueEntity> NameComparer { get; } = new NameEqualityComparer();
@@ -37,7 +38,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         public bool Durable { get; }
         public bool AutoDelete { get; }
         public long Id { get; }
-        public IDictionary<string, object> Attributes { get; }
+        public IDictionary<string, object> QueueAttributes { get; }
+        public IDictionary<string, object> QueueSubscriptionAttributes { get; }
         public Queue Queue => this;
 
         public override string ToString()
@@ -47,7 +49,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
                 $"name: {EntityName}",
                 Durable ? "durable" : "",
                 AutoDelete ? "auto-delete" : "",
-                Attributes.Any() ? $"attributes: {string.Join(";", Attributes.Select(a => $"{a.Key}={a.Value}"))}" : ""
+                QueueAttributes.Any() ? $"attributes: {string.Join(";", QueueAttributes.Select(a => $"{a.Key}={a.Value}"))}" : "",
+                QueueSubscriptionAttributes.Any() ? $"subscription-attributes: {string.Join(";", QueueSubscriptionAttributes.Select(a => $"{a.Key}={a.Value}"))}" : ""
             }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 

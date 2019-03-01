@@ -38,7 +38,12 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// <summary>
         /// Additional <see href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_SetQueueAttributes.html">attributes</see> for the queue.
         /// </summary>
-        IDictionary<string, object> Attributes { get; }
+        IDictionary<string, object> QueueAttributes { get; }
+
+        /// <summary>
+        /// Additional <see href="https://docs.aws.amazon.com/sns/latest/api/API_SetSubscriptionAttributes.html">attributes</see> for the queue's subscription.
+        /// </summary>
+        IDictionary<string, object> QueueSubscriptionAttributes { get; }
 
         /// <summary>
         /// Get the input address for the transport on the specified host
