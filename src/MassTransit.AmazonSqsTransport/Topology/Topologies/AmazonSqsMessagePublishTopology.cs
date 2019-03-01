@@ -62,6 +62,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             set => _topic.AutoDelete = value;
         }
 
+        IDictionary<string, object> ITopicConfigurator.TopicAttributes => _topic.TopicAttributes;
+        IDictionary<string, object> ITopicConfigurator.TopicSubscriptionAttributes => _topic.TopicSubscriptionAttributes;
+
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
         {
             publishAddress = GetPublishSettings().GetSendAddress(baseAddress);

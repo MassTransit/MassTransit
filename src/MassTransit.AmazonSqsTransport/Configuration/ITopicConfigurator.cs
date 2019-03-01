@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Configuration
 {
+    using System.Collections.Generic;
+
+
     /// <summary>
     /// Configures an exchange for AmazonSQS
     /// </summary>
@@ -27,5 +30,15 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// Specify that the queue (and the exchange of the same name) should be created as auto-delete
         /// </summary>
         bool AutoDelete { set; }
+
+        /// <summary>
+        /// Additional <see href="https://docs.aws.amazon.com/sns/latest/api/API_SetTopicAttributes.html">attributes</see> for the topic.
+        /// </summary>
+        IDictionary<string, object> TopicAttributes { get; }
+
+        /// <summary>
+        /// Additional <see href="https://docs.aws.amazon.com/sns/latest/api/API_SetSubscriptionAttributes.html">attributes</see> for the topic's subscription.
+        /// </summary>
+        IDictionary<string, object> TopicSubscriptionAttributes { get; }
     }
 }

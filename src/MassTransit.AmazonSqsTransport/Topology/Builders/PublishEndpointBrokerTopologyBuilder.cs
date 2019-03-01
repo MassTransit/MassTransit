@@ -68,14 +68,14 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
                 return this;
             }
 
-            public TopicHandle CreateTopic(string name, bool durable, bool autoDelete)
+            public TopicHandle CreateTopic(string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null, IDictionary<string, object> topicSubscriptionAttributes = null)
             {
-                return _builder.CreateTopic(name, durable, autoDelete);
+                return _builder.CreateTopic(name, durable, autoDelete, topicAttributes, topicSubscriptionAttributes);
             }
 
-            public QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object> attributes = null)
+            public QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null, IDictionary<string, object> queueSubscriptionAttributes = null)
             {
-                return _builder.CreateQueue(name, durable, autoDelete, attributes);
+                return _builder.CreateQueue(name, durable, autoDelete, queueAttributes, queueSubscriptionAttributes);
             }
 
             public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle topic, QueueHandle queue)

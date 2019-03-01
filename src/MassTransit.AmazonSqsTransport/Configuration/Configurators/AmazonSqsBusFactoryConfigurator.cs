@@ -87,7 +87,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             set => _settings.PurgeOnStartup = value;
         }
 
-        public IDictionary<string, object> Attributes => _settings.Attributes;
+        public IDictionary<string, object> QueueAttributes => _settings.QueueAttributes;
+        public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
 
         public IAmazonSqsHost Host(AmazonSqsHostSettings settings)
         {

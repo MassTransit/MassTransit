@@ -20,12 +20,16 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         Topic,
         TopicHandle
     {
-        public TopicEntity(long id, string name, bool durable, bool autoDelete)
+        public TopicEntity(long id, string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null, IDictionary<string, object> topicSubscriptionAttributes = null)
         {
             Id = id;
             EntityName = name;
             Durable = durable;
             AutoDelete = autoDelete;
+            TopicAttributes = topicAttributes ?? new Dictionary<string, object>();
+            TopicSubscriptionAttributes = topicSubscriptionAttributes ?? new Dictionary<string, object>();
+
+            EnsureRawDeliveryIsSet();
         }
 
         public static IEqualityComparer<TopicEntity> NameComparer { get; } = new NameEqualityComparer();
@@ -36,6 +40,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         public bool Durable { get; }
         public bool AutoDelete { get; }
         public long Id { get; }
+        public IDictionary<string, object> TopicAttributes { get; }
+        public IDictionary<string, object> TopicSubscriptionAttributes { get; }
         public Topic Topic => this;
 
         public override string ToString()
@@ -44,8 +50,15 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
             {
                 $"name: {EntityName}",
                 Durable ? "durable" : "",
-                AutoDelete ? "auto-delete" : ""
+                AutoDelete ? "auto-delete" : "",
+                TopicAttributes.Any() ? $"attributes: {string.Join(";", TopicAttributes.Select(a => $"{a.Key}={a.Value}"))}" : "",
+                TopicSubscriptionAttributes.Any() ? $"subscription-attributes: {string.Join(";", TopicSubscriptionAttributes.Select(a => $"{a.Key}={a.Value}"))}" : ""
             }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        }
+
+        private void EnsureRawDeliveryIsSet()
+        {
+            TopicSubscriptionAttributes["RawMessageDelivery"] = true;
         }
 
 

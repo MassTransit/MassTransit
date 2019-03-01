@@ -39,20 +39,20 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
             return Interlocked.Increment(ref _nextId);
         }
 
-        public TopicHandle CreateTopic(string name, bool durable, bool autoDelete)
+        public TopicHandle CreateTopic(string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null, IDictionary<string, object> topicSubscriptionAttributes = null)
         {
             var id = GetNextId();
 
-            var topicEntity = new TopicEntity(id, name, durable, autoDelete);
+            var topicEntity = new TopicEntity(id, name, durable, autoDelete, topicAttributes, topicSubscriptionAttributes);
 
             return Topics.GetOrAdd(topicEntity);
         }
 
-        public QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object> attributes = null)
+        public QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null, IDictionary<string, object> queueSubscriptionAttributes = null)
         {
             var id = GetNextId();
 
-            var queueEntity = new QueueEntity(id, name, durable, autoDelete, attributes);
+            var queueEntity = new QueueEntity(id, name, durable, autoDelete, queueAttributes, queueSubscriptionAttributes);
 
             return Queues.GetOrAdd(queueEntity);
         }

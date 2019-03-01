@@ -81,7 +81,12 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 if (_topicArns.TryGetValue(topic.EntityName, out var result))
                     return result;
 
-            var response = await _amazonSns.CreateTopicAsync(topic.EntityName).ConfigureAwait(false);
+            var request = new CreateTopicRequest(topic.EntityName)
+            {
+                Attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString())
+            };
+
+            var response = await _amazonSns.CreateTopicAsync(request).ConfigureAwait(false);
 
             await Task.Delay(500).ConfigureAwait(false);
 
@@ -100,16 +105,16 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                     return result;
 
             // required to preserve backwards compability
-            if (queue.EntityName.EndsWith(".fifo", true, CultureInfo.InvariantCulture) && !queue.Attributes.ContainsKey(QueueAttributeName.FifoQueue))
+            if (queue.EntityName.EndsWith(".fifo", true, CultureInfo.InvariantCulture) && !queue.QueueAttributes.ContainsKey(QueueAttributeName.FifoQueue))
             {
                 _log.Warn("Using '.fifo' suffix without 'FifoQueue' attribute might cause unexpected behavior.");
 
-                queue.Attributes[QueueAttributeName.FifoQueue] = true;
+                queue.QueueAttributes[QueueAttributeName.FifoQueue] = true;
             }
 
             var request = new CreateQueueRequest(queue.EntityName)
             {
-                Attributes = queue.Attributes.ToDictionary(x => x.Key, x => x.Value.ToString())
+                Attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString())
             };
 
             var response = await _amazonSqs.CreateQueueAsync(request).ConfigureAwait(false);
@@ -131,11 +136,22 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             var topicArn = results[0];
             var queueUrl = results[1];
 
-            var response = await _amazonSns.SubscribeQueueAsync(topicArn, _amazonSqs, queueUrl).ConfigureAwait(false);
+            var subscriptionArn = await _amazonSns.SubscribeQueueAsync(topicArn, _amazonSqs, queueUrl).ConfigureAwait(false);
 
             await Task.Delay(500).ConfigureAwait(false);
+            
+            var topicSubscriptionAttributes = topic.TopicSubscriptionAttributes;
+            var queueSubscriptionAttributes = queue.QueueSubscriptionAttributes;
+            var subscriptionAttributes = new Dictionary<string, string>();
 
-            await _amazonSns.SetSubscriptionAttributesAsync(response, "RawMessageDelivery", "true").ConfigureAwait(false);
+            topicSubscriptionAttributes.ToList().ForEach(x => subscriptionAttributes[x.Key] = x.Value.ToString());
+            queueSubscriptionAttributes.ToList().ForEach(x => subscriptionAttributes[x.Key] = x.Value.ToString());
+
+            foreach (var attribute in subscriptionAttributes)
+            {
+                await _amazonSns.SetSubscriptionAttributesAsync(subscriptionArn, attribute.Key, attribute.Value).ConfigureAwait(false);
+                await Task.Delay(500).ConfigureAwait(false);
+            }
         }
 
         async Task ClientContext.DeleteTopic(Topic topic)
