@@ -27,6 +27,7 @@ namespace Automatonymous.Activities
         where TMessage : class
     {
         readonly ScheduleDelayProvider<TInstance, TData, TException> _delayProvider;
+        readonly ScheduleTimeProvider<TInstance, TData, TException> _timeProvider;
         readonly EventExceptionMessageFactory<TInstance, TData, TException, TMessage> _messageFactory;
         readonly Schedule<TInstance, TMessage> _schedule;
         readonly IPipe<SendContext> _sendPipe;
@@ -48,6 +49,28 @@ namespace Automatonymous.Activities
             _messageFactory = messageFactory;
             _schedule = schedule;
             _delayProvider = delayProvider;
+
+            _sendPipe = Pipe.Empty<SendContext>();
+        }
+
+        public FaultedScheduleActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
+            Schedule<TInstance, TMessage> schedule,
+            Action<SendContext> contextCallback, ScheduleTimeProvider<TInstance, TData, TException> timeProvider)
+        {
+            _messageFactory = messageFactory;
+            _schedule = schedule;
+            _timeProvider = timeProvider;
+
+
+            _sendPipe = Pipe.Execute(contextCallback);
+        }
+
+        public FaultedScheduleActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
+            Schedule<TInstance, TMessage> schedule, ScheduleTimeProvider<TInstance, TData, TException> timeProvider)
+        {
+            _messageFactory = messageFactory;
+            _schedule = schedule;
+            _timeProvider = timeProvider;
 
             _sendPipe = Pipe.Empty<SendContext>();
         }
@@ -80,9 +103,17 @@ namespace Automatonymous.Activities
 
                 var message = _messageFactory(exceptionContext);
 
-                var delay = _delayProvider(exceptionContext);
-
-                ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(delay, message, _sendPipe).ConfigureAwait(false);
+                ScheduledMessage<TMessage> scheduledMessage;
+                if (_delayProvider != null)
+                {
+                    var delay = _delayProvider(exceptionContext);
+                    scheduledMessage = await schedulerContext.ScheduleSend(delay, message, _sendPipe).ConfigureAwait(false);
+                }
+                else
+                {
+                    var time = _timeProvider(exceptionContext);
+                    scheduledMessage = await schedulerContext.ScheduleSend(time, message, _sendPipe).ConfigureAwait(false);
+                }
 
                 Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
                 if (previousTokenId.HasValue)

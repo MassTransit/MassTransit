@@ -25,6 +25,7 @@ namespace Automatonymous.Activities
         where TMessage : class
     {
         readonly ScheduleDelayProvider<TInstance> _delayProvider;
+        readonly ScheduleTimeProvider<TInstance> _timeProvider;
         readonly EventMessageFactory<TInstance, TMessage> _messageFactory;
         readonly Schedule<TInstance> _schedule;
         readonly IPipe<SendContext> _sendPipe;
@@ -45,6 +46,26 @@ namespace Automatonymous.Activities
             _messageFactory = messageFactory;
             _schedule = schedule;
             _delayProvider = delayProvider;
+
+            _sendPipe = Pipe.Execute(contextCallback);
+        }
+
+        public ScheduleActivity(EventMessageFactory<TInstance, TMessage> messageFactory, Schedule<TInstance> schedule,
+            ScheduleTimeProvider<TInstance> timeProvider)
+        {
+            _messageFactory = messageFactory;
+            _schedule = schedule;
+            _timeProvider = timeProvider;
+
+            _sendPipe = Pipe.Empty<SendContext>();
+        }
+
+        public ScheduleActivity(EventMessageFactory<TInstance, TMessage> messageFactory, Schedule<TInstance> schedule, Action<SendContext> contextCallback,
+            ScheduleTimeProvider<TInstance> timeProvider)
+        {
+            _messageFactory = messageFactory;
+            _schedule = schedule;
+            _timeProvider = timeProvider;
 
             _sendPipe = Pipe.Execute(contextCallback);
         }
@@ -94,9 +115,17 @@ namespace Automatonymous.Activities
 
             var message = _messageFactory(consumeContext);
 
-            var delay = _delayProvider(consumeContext);
-
-            ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(delay, message, _sendPipe).ConfigureAwait(false);
+            ScheduledMessage<TMessage> scheduledMessage;
+            if (_delayProvider != null)
+            {
+                var delay = _delayProvider(consumeContext);
+                scheduledMessage = await schedulerContext.ScheduleSend(delay, message, _sendPipe).ConfigureAwait(false);
+            }
+            else
+            {
+                var time = _timeProvider(consumeContext);
+                scheduledMessage = await schedulerContext.ScheduleSend(time, message, _sendPipe).ConfigureAwait(false);
+            }
 
             Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
@@ -116,6 +145,7 @@ namespace Automatonymous.Activities
         where TMessage : class
     {
         readonly ScheduleDelayProvider<TInstance, TData> _delayProvider;
+        readonly ScheduleTimeProvider<TInstance, TData> _timeProvider;
         readonly EventMessageFactory<TInstance, TData, TMessage> _messageFactory;
         readonly Schedule<TInstance, TMessage> _schedule;
         readonly IPipe<SendContext> _sendPipe;
@@ -133,6 +163,23 @@ namespace Automatonymous.Activities
             _messageFactory = messageFactory;
             _schedule = schedule;
             _delayProvider = delayProvider;
+
+            _sendPipe = Pipe.Empty<SendContext>();
+        }
+
+        public ScheduleActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory, Schedule<TInstance, TMessage> schedule,
+            Action<SendContext> contextCallback, ScheduleTimeProvider<TInstance, TData> timeProvider)
+            : this(messageFactory, schedule, timeProvider)
+        {
+            _sendPipe = Pipe.Execute(contextCallback);
+        }
+
+        public ScheduleActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory, Schedule<TInstance, TMessage> schedule,
+            ScheduleTimeProvider<TInstance, TData> timeProvider)
+        {
+            _messageFactory = messageFactory;
+            _schedule = schedule;
+            _timeProvider = timeProvider;
 
             _sendPipe = Pipe.Empty<SendContext>();
         }
@@ -158,9 +205,17 @@ namespace Automatonymous.Activities
 
             var message = _messageFactory(consumeContext);
 
-            var delay = _delayProvider(consumeContext);
-
-            ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(delay, message, _sendPipe).ConfigureAwait(false);
+            ScheduledMessage<TMessage> scheduledMessage;
+            if (_delayProvider != null)
+            {
+                var delay = _delayProvider(consumeContext);
+                scheduledMessage = await schedulerContext.ScheduleSend(delay, message, _sendPipe).ConfigureAwait(false);
+            }
+            else
+            {
+                var time = _timeProvider(consumeContext);
+                scheduledMessage = await schedulerContext.ScheduleSend(time, message, _sendPipe).ConfigureAwait(false);
+            }
 
             Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
