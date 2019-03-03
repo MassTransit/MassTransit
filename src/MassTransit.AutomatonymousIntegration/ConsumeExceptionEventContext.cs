@@ -14,6 +14,17 @@ namespace Automatonymous
 {
     using MassTransit;
 
+    /// <summary>
+    /// Combines the consumption of an event in a state machine with the consumer context of the receiving endpoint.
+    /// </summary>
+    /// <typeparam name="TInstance"></typeparam>
+    /// <typeparam name="TException"></typeparam>
+    public interface ConsumeExceptionEventContext<out TInstance, out TException> :
+        EventContext<TInstance>,
+        ConsumeContext
+    {
+        TException Exception { get; }
+    }
 
     /// <summary>
     /// Combines the consumption of an event in a state machine with the consumer context of the receiving endpoint.

@@ -150,6 +150,66 @@
             return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressProvider, messageFactory, contextCallback));
         }
 
+        public static ExceptionActivityBinder<TInstance, TException> Send<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Uri destinationAddress, TMessage message,
+            Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedSendActivity<TInstance, TException, TMessage>(_ => destinationAddress, x => message, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> SendAsync<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Uri destinationAddress, Task<TMessage> message,
+            Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedSendActivity<TInstance, TException, TMessage>(_ => destinationAddress, x => message, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> Send<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, DestinationAddressProvider<TInstance> destinationAddressProvider,
+            TMessage message, Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressProvider, x => message, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> SendAsync<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, DestinationAddressProvider<TInstance> destinationAddressProvider,
+            Task<TMessage> message, Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressProvider, x => message, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> Send<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Uri destinationAddress,
+            EventExceptionMessageFactory<TInstance, TException, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedSendActivity<TInstance, TException, TMessage>(_ => destinationAddress, messageFactory, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> SendAsync<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Uri destinationAddress,
+            AsyncEventExceptionMessageFactory<TInstance, TException, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedSendActivity<TInstance, TException, TMessage>(_ => destinationAddress, messageFactory, contextCallback));
+        }
+
         public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
             this ExceptionActivityBinder<TInstance, TData, TException> source, Uri destinationAddress, TMessage message,
             Action<SendContext<TMessage>> contextCallback = null)
