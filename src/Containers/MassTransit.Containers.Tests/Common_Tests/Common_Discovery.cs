@@ -33,7 +33,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         using GreenPipes;
         using Saga;
         using TestFramework.Messages;
-        using Util;
 
 
         public class DiscoveryTypes
@@ -51,6 +50,21 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 await Task.Delay(1000);
 
                 await context.RespondAsync(new PongMessage(context.Message.CorrelationId));
+            }
+        }
+
+
+        public class ByzantineFilter<T> :
+            IFilter<T>
+            where T : class, PipeContext
+        {
+            public Task Send(T context, IPipe<T> next)
+            {
+                return Task.CompletedTask;
+            }
+
+            public void Probe(ProbeContext context)
+            {
             }
         }
 

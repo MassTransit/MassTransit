@@ -67,7 +67,7 @@ namespace MassTransit
 
             var types = AssemblyTypeCache.FindTypes(assemblies, IsSagaStateMachineOrDefinition).GetAwaiter().GetResult();
 
-            configurator.AddSagaStateMachines(registrar, types.FindTypes(TypeClassification.Concrete).ToArray());
+            configurator.AddSagaStateMachines(registrar, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace MassTransit
                     && candidate.Namespace.StartsWith(type.Namespace, StringComparison.OrdinalIgnoreCase);
             }
 
-            return AssemblyTypeCache.FindTypes(type.Assembly, TypeClassification.Concrete, Filter).GetAwaiter().GetResult();
+            return AssemblyTypeCache.FindTypes(type.Assembly, TypeClassification.Concrete | TypeClassification.Closed, Filter).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace MassTransit
 
             var types = AssemblyTypeCache.FindTypes(assemblies, x => x.HasInterface(typeof(SagaStateMachine<>))).GetAwaiter().GetResult();
 
-            registrar.RegisterSagaStateMachines(types.FindTypes(TypeClassification.Concrete).ToArray());
+            registrar.RegisterSagaStateMachines(types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
 
         public static void RegisterSagaStateMachines(this ISagaStateMachineRegistrar registrar, params Type[] types)

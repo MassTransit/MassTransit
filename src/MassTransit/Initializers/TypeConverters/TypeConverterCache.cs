@@ -22,7 +22,7 @@ namespace MassTransit.Initializers.TypeConverters
             var assembly = typeof(BooleanTypeConverter).Assembly;
             var ns = typeof(BooleanTypeConverter).Namespace;
 
-            var converterTypes = AssemblyTypeCache.FindTypes(assembly, TypeClassification.Concrete,
+            var converterTypes = AssemblyTypeCache.FindTypes(assembly, TypeClassification.Concrete | TypeClassification.Closed,
                 x => x.Namespace.StartsWith(ns) && x.HasInterface(typeof(ITypeConverter<,>))).GetAwaiter().GetResult().ToArray();
 
             foreach (var converterType in converterTypes)

@@ -37,7 +37,7 @@ namespace MassTransit
 
             var types = AssemblyTypeCache.FindTypes(assemblies, IsConsumerOrDefinition).GetAwaiter().GetResult();
 
-            AddConsumers(configurator, types.FindTypes(TypeClassification.Concrete).ToArray());
+            AddConsumers(configurator, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
 
         /// <summary>
@@ -97,7 +97,11 @@ namespace MassTransit
             var consumers = from c in consumerTypes
                 join d in consumerDefinitionTypes on c equals d.GetClosingArgument(typeof(IConsumerDefinition<>)) into dc
                 from d in dc.DefaultIfEmpty()
-                select new {ConsumerType = c, DefinitionType = d};
+                select new
+                {
+                    ConsumerType = c,
+                    DefinitionType = d
+                };
 
             foreach (var consumer in consumers)
                 configurator.AddConsumer(consumer.ConsumerType, consumer.DefinitionType);
@@ -115,7 +119,7 @@ namespace MassTransit
 
             var types = AssemblyTypeCache.FindTypes(assemblies, IsSagaTypeOrDefinition).GetAwaiter().GetResult();
 
-            AddSagas(configurator, types.FindTypes(TypeClassification.Concrete).ToArray());
+            AddSagas(configurator, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
 
         /// <summary>
@@ -176,7 +180,11 @@ namespace MassTransit
             var sagas = from c in sagaTypes
                 join d in sagaDefinitionTypes on c equals d.GetClosingArgument(typeof(ISagaDefinition<>)) into dc
                 from d in dc.DefaultIfEmpty()
-                select new {SagaType = c, DefinitionType = d};
+                select new
+                {
+                    SagaType = c,
+                    DefinitionType = d
+                };
 
             foreach (var saga in sagas)
                 configurator.AddSaga(saga.SagaType, saga.DefinitionType);
@@ -194,7 +202,7 @@ namespace MassTransit
 
             var types = AssemblyTypeCache.FindTypes(assemblies, IsActivityTypeOrDefinition).GetAwaiter().GetResult();
 
-            AddActivities(configurator, types.FindTypes(TypeClassification.Concrete).ToArray());
+            AddActivities(configurator, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
 
         /// <summary>
@@ -254,7 +262,11 @@ namespace MassTransit
             var activities = from c in activityTypes
                 join d in activityDefinitionTypes on c equals d.GetClosingArguments(typeof(IActivityDefinition<,,>)).First() into dc
                 from d in dc.DefaultIfEmpty()
-                select new {ActivityType = c, DefinitionType = d};
+                select new
+                {
+                    ActivityType = c,
+                    DefinitionType = d
+                };
 
             foreach (var activity in activities)
                 configurator.AddActivity(activity.ActivityType, activity.DefinitionType);
@@ -265,7 +277,11 @@ namespace MassTransit
             var executeActivities = from c in executeActivityTypes
                 join d in executeActivityDefinitionTypes on c equals d.GetClosingArguments(typeof(IExecuteActivityDefinition<,>)).First() into dc
                 from d in dc.DefaultIfEmpty()
-                select new {ActivityType = c, DefinitionType = d};
+                select new
+                {
+                    ActivityType = c,
+                    DefinitionType = d
+                };
 
             foreach (var executeActivity in executeActivities)
                 configurator.AddExecuteActivity(executeActivity.ActivityType, executeActivity.DefinitionType);
@@ -280,7 +296,7 @@ namespace MassTransit
                     && candidate.Namespace.StartsWith(type.Namespace, StringComparison.OrdinalIgnoreCase);
             }
 
-            return AssemblyTypeCache.FindTypes(type.Assembly, TypeClassification.Concrete, Filter).GetAwaiter().GetResult();
+            return AssemblyTypeCache.FindTypes(type.Assembly, TypeClassification.Concrete | TypeClassification.Closed, Filter).GetAwaiter().GetResult();
         }
     }
 }
