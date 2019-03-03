@@ -25,6 +25,7 @@ namespace Automatonymous.Activities
     {
         readonly ServiceAddressProvider<TInstance> _serviceAddressProvider;
         readonly EventMessageFactory<TInstance, TRequest> _messageFactory;
+        readonly AsyncEventMessageFactory<TInstance, TRequest> _asyncMessageFactory;
 
         public RequestActivity(Request<TInstance, TRequest, TResponse> request, EventMessageFactory<TInstance, TRequest> messageFactory)
             : base(request)
@@ -33,10 +34,26 @@ namespace Automatonymous.Activities
             _serviceAddressProvider = context => request.Settings.ServiceAddress;
         }
 
-        public RequestActivity(Request<TInstance, TRequest, TResponse> request, ServiceAddressProvider<TInstance> serviceAddressProvider, EventMessageFactory<TInstance, TRequest> messageFactory)
+        public RequestActivity(Request<TInstance, TRequest, TResponse> request, ServiceAddressProvider<TInstance> serviceAddressProvider,
+            EventMessageFactory<TInstance, TRequest> messageFactory)
             : base(request)
         {
             _messageFactory = messageFactory;
+            _serviceAddressProvider = context => serviceAddressProvider(context) ?? request.Settings.ServiceAddress;
+        }
+
+        public RequestActivity(Request<TInstance, TRequest, TResponse> request, AsyncEventMessageFactory<TInstance, TRequest> messageFactory)
+            : base(request)
+        {
+            _asyncMessageFactory = messageFactory;
+            _serviceAddressProvider = context => request.Settings.ServiceAddress;
+        }
+
+        public RequestActivity(Request<TInstance, TRequest, TResponse> request, ServiceAddressProvider<TInstance> serviceAddressProvider,
+            AsyncEventMessageFactory<TInstance, TRequest> messageFactory)
+            : base(request)
+        {
+            _asyncMessageFactory = messageFactory;
             _serviceAddressProvider = context => serviceAddressProvider(context) ?? request.Settings.ServiceAddress;
         }
 
@@ -69,13 +86,13 @@ namespace Automatonymous.Activities
             return next.Faulted(context);
         }
 
-        Task Execute(BehaviorContext<TInstance> context)
+        async Task Execute(BehaviorContext<TInstance> context)
         {
             ConsumeEventContext<TInstance> consumeContext = context.CreateConsumeContext();
 
-            var requestMessage = _messageFactory(consumeContext);
+            var requestMessage = _messageFactory?.Invoke(consumeContext) ?? await _asyncMessageFactory(consumeContext).ConfigureAwait(false);
 
-            return SendRequest(context, consumeContext, requestMessage, _serviceAddressProvider(consumeContext));
+            await SendRequest(context, consumeContext, requestMessage, _serviceAddressProvider(consumeContext)).ConfigureAwait(false);
         }
     }
 
@@ -90,6 +107,7 @@ namespace Automatonymous.Activities
     {
         readonly ServiceAddressProvider<TInstance, TData> _serviceAddressProvider;
         readonly EventMessageFactory<TInstance, TData, TRequest> _messageFactory;
+        readonly AsyncEventMessageFactory<TInstance, TData, TRequest> _asyncMessageFactory;
 
         public RequestActivity(Request<TInstance, TRequest, TResponse> request, EventMessageFactory<TInstance, TData, TRequest> messageFactory)
             : base(request)
@@ -98,10 +116,26 @@ namespace Automatonymous.Activities
             _serviceAddressProvider = context => request.Settings.ServiceAddress;
         }
 
-        public RequestActivity(Request<TInstance, TRequest, TResponse> request, ServiceAddressProvider<TInstance,TData> serviceAddressProvider, EventMessageFactory<TInstance, TData, TRequest> messageFactory)
+        public RequestActivity(Request<TInstance, TRequest, TResponse> request, ServiceAddressProvider<TInstance, TData> serviceAddressProvider,
+            EventMessageFactory<TInstance, TData, TRequest> messageFactory)
             : base(request)
         {
             _messageFactory = messageFactory;
+            _serviceAddressProvider = context => serviceAddressProvider(context) ?? request.Settings.ServiceAddress;
+        }
+
+        public RequestActivity(Request<TInstance, TRequest, TResponse> request, AsyncEventMessageFactory<TInstance, TData, TRequest> messageFactory)
+            : base(request)
+        {
+            _asyncMessageFactory = messageFactory;
+            _serviceAddressProvider = context => request.Settings.ServiceAddress;
+        }
+
+        public RequestActivity(Request<TInstance, TRequest, TResponse> request, ServiceAddressProvider<TInstance, TData> serviceAddressProvider,
+            AsyncEventMessageFactory<TInstance, TData, TRequest> messageFactory)
+            : base(request)
+        {
+            _asyncMessageFactory = messageFactory;
             _serviceAddressProvider = context => serviceAddressProvider(context) ?? request.Settings.ServiceAddress;
         }
 
@@ -114,7 +148,7 @@ namespace Automatonymous.Activities
         {
             ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
-            var requestMessage = _messageFactory(consumeContext);
+            var requestMessage = _messageFactory?.Invoke(consumeContext) ?? await _asyncMessageFactory(consumeContext).ConfigureAwait(false);
 
             await SendRequest(context, consumeContext, requestMessage, _serviceAddressProvider(consumeContext)).ConfigureAwait(false);
 

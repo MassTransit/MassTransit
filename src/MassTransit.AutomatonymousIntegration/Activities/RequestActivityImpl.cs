@@ -49,14 +49,13 @@ namespace Automatonymous.Activities
 
                 RequestTimeoutExpired<TRequest> message = new TimeoutExpired<TRequest>(now, expirationTime, context.Instance.CorrelationId, pipe.RequestId);
 
-                MessageSchedulerContext schedulerContext;
                 if (_request.Settings.SchedulingServiceAddress != null)
                 {
                     var scheduleEndpoint = await consumeContext.GetSendEndpoint(_request.Settings.SchedulingServiceAddress).ConfigureAwait(false);
 
                     await scheduleEndpoint.ScheduleSend(consumeContext.ReceiveContext.InputAddress, expirationTime, message).ConfigureAwait(false);
                 }
-                else if (consumeContext.TryGetPayload(out schedulerContext))
+                else if (consumeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
                     await schedulerContext.ScheduleSend(expirationTime, message).ConfigureAwait(false);
                 else
                     throw new ConfigurationException("A request timeout was specified but no message scheduler was specified or available");

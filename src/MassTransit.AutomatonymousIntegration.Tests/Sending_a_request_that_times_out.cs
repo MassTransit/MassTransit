@@ -28,24 +28,19 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         [Test]
         public async Task Should_receive_the_timeout_notification()
         {
-            RegisterMember registerMember = new RegisterMemberCommand
-            {
-                MemberNumber = Guid.NewGuid().ToString(),
-                Name = "Frank",
-                Address = "123 american way",
-            };
+            var memberNumber = Guid.NewGuid().ToString();
 
-            await InputQueueSendEndpoint.Send(registerMember);
+            await InputQueueSendEndpoint.Send<RegisterMember>(new { MemberNumber = memberNumber, Name = "Frank", Address = "123 American Way"});
 
-            Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == registerMember.MemberNumber
+            Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber
                 && GetCurrentState(x) == _machine.AddressValidationTimeout, TestTimeout);
             Assert.IsTrue(saga.HasValue);
         }
 
-        InMemorySagaRepository<Request_Specs.TestState> _repository;
+        InMemorySagaRepository<TestState> _repository;
         TestStateMachine _machine;
 
-        State GetCurrentState(Request_Specs.TestState state)
+        State GetCurrentState(TestState state)
         {
             return _machine.GetState(state).Result;
         }
@@ -53,13 +48,14 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         public Sending_a_request_that_times_out()
         {
             _serviceQueueAddress = new Uri("loopback://localhost/service_queue");
+            EndpointConvention.Map<ValidateName>(_serviceQueueAddress);
         }
 
         Uri _serviceQueueAddress;
 
         Uri ServiceQueueAddress
         {
-            get { return _serviceQueueAddress; }
+            get => _serviceQueueAddress;
             set
             {
                 if (Bus != null)

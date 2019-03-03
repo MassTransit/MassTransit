@@ -1,22 +1,9 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Pipeline;
 
 
     public class FaultedSendActivity<TInstance, TData, TException, TMessage> :
@@ -26,40 +13,44 @@ namespace Automatonymous.Activities
         where TMessage : class
         where TException : Exception
     {
-        readonly Uri _destionationAddress;
+        readonly AsyncEventExceptionMessageFactory<TInstance, TData, TException, TMessage> _asyncMessageFactory;
+        readonly DestinationAddressProvider<TInstance, TData> _destinationAddressProvider;
         readonly EventExceptionMessageFactory<TInstance, TData, TException, TMessage> _messageFactory;
         readonly IPipe<SendContext<TMessage>> _sendPipe;
 
-        public FaultedSendActivity(Uri destionationAddress, EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
+        public FaultedSendActivity(DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
+            EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
+            : this(messageFactory, contextCallback)
         {
-            _destionationAddress = destionationAddress;
-            _messageFactory = messageFactory;
-
-            _sendPipe = Pipe.Execute(contextCallback);
+            _destinationAddressProvider = destinationAddressProvider;
         }
 
-        public FaultedSendActivity(Uri destionationAddress, EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory)
+        public FaultedSendActivity(DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
+            AsyncEventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback)
+            : this(messageFactory, contextCallback)
         {
-            _destionationAddress = destionationAddress;
-            _messageFactory = messageFactory;
-
-            _sendPipe = Pipe.Empty<SendContext<TMessage>>();
+            _destinationAddressProvider = destinationAddressProvider;
         }
 
         public FaultedSendActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
+            : this(contextCallback)
         {
             _messageFactory = messageFactory;
-
-            _sendPipe = Pipe.Execute(contextCallback);
         }
 
-        public FaultedSendActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory)
+        public FaultedSendActivity(AsyncEventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback)
+            : this(contextCallback)
         {
-            _messageFactory = messageFactory;
+            _asyncMessageFactory = messageFactory;
+        }
 
-            _sendPipe = Pipe.Empty<SendContext<TMessage>>();
+        FaultedSendActivity(Action<SendContext<TMessage>> contextCallback)
+        {
+            _sendPipe = contextCallback != null ? Pipe.Execute(contextCallback) : Pipe.Empty<SendContext<TMessage>>();
         }
 
         void Visitable.Accept(StateMachineVisitor inspector)
@@ -81,21 +72,20 @@ namespace Automatonymous.Activities
         async Task Activity<TInstance, TData>.Faulted<T>(BehaviorExceptionContext<TInstance, TData, T> context,
             Behavior<TInstance, TData> next)
         {
-            ConsumeExceptionEventContext<TInstance, TData, TException> exceptionContext;
-            if (context.TryGetExceptionContext(out exceptionContext))
+            if (context.TryGetExceptionContext(out ConsumeExceptionEventContext<TInstance, TData, TException> exceptionContext))
             {
-                var message = _messageFactory(exceptionContext);
+                var message = _messageFactory?.Invoke(exceptionContext) ?? await _asyncMessageFactory(exceptionContext).ConfigureAwait(false);
 
-                if (_destionationAddress != null)
+                if (_destinationAddressProvider != null)
                 {
-                    var endpoint = await exceptionContext.GetSendEndpoint(_destionationAddress).ConfigureAwait(false);
+                    var destinationAddress = _destinationAddressProvider(exceptionContext.Instance, context.Data);
+
+                    var endpoint = await exceptionContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
                     await endpoint.Send(message, _sendPipe).ConfigureAwait(false);
                 }
                 else
-                {
                     await exceptionContext.Send(message, _sendPipe).ConfigureAwait(false);
-                }
             }
 
             await next.Faulted(context).ConfigureAwait(false);

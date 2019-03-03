@@ -98,6 +98,21 @@ namespace MassTransit
             Cached.Metadata = new Lazy<IEndpointConventionCache<TMessage>>(() => new EndpointConventionCache<TMessage>(endpointAddressProvider));
         }
 
+        internal static void Map(Uri destinationAddress)
+        {
+            if (Cached.Metadata.IsValueCreated)
+            {
+                if (TryGetEndpointAddress(out var address) && address != destinationAddress)
+                    throw new InvalidOperationException("The endpoint convention has already been created and can no longer be modified.");
+            }
+
+            Cached.Metadata = new Lazy<IEndpointConventionCache<TMessage>>(() => new EndpointConventionCache<TMessage>((out Uri address) =>
+            {
+                address = destinationAddress;
+                return true;
+            }));
+        }
+
         internal static bool TryGetEndpointAddress(out Uri address)
         {
             return Cached.Metadata.Value.TryGetEndpointAddress(out address);

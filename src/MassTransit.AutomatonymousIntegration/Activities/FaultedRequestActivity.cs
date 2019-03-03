@@ -26,6 +26,7 @@ namespace Automatonymous.Activities
         where TResponse : class
     {
         readonly EventExceptionMessageFactory<TInstance, TData, TException, TRequest> _messageFactory;
+        readonly AsyncEventExceptionMessageFactory<TInstance, TData, TException, TRequest> _asyncMessageFactory;
         readonly ServiceAddressProvider<TInstance, TData, TException> _serviceAddressProvider;
 
         public FaultedRequestActivity(Request<TInstance, TRequest, TResponse> request,
@@ -45,6 +46,23 @@ namespace Automatonymous.Activities
             _serviceAddressProvider = context => serviceAddressProvider(context) ?? request.Settings.ServiceAddress;
         }
 
+        public FaultedRequestActivity(Request<TInstance, TRequest, TResponse> request,
+            AsyncEventExceptionMessageFactory<TInstance, TData, TException, TRequest> messageFactory)
+            : base(request)
+        {
+            _asyncMessageFactory = messageFactory;
+            _serviceAddressProvider = context => request.Settings.ServiceAddress;
+        }
+
+        public FaultedRequestActivity(Request<TInstance, TRequest, TResponse> request,
+            ServiceAddressProvider<TInstance, TData, TException> serviceAddressProvider,
+            AsyncEventExceptionMessageFactory<TInstance, TData, TException, TRequest> messageFactory)
+            : base(request)
+        {
+            _asyncMessageFactory = messageFactory;
+            _serviceAddressProvider = context => serviceAddressProvider(context) ?? request.Settings.ServiceAddress;
+        }
+
         public void Accept(StateMachineVisitor visitor)
         {
             visitor.Visit(this);
@@ -58,10 +76,9 @@ namespace Automatonymous.Activities
         public async Task Faulted<T>(BehaviorExceptionContext<TInstance, TData, T> context, Behavior<TInstance, TData> next)
             where T : Exception
         {
-            ConsumeExceptionEventContext<TInstance, TData, TException> exceptionContext;
-            if (context.TryGetExceptionContext(out exceptionContext))
+            if (context.TryGetExceptionContext(out ConsumeExceptionEventContext<TInstance, TData, TException> exceptionContext))
             {
-                var message = _messageFactory(exceptionContext);
+                var message = _messageFactory?.Invoke(exceptionContext) ?? await _asyncMessageFactory(exceptionContext).ConfigureAwait(false);
                 var serviceAddress = _serviceAddressProvider(exceptionContext);
 
                 await SendRequest(context, exceptionContext, message, serviceAddress).ConfigureAwait(false);

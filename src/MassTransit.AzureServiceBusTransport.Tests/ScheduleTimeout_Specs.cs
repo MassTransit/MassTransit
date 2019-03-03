@@ -30,15 +30,13 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             [Test, Explicit]
             public async Task Should_cancel_when_the_order_is_submitted()
             {
-                CartItemAdded cartItemAdded = new CartItemAddedCommand
-                {
-                    MemberNumber = Guid.NewGuid().ToString()
-                };
+                CartItemAdded cartItemAdded = new CartItemAddedCommand {MemberNumber = Guid.NewGuid().ToString()};
 
                 await InputQueueSendEndpoint.Send(cartItemAdded);
 
                 Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == cartItemAdded.MemberNumber
                     && GetCurrentState(x) == _machine.Active, TestTimeout);
+
                 Assert.IsTrue(saga.HasValue);
 
                 await InputQueueSendEndpoint.Send(new OrderSubmittedEvent(cartItemAdded.MemberNumber));
@@ -51,10 +49,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             [Test, Explicit]
             public async Task Should_receive_the_timeout()
             {
-                CartItemAdded cartItemAdded = new CartItemAddedCommand
-                {
-                    MemberNumber = Guid.NewGuid().ToString()
-                };
+                CartItemAdded cartItemAdded = new CartItemAddedCommand {MemberNumber = Guid.NewGuid().ToString()};
 
                 await InputQueueSendEndpoint.Send(cartItemAdded);
 
@@ -64,15 +59,13 @@ namespace MassTransit.AzureServiceBusTransport.Tests
             [Test, Explicit]
             public async Task Should_reschedule_the_timeout_when_items_are_added()
             {
-                CartItemAdded cartItemAdded = new CartItemAddedCommand
-                {
-                    MemberNumber = Guid.NewGuid().ToString()
-                };
+                CartItemAdded cartItemAdded = new CartItemAddedCommand {MemberNumber = Guid.NewGuid().ToString()};
 
                 await InputQueueSendEndpoint.Send(cartItemAdded);
 
                 Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == cartItemAdded.MemberNumber
                     && GetCurrentState(x) == _machine.Active, TestTimeout);
+
                 Assert.IsTrue(saga.HasValue);
 
                 await InputQueueSendEndpoint.Send(cartItemAdded);
@@ -228,22 +221,21 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 });
 
 
-                Initially(
-                    When(ItemAdded)
-                        .ThenAsync(context =>
-                        {
-                            context.Instance.MemberNumber = context.Data.MemberNumber;
-                            context.Instance.ExpiresAfterSeconds = 3;
-                            return Console.Out.WriteLineAsync($"Cart {context.Instance.CorrelationId} Created: {context.Data.MemberNumber}");
-                        })
-                        .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance),
-                            context => TimeSpan.FromSeconds(context.Instance.ExpiresAfterSeconds))
-                        .TransitionTo(Active));
+                Initially(When(ItemAdded)
+                    .ThenAsync(context =>
+                    {
+                        context.Instance.MemberNumber = context.Data.MemberNumber;
+                        context.Instance.ExpiresAfterSeconds = 3;
+                        return Console.Out.WriteLineAsync($"Cart {context.Instance.CorrelationId} Created: {context.Data.MemberNumber}");
+                    })
+                    .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance),
+                        context => TimeSpan.FromSeconds(context.Instance.ExpiresAfterSeconds))
+                    .TransitionTo(Active));
 
                 During(Active,
                     When(CartTimeout.Received)
                         .ThenAsync(context => Console.Out.WriteLineAsync($"Cart Expired: {context.Data.MemberNumber}"))
-                        .Publish(context => (CartRemoved)new CartRemovedEvent(context.Instance))
+                        .PublishAsync(context => context.Init<CartRemoved>(context.Instance))
                         .Finalize(),
                     When(Submitted)
                         .ThenAsync(context => Console.Out.WriteLineAsync($"Cart Submitted: {context.Data.MemberNumber}"))

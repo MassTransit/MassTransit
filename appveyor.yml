@@ -1,4 +1,4 @@
-version: 5.3.2.{build}
+version: 5.5.0.{build}
 
 branches:
   only:

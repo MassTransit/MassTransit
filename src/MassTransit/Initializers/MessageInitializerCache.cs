@@ -76,6 +76,18 @@
             return Cached.InitializerCache.GetInitializer(values.GetType()).Initialize(values, cancellationToken);
         }
 
+        public static async Task<TMessage> InitializeMessage(PipeContext context, object values)
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            var initializer = Cached.InitializerCache.GetInitializer(values.GetType());
+
+            var initializeContext = await initializer.Initialize(initializer.Create(context), values).ConfigureAwait(false);
+
+            return initializeContext.Message;
+        }
+
         public static async Task<TMessage> InitializeMessage(object values, CancellationToken cancellationToken = default)
         {
             if (values == null)

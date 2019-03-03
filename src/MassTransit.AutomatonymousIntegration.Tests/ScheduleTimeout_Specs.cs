@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AutomatonymousIntegration.Tests
+﻿namespace MassTransit.AutomatonymousIntegration.Tests
 {
     namespace ScheduleTimeout_Specs
     {
@@ -19,7 +7,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         using Automatonymous;
         using NUnit.Framework;
         using Saga;
-        using TestFramework;
         using Testing;
 
 
@@ -58,18 +45,16 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             {
                 Task<ConsumeContext<CartRemoved>> handler = ConnectPublishHandler<CartRemoved>();
 
-                CartItemAdded cartItemAdded = new CartItemAddedCommand
-                {
-                    MemberNumber = Guid.NewGuid().ToString()
-                };
+                var memberNumber = NewId.NextGuid().ToString();
 
-                await InputQueueSendEndpoint.Send(cartItemAdded);
+                await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
 
-                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == cartItemAdded.MemberNumber
+                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber
                     && GetCurrentState(x) == _machine.Active, TestTimeout);
+
                 Assert.IsTrue(saga.HasValue);
 
-                await InputQueueSendEndpoint.Send(new OrderSubmittedEvent(cartItemAdded.MemberNumber));
+                await InputQueueSendEndpoint.Send<OrderSubmitted>(new {MemberNumber = memberNumber});
 
                 ConsumeContext<CartRemoved> removed = await handler;
 
@@ -81,12 +66,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             {
                 Task<ConsumeContext<CartRemoved>> handler = ConnectPublishHandler<CartRemoved>();
 
-                CartItemAdded cartItemAdded = new CartItemAddedCommand
-                {
-                    MemberNumber = Guid.NewGuid().ToString()
-                };
+                var memberNumber = NewId.NextGuid().ToString();
 
-                await InputQueueSendEndpoint.Send(cartItemAdded);
+                await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
 
                 ConsumeContext<CartRemoved> removed = await handler;
             }
@@ -96,18 +78,16 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             {
                 Task<ConsumeContext<CartRemoved>> handler = ConnectPublishHandler<CartRemoved>();
 
-                CartItemAdded cartItemAdded = new CartItemAddedCommand
-                {
-                    MemberNumber = Guid.NewGuid().ToString()
-                };
+                var memberNumber = NewId.NextGuid().ToString();
 
-                await InputQueueSendEndpoint.Send(cartItemAdded);
+                await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
 
-                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == cartItemAdded.MemberNumber
+                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber
                     && GetCurrentState(x) == _machine.Active, TestTimeout);
+
                 Assert.IsTrue(saga.HasValue);
 
-                await InputQueueSendEndpoint.Send(cartItemAdded);
+                await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
 
                 ConsumeContext<CartRemoved> removed = await handler;
             }
@@ -129,13 +109,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
 
-        class CartItemAddedCommand :
-            CartItemAdded
-        {
-            public string MemberNumber { get; set; }
-        }
-
-
         public interface CartItemAdded
         {
             string MemberNumber { get; }
@@ -148,60 +121,9 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
 
-        class CartRemovedEvent :
-            CartRemoved
-        {
-            readonly TestState _state;
-
-            public CartRemovedEvent(TestState state)
-            {
-                _state = state;
-            }
-
-            public string MemberNumber
-            {
-                get { return _state.MemberNumber; }
-            }
-        }
-
-
-        class CartExpiredEvent :
-            CartExpired
-        {
-            readonly TestState _state;
-
-            public CartExpiredEvent(TestState state)
-            {
-                _state = state;
-            }
-
-            public string MemberNumber
-            {
-                get { return _state.MemberNumber; }
-            }
-        }
-
-
         public interface CartExpired
         {
             string MemberNumber { get; }
-        }
-
-
-        class OrderSubmittedEvent :
-            OrderSubmitted
-        {
-            readonly string _memberNumber;
-
-            public OrderSubmittedEvent(string memberNumber)
-            {
-                _memberNumber = memberNumber;
-            }
-
-            public string MemberNumber
-            {
-                get { return _memberNumber; }
-            }
         }
 
 
@@ -228,30 +150,31 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 });
 
 
-                Initially(
-                    When(ItemAdded)
-                        .ThenAsync(context =>
-                        {
-                            context.Instance.MemberNumber = context.Data.MemberNumber;
-                            context.Instance.ExpiresAfterSeconds = 3;
-                            return Console.Out.WriteLineAsync($"Cart {context.Instance.CorrelationId} Created: {context.Data.MemberNumber}");
-                        })
-                        .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance), context => TimeSpan.FromSeconds(context.Instance.ExpiresAfterSeconds))
-                        .TransitionTo(Active));
+                Initially(When(ItemAdded)
+                    .ThenAsync(context =>
+                    {
+                        context.Instance.MemberNumber = context.Data.MemberNumber;
+                        context.Instance.ExpiresAfterSeconds = 3;
+                        return Console.Out.WriteLineAsync($"Cart {context.Instance.CorrelationId} Created: {context.Data.MemberNumber}");
+                    })
+                    .Schedule(CartTimeout, context => context.Init<CartExpired>(context.Instance),
+                        context => TimeSpan.FromSeconds(context.Instance.ExpiresAfterSeconds))
+                    .TransitionTo(Active));
 
                 During(Active,
                     When(CartTimeout.Received)
                         .ThenAsync(context => Console.Out.WriteLineAsync($"Cart Expired: {context.Data.MemberNumber}"))
-                        .Publish(context => new CartRemovedEvent(context.Instance))
+                        .PublishAsync(context => context.Init<CartRemoved>(context.Instance))
                         .Finalize(),
                     When(Submitted)
                         .ThenAsync(context => Console.Out.WriteLineAsync($"Cart Submitted: {context.Data.MemberNumber}"))
                         .Unschedule(CartTimeout)
-                        .Publish(context => new CartRemovedEvent(context.Instance))
+                        .PublishAsync(context => context.Init<CartRemoved>(context.Instance))
                         .Finalize(),
                     When(ItemAdded)
                         .ThenAsync(context => Console.Out.WriteLineAsync($"Card item added: {context.Data.MemberNumber}"))
-                        .Schedule(CartTimeout, context => new CartExpiredEvent(context.Instance), context => TimeSpan.FromSeconds(context.Instance.ExpiresAfterSeconds)));
+                        .Schedule(CartTimeout, context => context.Init<CartExpired>(context.Instance),
+                            context => TimeSpan.FromSeconds(context.Instance.ExpiresAfterSeconds)));
 
                 SetCompletedWhenFinalized();
             }

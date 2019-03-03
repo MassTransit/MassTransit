@@ -25,11 +25,7 @@ namespace MassTransit
         public static void Map<T>(Uri destinationAddress)
             where T : class
         {
-            EndpointConventionCache<T>.Map((out Uri address) =>
-            {
-                address = destinationAddress;
-                return true;
-            });
+            EndpointConventionCache<T>.Map(destinationAddress);
         }
 
         /// <summary>

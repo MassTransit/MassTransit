@@ -1,18 +1,7 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace Automatonymous
 {
     using System;
+    using System.Threading.Tasks;
     using Activities;
     using Binders;
     using MassTransit;
@@ -21,51 +10,39 @@ namespace Automatonymous
     public static class PublishExtensions
     {
         public static EventActivityBinder<TInstance> Publish<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
-            TMessage message)
-            where TInstance : class, SagaStateMachineInstance
-            where TMessage : class
-        {
-            return source.Add(new PublishActivity<TInstance, TMessage>(x => message));
-        }
-
-        public static EventActivityBinder<TInstance> Publish<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
-            TMessage message, Action<PublishContext<TMessage>> contextCallback)
+            TMessage message, Action<PublishContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
             return source.Add(new PublishActivity<TInstance, TMessage>(x => message, contextCallback));
         }
 
-        public static EventActivityBinder<TInstance> Publish<TInstance, TMessage>(
-            this EventActivityBinder<TInstance> source,
-            EventMessageFactory<TInstance, TMessage> messageFactory)
+        public static EventActivityBinder<TInstance> PublishAsync<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
+            Task<TMessage> message, Action<PublishContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
-            return source.Add(new PublishActivity<TInstance, TMessage>(messageFactory));
+            return source.Add(new PublishActivity<TInstance, TMessage>(x => message, contextCallback));
         }
 
-        public static EventActivityBinder<TInstance> Publish<TInstance, TMessage>(
-            this EventActivityBinder<TInstance> source,
-            EventMessageFactory<TInstance, TMessage> messageFactory, Action<PublishContext<TMessage>> contextCallback)
+        public static EventActivityBinder<TInstance> Publish<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
+            EventMessageFactory<TInstance, TMessage> messageFactory, Action<PublishContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
             return source.Add(new PublishActivity<TInstance, TMessage>(messageFactory, contextCallback));
         }
 
-        public static EventActivityBinder<TInstance, TData> Publish<TInstance, TData, TMessage>(
-            this EventActivityBinder<TInstance, TData> source, TMessage message)
+        public static EventActivityBinder<TInstance> PublishAsync<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
+            AsyncEventMessageFactory<TInstance, TMessage> messageFactory, Action<PublishContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
-            where TData : class
             where TMessage : class
         {
-            return source.Add(new PublishActivity<TInstance, TData, TMessage>(x => message));
+            return source.Add(new PublishActivity<TInstance, TMessage>(messageFactory, contextCallback));
         }
 
-        public static EventActivityBinder<TInstance, TData> Publish<TInstance, TData, TMessage>(
-            this EventActivityBinder<TInstance, TData> source, TMessage message,
-            Action<PublishContext<TMessage>> contextCallback)
+        public static EventActivityBinder<TInstance, TData> Publish<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            TMessage message, Action<PublishContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
@@ -73,18 +50,26 @@ namespace Automatonymous
             return source.Add(new PublishActivity<TInstance, TData, TMessage>(x => message, contextCallback));
         }
 
-        public static EventActivityBinder<TInstance, TData> Publish<TInstance, TData, TMessage>(
-            this EventActivityBinder<TInstance, TData> source, EventMessageFactory<TInstance, TData, TMessage> messageFactory)
+        public static EventActivityBinder<TInstance, TData> PublishAsync<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            Task<TMessage> message, Action<PublishContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
         {
-            return source.Add(new PublishActivity<TInstance, TData, TMessage>(messageFactory));
+            return source.Add(new PublishActivity<TInstance, TData, TMessage>(x => message, contextCallback));
         }
 
-        public static EventActivityBinder<TInstance, TData> Publish<TInstance, TData, TMessage>(
-            this EventActivityBinder<TInstance, TData> source, EventMessageFactory<TInstance, TData, TMessage> messageFactory,
-            Action<PublishContext<TMessage>> contextCallback)
+        public static EventActivityBinder<TInstance, TData> Publish<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            EventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<PublishContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TData : class
+            where TMessage : class
+        {
+            return source.Add(new PublishActivity<TInstance, TData, TMessage>(messageFactory, contextCallback));
+        }
+
+        public static EventActivityBinder<TInstance, TData> PublishAsync<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
+            AsyncEventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<PublishContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
@@ -93,18 +78,19 @@ namespace Automatonymous
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Publish<TInstance, TData, TException, TMessage>(
-            this ExceptionActivityBinder<TInstance, TData, TException> source, TMessage message)
+            this ExceptionActivityBinder<TInstance, TData, TException> source, TMessage message,
+            Action<PublishContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new PublishActivity<TInstance, TData, TMessage>(x => message));
+            return source.Add(new PublishActivity<TInstance, TData, TMessage>(x => message, contextCallback));
         }
 
-        public static ExceptionActivityBinder<TInstance, TData, TException> Publish<TInstance, TData, TException, TMessage>(
-            this ExceptionActivityBinder<TInstance, TData, TException> source, TMessage message,
-            Action<PublishContext<TMessage>> contextCallback)
+        public static ExceptionActivityBinder<TInstance, TData, TException> PublishAsync<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source, Task<TMessage> message,
+            Action<PublishContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
@@ -114,18 +100,21 @@ namespace Automatonymous
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Publish<TInstance, TData, TException, TMessage>(
-            this ExceptionActivityBinder<TInstance, TData, TException> source, EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory)
+            this ExceptionActivityBinder<TInstance, TData, TException> source,
+            EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
+            Action<PublishContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new FaultedPublishActivity<TInstance, TData, TException, TMessage>(messageFactory));
+            return source.Add(new FaultedPublishActivity<TInstance, TData, TException, TMessage>(messageFactory, contextCallback));
         }
 
-        public static ExceptionActivityBinder<TInstance, TData, TException> Publish<TInstance, TData, TException, TMessage>(
-            this ExceptionActivityBinder<TInstance, TData, TException> source, EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
-            Action<PublishContext<TMessage>> contextCallback)
+        public static ExceptionActivityBinder<TInstance, TData, TException> PublishAsync<TInstance, TData, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TData, TException> source,
+            AsyncEventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
+            Action<PublishContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class

@@ -19,7 +19,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         using Automatonymous;
         using NUnit.Framework;
         using Saga;
-        using TestFramework;
         using Testing;
 
 
@@ -38,18 +37,18 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             {
                 Task<ConsumeContext<MemberRegistered>> handler = ConnectPublishHandler<MemberRegistered>();
 
-                RegisterMember registerMember = new RegisterMemberCommand
-                {
-                    MemberNumber = Guid.NewGuid().ToString(),
-                    Name = "Frank",
-                    Address = "123 american way"
-                };
+                var memberNumber = Guid.NewGuid().ToString();
 
-                await InputQueueSendEndpoint.Send(registerMember);
+                await InputQueueSendEndpoint.Send<RegisterMember>(new
+                {
+                    MemberNumber = memberNumber,
+                    Name = "Frank",
+                    Address = "123 American Way"
+                });
 
                 ConsumeContext<MemberRegistered> registered = await handler;
 
-                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == registerMember.MemberNumber
+                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber
                     && GetCurrentState(x) == _machine.Registered, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
@@ -112,7 +111,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                 {
                     Console.WriteLine("Address validated: {0}", context.Message.CorrelationId);
 
-                    context.Respond(new AddressValidatedResponse(context.Message));
+                    await context.RespondAsync<AddressValidated>(new{});
                 });
 
                 configurator.Handler<ValidateName>(async context =>
@@ -121,21 +120,10 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
                     await context.RespondAsync<NameValidated>(new
                     {
-                        CorrelationId = context.Message.CorrelationId,
                         RequestName = context.Message.Name,
-                        Name = context.Message.Name,
                     });
                 });
             }
-        }
-
-
-        class RegisterMemberCommand :
-            RegisterMember
-        {
-            public string MemberNumber { get; set; }
-            public string Name { get; set; }
-            public string Address { get; set; }
         }
 
 
@@ -166,33 +154,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
             public TimeSpan Timeout
             {
                 get { return _timeout; }
-            }
-        }
-
-
-        class AddressValidatedResponse :
-            AddressValidated
-        {
-            readonly ValidateAddress _message;
-
-            public AddressValidatedResponse(ValidateAddress message)
-            {
-                _message = message;
-            }
-
-            public string Address
-            {
-                get { return _message.Address.ToUpperInvariant(); }
-            }
-
-            public string RequestAddress
-            {
-                get { return _message.Address; }
-            }
-
-            public Guid CorrelationId
-            {
-                get { return _message.CorrelationId; }
             }
         }
 
@@ -228,28 +189,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
 
-        class MemberRegisteredImpl :
-            MemberRegistered
-        {
-            readonly TestState _state;
-
-            public MemberRegisteredImpl(TestState state)
-            {
-                _state = state;
-            }
-
-            public string Name
-            {
-                get { return _state.Name; }
-            }
-
-            public string Address
-            {
-                get { return _state.Address; }
-            }
-        }
-
-
         public interface ValidateAddress :
             CorrelatedBy<Guid>
         {
@@ -282,50 +221,6 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         }
 
 
-        class ValidateAddressRequest :
-            ValidateAddress
-        {
-            readonly TestState _instance;
-
-            public ValidateAddressRequest(TestState instance)
-            {
-                _instance = instance;
-            }
-
-            public Guid CorrelationId
-            {
-                get { return _instance.CorrelationId; }
-            }
-
-            public string Address
-            {
-                get { return _instance.Address; }
-            }
-        }
-
-
-        class ValidateNameRequest :
-            ValidateName
-        {
-            readonly TestState _instance;
-
-            public ValidateNameRequest(TestState instance)
-            {
-                _instance = instance;
-            }
-
-            public Guid CorrelationId
-            {
-                get { return _instance.CorrelationId; }
-            }
-
-            public string Name
-            {
-                get { return _instance.Name; }
-            }
-        }
-
-
         class TestStateMachine :
             MassTransitStateMachine<TestState>
         {
@@ -344,20 +239,19 @@ namespace MassTransit.AutomatonymousIntegration.Tests
                     cfg.Timeout = settings.Timeout;
                 });
 
-                Initially(
-                    When(Register)
-                        .Then(context =>
-                        {
-                            Console.WriteLine("Registration received: {0}", context.Data.MemberNumber);
+                Initially(When(Register)
+                    .Then(context =>
+                    {
+                        Console.WriteLine("Registration received: {0}", context.Data.MemberNumber);
 
-                            Console.WriteLine("TestState ID: {0}", context.Instance.CorrelationId);
+                        Console.WriteLine("TestState ID: {0}", context.Instance.CorrelationId);
 
-                            context.Instance.Name = context.Data.Name;
-                            context.Instance.Address = context.Data.Address;
-                            context.Instance.MemberNumber = context.Data.MemberNumber;
-                        })
-                        .Request(ValidateAddress, context => ValidateAddress.Settings.ServiceAddress, context => new ValidateAddressRequest(context.Instance))
-                        .TransitionTo(ValidateAddress.Pending));
+                        context.Instance.Name = context.Data.Name;
+                        context.Instance.Address = context.Data.Address;
+                        context.Instance.MemberNumber = context.Data.MemberNumber;
+                    })
+                    .Request(ValidateAddress, x => ValidateAddress.Settings.ServiceAddress, x => x.Init<ValidateAddress>(x.Instance))
+                    .TransitionTo(ValidateAddress.Pending));
 
                 During(ValidateAddress.Pending,
                     When(ValidateAddress.Completed)
@@ -367,7 +261,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
                             context.Instance.Address = context.Data.Address;
                         })
-                        .Request(ValidateName, context => new ValidateNameRequest(context.Instance))
+                        .Request(ValidateName, context => context.Init<ValidateName>(context.Instance))
                         .TransitionTo(ValidateName.Pending),
                     When(ValidateAddress.Faulted)
                         .ThenAsync(async context => await Console.Out.WriteLineAsync("Request Faulted"))
@@ -384,7 +278,7 @@ namespace MassTransit.AutomatonymousIntegration.Tests
 
                             context.Instance.Name = context.Data.Name;
                         })
-                        .Publish(context => new MemberRegisteredImpl(context.Instance))
+                        .PublishAsync(context => context.Init<MemberRegistered>(context.Instance))
                         .TransitionTo(Registered),
                     When(ValidateName.Faulted)
                         .ThenAsync(async context => await Console.Out.WriteLineAsync("Request Faulted"))
