@@ -245,6 +245,16 @@
             if (IsValidMessageType)
                 yield return typeof(T);
 
+            if (typeof(T).ClosesType(typeof(Fault<>), out Type[] arguments))
+            {
+                foreach (var faultMessageType in TypeMetadataCache.GetMessageTypes(arguments[0]))
+                {
+                    var faultInterfaceType = typeof(Fault<>).MakeGenericType(faultMessageType);
+                    if (faultInterfaceType != typeof(T))
+                        yield return faultInterfaceType;
+                }
+            }
+
             var baseType = typeof(T).GetTypeInfo().BaseType;
             while (baseType != null && TypeMetadataCache.IsValidMessageType(baseType))
             {

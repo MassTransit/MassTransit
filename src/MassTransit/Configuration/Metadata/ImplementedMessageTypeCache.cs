@@ -17,6 +17,7 @@ namespace MassTransit.Metadata
     using System.Linq;
     using System.Reflection;
     using System.Threading;
+    using Internals.Extensions;
     using Util;
 
 
@@ -61,9 +62,20 @@ namespace MassTransit.Metadata
             if (TypeMetadataCache<TMessage>.IsValidMessageType)
                 yield return new ImplementedType(typeof(TMessage), true);
 
+            if (typeof(TMessage).ClosesType(typeof(Fault<>), out Type[] arguments))
+            {
+                foreach (var faultMessageType in TypeMetadataCache.GetMessageTypes(arguments[0]))
+                {
+                    var faultInterfaceType = typeof(Fault<>).MakeGenericType(faultMessageType);
+                    if (faultInterfaceType != typeof(TMessage))
+                        yield return new ImplementedType(faultInterfaceType, true);
+                }
+            }
+
             var implementedInterfaces = GetImplementedInterfaces(typeof(TMessage)).ToArray();
 
-            foreach (var baseInterface in implementedInterfaces.Except(implementedInterfaces.SelectMany(x => x.GetInterfaces())).Where(TypeMetadataCache.IsValidMessageType))
+            foreach (var baseInterface in implementedInterfaces.Except(implementedInterfaces.SelectMany(x => x.GetInterfaces()))
+                .Where(TypeMetadataCache.IsValidMessageType))
             {
                 yield return new ImplementedType(baseInterface, true);
             }
@@ -72,7 +84,7 @@ namespace MassTransit.Metadata
             {
                 yield return new ImplementedType(baseInterface, false);
             }
-            
+
             var baseType = typeof(TMessage).GetTypeInfo().BaseType;
             while (baseType != null && TypeMetadataCache.IsValidMessageType(baseType))
             {
