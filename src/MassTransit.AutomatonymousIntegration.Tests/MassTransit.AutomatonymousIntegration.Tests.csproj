@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
-    <PackageReference Include="Automatonymous" Version="4.1.5" />
+    <PackageReference Include="Automatonymous" Version="4.1.6" />
     <PackageReference Include="EntityFramework" Version="6.2.0" />
     <PackageReference Include="GreenPipes" Version="2.1.4" />
     <PackageReference Include="Iesi.Collections" Version="4.0.4" />
@@ -16,7 +16,7 @@
     <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.2.2" />
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="NHibernate" Version="5.2.3" />
+    <PackageReference Include="NHibernate" Version="5.2.4" />
     <PackageReference Include="NUnit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />
     <PackageReference Include="Quartz" Version="3.0.7" />
