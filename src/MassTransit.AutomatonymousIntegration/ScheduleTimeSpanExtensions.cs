@@ -236,6 +236,128 @@ namespace Automatonymous
             return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
         }
 
+        public static ExceptionActivityBinder<TInstance, TException> Schedule<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Schedule<TInstance, TMessage> schedule, TMessage message,
+            Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TException : Exception
+            where TMessage : class
+        {
+            DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
+            {
+                return DateTime.UtcNow + schedule.Delay;
+            }
+
+            return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(x => message, schedule, TimeProvider, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> Schedule<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Schedule<TInstance, TMessage> schedule, Task<TMessage> message,
+            Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TException : Exception
+            where TMessage : class
+        {
+            DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
+            {
+                return DateTime.UtcNow + schedule.Delay;
+            }
+
+            return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(x => message, schedule, TimeProvider, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> Schedule<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Schedule<TInstance, TMessage> schedule, TMessage message,
+            ScheduleDelayExceptionProvider<TInstance, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TException : Exception
+            where TMessage : class
+        {
+            DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
+            {
+                return DateTime.UtcNow + delayProvider(context);
+            }
+
+            return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(x => message, schedule, TimeProvider, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> Schedule<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Schedule<TInstance, TMessage> schedule, Task<TMessage> message,
+            ScheduleDelayExceptionProvider<TInstance, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TException : Exception
+            where TMessage : class
+        {
+            DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
+            {
+                return DateTime.UtcNow + delayProvider(context);
+            }
+
+            return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(x => message, schedule, TimeProvider, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> Schedule<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Schedule<TInstance, TMessage> schedule,
+            EventExceptionMessageFactory<TInstance, TException, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TException : Exception
+            where TMessage : class
+        {
+            DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
+            {
+                return DateTime.UtcNow + schedule.Delay;
+            }
+
+            return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> Schedule<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Schedule<TInstance, TMessage> schedule,
+            AsyncEventExceptionMessageFactory<TInstance, TException, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TException : Exception
+            where TMessage : class
+        {
+            DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
+            {
+                return DateTime.UtcNow + schedule.Delay;
+            }
+
+            return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> Schedule<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Schedule<TInstance, TMessage> schedule,
+            EventExceptionMessageFactory<TInstance, TException, TMessage> messageFactory,
+            ScheduleDelayExceptionProvider<TInstance, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TException : Exception
+            where TMessage : class
+        {
+            DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
+            {
+                return DateTime.UtcNow + delayProvider(context);
+            }
+
+            return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> Schedule<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Schedule<TInstance, TMessage> schedule,
+            AsyncEventExceptionMessageFactory<TInstance, TException, TMessage> messageFactory,
+            ScheduleDelayExceptionProvider<TInstance, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TException : Exception
+            where TMessage : class
+        {
+            DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
+            {
+                return DateTime.UtcNow + delayProvider(context);
+            }
+
+            return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
+        }
+
         public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
             this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule, TMessage message,
             Action<SendContext<TMessage>> contextCallback = null)
@@ -270,7 +392,7 @@ namespace Automatonymous
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
             this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule, TMessage message,
-            ScheduleDelayProvider<TInstance, TData, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
+            ScheduleDelayExceptionProvider<TInstance, TData, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TException : Exception
@@ -286,7 +408,7 @@ namespace Automatonymous
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
             this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule, Task<TMessage> message,
-            ScheduleDelayProvider<TInstance, TData, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
+            ScheduleDelayExceptionProvider<TInstance, TData, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TException : Exception
@@ -335,7 +457,7 @@ namespace Automatonymous
         public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
             this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule,
             EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
-            ScheduleDelayProvider<TInstance, TData, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
+            ScheduleDelayExceptionProvider<TInstance, TData, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TException : Exception
@@ -352,7 +474,7 @@ namespace Automatonymous
         public static ExceptionActivityBinder<TInstance, TData, TException> Schedule<TInstance, TData, TException, TMessage>(
             this ExceptionActivityBinder<TInstance, TData, TException> source, Schedule<TInstance, TMessage> schedule,
             AsyncEventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
-            ScheduleDelayProvider<TInstance, TData, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
+            ScheduleDelayExceptionProvider<TInstance, TData, TException> delayProvider, Action<SendContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TException : Exception
@@ -408,6 +530,20 @@ namespace Automatonymous
             where TInstance : class, SagaStateMachineInstance
         {
             return source.Add(new UnscheduleActivity<TInstance>(schedule));
+        }
+
+        /// <summary>
+        /// Unschedule a message, if the message was scheduled.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="schedule"></param>
+        /// <returns></returns>
+        public static ExceptionActivityBinder<TInstance, TException> Unschedule<TInstance, TException>(
+            this ExceptionActivityBinder<TInstance, TException> source, Schedule<TInstance> schedule)
+            where TInstance : class, SagaStateMachineInstance
+            where TException : Exception
+        {
+            return source.Add(new FaultedUnscheduleActivity<TInstance>(schedule));
         }
     }
 }

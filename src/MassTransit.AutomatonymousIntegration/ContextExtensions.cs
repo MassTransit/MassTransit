@@ -40,6 +40,25 @@ namespace Automatonymous
             return new AutomatonymousConsumeEventContext<TInstance>(context, consumeContext);
         }
 
+        public static bool TryGetExceptionContext<TInstance, TException>(
+            this BehaviorContext<TInstance> context, out ConsumeExceptionEventContext<TInstance, TException> exceptionContext)
+            where TException : Exception
+        {
+            var behaviorExceptionContext = context as BehaviorExceptionContext<TInstance, TException>;
+            if (behaviorExceptionContext != null)
+            {
+                ConsumeContext consumeContext;
+                if (!context.TryGetPayload(out consumeContext))
+                    throw new ContextException("The consume context could not be retrieved.");
+
+                exceptionContext = new AutomatonymousConsumeExceptionEventContext<TInstance, TException>(behaviorExceptionContext, consumeContext);
+                return true;
+            }
+
+            exceptionContext = null;
+            return false;
+        }
+
         public static bool TryGetExceptionContext<TInstance, TData, TException>(
             this BehaviorContext<TInstance, TData> context, out ConsumeExceptionEventContext<TInstance, TData, TException> exceptionContext)
             where TData : class

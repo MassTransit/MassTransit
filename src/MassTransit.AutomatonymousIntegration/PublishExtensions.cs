@@ -77,6 +77,48 @@ namespace Automatonymous
             return source.Add(new PublishActivity<TInstance, TData, TMessage>(messageFactory, contextCallback));
         }
 
+        public static ExceptionActivityBinder<TInstance, TException> Publish<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, TMessage message,
+            Action<PublishContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new PublishActivity<TInstance, TMessage>(x => message, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> PublishAsync<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source, Task<TMessage> message,
+            Action<PublishContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new PublishActivity<TInstance, TMessage>(x => message, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> Publish<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source,
+            EventExceptionMessageFactory<TInstance, TException, TMessage> messageFactory,
+            Action<PublishContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedPublishActivity<TInstance, TException, TMessage>(messageFactory, contextCallback));
+        }
+
+        public static ExceptionActivityBinder<TInstance, TException> PublishAsync<TInstance, TException, TMessage>(
+            this ExceptionActivityBinder<TInstance, TException> source,
+            AsyncEventExceptionMessageFactory<TInstance, TException, TMessage> messageFactory,
+            Action<PublishContext<TMessage>> contextCallback = null)
+            where TInstance : class, SagaStateMachineInstance
+            where TMessage : class
+            where TException : Exception
+        {
+            return source.Add(new FaultedPublishActivity<TInstance, TException, TMessage>(messageFactory, contextCallback));
+        }
+
         public static ExceptionActivityBinder<TInstance, TData, TException> Publish<TInstance, TData, TException, TMessage>(
             this ExceptionActivityBinder<TInstance, TData, TException> source, TMessage message,
             Action<PublishContext<TMessage>> contextCallback = null)
