@@ -38,6 +38,7 @@
   * [Create message contracts](usage/message-contracts.md)
   * [Create message consumers](usage/message-consumers.md)
   * [Produce messages](usage/producing-messages.md)
+  * [Initialize messages](usage/message-initializers.md)
   * [Correlate messages](usage/correlation.md)
   * [Use IoC container](usage/containers/README.md)
     * [Autofac](usage/containers/autofac.md)

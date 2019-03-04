@@ -5,6 +5,8 @@
 
     public class DateTimeTypeConverter :
         ITypeConverter<string, DateTime>,
+        ITypeConverter<int, DateTime>,
+        ITypeConverter<long, DateTime>,
         ITypeConverter<DateTime, string>,
         ITypeConverter<DateTime, DateTimeOffset>,
         ITypeConverter<DateTime, int>,
@@ -39,6 +41,38 @@
         {
             result = _epoch + TimeSpan.FromMilliseconds(input);
             return true;
+        }
+
+        public bool TryConvert(DateTime input, out int result)
+        {
+            if (input >= _epoch)
+            {
+                var timeSpan = input - _epoch;
+                if (timeSpan.TotalMilliseconds <= int.MaxValue)
+                {
+                    result = (int)timeSpan.TotalMilliseconds;
+                    return true;
+                }
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(DateTime input, out long result)
+        {
+            if (input >= _epoch)
+            {
+                var timeSpan = input - _epoch;
+                if (timeSpan.TotalMilliseconds <= long.MaxValue)
+                {
+                    result = (long)timeSpan.TotalMilliseconds;
+                    return true;
+                }
+            }
+
+            result = default;
+            return false;
         }
     }
 }

@@ -8,6 +8,7 @@ In order to use and understand MassTransit, a set of recipe-based usage examples
 * [Message Contracts](message-contracts.md)
 * [Create message consumers](message-consumers.md)
 * [Produce messages](producing-messages.md)
+* [Initialize messages](message-initializers.md)
 * [Correlate messages](correlation.md)
 * [Use IoC container](containers/README.md)
   * [Autofac](containers/autofac.md)
