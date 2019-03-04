@@ -100,6 +100,10 @@ namespace MassTransit
                 if (header.Key.StartsWith("MT-"))
                     continue;
 
+                // do not overwrite headers which have already been set
+                if (sendContext.Headers.TryGetHeader(header.Key, out _))
+                    continue;
+
                 sendContext.Headers.Set(header.Key, header.Value);
             }
         }
