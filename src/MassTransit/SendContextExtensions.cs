@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
+    using Context;
     using Util;
 
 
@@ -60,11 +61,10 @@ namespace MassTransit
         /// Set the host headers on the SendContext (for error, dead-letter, etc.)
         /// </summary>
         /// <param name="headers"></param>
-        /// <param name="exception"></param>
-        /// <param name="exceptionTimestamp"></param>
-        public static void SetExceptionHeaders(this SendHeaders headers, Exception exception, DateTime exceptionTimestamp)
+        /// <param name="exceptionContext"></param>
+        public static void SetExceptionHeaders(this SendHeaders headers, ExceptionReceiveContext exceptionContext)
         {
-            exception = exception.GetBaseException() ?? exception;
+            var exception = exceptionContext.Exception.GetBaseException() ?? exceptionContext.Exception;
 
             var exceptionMessage = ExceptionUtil.GetMessage(exception);
 
@@ -72,8 +72,14 @@ namespace MassTransit
 
             headers.Set(MessageHeaders.FaultExceptionType, TypeMetadataCache.GetShortName(exception.GetType()));
             headers.Set(MessageHeaders.FaultMessage, exceptionMessage);
-            headers.Set(MessageHeaders.FaultTimestamp, exceptionTimestamp.ToString("O"));
+            headers.Set(MessageHeaders.FaultTimestamp, exceptionContext.ExceptionTimestamp.ToString("O"));
             headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
+
+            if (exceptionContext.TryGetPayload(out ConsumerFaultInfo info))
+            {
+                headers.Set(MessageHeaders.FaultConsumerType, info.ConsumerType);
+                headers.Set(MessageHeaders.FaultMessageType, info.MessageType);
+            }
         }
 
         /// <summary>

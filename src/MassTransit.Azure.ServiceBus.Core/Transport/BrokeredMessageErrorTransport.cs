@@ -32,7 +32,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             void PreSend(Message message, SendHeaders headers)
             {
-                headers.SetExceptionHeaders(context.Exception, context.ExceptionTimestamp);
+                headers.SetExceptionHeaders(context);
 
                 message.TimeToLive = Defaults.BasicMessageTimeToLive;
             }

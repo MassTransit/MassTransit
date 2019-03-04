@@ -29,7 +29,7 @@ namespace MassTransit.Transports.InMemory
         {
             void PreSend(InMemoryTransportMessage message, SendHeaders headers)
             {
-                headers.SetExceptionHeaders(context.Exception, context.ExceptionTimestamp);
+                headers.SetExceptionHeaders(context);
             }
 
             return Move(context, PreSend);

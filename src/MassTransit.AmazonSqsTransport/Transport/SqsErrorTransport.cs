@@ -31,7 +31,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
         {
             void PreSend(SendMessageRequest sendMessageRequest, SendHeaders headers)
             {
-                headers.SetExceptionHeaders(context.Exception, context.ExceptionTimestamp);
+                headers.SetExceptionHeaders(context);
             }
 
             return Move(context, PreSend);

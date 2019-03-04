@@ -31,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         {
             void PreSend(IBasicProperties message, SendHeaders headers)
             {
-                headers.SetExceptionHeaders(context.Exception, context.ExceptionTimestamp);
+                headers.SetExceptionHeaders(context);
 
                 message.ClearExpiration();
             }

@@ -31,7 +31,7 @@ namespace MassTransit.ActiveMqTransport.Transport
         {
             void PreSend(IMessage message, SendHeaders headers)
             {
-                headers.SetExceptionHeaders(context.Exception, context.ExceptionTimestamp);
+                headers.SetExceptionHeaders(context);
             }
 
             return Move(context, PreSend);
