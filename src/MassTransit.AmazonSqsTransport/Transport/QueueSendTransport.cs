@@ -61,6 +61,12 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
                         transportMessage.MessageAttributes.Set(sendContext.Headers);
 
+                        if (!string.IsNullOrEmpty(sendContext.DeduplicationId))
+                            transportMessage.MessageDeduplicationId = sendContext.DeduplicationId;
+
+                        if (!string.IsNullOrEmpty(sendContext.GroupId))
+                            transportMessage.MessageGroupId = sendContext.GroupId;
+
                         transportMessage.MessageAttributes.Set("Content-Type", sendContext.ContentType.MediaType);
                         transportMessage.MessageAttributes.Set(nameof(sendContext.MessageId), sendContext.MessageId);
                         transportMessage.MessageAttributes.Set(nameof(sendContext.CorrelationId), sendContext.CorrelationId);

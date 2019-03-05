@@ -25,5 +25,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             : base(message, cancellationToken)
         {
         }
+
+        public string GroupId { get; set; }
+        public string DeduplicationId { get; set; }
     }
 }
