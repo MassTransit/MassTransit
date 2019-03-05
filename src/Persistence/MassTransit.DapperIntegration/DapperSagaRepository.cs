@@ -46,11 +46,11 @@ namespace MassTransit.DapperIntegration
         {
             using (var connection = new SqlConnection(_connectionString))
             {
-                var tableName = GetTableName<TSaga>();
+                var tableName = GetTableName();
                 var (whereStatement, parameters) = WhereStatementHelper.GetWhereStatementAndParametersFromExpression(query.FilterExpression);
 
                 return
-                    (await connection.QueryAsync<Guid>($"SELECT CorrelationId FROM {tableName} WITH (UPDLOCK, ROWLOCK) {whereStatement}",
+                    (await connection.QueryAsync<Guid>($"SELECT CorrelationId FROM {tableName} WITH (NOLOCK) {whereStatement}",
                         parameters).ConfigureAwait(false)).ToList();
             }
         }
@@ -83,7 +83,7 @@ namespace MassTransit.DapperIntegration
             {
                 try
                 {
-                    var tableName = GetTableName<T>();
+                    var tableName = GetTableName();
 
                     var instance = await connection.QuerySingleOrDefaultAsync<TSaga>(
                         $"SELECT * FROM {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @correlationId",
@@ -127,7 +127,7 @@ namespace MassTransit.DapperIntegration
 
         public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
         {
-           var tableName = GetTableName<T>();
+           var tableName = GetTableName();
             var (whereStatement, parameters) = WhereStatementHelper.GetWhereStatementAndParametersFromExpression(context.Query.FilterExpression);
 
             List<Guid> correlationIds = null;
@@ -135,7 +135,7 @@ namespace MassTransit.DapperIntegration
             {
                 correlationIds =
                     (await connection.QueryAsync<Guid>(
-                        $"SELECT CorrelationId FROM {tableName} {whereStatement}",
+                        $"SELECT CorrelationId FROM {tableName} WITH (NOLOCK) {whereStatement}",
                         parameters).ConfigureAwait(false)).ToList();
             }
 
@@ -190,10 +190,9 @@ namespace MassTransit.DapperIntegration
             }
         }
 
-        string GetTableName<T>() where T : class
+        string GetTableName()
         {
-            var tableName = $"{typeof(TSaga).Name}s";
-            return tableName;
+            return $"{typeof(TSaga).Name}s";
         }
 
         async Task PreInsertSagaInstance<T>(SqlConnection sqlConnection, TSaga instance)
