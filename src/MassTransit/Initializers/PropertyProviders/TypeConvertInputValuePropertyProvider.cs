@@ -6,14 +6,14 @@ namespace MassTransit.Initializers.PropertyProviders
     using Util;
 
 
-    public class ConvertInputValuePropertyProvider<TInput, TProperty, TInputProperty> :
+    public class TypeConvertInputValuePropertyProvider<TInput, TProperty, TInputProperty> :
         IPropertyProvider<TInput, TProperty>
         where TInput : class
     {
         readonly ITypeConverter<TProperty, TInputProperty> _converter;
         readonly IReadProperty<TInput, TInputProperty> _inputProperty;
 
-        public ConvertInputValuePropertyProvider(ITypeConverter<TProperty, TInputProperty> converter, string propertyName)
+        public TypeConvertInputValuePropertyProvider(ITypeConverter<TProperty, TInputProperty> converter, string propertyName)
         {
             if (converter == null)
                 throw new ArgumentNullException(nameof(converter));

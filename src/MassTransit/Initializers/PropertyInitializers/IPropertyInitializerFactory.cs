@@ -15,5 +15,10 @@ namespace MassTransit.Initializers.PropertyInitializers
             string inputPropertyName = null)
             where TInput : class
             where TMessage : class;
+
+        IHeaderInitializer<TMessage, TInput> CreateHeaderInitializer<TMessage, TInput>(string headerPropertyName,
+            string inputPropertyName = null)
+            where TInput : class
+            where TMessage : class;
     }
 }

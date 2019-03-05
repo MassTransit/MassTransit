@@ -1,5 +1,6 @@
 namespace MassTransit.Initializers.PropertyInitializers
 {
+    using HeaderInitializers;
     using PropertyConverters;
     using PropertyProviders;
 
@@ -19,9 +20,18 @@ namespace MassTransit.Initializers.PropertyInitializers
             where TMessage : class
             where TInput : class
         {
-            var provider = new ConvertInputValuePropertyProvider<TInput, TProperty, TInputProperty>(_converter, inputPropertyName ?? messagePropertyName);
+            var provider = new TypeConvertInputValuePropertyProvider<TInput, TProperty, TInputProperty>(_converter, inputPropertyName ?? messagePropertyName);
 
             return new ProviderPropertyInitializer<TMessage, TInput, TProperty>(provider, messagePropertyName);
+        }
+
+        public IHeaderInitializer<TMessage, TInput> CreateHeaderInitializer<TMessage, TInput>(string headerPropertyName, string inputPropertyName = null)
+            where TMessage : class
+            where TInput : class
+        {
+            var provider = new TypeConvertInputValuePropertyProvider<TInput, TProperty, TInputProperty>(_converter, inputPropertyName ?? headerPropertyName);
+
+            return new ProviderHeaderInitializer<TMessage, TInput, TProperty>(provider, headerPropertyName);
         }
 
         public bool IsPropertyTypeConverter<T>(out ITypeConverter<TProperty, T> typeConverter)

@@ -12,11 +12,16 @@
             _typeCache = new ConventionTypeCache<IMessageTypeInitializerConvention<TMessage>>(cacheFactory, convention);
         }
 
-        public bool TryGetMessagePropertyInitializer<TInput, TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
+        public bool TryGetPropertyInitializer<TInput, TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
             where TInput : class
         {
-            return _typeCache.GetOrAdd<TInput, IInitializerConvention<TMessage, TInput>>()
-                .TryGetMessagePropertyInitializer<TProperty>(propertyName, out initializer);
+            return _typeCache.GetOrAdd<TInput, IInitializerConvention<TMessage, TInput>>().TryGetPropertyInitializer<TProperty>(propertyName, out initializer);
+        }
+
+        public bool TryGetHeaderInitializer<TInput, TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+            where TInput : class
+        {
+            return _typeCache.GetOrAdd<TInput, IInitializerConvention<TMessage, TInput>>().TryGetHeaderInitializer<TProperty>(propertyName, out initializer);
         }
     }
 
@@ -35,13 +40,20 @@
             _typeCache = new ConventionTypeCache<IMessageTypeInitializerConvention>(cacheFactory, this);
         }
 
-        public bool TryGetMessagePropertyInitializer<TMessage, TInput, TProperty>(string propertyName,
+        public bool TryGetPropertyInitializer<TMessage, TInput, TProperty>(string propertyName,
             out IPropertyInitializer<TMessage, TInput> initializer)
             where TMessage : class
             where TInput : class
         {
             return _typeCache.GetOrAdd<TMessage, IInitializerConvention<TMessage>>()
-                .TryGetMessagePropertyInitializer<TInput, TProperty>(propertyName, out initializer);
+                .TryGetPropertyInitializer<TInput, TProperty>(propertyName, out initializer);
+        }
+
+        public bool TryGetHeaderInitializer<TMessage, TInput, TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+            where TMessage : class
+            where TInput : class
+        {
+            return _typeCache.GetOrAdd<TMessage, IInitializerConvention<TMessage>>().TryGetHeaderInitializer<TInput, TProperty>(propertyName, out initializer);
         }
     }
 }

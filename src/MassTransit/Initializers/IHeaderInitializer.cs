@@ -12,7 +12,7 @@
         where TMessage : class
         where TInput : class
     {
-        Task Apply(InitializeContext<TMessage, TInput> context, SendContext<TMessage> sendContext);
+        Task Apply(InitializeContext<TMessage, TInput> context, SendContext sendContext);
     }
 
 
@@ -23,6 +23,6 @@
     public interface IHeaderInitializer<in TMessage>
         where TMessage : class
     {
-        Task Apply(InitializeContext<TMessage> context, SendContext<TMessage> sendContext);
+        Task Apply(InitializeContext<TMessage> context, SendContext sendContext);
     }
 }

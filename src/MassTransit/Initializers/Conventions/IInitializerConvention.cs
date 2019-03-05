@@ -5,7 +5,8 @@
         where TMessage : class
         where TInput : class
     {
-        bool TryGetMessagePropertyInitializer<TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer);
+        bool TryGetPropertyInitializer<TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer);
+        bool TryGetHeaderInitializer<TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer);
     }
 
 
@@ -13,14 +14,21 @@
         IMessageTypeInitializerConvention
         where TMessage : class
     {
-        bool TryGetMessagePropertyInitializer<TInput, TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
+        bool TryGetPropertyInitializer<TInput, TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
+            where TInput : class;
+
+        bool TryGetHeaderInitializer<TInput, TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
             where TInput : class;
     }
 
 
     public interface IInitializerConvention
     {
-        bool TryGetMessagePropertyInitializer<TMessage, TInput, TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
+        bool TryGetPropertyInitializer<TMessage, TInput, TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
+            where TMessage : class
+            where TInput : class;
+
+        bool TryGetHeaderInitializer<TMessage, TInput, TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
             where TMessage : class
             where TInput : class;
     }

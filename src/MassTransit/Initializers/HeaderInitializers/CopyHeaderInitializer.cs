@@ -17,7 +17,7 @@
         where TMessage : class
         where TInput : class
     {
-        readonly IWriteProperty<SendContext<TMessage>, THeader> _headerProperty;
+        readonly IWriteProperty<SendContext, THeader> _headerProperty;
         readonly IReadProperty<TInput, THeader> _inputProperty;
 
         public CopyHeaderInitializer(string headerName, string inputPropertyName = null)
@@ -26,10 +26,10 @@
                 throw new ArgumentNullException(nameof(headerName));
 
             _inputProperty = ReadPropertyCache<TInput>.GetProperty<THeader>(inputPropertyName ?? headerName);
-            _headerProperty = WritePropertyCache<SendContext<TMessage>>.GetProperty<THeader>(headerName);
+            _headerProperty = WritePropertyCache<SendContext>.GetProperty<THeader>(headerName);
         }
 
-        public Task Apply(InitializeContext<TMessage, TInput> context, SendContext<TMessage> sendContext)
+        public Task Apply(InitializeContext<TMessage, TInput> context, SendContext sendContext)
         {
             var inputPropertyValue = _inputProperty.Get(context.Input);
 

@@ -5,14 +5,14 @@ namespace MassTransit.Initializers.PropertyProviders
     using Internals.Reflection;
 
 
-    public class ConvertMessageInputValuePropertyProvider<TInput, TProperty, TInputProperty> :
+    public class PropertyConvertInputValuePropertyProvider<TInput, TProperty, TInputProperty> :
         IPropertyProvider<TInput, TProperty>
         where TInput : class
     {
         readonly IPropertyConverter<TProperty, TInputProperty> _converter;
         readonly IReadProperty<TInput, TInputProperty> _inputProperty;
 
-        public ConvertMessageInputValuePropertyProvider(IPropertyConverter<TProperty, TInputProperty> converter, string inputPropertyName)
+        public PropertyConvertInputValuePropertyProvider(IPropertyConverter<TProperty, TInputProperty> converter, string inputPropertyName)
         {
             if (converter == null)
                 throw new ArgumentNullException(nameof(converter));

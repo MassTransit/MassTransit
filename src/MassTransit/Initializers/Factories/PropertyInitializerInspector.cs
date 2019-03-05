@@ -17,8 +17,7 @@
 
         public bool Apply(IMessageInitializerBuilder<TMessage, TInput> builder, IInitializerConvention convention)
         {
-            if (convention.TryGetMessagePropertyInitializer<TMessage, TInput, TProperty>(_propertyName,
-                out IPropertyInitializer<TMessage, TInput> initializer))
+            if (convention.TryGetPropertyInitializer<TMessage, TInput, TProperty>(_propertyName, out IPropertyInitializer<TMessage, TInput> initializer))
             {
                 builder.Add(_propertyName, initializer);
                 return true;

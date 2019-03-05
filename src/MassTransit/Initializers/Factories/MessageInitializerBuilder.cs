@@ -90,7 +90,7 @@ namespace MassTransit.Initializers.Factories
                 _initializer = initializer;
             }
 
-            public Task Apply(InitializeContext<TMessage, TInput> context, SendContext<TMessage> sendContext)
+            public Task Apply(InitializeContext<TMessage, TInput> context, SendContext sendContext)
             {
                 return _initializer.Apply(context, sendContext);
             }

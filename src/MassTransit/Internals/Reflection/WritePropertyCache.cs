@@ -14,7 +14,9 @@
 
         WritePropertyCache()
         {
-            _implementationType = typeof(T).GetTypeInfo().IsInterface ? TypeMetadataCache<T>.ImplementationType : typeof(T);
+            _implementationType = TypeMetadataCache<T>.IsValidMessageType && typeof(T).GetTypeInfo().IsInterface
+                ? TypeMetadataCache<T>.ImplementationType
+                : typeof(T);
 
             _properties = new Dictionary<string, IWriteProperty<T>>(StringComparer.OrdinalIgnoreCase);
         }

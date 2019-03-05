@@ -6,7 +6,6 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading;
-    using GreenPipes.Internals.Extensions;
     using Internals.Extensions;
     using Newtonsoft.Json.Linq;
     using Saga;
@@ -97,18 +96,18 @@
 
         TypeMetadataCache()
         {
-            _shortName = Internals.Extensions.TypeExtensions.GetTypeName(typeof(T));
+            _shortName = typeof(T).GetTypeName();
 
             _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
             _hasConsumerInterfaces = new Lazy<bool>(() => !_hasSagaInterfaces.Value && ScanForConsumerInterfaces(), LazyThreadSafetyMode.PublicationOnly);
 
-            _properties = new Lazy<List<PropertyInfo>>(() => Internals.Extensions.TypeExtensions.GetAllProperties(typeof(T)).ToList());
+            _properties = new Lazy<List<PropertyInfo>>(() => typeof(T).GetAllProperties().ToList());
 
             _isValidMessageType = new Lazy<bool>(CheckIfValidMessageType);
             _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T).GetTypeInfo()));
             _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
-            _implementationType = new Lazy<Type>(() => TypeCache.GetImplementationType(typeof(T)));
+            _implementationType = new Lazy<Type>(() => GreenPipes.Internals.Extensions.TypeCache.GetImplementationType(typeof(T)));
         }
 
         public static string ShortName => Cached.Metadata.Value.ShortName;
@@ -184,13 +183,19 @@
                 return false;
             }
 
+            if (typeInfo.HasInterface<SendContext>() || typeInfo.HasInterface<ConsumeContext>() || typeInfo.HasInterface<ReceiveContext>())
+            {
+                _invalidMessageTypeReason = $"ConsumeContext, ReceiveContext, and SendContext are not valid message types: {ShortName}";
+                return false;
+            }
+
             if (typeInfo.IsGenericType)
             {
                 var typeDefinition = typeInfo.GetGenericTypeDefinition();
                 if (typeDefinition == typeof(CorrelatedBy<>))
                 {
                     _invalidMessageTypeReason =
-                        $"CorrelatedBy<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(CorrelatedBy<>)).First().Name} is not a valid message type";
+                        $"CorrelatedBy<{typeof(T).GetClosingArgument(typeof(CorrelatedBy<>)).Name} is not a valid message type";
 
                     return false;
                 }
@@ -198,7 +203,7 @@
                 if (typeDefinition == typeof(Orchestrates<>))
                 {
                     _invalidMessageTypeReason =
-                        $"Orchestrates<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(Orchestrates<>)).First().Name} is not a valid message type";
+                        $"Orchestrates<{typeof(T).GetClosingArgument(typeof(Orchestrates<>)).Name} is not a valid message type";
 
                     return false;
                 }
@@ -206,14 +211,14 @@
                 if (typeDefinition == typeof(InitiatedBy<>))
                 {
                     _invalidMessageTypeReason =
-                        $"InitiatedBy<{Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(InitiatedBy<>)).First().Name} is not a valid message type";
+                        $"InitiatedBy<{typeof(T).GetClosingArgument(typeof(InitiatedBy<>)).Name} is not a valid message type";
 
                     return false;
                 }
 
                 if (typeDefinition == typeof(Observes<,>))
                 {
-                    var closingArguments = Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(Observes<,>)).ToArray();
+                    var closingArguments = typeof(T).GetClosingArguments(typeof(Observes<,>)).ToArray();
                     _invalidMessageTypeReason = $"Observes<{closingArguments[0].Name},{closingArguments[1].Name} is not a valid message type";
                     return false;
                 }
@@ -286,7 +291,7 @@
         {
             Type[] interfaces = typeof(T).GetTypeInfo().GetInterfaces();
 
-            return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IConsumer<>)));
+            return interfaces.Any(t => t.HasInterface(typeof(IConsumer<>)));
         }
 
         static bool ScanForSagaInterfaces()
@@ -296,9 +301,9 @@
             if (interfaces.Contains(typeof(ISaga)))
                 return true;
 
-            return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(InitiatedBy<>))
-                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Orchestrates<>))
-                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Observes<,>)));
+            return interfaces.Any(t => t.HasInterface(typeof(InitiatedBy<>))
+                || t.HasInterface(typeof(Orchestrates<>))
+                || t.HasInterface(typeof(Observes<,>)));
         }
 
 

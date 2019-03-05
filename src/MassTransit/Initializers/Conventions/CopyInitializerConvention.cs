@@ -1,6 +1,8 @@
 ﻿namespace MassTransit.Initializers.Conventions
 {
     using System;
+    using System.Text;
+    using HeaderInitializers;
     using PropertyInitializers;
 
 
@@ -9,7 +11,7 @@
         where TMessage : class
         where TInput : class
     {
-        public bool TryGetMessagePropertyInitializer<TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
+        public bool TryGetPropertyInitializer<TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
         {
             var inputPropertyInfo = typeof(TInput).GetProperty(propertyName);
             if (inputPropertyInfo != null)
@@ -40,6 +42,36 @@
             }
 
             initializer = null;
+            return false;
+        }
+
+        public bool TryGetHeaderInitializer<TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+        {
+            // headers use a double underscore prefix
+
+            string inputPropertyName = new StringBuilder(propertyName.Length + 2).Append("__").Append(propertyName).ToString();
+
+            var inputPropertyInfo = typeof(TInput).GetProperty(inputPropertyName);
+            if (inputPropertyInfo != null)
+            {
+                var propertyType = typeof(TProperty);
+                var inputPropertyType = inputPropertyInfo.PropertyType;
+
+                // exactly the same type, we just copy it over unmodified
+                if (inputPropertyType == propertyType)
+                {
+                    initializer = new CopyHeaderInitializer<TMessage, TInput, TProperty>(propertyName, inputPropertyName);
+                    return true;
+                }
+
+                if (PropertyInitializerCache.TryGetFactory<TProperty>(inputPropertyType, out var propertyConverter))
+                {
+                    initializer = propertyConverter.CreateHeaderInitializer<TMessage, TInput>(propertyName, inputPropertyName);
+                    return true;
+                }
+            }
+
+            initializer = default;
             return false;
         }
     }
