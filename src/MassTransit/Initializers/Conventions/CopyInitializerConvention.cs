@@ -74,6 +74,34 @@
             initializer = default;
             return false;
         }
+
+        public bool TryGetHeaderInitializer(string inputPropertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+        {
+            var inputPropertyInfo = typeof(TInput).GetProperty(inputPropertyName);
+            if (inputPropertyInfo != null)
+            {
+                if (inputPropertyName.StartsWith("__Header_") && inputPropertyName.Length > 9)
+                {
+                    string headerName = inputPropertyName.Substring(9).Replace("__", " ").Replace("_", "-").Replace(" ", "_");
+
+                    var inputPropertyType = inputPropertyInfo.PropertyType;
+
+                    // exactly the same type, we just copy it over unmodified
+                    if (inputPropertyType == typeof(string))
+                    {
+                        initializer = new SetStringHeaderInitializer<TMessage, TInput>(headerName, inputPropertyName);
+                        return true;
+                    }
+
+                    var type = typeof(SetHeaderInitializer<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), inputPropertyType);
+                    initializer = (IHeaderInitializer<TMessage, TInput>)Activator.CreateInstance(type, headerName, inputPropertyName);
+                    return true;
+                }
+            }
+
+            initializer = default;
+            return false;
+        }
     }
 
 

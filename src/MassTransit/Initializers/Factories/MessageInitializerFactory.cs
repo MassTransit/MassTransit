@@ -42,6 +42,15 @@ namespace MassTransit.Initializers.Factories
                 }
             }
 
+            foreach (IHeaderInitializerInspector<TMessage, TInput> inspector in CreateInputHeaderInspectors())
+            {
+                foreach (var convention in _conventions)
+                {
+                    if (inspector.Apply(builder, convention))
+                        break;
+                }
+            }
+
             return builder.Build();
         }
 
@@ -50,6 +59,13 @@ namespace MassTransit.Initializers.Factories
             return typeof(TMessage).GetAllProperties().Where(x => x.CanRead)
                 .Select(x => (IPropertyInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
                     typeof(PropertyInitializerInspector<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), x.PropertyType), x.Name));
+        }
+
+        static IEnumerable<IHeaderInitializerInspector<TMessage, TInput>> CreateInputHeaderInspectors()
+        {
+            return typeof(TInput).GetAllProperties().Where(x => x.CanRead)
+                .Select(x => (IHeaderInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
+                    typeof(InputHeaderInitializerInspector<,>).MakeGenericType(typeof(TMessage), typeof(TInput)), x.Name));
         }
 
         static IEnumerable<IHeaderInitializerInspector<TMessage, TInput>> CreateHeaderInspectors()

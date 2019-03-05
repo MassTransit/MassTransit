@@ -25,6 +25,7 @@ namespace MassTransit.Initializers.Factories
     {
         readonly IDictionary<string, IPropertyInitializer<TMessage, TInput>> _initializers;
         readonly IList<IHeaderInitializer<TMessage, TInput>> _headerInitializers;
+        readonly HashSet<string> _inputPropertyUsed;
 
         public MessageInitializerBuilder()
         {
@@ -33,6 +34,7 @@ namespace MassTransit.Initializers.Factories
 
             _initializers = new Dictionary<string, IPropertyInitializer<TMessage, TInput>>(StringComparer.OrdinalIgnoreCase);
             _headerInitializers = new List<IHeaderInitializer<TMessage, TInput>>();
+            _inputPropertyUsed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
         public IMessageInitializer<TMessage> Build()
@@ -60,6 +62,16 @@ namespace MassTransit.Initializers.Factories
         public void Add(IHeaderInitializer<TMessage, TInput> initializer)
         {
             _headerInitializers.Add(initializer);
+        }
+
+        public bool IsInputPropertyUsed(string propertyName)
+        {
+            return _inputPropertyUsed.Contains(propertyName);
+        }
+
+        public void SetInputPropertyUsed(string propertyName)
+        {
+            _inputPropertyUsed.Add(propertyName);
         }
 
 

@@ -36,6 +36,38 @@ Collections, including arrays, lists, and dictionaries, are broadly supported, i
 
 Nested objects are also supported, for instance, if a property was of type `Address` and another anonymous object was created (or any type whose property names match the names of the properties on the message contract), those properties would be set on the message contract.
 
+## Headers
+
+Header values can be specified in the anonymous object using a double-underscore (pronounced 'dunder' apparently) property name. For instance, to set the message time-to-live, specify a property with the duration. Remember, any value that can be converted to a `TimeSpan` works!
+
+```csharp
+public interface GetOrderStatus
+{
+    Guid OrderId { get; }
+}
+
+var response = await requestClient.GetResponse<OrderStatus>(new 
+{
+    __TimeToLive = 15000, // 15 seconds, or in this case, 15000 milliseconds
+    OrderId = orderId,
+});
+```
+
+> actually, that's a bad example since the request client already sets the message expiration, but you, get, the, point.
+
+To add a custom header value, a special property name format is used. In the name, underscores are converted to dashes, and double underscores are converted to underscores. In the following example:
+
+```csharp
+var response = await requestClient.GetResponse<OrderStatus>(new 
+{
+    __Header_X_B3_TraceId = zipkinTraceId,
+    __Header_X_B3_SpanId = zipkinSpanId,
+    OrderId = orderId,
+});
+```
+
+This would include set the headers used by open tracing (or Zipkin, as shown above) as part of the request message so the service could share in the span/trace. In this case, `X-B3-TraceId` and `X-B3-SpanId` would be added to the message envelope, and depending upon the transport, copied to the transport headers as well.
+
 ## Variables
 
 MassTransit also supports variables, which are special types added to the anonymous object. Following the example above, the initialization could be changed to use variables for the `OrderId` and `OrderDate`. Variables are consistent throughout the message creation, using the same variable multiple times returns the value. For instance, the Id created to set the _OrderId_ would be the same used to set the _OrderId_ in each item.

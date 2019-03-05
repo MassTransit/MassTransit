@@ -23,6 +23,12 @@
         {
             return _typeCache.GetOrAdd<TInput, IInitializerConvention<TMessage, TInput>>().TryGetHeaderInitializer<TProperty>(propertyName, out initializer);
         }
+
+        public bool TryGetHeaderInitializer<TInput>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+            where TInput : class
+        {
+            return _typeCache.GetOrAdd<TInput, IInitializerConvention<TMessage, TInput>>().TryGetHeaderInitializer(propertyName, out initializer);
+        }
     }
 
 
@@ -54,6 +60,13 @@
             where TInput : class
         {
             return _typeCache.GetOrAdd<TMessage, IInitializerConvention<TMessage>>().TryGetHeaderInitializer<TInput, TProperty>(propertyName, out initializer);
+        }
+
+        public bool TryGetHeaderInitializer<TMessage, TInput>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+            where TMessage : class
+            where TInput : class
+        {
+            return _typeCache.GetOrAdd<TMessage, IInitializerConvention<TMessage>>().TryGetHeaderInitializer(propertyName, out initializer);
         }
     }
 }

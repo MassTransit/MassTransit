@@ -17,9 +17,14 @@ namespace MassTransit.Initializers.Factories
 
         public bool Apply(IMessageInitializerBuilder<TMessage, TInput> builder, IInitializerConvention convention)
         {
+            if (builder.IsInputPropertyUsed(_propertyName))
+                return false;
+
             if (convention.TryGetHeaderInitializer<TMessage, TInput, TProperty>(_propertyName, out IHeaderInitializer<TMessage, TInput> initializer))
             {
                 builder.Add(initializer);
+
+                builder.SetInputPropertyUsed(_propertyName);
                 return true;
             }
 

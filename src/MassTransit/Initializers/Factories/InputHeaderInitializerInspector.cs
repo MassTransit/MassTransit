@@ -1,16 +1,16 @@
-﻿namespace MassTransit.Initializers.Factories
+namespace MassTransit.Initializers.Factories
 {
     using Conventions;
 
 
-    public class PropertyInitializerInspector<TMessage, TInput, TProperty> :
-        IPropertyInitializerInspector<TMessage, TInput>
+    public class InputHeaderInitializerInspector<TMessage, TInput> :
+        IHeaderInitializerInspector<TMessage, TInput>
         where TMessage : class
         where TInput : class
     {
         readonly string _propertyName;
 
-        public PropertyInitializerInspector(string propertyName)
+        public InputHeaderInitializerInspector(string propertyName)
         {
             _propertyName = propertyName;
         }
@@ -20,9 +20,9 @@
             if (builder.IsInputPropertyUsed(_propertyName))
                 return false;
 
-            if (convention.TryGetPropertyInitializer<TMessage, TInput, TProperty>(_propertyName, out IPropertyInitializer<TMessage, TInput> initializer))
+            if (convention.TryGetHeaderInitializer(_propertyName, out IHeaderInitializer<TMessage, TInput> initializer))
             {
-                builder.Add(_propertyName, initializer);
+                builder.Add(initializer);
 
                 builder.SetInputPropertyUsed(_propertyName);
                 return true;

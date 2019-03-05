@@ -7,6 +7,7 @@
     {
         bool TryGetPropertyInitializer<TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer);
         bool TryGetHeaderInitializer<TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer);
+        bool TryGetHeaderInitializer(string inputPropertyName, out IHeaderInitializer<TMessage, TInput> initializer);
     }
 
 
@@ -19,6 +20,9 @@
 
         bool TryGetHeaderInitializer<TInput, TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
             where TInput : class;
+
+        bool TryGetHeaderInitializer<TInput>(string inputPropertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+            where TInput : class;
     }
 
 
@@ -29,6 +33,10 @@
             where TInput : class;
 
         bool TryGetHeaderInitializer<TMessage, TInput, TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+            where TMessage : class
+            where TInput : class;
+
+        bool TryGetHeaderInitializer<TMessage, TInput>(string inputPropertyName, out IHeaderInitializer<TMessage, TInput> initializer)
             where TMessage : class
             where TInput : class;
     }

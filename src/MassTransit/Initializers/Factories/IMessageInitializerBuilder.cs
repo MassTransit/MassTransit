@@ -11,5 +11,9 @@
         void Add(IHeaderInitializer<TMessage> initializer);
 
         void Add(IHeaderInitializer<TMessage, TInput> initializer);
+
+        bool IsInputPropertyUsed(string propertyName);
+
+        void SetInputPropertyUsed(string propertyName);
     }
 }
