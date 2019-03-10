@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Containers\MassTransit.AspNetCoreIntegration\MassTransit.AspNetCoreIntegration.csproj" />
     <ProjectReference Include="..\..\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj" />
     <ProjectReference Include="..\..\MassTransit.SignalR\MassTransit.SignalR.csproj" />

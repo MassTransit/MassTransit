@@ -1,23 +1,10 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AspNetCoreIntegration
+﻿namespace MassTransit.AspNetCoreIntegration
 {
     using System;
     using ExtensionsDependencyInjectionIntegration;
     using Logging;
     using Logging.Tracing;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -33,22 +20,20 @@ namespace MassTransit.AspNetCoreIntegration
         /// <returns></returns>
         public static IServiceCollection AddMassTransit(this IServiceCollection services, Func<IServiceProvider, IBusControl> createBus)
         {
-            services.TryAddSingleton(createBus);
-            services.TryAddSingleton<IBus>(p =>
+            services.AddMassTransit(x =>
             {
-                var bus = p.GetRequiredService<IBusControl>();
-                var loggerFactory = p.GetService<ILoggerFactory>();
+                x.AddBus(provider =>
+                {
+                    var loggerFactory = provider.GetService<ILoggerFactory>();
 
-                if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
-                    ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
+                    if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
+                        ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
 
-                return bus;
+                    return createBus(provider);
+                });
             });
 
-            services.TryAddSingleton<IPublishEndpoint>(p => p.GetRequiredService<IBusControl>());
-            services.TryAddSingleton<ISendEndpointProvider>(p => p.GetRequiredService<IBusControl>());
-
-            services.AddHostedService();
+            services.AddSimplifiedHostedService();
 
             return services;
         }
@@ -67,8 +52,22 @@ namespace MassTransit.AspNetCoreIntegration
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            services.AddMassTransit(configure);
-            services.AddMassTransit(createBus);
+            services.AddMassTransit(x =>
+            {
+                configure(x);
+
+                x.AddBus(provider =>
+                {
+                    var loggerFactory = provider.GetService<ILoggerFactory>();
+
+                    if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
+                        ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
+
+                    return createBus(provider);
+                });
+            });
+
+            services.AddSimplifiedHostedService();
 
             return services;
         }
@@ -82,20 +81,26 @@ namespace MassTransit.AspNetCoreIntegration
         /// <returns></returns>
         public static IServiceCollection AddMassTransit(this IServiceCollection services, IBusControl bus, ILoggerFactory loggerFactory = null)
         {
-            if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
-                ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
+            services.AddMassTransit(x =>
+            {
+                x.AddBus(provider =>
+                {
+                    if (loggerFactory == null)
+                        loggerFactory = provider.GetService<ILoggerFactory>();
 
-            services.TryAddSingleton(bus);
-            services.TryAddSingleton<IBus>(bus);
-            services.TryAddSingleton<IPublishEndpoint>(bus);
-            services.TryAddSingleton<ISendEndpointProvider>(bus);
+                    if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
+                        ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
 
-            services.AddHostedService();
+                    return bus;
+                });
+            });
+
+            services.AddSimplifiedHostedService();
 
             return services;
         }
 
-        static void AddHostedService(this IServiceCollection services)
+        static void AddSimplifiedHostedService(this IServiceCollection services)
         {
             var busCheck = new HealthChecks.SimplifiedBusHealthCheck();
             var receiveEndpointCheck = new HealthChecks.ReceiveEndpointHealthCheck();
@@ -113,8 +118,9 @@ namespace MassTransit.AspNetCoreIntegration
             });
         }
 
-        static IHealthChecksBuilder AddBusHealthCheck(this IHealthChecksBuilder builder,
-            string suffix, IHealthCheck healthCheck) =>
-            builder.AddCheck($"masstransit-{suffix}", healthCheck, HealthStatus.Unhealthy, new[] {"ready"});
+        static IHealthChecksBuilder AddBusHealthCheck(this IHealthChecksBuilder builder, string suffix, IHealthCheck healthCheck)
+        {
+            return builder.AddCheck($"masstransit-{suffix}", healthCheck, HealthStatus.Unhealthy, new[] {"ready"});
+        }
     }
 }

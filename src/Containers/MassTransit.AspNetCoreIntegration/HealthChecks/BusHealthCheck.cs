@@ -16,9 +16,11 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
+    using Util;
 
 
-    public class BusHealthCheck : IBusObserver,
+    public class BusHealthCheck :
+        IBusObserver,
         IHealthCheck
     {
         string _failureMessage = "";
@@ -41,7 +43,7 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
 
         public Task PreStop(IBus bus)
         {
-            return Health.Done;
+            return TaskUtil.Completed;
         }
 
         public Task PostStop(IBus bus)
@@ -56,16 +58,15 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
 
         public Task PreStart(IBus bus)
         {
-            return Health.Done;
+            return TaskUtil.Completed;
         }
 
         public Task PostCreate(IBus bus)
         {
-            return Health.Done;
+            return TaskUtil.Completed;
         }
 
-        public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
-            CancellationToken cancellationToken = new CancellationToken())
+        Task<HealthCheckResult> IHealthCheck.CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken)
         {
             return Task.FromResult(_healthy
                 ? HealthCheckResult.Healthy("MassTransit bus is ready")
@@ -76,23 +77,16 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
         {
             _healthy = false;
             _failureMessage = message;
-            return Health.Done;
+
+            return TaskUtil.Completed;
         }
 
         Task Success()
         {
             _healthy = true;
             _failureMessage = "";
-            return Health.Done;
-        }
-    }
 
-
-    static class BusConfigurationExtensions
-    {
-        internal static void UseHealthCheck(IBusFactoryConfigurator busConfigurator, BusHealthCheck healthCheck)
-        {
-            busConfigurator.ConnectBusObserver(healthCheck);
+            return TaskUtil.Completed;
         }
     }
 }

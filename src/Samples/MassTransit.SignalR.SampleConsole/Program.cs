@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace MassTransit.SignalR.SampleConsole
 {
-    internal static class Program
+    static class Program
     {
         internal static async Task Main(string[] args)
         {
