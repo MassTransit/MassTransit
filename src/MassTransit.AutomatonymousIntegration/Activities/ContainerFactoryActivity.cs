@@ -28,7 +28,7 @@ namespace Automatonymous.Activities
 
         Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
         {
-            var factory = context.GetPayload<IStateMachineActivityFactory>();
+            var factory = context.GetStateMachineActivityFactory();
 
             Activity<TInstance> activity = factory.GetActivity<TActivity, TInstance>(context);
 
@@ -37,13 +37,13 @@ namespace Automatonymous.Activities
 
         Task Activity<TInstance>.Execute<T>(BehaviorContext<TInstance, T> context, Behavior<TInstance, T> next)
         {
-            var factory = context.GetPayload<IStateMachineActivityFactory>();
+            var factory = context.GetStateMachineActivityFactory();
 
             Activity<TInstance> activity = factory.GetActivity<TActivity, TInstance>(context);
 
-            var upconvert = new WidenBehavior<TInstance, T>(next, context);
+            var widenBehavior = new WidenBehavior<TInstance, T>(next, context);
 
-            return activity.Execute(context, upconvert);
+            return activity.Execute(context, widenBehavior);
         }
 
         Task Activity<TInstance>.Faulted<TException>(BehaviorExceptionContext<TInstance, TException> context, Behavior<TInstance> next)
@@ -79,7 +79,7 @@ namespace Automatonymous.Activities
 
         Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
-            var factory = context.GetPayload<IStateMachineActivityFactory>();
+            var factory = context.GetStateMachineActivityFactory();
 
             Activity<TInstance, TData> activity = factory.GetActivity<TActivity, TInstance, TData>(context);
 
