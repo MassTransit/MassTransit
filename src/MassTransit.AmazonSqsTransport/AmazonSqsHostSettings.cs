@@ -37,6 +37,12 @@ namespace MassTransit.AmazonSqsTransport
         ///     MAYBE this should be a SecureString instead of a regular string
         /// </summary>
         string SecretKey { get; }
+        
+        /// <summary>
+        ///     temp session token
+        ///     MAYBE this should be a SecureString instead of a regular string
+        /// </summary>
+        string SessionToken { get; }
 
         Uri HostAddress { get; }
 

@@ -21,27 +21,35 @@ namespace MassTransit.AmazonSqsTransport.Transport
         IConnection
     {
         readonly string _accessKey;
+        readonly string _secretKey;
+        readonly string _sessionToken;
         readonly AmazonSimpleNotificationServiceConfig _amazonSnsConfig;
         readonly AmazonSQSConfig _amazonSqsConfig;
-        readonly string _secretKey;
 
-        public Connection(string accessKey, string secretKey, RegionEndpoint regionEndpoint = null, AmazonSQSConfig amazonSqsConfig = null,
+        public Connection(string accessKey, string secretKey, string sessionToken = null ,RegionEndpoint regionEndpoint = null, AmazonSQSConfig amazonSqsConfig = null,
             AmazonSimpleNotificationServiceConfig amazonSnsConfig = null)
         {
             _accessKey = accessKey;
             _secretKey = secretKey;
+            _sessionToken = sessionToken;
             _amazonSqsConfig = amazonSqsConfig ?? new AmazonSQSConfig {RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1};
             _amazonSnsConfig = amazonSnsConfig ?? new AmazonSimpleNotificationServiceConfig {RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1};
         }
 
         public IAmazonSQS CreateAmazonSqsClient()
         {
-            return new AmazonSQSClient(_accessKey, _secretKey, _amazonSqsConfig);
+            if(string.IsNullOrWhiteSpace(_sessionToken))
+                return new AmazonSQSClient(_accessKey, _secretKey, _amazonSqsConfig);
+            else
+                return new AmazonSQSClient(_accessKey, _secretKey, _sessionToken, _amazonSqsConfig);
         }
 
         public IAmazonSimpleNotificationService CreateAmazonSnsClient()
         {
-            return new AmazonSimpleNotificationServiceClient(_accessKey, _secretKey, _amazonSnsConfig);
+            if(string.IsNullOrWhiteSpace(_sessionToken))
+                return new AmazonSimpleNotificationServiceClient(_accessKey, _secretKey, _amazonSnsConfig);
+            else
+                return new AmazonSimpleNotificationServiceClient(_accessKey, _secretKey, _sessionToken, _amazonSnsConfig);
         }
     }
 }

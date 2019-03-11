@@ -29,6 +29,12 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// </summary>
         /// <param name="secretKey"></param>
         void SecretKey(string secretKey);
+        
+        /// <summary>
+        /// Sets the sessionToken for the connection to AmazonSQS
+        /// </summary>
+        /// <param name="secretKey"></param>
+        void SessionToken(string secretKey);
 
         /// <summary>
         /// Sets the default config for the connection to AmazonSQS

@@ -34,8 +34,9 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             _settings = new ConfigurationHostSettings
             {
                 Region = regionEndpoint,
-                AccessKey = "",
-                SecretKey = "",
+                AccessKey = string.Empty,
+                SecretKey = string.Empty,
+                SessionToken = string.Empty,
                 AmazonSqsConfig = new AmazonSQSConfig { RegionEndpoint = regionEndpoint },
                 AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig { RegionEndpoint = regionEndpoint },
             };
@@ -60,6 +61,11 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public void SecretKey(string secretKey)
         {
             _settings.SecretKey = secretKey;
+        }
+
+        public void SessionToken(string sessionToken)
+        {
+            _settings.SessionToken = sessionToken;
         }
 
         public void Config(AmazonSQSConfig config)

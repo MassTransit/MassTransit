@@ -120,6 +120,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
     {
         const string AwsAccessKey = "{YOUR AWS ACCESS KEY}";
         const string AwsSecretKey = "{YOUR AWS SECRET KEY}";
+        const string AwsSessionToken = "{YOUR AWS SESSION TOKEN}";
 
         [Test]
         public async Task Should_succeed_and_connect_when_properly_configured()
@@ -134,6 +135,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                 {
                     h.AccessKey(AwsAccessKey);
                     h.SecretKey(AwsSecretKey);
+                    h.SessionToken(AwsSessionToken);
                 });
 
                 cfg.ReceiveEndpoint(host, "input-queue", x =>
@@ -235,9 +237,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
         public async Task Should_connect_locally_with_test_harness_and_a_handler()
         {
             var harness = new AmazonSqsTestHarness();
-            var handler = harness.Handler<PingMessage>(async context =>
-            {
-            });
+            var handler = harness.Handler<PingMessage>(async context => { });
 
             await harness.Start();
 
@@ -259,7 +259,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             Assert.That(handler.Consumed.Select().Any(), Is.True);
 
-            //            await Task.Delay(20000);
+            //await Task.Delay(20000);
 
             await harness.Bus.Publish(new PongMessage());
 
@@ -291,6 +291,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                 {
                     h.AccessKey(AwsAccessKey);
                     h.SecretKey(AwsSecretKey);
+                    h.SessionToken(AwsSessionToken);
                 });
             });
         }

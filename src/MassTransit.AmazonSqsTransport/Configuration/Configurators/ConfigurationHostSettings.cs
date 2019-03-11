@@ -32,6 +32,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public RegionEndpoint Region { get; set; }
         public string AccessKey { get; set; }
         public string SecretKey { get; set; }
+        public string SessionToken { get; set; }
 
         public AmazonSQSConfig AmazonSqsConfig { get; set; }
 
@@ -41,7 +42,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 
         public IConnection CreateConnection()
         {
-            return new Connection(AccessKey, SecretKey, Region, AmazonSqsConfig, AmazonSnsConfig);
+            return new Connection(AccessKey, SecretKey, SessionToken, Region, AmazonSqsConfig, AmazonSnsConfig);
         }
 
         Uri FormatHostAddress()
