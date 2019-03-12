@@ -23,5 +23,7 @@ namespace MassTransit.AmazonSqsTransport
     public interface AmazonSqsSendContext :
         SendContext
     {
+        string GroupId { get; set; }
+        string DeduplicationId { get; set; }
     }
 }
