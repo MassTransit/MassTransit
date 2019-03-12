@@ -13,6 +13,5 @@
     {
         string GroupId { get; set; }
         string DeduplicationId { get; set; }
-        int? DelaySeconds { get; set; }
     }
 }
