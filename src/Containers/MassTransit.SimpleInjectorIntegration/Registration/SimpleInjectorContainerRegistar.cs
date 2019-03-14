@@ -1,0 +1,105 @@
+namespace MassTransit.SimpleInjectorIntegration.Registration
+{
+    using System.Linq;
+    using Courier;
+    using Definition;
+    using MassTransit.Registration;
+    using Saga;
+    using ScopeProviders;
+    using Scoping;
+    using SimpleInjector;
+
+
+    public class SimpleInjectorContainerRegistar : IContainerRegistrar
+    {
+        readonly Container _container;
+
+        public SimpleInjectorContainerRegistar(Container container)
+        {
+            _container = container;
+        }
+
+        public void RegisterConsumer<T>()
+            where T : class, IConsumer
+        {
+            _container.Register<T>(Lifestyle.Scoped);
+        }
+
+        public void RegisterConsumerDefinition<TDefinition, TConsumer>()
+            where TDefinition : class, IConsumerDefinition<TConsumer>
+            where TConsumer : class, IConsumer
+        {
+            _container.Register<IConsumerDefinition<TConsumer>, TDefinition>(Lifestyle.Transient);
+        }
+
+        public void RegisterSaga<T>()
+            where T : class, ISaga
+        {
+        }
+
+        public void RegisterSagaDefinition<TDefinition, TSaga>()
+            where TDefinition : class, ISagaDefinition<TSaga>
+            where TSaga : class, ISaga
+        {
+            _container.Register<ISagaDefinition<TSaga>, TDefinition>(Lifestyle.Transient);
+        }
+
+        public void RegisterExecuteActivity<TActivity, TArguments>()
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            RegisterIfNotRegistered<TActivity>();
+
+            _container.Register<IExecuteActivityScopeProvider<TActivity, TArguments>,
+                SimpleInjectorExecuteActivityScopeProvider<TActivity, TArguments>>(Lifestyle.Transient);
+        }
+
+        public void RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>()
+            where TDefinition : class, IActivityDefinition<TActivity, TArguments, TLog>
+            where TActivity : class, Activity<TArguments, TLog>
+            where TArguments : class
+            where TLog : class
+        {
+            _container.Register<IActivityDefinition<TActivity, TArguments, TLog>, TDefinition>(Lifestyle.Transient);
+        }
+
+        public void RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>()
+            where TDefinition : class, IExecuteActivityDefinition<TActivity, TArguments>
+            where TActivity : class, ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            _container.Register<IExecuteActivityDefinition<TActivity, TArguments>, TDefinition>(Lifestyle.Transient);
+        }
+
+        public void RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
+            where TDefinition : class, IEndpointDefinition<T>
+            where T : class
+        {
+            _container.Register<IEndpointDefinition<T>, TDefinition>(Lifestyle.Transient);
+
+            if (settings != null)
+                _container.RegisterInstance(settings);
+        }
+
+        public void RegisterCompensateActivity<TActivity, TLog>()
+            where TActivity : class, CompensateActivity<TLog>
+            where TLog : class
+        {
+            RegisterIfNotRegistered<TActivity>();
+
+            _container.Register<ICompensateActivityScopeProvider<TActivity, TLog>,
+                SimpleInjectorCompensateActivityScopeProvider<TActivity, TLog>>(Lifestyle.Transient);
+        }
+
+        void RegisterIfNotRegistered<TActivity>()
+            where TActivity : class
+        {
+            var notExists = _container.GetCurrentRegistrations().SingleOrDefault(r => r.Registration.ImplementationType == typeof(TActivity)) == null;
+
+            if (notExists)
+            {
+                _container.Register<TActivity>(Lifestyle.Scoped);
+            }
+        }
+    }
+}

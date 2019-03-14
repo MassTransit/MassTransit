@@ -41,7 +41,7 @@ public static void Main(string[] args)
                 ec.ConfigureConsumers(context);
 
                 // configure consumer by type
-                ec.ConsumerConsumer(typeof(ConsumerOne), context);
+                ec.ConfigureConsumer(typeof(ConsumerOne), context);
             });
 
             // or, configure the endpoints by convention
