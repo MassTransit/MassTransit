@@ -67,17 +67,11 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             {
                 registry.AddMassTransit(cfg =>
                 {
-                    cfg.AddConsumer<SimpleConsumer>()
+                    cfg.AddConsumer<SimplerConsumer>()
                         .Endpoint(e => e.Name = "custom-endpoint-name");
 
                     cfg.AddBus(context => BusControl);
                 });
-
-                registry.For<ISimpleConsumerDependency>()
-                    .Use<SimpleConsumerDependency>();
-
-                registry.For<AnotherMessageConsumer>()
-                    .Use<AnotherMessageConsumerImpl>();
             });
         }
 
