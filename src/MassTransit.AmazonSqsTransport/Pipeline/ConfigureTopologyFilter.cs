@@ -69,7 +69,9 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             var subscriptions = _brokerTopology.QueueSubscriptions.Select(queue => Declare(context, queue));
 
-            await Task.WhenAll(topics.Concat(queues).Concat(subscriptions)).ConfigureAwait(false);
+            await Task.WhenAll(topics.Concat(queues)).ConfigureAwait(false);
+            foreach (var task in subscriptions)
+                await task;
         }
 
         async Task DeleteAutoDelete(ClientContext context)
