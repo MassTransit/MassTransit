@@ -326,5 +326,49 @@ namespace MassTransit.AmazonSqsTransport.Tests
                 await busControl.StopAsync();
             }
         }
+
+        [Test]
+        public async Task Should_create_queue_with_multiple_subscriptions()
+        {
+            var pingReceived = new TaskCompletionSource<bool>();
+            var pongReceived = new TaskCompletionSource<bool>();
+
+            IAmazonSqsHost host = null;
+
+            var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
+            {
+                host = cfg.Host("ap-southeast-2", h =>
+                {
+                    h.AccessKey(AwsAccessKey);
+                    h.SecretKey(AwsSecretKey);
+                });
+
+                cfg.ReceiveEndpoint(host, "multi_subs-queue", e =>
+                {
+                    e.Handler<PingMessage>(async context =>
+                    {
+                        pingReceived.TrySetResult(true);
+                        await Util.TaskUtil.Completed;
+
+                    });
+
+                    e.Handler<PongMessage>(async context =>
+                    {
+                        pongReceived.TrySetResult(true);
+                        await Util.TaskUtil.Completed;
+                    });
+                });
+            });
+
+            await busControl.StartAsync();
+
+            await busControl.Publish(new PingMessage());
+            await pingReceived.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(10));
+
+            await busControl.Publish(new PongMessage());
+            await pongReceived.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(10));
+
+            await busControl.StopAsync();
+        }
     }
 }
