@@ -330,8 +330,15 @@ namespace MassTransit.AmazonSqsTransport.Tests
         [Test]
         public async Task Should_create_queue_with_multiple_subscriptions()
         {
-            var pingReceived = new TaskCompletionSource<bool>();
-            var pongReceived = new TaskCompletionSource<bool>();
+            var messageTypes = new[]
+            {
+                typeof(Message0), typeof(Message1), typeof(Message2), typeof(Message3), typeof(Message4), typeof(Message5), typeof(Message6),
+                typeof(Message7), typeof(Message8), typeof(Message9), typeof(Message10), typeof(Message11), typeof(Message12), typeof(Message13),
+                typeof(Message14), typeof(Message15), typeof(Message16), typeof(Message17), typeof(Message18), typeof(Message19), typeof(Message20),
+                typeof(Message21), typeof(Message22)
+            };
+
+            var tasksCompleted = messageTypes.ToDictionary(k => k, v => new TaskCompletionSource<bool>());
 
             IAmazonSqsHost host = null;
 
@@ -343,32 +350,73 @@ namespace MassTransit.AmazonSqsTransport.Tests
                     h.SecretKey(AwsSecretKey);
                 });
 
-                cfg.ReceiveEndpoint(host, "multi_subs-queue", e =>
+                Func<object, Task> receiveTask = t =>
                 {
-                    e.Handler<PingMessage>(async context =>
-                    {
-                        pingReceived.TrySetResult(true);
-                        await Util.TaskUtil.Completed;
+                    tasksCompleted[t.GetType()].SetResult(true);
+                    return Util.TaskUtil.Completed;
+                };
 
-                    });
-
-                    e.Handler<PongMessage>(async context =>
-                    {
-                        pongReceived.TrySetResult(true);
-                        await Util.TaskUtil.Completed;
-                    });
+                cfg.ReceiveEndpoint(host, "long_multi_subs_queue", e =>
+                {
+                    e.Handler<Message0>(async c => await receiveTask(c.Message));
+                    e.Handler<Message1>(async c => await receiveTask(c.Message));
+                    e.Handler<Message2>(async c => await receiveTask(c.Message));
+                    e.Handler<Message3>(async c => await receiveTask(c.Message));
+                    e.Handler<Message4>(async c => await receiveTask(c.Message));
+                    e.Handler<Message5>(async c => await receiveTask(c.Message));
+                    e.Handler<Message6>(async c => await receiveTask(c.Message));
+                    e.Handler<Message7>(async c => await receiveTask(c.Message));
+                    e.Handler<Message8>(async c => await receiveTask(c.Message));
+                    e.Handler<Message9>(async c => await receiveTask(c.Message));
+                    e.Handler<Message10>(async c => await receiveTask(c.Message));
+                    e.Handler<Message11>(async c => await receiveTask(c.Message));
+                    e.Handler<Message12>(async c => await receiveTask(c.Message));
+                    e.Handler<Message13>(async c => await receiveTask(c.Message));
+                    e.Handler<Message14>(async c => await receiveTask(c.Message));
+                    e.Handler<Message15>(async c => await receiveTask(c.Message));
+                    e.Handler<Message16>(async c => await receiveTask(c.Message));
+                    e.Handler<Message17>(async c => await receiveTask(c.Message));
+                    e.Handler<Message18>(async c => await receiveTask(c.Message));
+                    e.Handler<Message19>(async c => await receiveTask(c.Message));
+                    e.Handler<Message20>(async c => await receiveTask(c.Message));
+                    e.Handler<Message21>(async c => await receiveTask(c.Message));
+                    e.Handler<Message22>(async c => await receiveTask(c.Message));
                 });
             });
 
             await busControl.StartAsync();
 
-            await busControl.Publish(new PingMessage());
-            await pingReceived.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(10));
+            var publishTasks = messageTypes.Select(m => busControl.Publish(Activator.CreateInstance(m)));
+            await Task.WhenAll(publishTasks);
 
-            await busControl.Publish(new PongMessage());
-            await pongReceived.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(10));
+            var awaitTasks = tasksCompleted.Values.Select(async t => await t.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(20)));
+            await Task.WhenAll(awaitTasks);
 
             await busControl.StopAsync();
         }
+
+        public class Message0 { }
+        public class Message1 { }
+        public class Message2 { }
+        public class Message3 { }
+        public class Message4 { }
+        public class Message5 { }
+        public class Message6 { }
+        public class Message7 { }
+        public class Message8 { }
+        public class Message9 { }
+        public class Message10 { }
+        public class Message11 { }
+        public class Message12 { }
+        public class Message13 { }
+        public class Message14 { }
+        public class Message15 { }
+        public class Message16 { }
+        public class Message17 { }
+        public class Message18 { }
+        public class Message19 { }
+        public class Message20 { }
+        public class Message21 { }
+        public class Message22 { }
     }
 }
