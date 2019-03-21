@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Configurators
 {
     using System;
+    using System.Security.Authentication;
 
 
     public class RabbitMqHostConfigurator :
@@ -24,6 +25,14 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public RabbitMqHostConfigurator(Uri hostAddress, string connectionName = null)
         {
             _settings = hostAddress.GetConfigurationHostSettings();
+
+            if (_settings.Port == 5671)
+            {
+                UseSsl(s =>
+                {
+                    s.Protocol = SslProtocols.Tls12;
+                });
+            }
 
             _settings.ClientProvidedName = connectionName;
             _settings.VirtualHost = GetVirtualHost(hostAddress);
@@ -100,6 +109,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             if (segments.Length == 0)
                 return "/";
+
             if (segments.Length == 1)
                 return segments[0];
 
