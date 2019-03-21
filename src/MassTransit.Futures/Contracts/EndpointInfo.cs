@@ -18,7 +18,7 @@
         /// <summary>
         /// The control address, where messages related to the service are sent
         /// </summary>
-        Uri ControlAddress { get; }
+        Uri InstanceAddress { get; }
 
         /// <summary>
         /// The endpoint address, when actual requests are sent to be processed by this endpoint

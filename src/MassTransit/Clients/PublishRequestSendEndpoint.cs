@@ -18,8 +18,9 @@ namespace MassTransit.Clients
     using Initializers;
 
 
-    public class PublishRequestSendEndpoint :
-        IRequestSendEndpoint
+    public class PublishRequestSendEndpoint<T> :
+        IRequestSendEndpoint<T>
+        where T : class
     {
         readonly IPublishEndpoint _endpoint;
 
@@ -28,8 +29,7 @@ namespace MassTransit.Clients
             _endpoint = endpoint;
         }
 
-        public async Task<T> CreateMessage<T>(object values, CancellationToken cancellationToken)
-            where T : class
+        public async Task<T> CreateMessage(object values, CancellationToken cancellationToken)
         {
             var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
@@ -39,8 +39,7 @@ namespace MassTransit.Clients
             return (await initializer.Initialize(values, cancellationToken).ConfigureAwait(false)).Message;
         }
 
-        public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
-            where T : class
+        public Task Send(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             return _endpoint.Publish(message, pipe, cancellationToken);
         }

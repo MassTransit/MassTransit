@@ -23,16 +23,6 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
-    public class SmartEndpointTestFixture :
-        InMemoryTestFixture
-    {
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-        }
-    }
-
-
-    [TestFixture]
     public class Using_the_new_request_client_syntax :
         InMemoryTestFixture
     {
@@ -97,7 +87,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_throw_a_timeout_exception()
         {
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress, MassTransit.RequestTimeout.After(s: 1));
+            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress, RequestTimeout.After(s: 1));
 
             Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}), Throws.TypeOf<RequestTimeoutException>());
         }
@@ -146,7 +136,7 @@ namespace MassTransit.Tests
 
                 await context.RespondAsync(new Value(), responseContext =>
                 {
-                    if (!responseContext.TryGetPayload(out ConsumeContext cc))
+                    if (!responseContext.TryGetPayload(out ConsumeContext _))
                         throw new InvalidOperationException("Expected to find a ConsumeContext there");
                 });
             });

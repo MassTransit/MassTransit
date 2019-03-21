@@ -34,16 +34,17 @@ namespace MassTransit.Clients
         readonly IBuildPipeConfigurator<SendContext<TRequest>> _pipeConfigurator;
         readonly TaskCompletionSource<bool> _readyToSend;
         readonly Guid _requestId;
-        readonly IRequestSendEndpoint _requestSendEndpoint;
+        readonly IRequestSendEndpoint<TRequest> _requestSendEndpoint;
         readonly Dictionary<Type, HandlerConnectHandle> _responseHandlers;
         readonly Task _send;
         readonly TaskCompletionSource<SendContext<TRequest>> _sendContext;
+        readonly CancellationTokenSource _cancellationTokenSource;
         readonly TaskScheduler _taskScheduler;
         CancellationTokenRegistration _registration;
         Timer _timeoutTimer;
         RequestTimeout _timeToLive;
 
-        public ClientRequestHandle(ClientFactoryContext context, IRequestSendEndpoint requestSendEndpoint, Task<TRequest> message,
+        public ClientRequestHandle(ClientFactoryContext context, IRequestSendEndpoint<TRequest> requestSendEndpoint, Task<TRequest> message,
             CancellationToken cancellationToken = default, RequestTimeout timeout = default, Guid? requestId = default, TaskScheduler taskScheduler = default)
         {
             _context = context;
@@ -64,12 +65,13 @@ namespace MassTransit.Clients
             _pipeConfigurator = new PipeConfigurator<SendContext<TRequest>>();
             _sendContext = new TaskCompletionSource<SendContext<TRequest>>();
             _readyToSend = new TaskCompletionSource<bool>();
+            _cancellationTokenSource = new CancellationTokenSource();
             _responseHandlers = new Dictionary<Type, HandlerConnectHandle>();
-
-            _timeoutTimer = new Timer(TimeoutExpired, this, (long)requestTimeout.Value.TotalMilliseconds, -1L);
 
             if (cancellationToken != default && cancellationToken.CanBeCanceled)
                 _registration = cancellationToken.Register(Cancel);
+
+            _timeoutTimer = new Timer(TimeoutExpired, this, (long)_timeToLive.Value.TotalMilliseconds, -1L);
 
             _send = SendRequest();
 
@@ -110,6 +112,8 @@ namespace MassTransit.Clients
             _readyToSend.TrySetCanceled();
             _sendContext.TrySetCanceled();
 
+            _cancellationTokenSource.Cancel();
+
             lock (_responseHandlers)
             {
                 foreach (var handler in _responseHandlers.Values)
@@ -146,6 +150,8 @@ namespace MassTransit.Clients
             _timeoutTimer = null;
 
             _registration.Dispose();
+
+//            _cancellationTokenSource.Dispose();
         }
 
         Task<TRequest> RequestHandle<TRequest>.Message => _message;
@@ -156,13 +162,24 @@ namespace MassTransit.Clients
             {
                 var message = await _message.ConfigureAwait(false);
 
-                await _requestSendEndpoint.Send(message, this, _cancellationToken).ConfigureAwait(false);
+                await _requestSendEndpoint.Send(message, this, _cancellationTokenSource.Token).ConfigureAwait(false);
             }
             catch (RequestException exception)
             {
                 Fail(exception);
 
                 throw;
+            }
+            catch (OperationCanceledException exception)
+            {
+                if (_sendContext.Task.IsFaulted)
+                    await _sendContext.Task.ConfigureAwait(false);
+
+                var requestException = new RequestCanceledException(_requestId.ToString("D"), exception, exception.CancellationToken);
+
+                Fail(requestException);
+
+                throw requestException;
             }
             catch (Exception exception)
             {
@@ -232,6 +249,8 @@ namespace MassTransit.Clients
                 foreach (var handle in _responseHandlers.Values)
                     handle.TrySetException(exception);
             }
+
+            _cancellationTokenSource.Cancel();
         }
 
         void TimeoutExpired(object state)

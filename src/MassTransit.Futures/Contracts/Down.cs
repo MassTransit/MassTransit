@@ -1,13 +1,13 @@
-﻿namespace MassTransit.Contracts
+namespace MassTransit.Contracts
 {
     using System;
 
 
     /// <summary>
-    /// Announces that a service endpoint is up and available to accept that specified message type
+    /// Announces that a service endpoint is down and no longer available to accept that specified message type
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface Up<T>
+    public interface Down<T>
         where T : class
     {
         /// <summary>
@@ -19,10 +19,5 @@
         /// The endpoint info of the service endpoint
         /// </summary>
         EndpointInfo Endpoint { get; }
-
-        /// <summary>
-        /// The other endpoints known by this endpoint
-        /// </summary>
-        EndpointInfo[] Peers { get; }
     }
 }

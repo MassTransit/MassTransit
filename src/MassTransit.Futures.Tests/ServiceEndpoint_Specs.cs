@@ -90,7 +90,7 @@ namespace MassTransit.Tests
                             Started = started,
                             ServiceAddress = serviceAddress,
                             EndpointAddress = endpointAddress,
-                            ControlAddress = controlAddress,
+                            InstanceAddress = controlAddress,
                         };
 
                         var runtime = new EndpointRuntime(settings);
@@ -126,7 +126,7 @@ namespace MassTransit.Tests
             public DateTime Started { get; set; }
             public Uri ServiceAddress { get; set; }
             public Uri EndpointAddress { get; set; }
-            public Uri ControlAddress { get; set; }
+            public Uri InstanceAddress { get; set; }
         }
 
 
@@ -407,43 +407,6 @@ namespace MassTransit.Tests
 
         public async Task Send(SendContext<T> context)
         {
-            context.Headers.Set(MessageHeaders.ClientId, _clientContext.ClientId.ToString("N"));
-            context.Headers.Set(MessageHeaders.Request.Remaining, _clientContext.Remaining.Value.ToString());
-
-            if (_pipe.IsNotEmpty())
-                await _pipe.Send(context).ConfigureAwait(false);
-        }
-    }
-
-
-    public struct RequestSendContextPipe :
-        IPipe<SendContext>
-    {
-        readonly ServiceEndpoint_Specs.RequestClientContext _clientContext;
-        readonly IPipe<SendContext> _pipe;
-
-        public RequestSendContextPipe(ServiceEndpoint_Specs.RequestClientContext clientContext)
-        {
-            _clientContext = clientContext;
-
-            _pipe = default;
-        }
-
-        public RequestSendContextPipe(ServiceEndpoint_Specs.RequestClientContext clientContext, IPipe<SendContext> pipe)
-        {
-            _clientContext = clientContext;
-            _pipe = pipe;
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            _pipe?.Probe(context);
-        }
-
-        public async Task Send(SendContext context)
-        {
-            context.RequestId = _clientContext.RequestId;
-
             context.Headers.Set(MessageHeaders.ClientId, _clientContext.ClientId.ToString("N"));
             context.Headers.Set(MessageHeaders.Request.Remaining, _clientContext.Remaining.Value.ToString());
 
