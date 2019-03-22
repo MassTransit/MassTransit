@@ -12,36 +12,30 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SignalR
 {
-    using MassTransit.SignalR.Utils;
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.Extensions.DependencyInjection;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-
 
     public static class MassTransitDependencyInjectionExtensions
     {
+        /// <summary>
+        /// Registers the Hub Lifetime Manager based on the configuration options provided
+        /// </summary>
+        /// <param name="signalRServerBuilder">The SignalR builder abstraction for configuring SignalR servers.</param>
+        /// <param name="configureOptions">The MassTransit SignalR configuration options</param>
         public static void AddMassTransitBackplane(this ISignalRServerBuilder signalRServerBuilder,
-            params Assembly[] hubAssemblies)
+            Action<MassTransitSignalROptions> configureOptions = null)
         {
-            IEnumerable<Type> hubs = from a in hubAssemblies
-                from t in a.GetTypes()
-                where typeof(Hub).IsAssignableFrom(t)
-                select t;
+            var options = new MassTransitSignalROptions();
 
-            foreach (var hub in hubs)
-            {
-                var consumerTypes = HubConsumersCache.GetOrAdd(hub);
+            configureOptions?.Invoke(options);
 
-                foreach (var consumer in consumerTypes)
-                {
-                    signalRServerBuilder.Services.AddScoped(consumer);
-                }
-            }
+            signalRServerBuilder.Services.AddSingleton(options);
 
-            signalRServerBuilder.Services.AddSingleton(typeof(HubLifetimeManager<>), typeof(MassTransitHubLifetimeManager<>));
+            if (options.UseMessageData)
+                signalRServerBuilder.Services.AddSingleton(typeof(HubLifetimeManager<>), typeof(MassTransitMessageDataHubLifetimeManager<>));
+            else
+                signalRServerBuilder.Services.AddSingleton(typeof(HubLifetimeManager<>), typeof(MassTransitHubLifetimeManager<>));
         }
     }
 }

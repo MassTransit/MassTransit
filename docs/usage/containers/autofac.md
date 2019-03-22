@@ -59,7 +59,7 @@ namespace Example
                         ec.ConfigureConsumers(context);
 
                         // configure consumer by type
-                        ec.ConsumerConsumer(typeof(ConsumerOne));
+                        ec.ConfigureConsumer(typeof(ConsumerOne));
                     });
 
                     // or, configure the endpoints by convention

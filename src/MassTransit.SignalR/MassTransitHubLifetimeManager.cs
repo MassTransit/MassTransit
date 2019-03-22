@@ -24,30 +24,18 @@ namespace MassTransit.SignalR
     using Utils;
 
 
-    public class MassTransitHubLifetimeManager<THub> : HubLifetimeManager<THub>
+    public class MassTransitHubLifetimeManager<THub> : BaseMassTransitHubLifetimeManager<THub>
         where THub : Hub
     {
         static readonly ILog _logger = Logger.Get<MassTransitHubLifetimeManager<THub>>();
-        readonly IRequestClient<GroupManagement<THub>> _groupManagementRequestClient;
-        readonly IReadOnlyList<IHubProtocol> _protocols;
 
-        readonly IPublishEndpoint _publishEndpoint;
-
-        public MassTransitHubLifetimeManager(IPublishEndpoint publishEndpoint,
+        public MassTransitHubLifetimeManager(
+            IPublishEndpoint publishEndpoint,
             IClientFactory clientFactory,
             IHubProtocolResolver hubProtocolResolver)
+            : base(publishEndpoint, clientFactory, hubProtocolResolver)
         {
-            _publishEndpoint = publishEndpoint;
-            _groupManagementRequestClient = clientFactory.CreateRequestClient<GroupManagement<THub>>(TimeSpan.FromSeconds(20));
-            _protocols = hubProtocolResolver.AllProtocols;
         }
-
-        public string ServerName { get; } = GenerateServerName();
-
-        public HubConnectionStore Connections { get; } = new HubConnectionStore();
-
-        public MassTransitSubscriptionManager Groups { get; } = new MassTransitSubscriptionManager();
-        public MassTransitSubscriptionManager Users { get; } = new MassTransitSubscriptionManager();
 
         public override Task OnConnectedAsync(HubConnectionContext connection)
         {
@@ -288,13 +276,6 @@ namespace MassTransit.SignalR
 
             var feature = connection.Features.Get<IMassTransitFeature>();
             feature.Groups.Remove(groupName);
-        }
-
-        static string GenerateServerName()
-        {
-            // Use the machine name for convenient diagnostics, but add a guid to make it unique.
-            // Example: MyServerName_02db60e5fab243b890a847fa5c4dcb29
-            return $"{Environment.MachineName}_{Guid.NewGuid():N}";
         }
     }
 }

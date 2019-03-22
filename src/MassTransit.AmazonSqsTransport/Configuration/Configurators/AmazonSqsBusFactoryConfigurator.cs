@@ -87,6 +87,11 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             set => _settings.PurgeOnStartup = value;
         }
 
+        public void OverrideDefaultBusEndpointQueueName(string value)
+        {
+            _settings.EntityName = value;
+        }
+
         public IDictionary<string, object> QueueAttributes => _settings.QueueAttributes;
         public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
 

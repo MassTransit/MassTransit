@@ -1,8 +1,13 @@
 ﻿namespace MassTransit.SignalR.Utils
 {
+    using MassTransit.MessageData;
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.AspNetCore.SignalR.Protocol;
+    using System;
     using System.Collections.Generic;
+    using System.IO;
+    using System.Runtime.Serialization.Formatters.Binary;
+    using System.Threading.Tasks;
 
     public static class SerializedHubMessageExtensions
     {
@@ -35,6 +40,26 @@
             }
 
             return messages;
+        }
+
+        public static async Task<IDictionary<string, byte[]>> ToProtocolDictionary(this MessageData<byte[]> messageData)
+        {
+            using (var memStream = new MemoryStream(await messageData.Value))
+            {
+                var binaryFormatter = new BinaryFormatter();
+                return binaryFormatter.Deserialize(memStream) as IDictionary<string, byte[]> ?? throw new ArgumentNullException("Couldn't deserialize MessageData into SignalR Message Dictionary");
+            }
+        }
+
+        public static async Task<MessageData<byte[]>> ToMessageData(this IDictionary<string, byte[]> protocolMessages, IMessageDataRepository repository)
+        {
+            using (var memStream = new MemoryStream())
+            {
+                var binaryFormatter = new BinaryFormatter();
+                binaryFormatter.Serialize(memStream, protocolMessages);
+
+                return await repository.PutBytes(memStream.ToArray());
+            }
         }
     }
 }
