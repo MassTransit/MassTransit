@@ -2,56 +2,118 @@
 {
     using MassTransit;
     using MassTransit.ExtensionsDependencyInjectionIntegration;
-    using MassTransit.SignalR.Contracts;
-    using MassTransit.SignalR.Utils;
     using Microsoft.AspNetCore.SignalR;
     using System;
     using Definition;
-
+    using MassTransit.SignalR.Consumers;
+    using MassTransit.SignalR.Contracts;
+    using MassTransit.MessageData;
 
     public static class MassTransitSignalRConfigurationExtensions
     {
         public static void AddSignalRHubConsumers<THub>(this IServiceCollectionConfigurator configurator)
             where THub : Hub
         {
-            configurator.AddRequestClient<GroupManagement<THub>>(TimeSpan.FromSeconds(10));
+            // Add Registrations for Regular Consumers
+            configurator.AddConsumer<AllConsumer<THub>>();
+            configurator.AddConsumer<ConnectionConsumer<THub>>();
+            configurator.AddConsumer<GroupConsumer<THub>>();
+            configurator.AddConsumer<GroupManagementConsumer<THub>>();
+            configurator.AddConsumer<UserConsumer<THub>>();
 
-            var consumers = HubConsumersCache.GetOrAdd<THub>();
-
-            foreach (var consumer in consumers)
-            {
-                configurator.AddConsumer(consumer);
-            }
+            // Add Registrations for Message Data Consumers
+            configurator.AddConsumer<AllMessageDataConsumer<THub>>();
+            configurator.AddConsumer<ConnectionMessageDataConsumer<THub>>();
+            configurator.AddConsumer<GroupMessageDataConsumer<THub>>();
+            configurator.AddConsumer<GroupManagementConsumer<THub>>();
+            configurator.AddConsumer<UserMessageDataConsumer<THub>>();
         }
 
-        public static void AddSignalRHubEndpoints<THub, TEndpointConfigurator>(this IBusFactoryConfigurator configurator,
+        public static void AddSignalRHubEndpoints<THub>(
+            this IBusFactoryConfigurator configurator,
             IServiceProvider serviceProvider,
-            IHost host, Action<TEndpointConfigurator> configureEndpoint = null)
-            where TEndpointConfigurator : class, IReceiveEndpointConfigurator
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
             where THub : Hub
         {
-            var consumers = HubConsumersCache.GetOrAdd<THub>();
+            // Get the configuration options
+            var options = serviceProvider.GetService(typeof(MassTransitSignalROptions)) as MassTransitSignalROptions;
 
-            var queueNameBase = host.Topology.CreateTemporaryQueueName($"signalRBackplane-{typeof(THub).Name}-");
-
-            // Loop through our 5 hub consumers and create a temporary endpoint for each
-            foreach (var consumerType in consumers)
+            if (!options.UseMessageData)
             {
-                // remove `1 from generic type
-                var name = consumerType.Name;
-                int index = name.IndexOf('`');
-                if (index > 0)
-                    name = name.Remove(index);
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+                {
+                    configureEndpoint?.Invoke(e);
+
+                    e.ConfigureConsumer<AllConsumer<THub>>(serviceProvider);
+                });
 
                 configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
                 {
-                    configureEndpoint?.Invoke((TEndpointConfigurator)e);
+                    e.UseMessageData<Connection<THub>>(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
+                    configureEndpoint?.Invoke(e);
 
-                    e.ConfigureConsumer(serviceProvider, consumerType);
+                    e.ConfigureConsumer<ConnectionConsumer<THub>>(serviceProvider);
+                });
+
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+                {
+                    e.UseMessageData<Group<THub>>(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
+                    configureEndpoint?.Invoke(e);
+
+                    e.ConfigureConsumer<GroupConsumer<THub>>(serviceProvider);
+                });
+
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+                {
+                    e.UseMessageData<User<THub>>(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
+                    configureEndpoint?.Invoke(e);
+
+                    e.ConfigureConsumer<UserConsumer<THub>>(serviceProvider);
                 });
             }
-        }
+            else
+            {
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+                {
+                    e.UseMessageData<AllMessageData<THub>>(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
+                    configureEndpoint?.Invoke(e);
 
+                    e.ConfigureConsumer<AllMessageDataConsumer<THub>>(serviceProvider);
+                });
+
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+                {
+                    e.UseMessageData<ConnectionMessageData<THub>>(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
+                    configureEndpoint?.Invoke(e);
+
+                    e.ConfigureConsumer<ConnectionMessageDataConsumer<THub>>(serviceProvider);
+                });
+
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+                {
+                    e.UseMessageData<GroupMessageData<THub>>(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
+                    configureEndpoint?.Invoke(e);
+
+                    e.ConfigureConsumer<GroupMessageDataConsumer<THub>>(serviceProvider);
+                });
+
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+                {
+                    e.UseMessageData<UserMessageData<THub>>(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
+                    configureEndpoint?.Invoke(e);
+
+                    e.ConfigureConsumer<UserMessageDataConsumer<THub>>(serviceProvider);
+                });
+            }
+
+            // Common Receive Endpoint
+            configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+            {
+                configureEndpoint?.Invoke(e);
+
+                e.ConfigureConsumer<GroupManagementConsumer<THub>>(serviceProvider);
+            });
+        }
 
         class HubEndpointDefinition<THub> :
             DefaultEndpointDefinition

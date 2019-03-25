@@ -26,7 +26,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
 
         public bool Durable { get; set; }
         public bool AutoDelete { get; set; }
-        public string EntityName { get; }
+        public string EntityName { get; set; }
 
         protected virtual IEnumerable<string> GetQueryStringOptions()
         {

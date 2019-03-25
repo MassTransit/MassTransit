@@ -1,14 +1,14 @@
 // Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
@@ -24,6 +24,7 @@ namespace MassTransit
     using Scoping;
     using SimpleInjector;
     using SimpleInjectorIntegration;
+    using SimpleInjectorIntegration.ScopeProviders;
 
 
     public static class SimpleInjectorExtensions
@@ -52,65 +53,6 @@ namespace MassTransit
                     SagaConfiguratorCache.Configure(sagaType, configurator, repositoryFactory);
         }
 
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, Container container, Action<IConsumerConfigurator<T>> configure = null)
-            where T : class, IConsumer
-        {
-            var consumerFactory = new ScopeConsumerFactory<T>(new SimpleInjectorConsumerScopeProvider(container));
-
-            configurator.Consumer(consumerFactory, configure);
-        }
-
-        public static void Saga<T>(this IReceiveEndpointConfigurator configurator, Container container, Action<ISagaConfigurator<T>> configure = null)
-            where T : class, ISaga
-        {
-            var repository = container.GetInstance<ISagaRepository<T>>();
-
-            var scopeProvider = new SimpleInjectorSagaScopeProvider<T>(container);
-
-            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
-
-            configurator.Saga(sagaRepository, configure);
-        }
-
-        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress, Container container)
-            where TActivity : class, ExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            var executeActivityScopeProvider = new SimpleInjectorExecuteActivityScopeProvider<TActivity, TArguments>(container);
-
-            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
-
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
-
-            configurator.AddEndpointSpecification(specification);
-        }
-
-        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Container container)
-            where TActivity : class, ExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            var executeActivityScopeProvider = new SimpleInjectorExecuteActivityScopeProvider<TActivity, TArguments>(container);
-
-            var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
-
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
-
-            configurator.AddEndpointSpecification(specification);
-        }
-
-        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, Container container)
-            where TActivity : class, CompensateActivity<TLog>
-            where TLog : class
-        {
-            var compensateActivityScopeProvider = new SimpleInjectorCompensateActivityScopeProvider<TActivity, TLog>(container);
-
-            var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
-
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
-
-            configurator.AddEndpointSpecification(specification);
-        }
-
         static IList<Type> FindTypes<T>(Container container, Func<Type, bool> filter)
         {
             return
@@ -119,6 +61,26 @@ namespace MassTransit
                     .Select(x => x.Registration.ImplementationType)
                     .Where(filter)
                     .ToList();
+        }
+
+        /// <summary>
+        /// Registers the InMemory saga repository for all saga types (generic, can be overridden)
+        /// </summary>
+        /// <param name="registry"></param>
+        public static void RegisterInMemorySagaRepository(this Container registry)
+        {
+            registry.RegisterSingleton(typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>));
+        }
+
+        /// <summary>
+        /// Register the InMemory saga repository for the specified saga type
+        /// </summary>
+        /// <param name="registry"></param>
+        /// <typeparam name="T"></typeparam>
+        public static void RegisterInMemorySagaRepository<T>(this Container registry)
+            where T : class, ISaga
+        {
+            registry.RegisterSingleton<ISagaRepository<T>, InMemorySagaRepository<T>>();
         }
     }
 }
