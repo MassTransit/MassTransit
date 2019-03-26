@@ -119,13 +119,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public async Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription description, RuleDescription rule, Filter filter)
         {
-            var subscriptionExists = await _namespaceManager.SubscriptionExistsAsync(description.TopicPath, description.SubscriptionName).ConfigureAwait(false);
+            var create = true;
             SubscriptionDescription subscriptionDescription = null;
-
-            if (subscriptionExists)
+            try
             {
                 subscriptionDescription = await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.SubscriptionName).ConfigureAwait(false);
-
                 if (string.IsNullOrWhiteSpace(description.ForwardTo))
                 {
                     if (!string.IsNullOrWhiteSpace(subscriptionDescription.ForwardTo))
@@ -152,6 +150,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                                 subscriptionDescription.ForwardTo);
 
                         await _namespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
+
+                        create = false;
                     }
                     else
                     {
@@ -164,8 +164,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                     }
                 }
             }
-            else
+            catch (MessagingEntityNotFoundException)
             {
+            }
+
+            if (create)
+            {
+                var created = false;
                 try
                 {
                     if (_log.IsDebugEnabled)
@@ -176,11 +181,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                         : filter != null
                             ? await _namespaceManager.CreateSubscriptionAsync(description, filter).ConfigureAwait(false)
                             : await _namespaceManager.CreateSubscriptionAsync(description).ConfigureAwait(false);
+
+                    created = true;
                 }
                 catch (MessagingEntityAlreadyExistsException)
                 {
-                    subscriptionDescription = await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.SubscriptionName).ConfigureAwait(false);
                 }
+
+                if (!created)
+                    subscriptionDescription = await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.SubscriptionName).ConfigureAwait(false);
             }
 
             if (_log.IsDebugEnabled)
