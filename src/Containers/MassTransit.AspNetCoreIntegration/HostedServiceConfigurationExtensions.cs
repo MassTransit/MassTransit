@@ -4,6 +4,7 @@ namespace MassTransit
     using AspNetCoreIntegration;
     using AspNetCoreIntegration.HealthChecks;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -35,7 +36,7 @@ namespace MassTransit
             var busCheck = new BusHealthCheck();
             var receiveEndpointCheck = new ReceiveEndpointHealthCheck();
 
-            collection.AddSingleton(busCheck);
+            collection.TryAddSingleton(busCheck);
 
             collection.AddHealthChecks()
                 .AddBusHealthCheck("bus", busCheck)
