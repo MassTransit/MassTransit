@@ -15,6 +15,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
     using System;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using ScopeProviders;
     using Scoping;
 
@@ -38,25 +39,25 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
 
         public void AddBus(Func<IServiceProvider, IBusControl> busFactory)
         {
-            Collection.AddSingleton(busFactory);
-            Collection.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
-            Collection.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
-            Collection.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
+            Collection.TryAddSingleton(busFactory);
+            Collection.TryAddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
+            Collection.TryAddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
+            Collection.TryAddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
 
-            Collection.AddSingleton(context => context.GetRequiredService<IBus>().CreateClientFactory());
+            Collection.TryAddSingleton(context => context.GetRequiredService<IBus>().CreateClientFactory());
         }
 
         public void AddRequestClient<T>(RequestTimeout timeout = default)
             where T : class
         {
-            Collection.AddSingleton(provider =>
+            Collection.TryAddSingleton(provider =>
             {
                 var clientFactory = provider.GetRequiredService<IClientFactory>();
 
                 return clientFactory.CreateRequestClient<T>(timeout);
             });
 
-            Collection.AddScoped(context =>
+            Collection.TryAddScoped(context =>
             {
                 var clientFactory = context.GetRequiredService<IClientFactory>();
 
@@ -70,14 +71,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         public void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
             where T : class
         {
-            Collection.AddSingleton(provider =>
+            Collection.TryAddSingleton(provider =>
             {
                 var clientFactory = provider.GetRequiredService<IClientFactory>();
 
                 return clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
             });
 
-            Collection.AddScoped(context =>
+            Collection.TryAddScoped(context =>
             {
                 var clientFactory = context.GetRequiredService<IClientFactory>();
 
@@ -90,18 +91,18 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
 
         static void AddMassTransitComponents(IServiceCollection collection)
         {
-            collection.AddScoped<ScopedConsumeContextProvider>();
-            collection.AddScoped<ConsumeContext>(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext());
+            collection.TryAddScoped<ScopedConsumeContextProvider>();
+            collection.TryAddScoped<ConsumeContext>(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext());
 
-            collection.AddScoped(provider => (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
+            collection.TryAddScoped(provider => (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
                 provider.GetRequiredService<IBus>());
 
-            collection.AddScoped(provider => (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
+            collection.TryAddScoped(provider => (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
                 provider.GetRequiredService<IBus>());
 
-            collection.AddSingleton<IConsumerScopeProvider>(provider => new DependencyInjectionConsumerScopeProvider(provider));
-            collection.AddSingleton<ISagaRepositoryFactory>(provider => new DependencyInjectionSagaRepositoryFactory(provider));
-            collection.AddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
+            collection.TryAddSingleton<IConsumerScopeProvider>(provider => new DependencyInjectionConsumerScopeProvider(provider));
+            collection.TryAddSingleton<ISagaRepositoryFactory>(provider => new DependencyInjectionSagaRepositoryFactory(provider));
+            collection.TryAddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
         }
     }
 }

@@ -35,14 +35,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         public void RegisterConsumer<T>()
             where T : class, IConsumer
         {
-            _collection.AddScoped<T>();
+            _collection.TryAddScoped<T>();
         }
 
         public void RegisterConsumerDefinition<TDefinition, TConsumer>()
             where TDefinition : class, IConsumerDefinition<TConsumer>
             where TConsumer : class, IConsumer
         {
-            _collection.AddTransient<IConsumerDefinition<TConsumer>, TDefinition>();
+            _collection.TryAddTransient<IConsumerDefinition<TConsumer>, TDefinition>();
         }
 
         public void RegisterSaga<T>()
@@ -54,7 +54,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga
         {
-            _collection.AddTransient<ISagaDefinition<TSaga>, TDefinition>();
+            _collection.TryAddTransient<ISagaDefinition<TSaga>, TDefinition>();
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()
@@ -63,7 +63,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         {
             _collection.TryAddScoped<TActivity>();
 
-            _collection.AddTransient<IExecuteActivityScopeProvider<TActivity, TArguments>,
+            _collection.TryAddTransient<IExecuteActivityScopeProvider<TActivity, TArguments>,
                 DependencyInjectionExecuteActivityScopeProvider<TActivity, TArguments>>();
         }
 
@@ -73,7 +73,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
             where TArguments : class
             where TLog : class
         {
-            _collection.AddTransient<IActivityDefinition<TActivity, TArguments, TLog>, TDefinition>();
+            _collection.TryAddTransient<IActivityDefinition<TActivity, TArguments, TLog>, TDefinition>();
         }
 
         public void RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>()
@@ -81,17 +81,17 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
-            _collection.AddTransient<IExecuteActivityDefinition<TActivity, TArguments>, TDefinition>();
+            _collection.TryAddTransient<IExecuteActivityDefinition<TActivity, TArguments>, TDefinition>();
         }
 
         public void RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
             where TDefinition : class, IEndpointDefinition<T>
             where T : class
         {
-            _collection.AddTransient<IEndpointDefinition<T>, TDefinition>();
+            _collection.TryAddTransient<IEndpointDefinition<T>, TDefinition>();
 
             if (settings != null)
-                _collection.AddSingleton(settings);
+                _collection.TryAddSingleton(settings);
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()
@@ -100,7 +100,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         {
             _collection.TryAddScoped<TActivity>();
 
-            _collection.AddTransient<ICompensateActivityScopeProvider<TActivity, TLog>,
+            _collection.TryAddTransient<ICompensateActivityScopeProvider<TActivity, TLog>,
                 DependencyInjectionCompensateActivityScopeProvider<TActivity, TLog>>();
         }
     }
