@@ -157,15 +157,17 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             await _amazonSns.SubscribeAsync(subscribeRequest).ConfigureAwait(false);
 
             var sqsQueueArn = queueAttributes[QueueAttributeName.QueueArn];
+            var topicArnPattern = topicArn.Substring(0, topicArn.LastIndexOf('_') + 1) + "*";
 
             queueAttributes.TryGetValue(QueueAttributeName.Policy, out var policyStr);
             var policy = string.IsNullOrEmpty(policyStr) ? new Policy() : Policy.FromJson(policyStr);
 
-            if (!QueueHasTopicPermission(policy, sqsQueueArn))
+            if (!QueueHasTopicPermission(policy, topicArnPattern, sqsQueueArn))
             {
                 var statement = new Statement(Statement.StatementEffect.Allow);
                 statement.Actions.Add(SQSActionIdentifiers.SendMessage);
                 statement.Resources.Add(new Resource(sqsQueueArn));
+                statement.Conditions.Add(ConditionFactory.NewSourceArnCondition(topicArnPattern));
                 statement.Principals.Add(new Principal("*"));
                 policy.Statements.Add(statement);
 
@@ -174,9 +176,16 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             }
         }
 
-        static bool QueueHasTopicPermission(Policy policy, string sqsQueueArn)
+        static bool QueueHasTopicPermission(Policy policy, string topicArnPattern, string sqsQueueArn)
         {
-            return policy.Statements.Any(s => s.Resources.Any(r => r.Id.Equals(sqsQueueArn)) && !s.Conditions.Any());
+            var conditions = policy.Statements
+                .Where(s => s.Resources.Any(r => r.Id.Equals(sqsQueueArn)))
+                .SelectMany(s => s.Conditions);
+
+            return conditions.Any(c =>
+                    string.Equals(c.Type, ConditionFactory.ArnComparisonType.ArnLike.ToString(), StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(c.ConditionKey, ConditionFactory.SOURCE_ARN_CONDITION_KEY, StringComparison.OrdinalIgnoreCase) &&
+                    c.Values.Contains<string>(topicArnPattern));
         }
 
         async Task ClientContext.DeleteTopic(Topic topic)

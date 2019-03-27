@@ -395,6 +395,40 @@ namespace MassTransit.AmazonSqsTransport.Tests
             await busControl.StopAsync();
         }
 
+        [Test]
+        public async Task Should_configure_custom_client_context()
+        {
+            var tasksCompleted = new TaskCompletionSource<bool>();
+
+            IAmazonSqsHost host = null;
+
+            var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
+            {
+                host = cfg.Host("eu-central-1", h =>
+                {
+                    h.AccessKey("AKIAIJQKG2LI4XLJMJEQ");
+                    h.SecretKey("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");
+                });
+                
+                cfg.ReceiveEndpoint(host, "raul_queue", e =>
+                {
+                    e.Handler<Message0>(async c =>
+                    {
+                        tasksCompleted.SetResult(true);
+                        await Util.TaskUtil.Completed;
+                    });
+                });
+            });
+
+            await busControl.StartAsync();
+
+            await busControl.Publish(new Message0());
+
+            await tasksCompleted.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+
+            await busControl.StopAsync();
+        }
+
         public class Message0 { }
         public class Message1 { }
         public class Message2 { }
