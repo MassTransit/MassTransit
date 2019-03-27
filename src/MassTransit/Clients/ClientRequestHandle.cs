@@ -198,7 +198,7 @@ namespace MassTransit.Clients
             }
         }
 
-        async void HandleFault()
+        async Task HandleFault()
         {
             try
             {
