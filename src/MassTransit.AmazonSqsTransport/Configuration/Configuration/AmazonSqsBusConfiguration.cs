@@ -17,6 +17,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
     using Topology;
     using Topology.Settings;
     using Topology.Topologies;
+    using Transport;
 
 
     public class AmazonSqsBusConfiguration :
@@ -29,6 +30,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
             : base(topology)
         {
             _hosts = new HostCollection<IAmazonSqsHostConfiguration>();
+
+            ClientContextSupervisorFactory = new ClientContextSupervisorFactory();
         }
 
         public bool DeployTopologyOnly { get; set; }
@@ -78,6 +81,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 
         public IReadOnlyHostCollection Hosts => _hosts;
 
+        public IClientContextSupervisorFactory ClientContextSupervisorFactory { get; set; }
+        
         IAmazonSqsHostTopology CreateHostTopology(Uri hostAddress)
         {
             return new AmazonSqsHostTopology(new AmazonSqsMessageNameFormatter(), hostAddress, Topology);

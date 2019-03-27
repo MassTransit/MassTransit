@@ -15,8 +15,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
     using System;
     using MassTransit.Configuration;
     using Topology.Settings;
-
-
+    using Transport;
+    
     public interface IAmazonSqsBusConfiguration :
         IBusConfiguration
     {
@@ -72,5 +72,10 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
         /// <returns></returns>
         IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
             IAmazonSqsEndpointConfiguration endpointConfiguration);
+
+        /// <summary>
+        /// Sets or gets the client context supervisor factory
+        /// </summary>
+        IClientContextSupervisorFactory ClientContextSupervisorFactory { get; set; }
     }
 }

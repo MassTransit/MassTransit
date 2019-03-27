@@ -63,7 +63,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
         {
             var settings = _topology.SendTopology.GetSendSettings(address);
 
-            var clientContextSupervisor = new AmazonSqsClientContextSupervisor(_host.ConnectionContextSupervisor);
+            var clientContextSupervisor = _busConfiguration.ClientContextSupervisorFactory.Create(_host.ConnectionContextSupervisor);
 
             var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology());
 
@@ -82,7 +82,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 
             var sendSettings = publishTopology.GetPublishSettings();
 
-            var clientContextSupervisor = new AmazonSqsClientContextSupervisor(_host.ConnectionContextSupervisor);
+            var clientContextSupervisor = _busConfiguration.ClientContextSupervisorFactory.Create(_host.ConnectionContextSupervisor);
 
             var configureTopologyFilter = new ConfigureTopologyFilter<PublishSettings>(sendSettings, publishTopology.GetBrokerTopology());
 
