@@ -21,6 +21,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
     using MassTransit.Builders;
     using Topology.Configuration;
     using Topology.Settings;
+    using Transport;
 
 
     public class AmazonSqsBusFactoryConfigurator :
@@ -122,6 +123,11 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public bool DeployTopologyOnly
         {
             set => _configuration.DeployTopologyOnly = value;
+        }
+
+        public IClientContextProvider ClientContextProvider
+        {
+            set => _configuration.ClientContextProvider = value;
         }
 
         public override void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,

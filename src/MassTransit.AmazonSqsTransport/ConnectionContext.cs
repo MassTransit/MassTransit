@@ -47,5 +47,11 @@ namespace MassTransit.AmazonSqsTransport
         /// </summary>
         /// <returns></returns>
         Task<IAmazonSimpleNotificationService> CreateAmazonSns();
+
+        /// <summary>
+        /// Creates a client context
+        /// </summary>
+        /// <returns></returns>
+        Task<ClientContext> CreateClientContext();
     }
 }

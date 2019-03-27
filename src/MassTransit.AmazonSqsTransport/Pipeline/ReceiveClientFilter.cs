@@ -40,10 +40,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
         async Task IFilter<ConnectionContext>.Send(ConnectionContext context, IPipe<ConnectionContext> next)
         {
-            var amazonSqs = await context.CreateAmazonSqs().ConfigureAwait(false);
-            var amazonSns = await context.CreateAmazonSns().ConfigureAwait(false);
-
-            var modelContext = new AmazonSqsClientContext(context, amazonSqs, amazonSns, context.CancellationToken);
+            var modelContext = await context.CreateClientContext().ConfigureAwait(false);
 
             try
             {

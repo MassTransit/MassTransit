@@ -54,5 +54,10 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         {
             return Task.Factory.StartNew(() => Connection.CreateAmazonSnsClient(), CancellationToken, TaskCreationOptions.None, _taskScheduler);
         }
+
+        public Task<ClientContext> CreateClientContext()
+        {
+            return Task.Factory.StartNew(() => _configuration.BusConfiguration.ClientContextProvider.Create(this), CancellationToken, TaskCreationOptions.None, _taskScheduler);
+        }
     }
 }

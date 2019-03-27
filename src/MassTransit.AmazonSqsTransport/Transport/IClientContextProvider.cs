@@ -12,8 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Transport
 {
-    public interface IClientContextSupervisorFactory
+    public interface IClientContextProvider
     {
-        IClientContextSupervisor Create(IConnectionContextSupervisor connectionContextSupervisor);
+        ClientContext Create(ConnectionContext connetionContext);
     }
 }

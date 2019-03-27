@@ -20,11 +20,16 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Configuration;
+    using Contexts;
+    using GreenPipes;
+    using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Logging;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework.Messages;
     using Testing;
+    using Transport;
 
 
     [TestFixture]
@@ -332,10 +337,29 @@ namespace MassTransit.AmazonSqsTransport.Tests
         {
             var messageTypes = new[]
             {
-                typeof(Message0), typeof(Message1), typeof(Message2), typeof(Message3), typeof(Message4), typeof(Message5), typeof(Message6),
-                typeof(Message7), typeof(Message8), typeof(Message9), typeof(Message10), typeof(Message11), typeof(Message12), typeof(Message13),
-                typeof(Message14), typeof(Message15), typeof(Message16), typeof(Message17), typeof(Message18), typeof(Message19), typeof(Message20),
-                typeof(Message21), typeof(Message22)
+                typeof(Message0),
+                typeof(Message1),
+                typeof(Message2),
+                typeof(Message3),
+                typeof(Message4),
+                typeof(Message5),
+                typeof(Message6),
+                typeof(Message7),
+                typeof(Message8),
+                typeof(Message9),
+                typeof(Message10),
+                typeof(Message11),
+                typeof(Message12),
+                typeof(Message13),
+                typeof(Message14),
+                typeof(Message15),
+                typeof(Message16),
+                typeof(Message17),
+                typeof(Message18),
+                typeof(Message19),
+                typeof(Message20),
+                typeof(Message21),
+                typeof(Message22)
             };
 
             var tasksCompleted = messageTypes.ToDictionary(k => k, v => new TaskCompletionSource<bool>());
@@ -409,8 +433,10 @@ namespace MassTransit.AmazonSqsTransport.Tests
                     h.AccessKey("AKIAIJQKG2LI4XLJMJEQ");
                     h.SecretKey("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");
                 });
-                
-                cfg.ReceiveEndpoint(host, "raul_queue", e =>
+
+                //cfg.ClientContextSupervisorFactory = new Factory();
+
+                cfg.ReceiveEndpoint(host, "raul_queue_3", e =>
                 {
                     e.Handler<Message0>(async c =>
                     {
@@ -429,28 +455,120 @@ namespace MassTransit.AmazonSqsTransport.Tests
             await busControl.StopAsync();
         }
 
-        public class Message0 { }
-        public class Message1 { }
-        public class Message2 { }
-        public class Message3 { }
-        public class Message4 { }
-        public class Message5 { }
-        public class Message6 { }
-        public class Message7 { }
-        public class Message8 { }
-        public class Message9 { }
-        public class Message10 { }
-        public class Message11 { }
-        public class Message12 { }
-        public class Message13 { }
-        public class Message14 { }
-        public class Message15 { }
-        public class Message16 { }
-        public class Message17 { }
-        public class Message18 { }
-        public class Message19 { }
-        public class Message20 { }
-        public class Message21 { }
-        public class Message22 { }
+
+        public class Message0
+        {
+        }
+
+
+        public class Message1
+        {
+        }
+
+
+        public class Message2
+        {
+        }
+
+
+        public class Message3
+        {
+        }
+
+
+        public class Message4
+        {
+        }
+
+
+        public class Message5
+        {
+        }
+
+
+        public class Message6
+        {
+        }
+
+
+        public class Message7
+        {
+        }
+
+
+        public class Message8
+        {
+        }
+
+
+        public class Message9
+        {
+        }
+
+
+        public class Message10
+        {
+        }
+
+
+        public class Message11
+        {
+        }
+
+
+        public class Message12
+        {
+        }
+
+
+        public class Message13
+        {
+        }
+
+
+        public class Message14
+        {
+        }
+
+
+        public class Message15
+        {
+        }
+
+
+        public class Message16
+        {
+        }
+
+
+        public class Message17
+        {
+        }
+
+
+        public class Message18
+        {
+        }
+
+
+        public class Message19
+        {
+        }
+
+
+        public class Message20
+        {
+        }
+
+
+        public class Message21
+        {
+        }
+
+
+        public class Message22
+        {
+        }
+
     }
 }

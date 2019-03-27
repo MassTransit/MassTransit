@@ -31,7 +31,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
         {
             _hosts = new HostCollection<IAmazonSqsHostConfiguration>();
 
-            ClientContextSupervisorFactory = new ClientContextSupervisorFactory();
+            ClientContextProvider = new ClientContextProvider();
         }
 
         public bool DeployTopologyOnly { get; set; }
@@ -81,7 +81,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 
         public IReadOnlyHostCollection Hosts => _hosts;
 
-        public IClientContextSupervisorFactory ClientContextSupervisorFactory { get; set; }
+        public IClientContextProvider ClientContextProvider { get; set; }
         
         IAmazonSqsHostTopology CreateHostTopology(Uri hostAddress)
         {

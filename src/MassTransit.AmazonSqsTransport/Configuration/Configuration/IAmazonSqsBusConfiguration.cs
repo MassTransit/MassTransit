@@ -74,8 +74,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
             IAmazonSqsEndpointConfiguration endpointConfiguration);
 
         /// <summary>
-        /// Sets or gets the client context supervisor factory
+        /// Sets or gets the client context provider
         /// </summary>
-        IClientContextSupervisorFactory ClientContextSupervisorFactory { get; set; }
+        IClientContextProvider ClientContextProvider { get; set; }
     }
 }
