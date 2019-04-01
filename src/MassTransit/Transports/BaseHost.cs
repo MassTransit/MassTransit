@@ -35,7 +35,6 @@ namespace MassTransit.Transports
             _hostConfiguration = hostConfiguration;
 
             _receiveEndpoints = new ReceiveEndpointCollection();
-            Add(_receiveEndpoints);
         }
 
         protected IReceiveEndpointCollection ReceiveEndpoints => _receiveEndpoints;
@@ -102,6 +101,13 @@ namespace MassTransit.Transports
             Probe(scope);
 
             _receiveEndpoints.Probe(scope);
+        }
+
+        async Task IAgent.Stop(StopContext context)
+        {
+            await _receiveEndpoints.Stop(context).ConfigureAwait(false);
+
+            await base.Stop(context).ConfigureAwait(false);
         }
 
         protected override async Task StopSupervisor(StopSupervisorContext context)
