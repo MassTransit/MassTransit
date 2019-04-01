@@ -35,14 +35,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         public void RegisterConsumer<T>()
             where T : class, IConsumer
         {
-            _collection.TryAddScoped<T>();
+            _collection.AddScoped<T>();
         }
 
         public void RegisterConsumerDefinition<TDefinition, TConsumer>()
             where TDefinition : class, IConsumerDefinition<TConsumer>
             where TConsumer : class, IConsumer
         {
-            _collection.TryAddTransient<IConsumerDefinition<TConsumer>, TDefinition>();
+            _collection.AddTransient<IConsumerDefinition<TConsumer>, TDefinition>();
         }
 
         public void RegisterSaga<T>()
@@ -54,7 +54,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga
         {
-            _collection.TryAddTransient<ISagaDefinition<TSaga>, TDefinition>();
+            _collection.AddTransient<ISagaDefinition<TSaga>, TDefinition>();
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()
@@ -63,7 +63,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         {
             _collection.TryAddScoped<TActivity>();
 
-            _collection.TryAddTransient<IExecuteActivityScopeProvider<TActivity, TArguments>,
+            _collection.AddTransient<IExecuteActivityScopeProvider<TActivity, TArguments>,
                 DependencyInjectionExecuteActivityScopeProvider<TActivity, TArguments>>();
         }
 

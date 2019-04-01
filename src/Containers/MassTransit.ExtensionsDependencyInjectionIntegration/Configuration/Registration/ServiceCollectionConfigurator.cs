@@ -92,7 +92,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         static void AddMassTransitComponents(IServiceCollection collection)
         {
             collection.AddScoped<ScopedConsumeContextProvider>();
-            collection.TryAddScoped<ConsumeContext>(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext());
+            collection.AddScoped<ConsumeContext>(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext());
 
             collection.AddScoped(provider => (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
                 provider.GetRequiredService<IBus>());
