@@ -11,11 +11,20 @@
         where TInstance : SagaStateMachineInstance
         where TMessage : class
     {
-        readonly AsyncEventMessageFactory<TInstance, TMessage> _asyncMessageFactory;
         readonly DestinationAddressProvider<TInstance> _destinationAddressProvider;
+        readonly AsyncEventMessageFactory<TInstance, TMessage> _asyncMessageFactory;
+        readonly SendEndpointAddressProvider<TInstance> _sendEndpointAddressProvider;
         readonly EventMessageFactory<TInstance, TMessage> _messageFactory;
         readonly IPipe<SendContext<TMessage>> _sendPipe;
 
+        public SendActivity(SendEndpointAddressProvider<TInstance> sendEndpointAddressProvider, EventMessageFactory<TInstance, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback)
+            : this(messageFactory, contextCallback)
+        {
+            _sendEndpointAddressProvider = sendEndpointAddressProvider;
+        }
+
+        [Obsolete]
         public SendActivity(DestinationAddressProvider<TInstance> destinationAddressProvider, EventMessageFactory<TInstance, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
             : this(messageFactory, contextCallback)
@@ -23,6 +32,14 @@
             _destinationAddressProvider = destinationAddressProvider;
         }
 
+        public SendActivity(SendEndpointAddressProvider<TInstance> sendEndpointAddressProvider, AsyncEventMessageFactory<TInstance, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback)
+            : this(messageFactory, contextCallback)
+        {
+            _sendEndpointAddressProvider = sendEndpointAddressProvider;
+        }
+
+        [Obsolete]
         public SendActivity(DestinationAddressProvider<TInstance> destinationAddressProvider, AsyncEventMessageFactory<TInstance, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
             : this(messageFactory, contextCallback)
@@ -88,9 +105,10 @@
 
             var message = _messageFactory?.Invoke(consumeContext) ?? await _asyncMessageFactory(consumeContext).ConfigureAwait(false);
 
-            if (_destinationAddressProvider != null)
+            if (_sendEndpointAddressProvider != null || _destinationAddressProvider != null)
             {
-                var destinationAddress = _destinationAddressProvider(consumeContext.Instance);
+                var destinationAddress = _sendEndpointAddressProvider?.Invoke(consumeContext)
+                    ?? _destinationAddressProvider(consumeContext.Instance);
 
                 var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -108,11 +126,20 @@
         where TData : class
         where TMessage : class
     {
-        readonly AsyncEventMessageFactory<TInstance, TData, TMessage> _asyncMessageFactory;
         readonly DestinationAddressProvider<TInstance, TData> _destinationAddressProvider;
+        readonly AsyncEventMessageFactory<TInstance, TData, TMessage> _asyncMessageFactory;
+        readonly SendEndpointAddressProvider<TInstance, TData> _sendEndpointAddressProvider;
         readonly EventMessageFactory<TInstance, TData, TMessage> _messageFactory;
         readonly IPipe<SendContext<TMessage>> _sendPipe;
 
+        public SendActivity(SendEndpointAddressProvider<TInstance, TData> sendEndpointAddressProvider,
+            EventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
+            : this(messageFactory, contextCallback)
+        {
+            _sendEndpointAddressProvider = sendEndpointAddressProvider;
+        }
+
+        [Obsolete]
         public SendActivity(DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
             EventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
             : this(messageFactory, contextCallback)
@@ -120,6 +147,14 @@
             _destinationAddressProvider = destinationAddressProvider;
         }
 
+        public SendActivity(SendEndpointAddressProvider<TInstance, TData> sendEndpointAddressProvider,
+            AsyncEventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
+            : this(messageFactory, contextCallback)
+        {
+            _sendEndpointAddressProvider = sendEndpointAddressProvider;
+        }
+
+        [Obsolete]
         public SendActivity(DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
             AsyncEventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
             : this(messageFactory, contextCallback)
@@ -161,9 +196,10 @@
 
             var message = _messageFactory?.Invoke(consumeContext) ?? await _asyncMessageFactory(consumeContext).ConfigureAwait(false);
 
-            if (_destinationAddressProvider != null)
+            if (_sendEndpointAddressProvider != null || _destinationAddressProvider != null)
             {
-                var destinationAddress = _destinationAddressProvider(consumeContext.Instance, context.Data);
+                var destinationAddress = _sendEndpointAddressProvider?.Invoke(consumeContext)
+                    ?? _destinationAddressProvider(consumeContext.Instance, consumeContext.Data);
 
                 var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 

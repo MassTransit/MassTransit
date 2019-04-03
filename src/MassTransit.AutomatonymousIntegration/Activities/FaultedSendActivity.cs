@@ -5,6 +5,7 @@ namespace Automatonymous.Activities
     using GreenPipes;
     using MassTransit;
 
+
     public class FaultedSendActivity<TInstance, TException, TMessage> :
         Activity<TInstance>
         where TInstance : SagaStateMachineInstance
@@ -12,24 +13,24 @@ namespace Automatonymous.Activities
         where TException : Exception
     {
         readonly AsyncEventExceptionMessageFactory<TInstance, TException, TMessage> _asyncMessageFactory;
-        readonly DestinationAddressProvider<TInstance> _destinationAddressProvider;
+        readonly SendEndpointAddressProvider<TInstance> _sendEndpointAddressProvider;
         readonly EventExceptionMessageFactory<TInstance, TException, TMessage> _messageFactory;
         readonly IPipe<SendContext<TMessage>> _sendPipe;
 
-        public FaultedSendActivity(DestinationAddressProvider<TInstance> destinationAddressProvider,
+        public FaultedSendActivity(SendEndpointAddressProvider<TInstance> sendEndpointAddressProvider,
             EventExceptionMessageFactory<TInstance, TException, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
             : this(messageFactory, contextCallback)
         {
-            _destinationAddressProvider = destinationAddressProvider;
+            _sendEndpointAddressProvider = sendEndpointAddressProvider;
         }
 
-        public FaultedSendActivity(DestinationAddressProvider<TInstance> destinationAddressProvider,
+        public FaultedSendActivity(SendEndpointAddressProvider<TInstance> sendEndpointAddressProvider,
             AsyncEventExceptionMessageFactory<TInstance, TException, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
             : this(messageFactory, contextCallback)
         {
-            _destinationAddressProvider = destinationAddressProvider;
+            _sendEndpointAddressProvider = sendEndpointAddressProvider;
         }
 
         public FaultedSendActivity(EventExceptionMessageFactory<TInstance, TException, TMessage> messageFactory,
@@ -79,9 +80,9 @@ namespace Automatonymous.Activities
             {
                 var message = _messageFactory?.Invoke(exceptionContext) ?? await _asyncMessageFactory(exceptionContext).ConfigureAwait(false);
 
-                if (_destinationAddressProvider != null)
+                if (_sendEndpointAddressProvider != null)
                 {
-                    var destinationAddress = _destinationAddressProvider(exceptionContext.Instance);
+                    var destinationAddress = _sendEndpointAddressProvider(exceptionContext);
 
                     var endpoint = await exceptionContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -100,9 +101,9 @@ namespace Automatonymous.Activities
             {
                 var message = _messageFactory?.Invoke(exceptionContext) ?? await _asyncMessageFactory(exceptionContext).ConfigureAwait(false);
 
-                if (_destinationAddressProvider != null)
+                if (_sendEndpointAddressProvider != null)
                 {
-                    var destinationAddress = _destinationAddressProvider(exceptionContext.Instance);
+                    var destinationAddress = _sendEndpointAddressProvider(exceptionContext);
 
                     var endpoint = await exceptionContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -116,6 +117,7 @@ namespace Automatonymous.Activities
         }
     }
 
+
     public class FaultedSendActivity<TInstance, TData, TException, TMessage> :
         Activity<TInstance, TData>
         where TInstance : SagaStateMachineInstance
@@ -124,24 +126,24 @@ namespace Automatonymous.Activities
         where TException : Exception
     {
         readonly AsyncEventExceptionMessageFactory<TInstance, TData, TException, TMessage> _asyncMessageFactory;
-        readonly DestinationAddressProvider<TInstance, TData> _destinationAddressProvider;
+        readonly SendEndpointAddressProvider<TInstance, TData> _sendEndpointAddressProvider;
         readonly EventExceptionMessageFactory<TInstance, TData, TException, TMessage> _messageFactory;
         readonly IPipe<SendContext<TMessage>> _sendPipe;
 
-        public FaultedSendActivity(DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
+        public FaultedSendActivity(SendEndpointAddressProvider<TInstance, TData> sendEndpointAddressProvider,
             EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
             : this(messageFactory, contextCallback)
         {
-            _destinationAddressProvider = destinationAddressProvider;
+            _sendEndpointAddressProvider = sendEndpointAddressProvider;
         }
 
-        public FaultedSendActivity(DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
+        public FaultedSendActivity(SendEndpointAddressProvider<TInstance, TData> sendEndpointAddressProvider,
             AsyncEventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
             : this(messageFactory, contextCallback)
         {
-            _destinationAddressProvider = destinationAddressProvider;
+            _sendEndpointAddressProvider = sendEndpointAddressProvider;
         }
 
         public FaultedSendActivity(EventExceptionMessageFactory<TInstance, TData, TException, TMessage> messageFactory,
@@ -186,9 +188,9 @@ namespace Automatonymous.Activities
             {
                 var message = _messageFactory?.Invoke(exceptionContext) ?? await _asyncMessageFactory(exceptionContext).ConfigureAwait(false);
 
-                if (_destinationAddressProvider != null)
+                if (_sendEndpointAddressProvider != null)
                 {
-                    var destinationAddress = _destinationAddressProvider(exceptionContext.Instance, context.Data);
+                    var destinationAddress = _sendEndpointAddressProvider(exceptionContext);
 
                     var endpoint = await exceptionContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
