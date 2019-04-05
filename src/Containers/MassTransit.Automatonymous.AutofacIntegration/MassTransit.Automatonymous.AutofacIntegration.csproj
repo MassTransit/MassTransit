@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <PackageReference Include="Autofac" Version="4.9.1" />
+      <PackageReference Include="Autofac" Version="4.9.2" />
       <PackageReference Include="Automatonymous" Version="4.1.6" />
       <PackageReference Include="GreenPipes" Version="2.1.4" />
       <PackageReference Include="NewId" Version="3.0.1" />
