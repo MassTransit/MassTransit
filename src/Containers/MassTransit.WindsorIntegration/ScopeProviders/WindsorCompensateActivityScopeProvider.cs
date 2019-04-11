@@ -39,7 +39,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             {
                 kernel.UpdateScope(context.ConsumeContext);
 
-                var activity = kernel.Resolve<TActivity>(new Arguments(new {context.Log}));
+                var activity = kernel.Resolve<TActivity>(new Arguments().AddTyped(context.Log));
 
                 CompensateActivityContext<TActivity, TLog> activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
 
@@ -51,7 +51,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             {
                 _kernel.UpdateScope(context.ConsumeContext);
 
-                var activity = _kernel.Resolve<TActivity>(new Arguments(new {context.Log}));
+                var activity = _kernel.Resolve<TActivity>(new Arguments().AddTyped(context.Log));
 
                 CompensateActivityContext<TActivity, TLog> activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
                 activityContext.UpdatePayload(_kernel);

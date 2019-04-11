@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Collections.Generic;
     using System.Globalization;
     using System.Net.Security;
+    using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
     using System.Text.RegularExpressions;
     using Configurators;
@@ -67,10 +68,7 @@ namespace MassTransit.RabbitMqTransport
                     name = NewId.Next().ToString("NS");
                     uri = uri.Remove(uri.Length - 1) + name;
 
-                    var builder = new UriBuilder(uri)
-                    {
-                        Query = string.IsNullOrEmpty(address.Query) ? "" : address.Query.Substring(1)
-                    };
+                    var builder = new UriBuilder(uri) {Query = string.IsNullOrEmpty(address.Query) ? "" : address.Query.Substring(1)};
 
                     address = builder.Uri;
                 }
@@ -122,7 +120,7 @@ namespace MassTransit.RabbitMqTransport
                 factory.HostName = null;
                 factory.EndpointResolverFactory = x => new SequentialEndpointResolver(settings.ClusterMembers);
             }
-            
+
             if (settings.UseClientCertificateAsAuthenticationIdentity)
             {
                 factory.AuthMechanisms.Clear();
@@ -134,6 +132,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 if (!string.IsNullOrWhiteSpace(settings.Username))
                     factory.UserName = settings.Username;
+
                 if (!string.IsNullOrWhiteSpace(settings.Password))
                     factory.Password = settings.Password;
             }
@@ -159,7 +158,7 @@ namespace MassTransit.RabbitMqTransport
                 factory.Ssl.CertPath = settings.ClientCertificatePath;
                 factory.Ssl.CertPassphrase = settings.ClientCertificatePassphrase;
             }
-            
+
             factory.ClientProperties = factory.ClientProperties ?? new Dictionary<string, object>();
 
             HostInfo hostInfo = HostMetadataCache.Host;
@@ -173,6 +172,7 @@ namespace MassTransit.RabbitMqTransport
             factory.ClientProperties["process_name"] = hostInfo.ProcessName;
             if (hostInfo.Assembly != null)
                 factory.ClientProperties["assembly"] = hostInfo.Assembly;
+
             if (hostInfo.AssemblyVersion != null)
                 factory.ClientProperties["assembly_version"] = hostInfo.AssemblyVersion;
 
@@ -195,15 +195,29 @@ namespace MassTransit.RabbitMqTransport
 
         internal static ConfigurationHostSettings GetConfigurationHostSettings(this Uri address)
         {
-            if (string.Compare("rabbitmq", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
-                throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme);
+            short defaultPort = 0;
+            switch (address.Scheme.ToLowerInvariant())
+            {
+                case "rabbitmq":
+                case "amqp":
+                    defaultPort = 5672;
+                    break;
+
+                case "rabbitmqs":
+                case "amqps":
+                    defaultPort = 5671;
+                    break;
+
+                default:
+                    throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme);
+            }
 
             var hostSettings = new ConfigurationHostSettings
             {
                 Host = address.Host,
                 Username = "",
                 Password = "",
-                Port = address.IsDefaultPort ? 5672 : address.Port
+                Port = address.IsDefaultPort ? defaultPort : address.Port
             };
 
             if (!string.IsNullOrEmpty(address.UserInfo))

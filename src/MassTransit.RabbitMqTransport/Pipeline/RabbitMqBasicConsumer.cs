@@ -229,17 +229,17 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             try
             {
-                await Completed.UntilCompletedOrTimeout(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+                await Completed.ConfigureAwait(false);
             }
-            catch (TimeoutException)
+            catch (OperationCanceledException)
             {
                 foreach (var pendingContext in _pending.Values)
                 {
                     pendingContext.Cancel();
                 }
-            }
 
-            await Completed.ConfigureAwait(false);
+                throw;
+            }
         }
 
         async Task ActiveAndActualAgentsCompleted(StopSupervisorContext context)

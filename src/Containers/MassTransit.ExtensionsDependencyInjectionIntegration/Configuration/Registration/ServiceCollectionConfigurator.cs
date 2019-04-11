@@ -15,6 +15,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
     using System;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using ScopeProviders;
     using Scoping;
 
@@ -38,7 +39,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
 
         public void AddBus(Func<IServiceProvider, IBusControl> busFactory)
         {
-            Collection.AddSingleton(busFactory);
+            Collection.TryAddSingleton(busFactory);
+
             Collection.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
             Collection.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
             Collection.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());

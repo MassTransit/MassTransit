@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <PackageReference Include="dapper.contrib" Version="1.50.7" />
+      <PackageReference Include="dapper.contrib" Version="1.60.1" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
   </ItemGroup>
 

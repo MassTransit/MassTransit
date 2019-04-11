@@ -90,7 +90,7 @@
 
             if (_destinationAddressProvider != null)
             {
-                var destinationAddress = _destinationAddressProvider(consumeContext.Instance);
+                var destinationAddress = _destinationAddressProvider(consumeContext);
 
                 var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -163,7 +163,7 @@
 
             if (_destinationAddressProvider != null)
             {
-                var destinationAddress = _destinationAddressProvider(consumeContext.Instance, context.Data);
+                var destinationAddress = _destinationAddressProvider(consumeContext);
 
                 var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 

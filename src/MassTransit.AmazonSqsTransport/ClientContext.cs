@@ -32,7 +32,7 @@ namespace MassTransit.AmazonSqsTransport
         ConnectionContext ConnectionContext { get; }
 
         Task<string> CreateTopic(Topic topic);
-        
+
         Task<string> CreateQueue(Queue queue);
 
         Task CreateQueueSubscription(Topic topic, Queue queue);
