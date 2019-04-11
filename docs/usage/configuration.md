@@ -120,7 +120,7 @@ public class Startup
 
                     ep.ConfigureConsumer<OrderConsumer>(provider);
                 });
-            });
+            }));
         });
     }
 
