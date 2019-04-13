@@ -19,6 +19,7 @@ In order to use and understand MassTransit, a set of recipe-based usage examples
 * [Request/response](request-response.md)
 * [Handle exceptions](exceptions.md)
 * [Configure retries](retries.md)
+* [Large payloads](message-data.md)
 * [Schedule messages](scheduling/README.md)
   * [Scheduling API](scheduling/scheduling-api.md)
   * [In-memory scheduling](scheduling/in-memory.md)
