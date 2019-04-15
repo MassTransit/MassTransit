@@ -13,90 +13,74 @@
 namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 {
     using System;
-    using System.Threading.Tasks;
-    using Configurators;
     using MassTransit.Configuration;
-    using MassTransit.Topology;
-    using Pipeline;
     using Topology;
-    using Transport;
-    using Transports;
+    using Topology.Settings;
+    using Topology.Topologies;
 
 
-    public class AmazonSqsHostConfiguration :
-        IAmazonSqsHostConfiguration
+    public class AmazonSqsBusConfiguration :
+        AmazonSqsEndpointConfiguration,
+        IAmazonSqsBusConfiguration
     {
-        readonly IAmazonSqsBusConfiguration _busConfiguration;
-        readonly IAmazonSqsHostControl _host;
-        readonly IAmazonSqsHostTopology _topology;
+        readonly IHostCollection<IAmazonSqsHostConfiguration> _hosts;
 
-        public AmazonSqsHostConfiguration(IAmazonSqsBusConfiguration busConfiguration, AmazonSqsHostSettings settings, IAmazonSqsHostTopology topology)
+        public AmazonSqsBusConfiguration(IAmazonSqsTopologyConfiguration topology)
+            : base(topology)
         {
-            Settings = settings;
-            _topology = topology;
-            _busConfiguration = busConfiguration;
-
-            _host = new AmazonSqsHost(this);
+            _hosts = new HostCollection<IAmazonSqsHostConfiguration>();
         }
 
-        IBusHostControl IHostConfiguration.Host => _host;
-        Uri IHostConfiguration.HostAddress => Settings.HostAddress;
-        IHostTopology IHostConfiguration.Topology => _topology;
+        public bool DeployTopologyOnly { get; set; }
 
-        public AmazonSqsHostSettings Settings { get; }
-
-        IAmazonSqsBusConfiguration IAmazonSqsHostConfiguration.BusConfiguration => _busConfiguration;
-        IAmazonSqsHostControl IAmazonSqsHostConfiguration.Host => _host;
-        IAmazonSqsHostTopology IAmazonSqsHostConfiguration.Topology => _topology;
-
-        public bool Matches(Uri address)
+        public bool TryGetHost(Uri address, out IAmazonSqsHostConfiguration hostConfiguration)
         {
-            if (!address.Scheme.Equals("amazonsqs", StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            var settings = new AmazonSqsHostConfigurator(address).Settings;
-
-            return AmazonSqsHostEqualityComparer.Default.Equals(Settings, settings);
+            return _hosts.TryGetHost(address, out hostConfiguration);
         }
 
-        public Task<ISendTransport> CreateSendTransport(Uri address)
+        public bool TryGetHost(IAmazonSqsHost host, out IAmazonSqsHostConfiguration hostConfiguration)
         {
-            var settings = _topology.SendTopology.GetSendSettings(address);
-
-            var clientContextSupervisor = new AmazonSqsClientContextSupervisor(_host.ConnectionContextSupervisor);
-
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology());
-
-            var transport = new QueueSendTransport(clientContextSupervisor, configureTopologyFilter, settings.EntityName);
-            transport.Add(clientContextSupervisor);
-
-            _host.Add(transport);
-
-            return Task.FromResult<ISendTransport>(transport);
+            return _hosts.TryGetHost(host, out hostConfiguration);
         }
 
-        public Task<ISendTransport> CreatePublishTransport<T>()
-            where T : class
+        public IAmazonSqsHostConfiguration CreateHostConfiguration(AmazonSqsHostSettings settings)
         {
-            IAmazonSqsMessagePublishTopology<T> publishTopology = _topology.Publish<T>();
+            var hostTopology = CreateHostTopology(settings.HostAddress);
 
-            var sendSettings = publishTopology.GetPublishSettings();
+            var hostConfiguration = new AmazonSqsHostConfiguration(this, settings, hostTopology);
 
-            var clientContextSupervisor = new AmazonSqsClientContextSupervisor(_host.ConnectionContextSupervisor);
+            _hosts.Add(hostConfiguration);
 
-            var configureTopologyFilter = new ConfigureTopologyFilter<PublishSettings>(sendSettings, publishTopology.GetBrokerTopology());
-
-            var sendTransport = new TopicSendTransport(clientContextSupervisor, configureTopologyFilter, sendSettings.EntityName);
-            sendTransport.Add(clientContextSupervisor);
-
-            _host.Add(sendTransport);
-
-            return Task.FromResult<ISendTransport>(sendTransport);
+            return hostConfiguration;
         }
 
-        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
+        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            IAmazonSqsEndpointConfiguration endpointConfiguration)
         {
-            return new AmazonSqsReceiveEndpointConfiguration(this, queueName, _busConfiguration.CreateEndpointConfiguration());
+            if (_hosts.Count == 0)
+                throw new ConfigurationException("At least one host must be configured");
+
+            var configuration = new AmazonSqsReceiveEndpointConfiguration(_hosts[0], queueName, endpointConfiguration);
+
+            return configuration;
+        }
+
+        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
+            IAmazonSqsEndpointConfiguration endpointConfiguration)
+        {
+            if (_hosts.Count == 0)
+                throw new ConfigurationException("At least one host must be configured");
+
+            var configuration = new AmazonSqsReceiveEndpointConfiguration(_hosts[0], settings, endpointConfiguration);
+
+            return configuration;
+        }
+
+        public IReadOnlyHostCollection Hosts => _hosts;
+
+        IAmazonSqsHostTopology CreateHostTopology(Uri hostAddress)
+        {
+            return new AmazonSqsHostTopology(new AmazonSqsMessageNameFormatter(), hostAddress, Topology);
         }
     }
 }
