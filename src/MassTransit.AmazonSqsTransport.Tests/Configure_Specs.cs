@@ -20,17 +20,11 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Configuration;
-    using Contexts;
-    using GreenPipes;
-    using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Logging;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework.Messages;
     using Testing;
-    using Transport;
-
 
     [TestFixture]
     public class Using_the_handler_test_factory
