@@ -31,7 +31,12 @@ namespace MassTransit.Tests
 
             string file = Path.Combine(path, "masstransit.tests.log4net.xml");
 
+        #if NETCORE
+            var logRepository = LogManager.GetRepository(System.Reflection.Assembly.GetEntryAssembly());
+            XmlConfigurator.Configure(logRepository, new FileInfo(file));
+        #else
             XmlConfigurator.Configure(new FileInfo(file));
+        #endif
 
             Trace.WriteLine("Loading Log4net: " + file);
 

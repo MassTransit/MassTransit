@@ -1,16 +1,4 @@
-// Copyright 2007-2013 Chris Patterson
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Steward.Core.Distribution.ConsistentHashing
+namespace MassTransit.Conductor.Distribution
 {
     using System;
     using System.Collections.Generic;
@@ -19,18 +7,17 @@ namespace MassTransit.Steward.Core.Distribution.ConsistentHashing
 
 
     public class ConsistentHashDistributionStrategy<T> :
-        DistributionStrategy<T>
+        IDistributionStrategy<T>
     {
         const int DefaultReplicationCount = 160;
         readonly SortedDictionary<int, T> _circle = new SortedDictionary<int, T>();
-        readonly HashGenerator _hashGenerator;
+        readonly IHashGenerator _hashGenerator;
         readonly HashKeyProvider<T> _keyProvider;
         readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
         readonly int _replicate;
         Lazy<int[]> _keyCache;
 
-        public ConsistentHashDistributionStrategy(HashGenerator hashGenerator, HashKeyProvider<T> keyProvider,
-            int replicate = DefaultReplicationCount)
+        public ConsistentHashDistributionStrategy(IHashGenerator hashGenerator, HashKeyProvider<T> keyProvider, int replicate = DefaultReplicationCount)
         {
             _hashGenerator = hashGenerator;
             _keyProvider = keyProvider;

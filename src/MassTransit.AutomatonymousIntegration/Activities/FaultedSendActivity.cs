@@ -5,6 +5,7 @@ namespace Automatonymous.Activities
     using GreenPipes;
     using MassTransit;
 
+
     public class FaultedSendActivity<TInstance, TException, TMessage> :
         Activity<TInstance>
         where TInstance : SagaStateMachineInstance
@@ -81,7 +82,7 @@ namespace Automatonymous.Activities
 
                 if (_destinationAddressProvider != null)
                 {
-                    var destinationAddress = _destinationAddressProvider(exceptionContext.Instance);
+                    var destinationAddress = _destinationAddressProvider(exceptionContext);
 
                     var endpoint = await exceptionContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -102,7 +103,7 @@ namespace Automatonymous.Activities
 
                 if (_destinationAddressProvider != null)
                 {
-                    var destinationAddress = _destinationAddressProvider(exceptionContext.Instance);
+                    var destinationAddress = _destinationAddressProvider(exceptionContext);
 
                     var endpoint = await exceptionContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -115,6 +116,7 @@ namespace Automatonymous.Activities
             await next.Faulted(context).ConfigureAwait(false);
         }
     }
+
 
     public class FaultedSendActivity<TInstance, TData, TException, TMessage> :
         Activity<TInstance, TData>
@@ -188,7 +190,7 @@ namespace Automatonymous.Activities
 
                 if (_destinationAddressProvider != null)
                 {
-                    var destinationAddress = _destinationAddressProvider(exceptionContext.Instance, context.Data);
+                    var destinationAddress = _destinationAddressProvider(exceptionContext);
 
                     var endpoint = await exceptionContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 

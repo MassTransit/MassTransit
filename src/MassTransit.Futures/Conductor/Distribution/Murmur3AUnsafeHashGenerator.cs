@@ -1,27 +1,15 @@
-// Copyright 2007-2013 Chris Patterson
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Steward.Core.Distribution.ConsistentHashing
+namespace MassTransit.Conductor.Distribution
 {
     using System;
 
 
-    public class Murmur3AUnsafe :
-        HashGenerator
+    public class Murmur3AUnsafeHashGenerator :
+        IHashGenerator
     {
         const uint Seed = 0xc58f1a7b;
 
-        const UInt32 c1 = 0xcc9e2d51;
-        const UInt32 c2 = 0x1b873593;
+        const UInt32 C1 = 0xcc9e2d51;
+        const UInt32 C2 = 0x1b873593;
 
         public unsafe uint Hash(string s)
         {
@@ -62,9 +50,9 @@ namespace MassTransit.Steward.Core.Distribution.ConsistentHashing
             {
                 k1 = *block;
 
-                k1 *= c1;
+                k1 *= C1;
                 k1 = Rotl32(k1, 15);
-                k1 *= c2;
+                k1 *= C2;
 
                 h1 ^= k1;
                 h1 = Rotl32(h1, 13);
@@ -80,14 +68,16 @@ namespace MassTransit.Steward.Core.Distribution.ConsistentHashing
             var tail = (byte*)block;
             if (rem >= 3)
                 k1 ^= (uint)(tail[2] << 16);
+
             if (rem >= 2)
                 k1 ^= (uint)(tail[1] << 8);
+
             if (rem > 0)
             {
                 k1 ^= tail[0];
-                k1 *= c1;
+                k1 *= C1;
                 k1 = Rotl32(k1, 15);
-                k1 *= c2;
+                k1 *= C2;
                 h1 ^= k1;
             }
 

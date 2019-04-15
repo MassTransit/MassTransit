@@ -52,6 +52,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                             await Console.Out.WriteLineAsync("Handler processing");
                         }
 
+                        await context.RespondAsync(new PongMessage(context.Message.CorrelationId));
+
                         await Console.Out.WriteLineAsync("Handler complete");
                     });
                 });
@@ -65,10 +67,14 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             try
             {
-                await bus.Publish(new PingMessage());
+                await bus.Publish(new PingMessage(), x =>
+                {
+                    x.RequestId = NewId.NextGuid();
+                    x.ResponseAddress = bus.Address;
+                });
 
                 await consumerStarted.Task;
-                
+
                 await Console.Out.WriteLineAsync("Consumer Start Acknowledged");
             }
             finally

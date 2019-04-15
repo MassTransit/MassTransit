@@ -12,12 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Transport
 {
-    using GreenPipes.Agents;
     using Transports;
 
 
     public interface IRabbitMqHostControl :
-        ISupervisor,
         IRabbitMqHost,
         IBusHostControl
     {

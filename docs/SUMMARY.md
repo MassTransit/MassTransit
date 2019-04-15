@@ -51,6 +51,7 @@
   * [Request/Response](usage/request-response.md)
   * [Handle exceptions](usage/exceptions.md)
   * [Configure retries](usage/retries.md)
+  * [Large payloads](usage/message-data.md)
   * [Schedule messages](usage/scheduling/README.md)
     * [Scheduling API](usage/scheduling/scheduling-api.md)
     * [In-memory scheduling](usage/scheduling/in-memory.md)

@@ -107,10 +107,10 @@ public class Startup
 
             x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
-                var host = cfg.Host("localhost", host => 
+                var host = cfg.Host("localhost", hostConfigurator => 
                 { 
-                    host.Username("guest");
-                    host.Password("guest");
+                    hostConfigurator.Username("guest");
+                    hostConfigurator.Password("guest");
                 });
 
                 cfg.ReceiveEndpoint(host, "submit-order", ep =>

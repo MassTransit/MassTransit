@@ -63,8 +63,17 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public bool Matches(Uri address)
         {
-            if (!address.Scheme.Equals("rabbitmq", StringComparison.OrdinalIgnoreCase))
-                return false;
+            switch (address.Scheme.ToLowerInvariant())
+            {
+                case "rabbitmq":
+                case "amqp":
+                case "rabbitmqs":
+                case "amqps":
+                    break;
+
+                default:
+                    return false;
+            }
 
             var settings = address.GetHostSettings();
 

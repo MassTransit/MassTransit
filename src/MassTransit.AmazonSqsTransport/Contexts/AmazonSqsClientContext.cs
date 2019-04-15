@@ -211,19 +211,54 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             {
                 while (!CancellationToken.IsCancellationRequested)
                 {
-                    var request = new ReceiveMessageRequest(queueUrl)
-                    {
-                        MaxNumberOfMessages = receiveSettings.PrefetchCount,
-                        WaitTimeSeconds = receiveSettings.WaitTimeSeconds,
-                        AttributeNames = new List<string> { "All" },
-                        MessageAttributeNames = new List<string> { "All" }
-                    };
+                    List<Message> messages = await PollMessages(queueUrl, receiveSettings).ConfigureAwait(false);
 
-                    var response = await _amazonSqs.ReceiveMessageAsync(request, CancellationToken).ConfigureAwait(false);
-
-                    await Task.WhenAll(response.Messages.Select(consumer.HandleMessage)).ConfigureAwait(false);
+                    await Task.WhenAll(messages.Select(consumer.HandleMessage)).ConfigureAwait(false);
                 }
             }, CancellationToken, TaskCreationOptions.None, _taskScheduler);
+        }
+
+        /// <summary>
+        /// SQS can only be polled for 10 messages at a time.
+        /// Make multiple poll requests, if necessary, to achieve up to PrefetchCount number of messages
+        /// </summary>
+        /// <param name="queueUrl">URL for queue to be polled</param>
+        /// <param name="receiveSettings"></param>
+        /// <returns></returns>
+        async Task<List<Message>> PollMessages(string queueUrl, ReceiveSettings receiveSettings)
+        {
+            var messages = new List<Message>();
+            var remainingNumMessagesToPoll = receiveSettings.PrefetchCount;
+            while(remainingNumMessagesToPoll > 0)
+            {
+                var numMessagesToPoll = Math.Min(remainingNumMessagesToPoll, 10);
+                var response = await ReceiveMessages(receiveSettings, queueUrl, numMessagesToPoll).ConfigureAwait(false);
+                var numMessagesReceived = response.Messages.Count;
+
+                messages.AddRange(response.Messages);
+
+                if (numMessagesReceived == 0)
+                {
+                    break;
+                }
+
+                remainingNumMessagesToPoll -= numMessagesReceived;
+            }
+
+            return messages;
+        }
+
+        async Task<ReceiveMessageResponse> ReceiveMessages(ReceiveSettings receiveSettings, string queueUrl, int maxNumberOfMessages)
+        {
+            var request = new ReceiveMessageRequest(queueUrl)
+            {
+                MaxNumberOfMessages = maxNumberOfMessages,
+                WaitTimeSeconds = receiveSettings.WaitTimeSeconds,
+                AttributeNames = new List<string> {"All"},
+                MessageAttributeNames = new List<string> {"All"}
+            };
+
+            return await _amazonSqs.ReceiveMessageAsync(request, CancellationToken).ConfigureAwait(false);
         }
 
         PublishRequest ClientContext.CreatePublishRequest(string topicName, byte[] body)

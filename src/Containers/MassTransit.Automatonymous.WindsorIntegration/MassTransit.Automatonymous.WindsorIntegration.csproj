@@ -15,7 +15,7 @@
 
   <ItemGroup>
       <PackageReference Include="Automatonymous" Version="4.1.6" />
-      <PackageReference Include="Castle.Windsor" Version="4.1.1" />
+      <PackageReference Include="Castle.Windsor" Version="5.0.0" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>

@@ -5,12 +5,11 @@
     using GreenPipes;
 
 
-    public interface IRequestSendEndpoint
+    public interface IRequestSendEndpoint<T>
+        where T : class
     {
-        Task<T> CreateMessage<T>(object values, CancellationToken cancellationToken)
-            where T : class;
+        Task<T> CreateMessage(object values, CancellationToken cancellationToken);
 
-        Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
-            where T : class;
+        Task Send(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken);
     }
 }

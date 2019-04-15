@@ -10,10 +10,10 @@
         where TRequest : class
     {
         readonly ClientFactoryContext _context;
-        readonly IRequestSendEndpoint _requestSendEndpoint;
+        readonly IRequestSendEndpoint<TRequest> _requestSendEndpoint;
         readonly RequestTimeout _timeout;
 
-        public RequestClient(ClientFactoryContext context, IRequestSendEndpoint requestSendEndpoint, RequestTimeout timeout)
+        public RequestClient(ClientFactoryContext context, IRequestSendEndpoint<TRequest> requestSendEndpoint, RequestTimeout timeout)
         {
             _context = context;
             _requestSendEndpoint = requestSendEndpoint;
@@ -30,10 +30,9 @@
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            Task<TRequest> request = _requestSendEndpoint.CreateMessage<TRequest>(values, cancellationToken);
+            Task<TRequest> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
 
-            return new ClientRequestHandle<TRequest>(_context, _requestSendEndpoint, request, cancellationToken,
-                timeout.Or(_timeout));
+            return new ClientRequestHandle<TRequest>(_context, _requestSendEndpoint, request, cancellationToken, timeout.Or(_timeout));
         }
 
         public Task<Response<T>> GetResponse<T>(TRequest message, CancellationToken cancellationToken, RequestTimeout timeout)
@@ -48,7 +47,7 @@
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            Task<TRequest> request = _requestSendEndpoint.CreateMessage<TRequest>(values, cancellationToken);
+            Task<TRequest> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
 
             return GetResponse<T>(request, cancellationToken, timeout);
         }
@@ -79,7 +78,7 @@
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            Task<TRequest> request = _requestSendEndpoint.CreateMessage<TRequest>(values, cancellationToken);
+            Task<TRequest> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
 
             return GetResponse<T1, T2>(request, cancellationToken, timeout);
         }
