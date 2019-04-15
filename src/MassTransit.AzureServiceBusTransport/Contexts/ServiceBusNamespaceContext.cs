@@ -180,12 +180,16 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
                 }
                 else
                 {
-                    var forwardTo = subscriptionDescription.ForwardTo;
-                    var address = _namespaceManager.Address.ToString();
-                    if (forwardTo.StartsWith(address))
-                        forwardTo = forwardTo.Substring(address.Length).Trim('/');
+                    string NormalizeForwardTo(string forwardTo)
+                    {
+                        var address = _namespaceManager.Address.ToString();
+                        return forwardTo.Replace(address, string.Empty).Trim('/');
+                    }
+                    
+                    var targetForwardTo = NormalizeForwardTo(description.ForwardTo);
+                    var currentForwardTo = NormalizeForwardTo(subscriptionDescription.ForwardTo);
 
-                    if (description.ForwardTo.Equals(forwardTo))
+                    if (targetForwardTo.Equals(currentForwardTo))
                     {
                         if (_log.IsDebugEnabled)
                             _log.DebugFormat("Updating subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
