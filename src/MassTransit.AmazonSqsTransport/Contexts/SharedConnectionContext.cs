@@ -69,5 +69,10 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         {
             return _context.CreateAmazonSns();
         }
+
+        Task<ClientContext> ConnectionContext.CreateClientContext()
+        {
+            return _context.CreateClientContext();
+        }
     }
 }

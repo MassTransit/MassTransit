@@ -24,7 +24,7 @@ namespace MassTransit.AmazonSqsTransport
 
 
     public interface ClientContext :
-        PipeContext
+        PipeContext, IAsyncDisposable
     {
         /// <summary>
         /// The connection context for the model

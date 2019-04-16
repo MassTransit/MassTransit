@@ -137,5 +137,10 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         }
 
         CancellationToken PipeContext.CancellationToken => _cancellationToken;
+
+        public Task DisposeAsync(CancellationToken cancellationToken)
+        {
+            return _context.DisposeAsync(cancellationToken);
+        }
     }
 }

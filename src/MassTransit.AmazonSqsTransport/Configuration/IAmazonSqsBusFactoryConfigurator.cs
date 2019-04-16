@@ -14,6 +14,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using System;
     using Topology.Configuration;
+    using Transport;
 
 
     public interface IAmazonSqsBusFactoryConfigurator :
@@ -77,5 +78,10 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// <param name="queueName">The input queue name</param>
         /// <param name="configure">The configuration method</param>
         void ReceiveEndpoint(IAmazonSqsHost host, string queueName, Action<IAmazonSqsReceiveEndpointConfigurator> configure);
+
+        /// <summary>
+        /// Sets or gets the client context provider
+        /// </summary>
+        IClientContextProvider ClientContextProvider { set; }
     }
 }

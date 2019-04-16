@@ -37,8 +37,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
     public class AmazonSqsClientContext :
         BasePipeContext,
-        ClientContext,
-        IAsyncDisposable
+        ClientContext
     {
         static readonly ILog _log = Logger.Get<AmazonSqsClientContext>();
 
@@ -50,13 +49,12 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         readonly IDictionary<string, string> _queueUrls;
         readonly IDictionary<string, string> _topicArns;
 
-        public AmazonSqsClientContext(ConnectionContext connectionContext, IAmazonSQS amazonSqs, IAmazonSimpleNotificationService amazonSns,
-            CancellationToken cancellationToken)
-            : base(new PayloadCacheScope(connectionContext), cancellationToken)
+        public AmazonSqsClientContext(ConnectionContext connectionContext)
+            : base(new PayloadCacheScope(connectionContext), connectionContext.CancellationToken)
         {
             _connectionContext = connectionContext;
-            _amazonSqs = amazonSqs;
-            _amazonSns = amazonSns;
+            _amazonSqs = connectionContext.Connection.CreateAmazonSqsClient();
+            _amazonSns = connectionContext.Connection.CreateAmazonSnsClient();
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
 

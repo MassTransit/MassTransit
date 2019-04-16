@@ -20,11 +20,13 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Configuration;
+    using Contexts;
     using GreenPipes.Internals.Extensions;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework.Messages;
     using Testing;
+    using Transport;
 
 
     [TestFixture]
@@ -395,6 +397,50 @@ namespace MassTransit.AmazonSqsTransport.Tests
             await busControl.StopAsync();
         }
 
+        [Test]
+        public async Task Should_configure_custom_client_context()
+        {
+            var tasksCompleted = new TaskCompletionSource<bool>();
+
+            IAmazonSqsHost host = null;
+
+            var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
+            {
+                host = cfg.Host("ap-southeast-2", h =>
+                {
+                    h.AccessKey(AwsAccessKey);
+                    h.SecretKey(AwsSecretKey);
+                });
+
+                cfg.ClientContextProvider = new CustomClientContextProvider();
+
+                cfg.ReceiveEndpoint(host, "custom_client_context_queue", e =>
+                {
+                    e.Handler<Message0>(async c =>
+                    {
+                        tasksCompleted.SetResult(true);
+                        await Util.TaskUtil.Completed;
+                    });
+                });
+            });
+
+            await busControl.StartAsync();
+
+            await busControl.Publish(new Message0());
+
+            await tasksCompleted.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(5));
+
+            await busControl.StopAsync();
+        }
+
+        public class CustomClientContextProvider : IClientContextProvider
+        {
+            public ClientContext Create(ConnectionContext connetionContext)
+            {
+                return new AmazonSqsClientContext(connetionContext);
+            }
+        }
+        
         public class Message0 { }
         public class Message1 { }
         public class Message2 { }

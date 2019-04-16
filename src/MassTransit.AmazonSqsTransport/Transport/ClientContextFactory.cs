@@ -63,10 +63,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
                 try
                 {
-                    var amazonSqs = await connectionContext.CreateAmazonSqs().ConfigureAwait(false);
-                    var amazonSns = await connectionContext.CreateAmazonSns().ConfigureAwait(false);
-
-                    var modelContext = new AmazonSqsClientContext(connectionContext, amazonSqs, amazonSns, cancellationToken);
+                    var modelContext = await connectionContext.CreateClientContext();
 
                     await asyncContext.Created(modelContext).ConfigureAwait(false);
 
