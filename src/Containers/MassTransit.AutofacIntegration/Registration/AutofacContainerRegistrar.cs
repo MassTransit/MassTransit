@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AutofacIntegration.Registration
 {
+    using System;
     using Autofac;
     using Courier;
     using Definition;
@@ -96,6 +97,32 @@ namespace MassTransit.AutofacIntegration.Registration
 
             if (settings != null)
                 _builder.RegisterInstance(settings);
+        }
+
+        public void RegisterRequestClient<T>(RequestTimeout timeout = default)
+            where T : class
+        {
+            _builder.Register(context =>
+            {
+                var clientFactory = context.Resolve<IClientFactory>();
+
+                return context.TryResolve(out ConsumeContext consumeContext)
+                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
+                    : clientFactory.CreateRequestClient<T>(timeout);
+            });
+        }
+
+        public void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
+            where T : class
+        {
+            _builder.Register(context =>
+            {
+                var clientFactory = context.Resolve<IClientFactory>();
+
+                return context.TryResolve(out ConsumeContext consumeContext)
+                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
+                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+            });
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()

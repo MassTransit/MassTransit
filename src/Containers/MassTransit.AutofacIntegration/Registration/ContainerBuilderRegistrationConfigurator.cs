@@ -95,32 +95,6 @@ namespace MassTransit.AutofacIntegration.Registration
                 .SingleInstance();
         }
 
-        public void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class
-        {
-            _builder.Register(context =>
-            {
-                var clientFactory = context.Resolve<IClientFactory>();
-
-                return context.TryResolve(out ConsumeContext consumeContext)
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
-                    : clientFactory.CreateRequestClient<T>(timeout);
-            });
-        }
-
-        public void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class
-        {
-            _builder.Register(context =>
-            {
-                var clientFactory = context.Resolve<IClientFactory>();
-
-                return context.TryResolve(out ConsumeContext consumeContext)
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
-                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-            });
-        }
-
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IComponentContext context)
         {
             if (context.TryResolve(out ConsumeContext consumeContext))

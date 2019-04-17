@@ -26,11 +26,5 @@ namespace MassTransit.StructureMapIntegration
         /// </summary>
         /// <param name="busFactory"></param>
         void AddBus(Func<IContext, IBusControl> busFactory);
-
-        void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class;
-
-        void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class;
     }
 }

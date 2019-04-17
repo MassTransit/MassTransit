@@ -26,11 +26,5 @@ namespace MassTransit.LamarIntegration
         /// </summary>
         /// <param name="busFactory"></param>
         void AddBus(Func<IServiceContext, IBusControl> busFactory);
-
-        void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class;
-
-        void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class;
     }
 }

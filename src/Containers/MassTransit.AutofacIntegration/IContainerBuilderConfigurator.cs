@@ -30,11 +30,5 @@ namespace MassTransit.AutofacIntegration
         /// </summary>
         /// <param name="busFactory"></param>
         void AddBus(Func<IComponentContext, IBusControl> busFactory);
-
-        void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class;
-
-        void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class;
     }
 }

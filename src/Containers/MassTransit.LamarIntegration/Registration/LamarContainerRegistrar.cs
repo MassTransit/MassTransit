@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.LamarIntegration.Registration
 {
+    using System;
     using Courier;
     using Definition;
     using Lamar;
@@ -96,6 +97,34 @@ namespace MassTransit.LamarIntegration.Registration
 
             if (settings != null)
                 _registry.ForSingletonOf<IEndpointSettings<IEndpointDefinition<T>>>().Use(settings);
+        }
+
+        public void RegisterRequestClient<T>(RequestTimeout timeout = default)
+            where T : class
+        {
+            _registry.For<IRequestClient<T>>().Use(context =>
+            {
+                var clientFactory = context.GetInstance<IClientFactory>();
+
+                ConsumeContext consumeContext = context.TryGetInstance<ConsumeContext>();
+                return (consumeContext != null)
+                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
+                    : clientFactory.CreateRequestClient<T>(timeout);
+            }).Scoped();
+        }
+
+        public void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
+            where T : class
+        {
+            _registry.For<IRequestClient<T>>().Use(context =>
+            {
+                var clientFactory = context.GetInstance<IClientFactory>();
+
+                ConsumeContext consumeContext = context.TryGetInstance<ConsumeContext>();
+                return (consumeContext != null)
+                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
+                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+            }).Scoped();
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()

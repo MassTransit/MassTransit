@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Registration
 {
+    using System;
     using Courier;
     using Definition;
     using Saga;
@@ -54,6 +55,12 @@ namespace MassTransit.Registration
 
         void RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings = null)
             where TDefinition : class, IEndpointDefinition<T>
+            where T : class;
+
+        void RegisterRequestClient<T>(RequestTimeout timeout = default)
+            where T : class;
+
+        void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
             where T : class;
     }
 }

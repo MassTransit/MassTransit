@@ -7,6 +7,7 @@ namespace MassTransit
 
     using System;
     using SimpleInjector;
+    using SimpleInjectorIntegration;
     using SimpleInjectorIntegration.Registration;
 
 

@@ -14,7 +14,6 @@ namespace MassTransit.WindsorIntegration.Registration
 {
     using System;
     using Castle.MicroKernel;
-    using Castle.MicroKernel.Lifestyle;
     using Castle.MicroKernel.Lifestyle.Scoped;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
@@ -76,34 +75,6 @@ namespace MassTransit.WindsorIntegration.Registration
                     .UsingFactoryMethod(kernel => kernel.Resolve<IBus>().CreateClientFactory(default))
                     .LifestyleSingleton()
             );
-        }
-
-        public void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class
-        {
-            _container.Register(Component.For<IRequestClient<T>>().UsingFactoryMethod(kernel =>
-            {
-                var clientFactory = kernel.Resolve<IClientFactory>();
-
-                var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
-                return (currentScope != null)
-                    ? clientFactory.CreateRequestClient<T>(kernel.Resolve<ConsumeContext>(), timeout)
-                    : clientFactory.CreateRequestClient<T>(timeout);
-            }));
-        }
-
-        public void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class
-        {
-            _container.Register(Component.For<IRequestClient<T>>().UsingFactoryMethod(kernel =>
-            {
-                var clientFactory = kernel.Resolve<IClientFactory>();
-
-                var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
-                return (currentScope != null)
-                    ? clientFactory.CreateRequestClient<T>(kernel.Resolve<ConsumeContext>(), destinationAddress, timeout)
-                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-            }));
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IKernel context)

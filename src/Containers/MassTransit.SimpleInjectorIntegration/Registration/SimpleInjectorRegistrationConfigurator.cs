@@ -40,57 +40,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             Container.RegisterSingleton(() => Container.GetInstance<IBus>().CreateClientFactory());
         }
 
-        public void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class
-        {
-            var hybridLifestyle = Lifestyle.CreateHybrid(Container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
-
-            Container.Register(() =>
-            {
-                var clientFactory = Container.GetInstance<IClientFactory>();
-
-                var scope = Lifestyle.Scoped.GetCurrentScope(Container) != null;
-
-                if (scope)
-                {
-                    var consumeContext = Container.TryGetInstance<ConsumeContext>();
-
-                    if (consumeContext != null)
-                    {
-                        return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
-                    }
-                }
-
-                return clientFactory.CreateRequestClient<T>(timeout);
-
-            }, hybridLifestyle);
-        }
-
-        public void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class
-        {
-            var hybridLifestyle = Lifestyle.CreateHybrid(Container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
-
-            Container.Register(() =>
-            {
-                var clientFactory = Container.GetInstance<IClientFactory>();
-
-                var scope = Lifestyle.Scoped.GetCurrentScope(Container) != null;
-
-                if (scope)
-                {
-                    var consumeContext = Container.TryGetInstance<ConsumeContext>();
-
-                    if (consumeContext != null)
-                    {
-                        return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
-                    }
-                }
-
-                return clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-            }, hybridLifestyle);
-        }
-
         static void AddMassTransitComponents(Container container)
         {
             container.Register<ScopedConsumeContextProvider>(Lifestyle.Scoped);
