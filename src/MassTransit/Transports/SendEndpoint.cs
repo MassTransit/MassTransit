@@ -192,7 +192,6 @@ namespace MassTransit.Transports
         {
             readonly SendEndpoint _endpoint;
             readonly IPipe<SendContext<T>> _pipe;
-            readonly IPipe<SendContext> _sendPipe;
 
             public EndpointSendContextPipe(SendEndpoint endpoint)
             {
@@ -205,16 +204,9 @@ namespace MassTransit.Transports
                 _pipe = pipe;
             }
 
-            public EndpointSendContextPipe(SendEndpoint endpoint, IPipe<SendContext> pipe)
-            {
-                _endpoint = endpoint;
-                _sendPipe = pipe;
-            }
-
             void IProbeSite.Probe(ProbeContext context)
             {
                 _pipe?.Probe(context);
-                _sendPipe?.Probe(context);
             }
 
             public async Task Send(SendContext<T> context)
@@ -230,9 +222,6 @@ namespace MassTransit.Transports
 
                 if (_pipe.IsNotEmpty())
                     await _pipe.Send(context).ConfigureAwait(false);
-
-                if (_sendPipe.IsNotEmpty())
-                    await _sendPipe.Send(context).ConfigureAwait(false);
 
                 if (!context.ConversationId.HasValue)
                     context.ConversationId = NewId.NextGuid();
