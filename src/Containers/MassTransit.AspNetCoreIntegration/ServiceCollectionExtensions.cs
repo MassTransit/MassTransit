@@ -2,6 +2,7 @@
 {
     using System;
     using ExtensionsDependencyInjectionIntegration;
+    using HealthChecks;
     using Logging;
     using Logging.Tracing;
     using Microsoft.Extensions.DependencyInjection;
@@ -17,8 +18,10 @@
         /// </summary>
         /// <param name="services">Service collection</param>
         /// <param name="createBus">Bus factory that loads consumers and sagas from IServiceProvider</param>
+        /// <param name="configureHealthChecks">Optional, allows you to specify custom health check names</param>
         /// <returns></returns>
-        public static IServiceCollection AddMassTransit(this IServiceCollection services, Func<IServiceProvider, IBusControl> createBus)
+        public static IServiceCollection AddMassTransit(this IServiceCollection services, Func<IServiceProvider, IBusControl> createBus,
+            Action<HealthCheckOptions> configureHealthChecks = null)
         {
             services.AddMassTransit(x =>
             {
@@ -33,7 +36,7 @@
                 });
             });
 
-            services.AddSimplifiedHostedService();
+            services.AddSimplifiedHostedService(configureHealthChecks);
 
             return services;
         }
@@ -44,10 +47,11 @@
         /// <param name="services">Service collection</param>
         /// <param name="createBus">Bus factory that loads consumers and sagas from IServiceProvider</param>
         /// <param name="configure">Use MassTransit DI extensions for IServiceCollection to register consumers and sagas</param>
+        /// <param name="configureHealthChecks">Optional, allows you to specify custom health check names</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         public static IServiceCollection AddMassTransit(this IServiceCollection services, Func<IServiceProvider, IBusControl> createBus,
-            Action<IServiceCollectionConfigurator> configure)
+            Action<IServiceCollectionConfigurator> configure, Action<HealthCheckOptions> configureHealthChecks = null)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
@@ -67,7 +71,7 @@
                 });
             });
 
-            services.AddSimplifiedHostedService();
+            services.AddSimplifiedHostedService(configureHealthChecks);
 
             return services;
         }
@@ -77,9 +81,11 @@
         /// </summary>
         /// <param name="services">Service collection</param>
         /// <param name="bus">The bus instance</param>
-        /// <param name="loggerFactory">ASP.NET Core logger factory instance</param>
+        /// <param name="loggerFactory">Optional: ASP.NET Core logger factory instance</param>
+        /// <param name="configureHealthChecks">Optional, allows you to specify custom health check names</param>
         /// <returns></returns>
-        public static IServiceCollection AddMassTransit(this IServiceCollection services, IBusControl bus, ILoggerFactory loggerFactory = null)
+        public static IServiceCollection AddMassTransit(this IServiceCollection services, IBusControl bus, ILoggerFactory loggerFactory = null,
+            Action<HealthCheckOptions> configureHealthChecks = null)
         {
             services.AddMassTransit(x =>
             {
@@ -95,19 +101,22 @@
                 });
             });
 
-            services.AddSimplifiedHostedService();
+            services.AddSimplifiedHostedService(configureHealthChecks);
 
             return services;
         }
 
-        static void AddSimplifiedHostedService(this IServiceCollection services)
+        static void AddSimplifiedHostedService(this IServiceCollection services, Action<HealthCheckOptions> configureHealthChecks)
         {
-            var busCheck = new HealthChecks.SimplifiedBusHealthCheck();
-            var receiveEndpointCheck = new HealthChecks.ReceiveEndpointHealthCheck();
+            var busCheck = new SimplifiedBusHealthCheck();
+            var receiveEndpointCheck = new ReceiveEndpointHealthCheck();
+
+            var healthCheckOptions = HealthCheckOptions.Default;
+            configureHealthChecks?.Invoke(healthCheckOptions);
 
             services.AddHealthChecks()
-                .AddBusHealthCheck("bus", busCheck)
-                .AddBusHealthCheck("endpoint", receiveEndpointCheck);
+                .AddBusHealthCheck(healthCheckOptions.BusHealthCheckName, busCheck)
+                .AddBusHealthCheck(healthCheckOptions.ReceiveEndpointHealthCheckName, receiveEndpointCheck);
 
             services.AddSingleton<IHostedService>(p =>
             {
@@ -118,9 +127,9 @@
             });
         }
 
-        static IHealthChecksBuilder AddBusHealthCheck(this IHealthChecksBuilder builder, string suffix, IHealthCheck healthCheck)
+        static IHealthChecksBuilder AddBusHealthCheck(this IHealthChecksBuilder builder, string healthCheckName, IHealthCheck healthCheck)
         {
-            return builder.AddCheck($"masstransit-{suffix}", healthCheck, HealthStatus.Unhealthy, new[] {"ready"});
+            return builder.AddCheck(healthCheckName, healthCheck, HealthStatus.Unhealthy, new[] {"ready"});
         }
     }
 }

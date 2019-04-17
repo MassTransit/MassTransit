@@ -27,7 +27,7 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
                 return Task.FromResult(HealthCheckResult.Healthy("All endpoints ready",
                     new Dictionary<string, object> {{"Endpoints", _endpoints.Keys.ToArray()}}));
 
-            var faulted = _endpoints.Where(x => !x.Value.Ready).ToArray();
+            KeyValuePair<Uri, EndpointStatus>[] faulted = _endpoints.Where(x => !x.Value.Ready).ToArray();
 
             var unhealthyMessage = string.Join(",", faulted.Select(x => x.Key));
 
