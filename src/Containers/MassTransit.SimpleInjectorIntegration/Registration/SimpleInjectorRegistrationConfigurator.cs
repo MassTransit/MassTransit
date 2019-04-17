@@ -11,10 +11,14 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         RegistrationConfigurator,
         ISimpleInjectorConfigurator
     {
+        readonly Lifestyle _hybridLifestyle;
+
         public SimpleInjectorRegistrationConfigurator(Container container)
             : base(new SimpleInjectorContainerRegistar(container))
         {
             Container = container;
+
+            _hybridLifestyle = Lifestyle.CreateHybrid(container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
 
             AddMassTransitComponents(Container);
 
@@ -31,13 +35,21 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             Container.RegisterSingleton<IBus>(() => Container.GetInstance<IBusControl>());
 
-            Container.Register(() => (ISendEndpointProvider)Container.TryGetInstance<ScopedConsumeContextProvider>()?.GetContext() ??
-                Container.GetInstance<IBus>(), Lifestyle.Scoped);
+            Container.Register(GetSendEndpointProvider, _hybridLifestyle);
 
-            Container.Register(() => (IPublishEndpoint)Container.TryGetInstance<ScopedConsumeContextProvider>()?.GetContext() ??
-                Container.GetInstance<IBus>(), Lifestyle.Scoped);
+            Container.Register(GetPublishEndpoint, _hybridLifestyle);
 
             Container.RegisterSingleton(() => Container.GetInstance<IBus>().CreateClientFactory());
+        }
+
+        ISendEndpointProvider GetSendEndpointProvider()
+        {
+            return (ISendEndpointProvider)Container.GetConsumeContext() ?? Container.GetInstance<IBus>();
+        }
+
+        IPublishEndpoint GetPublishEndpoint()
+        {
+            return (IPublishEndpoint)Container.GetConsumeContext() ?? Container.GetInstance<IBus>();
         }
 
         static void AddMassTransitComponents(Container container)

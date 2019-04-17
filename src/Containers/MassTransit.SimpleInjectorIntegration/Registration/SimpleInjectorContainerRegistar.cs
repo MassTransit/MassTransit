@@ -15,10 +15,13 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         IContainerRegistrar
     {
         readonly Container _container;
+        readonly Lifestyle _hybridLifestyle;
 
         public SimpleInjectorContainerRegistar(Container container)
         {
             _container = container;
+
+            _hybridLifestyle = Lifestyle.CreateHybrid(_container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
         }
 
         public void RegisterConsumer<T>()
@@ -86,47 +89,29 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         public void RegisterRequestClient<T>(RequestTimeout timeout)
             where T : class
         {
-            var hybridLifestyle = Lifestyle.CreateHybrid(_container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
-
             _container.Register(() =>
             {
                 var clientFactory = _container.GetInstance<IClientFactory>();
 
-                var scope = Lifestyle.Scoped.GetCurrentScope(_container) != null;
-                if (scope)
-                {
-                    var consumeContext = _container.TryGetInstance<ConsumeContext>();
-                    if (consumeContext != null)
-                    {
-                        return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
-                    }
-                }
-
-                return clientFactory.CreateRequestClient<T>(timeout);
-            }, hybridLifestyle);
+                var consumeContext = _container.GetConsumeContext();
+                return consumeContext != null
+                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
+                    : clientFactory.CreateRequestClient<T>(timeout);
+            }, _hybridLifestyle);
         }
 
         public void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
             where T : class
         {
-            var hybridLifestyle = Lifestyle.CreateHybrid(_container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
-
             _container.Register(() =>
             {
                 var clientFactory = _container.GetInstance<IClientFactory>();
 
-                var scope = Lifestyle.Scoped.GetCurrentScope(_container) != null;
-                if (scope)
-                {
-                    var consumeContext = _container.TryGetInstance<ConsumeContext>();
-                    if (consumeContext != null)
-                    {
-                        return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
-                    }
-                }
-
-                return clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-            }, hybridLifestyle);
+                var consumeContext = _container.GetConsumeContext();
+                return consumeContext != null
+                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
+                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+            }, _hybridLifestyle);
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()

@@ -67,10 +67,10 @@ namespace MassTransit.WindsorIntegration.Registration
                     .UsingFactoryMethod(busFactory).LifestyleSingleton(),
                 Component.For<ISendEndpointProvider>()
                     .UsingFactoryMethod(GetCurrentSendEndpointProvider)
-                    .LifestyleScoped(),
+                    .LifestyleTransient(),
                 Component.For<IPublishEndpoint>()
                     .UsingFactoryMethod(GetCurrentPublishEndpoint)
-                    .LifestyleScoped(),
+                    .LifestyleTransient(),
                 Component.For<IClientFactory>()
                     .UsingFactoryMethod(kernel => kernel.Resolve<IBus>().CreateClientFactory(default))
                     .LifestyleSingleton()
