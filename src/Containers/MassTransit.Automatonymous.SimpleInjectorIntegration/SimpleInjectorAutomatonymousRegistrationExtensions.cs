@@ -16,6 +16,8 @@ namespace MassTransit
     using System.Reflection;
     using Automatonymous;
     using AutomatonymousSimpleInjectorIntegration.Registration;
+    using SimpleInjectorIntegration;
+
 
     public static class SimpleInjectorAutomatonymousRegistrationExtensions
     {

@@ -27,11 +27,5 @@ namespace MassTransit.WindsorIntegration
         /// </summary>
         /// <param name="busFactory"></param>
         void AddBus(Func<IKernel, IBusControl> busFactory);
-
-        void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class;
-
-        void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class;
     }
 }

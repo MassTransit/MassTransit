@@ -107,7 +107,7 @@ public class Startup
 
             x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
-                var host = cfg.Host("localhost", hostConfigurator => 
+                var host = cfg.Host(new Uri("localhost"), hostConfigurator => 
                 { 
                     hostConfigurator.Username("guest");
                     hostConfigurator.Password("guest");
@@ -116,11 +116,11 @@ public class Startup
                 cfg.ReceiveEndpoint(host, "submit-order", ep =>
                 {
                     ep.PrefetchCount = 16;
-                    ep.UseMessageRetry(x => x.Interval(2, 100));
+                    ep.UseMessageRetry(r => r.Interval(2, 100));
 
                     ep.ConfigureConsumer<OrderConsumer>(provider);
                 });
-            });
+            }));
         });
     }
 

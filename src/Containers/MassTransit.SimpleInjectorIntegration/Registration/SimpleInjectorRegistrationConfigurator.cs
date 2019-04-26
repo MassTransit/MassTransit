@@ -11,10 +11,14 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         RegistrationConfigurator,
         ISimpleInjectorConfigurator
     {
+        readonly Lifestyle _hybridLifestyle;
+
         public SimpleInjectorRegistrationConfigurator(Container container)
             : base(new SimpleInjectorContainerRegistar(container))
         {
             Container = container;
+
+            _hybridLifestyle = Lifestyle.CreateHybrid(container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
 
             AddMassTransitComponents(Container);
 
@@ -31,64 +35,21 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             Container.RegisterSingleton<IBus>(() => Container.GetInstance<IBusControl>());
 
-            Container.Register(() => (ISendEndpointProvider)Container.TryGetInstance<ScopedConsumeContextProvider>()?.GetContext() ??
-                Container.GetInstance<IBus>(), Lifestyle.Scoped);
+            Container.Register(GetSendEndpointProvider, _hybridLifestyle);
 
-            Container.Register(() => (IPublishEndpoint)Container.TryGetInstance<ScopedConsumeContextProvider>()?.GetContext() ??
-                Container.GetInstance<IBus>(), Lifestyle.Scoped);
+            Container.Register(GetPublishEndpoint, _hybridLifestyle);
 
             Container.RegisterSingleton(() => Container.GetInstance<IBus>().CreateClientFactory());
         }
 
-        public void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class
+        ISendEndpointProvider GetSendEndpointProvider()
         {
-            var hybridLifestyle = Lifestyle.CreateHybrid(Container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
-
-            Container.Register(() =>
-            {
-                var clientFactory = Container.GetInstance<IClientFactory>();
-
-                var scope = Lifestyle.Scoped.GetCurrentScope(Container) != null;
-
-                if (scope)
-                {
-                    var consumeContext = Container.TryGetInstance<ConsumeContext>();
-
-                    if (consumeContext != null)
-                    {
-                        return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
-                    }
-                }
-
-                return clientFactory.CreateRequestClient<T>(timeout);
-
-            }, hybridLifestyle);
+            return (ISendEndpointProvider)Container.GetConsumeContext() ?? Container.GetInstance<IBus>();
         }
 
-        public void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class
+        IPublishEndpoint GetPublishEndpoint()
         {
-            var hybridLifestyle = Lifestyle.CreateHybrid(Container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
-
-            Container.Register(() =>
-            {
-                var clientFactory = Container.GetInstance<IClientFactory>();
-
-                var scope = Lifestyle.Scoped.GetCurrentScope(Container) != null;
-
-                if (scope)
-                {
-                    var consumeContext = Container.TryGetInstance<ConsumeContext>();
-
-                    if (consumeContext != null)
-                    {
-                        return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
-                    }
-                }
-
-                return clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-            }, hybridLifestyle);
+            return (IPublishEndpoint)Container.GetConsumeContext() ?? Container.GetInstance<IBus>();
         }
 
         static void AddMassTransitComponents(Container container)

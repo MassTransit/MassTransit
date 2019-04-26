@@ -1,5 +1,6 @@
 namespace MassTransit.SimpleInjectorIntegration.Registration
 {
+    using System;
     using System.Linq;
     using Courier;
     using Definition;
@@ -10,13 +11,17 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using SimpleInjector;
 
 
-    public class SimpleInjectorContainerRegistar : IContainerRegistrar
+    public class SimpleInjectorContainerRegistar :
+        IContainerRegistrar
     {
         readonly Container _container;
+        readonly Lifestyle _hybridLifestyle;
 
         public SimpleInjectorContainerRegistar(Container container)
         {
             _container = container;
+
+            _hybridLifestyle = Lifestyle.CreateHybrid(_container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
         }
 
         public void RegisterConsumer<T>()
@@ -79,6 +84,34 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             if (settings != null)
                 _container.RegisterInstance(settings);
+        }
+
+        public void RegisterRequestClient<T>(RequestTimeout timeout)
+            where T : class
+        {
+            _container.Register(() =>
+            {
+                var clientFactory = _container.GetInstance<IClientFactory>();
+
+                var consumeContext = _container.GetConsumeContext();
+                return consumeContext != null
+                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
+                    : clientFactory.CreateRequestClient<T>(timeout);
+            }, _hybridLifestyle);
+        }
+
+        public void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
+            where T : class
+        {
+            _container.Register(() =>
+            {
+                var clientFactory = _container.GetInstance<IClientFactory>();
+
+                var consumeContext = _container.GetConsumeContext();
+                return consumeContext != null
+                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
+                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+            }, _hybridLifestyle);
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()

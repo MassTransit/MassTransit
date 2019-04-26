@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration.Registration
 {
+    using System;
+    using Castle.MicroKernel.Lifestyle.Scoped;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using Courier;
@@ -103,6 +105,34 @@ namespace MassTransit.WindsorIntegration.Registration
                 Component.For<IEndpointDefinition<T>>()
                     .ImplementedBy<TDefinition>(),
                 Component.For<IEndpointSettings<IEndpointDefinition<T>>>().Instance(settings));
+        }
+
+        public void RegisterRequestClient<T>(RequestTimeout timeout = default)
+            where T : class
+        {
+            _container.Register(Component.For<IRequestClient<T>>().UsingFactoryMethod(kernel =>
+            {
+                var clientFactory = kernel.Resolve<IClientFactory>();
+
+                var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
+                return (currentScope != null)
+                    ? clientFactory.CreateRequestClient<T>(kernel.Resolve<ConsumeContext>(), timeout)
+                    : clientFactory.CreateRequestClient<T>(timeout);
+            }));
+        }
+
+        public void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
+            where T : class
+        {
+            _container.Register(Component.For<IRequestClient<T>>().UsingFactoryMethod(kernel =>
+            {
+                var clientFactory = kernel.Resolve<IClientFactory>();
+
+                var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
+                return (currentScope != null)
+                    ? clientFactory.CreateRequestClient<T>(kernel.Resolve<ConsumeContext>(), destinationAddress, timeout)
+                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+            }));
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()

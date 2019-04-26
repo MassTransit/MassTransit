@@ -26,25 +26,5 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
         /// </summary>
         /// <param name="busFactory"></param>
         void AddBus(Func<IServiceProvider, IBusControl> busFactory);
-
-        /// <summary>
-        /// Add a request client, for the request type, which uses the <see cref="ConsumeContext"/> if present, otherwise
-        /// uses the <see cref="IBus"/>. The request is published, unless an endpoint convention is specified for the
-        /// request type.
-        /// </summary>
-        /// <param name="timeout">The request timeout</param>
-        /// <typeparam name="T">The request message type</typeparam>
-        void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class;
-
-        /// <summary>
-        /// Add a request client, for the request type, which uses the <see cref="ConsumeContext"/> if present, otherwise
-        /// uses the <see cref="IBus"/>.
-        /// </summary>
-        /// <param name="destinationAddress">The destination address for the request</param>
-        /// <param name="timeout">The request timeout</param>
-        /// <typeparam name="T">The request message type</typeparam>
-        void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class;
     }
 }

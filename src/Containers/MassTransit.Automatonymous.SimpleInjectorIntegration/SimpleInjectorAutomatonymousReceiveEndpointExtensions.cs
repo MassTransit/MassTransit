@@ -21,6 +21,7 @@ namespace MassTransit
     using Saga;
     using SimpleInjector;
     using SimpleInjectorIntegration;
+    using SimpleInjectorIntegration.Registration;
 
 
     public static class SimpleInjectorAutomatonymousReceiveEndpointExtensions
