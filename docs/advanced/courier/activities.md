@@ -13,11 +13,11 @@ public class DownloadImageActivity :
 }
 ```
 
-The *Activity* interface is generic with two arguments. The first argument specifies the activity’s input type and the second argument specifies the activity’s log type. In the example shown above, *DownloadImageArguments* is the input type and *DownloadImageLog* is the log type. Both arguments must be interface types so that the implementations can be dynamically created.
+The *Activity* interface is generic with two arguments. The first parameter specifies the activity’s argument type and the second parameter specifies the activity’s log type. In the example shown above, *DownloadImageArguments* is the argument type and *DownloadImageLog* is the log type. Both parameters must be interface types so that the implementations can be dynamically created.
 
 ## Execute Activities
 
-An *Execute Activity* is an activity that only executes and does not support compensation. As such, the definition of a log type is not required.
+An *Execute Activity* is an activity that only executes and does not support compensation. As such, the declaration of a log type is not required.
 
 ```csharp
 public class ValidateImageActivity :
