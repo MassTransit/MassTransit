@@ -7,6 +7,7 @@ namespace MassTransit.Conductor.Client
     using Distribution;
     using GreenPipes.Caching;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Util;
 
 
@@ -15,7 +16,7 @@ namespace MassTransit.Conductor.Client
         IConsumer<Up<TMessage>>
         where TMessage : class
     {
-        readonly ILog _log = Logger.Get<MessageClient<TMessage>>();
+        readonly ILogger _logger = Logger.Get<MessageClient<TMessage>>();
         readonly IServiceClient _serviceClient;
         readonly ICache<EndpointInfo> _cache;
         readonly IIndex<Guid, EndpointInfo> _index;
@@ -54,9 +55,8 @@ namespace MassTransit.Conductor.Client
 
         public async Task Consume(ConsumeContext<Up<TMessage>> context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("EndpointInfo received: (service-address: {0}, endpoint-address: {1}, client-id: {2})", context.Message.ServiceAddress,
-                    context.Message.Endpoint.EndpointAddress, _serviceClient.ClientId);
+            _logger.LogDebug("EndpointInfo received: (service-address: {0}, endpoint-address: {1}, client-id: {2})", context.Message.ServiceAddress,
+                context.Message.Endpoint.EndpointAddress, _serviceClient.ClientId);
 
             _distribution.Add(context.Message.Endpoint);
 

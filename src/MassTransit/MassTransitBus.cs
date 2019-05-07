@@ -1,14 +1,14 @@
 // Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
@@ -22,6 +22,7 @@ namespace MassTransit
     using Events;
     using GreenPipes;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Pipeline;
     using Topology;
     using Transports;
@@ -31,7 +32,7 @@ namespace MassTransit
     public class MassTransitBus :
         IBusControl
     {
-        static readonly ILog _log = Logger.Get<MassTransitBus>();
+        static readonly ILogger _logger = Logger.Get<MassTransitBus>();
         readonly IBusObserver _busObservable;
         readonly IConsumePipe _consumePipe;
         readonly IReadOnlyHostCollection _hosts;
@@ -126,7 +127,7 @@ namespace MassTransit
         {
             if (_busHandle != null)
             {
-                _log.Warn($"The bus was already started, additional Start attempts are ignored: {Address}");
+                _logger.LogWarning($"The bus was already started, additional Start attempts are ignored: {Address}");
                 return _busHandle;
             }
 
@@ -138,8 +139,7 @@ namespace MassTransit
             var hosts = new List<HostHandle>();
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Starting bus hosts...");
+                _logger.LogDebug("Starting bus hosts...");
 
                 if (cancellationToken == default)
                 {
@@ -170,8 +170,7 @@ namespace MassTransit
                 {
                     if (busHandle != null)
                     {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Stopping bus hosts...");
+                        _logger.LogDebug("Stopping bus hosts...");
 
                         await busHandle.StopAsync(cancellationToken).ConfigureAwait(false);
                     }
@@ -184,7 +183,7 @@ namespace MassTransit
                 }
                 catch (Exception stopException)
                 {
-                    _log.Error("Failed to stop partially created bus", stopException);
+                    _logger.LogError("Failed to stop partially created bus", stopException);
                 }
 
                 await _busObservable.StartFaulted(this, ex).ConfigureAwait(false);
@@ -201,7 +200,7 @@ namespace MassTransit
         {
             if (_busHandle == null)
             {
-                _log.Warn($"The bus could not be stopped as it was never started: {Address}");
+                _logger.LogWarning($"The bus could not be stopped as it was never started: {Address}");
                 return TaskUtil.Completed;
             }
 
@@ -241,10 +240,7 @@ namespace MassTransit
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("bus");
-            scope.Set(new
-            {
-                Address
-            });
+            scope.Set(new {Address});
 
             foreach (var host in _hosts)
                 host.Probe(scope);
@@ -277,8 +273,7 @@ namespace MassTransit
 
                 try
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Stopping hosts...");
+                    _logger.LogDebug("Stopping hosts...");
 
                     await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 
@@ -288,8 +283,7 @@ namespace MassTransit
                 {
                     await _busObserver.StopFaulted(_bus, exception).ConfigureAwait(false);
 
-                    if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Exception occurred while stopping hosts", exception);
+                    _logger.LogWarning("Exception occurred while stopping hosts", exception);
 
                     throw;
                 }

@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
@@ -22,12 +22,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using MassTransit.Pipeline.Observables;
     using MassTransit.Scheduling;
     using Microsoft.Azure.ServiceBus;
+    using Microsoft.Extensions.Logging;
     using Transports;
 
 
     /// <summary>
     /// Send messages to an azure transport using the message sender.
-    /// 
+    ///
     /// May be sensible to create a IBatchSendTransport that allows multiple
     /// messages to be sent as a single batch (perhaps using Tx support?)
     /// </summary>
@@ -35,7 +36,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         Supervisor,
         ISendTransport
     {
-        static readonly ILog _log = Logger.Get<ServiceBusSendTransport>();
+        static readonly ILogger _logger = Logger.Get<ServiceBusSendTransport>();
         readonly Uri _address;
         readonly SendObservable _observers;
 
@@ -62,8 +63,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         protected override Task StopSupervisor(StopSupervisorContext context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping transport: {0}", _address);
+            _logger.LogDebug("Stopping transport: {0}", _address);
 
             return base.StopSupervisor(context);
         }
@@ -139,8 +139,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 var enqueueTimeUtc = context.ScheduledEnqueueTimeUtc.Value;
                 if (enqueueTimeUtc < now)
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("The scheduled time was in the past, sending: {0}", context.ScheduledEnqueueTimeUtc);
+                    _logger.LogDebug("The scheduled time was in the past, sending: {0}", context.ScheduledEnqueueTimeUtc);
 
                     return false;
                 }
@@ -159,8 +158,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 }
                 catch (ArgumentOutOfRangeException)
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("The scheduled time was rejected by the server, sending: {0}", context.MessageId);
+                    _logger.LogDebug("The scheduled time was rejected by the server, sending: {0}", context.MessageId);
 
                     return false;
                 }
@@ -172,13 +170,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 {
                     await clientContext.CancelScheduledSend(sequenceNumber).ConfigureAwait(false);
 
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Canceled Scheduled: {0} {1}", sequenceNumber, clientContext.EntityPath);
+                    _logger.LogDebug("Canceled Scheduled: {0} {1}", sequenceNumber, clientContext.EntityPath);
                 }
                 catch (MessageNotFoundException exception)
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("The scheduled message was not found: {0}", exception.Message);
+                    _logger.LogDebug("The scheduled message was not found: {0}", exception.Message);
                 }
             }
 
@@ -197,10 +193,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
             static Message CreateBrokeredMessage(AzureServiceBusSendContext<T> context)
             {
-                var brokeredMessage = new Message(context.Body)
-                {
-                    ContentType = context.ContentType.MediaType
-                };
+                var brokeredMessage = new Message(context.Body) {ContentType = context.ContentType.MediaType};
 
                 brokeredMessage.UserProperties.SetTextHeaders(context.Headers, (_, text) => text);
 

@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
@@ -23,6 +23,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using Logging;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
+    using Microsoft.Extensions.Logging;
     using Transports.Metrics;
     using Util;
 
@@ -31,7 +32,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         Supervisor,
         IReceiver
     {
-        static readonly ILog _log = Logger.Get<Receiver>();
+        static readonly ILogger _logger = Logger.Get<Receiver>();
 
         readonly ClientContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
@@ -67,13 +68,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         protected Task ExceptionHandler(ExceptionReceivedEventArgs args)
         {
             if (!(args.Exception is OperationCanceledException))
-                if (_log.IsErrorEnabled)
-                    _log.Error($"Exception received on receiver: {_context.InputAddress} during {args.ExceptionReceivedContext.Action}", args.Exception);
+                _logger.LogError($"Exception received on receiver: {_context.InputAddress} during {args.ExceptionReceivedContext.Action}", args.Exception);
 
             if (Tracker.ActiveDeliveryCount == 0)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Receiver shutdown completed: {0}", _context.InputAddress);
+                _logger.LogDebug("Receiver shutdown completed: {0}", _context.InputAddress);
 
                 _deliveryComplete.TrySetResult(true);
 
@@ -87,8 +86,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             if (IsStopping)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Receiver shutdown completed: {0}", _context.InputAddress);
+                _logger.LogDebug("Receiver shutdown completed: {0}", _context.InputAddress);
 
                 _deliveryComplete.TrySetResult(true);
             }
@@ -96,8 +94,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         protected override async Task StopSupervisor(StopSupervisorContext context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping receiver: {0}", _context.InputAddress);
+            _logger.LogDebug("Stopping receiver: {0}", _context.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
@@ -117,8 +114,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 }
                 catch (OperationCanceledException)
                 {
-                    if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _context.InputAddress);
+                    _logger.LogWarning("Stop canceled waiting for message consumers to complete: {0}", _context.InputAddress);
                 }
         }
 
@@ -132,8 +128,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
             using (var delivery = Tracker.BeginDelivery())
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Receiving {0}:{1}({2})", delivery.Id, message.MessageId, _context.EntityPath);
+                _logger.LogDebug("Receiving {0}:{1}({2})", delivery.Id, message.MessageId, _context.EntityPath);
 
                 await _messageReceiver.Handle(message, context => AddReceiveContextPayloads(context, messageReceiver, message)).ConfigureAwait(false);
             }
@@ -157,8 +152,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             }
             catch (Exception exception)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Debug($"Stopping receiver, abandoned message faulted: {_context.InputAddress}", exception);
+                _logger.LogDebug($"Stopping receiver, abandoned message faulted: {_context.InputAddress}", exception);
             }
         }
     }

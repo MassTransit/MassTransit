@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Integration
 {
@@ -22,6 +22,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
 
@@ -29,7 +30,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     public class ConnectionContextFactory :
         IPipeContextFactory<ConnectionContext>
     {
-        static readonly ILog _log = Logger.Get<ConnectionContextFactory>();
+        static readonly ILogger _logger = Logger.Get<ConnectionContextFactory>();
         readonly IRabbitMqHostConfiguration _configuration;
         readonly Lazy<ConnectionFactory> _connectionFactory;
         readonly string _description;
@@ -89,8 +90,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 if (supervisor.Stopping.IsCancellationRequested)
                     throw new OperationCanceledException($"The connection is stopping and cannot be used: {_description}");
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connecting: {0}", _description);
+                _logger.LogDebug("Connecting: {0}", _description);
 
                 if (_configuration.Settings.ClusterMembers?.Any() ?? false)
                 {
@@ -103,8 +103,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                     connection = _connectionFactory.Value.CreateConnection(hostNames, _configuration.Settings.ClientProvidedName);
                 }
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connected: {0} (address: {1}, local: {2})", _description, connection.Endpoint, connection.LocalPort);
+                _logger.LogDebug("Connected: {0} (address: {1}, local: {2})", _description, connection.Endpoint, connection.LocalPort);
 
                 var connectionContext = new RabbitMqConnectionContext(connection, _configuration, _description, supervisor.Stopped);
 
@@ -114,8 +113,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
             catch (ConnectFailureException ex)
             {
-                if (_log.IsDebugEnabled)
-                    _log.Debug("RabbitMQ Connect failed:", ex);
+                _logger.LogDebug("RabbitMQ Connect failed:", ex);
 
                 connection?.Dispose();
 
@@ -123,8 +121,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
             catch (BrokerUnreachableException ex)
             {
-                if (_log.IsDebugEnabled)
-                    _log.Debug("RabbitMQ was unreachable", ex);
+                _logger.LogDebug("RabbitMQ was unreachable", ex);
 
                 connection?.Dispose();
 
@@ -132,8 +129,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
             catch (OperationInterruptedException ex)
             {
-                if (_log.IsDebugEnabled)
-                    _log.Debug("RabbitMQ operation interrupted", ex);
+                _logger.LogDebug("RabbitMQ operation interrupted", ex);
 
                 connection?.Dispose();
 

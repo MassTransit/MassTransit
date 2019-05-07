@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Management
 {
@@ -17,12 +17,13 @@ namespace MassTransit.RabbitMqTransport.Management
     using Contracts;
     using Logging;
     using MassTransit.Pipeline.Pipes;
+    using Microsoft.Extensions.Logging;
 
 
     public class SetPrefetchCountManagementConsumer :
         IConsumer<SetPrefetchCount>
     {
-        static readonly ILog _log = Logger.Get<SetPrefetchCountManagementConsumer>();
+        static readonly ILogger _logger = Logger.Get<SetPrefetchCountManagementConsumer>();
 
         readonly IManagementPipe _managementPipe;
         readonly string _queueName;
@@ -54,13 +55,11 @@ namespace MassTransit.RabbitMqTransport.Management
                             context.Message.PrefetchCount
                         }).ConfigureAwait(false);
 
-                        if (_log.IsDebugEnabled)
-                            _log.Debug($"Set Prefetch Count: {context.Message.PrefetchCount} ({_queueName})");
+                        _logger.LogDebug($"Set Prefetch Count: {context.Message.PrefetchCount} ({_queueName})");
                     }
                     catch (Exception exception)
                     {
-                        if (_log.IsErrorEnabled)
-                            _log.Error($"Set Prefetch Count Failed: {context.Message.PrefetchCount} ({_queueName})", exception);
+                        _logger.LogError($"Set Prefetch Count Failed: {context.Message.PrefetchCount} ({_queueName})", exception);
 
                         throw;
                     }

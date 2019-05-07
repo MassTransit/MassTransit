@@ -16,10 +16,12 @@ namespace MassTransit.QuartzService
     using Configuration;
     using GreenPipes;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Quartz;
     using Quartz.Impl;
     using QuartzIntegration;
     using Scheduling;
+    using Serilog;
     using Topshelf;
     using Util;
 
@@ -29,15 +31,16 @@ namespace MassTransit.QuartzService
     {
         readonly IConfigurationProvider _configurationProvider;
         readonly int _consumerLimit;
-        readonly ILog _log = Logger.Get<ScheduleMessageService>();
         readonly string _queueName;
         readonly IScheduler _scheduler;
         IBusControl _bus;
         BusHandle _busHandle;
+        readonly Serilog.ILogger _logger;
 
-        public ScheduleMessageService(IConfigurationProvider configurationProvider)
+        public ScheduleMessageService(IConfigurationProvider configurationProvider, Serilog.ILogger logger)
         {
             _configurationProvider = configurationProvider;
+            _logger = logger;
             _queueName = configurationProvider.GetSetting("ControlQueueName");
             _consumerLimit = configurationProvider.GetSetting("ConsumerLimit", Math.Min(2, Environment.ProcessorCount));
 
@@ -56,6 +59,7 @@ namespace MassTransit.QuartzService
                     {
                         var host = busConfig.Host(serviceBusUri, h => _configurationProvider.GetHostSettings(h));
                         busConfig.UseJsonSerializer();
+                        busConfig.UseSerilog(_logger);
 
                         busConfig.ReceiveEndpoint(host, _queueName, endpoint =>
                         {

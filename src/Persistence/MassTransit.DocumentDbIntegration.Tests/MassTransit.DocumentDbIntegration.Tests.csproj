@@ -8,14 +8,14 @@
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
     <PackageReference Include="GreenPipes" Version="2.1.4" />
-    <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="Moq" Version="4.10.1" />
     <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NUnit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    <ProjectReference Include="..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.0.0" />
     <ProjectReference Include="..\MassTransit.DocumentDbIntegration\MassTransit.DocumentDbIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj" />

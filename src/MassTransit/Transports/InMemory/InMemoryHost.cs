@@ -1,14 +1,14 @@
 // Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory
 {
@@ -24,6 +24,7 @@ namespace MassTransit.Transports.InMemory
     using GreenPipes.Caching;
     using Logging;
     using MassTransit.Configurators;
+    using Microsoft.Extensions.Logging;
     using Topology.Builders;
 
 
@@ -34,7 +35,7 @@ namespace MassTransit.Transports.InMemory
         BaseHost,
         IInMemoryHostControl
     {
-        static readonly ILog _log = Logger.Get<InMemoryHost>();
+        static readonly ILogger _logger = Logger.Get<InMemoryHost>();
 
         readonly IInMemoryHostConfiguration _hostConfiguration;
         readonly IIndex<string, InMemorySendTransport> _index;
@@ -55,8 +56,7 @@ namespace MassTransit.Transports.InMemory
 
         public IReceiveTransport GetReceiveTransport(string queueName, ReceiveEndpointContext receiveEndpointContext)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating receive transport for queue: {0}", queueName);
+            _logger.LogDebug("Creating receive transport for queue: {0}", queueName);
 
             var queue = _messageFabric.GetQueue(queueName);
 
@@ -104,8 +104,7 @@ namespace MassTransit.Transports.InMemory
 
             return await _index.Get(queueName, async key =>
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Creating send transport for exchange: {0}", queueName);
+                _logger.LogDebug("Creating send transport for exchange: {0}", queueName);
 
                 var exchange = _messageFabric.GetExchange(queueName);
 

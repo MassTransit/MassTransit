@@ -20,6 +20,7 @@ namespace MassTransit.QuartzIntegration
     using System.Threading.Tasks;
     using System.Xml.Linq;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Quartz;
@@ -31,7 +32,7 @@ namespace MassTransit.QuartzIntegration
         IConsumer<ScheduleMessage>,
         IConsumer<ScheduleRecurringMessage>
     {
-        static readonly ILog _log = Logger.Get<ScheduleMessageConsumer>();
+        static readonly ILogger _logger = Logger.Get<ScheduleMessageConsumer>();
         readonly IScheduler _scheduler;
 
         public ScheduleMessageConsumer(IScheduler scheduler)
@@ -44,8 +45,7 @@ namespace MassTransit.QuartzIntegration
             var correlationId = context.Message.CorrelationId.ToString("N");
 
             var jobKey = new JobKey(correlationId);
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("ScheduleMessage: {0} at {1}", jobKey, context.Message.ScheduledTime);
+            _logger.LogDebug("ScheduleMessage: {0} at {1}", jobKey, context.Message.ScheduledTime);
 
             var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
@@ -57,15 +57,14 @@ namespace MassTransit.QuartzIntegration
                 .Build();
 
             if (await _scheduler.CheckExists(trigger.Key).ConfigureAwait(false))
-               await _scheduler.RescheduleJob(trigger.Key, trigger).ConfigureAwait(false);
+                await _scheduler.RescheduleJob(trigger.Key, trigger).ConfigureAwait(false);
             else
                 await _scheduler.ScheduleJob(jobDetail, trigger).ConfigureAwait(false);
         }
 
         public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("ScheduleRecurringMessage: {0} at {1}", context.Message.CorrelationId, context.Message.Schedule.ScheduleId);
+            _logger.LogDebug("ScheduleRecurringMessage: {0} at {1}", context.Message.CorrelationId, context.Message.Schedule.ScheduleId);
 
             var jobKey = new JobKey(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
 
@@ -100,6 +99,7 @@ namespace MassTransit.QuartzIntegration
                         case MissedEventPolicy.Skip:
                             x.WithMisfireHandlingInstructionDoNothing();
                             break;
+
                         case MissedEventPolicy.Send:
                             x.WithMisfireHandlingInstructionFireAndProceed();
                             break;
@@ -136,14 +136,19 @@ namespace MassTransit.QuartzIntegration
 
             if (context.MessageId.HasValue)
                 builder = builder.UsingJobData("MessageId", context.MessageId.Value.ToString());
+
             if (context.CorrelationId.HasValue)
                 builder = builder.UsingJobData("CorrelationId", context.CorrelationId.Value.ToString());
+
             if (context.ConversationId.HasValue)
                 builder = builder.UsingJobData("ConversationId", context.ConversationId.Value.ToString());
+
             if (context.InitiatorId.HasValue)
                 builder = builder.UsingJobData("InitiatorId", context.InitiatorId.Value.ToString());
+
             if (context.RequestId.HasValue)
                 builder = builder.UsingJobData("RequestId", context.RequestId.Value.ToString());
+
             if (context.ExpirationTime.HasValue)
                 builder = builder.UsingJobData("ExpirationTime", context.ExpirationTime.Value.ToString());
 

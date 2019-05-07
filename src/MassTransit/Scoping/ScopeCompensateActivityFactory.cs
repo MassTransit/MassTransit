@@ -4,6 +4,7 @@
     using Courier;
     using GreenPipes;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Util;
 
 
@@ -17,7 +18,7 @@
         where TActivity : class, CompensateActivity<TArguments>
         where TArguments : class
     {
-        static readonly ILog _log = Logger.Get<ScopeCompensateActivityFactory<TActivity, TArguments>>();
+        static readonly ILogger _logger = Logger.Get<ScopeCompensateActivityFactory<TActivity, TArguments>>();
 
         readonly ICompensateActivityScopeProvider<TActivity, TArguments> _scopeProvider;
 
@@ -31,8 +32,7 @@
         {
             using (ICompensateActivityScopeContext<TActivity, TArguments> scope = _scopeProvider.GetScope(context))
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("CompensateActivityFactory: Compensating: {0}", TypeMetadataCache<TActivity>.ShortName);
+                _logger.LogDebug("CompensateActivityFactory: Compensating: {0}", TypeMetadataCache<TActivity>.ShortName);
 
                 return await next.Send(scope.Context).ConfigureAwait(false);
             }

@@ -4,6 +4,7 @@
     using Courier;
     using GreenPipes;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Util;
 
 
@@ -17,7 +18,7 @@
         where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
-        static readonly ILog _log = Logger.Get<ScopeExecuteActivityFactory<TActivity, TArguments>>();
+        static readonly ILogger _logger = Logger.Get<ScopeExecuteActivityFactory<TActivity, TArguments>>();
 
         readonly IExecuteActivityScopeProvider<TActivity, TArguments> _scopeProvider;
 
@@ -31,8 +32,7 @@
         {
             using (IExecuteActivityScopeContext<TActivity, TArguments> scope = _scopeProvider.GetScope(context))
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("ExecuteActivityFactory: Executing: {0}", TypeMetadataCache<TActivity>.ShortName);
+                _logger.LogDebug("ExecuteActivityFactory: Executing: {0}", TypeMetadataCache<TActivity>.ShortName);
 
                 return await next.Send(scope.Context).ConfigureAwait(false);
             }

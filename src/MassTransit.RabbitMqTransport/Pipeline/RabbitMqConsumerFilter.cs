@@ -1,14 +1,14 @@
 // Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Topology;
 
 
@@ -28,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         Supervisor,
         IFilter<ModelContext>
     {
-        static readonly ILog _log = Logger.Get<RabbitMqConsumerFilter>();
+        static readonly ILogger _logger = Logger.Get<RabbitMqConsumerFilter>();
         readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
 
         public RabbitMqConsumerFilter(RabbitMqReceiveEndpointContext receiveEndpointContext)
@@ -66,9 +67,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 RabbitMqDeliveryMetrics metrics = consumer;
                 await _receiveEndpointContext.TransportObservers.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer completed {0}: {1} received, {2} concurrent", metrics.ConsumerTag, metrics.DeliveryCount,
-                        metrics.ConcurrentDeliveryCount);
+                _logger.LogDebug("Consumer completed {0}: {1} received, {2} concurrent", metrics.ConsumerTag, metrics.DeliveryCount,
+                    metrics.ConcurrentDeliveryCount);
             }
         }
     }

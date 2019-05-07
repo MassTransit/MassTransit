@@ -15,13 +15,14 @@ namespace MassTransit
     using System;
     using ConsumeConfigurators;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Pipeline.ConsumerFactories;
     using Util;
 
 
     public static class BatchConsumerExtensions
     {
-        static readonly ILog _log = Logger.Get(typeof(BatchConsumerExtensions));
+        static readonly ILogger _logger = Logger.Get(typeof(BatchConsumerExtensions));
 
         /// <summary>
         /// Configure a Batch&lt;<typeparamref name="TMessage"/>&gt; consumer, which allows messages to be collected into an array and consumed
@@ -35,8 +36,7 @@ namespace MassTransit
         public static void Batch<TMessage>(this IReceiveEndpointConfigurator configurator, Action<IBatchConfigurator<TMessage>> configure)
             where TMessage : class
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Configuring batch: {0}", TypeMetadataCache<TMessage>.ShortName);
+            _logger.LogDebug("Configuring batch: {0}", TypeMetadataCache<TMessage>.ShortName);
 
             var batchConfigurator = new BatchConfigurator<TMessage>(configurator);
 
@@ -55,8 +55,7 @@ namespace MassTransit
             where TConsumer : class, IConsumer<Batch<TMessage>>
             where TMessage : class
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Batch Consumer: {0} (using delegate consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
+            _logger.LogDebug("Subscribing Batch Consumer: {0} (using delegate consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
 
             var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactoryMethod);
 

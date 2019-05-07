@@ -1,14 +1,14 @@
 // Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Policies
 {
@@ -18,11 +18,12 @@ namespace MassTransit.Policies
     using GreenPipes;
     using GreenPipes.Payloads;
     using Logging;
+    using Microsoft.Extensions.Logging;
 
 
     public static class PipeRetryExtensions
     {
-        static readonly ILog _log = Logger.Get<IRetryPolicy>();
+        static readonly ILogger _logger = Logger.Get<IRetryPolicy>();
 
         public static async Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -168,10 +169,8 @@ namespace MassTransit.Policies
                 }
                 catch (Exception ex)
                 {
-                    if (_log.IsWarnEnabled)
-                        _log.Warn($"Repeating until cancelled: {cancellationToken.IsCancellationRequested}", ex);
+                    _logger.LogWarning($"Repeating until cancelled: {cancellationToken.IsCancellationRequested}", ex);
                 }
-                
             }
         }
 

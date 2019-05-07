@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.DapperIntegration
 {
@@ -24,6 +24,7 @@ namespace MassTransit.DapperIntegration
     using Dapper.Contrib.Extensions;
     using GreenPipes;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Saga;
     using Sql;
     using Util;
@@ -34,7 +35,7 @@ namespace MassTransit.DapperIntegration
         IQuerySagaRepository<TSaga>
         where TSaga : class, ISaga
     {
-        static readonly ILog Log = Logger.Get<DapperSagaRepository<TSaga>>();
+        static readonly ILogger Log = Logger.Get<DapperSagaRepository<TSaga>>();
         readonly string _connectionString;
 
         public DapperSagaRepository(string connectionString)
@@ -58,10 +59,7 @@ namespace MassTransit.DapperIntegration
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("sagaRepository");
-            scope.Set(new
-            {
-                Persistence = "dapper"
-            });
+            scope.Set(new {Persistence = "dapper"});
         }
 
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
@@ -87,7 +85,7 @@ namespace MassTransit.DapperIntegration
 
                     var instance = await connection.QuerySingleOrDefaultAsync<TSaga>(
                         $"SELECT * FROM {tableName} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @correlationId",
-                        new { correlationId }).ConfigureAwait(false);
+                        new {correlationId}).ConfigureAwait(false);
 
                     if (instance == null)
                     {
@@ -97,11 +95,8 @@ namespace MassTransit.DapperIntegration
                     }
                     else
                     {
-                        if (Log.IsDebugEnabled)
-                        {
-                            Log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                                TypeMetadataCache<T>.ShortName);
-                        }
+                        Log.LogDebug("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                            TypeMetadataCache<T>.ShortName);
 
                         await SendToInstance(context, connection, policy, instance, tableName, next).ConfigureAwait(false);
                     }
@@ -110,24 +105,23 @@ namespace MassTransit.DapperIntegration
                 }
                 catch (SagaException sex)
                 {
-                    if (Log.IsErrorEnabled)
-                        Log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+                    Log.LogError($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
 
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    if (Log.IsErrorEnabled)
-                        Log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+                    Log.LogError($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 
                     throw new SagaException(ex.Message, typeof(TSaga), typeof(T), correlationId, ex);
                 }
             }
         }
 
-        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next) where T : class
+        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+            where T : class
         {
-           var tableName = GetTableName();
+            var tableName = GetTableName();
             var (whereStatement, parameters) = WhereStatementHelper.GetWhereStatementAndParametersFromExpression(context.Query.FilterExpression);
 
             List<Guid> correlationIds = null;
@@ -151,7 +145,7 @@ namespace MassTransit.DapperIntegration
                         var instance =
                             await connection.QuerySingleOrDefaultAsync<TSaga>(
                                 $"SELECT * FROM {tableName} WITH (UPDLOCK, ROWLOCK) where CorrelationId = @correlationId",
-                                new { correlationId }).ConfigureAwait(false);
+                                new {correlationId}).ConfigureAwait(false);
 
                         if (instance != null)
                         {
@@ -175,15 +169,13 @@ namespace MassTransit.DapperIntegration
                 }
                 catch (SagaException sex)
                 {
-                    if (Log.IsErrorEnabled)
-                        Log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+                    Log.LogError($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
 
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    if (Log.IsErrorEnabled)
-                        Log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+                    Log.LogError($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 
                     throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                 }
@@ -203,12 +195,9 @@ namespace MassTransit.DapperIntegration
             }
             catch (Exception ex)
             {
-                if (Log.IsDebugEnabled)
-                {
-                    Log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName,
-                        instance.CorrelationId,
-                        TypeMetadataCache<T>.ShortName, ex.Message);
-                }
+                Log.LogDebug("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName,
+                    instance.CorrelationId,
+                    TypeMetadataCache<T>.ShortName, ex.Message);
             }
         }
 
@@ -218,8 +207,7 @@ namespace MassTransit.DapperIntegration
         {
             try
             {
-                if (Log.IsDebugEnabled)
-                    Log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                Log.LogDebug("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
 
                 var sagaConsumeContext = new DapperSagaConsumeContext<TSaga, T>(sqlConnection, context, instance, tableName);
 
@@ -239,7 +227,7 @@ namespace MassTransit.DapperIntegration
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), instance.CorrelationId, ex);
             }
         }
-        
+
         protected virtual async Task InsertSagaInstance(SqlConnection sqlConnection, TSaga instance)
         {
             await sqlConnection.InsertAsync(instance).ConfigureAwait(false);
@@ -249,6 +237,7 @@ namespace MassTransit.DapperIntegration
         {
             await sqlConnection.UpdateAsync(instance).ConfigureAwait(false);
         }
+
 
         /// <summary>
         /// Once the message pipe has processed the saga instance, add it to the saga repository
@@ -263,7 +252,8 @@ namespace MassTransit.DapperIntegration
             readonly IPipe<SagaConsumeContext<TSaga, TMessage>> _next;
             readonly Func<SqlConnection, TSaga, Task> _insertSagaInstance;
 
-            public MissingPipe(SqlConnection sqlConnection, string tableName, IPipe<SagaConsumeContext<TSaga, TMessage>> next, Func<SqlConnection, TSaga, Task> insertSagaInstance)
+            public MissingPipe(SqlConnection sqlConnection, string tableName, IPipe<SagaConsumeContext<TSaga, TMessage>> next,
+                Func<SqlConnection, TSaga, Task> insertSagaInstance)
             {
                 _sqlConnection = sqlConnection;
                 _tableName = tableName;
@@ -278,12 +268,9 @@ namespace MassTransit.DapperIntegration
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                if (Log.IsDebugEnabled)
-                {
-                    Log.DebugFormat("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName,
-                        context.Saga.CorrelationId,
-                        TypeMetadataCache<TMessage>.ShortName);
-                }
+                Log.LogDebug("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName,
+                    context.Saga.CorrelationId,
+                    TypeMetadataCache<TMessage>.ShortName);
 
                 var sagaConsumeContext = new DapperSagaConsumeContext<TSaga, TMessage>(_sqlConnection, context, context.Saga, _tableName, false);
 

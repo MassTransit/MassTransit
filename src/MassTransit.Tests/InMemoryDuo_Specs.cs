@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
@@ -18,6 +18,7 @@ namespace MassTransit.Tests
     using GreenPipes;
     using Logging;
     using MassTransit.Testing;
+    using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using Shouldly;
     using Util;
@@ -62,7 +63,7 @@ namespace MassTransit.Tests
         class RelayConsumer :
             IConsumer<A>
         {
-            readonly ILog _log = Logger.Get<RelayConsumer>();
+            readonly ILogger _logger = Logger.Get<RelayConsumer>();
 
             readonly IPublishEndpoint _otherHost;
 
@@ -76,8 +77,7 @@ namespace MassTransit.Tests
                 if (GetVirtualHost(context.SourceAddress) != GetVirtualHost(context.ReceiveContext.InputAddress))
                     return TaskUtil.Completed;
 
-                if (_log.IsInfoEnabled)
-                    _log.Info($"Forwarding message: {context.MessageId} from {context.SourceAddress}");
+                _logger.LogInformation($"Forwarding message: {context.MessageId} from {context.SourceAddress}");
 
                 IPipe<SendContext> contextPipe = context.CreateCopyContextPipe();
 
@@ -89,8 +89,8 @@ namespace MassTransit.Tests
         static string GetVirtualHost(Uri address)
         {
             return address.AbsolutePath.Split('/').First(x => !string.IsNullOrWhiteSpace(x));
-
         }
+
 
         class RealConsumer :
             IConsumer<A>

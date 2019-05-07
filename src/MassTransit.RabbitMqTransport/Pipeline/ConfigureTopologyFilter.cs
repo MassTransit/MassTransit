@@ -1,14 +1,14 @@
 // Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
@@ -16,6 +16,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Topology.Builders;
     using Topology.Entities;
 
@@ -28,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IFilter<ModelContext>
         where TSettings : class
     {
-        readonly ILog _log = Logger.Get<ConfigureTopologyFilter<TSettings>>();
+        readonly ILogger _logger = Logger.Get<ConfigureTopologyFilter<TSettings>>();
         readonly TSettings _settings;
         readonly BrokerTopology _brokerTopology;
 
@@ -70,40 +71,28 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         Task Declare(ModelContext context, Exchange exchange)
         {
-            if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("Declare exchange ({0})", exchange);
-            }
+            _logger.LogDebug("Declare exchange ({0})", exchange);
 
             return context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete, exchange.ExchangeArguments);
         }
 
         Task Declare(ModelContext context, Queue queue)
         {
-            if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("Declare queue ({0})", queue);
-            }
+            _logger.LogDebug("Declare queue ({0})", queue);
 
             return context.QueueDeclare(queue.QueueName, queue.Durable, queue.Exclusive, queue.AutoDelete, queue.QueueArguments);
         }
 
         Task Bind(ModelContext context, ExchangeToExchangeBinding binding)
         {
-            if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("Bind exchange to exchange ({0})", binding);
-            }
+            _logger.LogDebug("Bind exchange to exchange ({0})", binding);
 
             return context.ExchangeBind(binding.Destination.ExchangeName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments);
         }
 
         Task Bind(ModelContext context, ExchangeToQueueBinding binding)
         {
-            if (_log.IsDebugEnabled)
-            {
-                _log.DebugFormat("Bind exchange to queue ({0})", binding);
-            }
+            _logger.LogDebug("Bind exchange to queue ({0})", binding);
 
             return context.QueueBind(binding.Destination.QueueName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments);
         }

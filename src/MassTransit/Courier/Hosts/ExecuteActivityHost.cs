@@ -1,14 +1,14 @@
 // Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier.Hosts
 {
@@ -18,6 +18,7 @@ namespace MassTransit.Courier.Hosts
     using Contracts;
     using GreenPipes;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Util;
 
 
@@ -26,7 +27,7 @@ namespace MassTransit.Courier.Hosts
         where TActivity : class, ExecuteActivity<TArguments>
         where TArguments : class
     {
-        static readonly ILog _log = Logger.Get<ExecuteActivityHost<TActivity, TArguments>>();
+        static readonly ILogger _logger = Logger.Get<ExecuteActivityHost<TActivity, TArguments>>();
         readonly ExecuteActivityFactory<TActivity, TArguments> _activityFactory;
         readonly Uri _compensateAddress;
         readonly IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> _executePipe;
@@ -36,6 +37,7 @@ namespace MassTransit.Courier.Hosts
         {
             if (compensateAddress == null)
                 throw new ArgumentNullException(nameof(compensateAddress));
+
             if (activityFactory == null)
                 throw new ArgumentNullException(nameof(activityFactory));
 
@@ -62,6 +64,7 @@ namespace MassTransit.Courier.Hosts
                 ActivityType = TypeMetadataCache<TActivity>.ShortName,
                 ArgumentType = TypeMetadataCache<TArguments>.ShortName
             });
+
             if (_compensateAddress != null)
                 scope.Add("compensateAddress", _compensateAddress);
 
@@ -75,11 +78,8 @@ namespace MassTransit.Courier.Hosts
             {
                 ExecuteContext<TArguments> executeContext = new HostExecuteContext<TArguments>(HostMetadataCache.Host, _compensateAddress, context);
 
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("Host: {0} Activity: {1} Executing: {2}", context.ReceiveContext.InputAddress, TypeMetadataCache<TActivity>.ShortName,
-                        executeContext.TrackingNumber);
-                }
+                _logger.LogDebug("Host: {0} Activity: {1} Executing: {2}", context.ReceiveContext.InputAddress, TypeMetadataCache<TActivity>.ShortName,
+                    executeContext.TrackingNumber);
 
                 await Task.Yield();
 
@@ -102,7 +102,7 @@ namespace MassTransit.Courier.Hosts
             }
             catch (Exception ex)
             {
-                _log.Error($"The activity {TypeMetadataCache<TActivity>.ShortName} threw an exception", ex);
+                _logger.LogError($"The activity {TypeMetadataCache<TActivity>.ShortName} threw an exception", ex);
 
                 await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, ex).ConfigureAwait(false);
 

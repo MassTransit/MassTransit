@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WebJobs.EventHubsIntegration
 {
@@ -16,9 +16,9 @@ namespace MassTransit.WebJobs.EventHubsIntegration
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
-    using Logging;
     using Microsoft.Azure.EventHubs;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Extensions.Logging;
     using Transports;
 
 
@@ -27,12 +27,12 @@ namespace MassTransit.WebJobs.EventHubsIntegration
     {
         readonly IBinder _binder;
         readonly CancellationToken _cancellationToken;
-        readonly ILog _log;
+        readonly ILogger _logger;
 
-        public EventHubAttributeSendTransportProvider(IBinder binder, ILog log, CancellationToken cancellationToken)
+        public EventHubAttributeSendTransportProvider(IBinder binder, ILogger logger, CancellationToken cancellationToken)
         {
             _binder = binder;
-            _log = log;
+            _logger = logger;
             _cancellationToken = cancellationToken;
         }
 
@@ -44,7 +44,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
 
             IAsyncCollector<EventData> collector = await _binder.BindAsync<IAsyncCollector<EventData>>(attribute, _cancellationToken).ConfigureAwait(false);
 
-            var client = new CollectorEventDataSendEndpointContext(eventHubName, _log, collector, _cancellationToken);
+            var client = new CollectorEventDataSendEndpointContext(eventHubName, _logger, collector, _cancellationToken);
 
             var source = new CollectorEventDataSendEndpointContextSource(client);
 

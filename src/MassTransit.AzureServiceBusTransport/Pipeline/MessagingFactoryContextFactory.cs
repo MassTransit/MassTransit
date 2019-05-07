@@ -20,6 +20,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
 
@@ -27,7 +28,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     public class MessagingFactoryContextFactory :
         IPipeContextFactory<MessagingFactoryContext>
     {
-        static readonly ILog _log = Logger.Get<MessagingFactoryContextFactory>();
+        static readonly ILogger _logger = Logger.Get<MessagingFactoryContextFactory>();
         readonly MessagingFactorySettings _messagingFactorySettings;
         readonly RetryPolicy _retryPolicy;
         readonly Uri _serviceUri;
@@ -89,15 +90,13 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 if (supervisor.Stopping.IsCancellationRequested)
                     throw new OperationCanceledException($"The connection is stopping and cannot be used: {_serviceUri}");
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connecting: {0}", _serviceUri);
+                _logger.LogDebug("Connecting: {0}", _serviceUri);
 
                 var messagingFactory = await MessagingFactory.CreateAsync(_serviceUri, _messagingFactorySettings).ConfigureAwait(false);
 
                 messagingFactory.RetryPolicy = _retryPolicy;
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connected: {0}", _serviceUri);
+                _logger.LogDebug("Connected: {0}", _serviceUri);
 
                 var messagingFactoryContext = new ServiceBusMessagingFactoryContext(messagingFactory, supervisor.Stopped);
 
@@ -105,8 +104,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             }
             catch (Exception ex)
             {
-                if (_log.IsDebugEnabled)
-                    _log.Debug($"MessagingFactory Create Failed: {_serviceUri}", ex);
+                _logger.LogDebug($"MessagingFactory Create Failed: {_serviceUri}", ex);
 
                 throw;
             }

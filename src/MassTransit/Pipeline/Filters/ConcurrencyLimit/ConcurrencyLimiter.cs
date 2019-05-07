@@ -5,6 +5,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
     using System.Threading.Tasks;
     using Contracts;
     using Logging;
+    using Microsoft.Extensions.Logging;
 
 
     /// <summary>
@@ -14,7 +15,7 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
     public class ConcurrencyLimiter :
         IConcurrencyLimiter
     {
-        static readonly ILog _log = Logger.Get<ConcurrencyLimiter>();
+        static readonly ILogger _logger = Logger.Get<ConcurrencyLimiter>();
 
         readonly int _concurrencyLimit;
         readonly string _id;
@@ -71,13 +72,11 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
                             context.Message.ConcurrencyLimit
                         }).ConfigureAwait(false);
 
-                        if (_log.IsDebugEnabled)
-                            _log.Debug($"Set Consumer Limit: {context.Message.ConcurrencyLimit} ({context.Message.Id})");
+                        _logger.LogDebug($"Set Consumer Limit: {context.Message.ConcurrencyLimit} ({context.Message.Id})");
                     }
                     catch (Exception exception)
                     {
-                        if (_log.IsErrorEnabled)
-                            _log.Error($"Set Consumer Limit Failed: {context.Message.ConcurrencyLimit} ({context.Message.Id})", exception);
+                        _logger.LogError($"Set Consumer Limit Failed: {context.Message.ConcurrencyLimit} ({context.Message.Id})", exception);
 
                         throw;
                     }

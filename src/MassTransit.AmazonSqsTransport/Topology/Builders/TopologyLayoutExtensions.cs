@@ -13,22 +13,23 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Builders
 {
     using Logging;
+    using Microsoft.Extensions.Logging;
 
 
     public static class TopologyLayoutExtensions
     {
-        static readonly ILog _log = Logger.Get<BrokerTopology>();
+        static readonly ILogger _logger = Logger.Get<BrokerTopology>();
 
         public static void LogResult(this BrokerTopology layout)
         {
             foreach (var topic in layout.Topics)
             {
-                _log.InfoFormat("Topic: {0}, type: {1}, durable: {2}, auto-delete: {3}", topic.EntityName, topic.Durable, topic.AutoDelete);
+                _logger.LogInformation("Topic: {0}, type: {1}, durable: {2}, auto-delete: {3}", topic.EntityName, topic.Durable, topic.AutoDelete);
             }
 
             foreach (var consumer in layout.QueueSubscriptions)
             {
-                _log.InfoFormat("TopicSubscription: source {0}, destination: {1}", consumer.Source.EntityName, consumer.Destination.EntityName);
+                _logger.LogInformation("TopicSubscription: source {0}, destination: {1}", consumer.Source.EntityName, consumer.Destination.EntityName);
             }
         }
     }

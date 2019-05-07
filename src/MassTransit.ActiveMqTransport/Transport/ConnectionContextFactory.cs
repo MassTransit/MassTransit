@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Transport
 {
@@ -21,13 +21,14 @@ namespace MassTransit.ActiveMqTransport.Transport
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
+    using Microsoft.Extensions.Logging;
 
 
     public class ConnectionContextFactory :
         IPipeContextFactory<ConnectionContext>
     {
         readonly IActiveMqHostConfiguration _configuration;
-        static readonly ILog _log = Logger.Get<ConnectionContextFactory>();
+        static readonly ILogger _logger = Logger.Get<ConnectionContextFactory>();
 
         public ConnectionContextFactory(IActiveMqHostConfiguration configuration)
         {
@@ -79,15 +80,13 @@ namespace MassTransit.ActiveMqTransport.Transport
                 if (supervisor.Stopping.IsCancellationRequested)
                     throw new OperationCanceledException($"The connection is stopping and cannot be used: {_configuration.Description}");
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connecting: {0}", _configuration.Description);
+                    _logger.LogDebug("Connecting: {0}", _configuration.Description);
 
                 connection = _configuration.Settings.CreateConnection();
 
                 connection.Start();
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connected: {0} (client-id: {1}, version: {2})", _configuration.Description, connection.ClientId, connection.MetaData.NMSVersion);
+                    _logger.LogDebug("Connected: {0} (client-id: {1}, version: {2})", _configuration.Description, connection.ClientId, connection.MetaData.NMSVersion);
 
                 var connectionContext = new ActiveMqConnectionContext(connection, _configuration, supervisor.Stopped);
 
@@ -102,8 +101,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             }
             catch (NMSConnectionException ex)
             {
-                if (_log.IsDebugEnabled)
-                    _log.Debug("ActiveMQ Connect failed:", ex);
+                    _logger.LogDebug("ActiveMQ Connect failed:", ex);
 
                 await asyncContext.CreateFaulted(ex).ConfigureAwait(false);
 

@@ -6,11 +6,13 @@
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
+
 
     public class UserBaseConsumer<THub>
         where THub : Hub
     {
-        static readonly ILog _logger = Logger.Get<UserBaseConsumer<THub>>();
+        static readonly ILogger _logger = Logger.Get<UserBaseConsumer<THub>>();
 
         private readonly BaseMassTransitHubLifetimeManager<THub> _hubLifetimeManager;
 
@@ -39,7 +41,7 @@
             }
             catch (Exception e)
             {
-                _logger.Warn("Failed writing message.", e);
+                _logger.LogWarning("Failed writing message.", e);
             }
         }
     }

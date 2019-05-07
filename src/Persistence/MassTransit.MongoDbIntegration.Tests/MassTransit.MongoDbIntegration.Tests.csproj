@@ -21,7 +21,9 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NUnit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    <ProjectReference Include="..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.0.0" />
+    <ProjectReference Include="..\..\Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />

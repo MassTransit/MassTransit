@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2012 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.NHibernateIntegration
 {
@@ -17,6 +17,7 @@ namespace MassTransit.NHibernateIntegration
     using System.Threading;
     using Logging;
     using MassTransit.Saga;
+    using Microsoft.Extensions.Logging;
     using NHibernate;
     using NHibernate.Cfg;
     using NHibernate.Cfg.Loquacious;
@@ -31,7 +32,7 @@ namespace MassTransit.NHibernateIntegration
     public class NHibernateSessionFactoryProvider
     {
         static readonly Mutex _factoryMutex = new Mutex();
-        static readonly ILog _log = Logger.Get<NHibernateSessionFactoryProvider>();
+        static readonly ILogger _logger = Logger.Get<NHibernateSessionFactoryProvider>();
         readonly IEnumerable<Type> _mappedTypes;
         bool _computed;
         Action<IDbIntegrationConfigurationProperties> _databaseIntegration;
@@ -72,7 +73,7 @@ namespace MassTransit.NHibernateIntegration
         /// </summary>
         public void UpdateSchema()
         {
-            _log.DebugFormat("Updating schema for connection: {0}", Configuration);
+            _logger.LogDebug("Updating schema for connection: {0}", Configuration);
 
             new SchemaUpdate(Configuration).Execute(false, true);
         }

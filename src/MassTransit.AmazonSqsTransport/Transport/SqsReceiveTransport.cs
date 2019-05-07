@@ -21,6 +21,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Policies;
     using Topology;
     using Transports;
@@ -30,7 +31,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
         Supervisor,
         IReceiveTransport
     {
-        static readonly ILog _log = Logger.Get<SqsReceiveTransport>();
+        static readonly ILogger _logger = Logger.Get<SqsReceiveTransport>();
         readonly IPipe<ConnectionContext> _connectionPipe;
         readonly IAmazonSqsHost _host;
         readonly Uri _inputAddress;
@@ -119,8 +120,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
         async Task<AmazonSqsConnectException> ConvertToAmazonSqsConnectionException(Exception ex, string message)
         {
-            if (_log.IsDebugEnabled)
-                _log.Debug(message, ex);
+            _logger.LogDebug(message, ex);
 
             var exception = new AmazonSqsConnectException(message + _host.ConnectionContextSupervisor, ex);
 
@@ -131,8 +131,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
         Task NotifyFaulted(Exception exception)
         {
-            if (_log.IsErrorEnabled)
-                _log.ErrorFormat("AmazonSQS Connect Failed: {0}", exception.Message);
+            _logger.LogError("AmazonSQS Connect Failed: {0}", exception.Message);
 
             return _receiveEndpointContext.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, exception));
         }

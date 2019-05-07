@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.WebJobs.EventHubsIntegration
 {
@@ -21,6 +21,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
     using GreenPipes.Agents;
     using Logging;
     using Microsoft.Azure.EventHubs;
+    using Microsoft.Extensions.Logging;
     using Pipeline.Observables;
     using Transports;
 
@@ -32,7 +33,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
         Supervisor,
         ISendTransport
     {
-        static readonly ILog _log = Logger.Get<EventHubSendTransport>();
+        static readonly ILogger _logger = Logger.Get<EventHubSendTransport>();
         readonly Uri _address;
         readonly SendObservable _observers;
 
@@ -89,8 +90,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
 
         protected override Task StopSupervisor(StopSupervisorContext context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping transport: {0}", _address);
+            _logger.LogDebug("Stopping transport: {0}", _address);
 
             return base.StopSupervisor(context);
         }

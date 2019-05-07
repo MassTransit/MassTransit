@@ -1,14 +1,14 @@
 // Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Pipeline
 {
@@ -17,6 +17,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Topology;
     using Topology.Builders;
     using Topology.Entities;
@@ -31,7 +32,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         where TSettings : class
     {
         readonly BrokerTopology _brokerTopology;
-        readonly ILog _log = Logger.Get<ConfigureTopologyFilter<TSettings>>();
+        readonly ILogger _logger = Logger.Get<ConfigureTopologyFilter<TSettings>>();
         readonly TSettings _settings;
 
         public ConfigureTopologyFilter(TSettings settings, BrokerTopology brokerTopology)
@@ -50,7 +51,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             }).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
-            
+
             if (_settings is ReceiveSettings)
                 await DeleteAutoDelete(context).ConfigureAwait(false);
         }
@@ -78,32 +79,28 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
         Task Declare(SessionContext context, Topic topic)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Declare exchange ({0})", topic);
+            _logger.LogDebug("Declare exchange ({0})", topic);
 
             return context.GetTopic(topic.EntityName);
         }
 
         Task Declare(SessionContext context, Queue queue)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Declare queue ({0})", queue);
+            _logger.LogDebug("Declare queue ({0})", queue);
 
             return context.GetQueue(queue.EntityName);
         }
 
         Task Delete(SessionContext context, Topic topic)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Delete topic ({0})", topic);
+            _logger.LogDebug("Delete topic ({0})", topic);
 
             return context.DeleteTopic(topic.EntityName);
         }
 
         Task Delete(SessionContext context, Queue queue)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Delete queue ({0})", queue);
+            _logger.LogDebug("Delete queue ({0})", queue);
 
             return context.DeleteQueue(queue.EntityName);
         }

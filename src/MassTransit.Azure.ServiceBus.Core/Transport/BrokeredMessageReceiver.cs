@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
@@ -20,6 +20,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using Logging;
     using MassTransit.Pipeline;
     using Microsoft.Azure.ServiceBus;
+    using Microsoft.Extensions.Logging;
     using Transports;
 
 
@@ -30,13 +31,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         IBrokeredMessageReceiver
     {
         readonly Uri _inputAddress;
-        readonly ILog _log;
+        readonly ILogger _logger;
         readonly ReceiveEndpointContext _receiveEndpointContext;
 
-        public BrokeredMessageReceiver(Uri inputAddress, ILog log, ReceiveEndpointContext receiveEndpointContext)
+        public BrokeredMessageReceiver(Uri inputAddress, ILogger logger, ReceiveEndpointContext receiveEndpointContext)
         {
             _inputAddress = inputAddress;
-            _log = log;
+            _logger = logger;
             _receiveEndpointContext = receiveEndpointContext;
         }
 
@@ -93,15 +94,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             {
                 await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
-                if (_log.IsWarnEnabled)
-                    _log.Warn($"Session Lock Lost: {message.MessageId}", ex);
+                _logger.LogWarning($"Session Lock Lost: {message.MessageId}", ex);
             }
             catch (MessageLockLostException ex)
             {
                 await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
-                if (_log.IsWarnEnabled)
-                    _log.Warn($"Message Lock Lost: {message.MessageId}", ex);
+                _logger.LogWarning($"Message Lock Lost: {message.MessageId}", ex);
             }
             catch (Exception ex)
             {
@@ -116,8 +115,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 }
                 catch (Exception exception)
                 {
-                    if (_log.IsWarnEnabled)
-                        _log.Warn($"Abandon message faulted: {message.MessageId}", exception);
+                    _logger.LogWarning($"Abandon message faulted: {message.MessageId}", exception);
                 }
             }
             finally

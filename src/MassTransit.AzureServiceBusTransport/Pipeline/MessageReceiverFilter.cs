@@ -1,14 +1,14 @@
 // Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Transport;
 
 
@@ -27,7 +28,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         Supervisor,
         IFilter<ClientContext>
     {
-        static readonly ILog _log = Logger.Get<MessageReceiverFilter>();
+        static readonly ILogger _logger = Logger.Get<MessageReceiverFilter>();
         readonly IBrokeredMessageReceiver _messageReceiver;
         readonly IReceiveTransportObserver _transportObserver;
 
@@ -45,8 +46,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         async Task IFilter<ClientContext>.Send(ClientContext context, IPipe<ClientContext> next)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating message receiver for {0}", context.InputAddress);
+            _logger.LogDebug("Creating message receiver for {0}", context.InputAddress);
 
             var receiver = CreateMessageReceiver(context, _messageReceiver);
 
@@ -68,8 +68,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
                 await _transportObserver.Completed(new ReceiveTransportCompletedEvent(context.InputAddress, metrics)).ConfigureAwait(false);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer {0}: {1} received, {2} concurrent", context.InputAddress, metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+                _logger.LogDebug("Consumer {0}: {1} received, {2} concurrent", context.InputAddress, metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
             }
 
             await next.Send(context).ConfigureAwait(false);

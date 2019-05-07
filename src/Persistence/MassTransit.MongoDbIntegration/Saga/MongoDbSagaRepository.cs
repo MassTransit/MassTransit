@@ -22,6 +22,7 @@ namespace MassTransit.MongoDbIntegration.Saga
     using GreenPipes.Internals.Extensions;
     using Logging;
     using MassTransit.Saga;
+    using Microsoft.Extensions.Logging;
     using MongoDB.Driver;
     using Pipeline;
     using Util;
@@ -31,7 +32,7 @@ namespace MassTransit.MongoDbIntegration.Saga
         ISagaRepository<TSaga>
         where TSaga : class, IVersionedSaga
     {
-        static readonly ILog _log = Logger.Get<MongoDbSagaRepository<TSaga>>();
+        static readonly ILogger _logger = Logger.Get<MongoDbSagaRepository<TSaga>>();
         readonly IMongoCollection<TSaga> _collection;
         readonly IMongoDbSagaConsumeContextFactory _mongoDbSagaConsumeContextFactory;
 
@@ -45,19 +46,16 @@ namespace MassTransit.MongoDbIntegration.Saga
         {
         }
 
-        public MongoDbSagaRepository(
-            IMongoDatabase mongoDatabase,
+        public MongoDbSagaRepository(IMongoDatabase mongoDatabase,
             IMongoDbSagaConsumeContextFactory mongoDbSagaConsumeContextFactory,
             string collectionName = null)
             : this(mongoDatabase, mongoDbSagaConsumeContextFactory, new DefaultCollectionNameFormatter(collectionName))
         {
         }
 
-        public MongoDbSagaRepository(
-            IMongoDatabase database,
+        public MongoDbSagaRepository(IMongoDatabase database,
             IMongoDbSagaConsumeContextFactory mongoDbSagaConsumeContextFactory,
-            ICollectionNameFormatter collectionNameFormatter
-        )
+            ICollectionNameFormatter collectionNameFormatter)
         {
             _mongoDbSagaConsumeContextFactory = mongoDbSagaConsumeContextFactory;
             _collection = database.GetCollection<TSaga>(collectionNameFormatter);
@@ -127,15 +125,13 @@ namespace MassTransit.MongoDbIntegration.Saga
             }
             catch (SagaException sex)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+                _logger.LogError($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
 
                 throw;
             }
             catch (Exception ex)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+                _logger.LogError($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
             }
@@ -148,13 +144,12 @@ namespace MassTransit.MongoDbIntegration.Saga
             {
                 await _collection.InsertOneAsync(instance, cancellationToken: context.CancellationToken).ConfigureAwait(false);
 
-                _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                _logger.LogDebug("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
             }
             catch (Exception ex)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName,
-                        ex.Message);
+                _logger.LogDebug("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName,
+                    ex.Message);
             }
         }
 
@@ -163,8 +158,7 @@ namespace MassTransit.MongoDbIntegration.Saga
         {
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                _logger.LogDebug("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
 
                 SagaConsumeContext<TSaga, T> sagaConsumeContext = _mongoDbSagaConsumeContextFactory.Create(_collection, context, instance);
 

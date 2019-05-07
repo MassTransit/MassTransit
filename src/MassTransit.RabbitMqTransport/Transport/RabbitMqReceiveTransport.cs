@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Transport
 {
@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Policies;
     using RabbitMQ.Client.Exceptions;
     using Topology;
@@ -30,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         Supervisor,
         IReceiveTransport
     {
-        static readonly ILog _log = Logger.Get<RabbitMqReceiveTransport>();
+        static readonly ILogger _logger = Logger.Get<RabbitMqReceiveTransport>();
         readonly IPipe<ConnectionContext> _connectionPipe;
         readonly IRabbitMqHost _host;
         readonly Uri _inputAddress;
@@ -58,7 +59,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         }
 
         /// <summary>
-        /// Start the receive transport, returning a Task that can be awaited to signal the transport has 
+        /// Start the receive transport, returning a Task that can be awaited to signal the transport has
         /// completely shutdown once the cancellation token is cancelled.
         /// </summary>
         /// <returns>A task that is completed once the transport is shut down</returns>
@@ -135,8 +136,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         async Task<RabbitMqConnectionException> ConvertToRabbitMqConnectionException(Exception ex, string message)
         {
-            if (_log.IsDebugEnabled)
-                _log.Debug(message, ex);
+            _logger.LogDebug(message, ex);
 
             var exception = new RabbitMqConnectionException(message + _host.ConnectionContextSupervisor, ex);
 
@@ -147,8 +147,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         Task NotifyFaulted(RabbitMqConnectionException exception)
         {
-            if (_log.IsErrorEnabled)
-                _log.ErrorFormat("RabbitMQ Connect Failed: {0}", exception.Message);
+            _logger.LogError("RabbitMQ Connect Failed: {0}", exception.Message);
 
             return _receiveEndpointContext.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, exception));
         }

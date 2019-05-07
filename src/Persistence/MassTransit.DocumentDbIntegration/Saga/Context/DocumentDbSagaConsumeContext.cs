@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.DocumentDbIntegration.Saga.Context
 {
@@ -18,6 +18,7 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
     using MassTransit.Context;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
+    using Microsoft.Extensions.Logging;
     using Util;
 
 
@@ -27,7 +28,7 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
         where TMessage : class
         where TSaga : class, IVersionedSaga
     {
-        static readonly ILog _log = Logger.Get<DocumentDbSagaRepository<TSaga>>();
+        static readonly ILogger _logger = Logger.Get<DocumentDbSagaRepository<TSaga>>();
         readonly IDocumentClient _client;
         readonly string _collectionName;
         readonly string _databaseName;
@@ -57,8 +58,7 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
                 await _client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, Saga.CorrelationId.ToString()), _requestOptions)
                     .ConfigureAwait(false);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName, Saga.CorrelationId);
+                _logger.LogDebug("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName, Saga.CorrelationId);
             }
         }
 

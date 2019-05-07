@@ -3,7 +3,6 @@
     using System;
     using ExtensionsDependencyInjectionIntegration;
     using Logging;
-    using Logging.Tracing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
@@ -26,8 +25,8 @@
                 {
                     var loggerFactory = provider.GetService<ILoggerFactory>();
 
-                    if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
-                        ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
+                    if (loggerFactory != null)
+                        Logger.UseLoggerFactory(loggerFactory);
 
                     return createBus(provider);
                 });
@@ -60,8 +59,8 @@
                 {
                     var loggerFactory = provider.GetService<ILoggerFactory>();
 
-                    if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
-                        ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
+                    if (loggerFactory != null)
+                        Logger.UseLoggerFactory(loggerFactory);
 
                     return createBus(provider);
                 });
@@ -88,8 +87,8 @@
                     if (loggerFactory == null)
                         loggerFactory = provider.GetService<ILoggerFactory>();
 
-                    if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
-                        ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
+                    if (loggerFactory != null)
+                        Logger.UseLoggerFactory(loggerFactory);
 
                     return bus;
                 });

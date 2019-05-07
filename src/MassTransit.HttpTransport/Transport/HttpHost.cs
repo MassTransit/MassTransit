@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Transport
 {
@@ -23,6 +23,7 @@ namespace MassTransit.HttpTransport.Transport
     using GreenPipes.Agents;
     using Hosting;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Transports;
 
 
@@ -30,7 +31,7 @@ namespace MassTransit.HttpTransport.Transport
         BaseHost,
         IHttpHostControl
     {
-        static readonly ILog _log = Logger.Get<HttpHost>();
+        static readonly ILogger _logger = Logger.Get<HttpHost>();
 
         readonly IHttpHostConfiguration _hostConfiguration;
         readonly HttpHostContextSupervisor _httpHostContextSupervisor;
@@ -43,7 +44,8 @@ namespace MassTransit.HttpTransport.Transport
             _httpHostContextSupervisor = new HttpHostContextSupervisor(hostConfiguration);
         }
 
-        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
         {
             throw new NotImplementedException();
         }
@@ -60,8 +62,7 @@ namespace MassTransit.HttpTransport.Transport
 
             IPipe<HttpHostContext> connectionPipe = Pipe.ExecuteAsync<HttpHostContext>(async context =>
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connection established to {0}", Settings.Host);
+                _logger.LogDebug("Connection established to {0}", Settings.Host);
 
                 try
                 {
@@ -84,8 +85,7 @@ namespace MassTransit.HttpTransport.Transport
                 }
             });
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting connection to {0}", Settings.Host);
+            _logger.LogDebug("Starting connection to {0}", Settings.Host);
 
             var connectionTask = HttpHostContextSupervisor.Send(connectionPipe, Stopping);
 
@@ -115,6 +115,7 @@ namespace MassTransit.HttpTransport.Transport
 
         public IHttpHostContextSupervisor HttpHostContextSupervisor => _httpHostContextSupervisor;
         public HttpHostSettings Settings => _hostConfiguration.Settings;
+
 
         class Handle :
             HostHandle

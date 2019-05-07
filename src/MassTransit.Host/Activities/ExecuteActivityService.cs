@@ -1,14 +1,14 @@
 // Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host.Activities
 {
@@ -16,6 +16,7 @@ namespace MassTransit.Host.Activities
     using Courier;
     using Hosting;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Topshelf;
 
 
@@ -31,17 +32,17 @@ namespace MassTransit.Host.Activities
         where TArguments : class
     {
         readonly string _activityName;
-        readonly ExecuteActivityFactory<TActivity,TArguments> _executeActivityFactory;
+        readonly ExecuteActivityFactory<TActivity, TArguments> _executeActivityFactory;
         readonly int _executeConsumerLimit;
         readonly string _executeQueueName;
-        readonly ILog _log;
+        readonly ILogger _logger;
         readonly IServiceConfigurator _serviceFactory;
         bool _disposed;
 
         public ExecuteActivityService(IConfigurationProvider configuration, IServiceConfigurator serviceFactory,
             IActivityQueueNameProvider activityUriProvider, ExecuteActivityFactory<TActivity, TArguments> executeActivityFactory)
         {
-            _log = Logger.Get(GetType());
+            _logger = Logger.Get(GetType());
 
             _serviceFactory = serviceFactory;
             _executeActivityFactory = executeActivityFactory;
@@ -56,6 +57,7 @@ namespace MassTransit.Host.Activities
         {
             if (_disposed)
                 return;
+
             _disposed = true;
         }
 
@@ -74,6 +76,7 @@ namespace MassTransit.Host.Activities
             string activityName = typeof(TActivity).Name;
             if (activityName.EndsWith("Service", StringComparison.OrdinalIgnoreCase))
                 activityName = activityName.Substring(0, activityName.Length - "Service".Length);
+
             return activityName;
         }
 
@@ -86,7 +89,7 @@ namespace MassTransit.Host.Activities
 
         protected virtual void CreateExecuteServiceBus()
         {
-            _log.InfoFormat("Creating Execute {0} Receive Endpoint", _activityName);
+            _logger.LogInformation("Creating Execute {0} Receive Endpoint", _activityName);
 
             _serviceFactory.ReceiveEndpoint(_executeQueueName, _executeConsumerLimit, x =>
             {

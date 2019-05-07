@@ -1,14 +1,14 @@
 // Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Saga.Factories
 {
@@ -17,6 +17,7 @@ namespace MassTransit.Saga.Factories
     using GreenPipes;
     using Logging;
     using Metadata;
+    using Microsoft.Extensions.Logging;
     using Util;
 
 
@@ -30,7 +31,7 @@ namespace MassTransit.Saga.Factories
         where TSaga : class, ISaga
         where TMessage : class
     {
-        static readonly ILog _log = Logger.Get<DefaultSagaFactory<TSaga, TMessage>>();
+        static readonly ILogger _logger = Logger.Get<DefaultSagaFactory<TSaga, TMessage>>();
 
         public TSaga Create(ConsumeContext<TMessage> context)
         {
@@ -47,8 +48,7 @@ namespace MassTransit.Saga.Factories
 
             TSaga instance = SagaMetadataCache<TSaga>.FactoryMethod(context.CorrelationId.Value);
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("SAGA:{0}:{1} Created {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
+            _logger.LogDebug($"SAGA:{TypeMetadataCache<TSaga>.ShortName}:{instance.CorrelationId} Created {TypeMetadataCache<TMessage>.ShortName}");
 
             var proxy = new NewSagaConsumeContext<TSaga, TMessage>(context, instance);
 

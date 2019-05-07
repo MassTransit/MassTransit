@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous
 {
@@ -22,6 +22,7 @@ namespace Automatonymous
     using MassTransit.Internals.Extensions;
     using MassTransit.Logging;
     using MassTransit.Scheduling;
+    using Microsoft.Extensions.Logging;
     using Requests;
     using SagaConfigurators;
     using Schedules;
@@ -39,13 +40,13 @@ namespace Automatonymous
         where TInstance : class, SagaStateMachineInstance
     {
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
-        readonly ILog _log;
+        readonly ILogger _logger;
         readonly Lazy<StateMachineRegistration[]> _registrations;
         Func<TInstance, bool> _isCompleted;
 
         protected MassTransitStateMachine()
         {
-            _log = Logger.Get(GetType());
+            _logger = Logger.Get(GetType());
 
             _registrations = new Lazy<StateMachineRegistration[]>(GetRegistrations);
 
@@ -74,7 +75,7 @@ namespace Automatonymous
         }
 
         /// <summary>
-        /// Sets the method used to determine if a state machine instance is completed. A completed 
+        /// Sets the method used to determine if a state machine instance is completed. A completed
         /// state machine instance is removed from the saga repository.
         /// </summary>
         /// <param name="completed"></param>
@@ -248,7 +249,6 @@ namespace Automatonymous
                     .ClearRequest(request),
                 When(request.TimeoutExpired, request.EventFilter)
                     .ClearRequest(request));
-
         }
 
         /// <summary>
@@ -316,8 +316,7 @@ namespace Automatonymous
                             {
                                 if (!tokenId.HasValue || (messageTokenId.Value != tokenId.Value))
                                 {
-                                    if (_log.IsDebugEnabled)
-                                        _log.DebugFormat("SAGA: {0} Scheduled message not current: {1}", context.Instance.CorrelationId, messageTokenId.Value);
+                                    _logger.LogDebug("SAGA: {0} Scheduled message not current: {1}", context.Instance.CorrelationId, messageTokenId.Value);
 
                                     return;
                                 }
@@ -328,7 +327,7 @@ namespace Automatonymous
 
                         await ((StateMachine<TInstance>)this).RaiseEvent(eventContext).ConfigureAwait(false);
 
-                        if(schedule.GetTokenId(context.Instance) == tokenId)
+                        if (schedule.GetTokenId(context.Instance) == tokenId)
                             schedule.SetTokenId(context.Instance, default(Guid?));
                     }));
         }
@@ -389,6 +388,7 @@ namespace Automatonymous
                 {
                     var declarationType = typeof(CorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType,
                         messageTypeInfo.AsType());
+
                     var declaration = Activator.CreateInstance(declarationType, propertyInfo);
                     events.Add((StateMachineRegistration)declaration);
                 }
@@ -396,6 +396,7 @@ namespace Automatonymous
                 {
                     var declarationType = typeof(UncorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType,
                         messageTypeInfo.AsType());
+
                     var declaration = Activator.CreateInstance(declarationType, propertyInfo);
                     events.Add((StateMachineRegistration)declaration);
                 }

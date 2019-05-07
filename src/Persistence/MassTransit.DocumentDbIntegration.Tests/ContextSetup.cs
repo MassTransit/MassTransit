@@ -1,20 +1,33 @@
 ﻿namespace MassTransit.DocumentDbIntegration.Tests
 {
     using System.Threading.Tasks;
-    using Log4NetIntegration.Logging;
+    using MassTransit.Tests;
     using NUnit.Framework;
     using Saga;
+    using Serilog;
 
 
     [SetUpFixture]
     public class ContextSetup
     {
+        ILogger _baseLogger;
+
         [OneTimeSetUp]
         public async Task Before_any()
         {
-            Log4NetLogger.Use("test.log4net.xml");
+            _baseLogger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .WriteTo.File("log\\MassTransit.Tests.log", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
 
+            Logging.Logger.UseLoggerFactory(new SerilogLoggerFactory(_baseLogger));
             await SagaRepository.Instance.Initialize();
+        }
+
+        [OneTimeTearDown]
+        public void After_all()
+        {
+            Logging.Logger.Shutdown();
         }
     }
 }

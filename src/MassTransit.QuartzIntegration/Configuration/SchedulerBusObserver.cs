@@ -15,6 +15,7 @@ namespace MassTransit.QuartzIntegration.Configuration
     using System;
     using System.Threading.Tasks;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Quartz;
     using Util;
 
@@ -25,7 +26,7 @@ namespace MassTransit.QuartzIntegration.Configuration
     public class SchedulerBusObserver :
         IBusObserver
     {
-        readonly ILog _log = Logger.Get<SchedulerBusObserver>();
+        readonly ILogger _logger = Logger.Get<SchedulerBusObserver>();
         readonly IScheduler _scheduler;
         readonly Uri _schedulerEndpointAddress;
 
@@ -52,16 +53,14 @@ namespace MassTransit.QuartzIntegration.Configuration
 
         public async Task PostStart(IBus bus, Task<BusReady> busReady)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Quartz Scheduler Starting: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
+            _logger.LogDebug("Quartz Scheduler Starting: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
 
             await busReady.ConfigureAwait(false);
 
             _scheduler.JobFactory = new MassTransitJobFactory(bus);
             await _scheduler.Start().ConfigureAwait(false);
 
-            if (_log.IsInfoEnabled)
-                _log.InfoFormat("Quartz Scheduler Started: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
+            _logger.LogInformation("Quartz Scheduler Started: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
         }
 
         public Task StartFaulted(IBus bus, Exception exception)
@@ -73,16 +72,14 @@ namespace MassTransit.QuartzIntegration.Configuration
         {
             await _scheduler.Standby().ConfigureAwait(false);
 
-            if (_log.IsInfoEnabled)
-                _log.InfoFormat("Quartz Scheduler Paused: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
+            _logger.LogInformation("Quartz Scheduler Paused: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
         }
 
         public async Task PostStop(IBus bus)
         {
             await _scheduler.Shutdown().ConfigureAwait(false);
 
-            if (_log.IsInfoEnabled)
-                _log.InfoFormat("Quartz Scheduler Stopped: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
+            _logger.LogInformation("Quartz Scheduler Stopped: {0} ({1}/{2})", _schedulerEndpointAddress, _scheduler.SchedulerName, _scheduler.SchedulerInstanceId);
         }
 
         public Task StopFaulted(IBus bus, Exception exception)

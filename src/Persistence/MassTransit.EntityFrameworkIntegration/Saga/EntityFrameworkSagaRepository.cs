@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.EntityFrameworkIntegration.Saga
 {
@@ -25,6 +25,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using GreenPipes;
     using Logging;
     using MassTransit.Saga;
+    using Microsoft.Extensions.Logging;
     using Util;
 
 
@@ -33,18 +34,16 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
         IQuerySagaRepository<TSaga>
         where TSaga : class, ISaga
     {
-        static readonly ILog _log = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
+        static readonly ILogger _logger = Logger.Get<EntityFrameworkSagaRepository<TSaga>>();
         readonly IsolationLevel _isolationLevel;
         readonly ISagaDbContextFactory<TSaga> _sagaDbContextFactory;
         readonly Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
         readonly IRawSqlLockStatements _rawSqlLockStatements;
 
-        public EntityFrameworkSagaRepository(
-            ISagaDbContextFactory<TSaga> sagaDbContextFactory,
+        public EntityFrameworkSagaRepository(ISagaDbContextFactory<TSaga> sagaDbContextFactory,
             IsolationLevel isolationLevel,
             IRawSqlLockStatements rawSqlLockStatements = null,
-            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null
-            )
+            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
             _sagaDbContextFactory = sagaDbContextFactory;
             _isolationLevel = isolationLevel;
@@ -52,36 +51,29 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             _queryCustomization = queryCustomization;
         }
 
-        public static EntityFrameworkSagaRepository<TSaga> CreateOptimistic(
-            ISagaDbContextFactory<TSaga> sagaDbContextFactory,
-            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null
-            )
+        public static EntityFrameworkSagaRepository<TSaga> CreateOptimistic(ISagaDbContextFactory<TSaga> sagaDbContextFactory,
+            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
             return new EntityFrameworkSagaRepository<TSaga>(sagaDbContextFactory, IsolationLevel.ReadCommitted, null, queryCustomization);
         }
 
-        public static EntityFrameworkSagaRepository<TSaga> CreateOptimistic(
-            Func<DbContext> sagaDbContextFactory,
-            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null
-            )
+        public static EntityFrameworkSagaRepository<TSaga> CreateOptimistic(Func<DbContext> sagaDbContextFactory,
+            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
             return CreateOptimistic(new DelegateSagaDbContextFactory<TSaga>(sagaDbContextFactory), queryCustomization);
         }
 
-        public static EntityFrameworkSagaRepository<TSaga> CreatePessimistic(
-            ISagaDbContextFactory<TSaga> sagaDbContextFactory,
+        public static EntityFrameworkSagaRepository<TSaga> CreatePessimistic(ISagaDbContextFactory<TSaga> sagaDbContextFactory,
             IRawSqlLockStatements rawSqlLockStatements = null,
-            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null
-            )
+            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
-            return new EntityFrameworkSagaRepository<TSaga>(sagaDbContextFactory, IsolationLevel.Serializable, rawSqlLockStatements ?? new MsSqlLockStatements(), queryCustomization);
+            return new EntityFrameworkSagaRepository<TSaga>(sagaDbContextFactory, IsolationLevel.Serializable,
+                rawSqlLockStatements ?? new MsSqlLockStatements(), queryCustomization);
         }
 
-        public static EntityFrameworkSagaRepository<TSaga> CreatePessimistic(
-            Func<DbContext> sagaDbContextFactory,
+        public static EntityFrameworkSagaRepository<TSaga> CreatePessimistic(Func<DbContext> sagaDbContextFactory,
             IRawSqlLockStatements rawSqlLockStatements = null,
-            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null
-            )
+            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
             return CreatePessimistic(new DelegateSagaDbContextFactory<TSaga>(sagaDbContextFactory), rawSqlLockStatements, queryCustomization);
         }
@@ -135,7 +127,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     if (policy.PreInsertInstance(context, out var instance))
                     {
                         var inserted = await PreInsertSagaInstance<T>(dbContext, instance, context.CancellationToken).ConfigureAwait(false);
-                        if (!inserted) instance = null; // Reset this back to null if the insert failed. We will use the MissingPipe to create instead
+                        if (!inserted)
+                            instance = null; // Reset this back to null if the insert failed. We will use the MissingPipe to create instead
                     }
 
                     try
@@ -148,7 +141,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                                 var rowLockQuery = _rawSqlLockStatements.GetRowLockStatement<TSaga>(dbContext);
                                 await dbContext.Database.ExecuteSqlCommandAsync(rowLockQuery, context.CancellationToken, sagaId).ConfigureAwait(false);
                             }
-                            
+
                             instance = await QuerySagas(dbContext)
                                 .SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken)
                                 .ConfigureAwait(false);
@@ -162,11 +155,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         }
                         else
                         {
-                            if (_log.IsDebugEnabled)
-                            {
-                                _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                                    TypeMetadataCache<T>.ShortName);
-                            }
+                            _logger.LogDebug("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                                TypeMetadataCache<T>.ShortName);
 
                             var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
 
@@ -185,8 +175,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         }
                         catch (Exception innerException)
                         {
-                            if (_log.IsWarnEnabled)
-                                _log.Warn("The transaction rollback failed", innerException);
+                            _logger.LogWarning("The transaction rollback failed", innerException);
                         }
 
                         throw;
@@ -199,8 +188,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         }
                         else
                         {
-                            if (_log.IsErrorEnabled)
-                                _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+                            _logger.LogError($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 
                             try
                             {
@@ -208,8 +196,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                             }
                             catch (Exception innerException)
                             {
-                                if (_log.IsWarnEnabled)
-                                    _log.Warn("The transaction rollback failed", innerException);
+                                _logger.LogWarning("The transaction rollback failed", innerException);
                             }
                         }
 
@@ -217,8 +204,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     }
                     catch (Exception ex)
                     {
-                        if (_log.IsErrorEnabled)
-                            _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+                        _logger.LogError($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 
                         try
                         {
@@ -226,8 +212,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         }
                         catch (Exception innerException)
                         {
-                            if (_log.IsWarnEnabled)
-                                _log.Warn("The transaction rollback failed", innerException);
+                            _logger.LogWarning("The transaction rollback failed", innerException);
                         }
 
                         throw;
@@ -267,7 +252,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     try
                     {
                         // Simple path for Optimistic Concurrency
-                        if(_rawSqlLockStatements == null)
+                        if (_rawSqlLockStatements == null)
                         {
                             var instances = await QuerySagas(dbContext)
                                 .Where(context.Query.FilterExpression)
@@ -280,7 +265,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                                 await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
                             }
                             else
-                                await Task.WhenAll(instances.Select(instance => SendToInstance(context, dbContext, policy, instance, next))).ConfigureAwait(false);
+                                await Task.WhenAll(instances.Select(instance => SendToInstance(context, dbContext, policy, instance, next)))
+                                    .ConfigureAwait(false);
                         }
                         // Pessimistic Concurrency
                         else
@@ -295,12 +281,13 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
                                 foreach (var nonTrackedInstance in nonTrackedInstances)
                                 {
-                                    // Hack for locking row for the duration of the transaction. 
+                                    // Hack for locking row for the duration of the transaction.
                                     // We only lock one at a time, since we don't want an accidental range lock.
-                                    await dbContext.Database.ExecuteSqlCommandAsync(rowLockQuery, context.CancellationToken, nonTrackedInstance).ConfigureAwait(false);
+                                    await dbContext.Database.ExecuteSqlCommandAsync(rowLockQuery, context.CancellationToken, nonTrackedInstance)
+                                        .ConfigureAwait(false);
 
                                     var instance = await QuerySagas(dbContext)
-                                        .SingleOrDefaultAsync(x=>x.CorrelationId == nonTrackedInstance, context.CancellationToken)
+                                        .SingleOrDefaultAsync(x => x.CorrelationId == nonTrackedInstance, context.CancellationToken)
                                         .ConfigureAwait(false);
 
                                     if (instance != null)
@@ -309,7 +296,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                                         missingCorrelationIds.Add(nonTrackedInstance);
                                 }
 
-                                if (foundInstances.Any()) await Task.WhenAll(foundInstances).ConfigureAwait(false);
+                                if (foundInstances.Any())
+                                    await Task.WhenAll(foundInstances).ConfigureAwait(false);
                             }
 
                             // If no sagas are found or all are missing
@@ -333,8 +321,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         }
                         catch (Exception innerException)
                         {
-                            if (_log.IsWarnEnabled)
-                                _log.Warn("The transaction rollback failed", innerException);
+                            _logger.LogWarning("The transaction rollback failed", innerException);
                         }
 
                         throw;
@@ -353,8 +340,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                             }
                             catch (Exception innerException)
                             {
-                                if (_log.IsWarnEnabled)
-                                    _log.Warn("The transaction rollback failed", innerException);
+                                _logger.LogWarning("The transaction rollback failed", innerException);
                             }
                         }
 
@@ -362,8 +348,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                     }
                     catch (SagaException sex)
                     {
-                        if (_log.IsErrorEnabled)
-                            _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+                        _logger.LogError($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
 
                         try
                         {
@@ -371,8 +356,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         }
                         catch (Exception innerException)
                         {
-                            if (_log.IsWarnEnabled)
-                                _log.Warn("The transaction rollback failed", innerException);
+                            _logger.LogWarning("The transaction rollback failed", innerException);
                         }
 
                         throw;
@@ -385,12 +369,10 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                         }
                         catch (Exception innerException)
                         {
-                            if (_log.IsWarnEnabled)
-                                _log.Warn("The transaction rollback failed", innerException);
+                            _logger.LogWarning("The transaction rollback failed", innerException);
                         }
 
-                        if (_log.IsErrorEnabled)
-                            _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+                        _logger.LogError($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
 
                         throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                     }
@@ -418,7 +400,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                 entity = dbContext.Set<TSaga>().Add(instance);
                 await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                _logger.LogDebug("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
                     TypeMetadataCache<T>.ShortName);
 
                 return true;
@@ -430,11 +412,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
                 // see here for details: https://www.davideguida.com/how-to-reset-the-entities-state-on-a-entity-framework-db-context/
                 dbContext.Entry(entity).State = EntityState.Detached;
 
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                        TypeMetadataCache<T>.ShortName, ex.Message);
-                }
+                _logger.LogDebug("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                    TypeMetadataCache<T>.ShortName, ex.Message);
             }
 
             return false;
@@ -446,8 +425,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
         {
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                _logger.LogDebug("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
 
                 var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
 
@@ -473,6 +451,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             return query;
         }
 
+
         /// <summary>
         /// Once the message pipe has processed the saga instance, add it to the saga repository
         /// </summary>
@@ -497,12 +476,9 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName,
-                        context.Saga.CorrelationId,
-                        TypeMetadataCache<TMessage>.ShortName);
-                }
+                _logger.LogDebug("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName,
+                    context.Saga.CorrelationId,
+                    TypeMetadataCache<TMessage>.ShortName);
 
                 var proxy = new EntityFrameworkSagaConsumeContext<TSaga, TMessage>(_dbContext, context, context.Saga, false);
 

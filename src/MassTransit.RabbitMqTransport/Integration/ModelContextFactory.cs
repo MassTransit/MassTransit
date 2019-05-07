@@ -19,13 +19,14 @@ namespace MassTransit.RabbitMqTransport.Integration
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using RabbitMQ.Client;
 
 
     public class ModelContextFactory :
         IPipeContextFactory<ModelContext>
     {
-        static readonly ILog _log = Logger.Get<ModelContextFactory>();
+        static readonly ILogger _logger = Logger.Get<ModelContextFactory>();
 
         readonly IConnectionContextSupervisor _connectionContextSupervisor;
 
@@ -101,8 +102,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
             public async Task Send(ConnectionContext context)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Creating model: {0}", context.Description);
+                _logger.LogDebug("Creating model: {0}", context.Description);
 
                 try
                 {

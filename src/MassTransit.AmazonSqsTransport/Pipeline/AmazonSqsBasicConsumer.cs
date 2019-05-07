@@ -22,6 +22,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Topology;
     using Transports.Metrics;
 
@@ -36,7 +37,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     {
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly Uri _inputAddress;
-        readonly ILog _log = Logger.Get<AmazonSqsBasicConsumer>();
+        readonly ILogger _logger = Logger.Get<AmazonSqsBasicConsumer>();
         readonly ClientContext _client;
         readonly ConcurrentDictionary<string, AmazonSqsReceiveContext> _pending;
         readonly ReceiveSettings _receiveSettings;
@@ -96,8 +97,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                 try
                 {
                     if (!_pending.TryAdd(message.MessageId, context))
-                        if (_log.IsErrorEnabled)
-                            _log.ErrorFormat("Duplicate BasicDeliver: {0}", message.MessageId);
+                        _logger.LogError("Duplicate BasicDeliver: {0}", message.MessageId);
 
                     await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
@@ -130,8 +130,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         {
             if (IsStopping)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer shutdown completed: {0}", _context.InputAddress);
+                _logger.LogDebug("Consumer shutdown completed: {0}", _context.InputAddress);
 
                 _deliveryComplete.TrySetResult(true);
             }
@@ -145,15 +144,13 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             }
             catch (Exception exception)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Debug("Shutting down, deliveryComplete Faulted: {_topology.InputAddress}", exception);
+                _logger.LogDebug("Shutting down, deliveryComplete Faulted: {_topology.InputAddress}", exception);
             }
         }
 
         protected override async Task StopSupervisor(StopSupervisorContext context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping consumer: {0}", _context.InputAddress);
+            _logger.LogDebug("Stopping consumer: {0}", _context.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
@@ -172,8 +169,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                 }
                 catch (OperationCanceledException)
                 {
-                    if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _context.InputAddress);
+                    _logger.LogWarning("Stop canceled waiting for message consumers to complete: {0}", _context.InputAddress);
                 }
             }
         }

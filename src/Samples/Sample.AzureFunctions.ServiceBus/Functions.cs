@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace Sample.AzureFunctions.ServiceBus
 {
@@ -40,7 +40,7 @@ namespace Sample.AzureFunctions.ServiceBus
                 cfg.InputAddress = new Uri("sb://masstransit-build.servicebus.windows.net/input-queue");
 
                 cfg.UseRetry(x => x.Intervals(10, 100, 500, 1000));
-                cfg.Consumer(() => new SubmitOrderConsumer(cfg.Log));
+                cfg.Consumer(() => new SubmitOrderConsumer(cfg.Logger));
             });
 
             return handler.Handle(message);
@@ -59,7 +59,7 @@ namespace Sample.AzureFunctions.ServiceBus
                 cfg.InputAddress = new Uri("sb://masstransit-eventhub.servicebus.windows.net/input-hub");
 
                 cfg.UseRetry(x => x.Intervals(10, 100, 500, 1000));
-                cfg.Consumer(() => new AuditOrderConsumer(cfg.Log));
+                cfg.Consumer(() => new AuditOrderConsumer(cfg.Logger));
             });
 
             return handler.Handle(message);
@@ -70,17 +70,16 @@ namespace Sample.AzureFunctions.ServiceBus
     public class SubmitOrderConsumer :
         IConsumer<SubmitOrder>
     {
-        readonly ILog _log;
+        readonly ILogger _logger;
 
-        public SubmitOrderConsumer(ILog log)
+        public SubmitOrderConsumer(ILogger logger)
         {
-            _log = log;
+            _logger = logger;
         }
 
         public Task Consume(ConsumeContext<SubmitOrder> context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Processing Order: {0}", context.Message.OrderNumber);
+            _logger.LogDebug("Processing Order: {0}", context.Message.OrderNumber);
 
             context.Publish<OrderReceived>(new
             {
@@ -96,17 +95,16 @@ namespace Sample.AzureFunctions.ServiceBus
     public class AuditOrderConsumer :
         IConsumer<OrderReceived>
     {
-        readonly ILog _log;
+        readonly ILogger _logger;
 
-        public AuditOrderConsumer(ILog log)
+        public AuditOrderConsumer(ILogger logger)
         {
-            _log = log;
+            _logger = logger;
         }
 
         public async Task Consume(ConsumeContext<OrderReceived> context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Received Order: {0}", context.Message.OrderNumber);
+            _logger.LogDebug("Received Order: {0}", context.Message.OrderNumber);
         }
     }
 

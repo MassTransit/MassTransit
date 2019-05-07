@@ -1,21 +1,22 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.QuartzService
 {
     using System.Diagnostics;
     using Configuration;
-    using Log4NetIntegration.Logging;
     using Monitoring.Performance.Windows;
+    using Serilog;
+    using Serilog.Core;
     using Topshelf;
     using Topshelf.Logging;
     using Topshelf.Runtime;
@@ -23,11 +24,13 @@ namespace MassTransit.QuartzService
 
     class Program
     {
+        static readonly Logger Logger = new LoggerConfiguration()
+            .WriteTo.File("log\\MassTransit.log", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
         public static int Main()
         {
-            Log4NetLogWriterFactory.Use("log4net.config");
-            Log4NetLogger.Use();
-
+            SerilogLogWriterFactory.Use(Logger);
 
             return (int)HostFactory.Run(x =>
             {
@@ -41,6 +44,7 @@ namespace MassTransit.QuartzService
                     new WindowsPerformanceCounterInstaller().Install();
                 });
 
+                x.UseSerilog();
                 x.Service(CreateService);
             });
         }
@@ -55,7 +59,7 @@ namespace MassTransit.QuartzService
         {
             var configurationProvider = new FileConfigurationProvider();
 
-            return new ScheduleMessageService(configurationProvider);
+            return new ScheduleMessageService(configurationProvider, Logger);
         }
     }
 }

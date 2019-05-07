@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
@@ -17,13 +17,14 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Microsoft.ServiceBus.Messaging;
 
 
     public class RenewLockFilter :
         IFilter<ConsumeContext>
     {
-        static readonly ILog _log = Logger.Get<RenewLockFilter>();
+        static readonly ILogger _logger = Logger.Get<RenewLockFilter>();
 
         readonly TimeSpan _delay;
 
@@ -94,8 +95,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
                         await _context.RenewLockAsync().ConfigureAwait(false);
 
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Renewed Lock: {0}", _context.MessageId);
+                        _logger.LogDebug("Renewed Lock: {0}", _context.MessageId);
 
                         delay = _delay;
                     }
@@ -109,16 +109,14 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                         _source.Cancel();
                         _completed.TrySetException(exception);
 
-                        if (_log.IsWarnEnabled)
-                            _log.Warn($"Lost Message Lock: {_context.MessageId}", exception);
+                        _logger.LogWarning($"Lost Message Lock: {_context.MessageId}", exception);
                     }
                     catch (SessionLockLostException exception)
                     {
                         _source.Cancel();
                         _completed.TrySetException(exception);
 
-                        if (_log.IsWarnEnabled)
-                            _log.Warn($"Lost Message Lock: {_context.MessageId}", exception);
+                        _logger.LogWarning($"Lost Message Lock: {_context.MessageId}", exception);
                     }
                     catch (MessagingException exception)
                     {
@@ -132,16 +130,14 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                     {
                         delay = TimeSpan.Zero;
 
-                        if (_log.IsWarnEnabled)
-                            _log.Warn($"Renew Lock Timeout (will retry): {_context.MessageId}", exception);
+                        _logger.LogWarning($"Renew Lock Timeout (will retry): {_context.MessageId}", exception);
                     }
                     catch (Exception exception)
                     {
                         _source.Cancel();
                         _completed.TrySetException(exception);
 
-                        if (_log.IsWarnEnabled)
-                            _log.Warn($"Renew Lock Exception: {_context.MessageId}", exception);
+                        _logger.LogWarning($"Renew Lock Exception: {_context.MessageId}", exception);
                     }
                 }
 

@@ -15,6 +15,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NUnit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.0.0" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -25,7 +27,6 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <ProjectReference Include="..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.EntityFrameworkIntegration\MassTransit.EntityFrameworkIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj" />

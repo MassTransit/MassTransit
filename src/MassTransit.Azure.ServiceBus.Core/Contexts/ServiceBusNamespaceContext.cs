@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Contexts
 {
@@ -21,6 +21,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using Logging;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
+    using Microsoft.Extensions.Logging;
     using Util;
 
 
@@ -29,7 +30,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         NamespaceContext,
         IAsyncDisposable
     {
-        static readonly ILog _log = Logger.Get<ServiceBusNamespaceContext>();
+        static readonly ILogger _logger = Logger.Get<ServiceBusNamespaceContext>();
 
         readonly NamespaceManager _namespaceManager;
 
@@ -41,8 +42,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Closed namespace manager: {0}", _namespaceManager.Address);
+            _logger.LogDebug("Closed namespace manager: {0}", _namespaceManager.Address);
 
             return TaskUtil.Completed;
         }
@@ -61,8 +61,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             {
                 try
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Creating queue {0}", queueDescription.Path);
+                    _logger.LogDebug("Creating queue {0}", queueDescription.Path);
 
                     queueDescription = await _namespaceManager.CreateQueueAsync(queueDescription).ConfigureAwait(false);
                 }
@@ -72,15 +71,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                 }
             }
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Queue: {0} ({1})", queueDescription.Path,
-                    string.Join(", ",
-                        new[]
-                        {
-                            queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
-                            queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : "",
-                            queueDescription.RequiresSession ? "session" : ""
-                        }.Where(x => !string.IsNullOrWhiteSpace(x))));
+            _logger.LogDebug("Queue: {0} ({1})", queueDescription.Path,
+                string.Join(", ",
+                    new[]
+                    {
+                        queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
+                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : "",
+                        queueDescription.RequiresSession ? "session" : ""
+                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
 
             return queueDescription;
         }
@@ -97,8 +95,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             {
                 try
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Creating topic {0}", topicDescription.Path);
+                    _logger.LogDebug("Creating topic {0}", topicDescription.Path);
 
                     topicDescription = await _namespaceManager.CreateTopicAsync(topicDescription).ConfigureAwait(false);
                 }
@@ -108,9 +105,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                 }
             }
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Topic: {0} ({1})", topicDescription.Path,
-                    string.Join(", ", new[] {topicDescription.RequiresDuplicateDetection ? "dupe detect" : ""}.Where(x => !string.IsNullOrWhiteSpace(x))));
+            _logger.LogDebug("Topic: {0} ({1})", topicDescription.Path,
+                string.Join(", ", new[] {topicDescription.RequiresDuplicateDetection ? "dupe detect" : ""}.Where(x => !string.IsNullOrWhiteSpace(x))));
 
             return topicDescription;
         }
@@ -121,32 +117,49 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             SubscriptionDescription subscriptionDescription = null;
             try
             {
-                subscriptionDescription = await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.SubscriptionName)
-                    .ConfigureAwait(false);
+                subscriptionDescription =
+                    await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.SubscriptionName).ConfigureAwait(false);
 
-                string NormalizeForwardTo(string forwardTo)
+                if (string.IsNullOrWhiteSpace(description.ForwardTo))
                 {
-                    if (string.IsNullOrEmpty(forwardTo))
-                        return string.Empty;
-
-                    var address = _namespaceManager.Address.ToString();
-                    return forwardTo.Replace(address, string.Empty).Trim('/');
-                }
-
-                var targetForwardTo = NormalizeForwardTo(description.ForwardTo);
-                var currentForwardTo = NormalizeForwardTo(subscriptionDescription.ForwardTo);
-
-                if (!targetForwardTo.Equals(currentForwardTo))
-                {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Updating subscription: {0} ({1} -> {2})", subscriptionDescription.SubscriptionName,
+                    if (!string.IsNullOrWhiteSpace(subscriptionDescription.ForwardTo))
+                    {
+                        _logger.LogWarning("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.SubscriptionName,
                             subscriptionDescription.TopicPath,
                             subscriptionDescription.ForwardTo);
 
-                    await _namespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
-                }
+                        string NormalizeForwardTo(string forwardTo)
+                        {
+                            if (string.IsNullOrEmpty(forwardTo))
+                                return string.Empty;
 
-                create = false;
+                            var address = _namespaceManager.Address.ToString();
+                            return forwardTo.Replace(address, string.Empty).Trim('/');
+                        }
+
+                        var targetForwardTo = NormalizeForwardTo(description.ForwardTo);
+                        var currentForwardTo = NormalizeForwardTo(subscriptionDescription.ForwardTo);
+
+                        if (targetForwardTo.Equals(currentForwardTo))
+                        {
+                            _logger.LogDebug("Updating subscription: {0} ({1} -> {2})", subscriptionDescription.SubscriptionName,
+                                subscriptionDescription.TopicPath,
+                                subscriptionDescription.ForwardTo);
+
+                            await _namespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
+                        }
+
+                        create = false;
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.SubscriptionName,
+                            subscriptionDescription.TopicPath,
+                            subscriptionDescription.ForwardTo);
+
+                        await _namespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.SubscriptionName).ConfigureAwait(false);
+                    }
+                }
             }
             catch (MessagingEntityNotFoundException)
             {
@@ -157,8 +170,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                 var created = false;
                 try
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Creating subscription {0} -> {1}", description.TopicPath, description.ForwardTo);
+                    _logger.LogDebug("Creating subscription {0} -> {1}", description.TopicPath, description.ForwardTo);
 
                     subscriptionDescription = rule != null
                         ? await _namespaceManager.CreateSubscriptionAsync(description, rule).ConfigureAwait(false)
@@ -177,9 +189,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                         .ConfigureAwait(false);
             }
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscription: {0} ({1} -> {2})", subscriptionDescription.SubscriptionName, subscriptionDescription.TopicPath,
-                    subscriptionDescription.ForwardTo);
+            _logger.LogDebug("Subscription: {0} ({1} -> {2})", subscriptionDescription.SubscriptionName, subscriptionDescription.TopicPath,
+                subscriptionDescription.ForwardTo);
 
             return subscriptionDescription;
         }
@@ -194,8 +205,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             {
             }
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscription Deleted: {0} ({1} -> {2})", description.SubscriptionName, description.TopicPath, description.ForwardTo);
+            _logger.LogDebug("Subscription Deleted: {0} ({1} -> {2})", description.SubscriptionName, description.TopicPath, description.ForwardTo);
         }
     }
 }

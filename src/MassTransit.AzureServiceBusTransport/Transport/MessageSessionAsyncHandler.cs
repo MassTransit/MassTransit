@@ -1,14 +1,14 @@
 // Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
@@ -16,6 +16,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using System.Threading.Tasks;
     using Contexts;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Microsoft.ServiceBus.Messaging;
     using Transports.Metrics;
     using Util;
@@ -24,14 +25,15 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     public class MessageSessionAsyncHandler :
         IMessageSessionAsyncHandler
     {
-        static readonly ILog _log = Logger.Get<MessageSessionAsyncHandler>();
+        static readonly ILogger _logger = Logger.Get<MessageSessionAsyncHandler>();
         readonly ClientContext _context;
         readonly IReceiver _receiver;
         readonly MessageSession _session;
         readonly IDeliveryTracker _tracker;
         readonly IBrokeredMessageReceiver _messageReceiver;
 
-        public MessageSessionAsyncHandler(ClientContext context, IReceiver receiver, MessageSession session, IDeliveryTracker tracker, IBrokeredMessageReceiver messageReceiver)
+        public MessageSessionAsyncHandler(ClientContext context, IReceiver receiver, MessageSession session, IDeliveryTracker tracker,
+            IBrokeredMessageReceiver messageReceiver)
         {
             _context = context;
             _receiver = receiver;
@@ -50,8 +52,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
             using (var delivery = _tracker.BeginDelivery())
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Receiving {0}:{1}({3}) - {2}", delivery.Id, message.MessageId, _context.EntityPath, session.SessionId);
+                _logger.LogDebug("Receiving {0}:{1}({3}) - {2}", delivery.Id, message.MessageId, _context.EntityPath, session.SessionId);
 
                 await _messageReceiver.Handle(message, context =>
                 {
@@ -63,16 +64,14 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public Task OnCloseSessionAsync(MessageSession session)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Session Closed: {0} ({1})", session.SessionId, _context.InputAddress);
+            _logger.LogDebug("Session Closed: {0} ({1})", session.SessionId, _context.InputAddress);
 
             return TaskUtil.Completed;
         }
 
         public Task OnSessionLostAsync(Exception exception)
         {
-            if (_log.IsDebugEnabled)
-                _log.Debug($"Session Closed: {_session.SessionId} ({_context.InputAddress})", exception);
+            _logger.LogDebug($"Session Closed: {_session.SessionId} ({_context.InputAddress})", exception);
 
             return TaskUtil.Completed;
         }
@@ -87,8 +86,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             }
             catch (Exception exception)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Debug("Stopping async handler, abandoned message faulted: {_inputAddress}", exception);
+                _logger.LogDebug("Stopping async handler, abandoned message faulted: {_inputAddress}", exception);
             }
         }
     }

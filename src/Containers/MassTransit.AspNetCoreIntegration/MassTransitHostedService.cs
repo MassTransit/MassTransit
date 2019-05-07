@@ -3,7 +3,6 @@ namespace MassTransit.AspNetCoreIntegration
     using System.Threading;
     using System.Threading.Tasks;
     using HealthChecks;
-    using Logging.Tracing;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 
@@ -21,9 +20,6 @@ namespace MassTransit.AspNetCoreIntegration
             _bus = bus;
             _simplifiedBusCheck = simplifiedBusCheck;
             _receiveEndpointCheck = receiveEndpointCheck;
-
-            if (loggerFactory != null && Logging.Logger.Current.GetType() == typeof(TraceLogger))
-                ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

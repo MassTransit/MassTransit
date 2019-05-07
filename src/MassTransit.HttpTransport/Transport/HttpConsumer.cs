@@ -1,14 +1,14 @@
 // Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Transport
 {
@@ -20,6 +20,7 @@ namespace MassTransit.HttpTransport.Transport
     using GreenPipes.Internals.Extensions;
     using Logging;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
     using Pipeline;
     using Transports.Metrics;
 
@@ -31,7 +32,7 @@ namespace MassTransit.HttpTransport.Transport
         readonly TaskCompletionSource<bool> _deliveryComplete;
 
         readonly Uri _inputAddress;
-        readonly ILog _log = Logger.Get<HttpConsumer>();
+        readonly ILogger _logger = Logger.Get<HttpConsumer>();
         readonly HttpReceiveEndpointContext _context;
         readonly IDeliveryTracker _tracker;
 
@@ -103,8 +104,7 @@ namespace MassTransit.HttpTransport.Transport
         {
             if (IsStopping)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("HttpConsumer stopped: {0}", _inputAddress);
+                _logger.LogDebug("HttpConsumer stopped: {0}", _inputAddress);
 
                 _deliveryComplete.TrySetResult(true);
             }
@@ -112,8 +112,7 @@ namespace MassTransit.HttpTransport.Transport
 
         protected override async Task StopAgent(StopContext context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping consumer: {0}", _context.InputAddress);
+            _logger.LogDebug("Stopping consumer: {0}", _context.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
@@ -130,8 +129,7 @@ namespace MassTransit.HttpTransport.Transport
                 }
                 catch (OperationCanceledException)
                 {
-                    if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _context.InputAddress);
+                    _logger.LogWarning("Stop canceled waiting for message consumers to complete: {0}", _context.InputAddress);
                 }
             }
         }

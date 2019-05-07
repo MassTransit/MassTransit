@@ -13,16 +13,14 @@
 namespace MassTransit.Host
 {
     using System;
-    using System.IO;
-    using log4net;
-    using log4net.Config;
-    using Log4NetIntegration.Logging;
+    using Serilog;
     using Topshelf;
-    using Topshelf.Logging;
 
 
     class Program
     {
+        static ILogger _baseLogger;
+
         static int Main()
         {
             SetupLogger();
@@ -44,19 +42,12 @@ namespace MassTransit.Host
 
         static void SetupLogger()
         {
-            var configFile = new FileInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MassTransit.Host.log4net.config"));
-            if (configFile.Exists)
-            {
-            #if NETCORE
-                var logRepository = LogManager.GetRepository(System.Reflection.Assembly.GetEntryAssembly());
-                XmlConfigurator.Configure(logRepository, configFile);
-            #else
-                XmlConfigurator.Configure(configFile);
-            #endif
-            }
+            _baseLogger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .WriteTo.File("log\\MassTransit.log", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
 
-            Log4NetLogWriterFactory.Use();
-            Log4NetLogger.Use();
+            Logging.Logger.UseLoggerFactory(new SerilogLoggerFactory(_baseLogger));
         }
     }
 }

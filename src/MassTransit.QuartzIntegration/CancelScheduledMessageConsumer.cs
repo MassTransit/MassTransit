@@ -14,6 +14,7 @@ namespace MassTransit.QuartzIntegration
 {
     using System.Threading.Tasks;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Quartz;
     using Scheduling;
 
@@ -22,7 +23,7 @@ namespace MassTransit.QuartzIntegration
         IConsumer<CancelScheduledMessage>,
         IConsumer<CancelScheduledRecurringMessage>
     {
-        static readonly ILog _log = Logger.Get<CancelScheduledMessageConsumer>();
+        static readonly ILogger _logger = Logger.Get<CancelScheduledMessageConsumer>();
         readonly IScheduler _scheduler;
 
         public CancelScheduledMessageConsumer(IScheduler scheduler)
@@ -37,13 +38,10 @@ namespace MassTransit.QuartzIntegration
             var jobKey = new JobKey(correlationId);
             var deletedJob = await _scheduler.DeleteJob(jobKey).ConfigureAwait(false);
 
-            if (_log.IsDebugEnabled)
-            {
-                if (deletedJob)
-                    _log.DebugFormat("Cancelled Scheduled Message: {0} at {1}", jobKey, context.Message.Timestamp);
-                else
-                    _log.DebugFormat("CancelScheduledMessage: no message found {0}", jobKey);
-            }
+            if (deletedJob)
+                _logger.LogDebug("Cancelled Scheduled Message: {0} at {1}", jobKey, context.Message.Timestamp);
+            else
+                _logger.LogDebug("CancelScheduledMessage: no message found {0}", jobKey);
         }
 
         public async Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
@@ -59,16 +57,13 @@ namespace MassTransit.QuartzIntegration
 
             bool unscheduledJob = await _scheduler.UnscheduleJob(new TriggerKey(scheduleId, context.Message.ScheduleGroup)).ConfigureAwait(false);
 
-            if (_log.IsDebugEnabled)
+            if (unscheduledJob)
             {
-                if (unscheduledJob)
-                {
-                    _log.DebugFormat("CancelRecurringScheduledMessage: {0}/{1} at {2}", context.Message.ScheduleId, context.Message.ScheduleGroup,
-                        context.Message.Timestamp);
-                }
-                else
-                    _log.DebugFormat("CancelRecurringScheduledMessage: no message found {0}", context.Message);
+                _logger.LogDebug("CancelRecurringScheduledMessage: {0}/{1} at {2}", context.Message.ScheduleId, context.Message.ScheduleGroup,
+                    context.Message.Timestamp);
             }
+            else
+                _logger.LogDebug("CancelRecurringScheduledMessage: no message found {0}", context.Message);
         }
     }
 }

@@ -1,14 +1,14 @@
 // Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Hosting
 {
@@ -19,12 +19,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Primitives;
+    using Microsoft.Extensions.Logging;
+
 
     public class ServiceBusHostBusFactory :
         IHostBusFactory
     {
         readonly ServiceBusAmqpTransportSettings _ampAmqpTransportSettings;
-        readonly ILog _log = Logger.Get<ServiceBusHostBusFactory>();
+        readonly ILogger _logger = Logger.Get<ServiceBusHostBusFactory>();
 
         readonly ServiceBusSettings _settings;
 
@@ -39,6 +41,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
             ServiceBusAmqpTransportSettings amqpTransportSettings;
             if (!settingsProvider.TryGetSettings("ServiceBusAmqpTransport", out amqpTransportSettings))
                 throw new ConfigurationException("The ServiceBusAmqpTransport settings were not available");
+
             _ampAmqpTransportSettings = amqpTransportSettings;
         }
 
@@ -71,8 +74,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
                     }
                 });
 
-                if (_log.IsInfoEnabled)
-                    _log.Info($"Configuring Host: {hostSettings.ServiceUri}");
+                _logger.LogInformation($"Configuring Host: {hostSettings.ServiceUri}");
 
                 var serviceConfigurator = new ServiceBusServiceConfigurator(configurator, host);
 
@@ -88,7 +90,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
 
             private readonly ServiceBusSettings _settings;
 
-            public SettingsAdapter(ServiceBusSettings settings, 
+            public SettingsAdapter(ServiceBusSettings settings,
                 ServiceBusAmqpTransportSettings ampAmqpTransportSettings,
                 string serviceName)
             {
@@ -99,13 +101,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
                 {
                     if (string.IsNullOrWhiteSpace(_settings.Namespace))
                         throw new ConfigurationException("The ServiceBus Namespace setting has not been configured");
+
                     if (string.IsNullOrEmpty(settings.KeyName))
                         throw new ConfigurationException("The ServiceBus KeyName setting has not been configured");
+
                     if (string.IsNullOrEmpty(settings.SharedAccessKey))
                         throw new ConfigurationException("The ServiceBus SharedAccessKey setting has not been configured");
 
                     ServiceUri = AzureServiceBusEndpointUriCreator.Create(_settings.Namespace, _settings.ServicePath ?? serviceName);
-                    TokenProvider = Microsoft.Azure.ServiceBus.Primitives.TokenProvider.CreateSharedAccessSignatureTokenProvider(settings.KeyName, settings.SharedAccessKey);
+                    TokenProvider = Microsoft.Azure.ServiceBus.Primitives.TokenProvider.CreateSharedAccessSignatureTokenProvider(settings.KeyName,
+                        settings.SharedAccessKey);
                 }
                 else
                 {

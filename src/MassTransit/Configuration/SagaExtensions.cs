@@ -1,20 +1,21 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
     using System;
     using GreenPipes;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Pipeline;
     using Saga;
     using Saga.Connectors;
@@ -24,7 +25,7 @@ namespace MassTransit
 
     public static class SagaExtensions
     {
-        static readonly ILog _log = Logger.Get(typeof(SagaExtensions));
+        static readonly ILogger _logger = Logger.Get(typeof(SagaExtensions));
 
         /// <summary>
         /// Configure a saga subscription
@@ -38,8 +39,7 @@ namespace MassTransit
             Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<T>.ShortName);
+            _logger.LogDebug("Subscribing Saga: {0}", TypeMetadataCache<T>.ShortName);
 
             var sagaConfigurator = new SagaConfigurator<T>(sagaRepository, configurator);
 
@@ -61,11 +61,11 @@ namespace MassTransit
         {
             if (bus == null)
                 throw new ArgumentNullException(nameof(bus));
+
             if (sagaRepository == null)
                 throw new ArgumentNullException(nameof(sagaRepository));
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Saga: {0}", TypeMetadataCache<T>.ShortName);
+            _logger.LogDebug("Subscribing Saga: {0}", TypeMetadataCache<T>.ShortName);
 
             ISagaSpecification<T> specification = SagaConnectorCache<T>.Connector.CreateSagaSpecification<T>();
             foreach (IPipeSpecification<SagaConsumeContext<T>> pipeSpecification in pipeSpecifications)

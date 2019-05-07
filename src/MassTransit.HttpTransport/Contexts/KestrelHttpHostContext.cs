@@ -1,14 +1,14 @@
 // Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.HttpTransport.Contexts
 {
@@ -26,6 +26,7 @@ namespace MassTransit.HttpTransport.Contexts
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Logging;
     using Transport;
 
 
@@ -34,7 +35,7 @@ namespace MassTransit.HttpTransport.Contexts
         HttpHostContext,
         IAsyncDisposable
     {
-        static readonly ILog _log = Logger.Get<KestrelHttpHostContext>();
+        static readonly ILogger _logger = Logger.Get<KestrelHttpHostContext>();
 
         readonly IHttpHostConfiguration _configuration;
         readonly SortedDictionary<string, List<Endpoint>> _endpoints;
@@ -53,8 +54,7 @@ namespace MassTransit.HttpTransport.Contexts
 
         public async Task Start(CancellationToken cancellationToken)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Configuring Web Host: {0}", _configuration.HostAddress);
+            _logger.LogDebug("Configuring Web Host: {0}", _configuration.HostAddress);
 
             IPHostEntry entries = await Dns.GetHostEntryAsync(_configuration.Settings.Host).ConfigureAwait(false);
 
@@ -77,25 +77,21 @@ namespace MassTransit.HttpTransport.Contexts
                     .Build();
             }
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Building Web Host: {0}", _configuration.HostAddress);
+            _logger.LogDebug("Building Web Host: {0}", _configuration.HostAddress);
 
             _webHost = BuildWebHost();
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting Web Host: {0}", _configuration.HostAddress);
+            _logger.LogDebug("Starting Web Host: {0}", _configuration.HostAddress);
 
             try
             {
                 await _webHost.StartAsync(cancellationToken).ConfigureAwait(false);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Started Web Host: {0}", _configuration.HostAddress);
+                _logger.LogDebug("Started Web Host: {0}", _configuration.HostAddress);
             }
             catch (Exception exception)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"Fault Starting Web Host: {_configuration.HostAddress}", exception);
+                _logger.LogError($"Fault Starting Web Host: {_configuration.HostAddress}", exception);
 
                 throw;
             }
@@ -108,8 +104,7 @@ namespace MassTransit.HttpTransport.Contexts
             if (_started)
                 throw new InvalidOperationException("The host has already been started, no additional endpoints may be added.");
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Adding Endpoint Handler: {0}", pathMatch);
+            _logger.LogDebug("Adding Endpoint Handler: {0}", pathMatch);
 
             lock (_endpoints)
             {

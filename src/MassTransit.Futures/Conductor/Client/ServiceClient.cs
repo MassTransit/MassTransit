@@ -9,13 +9,14 @@ namespace MassTransit.Conductor.Client
     using GreenPipes.Caching;
     using Logging;
     using MassTransit.Pipeline;
+    using Microsoft.Extensions.Logging;
     using Util;
 
 
     public class ServiceClient :
         IServiceClient
     {
-        readonly ILog _log = Logger.Get<ServiceClient>();
+        readonly ILogger _logger = Logger.Get<ServiceClient>();
         readonly ICache<IMessageClient> _cache;
         readonly IIndex<Type, IMessageClient> _index;
         readonly IClientFactory _clientFactory;
@@ -54,8 +55,7 @@ namespace MassTransit.Conductor.Client
             var handle = _consumePipeConnector.ConnectInstance(messageClient);
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Requesting Link to {0} (client-id: {1})", TypeMetadataCache<T>.ShortName, ClientId);
+                _logger.LogDebug("Requesting Link to {0} (client-id: {1})", TypeMetadataCache<T>.ShortName, ClientId);
 
                 var request = _clientFactory.CreateRequestClient<Link<T>>().Create(new {ClientId}, cancellationToken);
 

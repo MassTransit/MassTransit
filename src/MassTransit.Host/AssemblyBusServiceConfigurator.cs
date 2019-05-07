@@ -1,14 +1,14 @@
 // Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host
 {
@@ -19,6 +19,7 @@ namespace MassTransit.Host
     using Hosting;
     using Internals.Extensions;
     using Logging;
+    using Microsoft.Extensions.Logging;
 
 
     /// <summary>
@@ -28,7 +29,7 @@ namespace MassTransit.Host
         IBusServiceConfigurator
     {
         readonly IEndpointSpecification[] _endpointSpecifications;
-        readonly ILog _log = Logger.Get<AssemblyBusServiceConfigurator>();
+        readonly ILogger _logger = Logger.Get<AssemblyBusServiceConfigurator>();
         readonly IServiceSpecification _serviceSpecification;
         readonly ISettingsProvider _settingsProvider;
         readonly ILifetimeScope _lifetimeScope;
@@ -44,7 +45,7 @@ namespace MassTransit.Host
 
         void IBusServiceConfigurator.Configure(IServiceConfigurator configurator)
         {
-            _log.Info($"Configuring Service: {_serviceSpecification.GetType().GetTypeName()}");
+            _logger.LogInformation($"Configuring Service: {_serviceSpecification.GetType().GetTypeName()}");
 
             _serviceSpecification.Configure(configurator);
 
@@ -54,13 +55,13 @@ namespace MassTransit.Host
                 int consumerLimit;
                 GetEndpointSettings(specification, out queueName, out consumerLimit);
 
-                _log.Info($"Configuring Endpoint: {specification.GetType().GetTypeName()} (queue-name: {queueName}, consumer-limit: {consumerLimit})");
+                _logger.LogInformation($"Configuring Endpoint: {specification.GetType().GetTypeName()} (queue-name: {queueName}, consumer-limit: {consumerLimit})");
 
                 configurator.ReceiveEndpoint(queueName, consumerLimit, x =>
                 {
                     specification.Configure(x);
 
-                    _log.Info($"Configured Endpoint: {specification.GetType().GetTypeName()} (address: {x.InputAddress})");
+                    _logger.LogInformation($"Configured Endpoint: {specification.GetType().GetTypeName()} (address: {x.InputAddress})");
                 });
             }
 
@@ -74,7 +75,7 @@ namespace MassTransit.Host
             {
                 foreach (var observer in observers)
                 {
-                    _log.Info($"Configuring Bus Observer: {observer.GetType().GetTypeName()}");
+                    _logger.LogInformation($"Configuring Bus Observer: {observer.GetType().GetTypeName()}");
 
                     configurator.BusObserver(observer);
                 }

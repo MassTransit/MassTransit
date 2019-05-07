@@ -18,6 +18,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading.Tasks;
     using GreenPipes;
     using Logging;
+    using Microsoft.Extensions.Logging;
     using Topology;
     using Topology.Entities;
 
@@ -27,7 +28,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
         where TSettings : class
     {
         readonly BrokerTopology _brokerTopology;
-        readonly ILog _log = Logger.Get<ConfigureTopologyFilter<TSettings>>();
+        readonly ILogger _logger = Logger.Get<ConfigureTopologyFilter<TSettings>>();
         readonly bool _removeSubscriptions;
         CancellationToken _cancellationToken;
 
@@ -58,8 +59,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                         }
                         catch (Exception ex)
                         {
-                            if (_log.IsWarnEnabled)
-                                _log.Warn("Failed to remove one or more subscriptions from the endpoint.", ex);
+                            _logger.LogWarning("Failed to remove one or more subscriptions from the endpoint.", ex);
                         }
                     });
             }).ConfigureAwait(false);
