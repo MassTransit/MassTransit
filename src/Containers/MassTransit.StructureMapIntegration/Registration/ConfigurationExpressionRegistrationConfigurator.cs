@@ -52,18 +52,6 @@ namespace MassTransit.StructureMapIntegration.Registration
 
         ConfigurationExpression IConfigurationExpressionConfigurator.Builder => _expression;
 
-        public void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class
-        {
-            _expression.For<IRequestClient<T>>().Use(context => CreateRequestClient<T>(timeout, context));
-        }
-
-        public void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class
-        {
-            _expression.For<IRequestClient<T>>().Use(context => CreateRequestClient<T>(destinationAddress, timeout, context));
-        }
-
         IConsumerScopeProvider CreateConsumerScopeProvider(IContext context)
         {
             return new StructureMapConsumerScopeProvider(context.GetInstance<IContainer>());
@@ -95,28 +83,6 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IClientFactory>()
                 .Use(context => context.GetInstance<IBus>().CreateClientFactory(default))
                 .Singleton();
-        }
-
-        static IRequestClient<T> CreateRequestClient<T>(RequestTimeout timeout, IContext context)
-            where T : class
-        {
-            var clientFactory = context.GetInstance<IClientFactory>();
-
-            var consumeContext = context.TryGetInstance<ConsumeContext>();
-            return consumeContext != null
-                ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
-                : clientFactory.CreateRequestClient<T>(timeout);
-        }
-
-        static IRequestClient<T> CreateRequestClient<T>(Uri destinationAddress, RequestTimeout timeout, IContext context)
-            where T : class
-        {
-            var clientFactory = context.GetInstance<IClientFactory>();
-
-            var consumeContext = context.TryGetInstance<ConsumeContext>();
-            return consumeContext != null
-                ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
-                : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IContext context)

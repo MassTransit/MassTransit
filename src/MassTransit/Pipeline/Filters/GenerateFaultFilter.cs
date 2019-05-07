@@ -14,6 +14,7 @@ namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Threading.Tasks;
+    using Context;
     using Events;
     using GreenPipes;
     using Serialization;

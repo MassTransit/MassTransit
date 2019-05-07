@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Registration
 {
+    using System;
     using Courier;
     using Definition;
     using MassTransit.Registration;
@@ -92,6 +93,48 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
 
             if (settings != null)
                 _collection.AddSingleton(settings);
+        }
+
+        public void RegisterRequestClient<T>(RequestTimeout timeout = default)
+            where T : class
+        {
+            _collection.AddSingleton(provider =>
+            {
+                var clientFactory = provider.GetRequiredService<IClientFactory>();
+
+                return clientFactory.CreateRequestClient<T>(timeout);
+            });
+
+            _collection.AddScoped(context =>
+            {
+                var clientFactory = context.GetRequiredService<IClientFactory>();
+
+                var consumeContext = context.GetService<ConsumeContext>();
+                return (consumeContext != null)
+                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
+                    : clientFactory.CreateRequestClient<T>(timeout);
+            });
+        }
+
+        public void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
+            where T : class
+        {
+            _collection.AddSingleton(provider =>
+            {
+                var clientFactory = provider.GetRequiredService<IClientFactory>();
+
+                return clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+            });
+
+            _collection.AddScoped(context =>
+            {
+                var clientFactory = context.GetRequiredService<IClientFactory>();
+
+                var consumeContext = context.GetService<ConsumeContext>();
+                return consumeContext != null
+                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
+                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+            });
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()

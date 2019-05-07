@@ -99,7 +99,6 @@ namespace MassTransit.Pipeline.Pipes
             readonly IMessageSendPipeSpecification<TMessage> _specification;
 
             public MessagePipe(SendObservable observers, IMessageSendPipeSpecification<TMessage> specification)
-
             {
                 _output = new Lazy<IMessageSendPipe<TMessage>>(CreateFilter);
 
@@ -114,11 +113,10 @@ namespace MassTransit.Pipeline.Pipes
 
             Task IMessagePipe.Send<T>(SendContext<T> context)
             {
-                var sendContext = context as SendContext<TMessage>;
-                if (sendContext == null)
-                    throw new ArgumentException($"The argument type did not match the output type: {TypeMetadataCache<T>.ShortName}");
+                if (context is SendContext<TMessage> sendContext)
+                    return _output.Value.Send(sendContext);
 
-                return _output.Value.Send(sendContext);
+                throw new ArgumentException($"The argument type did not match the output type: {TypeMetadataCache<T>.ShortName}");
             }
 
             public void Probe(ProbeContext context)
@@ -128,11 +126,11 @@ namespace MassTransit.Pipeline.Pipes
 
             ConnectHandle ISendMessageObserverConnector.ConnectSendMessageObserver<T>(ISendMessageObserver<T> observer)
             {
-                var connector = _output.Value as IMessageSendPipe<T>;
-                if (connector == null)
-                    throw new ArgumentException($"The filter is not of the specified type: {typeof(T).Name}", nameof(observer));
+                if (_output.Value is IMessageSendPipe<T> connector)
+                    return connector.ConnectSendMessageObserver(observer);
 
-                return connector.ConnectSendMessageObserver(observer);
+                throw new ArgumentException($"The filter is not of the specified type: {typeof(T).Name}", nameof(observer));
+
             }
 
             IMessageSendPipe<TMessage> CreateFilter()

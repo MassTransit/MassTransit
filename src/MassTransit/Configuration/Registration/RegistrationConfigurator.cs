@@ -179,6 +179,16 @@ namespace MassTransit.Registration
             _endpointRegistrations.GetOrAdd(typeof(TDefinition), ValueFactory);
         }
 
+        void IRegistrationConfigurator.AddRequestClient<T>(RequestTimeout timeout)
+        {
+            _containerRegistrar.RegisterRequestClient<T>(timeout);
+        }
+
+        void IRegistrationConfigurator.AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
+        {
+            _containerRegistrar.RegisterRequestClient<T>(destinationAddress, timeout);
+        }
+
         public IRegistration CreateRegistration(IConfigurationServiceProvider configurationServiceProvider)
         {
             return new Registration(configurationServiceProvider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),

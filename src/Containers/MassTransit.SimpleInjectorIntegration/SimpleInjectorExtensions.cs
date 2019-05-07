@@ -24,6 +24,7 @@ namespace MassTransit
     using Scoping;
     using SimpleInjector;
     using SimpleInjectorIntegration;
+    using SimpleInjectorIntegration.Registration;
     using SimpleInjectorIntegration.ScopeProviders;
 
 

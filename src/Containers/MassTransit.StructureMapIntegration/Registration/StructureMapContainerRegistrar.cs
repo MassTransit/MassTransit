@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.StructureMapIntegration.Registration
 {
+    using System;
     using Courier;
     using Definition;
     using StructureMap;
@@ -95,6 +96,40 @@ namespace MassTransit.StructureMapIntegration.Registration
 
             if (settings != null)
                 _expression.ForSingletonOf<IEndpointSettings<IEndpointDefinition<T>>>().Use(settings);
+        }
+
+        public void RegisterRequestClient<T>(RequestTimeout timeout = default)
+            where T : class
+        {
+            _expression.For<IRequestClient<T>>().Use(context => CreateRequestClient<T>(timeout, context));
+        }
+
+        public void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
+            where T : class
+        {
+            _expression.For<IRequestClient<T>>().Use(context => CreateRequestClient<T>(destinationAddress, timeout, context));
+        }
+
+        static IRequestClient<T> CreateRequestClient<T>(RequestTimeout timeout, IContext context)
+            where T : class
+        {
+            var clientFactory = context.GetInstance<IClientFactory>();
+
+            var consumeContext = context.TryGetInstance<ConsumeContext>();
+            return consumeContext != null
+                ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
+                : clientFactory.CreateRequestClient<T>(timeout);
+        }
+
+        static IRequestClient<T> CreateRequestClient<T>(Uri destinationAddress, RequestTimeout timeout, IContext context)
+            where T : class
+        {
+            var clientFactory = context.GetInstance<IClientFactory>();
+
+            var consumeContext = context.TryGetInstance<ConsumeContext>();
+            return consumeContext != null
+                ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
+                : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()

@@ -87,34 +87,6 @@ namespace MassTransit.LamarIntegration.Registration
                 .Singleton();
         }
 
-        public void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class
-        {
-            _registry.For<IRequestClient<T>>().Use(context =>
-            {
-                var clientFactory = context.GetInstance<IClientFactory>();
-
-                ConsumeContext consumeContext = context.TryGetInstance<ConsumeContext>();
-                return (consumeContext != null)
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
-                    : clientFactory.CreateRequestClient<T>(timeout);
-            }).Scoped();
-        }
-
-        public void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class
-        {
-            _registry.For<IRequestClient<T>>().Use(context =>
-            {
-                var clientFactory = context.GetInstance<IClientFactory>();
-
-                ConsumeContext consumeContext = context.TryGetInstance<ConsumeContext>();
-                return (consumeContext != null)
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
-                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-            }).Scoped();
-        }
-
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IServiceContext context)
         {
             return context.TryGetInstance<ConsumeContext>() ?? (ISendEndpointProvider)context.GetInstance<IBus>();

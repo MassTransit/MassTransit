@@ -48,48 +48,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
             Collection.AddSingleton(context => context.GetRequiredService<IBus>().CreateClientFactory());
         }
 
-        public void AddRequestClient<T>(RequestTimeout timeout = default)
-            where T : class
-        {
-            Collection.AddSingleton(provider =>
-            {
-                var clientFactory = provider.GetRequiredService<IClientFactory>();
-
-                return clientFactory.CreateRequestClient<T>(timeout);
-            });
-
-            Collection.AddScoped(context =>
-            {
-                var clientFactory = context.GetRequiredService<IClientFactory>();
-
-                var consumeContext = context.GetService<ConsumeContext>();
-                return (consumeContext != null)
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
-                    : clientFactory.CreateRequestClient<T>(timeout);
-            });
-        }
-
-        public void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
-            where T : class
-        {
-            Collection.AddSingleton(provider =>
-            {
-                var clientFactory = provider.GetRequiredService<IClientFactory>();
-
-                return clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-            });
-
-            Collection.AddScoped(context =>
-            {
-                var clientFactory = context.GetRequiredService<IClientFactory>();
-
-                var consumeContext = context.GetService<ConsumeContext>();
-                return consumeContext != null
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
-                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-            });
-        }
-
         static void AddMassTransitComponents(IServiceCollection collection)
         {
             collection.AddScoped<ScopedConsumeContextProvider>();
