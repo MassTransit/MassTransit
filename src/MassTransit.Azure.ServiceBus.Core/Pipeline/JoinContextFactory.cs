@@ -18,6 +18,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
+    using Util;
 
 
     public abstract class JoinContextFactory<TLeft, TRight, TContext> :
@@ -45,7 +46,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
         {
             IAsyncPipeContextAgent<TContext> asyncContext = supervisor.AddAsyncContext<TContext>();
 
-            Task<TContext> context = CreateJoinContext(asyncContext, supervisor.Stopped);
+            TaskUtil.Await(() => CreateJoinContext(asyncContext, supervisor.Stopped));
 
             return asyncContext;
         }
