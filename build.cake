@@ -53,13 +53,28 @@ Task("Build")
     .IsDependentOn("Restore-NuGet")
     .Does<BuildParameters>(data =>
 {
-    var settings = new DotNetCoreBuildSettings{
-        NoRestore = true,
-        Configuration = data.Configuration,
-        MSBuildSettings = new DotNetCoreMSBuildSettings().WithProperty("Version", data.Version.Version)
-    };
+    if(data.IsRunningOnUnix)
+    {
+        var settings = new DotNetCoreBuildSettings{
+            NoRestore = true,
+            Configuration = data.Configuration,
+            MSBuildSettings = new DotNetCoreMSBuildSettings().WithProperty("Version", data.Version.Version)
+        };
 
-    DotNetCoreBuild(data.Paths.Directories.Solution.FullPath, settings);
+        DotNetCoreBuild(data.Paths.Directories.Solution.FullPath, settings);
+    }
+    else
+    {
+        var settings = new MSBuildSettings
+        {
+            Restore = false,
+            Configuration = data.Configuration,
+            ToolVersion = MSBuildToolVersion.VS2017
+        };
+
+        MSBuild(data.Paths.Directories.Solution.FullPath, settings.WithProperty("Version",data.Version.Version));
+    }
+
 });
 
 Task("Test")
