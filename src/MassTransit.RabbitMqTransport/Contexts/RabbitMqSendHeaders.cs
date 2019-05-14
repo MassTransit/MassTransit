@@ -72,6 +72,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 if (value is byte[])
                     value = Encoding.UTF8.GetString((byte[])value);
             }
+
             return found;
         }
 
@@ -92,7 +93,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
             return defaultValue;
         }
 
-        T? MassTransit.Headers.Get<T>(string key, T? defaultValue)
+        public T? Get<T>(string key, T? defaultValue)
+            where T : struct
         {
             object value;
             if (TryGetHeader(key, out value))

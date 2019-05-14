@@ -52,7 +52,8 @@ namespace MassTransit.Context
             return _deserializer.Deserialize(_provider, key, defaultValue);
         }
 
-        T? Headers.Get<T>(string key, T? defaultValue)
+        public T? Get<T>(string key, T? defaultValue)
+            where T : struct
         {
             return _deserializer.Deserialize(_provider, key, defaultValue);
         }

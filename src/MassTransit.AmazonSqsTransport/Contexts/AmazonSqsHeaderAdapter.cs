@@ -65,7 +65,11 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         MessageAttributeValue ToValue(string value)
         {
-            return new MessageAttributeValue {StringValue = value, DataType = "String"};
+            return new MessageAttributeValue
+            {
+                StringValue = value,
+                DataType = "String"
+            };
         }
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()
@@ -86,7 +90,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return defaultValue;
         }
 
-        T? Headers.Get<T>(string key, T? defaultValue)
+        public T? Get<T>(string key, T? defaultValue)
+            where T : struct
         {
             if (TryGetHeader(key, out var value))
                 return ObjectTypeDeserializer.Deserialize(value, defaultValue);
