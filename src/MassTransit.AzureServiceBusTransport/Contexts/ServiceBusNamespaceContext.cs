@@ -94,13 +94,14 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Queue: {0} ({1})", queueDescription.Path,
-                    string.Join(", ", new[]
-                    {
-                        queueDescription.EnableExpress ? "express" : "",
-                        queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
-                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : "",
-                        queueDescription.RequiresSession ? "session" : ""
-                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
+                    string.Join(", ",
+                        new[]
+                        {
+                            queueDescription.EnableExpress ? "express" : "",
+                            queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
+                            queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : "",
+                            queueDescription.RequiresSession ? "session" : ""
+                        }.Where(x => !string.IsNullOrWhiteSpace(x))));
 
             return queueDescription;
         }
@@ -150,11 +151,9 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Topic: {0} ({1})", topicDescription.Path,
-                    string.Join(", ", new[]
-                    {
-                        topicDescription.EnableExpress ? "express" : "",
-                        topicDescription.RequiresDuplicateDetection ? "dupe detect" : ""
-                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
+                    string.Join(", ",
+                        new[] {topicDescription.EnableExpress ? "express" : "", topicDescription.RequiresDuplicateDetection ? "dupe detect" : ""}.Where(x =>
+                            !string.IsNullOrWhiteSpace(x))));
 
             return topicDescription;
         }
@@ -165,53 +164,32 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
             SubscriptionDescription subscriptionDescription = null;
             try
             {
-                subscriptionDescription = await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
-                if (string.IsNullOrWhiteSpace(description.ForwardTo))
+                subscriptionDescription = await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name)
+                    .ConfigureAwait(false);
+
+                string NormalizeForwardTo(string forwardTo)
                 {
-                    if (!string.IsNullOrWhiteSpace(subscriptionDescription.ForwardTo))
-                    {
-                        if (_log.IsWarnEnabled)
-                            _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name,
-                                subscriptionDescription.TopicPath,
-                                subscriptionDescription.ForwardTo);
+                    if (string.IsNullOrEmpty(forwardTo))
+                        return string.Empty;
 
-                        await _namespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
-                    }
+                    var address = _namespaceManager.Address.ToString();
+                    return forwardTo.Replace(address, string.Empty).Trim('/');
                 }
-                else
+
+                var targetForwardTo = NormalizeForwardTo(description.ForwardTo);
+                var currentForwardTo = NormalizeForwardTo(subscriptionDescription.ForwardTo);
+
+                if (!targetForwardTo.Equals(currentForwardTo))
                 {
-                    string NormalizeForwardTo(string forwardTo)
-                    {
-                        if (string.IsNullOrEmpty(forwardTo))
-                            return string.Empty;
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Updating subscription: {0} ({1} -> {2})", subscriptionDescription.Name,
+                            subscriptionDescription.TopicPath,
+                            subscriptionDescription.ForwardTo);
 
-                        var address = _namespaceManager.Address.ToString();
-                        return forwardTo.Replace(address, string.Empty).Trim('/');
-                    }
-                    
-                    var targetForwardTo = NormalizeForwardTo(description.ForwardTo);
-                    var currentForwardTo = NormalizeForwardTo(subscriptionDescription.ForwardTo);
-
-                    if (targetForwardTo.Equals(currentForwardTo))
-                    {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Updating subscription: {0} ({1} -> {2})", subscriptionDescription.Name, subscriptionDescription.TopicPath,
-                                subscriptionDescription.ForwardTo);
-
-                        await _namespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
-
-                        create = false;
-                    }
-                    else
-                    {
-                        if (_log.IsWarnEnabled)
-                            _log.WarnFormat("Removing invalid subscription: {0} ({1} -> {2})", subscriptionDescription.Name,
-                                subscriptionDescription.TopicPath,
-                                subscriptionDescription.ForwardTo);
-
-                        await _namespaceManager.DeleteSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
-                    }
+                    await _namespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
                 }
+
+                create = false;
             }
             catch (MessagingEntityNotFoundException)
             {
@@ -236,19 +214,10 @@ namespace MassTransit.AzureServiceBusTransport.Contexts
                 catch (MessagingEntityAlreadyExistsException)
                 {
                 }
-                catch (MessagingException mex)
-                {
-                    if (mex.Message.Contains("(409)"))
-                    {
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
 
                 if (!created)
-                    subscriptionDescription = await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name).ConfigureAwait(false);
+                    subscriptionDescription = await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.Name)
+                        .ConfigureAwait(false);
             }
 
             if (_log.IsDebugEnabled)
