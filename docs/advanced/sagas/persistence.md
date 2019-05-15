@@ -200,7 +200,7 @@ public class AutofacSagaDbContextFactory<TSaga> :
 {
 	readonly ILifetimeScope _defaultLifetimeScope;
 
-	public DelegateSagaDbContextFactory(ILifetimeScope defaultLifetimeScope)
+	public AutofacSagaDbContextFactory(ILifetimeScope defaultLifetimeScope)
 	{
 		_defaultLifetimeScope = defaultLifetimeScope;
 	}
