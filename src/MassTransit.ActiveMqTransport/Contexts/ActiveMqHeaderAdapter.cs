@@ -81,7 +81,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
             return defaultValue;
         }
 
-        T? Headers.Get<T>(string key, T? defaultValue)
+        public T? Get<T>(string key, T? defaultValue)
+            where T : struct
         {
             if (TryGetHeader(key, out var value))
                 return ObjectTypeDeserializer.Deserialize(value, defaultValue);

@@ -59,7 +59,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                         catch (Exception ex)
                         {
                             if (_log.IsWarnEnabled)
-                                _log.Warn("Failed to remove one or more subsriptions from the endpoint.", ex);
+                                _log.Warn("Failed to remove one or more subscriptions from the endpoint.", ex);
                         }
                     });
             }).ConfigureAwait(false);

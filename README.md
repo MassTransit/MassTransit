@@ -157,13 +157,19 @@ enhancements and calls for help from people who forget to check back if they get
 
 ## Building from Source
 
- 1. Clone the source down to your machine. 
-   `git clone git://github.com/MassTransit/MassTransit.git`
- 1. Run `build.bat`
+ 1. Install the latest [.NET Core 3.0](https://dotnet.microsoft.com/download/dotnet-core/3.0) preview.
+ 1. Clone the source down to your machine.<br/>
+    ```bash
+    git clone git://github.com/MassTransit/MassTransit.git
+    ```
+ 1. Run `build.ps1` or `build.sh`.
 
 ## Contributing
 
- 1. `git config --global core.autocrlf false`
+ 1. Turn off `autocrlf`.
+    ```bash
+    git config core.autocrlf false
+    ```
  1. Hack!
  1. Make a pull request.
 

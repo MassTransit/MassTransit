@@ -46,6 +46,19 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             IAsyncPipeContextAgent<TContext> asyncContext = supervisor.AddAsyncContext<TContext>();
 
             Task<TContext> context = CreateJoinContext(asyncContext, supervisor.Stopped);
+            context.ContinueWith(task =>
+            {
+                try
+                {
+                    if (task.IsCanceled)
+                        asyncContext.CreateCanceled();
+                    else if (task.IsFaulted)
+                        asyncContext.CreateFaulted(task.Exception);
+                }
+                catch
+                {
+                }
+            });
 
             return asyncContext;
         }

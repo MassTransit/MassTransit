@@ -47,7 +47,8 @@ namespace MassTransit.Serialization
             return result ?? defaultValue;
         }
 
-        T? Headers.Get<T>(string key, T? defaultValue)
+        public T? Get<T>(string key, T? defaultValue)
+            where T : struct
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
