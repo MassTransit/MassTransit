@@ -12,9 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests
 {
+    using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
     using Autofac;
+    using Automatonymous;
+    using MassTransit.Internals.Extensions;
     using NUnit.Framework;
     using Saga;
     using Scenarios.StateMachines;
@@ -30,13 +33,21 @@ namespace MassTransit.Containers.Tests
             Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
             Task<ConsumeContext<TestUpdated>> updated = ConnectPublishHandler<TestUpdated>();
 
-            await InputQueueSendEndpoint.Send(new StartTest {CorrelationId = NewId.NextGuid(), TestKey = "Unique"});
+            await InputQueueSendEndpoint.Send(new StartTest { CorrelationId = NewId.NextGuid(), TestKey = "Unique" });
 
             await started;
 
-            await InputQueueSendEndpoint.Send(new UpdateTest {TestKey = "Unique"});
+            await InputQueueSendEndpoint.Send(new UpdateTest { TestKey = "Unique" });
 
             await updated;
+
+            var stateMachinesThatAreRegistered = _container.ComponentRegistry
+                                                           .Registrations
+                                                           .Where(x => x.Activator.LimitType.HasInterface(typeof(SagaStateMachine<>)) == true)
+                                                           .Select(x => x.Activator.LimitType)
+                                                           .ToArray();
+
+            Assert.Contains(typeof(TestStateMachineSaga2), stateMachinesThatAreRegistered);
         }
 
         IContainer _container;
@@ -51,7 +62,13 @@ namespace MassTransit.Containers.Tests
 
             builder.RegisterType<PublishTestStartedActivity>();
 
-            builder.RegisterStateMachineSagas(typeof(TestStateMachineSaga).GetTypeInfo().Assembly);
+            var stateMachineTypes = typeof(TestStateMachineSaga)
+                .Assembly
+                .GetTypes()
+                .Where(x => x.HasInterface(typeof(SagaStateMachine<>)))
+                .ToArray();
+
+            builder.RegisterSagaStateMachines(stateMachineTypes);
 
             _container = builder.Build();
 
