@@ -62,13 +62,22 @@ namespace MassTransit.Serialization
             _consumeTasks = new List<Task>();
         }
 
-        public override Task ConsumeCompleted
+        public override Task ConsumeCompleted => ConsumeTasksCompleted();
+
+        async Task ConsumeTasksCompleted()
         {
-            get
+            Task[] tasks = null;
+            do
             {
                 lock (_consumeTasks)
-                    return Task.WhenAll(_consumeTasks.ToArray());
+                    tasks = _consumeTasks.Where(x => !x.IsCompleted).ToArray();
+
+                if (tasks.Length == 0)
+                    break;
+
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
+            while (tasks.Length > 0);
         }
 
         public override Guid? MessageId => _messageId ?? (_messageId = ConvertIdToGuid(_envelope.MessageId));

@@ -4,6 +4,7 @@ namespace MassTransit.Context
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
@@ -68,13 +69,22 @@ namespace MassTransit.Context
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
         public IPublishTopology PublishTopology => _receiveEndpointContext.Publish;
 
-        public Task ReceiveCompleted
+        public Task ReceiveCompleted => ReceiveTasksCompleted();
+
+        async Task ReceiveTasksCompleted()
         {
-            get
+            Task[] tasks = null;
+            do
             {
                 lock (_receiveTasks)
-                    return Task.WhenAll(_receiveTasks.ToArray());
+                    tasks = _receiveTasks.Where(x => !x.IsCompleted).ToArray();
+
+                if (tasks.Length == 0)
+                    break;
+
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
+            while (tasks.Length > 0);
         }
 
         public void AddReceiveTask(Task task)
