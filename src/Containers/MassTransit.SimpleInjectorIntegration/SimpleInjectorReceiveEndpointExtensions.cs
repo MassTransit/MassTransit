@@ -45,7 +45,8 @@ namespace MassTransit
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
-            Container container)
+            Container container,
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
@@ -55,10 +56,13 @@ namespace MassTransit
 
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
 
+            configure?.Invoke(specification);
+
             configurator.AddEndpointSpecification(specification);
         }
 
-        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Container container)
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Container container,
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, ExecuteActivity<TArguments>
             where TArguments : class
         {
@@ -68,10 +72,13 @@ namespace MassTransit
 
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
 
+            configure?.Invoke(specification);
+
             configurator.AddEndpointSpecification(specification);
         }
 
-        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, Container container)
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, Container container,
+            Action<ICompensateActivityConfigurator<TActivity, TLog>> configure = null)
             where TActivity : class, CompensateActivity<TLog>
             where TLog : class
         {
@@ -80,6 +87,8 @@ namespace MassTransit
             var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
 
             var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+
+            configure?.Invoke(specification);
 
             configurator.AddEndpointSpecification(specification);
         }
