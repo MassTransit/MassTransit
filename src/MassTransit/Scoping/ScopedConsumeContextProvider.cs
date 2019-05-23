@@ -37,13 +37,9 @@ namespace MassTransit.Scoping
 
                 context.GetOrAddPayload(() => _marker);
             }
-            else if (!context.TryGetPayload<ScopedConsumeContext>(out var marker))
+            else if (!context.TryGetPayload<ScopedConsumeContext>(out _))
             {
                 throw new InvalidOperationException("The ConsumeContext was already set.");
-            }
-            else if (marker != _marker)
-            {
-                throw new InvalidOperationException("The scoped ConsumeContext marker did not match.");
             }
         }
 

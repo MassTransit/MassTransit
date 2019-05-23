@@ -22,6 +22,7 @@ namespace MassTransit.Containers.Tests
             collection.AddMassTransit(x =>
             {
                 x.AddConsumer<SimpleConsumer>();
+                x.AddConsumer<SimplerConsumer>();
                 x.AddBus(provider => BusControl);
             });
 
@@ -34,6 +35,7 @@ namespace MassTransit.Containers.Tests
         protected void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.ConfigureConsumer<SimpleConsumer>(_provider);
+            configurator.ConfigureConsumer<SimplerConsumer>(_provider);
         }
 
         [Test]
@@ -56,6 +58,12 @@ namespace MassTransit.Containers.Tests
 
             lastConsumer.Dependency.SomethingDone
                 .ShouldBe(true); //Dependency was disposed before consumer executed");
+
+            SimplerConsumer lasterConsumer = await SimplerConsumer.LastConsumer.UntilCompletedOrCanceled(TestCancellationToken);
+            lasterConsumer.ShouldNotBe(null);
+
+            SimpleMessageInterface laster = await lasterConsumer.Last.UntilCompletedOrCanceled(TestCancellationToken);
+
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
