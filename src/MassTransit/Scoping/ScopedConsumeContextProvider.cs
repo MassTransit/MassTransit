@@ -23,16 +23,28 @@ namespace MassTransit.Scoping
     {
         ConsumeContext _context;
         bool _accessed;
+        ScopedConsumeContext _marker;
 
         public void SetContext(ConsumeContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            if (_context != null && _context != context)
-                throw new InvalidOperationException("The ConsumeContext was already set.");
+            if (_context == null)
+            {
+                _context = context;
+                _marker = new ScopedConsumeContext();
 
-            _context = context;
+                context.GetOrAddPayload(() => _marker);
+            }
+            else if (!context.TryGetPayload<ScopedConsumeContext>(out var marker))
+            {
+                throw new InvalidOperationException("The ConsumeContext was already set.");
+            }
+            else if (marker != _marker)
+            {
+                throw new InvalidOperationException("The scoped ConsumeContext marker did not match.");
+            }
         }
 
         public ConsumeContext GetContext()
@@ -46,6 +58,11 @@ namespace MassTransit.Scoping
             _accessed = true;
 
             return _context;
+        }
+
+
+        class ScopedConsumeContext
+        {
         }
     }
 }
