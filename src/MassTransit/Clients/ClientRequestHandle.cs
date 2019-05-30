@@ -42,6 +42,7 @@ namespace MassTransit.Clients
         readonly TaskScheduler _taskScheduler;
         CancellationTokenRegistration _registration;
         Timer _timeoutTimer;
+        bool _faultedOrCanceled;
         RequestTimeout _timeToLive;
 
         public ClientRequestHandle(ClientFactoryContext context, IRequestSendEndpoint<TRequest> requestSendEndpoint, Task<TRequest> message,
@@ -109,15 +110,25 @@ namespace MassTransit.Clients
 
         public void Cancel()
         {
-            _readyToSend.TrySetCanceled();
-            _sendContext.TrySetCanceled();
-
-            _cancellationTokenSource.Cancel();
+            if (Volatile.Read(ref _faultedOrCanceled))
+                return;
 
             lock (_responseHandlers)
             {
+                if (Volatile.Read(ref _faultedOrCanceled))
+                    return;
+
+                Volatile.Write(ref _faultedOrCanceled, true);
+
+                DisposeTimer();
+
+                _readyToSend.TrySetCanceled();
+                _sendContext.TrySetCanceled();
+
                 foreach (var handler in _responseHandlers.Values)
                     handler.TrySetCanceled();
+
+                _cancellationTokenSource.Cancel();
             }
         }
 
@@ -146,12 +157,9 @@ namespace MassTransit.Clients
                     handle.Disconnect();
             }
 
-            _timeoutTimer?.Dispose();
-            _timeoutTimer = null;
-
             _registration.Dispose();
 
-//            _cancellationTokenSource.Dispose();
+            //            _cancellationTokenSource.Dispose();
         }
 
         Task<TRequest> RequestHandle<TRequest>.Message => _message;
@@ -241,26 +249,54 @@ namespace MassTransit.Clients
 
         void Fail(Exception exception)
         {
-            _readyToSend.TrySetException(exception);
-            _sendContext.TrySetException(exception);
+            if (Volatile.Read(ref _faultedOrCanceled))
+                return;
 
             lock (_responseHandlers)
             {
+                if (Volatile.Read(ref _faultedOrCanceled))
+                    return;
+
+                Volatile.Write(ref _faultedOrCanceled, true);
+
+                DisposeTimer();
+
+                _readyToSend.TrySetException(exception);
+                _sendContext.TrySetException(exception);
+
                 foreach (var handle in _responseHandlers.Values)
                     handle.TrySetException(exception);
-            }
 
-            _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Cancel();
+            }
         }
 
         void TimeoutExpired(object state)
         {
-            _timeoutTimer?.Dispose();
+            if (Volatile.Read(ref _faultedOrCanceled))
+                return;
+
+            void HandleTimeout()
+            {
+                var timeoutException = new RequestTimeoutException(_requestId.ToString());
+
+                Fail(timeoutException);
+            }
+
+            Task.Factory.StartNew(HandleTimeout, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
+        }
+
+        void DisposeTimer()
+        {
+            try
+            {
+                _timeoutTimer?.Dispose();
+            }
+            catch (ObjectDisposedException e)
+            {
+            }
+
             _timeoutTimer = null;
-
-            var timeoutException = new RequestTimeoutException(_requestId.ToString());
-
-            Fail(timeoutException);
         }
     }
 }
