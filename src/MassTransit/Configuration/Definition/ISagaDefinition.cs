@@ -4,7 +4,8 @@ namespace MassTransit.Definition
     using Saga;
 
 
-    public interface ISagaDefinition
+    public interface ISagaDefinition :
+        IDefinition
     {
         /// <summary>
         /// The saga type

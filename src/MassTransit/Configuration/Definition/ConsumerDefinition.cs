@@ -32,9 +32,10 @@ namespace MassTransit.Definition
 
         /// Set the concurrent message limit for the consumer, which limits how many consumers are able to concurrently
         /// consume messages. 
-        protected int ConcurrentMessageLimit
+        public int? ConcurrentMessageLimit
         {
-            set => _concurrentMessageLimit = value;
+            get => _concurrentMessageLimit;
+            protected set => _concurrentMessageLimit = value;
         }
 
         void IConsumerDefinition<TConsumer>.Configure(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TConsumer> consumerConfigurator)

@@ -26,9 +26,10 @@ namespace MassTransit.Definition
         /// <summary>
         /// Specify a concurrency limit, which is applied to the entire consumer, saga, or activity, regardless of message type.
         /// </summary>
-        protected int ConcurrentMessageLimit
+        public int? ConcurrentMessageLimit
         {
-            set => _concurrentMessageLimit = value;
+            get => _concurrentMessageLimit;
+            protected set => _concurrentMessageLimit = value;
         }
 
         void IExecuteActivityDefinition<TActivity, TArguments>.Configure(IReceiveEndpointConfigurator endpointConfigurator,
