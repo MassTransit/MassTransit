@@ -42,7 +42,7 @@ namespace MassTransit.Clients
         readonly TaskScheduler _taskScheduler;
         CancellationTokenRegistration _registration;
         Timer _timeoutTimer;
-        bool _faultedOrCanceled;
+        int _faultedOrCanceled;
         RequestTimeout _timeToLive;
 
         public ClientRequestHandle(ClientFactoryContext context, IRequestSendEndpoint<TRequest> requestSendEndpoint, Task<TRequest> message,
@@ -110,26 +110,10 @@ namespace MassTransit.Clients
 
         public void Cancel()
         {
-            if (Volatile.Read(ref _faultedOrCanceled))
+            if (Interlocked.CompareExchange(ref _faultedOrCanceled, 1, 0) != 0)
                 return;
 
-            lock (_responseHandlers)
-            {
-                if (Volatile.Read(ref _faultedOrCanceled))
-                    return;
-
-                Volatile.Write(ref _faultedOrCanceled, true);
-
-                DisposeTimer();
-
-                _readyToSend.TrySetCanceled();
-                _sendContext.TrySetCanceled();
-
-                foreach (var handler in _responseHandlers.Values)
-                    handler.TrySetCanceled();
-
-                _cancellationTokenSource.Cancel();
-            }
+            Task.Factory.StartNew(CancelAndDispose, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
         }
 
         void IPipeConfigurator<SendContext<TRequest>>.AddPipeSpecification(IPipeSpecification<SendContext<TRequest>> specification)
@@ -149,17 +133,8 @@ namespace MassTransit.Clients
 
         public void Dispose()
         {
-            Cancel();
-
-            lock (_responseHandlers)
-            {
-                foreach (var handle in _responseHandlers.Values)
-                    handle.Disconnect();
-            }
-
-            _registration.Dispose();
-
-            //            _cancellationTokenSource.Dispose();
+            if (Interlocked.CompareExchange(ref _faultedOrCanceled, 1, 0) == 0)
+                CancelAndDispose();
         }
 
         Task<TRequest> RequestHandle<TRequest>.Message => _message;
@@ -249,41 +224,59 @@ namespace MassTransit.Clients
 
         void Fail(Exception exception)
         {
-            if (Volatile.Read(ref _faultedOrCanceled))
+            if (Interlocked.CompareExchange(ref _faultedOrCanceled, 1, 0) != 0)
                 return;
 
-            lock (_responseHandlers)
+            void HandleFail()
             {
-                if (Volatile.Read(ref _faultedOrCanceled))
-                    return;
-
-                Volatile.Write(ref _faultedOrCanceled, true);
+                _registration.Dispose();
 
                 DisposeTimer();
 
                 _readyToSend.TrySetException(exception);
                 _sendContext.TrySetException(exception);
 
-                foreach (var handle in _responseHandlers.Values)
-                    handle.TrySetException(exception);
+                lock (_responseHandlers)
+                {
+                    foreach (var handle in _responseHandlers.Values)
+                    {
+                        handle.TrySetException(exception);
+                        handle.Disconnect();
+                    }
+                }
 
                 _cancellationTokenSource.Cancel();
             }
+
+            Task.Factory.StartNew(HandleFail, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
+        }
+
+        void CancelAndDispose()
+        {
+            _registration.Dispose();
+
+            DisposeTimer();
+
+            _readyToSend.TrySetCanceled();
+            _sendContext.TrySetCanceled();
+
+            lock (_responseHandlers)
+            {
+                foreach (var handle in _responseHandlers.Values)
+                {
+                    handle.TrySetCanceled();
+                    handle.Disconnect();
+                }
+            }
+
+            _cancellationTokenSource.Cancel();
         }
 
         void TimeoutExpired(object state)
         {
-            if (Volatile.Read(ref _faultedOrCanceled))
-                return;
+            var timeoutException = new RequestTimeoutException(_requestId.ToString());
 
-            void HandleTimeout()
-            {
-                var timeoutException = new RequestTimeoutException(_requestId.ToString());
-
-                Fail(timeoutException);
-            }
-
-            Task.Factory.StartNew(HandleTimeout, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
+            Fail(timeoutException);
         }
 
         void DisposeTimer()
@@ -292,7 +285,7 @@ namespace MassTransit.Clients
             {
                 _timeoutTimer?.Dispose();
             }
-            catch (ObjectDisposedException e)
+            catch (ObjectDisposedException)
             {
             }
 
