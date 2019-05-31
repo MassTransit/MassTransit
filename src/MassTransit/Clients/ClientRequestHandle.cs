@@ -42,7 +42,6 @@ namespace MassTransit.Clients
         readonly TaskScheduler _taskScheduler;
         CancellationTokenRegistration _registration;
         Timer _timeoutTimer;
-        bool _faultedOrCanceled;
         RequestTimeout _timeToLive;
 
         public ClientRequestHandle(ClientFactoryContext context, IRequestSendEndpoint<TRequest> requestSendEndpoint, Task<TRequest> message,
@@ -110,16 +109,8 @@ namespace MassTransit.Clients
 
         public void Cancel()
         {
-            if (Volatile.Read(ref _faultedOrCanceled))
-                return;
-
             lock (_responseHandlers)
             {
-                if (Volatile.Read(ref _faultedOrCanceled))
-                    return;
-
-                Volatile.Write(ref _faultedOrCanceled, true);
-
                 DisposeTimer();
 
                 _readyToSend.TrySetCanceled();
@@ -249,16 +240,10 @@ namespace MassTransit.Clients
 
         void Fail(Exception exception)
         {
-            if (Volatile.Read(ref _faultedOrCanceled))
-                return;
+            _registration.Dispose();
 
             lock (_responseHandlers)
             {
-                if (Volatile.Read(ref _faultedOrCanceled))
-                    return;
-
-                Volatile.Write(ref _faultedOrCanceled, true);
-
                 DisposeTimer();
 
                 _readyToSend.TrySetException(exception);
@@ -273,9 +258,6 @@ namespace MassTransit.Clients
 
         void TimeoutExpired(object state)
         {
-            if (Volatile.Read(ref _faultedOrCanceled))
-                return;
-
             void HandleTimeout()
             {
                 var timeoutException = new RequestTimeoutException(_requestId.ToString());

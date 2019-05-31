@@ -17,7 +17,6 @@ namespace MassTransit.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using GreenPipes.Internals.Extensions;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -236,21 +235,24 @@ namespace MassTransit.Tests
             {
                 Console.WriteLine($"Sending request {i + 1} of {numOfLoops}");
 
+                bool taskCompleted = false;
                 try
                 {
                     using (var timeoutReq = new CancellationTokenSource(ctsTimeout))
                     {
                         var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
 
-                        await client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token)
-                            .UntilCompletedOrTimeout(TimeSpan.FromSeconds(5))
-                            .ConfigureAwait(false);
+                        taskCompleted = await WaitWithTimeout(client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token), TimeSpan.FromSeconds(5))
+                                            .ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
+                    taskCompleted = true;
                 }
+
+                Assert.That(taskCompleted, Is.True, $"Task didn't complete in time for request {i + 1} of {numOfLoops}");
             }
         }
 
@@ -265,33 +267,43 @@ namespace MassTransit.Tests
             {
                 Console.WriteLine($"Sending request {i + 1} of {numOfLoops}");
 
+                bool taskCompleted = false;
+
                 try
                 {
                     using (var timeoutReq = new CancellationTokenSource(ctsTimeout))
                     {
                         var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
 
-                        await client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token)
-                            .UntilCompletedOrTimeout(TimeSpan.FromSeconds(5))
+                        taskCompleted = await WaitWithTimeout(client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token), TimeSpan.FromSeconds(5))
                             .ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
+                    taskCompleted = true;
                 }
+
+                Assert.That(taskCompleted, Is.True, $"Task didn't complete in time for request {i + 1} of {numOfLoops}");
             }
+        }
+
+        private async Task<bool> WaitWithTimeout(Task task, TimeSpan timeout)
+        {
+            DateTime endWait = DateTime.UtcNow + timeout;
+            while (!task.IsCompleted && DateTime.UtcNow <= endWait)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
+            }
+
+            return task.IsCompleted;
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handler<PingMessage>(configurator, async context =>
             {
-                await Task.Delay(500);
-                await context.RespondAsync(new PongMessage(), responseContext =>
-                {
-
-                });
             });
         }
     }
