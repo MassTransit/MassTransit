@@ -14,11 +14,14 @@ namespace MassTransit.ActiveMqTransport
 {
     using System;
     using System.Threading.Tasks;
+    using Contexts;
+    using MassTransit.Scheduling;
+    using Scheduling;
 
     public static class ActiveMqDeferMessageExtensions
     {
         /// <summary>
-        /// Defers the message for redelivery using a delayed exchange (an experimental RabbitMQ plug-in).
+        /// Defers the message for redelivery using a delayed exchange.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="context"></param>
@@ -35,7 +38,10 @@ namespace MassTransit.ActiveMqTransport
                     throw new ArgumentException("A valid message scheduler was not found, and no ModelContext was available", nameof(context));
                 }
 
-                scheduler = new DelayedExchangeMessageScheduler(context, modelContext.ConnectionContext.Topology, modelContext.ConnectionContext.HostAddress);
+                var provider = new DelayedExchangeScheduleMessageProvider(context, modelContext.ConnectionContext.Topology,
+                    modelContext.ConnectionContext.HostAddress);
+
+                scheduler = new MessageScheduler(provider);
             }
 
             MessageRedeliveryContext redeliveryContext = new DelayedExchangeMessageRedeliveryContext<T>(context, scheduler);
