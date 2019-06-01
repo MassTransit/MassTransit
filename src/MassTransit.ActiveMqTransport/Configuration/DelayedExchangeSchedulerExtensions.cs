@@ -18,8 +18,8 @@ namespace MassTransit.ActiveMqTransport
     public static class DelayedExchangeSchedulerExtensions
     {
         /// <summary>
-        /// Uses the RabbitMQ Delayed ExchangeName plugin to schedule messages for future delivery. A lightweight
-        /// alternative to Quartz, which does not require any storage outside of RabbitMQ.
+        /// Uses the ActiveMQ schedule messages for future delivery. A lightweight
+        /// alternative to Quartz, which does not require any storage outside of ActiveMQ.
         /// </summary>
         /// <param name="configurator"></param>
         public static void UseDelayedExchangeMessageScheduler(this IBusFactoryConfigurator configurator)

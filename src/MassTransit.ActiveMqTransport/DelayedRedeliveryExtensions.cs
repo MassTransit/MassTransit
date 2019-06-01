@@ -23,7 +23,7 @@ namespace MassTransit.ActiveMqTransport
     {
         /// <summary>
         /// Use the message scheduler to schedule redelivery of a specific message type based upon the retry policy, via
-        /// the delayed exchange feature of RabbitMQ.
+        /// the delayed exchange feature of ActiveMQ.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
