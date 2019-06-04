@@ -219,7 +219,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void AddExchange<TExchange>(IRabbitMqHost host, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            var configuration = CreateConfiguration(host, null, CreateExchangeName<TExchange>(), true, false);
+            var configuration = CreateConfiguration(host, null, CreateExchangeName<TExchange>(), false, true);
 
             ConfigureReceiveEndpoint(configuration, configuration.Configurator, configureEndpoint);
         }
