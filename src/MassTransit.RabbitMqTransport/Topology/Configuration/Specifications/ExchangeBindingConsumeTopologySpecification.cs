@@ -45,7 +45,14 @@ namespace MassTransit.RabbitMqTransport.Topology.Specifications
         {
             var exchangeHandle = builder.ExchangeDeclare(ExchangeName, ExchangeType, Durable, AutoDelete, ExchangeArguments);
 
-            var bindingHandle = builder.ExchangeBind(exchangeHandle, builder.Exchange, RoutingKey, BindingArguments);
+            if (builder.Exchange != null)
+            {
+                builder.ExchangeBind(exchangeHandle, builder.Exchange, RoutingKey, BindingArguments);
+            }
+            else
+            {
+                builder.QueueBind(exchangeHandle, builder.Queue, RoutingKey, BindingArguments);
+            }
         }
     }
 }

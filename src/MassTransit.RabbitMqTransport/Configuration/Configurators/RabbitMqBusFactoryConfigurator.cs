@@ -210,14 +210,14 @@ namespace MassTransit.RabbitMqTransport.Configurators
             ConfigureReceiveEndpoint(configuration, configuration.Configurator, configure);
         }
 
-        public void AddQueue<TQueue>()
+        public void AddQueue<TQueue>(IRabbitMqHost host, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            var configuration = CreateQueueWithoutExchangeConfiguration(CreateQueueName<TQueue>());
+            var configuration = CreateQueueWithoutExchangeConfiguration(host, CreateQueueName<TQueue>());
 
-            ConfigureReceiveEndpoint(configuration, configuration.Configurator, e => { });
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, configureEndpoint);
         }
 
-        public void AddExchange<TExchange>()
+        public void AddExchange<TExchange>(Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
         {
             var configuration = CreateExchangeWithoutQueueConfiguration(CreateExchangeName<TExchange>());
 
@@ -231,11 +231,12 @@ namespace MassTransit.RabbitMqTransport.Configurators
             ConfigureReceiveEndpoint(configuration, configuration.Configurator, e => { e.Bind<TExchange>(); });
         }
 
-        IRabbitMqReceiveEndpointConfiguration CreateQueueWithoutExchangeConfiguration(string queueName)
+        IRabbitMqReceiveEndpointConfiguration CreateQueueWithoutExchangeConfiguration(IRabbitMqHost host, string queueName)
         {
-            var settings = new RabbitMqReceiveSettings(queueName, null, null, true, false, true, false);
-
-            return _configuration.CreateReceiveEndpointConfiguration(settings, _configuration.CreateEndpointConfiguration());
+            if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
+                throw new ArgumentException("The host was not configured on this bus", nameof(host));
+            
+            return hostConfiguration.CreateReceiveEndpointConfiguration(queueName, null, true, false);
         }
 
         IRabbitMqReceiveEndpointConfiguration CreateExchangeWithoutQueueConfiguration(string exchangeName)

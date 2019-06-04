@@ -60,7 +60,15 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             return new RabbitMqReceiveEndpointConfiguration(this, settings, _busConfiguration.CreateEndpointConfiguration());
         }
-        
+
+        public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, string exchangeName, bool enableQueue, bool enableExchange)
+        {
+            var settings = new RabbitMqReceiveSettings(queueName, exchangeName, _busConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false, enableQueue, enableExchange);
+
+            return new RabbitMqReceiveEndpointConfiguration(this, settings, _busConfiguration.CreateEndpointConfiguration());
+        }
+
+
         public bool Matches(Uri address)
         {
             switch (address.Scheme.ToLowerInvariant())

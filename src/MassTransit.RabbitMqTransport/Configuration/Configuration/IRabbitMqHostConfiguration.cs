@@ -36,6 +36,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// </summary>
         /// <returns></returns>
         IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName);
+        IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, string exchangeName, bool enableQueue, bool enableExchange);
 
         new IRabbitMqHostTopology Topology { get; }
 
