@@ -81,7 +81,7 @@ namespace Automatonymous
         IEventCorrelationConfigurator<TInstance, TData> CorrelateBy(Expression<Func<TInstance, ConsumeContext<TData>, bool>> correlationExpression);
 
         /// <summary>
-        /// Creates a new instance of the saga, and if appropriate, pre-inserts the saga intance to the database. If the saga already exists, any
+        /// Creates a new instance of the saga, and if appropriate, pre-inserts the saga instance to the database. If the saga already exists, any
         /// exceptions from the insert are suppressed and processing continues normally.
         /// </summary>
         /// <param name="factoryMethod">The factory method for the saga</param>
@@ -94,6 +94,7 @@ namespace Automatonymous
         /// </summary>
         /// <param name="getBehavior">The configuration call to specify the behavior on missing instance</param>
         /// <returns></returns>
-        IEventCorrelationConfigurator<TInstance, TData> OnMissingInstance(Func<IMissingInstanceConfigurator<TData>, IPipe<ConsumeContext<TData>>> getBehavior);
+        IEventCorrelationConfigurator<TInstance, TData> OnMissingInstance(Func<IMissingInstanceConfigurator<TInstance, TData>, IPipe<ConsumeContext<TData>>>
+            getBehavior);
     }
 }

@@ -18,7 +18,8 @@ namespace Automatonymous
     using MassTransit;
 
 
-    public interface IMissingInstanceConfigurator<TData>
+    public interface IMissingInstanceConfigurator<TInstance, TData>
+        where TInstance : SagaStateMachineInstance
         where TData : class
     {
         /// <summary>

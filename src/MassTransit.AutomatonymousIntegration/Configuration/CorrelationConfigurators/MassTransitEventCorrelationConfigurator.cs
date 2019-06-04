@@ -73,10 +73,12 @@ namespace Automatonymous.CorrelationConfigurators
         }
 
         public IEventCorrelationConfigurator<TInstance, TData> CorrelateById<T>(Expression<Func<TInstance, T>> propertyExpression,
-            Func<ConsumeContext<TData>, T> selector) where T : struct
+            Func<ConsumeContext<TData>, T> selector)
+            where T : struct
         {
             if (propertyExpression == null)
                 throw new ArgumentNullException(nameof(propertyExpression));
+
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
@@ -96,6 +98,7 @@ namespace Automatonymous.CorrelationConfigurators
         {
             if (propertyExpression == null)
                 throw new ArgumentNullException(nameof(propertyExpression));
+
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
@@ -115,6 +118,7 @@ namespace Automatonymous.CorrelationConfigurators
         {
             if (propertyExpression == null)
                 throw new ArgumentNullException(nameof(propertyExpression));
+
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
@@ -161,7 +165,7 @@ namespace Automatonymous.CorrelationConfigurators
         }
 
         public IEventCorrelationConfigurator<TInstance, TData> OnMissingInstance(
-            Func<IMissingInstanceConfigurator<TData>, IPipe<ConsumeContext<TData>>> getMissingPipe)
+            Func<IMissingInstanceConfigurator<TInstance, TData>, IPipe<ConsumeContext<TData>>> getMissingPipe)
         {
             if (getMissingPipe == null)
                 throw new ArgumentNullException(nameof(getMissingPipe));
