@@ -212,40 +212,18 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void AddQueue<TQueue>(IRabbitMqHost host, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            var configuration = CreateQueueWithoutExchangeConfiguration(host, CreateQueueName<TQueue>());
+            var configuration = CreateConfiguration(host, CreateQueueName<TQueue>(), null, true, false);
 
             ConfigureReceiveEndpoint(configuration, configuration.Configurator, configureEndpoint);
         }
 
-        public void AddExchange<TExchange>(Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
+        public void AddExchange<TExchange>(IRabbitMqHost host, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            var configuration = CreateExchangeWithoutQueueConfiguration(CreateExchangeName<TExchange>());
+            var configuration = CreateConfiguration(host, null, CreateExchangeName<TExchange>(), true, false);
 
-            ConfigureReceiveEndpoint(configuration, configuration.Configurator, e => { });
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, configureEndpoint);
         }
-
-        public void AddExchangeToQueue<TQueue, TExchange>(IRabbitMqHost host) where TExchange : class
-        {
-            var configuration = CreateConfigurationWithoutExchange(host, CreateQueueName<TQueue>());
-
-            ConfigureReceiveEndpoint(configuration, configuration.Configurator, e => { e.Bind<TExchange>(); });
-        }
-
-        IRabbitMqReceiveEndpointConfiguration CreateQueueWithoutExchangeConfiguration(IRabbitMqHost host, string queueName)
-        {
-            if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
-                throw new ArgumentException("The host was not configured on this bus", nameof(host));
-            
-            return hostConfiguration.CreateReceiveEndpointConfiguration(queueName, null, true, false);
-        }
-
-        IRabbitMqReceiveEndpointConfiguration CreateExchangeWithoutQueueConfiguration(string exchangeName)
-        {
-            var settings = new RabbitMqReceiveSettings(null, exchangeName, _configuration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false, false, true);
-
-            return _configuration.CreateReceiveEndpointConfiguration(settings, _configuration.CreateEndpointConfiguration());
-        }
-
+        
         IRabbitMqReceiveEndpointConfiguration CreateConfiguration(string queueName)
         {
 
@@ -262,12 +240,12 @@ namespace MassTransit.RabbitMqTransport.Configurators
             return hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
         }
 
-        IRabbitMqReceiveEndpointConfiguration CreateConfigurationWithoutExchange(IRabbitMqHost host, string queueName)
+        IRabbitMqReceiveEndpointConfiguration CreateConfiguration(IRabbitMqHost host, string queueName, string exchangeName, bool enableQueue, bool enableExchange)
         {
             if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
                 throw new ArgumentException("The host was not configured on this bus", nameof(host));
 
-            return hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
+            return hostConfiguration.CreateReceiveEndpointConfiguration(queueName, exchangeName, enableQueue, enableExchange);
         }
 
         private string CreateExchangeName<T>()
