@@ -28,16 +28,22 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         bool _bindToQueue;
         string _queueName;
 
+        public bool EnableQueue { get; }
+        public bool EnableExchange { get; }
+
         public RabbitMqSendSettings(string exchangeName, string exchangeType, bool durable, bool autoDelete)
             : base(exchangeName, exchangeType, durable, autoDelete)
         {
+            EnableQueue = true;
+            EnableExchange = true;
+
             _exchangeBindings = new List<ExchangeBindingPublishTopologySpecification>();
 
             QueueArguments = new Dictionary<string, object>();
         }
 
         public IDictionary<string, object> QueueArguments { get; }
-
+        
         public Uri GetSendAddress(Uri hostAddress)
         {
             var builder = new UriBuilder(hostAddress);

@@ -21,37 +21,24 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
         IExchangeConfigurator,
         Exchange
     {
-        private bool IgnoreExchange { get; set; }
-
         public ExchangeConfigurator(string exchangeName, string exchangeType, bool durable = true, bool autoDelete = false)
         {
+            ExchangeName = exchangeName;
+            ExchangeType = exchangeType;
+            Durable = durable;
+            AutoDelete = autoDelete;
 
-            IgnoreExchange = string.IsNullOrEmpty(exchangeType);
-
-            if (!IgnoreExchange)
-            {
-                ExchangeName = exchangeName;
-                ExchangeType = exchangeType;
-                Durable = durable;
-                AutoDelete = autoDelete;
-
-                ExchangeArguments = new Dictionary<string, object>();
-            }
+            ExchangeArguments = new Dictionary<string, object>();
         }
 
         public ExchangeConfigurator(Exchange source)
         {
-            IgnoreExchange = string.IsNullOrEmpty(source.ExchangeType);
+            ExchangeName = source.ExchangeName;
+            ExchangeType = source.ExchangeType;
+            Durable = source.Durable;
+            AutoDelete = source.AutoDelete;
 
-            if (!IgnoreExchange)
-            {
-                ExchangeName = source.ExchangeName;
-                ExchangeType = source.ExchangeType;
-                Durable = source.Durable;
-                AutoDelete = source.AutoDelete;
-
-                ExchangeArguments = new Dictionary<string, object>(source.ExchangeArguments);
-            }
+            ExchangeArguments = new Dictionary<string, object>(source.ExchangeArguments);
         }
 
         public string ExchangeName { get; set; }
@@ -63,38 +50,30 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
 
         public void SetExchangeArgument(string key, object value)
         {
-            if (!IgnoreExchange)
-            {
-                if (value != null)
-                    ExchangeArguments[key] = value;
-                else
-                    ExchangeArguments.Remove(key);
-            }
+            if (value != null)
+                ExchangeArguments[key] = value;
+            else
+                ExchangeArguments.Remove(key);
+
         }
 
         public void SetExchangeArgument(string key, TimeSpan value)
         {
-            if (!IgnoreExchange)
-            {
-                var milliseconds = (int)value.TotalMilliseconds;
-
-                SetExchangeArgument(key, milliseconds);
-            }
+            var milliseconds = (int)value.TotalMilliseconds;
+            SetExchangeArgument(key, milliseconds);
         }
 
         protected virtual IEnumerable<string> GetQueryStringOptions()
         {
-            if (!IgnoreExchange)
-            {
-                if (!Durable)
-                    yield return "durable=false";
+            if (!Durable)
+                yield return "durable=false";
 
-                if (AutoDelete)
-                    yield return "autodelete=true";
+            if (AutoDelete)
+                yield return "autodelete=true";
 
-                if (ExchangeType != RabbitMQ.Client.ExchangeType.Fanout)
-                    yield return "type=" + ExchangeType;
-            }
+            if (ExchangeType != RabbitMQ.Client.ExchangeType.Fanout)
+                yield return "type=" + ExchangeType;
+
         }
     }
 }

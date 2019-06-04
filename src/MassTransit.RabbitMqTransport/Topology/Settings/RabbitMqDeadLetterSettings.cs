@@ -21,25 +21,33 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         QueueBindingConfigurator,
         DeadLetterSettings
     {
+
+        public bool EnableQueue { get; }
+
+        public bool EnableExchange { get; }
+
         public RabbitMqDeadLetterSettings(EntitySettings source, string name)
             : base(name, source.ExchangeType, source.Durable, source.AutoDelete)
         {
             QueueName = name;
+            EnableQueue = source.EnableQueue;
+            EnableExchange = source.EnableExchange;
 
-            if (source.ExchangeArguments != null)
+            if (EnableExchange)
             {
                 foreach (KeyValuePair<string, object> argument in source.ExchangeArguments)
                     SetExchangeArgument(argument.Key, argument.Value);
             }
         }
-
+        
         public BrokerTopology GetBrokerTopology()
         {
             var builder = new PublishEndpointBrokerTopologyBuilder();
 
+           
             var queue = builder.QueueDeclare(QueueName, Durable, AutoDelete, false, QueueArguments);
 
-            if (!string.IsNullOrEmpty(ExchangeType))
+            if (EnableExchange)
             {
                 builder.Exchange = builder.ExchangeDeclare(ExchangeName, ExchangeType, Durable, AutoDelete, ExchangeArguments);
                 builder.QueueBind(builder.Exchange, queue, RoutingKey, BindingArguments);

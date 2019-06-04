@@ -41,5 +41,8 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// The RabbitMQ exchange type
         /// </summary>
         string ExchangeType { get; }
+
+        bool EnableQueue { get; }
+        bool EnableExchange { get; }
     }
 }

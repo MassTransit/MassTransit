@@ -21,14 +21,17 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         QueueBindingConfigurator,
         ReceiveSettings
     {
-        public RabbitMqReceiveSettings(string name, string type, bool durable, bool autoDelete)
+        public RabbitMqReceiveSettings(string name, string type, bool durable, bool autoDelete, bool enableQueue = true, bool enableExchange = true)
             : base(name, type, durable, autoDelete)
         {
+            EnableQueue = enableQueue;
+            EnableExchange = enableExchange;
             PrefetchCount = (ushort)Math.Min(Environment.ProcessorCount * 2, 16);
 
             ConsumeArguments = new Dictionary<string, object>();
         }
 
+        
         public ushort PrefetchCount { get; set; }
         public bool PurgeOnStartup { get; set; }
         public bool ExclusiveConsumer { get; set; }
@@ -39,6 +42,10 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         }
 
         public IDictionary<string, object> ConsumeArguments { get; }
+
+        public bool EnableQueue { get; }
+
+        public bool EnableExchange { get; }
 
         public Uri GetInputAddress(Uri hostAddress)
         {

@@ -232,7 +232,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         IRabbitMqReceiveEndpointConfiguration CreateConfigurationWithoutExchange(string queueName)
         {
-            var settings = new RabbitMqReceiveSettings(queueName, null, true, false);
+            var settings = new RabbitMqReceiveSettings(queueName, null, true, false, true, false);
 
             return _configuration.CreateReceiveEndpointConfiguration(settings, _configuration.CreateEndpointConfiguration());
         }
