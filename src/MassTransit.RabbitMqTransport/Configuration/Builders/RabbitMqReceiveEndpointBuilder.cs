@@ -92,7 +92,10 @@ namespace MassTransit.RabbitMqTransport.Builders
                 queueAutoDelete = false;
             }
 
-            topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, queueAutoDelete, settings.Exclusive, queueArguments);
+            if (settings.EnableQueue)
+            {
+                topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, queueAutoDelete, settings.Exclusive, queueArguments);
+            }
 
             //Create an exchange and bind it to the queue if present
             if (settings.EnableExchange)
@@ -100,9 +103,12 @@ namespace MassTransit.RabbitMqTransport.Builders
                 topologyBuilder.Exchange = topologyBuilder.ExchangeDeclare(settings.ExchangeName ?? settings.QueueName, settings.ExchangeType, settings.Durable,
                     settings.AutoDelete, settings.ExchangeArguments);
 
-                topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
+                if (settings.EnableQueue)
+                {
+                    topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
+                }
             }
-
+            
             _configuration.Topology.Consume.Apply(topologyBuilder);
 
             return topologyBuilder.BuildTopologyLayout();

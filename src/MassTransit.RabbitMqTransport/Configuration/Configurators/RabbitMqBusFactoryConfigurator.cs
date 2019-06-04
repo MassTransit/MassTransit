@@ -40,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             var busQueueName = _configuration.Topology.Consume.CreateTemporaryQueueName("bus");
 
-            _settings = new RabbitMqReceiveSettings(busQueueName, busEndpointConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, false,
+            _settings = new RabbitMqReceiveSettings(busQueueName, busQueueName, busEndpointConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, false,
                 true);
 
             _settings.AutoDeleteAfter(TimeSpan.FromMinutes(1));
@@ -210,38 +210,45 @@ namespace MassTransit.RabbitMqTransport.Configurators
             ConfigureReceiveEndpoint(configuration, configuration.Configurator, configure);
         }
 
-        public void AddQueue<T>()
+        public void AddQueue<TQueue>()
         {
-            var configuration = CreateConfigurationWithoutExchange(typeof(T).Name);
+            var configuration = CreateQueueWithoutExchangeConfiguration(CreateQueueName<TQueue>());
 
             ConfigureReceiveEndpoint(configuration, configuration.Configurator, e => { });
         }
 
-
-        public void AddExchange<T>()
+        public void AddExchange<TExchange>()
         {
-          
+            var configuration = CreateExchangeWithoutQueueConfiguration(CreateExchangeName<TExchange>());
+
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, e => { });
         }
 
-
-        public void AddExchangeToQueue<T1, T2>()
+        public void AddExchangeToQueue<TQueue, TExchange>(IRabbitMqHost host) where TExchange : class
         {
+            var configuration = CreateConfigurationWithoutExchange(host, CreateQueueName<TQueue>());
+
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, e => { e.Bind<TExchange>(); });
         }
 
-
-
-        IRabbitMqReceiveEndpointConfiguration CreateConfigurationWithoutExchange(string queueName)
+        IRabbitMqReceiveEndpointConfiguration CreateQueueWithoutExchangeConfiguration(string queueName)
         {
-            var settings = new RabbitMqReceiveSettings(queueName, null, true, false, true, false);
+            var settings = new RabbitMqReceiveSettings(queueName, null, null, true, false, true, false);
 
             return _configuration.CreateReceiveEndpointConfiguration(settings, _configuration.CreateEndpointConfiguration());
         }
 
+        IRabbitMqReceiveEndpointConfiguration CreateExchangeWithoutQueueConfiguration(string exchangeName)
+        {
+            var settings = new RabbitMqReceiveSettings(null, exchangeName, _configuration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false, false, true);
+
+            return _configuration.CreateReceiveEndpointConfiguration(settings, _configuration.CreateEndpointConfiguration());
+        }
 
         IRabbitMqReceiveEndpointConfiguration CreateConfiguration(string queueName)
         {
 
-            var settings = new RabbitMqReceiveSettings(queueName, _configuration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true,false);
+            var settings = new RabbitMqReceiveSettings(queueName, queueName, _configuration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false);
 
             return _configuration.CreateReceiveEndpointConfiguration(settings, _configuration.CreateEndpointConfiguration());
         }
@@ -254,6 +261,22 @@ namespace MassTransit.RabbitMqTransport.Configurators
             return hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
         }
 
-     
+        IRabbitMqReceiveEndpointConfiguration CreateConfigurationWithoutExchange(IRabbitMqHost host, string queueName)
+        {
+            if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
+                throw new ArgumentException("The host was not configured on this bus", nameof(host));
+
+            return hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
+        }
+
+        private string CreateExchangeName<T>()
+        {
+            return typeof(T).Namespace + ":" + typeof(T).Name;
+        }
+
+        private string CreateQueueName<T>()
+        {
+            return typeof(T).Name;
+        }
     }
 }

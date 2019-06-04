@@ -265,7 +265,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             var queueName = $"{_settings.QueueName}";
 
-            if (!RabbitMqEntityNameValidator.Validator.IsValidEntityName(_settings.QueueName))
+            if (_settings.EnableQueue && !RabbitMqEntityNameValidator.Validator.IsValidEntityName(_settings.QueueName))
                 yield return this.Failure(queueName, "must be a valid queue name");
 
             if (_settings.PurgeOnStartup)

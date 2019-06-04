@@ -43,13 +43,13 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
-
             var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostAddress);
-
             var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receiveEndpointContext);
-
-            await context.BasicConsume(receiveSettings.QueueName, false, _receiveEndpointContext.ExclusiveConsumer, receiveSettings.ConsumeArguments, consumer)
+            if (receiveSettings.EnableQueue)
+            {
+                await context.BasicConsume(receiveSettings.QueueName, false, _receiveEndpointContext.ExclusiveConsumer, receiveSettings.ConsumeArguments, consumer)
                 .ConfigureAwait(false);
+            }
 
             await consumer.Ready.ConfigureAwait(false);
 

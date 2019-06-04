@@ -15,7 +15,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
     using System.Collections.Generic;
     using Builders;
     using Configurators;
-
+    using MassTransit.RabbitMqTransport.Topology.Entities;
 
     public class RabbitMqErrorSettings :
         QueueBindingConfigurator,
@@ -25,7 +25,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         public bool EnableExchange { get; }
 
         public RabbitMqErrorSettings(EntitySettings source, string name)
-            : base(name, source.ExchangeType, source.Durable, source.AutoDelete)
+            : base(name, source.ExchangeName, source.ExchangeType, source.Durable, source.AutoDelete)
         {
             QueueName = name;
             EnableQueue = source.EnableQueue;
@@ -44,12 +44,21 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         {
             var builder = new PublishEndpointBrokerTopologyBuilder();
 
-            var queue = builder.QueueDeclare(QueueName, Durable, AutoDelete, false, QueueArguments);
+            QueueHandle queue = null;
+
+            if (EnableQueue)
+            {
+                queue = builder.QueueDeclare(QueueName, Durable, AutoDelete, false, QueueArguments);
+            }
 
             if (EnableExchange)
             {
                 builder.Exchange = builder.ExchangeDeclare(ExchangeName, ExchangeType, Durable, AutoDelete, ExchangeArguments);
-                builder.QueueBind(builder.Exchange, queue, RoutingKey, BindingArguments);
+
+                if (EnableQueue)
+                {
+                    builder.QueueBind(builder.Exchange, queue, RoutingKey, BindingArguments);
+                }
             }
 
             return builder.BuildBrokerTopology();

@@ -21,8 +21,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         QueueBindingConfigurator,
         ReceiveSettings
     {
-        public RabbitMqReceiveSettings(string name, string type, bool durable, bool autoDelete, bool enableQueue = true, bool enableExchange = true)
-            : base(name, type, durable, autoDelete)
+        public RabbitMqReceiveSettings(string queueName, string exchangeName, string type, bool durable, bool autoDelete, bool enableQueue = true, bool enableExchange = true)
+            : base(queueName, exchangeName, type, durable, autoDelete)
         {
             EnableQueue = enableQueue;
             EnableExchange = enableExchange;

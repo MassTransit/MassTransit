@@ -56,11 +56,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
         {
-            var settings = new RabbitMqReceiveSettings(queueName, _busConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false);
+            var settings = new RabbitMqReceiveSettings(queueName, queueName, _busConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, true);
 
             return new RabbitMqReceiveEndpointConfiguration(this, settings, _busConfiguration.CreateEndpointConfiguration());
         }
-
+        
         public bool Matches(Uri address)
         {
             switch (address.Scheme.ToLowerInvariant())

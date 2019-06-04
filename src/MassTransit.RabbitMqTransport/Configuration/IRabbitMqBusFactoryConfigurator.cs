@@ -79,9 +79,9 @@ namespace MassTransit.RabbitMqTransport
         void ReceiveEndpoint(IRabbitMqHost host, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure);
 
         
-        void AddQueue<T>();
-        void AddExchange<T>();
-        void AddExchangeToQueue<T1, T2>();
+        void AddQueue<TQueue>();
+        void AddExchange<TExchange>();
+        void AddExchangeToQueue<TQueue, TExchange>(IRabbitMqHost host) where TExchange : class;
 
     }
 }

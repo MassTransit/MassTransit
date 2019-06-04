@@ -27,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Specifications
     {
         public ExchangeToQueueBindingPublishTopologySpecification(string exchangeName, string exchangeType, string queueName = null, bool durable = true,
             bool autoDelete = false)
-            : base(queueName ?? exchangeName, exchangeType, durable, autoDelete)
+            : base(queueName ?? exchangeName, exchangeName, exchangeType, durable, autoDelete)
         {
             ExchangeName = exchangeName;
         }

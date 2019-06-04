@@ -22,8 +22,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
         IQueueConfigurator,
         Queue
     {
-        public QueueConfigurator(string queueName, string exchangeType, bool durable, bool autoDelete)
-            : base(queueName, exchangeType, durable, autoDelete)
+        public QueueConfigurator(string queueName, string exchangeName, string exchangeType, bool durable, bool autoDelete)
+            : base(exchangeName, exchangeType, durable, autoDelete)
         {
             QueueArguments = new Dictionary<string, object>();
 
