@@ -94,11 +94,14 @@ namespace MassTransit.RabbitMqTransport.Builders
 
             topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, queueAutoDelete, settings.Exclusive, queueArguments);
 
-            topologyBuilder.Exchange = topologyBuilder.ExchangeDeclare(settings.ExchangeName ?? settings.QueueName, settings.ExchangeType, settings.Durable,
-                settings.AutoDelete, settings.ExchangeArguments);
-
-            topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
-
+            //Create an exchange and bind it to the queue if present
+            if (!string.IsNullOrEmpty(settings.ExchangeName))
+            {
+                topologyBuilder.Exchange = topologyBuilder.ExchangeDeclare(settings.ExchangeName, settings.ExchangeType, settings.Durable,
+                    settings.AutoDelete, settings.ExchangeArguments);
+                
+                topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
+            }
             _configuration.Topology.Consume.Apply(topologyBuilder);
 
             return topologyBuilder.BuildTopologyLayout();

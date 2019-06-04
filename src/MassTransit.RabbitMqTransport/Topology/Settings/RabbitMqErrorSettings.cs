@@ -26,19 +26,24 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         {
             QueueName = name;
 
-            foreach (KeyValuePair<string, object> argument in source.ExchangeArguments)
-                SetExchangeArgument(argument.Key, argument.Value);
+            if (source.ExchangeArguments != null)
+            {
+                foreach (KeyValuePair<string, object> argument in source.ExchangeArguments)
+                    SetExchangeArgument(argument.Key, argument.Value);
+            }
         }
 
         public BrokerTopology GetBrokerTopology()
         {
             var builder = new PublishEndpointBrokerTopologyBuilder();
 
-            builder.Exchange = builder.ExchangeDeclare(ExchangeName, ExchangeType, Durable, AutoDelete, ExchangeArguments);
-
             var queue = builder.QueueDeclare(QueueName, Durable, AutoDelete, false, QueueArguments);
 
-            builder.QueueBind(builder.Exchange, queue, RoutingKey, BindingArguments);
+            if (!string.IsNullOrEmpty(ExchangeType))
+            {
+                builder.Exchange = builder.ExchangeDeclare(ExchangeName, ExchangeType, Durable, AutoDelete, ExchangeArguments);
+                builder.QueueBind(builder.Exchange, queue, RoutingKey, BindingArguments);
+            }
 
             return builder.BuildBrokerTopology();
         }

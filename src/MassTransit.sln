@@ -174,9 +174,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.SignalR.Sample"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.WebJobs.EventHubsIntegration", "MassTransit.WebJobs.EventHubsIntegration\MassTransit.WebJobs.EventHubsIntegration.csproj", "{56E9DB90-C063-49CA-BAF7-FFCFE963E44C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WebJobs.Tests", "MassTransit.WebJobs.Tests\MassTransit.WebJobs.Tests.csproj", "{0C214618-DBFA-45B6-B1B3-99E90F17FE23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.WebJobs.Tests", "MassTransit.WebJobs.Tests\MassTransit.WebJobs.Tests.csproj", "{0C214618-DBFA-45B6-B1B3-99E90F17FE23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Automatonymous.SimpleInjectorIntegration", "Containers\MassTransit.Automatonymous.SimpleInjectorIntegration\MassTransit.Automatonymous.SimpleInjectorIntegration.csproj", "{A210D0E6-7798-46DC-93C0-367F8CBD8DC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Automatonymous.SimpleInjectorIntegration", "Containers\MassTransit.Automatonymous.SimpleInjectorIntegration\MassTransit.Automatonymous.SimpleInjectorIntegration.csproj", "{A210D0E6-7798-46DC-93C0-367F8CBD8DC5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{370917AD-748F-4487-A00F-4D752B561325}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleService", "..\..\Sample-ConsoleService\SampleService\SampleService.csproj", "{5C7281A1-2F54-437A-B94B-1428541081FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -965,6 +969,18 @@ Global
 		{A210D0E6-7798-46DC-93C0-367F8CBD8DC5}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
 		{A210D0E6-7798-46DC-93C0-367F8CBD8DC5}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
 		{A210D0E6-7798-46DC-93C0-367F8CBD8DC5}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.Debug|x86.Build.0 = Debug|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.Release|x86.ActiveCfg = Release|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.Release|x86.Build.0 = Release|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{5C7281A1-2F54-437A-B94B-1428541081FA}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1036,6 +1052,7 @@ Global
 		{56E9DB90-C063-49CA-BAF7-FFCFE963E44C} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{0C214618-DBFA-45B6-B1B3-99E90F17FE23} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{A210D0E6-7798-46DC-93C0-367F8CBD8DC5} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
+		{5C7281A1-2F54-437A-B94B-1428541081FA} = {370917AD-748F-4487-A00F-4D752B561325}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}

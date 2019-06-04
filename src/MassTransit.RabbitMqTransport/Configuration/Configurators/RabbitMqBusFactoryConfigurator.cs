@@ -210,10 +210,38 @@ namespace MassTransit.RabbitMqTransport.Configurators
             ConfigureReceiveEndpoint(configuration, configuration.Configurator, configure);
         }
 
+        public void AddQueue<T>()
+        {
+            var configuration = CreateConfigurationWithoutExchange(typeof(T).Name);
+
+            ConfigureReceiveEndpoint(configuration, configuration.Configurator, e => { });
+        }
+
+
+        public void AddExchange<T>()
+        {
+          
+        }
+
+
+        public void AddExchangeToQueue<T1, T2>()
+        {
+        }
+
+
+
+        IRabbitMqReceiveEndpointConfiguration CreateConfigurationWithoutExchange(string queueName)
+        {
+            var settings = new RabbitMqReceiveSettings(queueName, null, true, false);
+
+            return _configuration.CreateReceiveEndpointConfiguration(settings, _configuration.CreateEndpointConfiguration());
+        }
+
+
         IRabbitMqReceiveEndpointConfiguration CreateConfiguration(string queueName)
         {
-            var settings = new RabbitMqReceiveSettings(queueName, _configuration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType,
-                true, false);
+
+            var settings = new RabbitMqReceiveSettings(queueName, _configuration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true,false);
 
             return _configuration.CreateReceiveEndpointConfiguration(settings, _configuration.CreateEndpointConfiguration());
         }
@@ -225,5 +253,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             return hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
         }
+
+     
     }
 }

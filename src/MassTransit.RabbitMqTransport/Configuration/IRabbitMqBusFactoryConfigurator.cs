@@ -77,5 +77,11 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="queueName">The input queue name</param>
         /// <param name="configure">The configuration method</param>
         void ReceiveEndpoint(IRabbitMqHost host, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure);
+
+        
+        void AddQueue<T>();
+        void AddExchange<T>();
+        void AddExchangeToQueue<T1, T2>();
+
     }
 }
