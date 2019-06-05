@@ -28,30 +28,15 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             CancellationToken cancellationToken)
             where T : class
         {
-            var messageId = NewId.NextGuid();
-
-            IPipe<SendContext<T>> delayPipe = Pipe.ExecuteAsync<SendContext<T>>(async context =>
-            {
-                context.MessageId = messageId;
-                var rabbitSendContext = context.GetPayload<RabbitMqSendContext>();
-
-                var delay = Math.Max(0, (scheduledTime.Kind == DateTimeKind.Local
-                    ? scheduledTime - DateTime.Now
-                    : scheduledTime - DateTime.UtcNow).TotalMilliseconds);
-
-                if (delay > 0)
-                    rabbitSendContext.SetTransportHeader("x-delay", (long)delay);
-
-                await pipe.Send(context).ConfigureAwait(false);
-            });
+            var scheduleMessagePipe = new RabbitMqScheduleMessagePipe<T>(scheduledTime, pipe);
 
             var payload = await message.ConfigureAwait(false);
 
             var schedulerEndpoint = await GetSchedulerEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await schedulerEndpoint.Send(payload, delayPipe, cancellationToken).ConfigureAwait(false);
+            await schedulerEndpoint.Send(payload, scheduleMessagePipe, cancellationToken).ConfigureAwait(false);
 
-            return new ScheduledMessageHandle<T>(messageId, scheduledTime, destinationAddress, payload);
+            return new ScheduledMessageHandle<T>(scheduleMessagePipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress, payload);
         }
 
         public Task CancelScheduledSend(Guid tokenId)

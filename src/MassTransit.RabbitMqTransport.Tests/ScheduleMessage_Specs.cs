@@ -13,6 +13,7 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using NUnit.Framework;
 
@@ -73,7 +74,13 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             await _first;
 
+            var timer = Stopwatch.StartNew();
+
             await _second;
+
+            timer.Stop();
+
+            Assert.That(timer.Elapsed, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2)));
         }
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)

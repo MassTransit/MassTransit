@@ -33,7 +33,7 @@
 
             var endpoint = await _sendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send(payload, pipe, cancellationToken).ConfigureAwait(false);
+            await endpoint.Send(payload, scheduleMessagePipe, cancellationToken).ConfigureAwait(false);
 
             return new ScheduledMessageHandle<T>(scheduleMessagePipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress, payload);
         }

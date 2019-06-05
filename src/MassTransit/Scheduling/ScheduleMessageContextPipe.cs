@@ -68,11 +68,7 @@ namespace MassTransit.Scheduling
             _context.ScheduledMessageId = _scheduledMessageId;
 
             if (_pipe.IsNotEmpty())
-            {
-                SendContext<T> contextProxy = context.CreateProxy(context.Message);
-
-                await _pipe.Send(contextProxy).ConfigureAwait(false);
-            }
+                await _pipe.Send(context).ConfigureAwait(false);
         }
     }
 
@@ -107,9 +103,7 @@ namespace MassTransit.Scheduling
             _context.ScheduledMessageId = _scheduledMessageId;
 
             if (_pipe.IsNotEmpty())
-            {
                 await _pipe.Send(context).ConfigureAwait(false);
-            }
         }
 
         void IProbeSite.Probe(ProbeContext context)

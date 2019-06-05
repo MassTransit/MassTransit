@@ -52,12 +52,12 @@ namespace MassTransit.Context
             return false;
         }
 
-        public static Guid GetTokenId(T message)
+        public static Guid GetTokenId(T message, Guid? defaultValue = default)
         {
             if (Cached.Metadata.Value.TryGetTokenId(message, out var tokenId))
                 return tokenId;
 
-            return NewId.NextGuid();
+            return defaultValue ?? NewId.NextGuid();
         }
 
         internal static void UseTokenId(TokenIdSelector tokenIdSelector)

@@ -28,12 +28,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Scheduling
             _scheduledTime = scheduledTime;
         }
 
-        public ServiceBusScheduleMessagePipe(DateTime scheduledTime, IPipe<SendContext> pipe)
-            : base(pipe)
-        {
-            _scheduledTime = scheduledTime;
-        }
-
         public override Task Send(SendContext<T> context)
         {
             context.SetScheduledEnqueueTime(_scheduledTime);
