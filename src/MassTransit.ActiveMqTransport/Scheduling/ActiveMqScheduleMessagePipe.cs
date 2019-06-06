@@ -38,7 +38,7 @@ namespace MassTransit.ActiveMqTransport.Scheduling
 
         public override Task Send(SendContext<T> context)
         {
-            ScheduledMessageId = ScheduleTokenIdCache<T>.GetTokenId(context.Message);
+            ScheduledMessageId = ScheduleTokenIdCache<T>.GetTokenId(context.Message, context.MessageId);
 
             var delay = Math.Max(0, (_scheduledTime.Kind == DateTimeKind.Local
                 ? _scheduledTime - DateTime.Now
