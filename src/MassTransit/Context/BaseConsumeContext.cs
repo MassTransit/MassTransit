@@ -77,7 +77,7 @@ namespace MassTransit.Context
             {
                 var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await endpoint.Send(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
+                await ConsumeTask(endpoint.Send(message, new ResponsePipe<T>(this), CancellationToken)).ConfigureAwait(false);
             }
             else
                 await Publish(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
@@ -115,7 +115,7 @@ namespace MassTransit.Context
             {
                 var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
+                await ConsumeTask(endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken)).ConfigureAwait(false);
             }
             else
                 await Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
@@ -143,7 +143,8 @@ namespace MassTransit.Context
             {
                 var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await SendEndpointConverterCache.Send(endpoint, message, messageType, new ResponsePipe(this), CancellationToken).ConfigureAwait(false);
+                await ConsumeTask(SendEndpointConverterCache.Send(endpoint, message, messageType, new ResponsePipe(this), CancellationToken)).ConfigureAwait
+                    (false);
             }
             else
                 await Publish(message, messageType, new ResponsePipe(this), CancellationToken).ConfigureAwait(false);
@@ -177,7 +178,7 @@ namespace MassTransit.Context
             {
                 var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await SendEndpointConverterCache.Send(endpoint, message, messageType, new ResponsePipe(this, sendPipe), CancellationToken)
+                await ConsumeTask(SendEndpointConverterCache.Send(endpoint, message, messageType, new ResponsePipe(this, sendPipe), CancellationToken))
                     .ConfigureAwait(false);
             }
             else
@@ -333,24 +334,44 @@ namespace MassTransit.Context
         {
             Fault<T> fault = new FaultEvent<T>(context.Message, context.MessageId, HostMetadataCache.Host, exception);
 
-            IPipe<SendContext<Fault<T>>> faultPipe = Pipe.Execute<SendContext<Fault<T>>>(x =>
-            {
-                x.TransferConsumeContextHeaders(context);
-
-                x.CorrelationId = context.CorrelationId;
-                x.RequestId = context.RequestId;
-            });
+            var faultPipe = new FaultPipe<T>(context);
 
             var destinationAddress = FaultAddress ?? ResponseAddress;
-
             if (destinationAddress != null)
             {
                 var endpoint = await GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-                await endpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
+                await ConsumeTask(endpoint.Send(fault, faultPipe, CancellationToken)).ConfigureAwait(false);
             }
             else
                 await Publish(fault, faultPipe, CancellationToken).ConfigureAwait(false);
+        }
+
+
+        struct FaultPipe<T> :
+            IPipe<SendContext<Fault<T>>>
+            where T : class
+        {
+            readonly ConsumeContext<T> _context;
+
+            public FaultPipe(ConsumeContext<T> context)
+            {
+                _context = context;
+            }
+
+            public Task Send(SendContext<Fault<T>> context)
+            {
+                context.TransferConsumeContextHeaders(_context);
+
+                context.CorrelationId = _context.CorrelationId;
+                context.RequestId = _context.RequestId;
+
+                return TaskUtil.Completed;
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
         }
     }
 }

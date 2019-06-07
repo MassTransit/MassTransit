@@ -19,7 +19,8 @@ namespace Automatonymous.CorrelationConfigurators
 
 
     public class EventMissingInstanceConfigurator<TInstance, TData> :
-        IMissingInstanceConfigurator<TData>
+        IMissingInstanceConfigurator<TInstance, TData>
+        where TInstance : SagaStateMachineInstance
         where TData : class
     {
         public IPipe<ConsumeContext<TData>> Discard()

@@ -4,7 +4,8 @@ namespace MassTransit.Definition
     using Courier;
 
 
-    public interface IExecuteActivityDefinition
+    public interface IExecuteActivityDefinition :
+        IDefinition
     {
         /// <summary>
         /// The Activity type

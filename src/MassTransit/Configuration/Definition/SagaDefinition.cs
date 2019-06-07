@@ -33,9 +33,10 @@ namespace MassTransit.Definition
         /// Set the concurrent message limit for the saga, which limits how many saga instances are able to concurrently
         /// consume messages.
         /// </summary>
-        protected int ConcurrentMessageLimit
+        public int? ConcurrentMessageLimit
         {
-            set => _concurrentMessageLimit = value;
+            get => _concurrentMessageLimit;
+            protected set => _concurrentMessageLimit = value;
         }
 
         void ISagaDefinition<TSaga>.Configure(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<TSaga> sagaConfigurator)

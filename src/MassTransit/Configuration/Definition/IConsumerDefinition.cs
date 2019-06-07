@@ -4,7 +4,8 @@ namespace MassTransit.Definition
     using ConsumeConfigurators;
 
 
-    public interface IConsumerDefinition
+    public interface IConsumerDefinition :
+        IDefinition
     {
         /// <summary>
         /// The consumer type

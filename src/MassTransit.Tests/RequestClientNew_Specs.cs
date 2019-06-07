@@ -17,8 +17,10 @@ namespace MassTransit.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using NUnit.Framework;
     using TestFramework;
+    using TestFramework.Messages;
     using Util;
 
 
@@ -215,6 +217,82 @@ namespace MassTransit.Tests
         public class ExistingMemberFound
         {
             public string MemberId { get; set; }
+        }
+    }
+
+
+    [TestFixture]
+    public class Using_the_request_client_with_cancellation_token :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_handle_cancellation()
+        {
+            var timeout = TimeSpan.FromMilliseconds(100);
+            var ctsTimeout = TimeSpan.FromMilliseconds(100);
+
+            int numOfLoops = 5;
+            for (var i = 0; i < numOfLoops; ++i)
+            {
+                Console.WriteLine($"Sending request {i + 1} of {numOfLoops}");
+
+                try
+                {
+                    using (var timeoutReq = new CancellationTokenSource(ctsTimeout))
+                    {
+                        var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
+
+                        await client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token)
+                            .UntilCompletedOrTimeout(TimeSpan.FromSeconds(5))
+                            .ConfigureAwait(false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+
+        [Test]
+        public async Task Should_handle_an_earlier_timeout()
+        {
+            var timeout = TimeSpan.FromMilliseconds(100);
+            var ctsTimeout = TimeSpan.FromMilliseconds(140);
+
+            int numOfLoops = 5;
+            for (var i = 0; i < numOfLoops; ++i)
+            {
+                Console.WriteLine($"Sending request {i + 1} of {numOfLoops}");
+
+                try
+                {
+                    using (var timeoutReq = new CancellationTokenSource(ctsTimeout))
+                    {
+                        var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
+
+                        await client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token)
+                            .UntilCompletedOrTimeout(TimeSpan.FromSeconds(5))
+                            .ConfigureAwait(false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            Handler<PingMessage>(configurator, async context =>
+            {
+                await Task.Delay(500);
+                await context.RespondAsync(new PongMessage(), responseContext =>
+                {
+
+                });
+            });
         }
     }
 }

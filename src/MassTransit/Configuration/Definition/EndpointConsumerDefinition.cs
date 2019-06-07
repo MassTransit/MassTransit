@@ -25,5 +25,7 @@ namespace MassTransit.Definition
         {
             return _endpointDefinition.GetEndpointName(formatter);
         }
+
+        public int? ConcurrentMessageLimit => _endpointDefinition.ConcurrentMessageLimit;
     }
 }

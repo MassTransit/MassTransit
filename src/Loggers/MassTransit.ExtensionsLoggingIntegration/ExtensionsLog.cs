@@ -1,56 +1,30 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.ExtensionsLoggingIntegration
 {
     using System;
-    using MT = Logging;
     using Microsoft.Extensions.Logging;
 
-    public class ExtensionsLog : MT.ILog
+
+    public class ExtensionsLog :
+        Logging.ILog
     {
-        private readonly ILogger _logger;
+        readonly ILogger _logger;
 
         public ExtensionsLog(ILogger logger)
         {
-            _logger = logger;            
+            _logger = logger;
         }
 
-        public bool IsDebugEnabled
-        {
-            get { return _logger.IsEnabled(LogLevel.Debug); }
-        }
+        public bool IsDebugEnabled => _logger.IsEnabled(LogLevel.Debug);
 
-        public bool IsErrorEnabled
-        {
-            get { return _logger.IsEnabled(LogLevel.Error); }
-        }
+        public bool IsErrorEnabled => _logger.IsEnabled(LogLevel.Error);
 
-        public bool IsFatalEnabled
-        {
-            get { return _logger.IsEnabled(LogLevel.Critical); }
-        }
+        public bool IsFatalEnabled => _logger.IsEnabled(LogLevel.Critical);
 
-        public bool IsInfoEnabled
-        {
-            get { return _logger.IsEnabled(LogLevel.Information); }
-        }
+        public bool IsInfoEnabled => _logger.IsEnabled(LogLevel.Information);
 
-        public bool IsWarnEnabled
-        {
-            get { return _logger.IsEnabled(LogLevel.Warning); }
-        }
+        public bool IsWarnEnabled => _logger.IsEnabled(LogLevel.Warning);
 
-        public void Debug(MT.LogOutputProvider messageProvider)
+        public void Debug(Logging.LogOutputProvider messageProvider)
         {
             _logger.Log(LogLevel.Debug, 0, messageProvider, null, MessageFormatter);
         }
@@ -75,7 +49,7 @@ namespace MassTransit.ExtensionsLoggingIntegration
             _logger.LogDebug(string.Format(formatProvider, format, args));
         }
 
-        public void Error(MT.LogOutputProvider messageProvider)
+        public void Error(Logging.LogOutputProvider messageProvider)
         {
             _logger.Log(LogLevel.Error, 0, messageProvider, null, MessageFormatter);
         }
@@ -100,7 +74,7 @@ namespace MassTransit.ExtensionsLoggingIntegration
             _logger.LogError(string.Format(formatProvider, format, args));
         }
 
-        public void Fatal(MT.LogOutputProvider messageProvider)
+        public void Fatal(Logging.LogOutputProvider messageProvider)
         {
             _logger.Log(LogLevel.Critical, 0, messageProvider, null, MessageFormatter);
         }
@@ -125,7 +99,7 @@ namespace MassTransit.ExtensionsLoggingIntegration
             _logger.LogCritical(string.Format(formatProvider, format, args));
         }
 
-        public void Info(MT.LogOutputProvider messageProvider)
+        public void Info(Logging.LogOutputProvider messageProvider)
         {
             _logger.Log(LogLevel.Information, 0, messageProvider, null, MessageFormatter);
         }
@@ -150,12 +124,7 @@ namespace MassTransit.ExtensionsLoggingIntegration
             _logger.LogInformation(string.Format(formatProvider, format, args));
         }
 
-        public void LogFormat(LogLevel level, IFormatProvider formatProvider, string format, params object[] args)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Warn(MT.LogOutputProvider messageProvider)
+        public void Warn(Logging.LogOutputProvider messageProvider)
         {
             _logger.Log(LogLevel.Warning, 0, messageProvider, null, MessageFormatter);
         }
@@ -180,77 +149,82 @@ namespace MassTransit.ExtensionsLoggingIntegration
             _logger.LogWarning(string.Format(formatProvider, format, args));
         }
 
-        public void Log(MT.LogLevel level, object obj)
+        public void Log(Logging.LogLevel level, object obj)
         {
-            if (level == MT.LogLevel.Fatal)
+            if (level == Logging.LogLevel.Fatal)
                 Fatal(obj);
-            else if (level == MT.LogLevel.Error)
+            else if (level == Logging.LogLevel.Error)
                 Error(obj);
-            else if (level == MT.LogLevel.Warn)
+            else if (level == Logging.LogLevel.Warn)
                 Warn(obj);
-            else if (level == MT.LogLevel.Info)
+            else if (level == Logging.LogLevel.Info)
                 Info(obj);
-            else if (level >= MT.LogLevel.Debug)
+            else if (level >= Logging.LogLevel.Debug)
                 Debug(obj);
         }
 
-        public void Log(MT.LogLevel level, object obj, Exception exception)
+        public void Log(Logging.LogLevel level, object obj, Exception exception)
         {
-            if (level == MT.LogLevel.Fatal)
+            if (level == Logging.LogLevel.Fatal)
                 Fatal(obj, exception);
-            else if (level == MT.LogLevel.Error)
+            else if (level == Logging.LogLevel.Error)
                 Error(obj, exception);
-            else if (level == MT.LogLevel.Warn)
+            else if (level == Logging.LogLevel.Warn)
                 Warn(obj, exception);
-            else if (level == MT.LogLevel.Info)
+            else if (level == Logging.LogLevel.Info)
                 Info(obj, exception);
-            else if (level >= MT.LogLevel.Debug)
+            else if (level >= Logging.LogLevel.Debug)
                 Debug(obj, exception);
         }
 
-        public void Log(MT.LogLevel level, MT.LogOutputProvider messageProvider)
+        public void Log(Logging.LogLevel level, Logging.LogOutputProvider messageProvider)
         {
-            if (level == MT.LogLevel.Fatal)
+            if (level == Logging.LogLevel.Fatal)
                 Fatal(messageProvider);
-            else if (level == MT.LogLevel.Error)
+            else if (level == Logging.LogLevel.Error)
                 Error(messageProvider);
-            else if (level == MT.LogLevel.Warn)
+            else if (level == Logging.LogLevel.Warn)
                 Warn(messageProvider);
-            else if (level == MT.LogLevel.Info)
+            else if (level == Logging.LogLevel.Info)
                 Info(messageProvider);
-            else if (level >= MT.LogLevel.Debug)
+            else if (level >= Logging.LogLevel.Debug)
                 Debug(messageProvider);
         }
 
-        public void LogFormat(MT.LogLevel level, string format, params object[] args)
+        public void LogFormat(Logging.LogLevel level, string format, params object[] args)
         {
-            if (level == MT.LogLevel.Fatal)
+            if (level == Logging.LogLevel.Fatal)
                 FatalFormat(format, args);
-            else if (level == MT.LogLevel.Error)
+            else if (level == Logging.LogLevel.Error)
                 ErrorFormat(format, args);
-            else if (level == MT.LogLevel.Warn)
+            else if (level == Logging.LogLevel.Warn)
                 WarnFormat(format, args);
-            else if (level == MT.LogLevel.Info)
+            else if (level == Logging.LogLevel.Info)
                 InfoFormat(format, args);
-            else if (level >= MT.LogLevel.Debug)
+            else if (level >= Logging.LogLevel.Debug)
                 DebugFormat(format, args);
         }
 
-        public void LogFormat(MT.LogLevel level, IFormatProvider formatProvider, string format, params object[] args)
+        public void LogFormat(Logging.LogLevel level, IFormatProvider formatProvider, string format, params object[] args)
         {
-            if (level == MT.LogLevel.Fatal)
+            if (level == Logging.LogLevel.Fatal)
                 FatalFormat(formatProvider, format, args);
-            else if (level == MT.LogLevel.Error)
+            else if (level == Logging.LogLevel.Error)
                 ErrorFormat(formatProvider, format, args);
-            else if (level == MT.LogLevel.Warn)
+            else if (level == Logging.LogLevel.Warn)
                 WarnFormat(formatProvider, format, args);
-            else if (level == MT.LogLevel.Info)
+            else if (level == Logging.LogLevel.Info)
                 InfoFormat(formatProvider, format, args);
-            else if (level >= MT.LogLevel.Debug)
+            else if (level >= Logging.LogLevel.Debug)
                 DebugFormat(formatProvider, format, args);
         }
 
-        private static string MessageFormatter(MT.LogOutputProvider output, Exception error)
+        public void LogFormat(LogLevel level, IFormatProvider formatProvider, string format, params object[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        static string MessageFormatter(Logging.LogOutputProvider output, Exception error)
         {
             return output == null ? null : output()?.ToString();
         }

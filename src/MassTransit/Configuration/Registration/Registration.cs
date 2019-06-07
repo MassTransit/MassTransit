@@ -168,8 +168,21 @@ namespace MassTransit.Registration
                 join ea in executeActivitiesByEndpoint on e equals ea.Key into eas
                 from ea in eas.DefaultIfEmpty()
                 join ep in endpointsWithName on e equals ep.Name into eps
-                from ep in eps.Select(x => x.Definition).DefaultIfEmpty(new NamedEndpointDefinition(e))
-                select new {Name = e, Definition = ep, Consumers = c, Sagas = s, Activities = a, ExecuteActivities = ea};
+                from ep in eps.Select(x => x.Definition)
+                    .DefaultIfEmpty(c?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).SingleOrDefault()
+                        ?? s?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).SingleOrDefault()
+                        ?? a?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).SingleOrDefault()
+                        ?? ea?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).SingleOrDefault()
+                        ?? new NamedEndpointDefinition(e))
+                select new
+                {
+                    Name = e,
+                    Definition = ep,
+                    Consumers = c,
+                    Sagas = s,
+                    Activities = a,
+                    ExecuteActivities = ea
+                };
 
             foreach (var endpoint in endpoints)
             {

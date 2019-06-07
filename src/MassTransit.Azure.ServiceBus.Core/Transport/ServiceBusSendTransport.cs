@@ -216,13 +216,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 if (context.PartitionKey != null)
                     brokeredMessage.PartitionKey = context.PartitionKey;
 
-                var sessionId = string.IsNullOrWhiteSpace(context.SessionId) ? context.ConversationId?.ToString("N") : context.SessionId;
-                if (!string.IsNullOrWhiteSpace(sessionId))
+                if (!string.IsNullOrWhiteSpace(context.SessionId))
                 {
-                    brokeredMessage.SessionId = sessionId;
+                    brokeredMessage.SessionId = context.SessionId;
 
                     if (context.ReplyToSessionId == null)
-                        brokeredMessage.ReplyToSessionId = sessionId;
+                        brokeredMessage.ReplyToSessionId = context.SessionId;
                 }
 
                 if (context.ReplyToSessionId != null)

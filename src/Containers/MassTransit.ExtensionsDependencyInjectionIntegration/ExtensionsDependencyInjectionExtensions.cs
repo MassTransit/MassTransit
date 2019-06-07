@@ -36,7 +36,7 @@ namespace MassTransit
         /// Registers the InMemory saga repository for all saga types (generic, can be overridden)
         /// </summary>
         /// <param name="collection"></param>
-        public static void RegisterInMemorySagaRepository(this ServiceCollection collection)
+        public static void RegisterInMemorySagaRepository(this IServiceCollection collection)
         {
             collection.AddSingleton(typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>));
         }
@@ -46,7 +46,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="collection"></param>
         /// <typeparam name="T"></typeparam>
-        public static void RegisterInMemorySagaRepository<T>(this ServiceCollection collection)
+        public static void RegisterInMemorySagaRepository<T>(this IServiceCollection collection)
             where T : class, ISaga
         {
             collection.AddSingleton<ISagaRepository<T>, InMemorySagaRepository<T>>();
