@@ -67,6 +67,9 @@ namespace MassTransit.AmazonSqsTransport.Transport
                         if (!string.IsNullOrEmpty(sendContext.GroupId))
                             transportMessage.MessageGroupId = sendContext.GroupId;
 
+                        if (sendContext.DelaySeconds.HasValue)
+                            transportMessage.DelaySeconds = sendContext.DelaySeconds.Value;
+
                         transportMessage.MessageAttributes.Set("Content-Type", sendContext.ContentType.MediaType);
                         transportMessage.MessageAttributes.Set(nameof(sendContext.MessageId), sendContext.MessageId);
                         transportMessage.MessageAttributes.Set(nameof(sendContext.CorrelationId), sendContext.CorrelationId);
