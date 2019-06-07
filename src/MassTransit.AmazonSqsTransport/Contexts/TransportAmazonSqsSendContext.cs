@@ -28,5 +28,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         public string GroupId { get; set; }
         public string DeduplicationId { get; set; }
+        public int? DelaySeconds { get; set; }
     }
 }
