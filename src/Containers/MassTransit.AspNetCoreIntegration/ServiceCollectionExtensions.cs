@@ -6,7 +6,6 @@
     using Logging;
     using Logging.Tracing;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 
@@ -115,8 +114,8 @@
             configureHealthChecks?.Invoke(healthCheckOptions);
 
             services.AddHealthChecks()
-                .AddBusHealthCheck(healthCheckOptions.BusHealthCheckName, busCheck)
-                .AddBusHealthCheck(healthCheckOptions.ReceiveEndpointHealthCheckName, receiveEndpointCheck);
+                .AddCheck(healthCheckOptions.BusHealthCheckName, busCheck, healthCheckOptions.FailureStatus, healthCheckOptions.Tags)
+                .AddCheck(healthCheckOptions.ReceiveEndpointHealthCheckName, receiveEndpointCheck, healthCheckOptions.FailureStatus, healthCheckOptions.Tags);
 
             services.AddSingleton<IHostedService>(p =>
             {
@@ -125,11 +124,6 @@
 
                 return new MassTransitHostedService(bus, loggerFactory, busCheck, receiveEndpointCheck);
             });
-        }
-
-        static IHealthChecksBuilder AddBusHealthCheck(this IHealthChecksBuilder builder, string healthCheckName, IHealthCheck healthCheck)
-        {
-            return builder.AddCheck(healthCheckName, healthCheck, HealthStatus.Unhealthy, new[] {"ready"});
         }
     }
 }
