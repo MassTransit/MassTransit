@@ -36,7 +36,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
         {
             base.ConfigureAmazonSqsBusHost(configurator, host);
 
-            configurator.UseDelayedMessageScheduler();
+            configurator.UseAmazonSqsMessageScheduler();
         }
 
         Task<ConsumeContext<SecondMessage>> _second;
@@ -88,7 +88,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
         {
             base.ConfigureAmazonSqsBusHost(configurator, host);
 
-            configurator.UseDelayedMessageScheduler();
+            configurator.UseAmazonSqsMessageScheduler();
         }
 
         Task<ConsumeContext<SecondMessage>> _second;
