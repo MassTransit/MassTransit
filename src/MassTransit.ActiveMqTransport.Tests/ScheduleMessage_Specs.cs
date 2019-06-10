@@ -115,49 +115,4 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
         }
     }
-
-    public class Scheduling_a_published_message :
-        ActiveMqTestFixture
-    {
-        [Test]
-        public async Task Should_get_both_messages()
-        {
-            await InputQueueSendEndpoint.Send(new FirstMessage());
-
-            await _first;
-
-            await _second;
-        }
-
-        protected override void ConfigureActiveMqBusHost(IActiveMqBusFactoryConfigurator configurator, IActiveMqHost host)
-        {
-            base.ConfigureActiveMqBusHost(configurator, host);
-
-            configurator.UseDelayedExchangeMessageScheduler();
-        }
-
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
-
-        protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
-        {
-            _first = Handler<FirstMessage>(configurator, async context =>
-            {
-                await context.SchedulePublish(TimeSpan.FromSeconds(1), new SecondMessage());
-            });
-
-            _second = Handled<SecondMessage>(configurator);
-        }
-
-
-        public class FirstMessage
-        {
-        }
-
-
-        public class SecondMessage
-        {
-        }
-    }
-
 }
