@@ -68,6 +68,11 @@ namespace MassTransit.RabbitMqTransport.Topology
         TimeSpan? QueueExpiration { get; }
 
         /// <summary>
+        /// If false, deploys only exchange, without queue
+        /// </summary>
+        bool BindQueue { get; }
+
+        /// <summary>
         /// Get the input address for the transport on the specified host
         /// </summary>
         Uri GetInputAddress(Uri hostAddress);

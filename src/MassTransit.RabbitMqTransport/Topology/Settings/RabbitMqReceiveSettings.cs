@@ -33,6 +33,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         public bool PurgeOnStartup { get; set; }
         public bool ExclusiveConsumer { get; set; }
 
+        public bool BindQueue { get; set; } = true;
+
         public int ConsumerPriority
         {
             set => ConsumeArguments["x-priority"] = value;
