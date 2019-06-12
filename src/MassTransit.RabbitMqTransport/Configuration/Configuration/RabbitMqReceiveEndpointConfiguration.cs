@@ -179,6 +179,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set => _settings.Lazy = value;
         }
 
+        public bool BindQueue
+        {
+            set => _settings.BindQueue = value;
+        }
+
         public TimeSpan? QueueExpiration
         {
             set => _settings.QueueExpiration = value;

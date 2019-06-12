@@ -29,6 +29,11 @@ namespace MassTransit.RabbitMqTransport
         bool BindMessageExchanges { set; }
 
         /// <summary>
+        /// If false, deploys only exchange, without queue
+        /// </summary>
+        bool BindQueue { set; }
+
+        /// <summary>
         /// Specifies the dead letter exchange name, which is used to send expired messages
         /// </summary>
         string DeadLetterExchange { set; }
