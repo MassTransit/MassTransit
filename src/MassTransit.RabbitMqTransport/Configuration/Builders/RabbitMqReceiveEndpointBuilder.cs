@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Builders
 {
@@ -81,26 +81,11 @@ namespace MassTransit.RabbitMqTransport.Builders
 
         BrokerTopology BuildTopology(ReceiveSettings settings)
         {
-            var topologyBuilder = new ReceiveEndpointBrokerTopologyBuilder();
-
-            var queueArguments = new Dictionary<string, object>(settings.QueueArguments);
-
-            bool queueAutoDelete = settings.AutoDelete;
-            if (settings.QueueExpiration.HasValue)
-            {
-                queueArguments["x-expires"] = (long)settings.QueueExpiration.Value.TotalMilliseconds;
-                queueAutoDelete = false;
-            }
-
-            topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, queueAutoDelete, settings.Exclusive, queueArguments);
-
-            topologyBuilder.Exchange = topologyBuilder.ExchangeDeclare(settings.ExchangeName ?? settings.QueueName, settings.ExchangeType, settings.Durable,
-                settings.AutoDelete, settings.ExchangeArguments);
-
-            topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
+            var topologyBuilder = new ReceiveEndpointBrokerTopologyBuilder(settings);
+            topologyBuilder.QueueBind();
+            topologyBuilder.ExchangeDeclare();
 
             _configuration.Topology.Consume.Apply(topologyBuilder);
-
             return topologyBuilder.BuildTopologyLayout();
         }
     }
