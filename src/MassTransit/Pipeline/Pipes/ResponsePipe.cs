@@ -1,5 +1,6 @@
 namespace MassTransit.Pipeline.Pipes
 {
+    using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -72,6 +73,7 @@ namespace MassTransit.Pipeline.Pipes
         {
             context.RequestId = _context.RequestId;
             context.SourceAddress = _context.ReceiveContext.InputAddress;
+            context.TimeToLive = _context.ExpirationTime - DateTime.UtcNow;
 
             if (_pipe.IsNotEmpty())
                 return _pipe.Send(context);
