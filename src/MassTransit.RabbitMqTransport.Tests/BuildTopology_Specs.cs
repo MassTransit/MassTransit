@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
@@ -17,8 +17,10 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading.Tasks;
     using MassTransit.Topology.EntityNameFormatters;
     using NUnit.Framework;
+    using RabbitMQ.Client;
     using Topology;
     using Topology.Builders;
+    using Topology.Settings;
     using Topology.Topologies;
     using TopologyTestTypes;
 
@@ -158,15 +160,17 @@ namespace MassTransit.RabbitMqTransport.Tests
             _nameFormatter = new RabbitMqMessageNameFormatter();
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
             _consumeTopology = new RabbitMqConsumeTopology(RabbitMqBusFactory.MessageTopology, new RabbitMqPublishTopology(RabbitMqBusFactory.MessageTopology));
-
-            _builder = new ReceiveEndpointBrokerTopologyBuilder();
+            var settings = new RabbitMqReceiveSettings(_inputQueueName, ExchangeType.Fanout, true, false)
+            {
+                AutoDelete = false,
+                Exclusive = false,
+                RoutingKey = ""
+            };
+            _builder = new ReceiveEndpointBrokerTopologyBuilder(settings);
 
             _inputQueueName = "input-queue";
-            _builder.Queue = _builder.QueueDeclare(_inputQueueName, true, false, false, new Dictionary<string, object>());
-            _builder.Exchange = _builder.ExchangeDeclare(_inputQueueName, _consumeTopology.ExchangeTypeSelector.DefaultExchangeType, true, false,
-                new Dictionary<string, object>());
-
-            _builder.QueueBind(_builder.Exchange, _builder.Queue, "", new Dictionary<string, object>());
+            _builder.QueueBind();
+            _builder.ExchangeDeclare();
         }
 
         RabbitMqMessageNameFormatter _nameFormatter;
