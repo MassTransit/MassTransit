@@ -29,6 +29,8 @@ namespace MassTransit.Pipeline.Filters
                 await next.Send(outboxContext).ConfigureAwait(false);
 
                 await outboxContext.ExecutePendingActions().ConfigureAwait(false);
+
+                await outboxContext.ConsumeCompleted.ConfigureAwait(false);
             }
             catch (Exception)
             {
@@ -45,6 +47,7 @@ namespace MassTransit.Pipeline.Filters
         }
     }
 
+
     public class InMemoryOutboxFilter<T> :
         IFilter<ConsumeContext<T>>
         where T : class
@@ -57,6 +60,8 @@ namespace MassTransit.Pipeline.Filters
                 await next.Send(outboxContext).ConfigureAwait(false);
 
                 await outboxContext.ExecutePendingActions().ConfigureAwait(false);
+
+                await outboxContext.ConsumeCompleted.ConfigureAwait(false);
             }
             catch (Exception)
             {
