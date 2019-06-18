@@ -75,7 +75,7 @@ namespace MassTransit.Courier
                 contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
                     ? variables
                     : GetEmptyObject()
-                ));
+            ));
         }
 
         public Task PublishRoutingSlipFaulted(DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables,
@@ -89,7 +89,7 @@ namespace MassTransit.Courier
                 contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
                     ? variables
                     : GetEmptyObject()
-                ));
+            ));
         }
 
         public Task PublishRoutingSlipActivityCompleted(string activityName, Guid executionId,
@@ -196,22 +196,34 @@ namespace MassTransit.Courier
             DateTime timestamp, TimeSpan duration, DateTime failureTimestamp, TimeSpan routingSlipDuration,
             ExceptionInfo exceptionInfo, IDictionary<string, object> variables, IDictionary<string, object> data)
         {
-            return PublishEvent(RoutingSlipEvents.ActivityCompensationFailed | RoutingSlipEvents.CompensationFailed, contents => new CompensationFailed(
-                _host,
-                _routingSlip.TrackingNumber,
-                activityName,
-                executionId,
-                timestamp,
-                duration,
-                failureTimestamp,
-                routingSlipDuration,
-                exceptionInfo,
-                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
-                    ? variables
-                    : GetEmptyObject(),
-                contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Data)
-                    ? data
-                    : GetEmptyObject()));
+            var activityTask = PublishEvent<RoutingSlipActivityCompensationFailed>(RoutingSlipEvents.ActivityCompensationFailed,
+                contents => new ActivityCompensationFailed(
+                    _host,
+                    _routingSlip.TrackingNumber,
+                    activityName,
+                    executionId,
+                    timestamp,
+                    duration,
+                    exceptionInfo,
+                    contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
+                        ? variables
+                        : GetEmptyObject(),
+                    contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Data)
+                        ? data
+                        : GetEmptyObject()));
+
+            var slipTask = PublishEvent<RoutingSlipCompensationFailed>(RoutingSlipEvents.CompensationFailed,
+                contents => new CompensationFailed(
+                    _host,
+                    _routingSlip.TrackingNumber,
+                    failureTimestamp,
+                    routingSlipDuration,
+                    exceptionInfo,
+                    contents == RoutingSlipEventContents.All || contents.HasFlag(RoutingSlipEventContents.Variables)
+                        ? variables
+                        : GetEmptyObject()));
+
+            return Task.WhenAll(activityTask, slipTask);
         }
 
         static IDictionary<string, object> GetEmptyObject()
@@ -241,18 +253,18 @@ namespace MassTransit.Courier
                 if (string.IsNullOrWhiteSpace(_activityName) || string.IsNullOrWhiteSpace(subscription.ActivityName)
                     || _activityName.Equals(subscription.ActivityName, StringComparison.OrdinalIgnoreCase))
                 {
-                var endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address).ConfigureAwait(false);
+                    var endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address).ConfigureAwait(false);
 
-                var message = messageFactory(subscription.Include);
+                    var message = messageFactory(subscription.Include);
 
-                if (subscription.Message != null)
-                {
-                    var adapter = new MessageEnvelopeContextAdapter(null, subscription.Message, JsonMessageSerializer.ContentTypeHeaderValue, message);
+                    if (subscription.Message != null)
+                    {
+                        var adapter = new MessageEnvelopeContextAdapter(null, subscription.Message, JsonMessageSerializer.ContentTypeHeaderValue, message);
 
-                    await endpoint.Send(message, adapter).ConfigureAwait(false);
-                }
-                else
-                    await endpoint.Send(message).ConfigureAwait(false);
+                        await endpoint.Send(message, adapter).ConfigureAwait(false);
+                    }
+                    else
+                        await endpoint.Send(message).ConfigureAwait(false);
                 }
             }
         }

@@ -94,6 +94,42 @@ namespace MassTransit.Tests.Courier
         }
 
         [Test]
+        public async Task Should_handle_the_failed_to_compensate_event_via_subscription()
+        {
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+
+            Task<ConsumeContext<RoutingSlipActivityCompensationFailed>> handledCompensationFailure =
+                SubscribeHandler<RoutingSlipActivityCompensationFailed>(x => x.Message.TrackingNumber == builder.TrackingNumber);
+            Task<ConsumeContext<RoutingSlipCompensationFailed>> handledRoutingSlipFailure =
+                SubscribeHandler<RoutingSlipCompensationFailed>(x => x.Message.TrackingNumber == builder.TrackingNumber);
+
+            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+            ActivityTestContext faultyCompensateActivity = GetActivityContext<FaultyCompensateActivity>();
+            ActivityTestContext faultActivity = GetActivityContext<FaultyActivity>();
+
+            builder.AddVariable("Value", "Hello");
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
+            builder.AddActivity(faultyCompensateActivity.Name, faultyCompensateActivity.ExecuteUri);
+            builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri);
+
+            builder.AddSubscription(
+                Bus.Address,
+                RoutingSlipEvents.CompensationFailed,
+                RoutingSlipEventContents.All);
+
+            builder.AddSubscription(
+                Bus.Address,
+                RoutingSlipEvents.ActivityCompensationFailed,
+                RoutingSlipEventContents.All);
+
+            await Bus.Execute(builder.Build());
+
+            await handledRoutingSlipFailure;
+
+            await handledCompensationFailure;
+        }
+
+        [Test]
         public async Task Should_publish_the_faulted_routing_slip_event()
         {
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
