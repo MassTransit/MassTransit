@@ -2,14 +2,17 @@ namespace MassTransit.Context
 {
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Util;
+    using Pipeline;
 
 
-    public struct ConsumeSendContextPipe<T> :
-        IPipe<SendContext<T>>
-        where T : class
+    public struct ConsumeSendContextPipe<TMessage> :
+        IPipe<SendContext<TMessage>>,
+        ISendContextPipe
+        where TMessage : class
     {
         readonly ConsumeContext _consumeContext;
-        readonly IPipe<SendContext<T>> _pipe;
+        readonly IPipe<SendContext<TMessage>> _pipe;
 
         public ConsumeSendContextPipe(ConsumeContext consumeContext)
         {
@@ -18,7 +21,7 @@ namespace MassTransit.Context
             _pipe = default;
         }
 
-        public ConsumeSendContextPipe(ConsumeContext consumeContext, IPipe<SendContext<T>> pipe)
+        public ConsumeSendContextPipe(ConsumeContext consumeContext, IPipe<SendContext<TMessage>> pipe)
         {
             _consumeContext = consumeContext;
             _pipe = pipe;
@@ -35,13 +38,18 @@ namespace MassTransit.Context
             _pipe?.Probe(context);
         }
 
-        public async Task Send(SendContext<T> context)
+        public Task Send(SendContext<TMessage> context)
+        {
+            return _pipe?.Send(context) ?? TaskUtil.Completed;
+        }
+
+        public Task Send<T>(SendContext<T> context)
+            where T : class
         {
             if (_consumeContext != null)
                 context.TransferConsumeContextHeaders(_consumeContext);
 
-            if (_pipe.IsNotEmpty())
-                await _pipe.Send(context).ConfigureAwait(false);
+            return TaskUtil.Completed;
         }
     }
 }
