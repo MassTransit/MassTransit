@@ -16,7 +16,7 @@
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
-    <PackageReference Include="WindowsAzure.ServiceBus" Version="4.1.11" />
+    <PackageReference Include="WindowsAzure.ServiceBus" Version="5.2.0" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
