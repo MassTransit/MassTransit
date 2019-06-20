@@ -18,6 +18,7 @@
     * [Saga](learn/samples/saga.md)
     * [Courier](learn/samples/courier.md)
     * [Containers](learn/samples/containers.md)
+    * [Quartz](learn/samples/quartz.md)
   * [Videos](learn/videos.md)
   * [Courses](learn/courses.md)
   * [Loving the community](learn/loving-the-community.md)

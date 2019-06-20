@@ -177,6 +177,7 @@ x.ReceiveEndpoint(host, "shopping_cart_state", e =>
     e.UseRetry(x =>
         {
             x.Handle<DbUpdateConcurrencyException>();
+            x.Handle<DbUpdateException>(y => y.InnerException is SqlException e && e.Number == 2627); // This is the SQLServer error code for duplicate key, if you are using another Relational Db, the code might be different
             x.Interval(5, TimeSpan.FromMilliseconds(100)));
         }); // Add the retry middleware for optimistic concurrency
     e.StateMachineSaga(sagaStateMachine, repository);
