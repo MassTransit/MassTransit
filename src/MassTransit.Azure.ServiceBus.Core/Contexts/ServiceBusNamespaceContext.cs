@@ -123,6 +123,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             {
                 subscriptionDescription = await _namespaceManager.GetSubscriptionAsync(description.TopicPath, description.SubscriptionName)
                     .ConfigureAwait(false);
+                RuleDescription ruleDescription = await _namespaceManager.GetRuleAsync(description.TopicPath, description.SubscriptionName, rule.Name)
+                    .ConfigureAwait(false);
 
                 string NormalizeForwardTo(string forwardTo)
                 {
@@ -144,6 +146,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                             subscriptionDescription.ForwardTo);
 
                     await _namespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
+                }
+
+                if (rule.Name == ruleDescription.Name && (rule.Filter != ruleDescription.Filter || rule.Action != ruleDescription.Action))
+                {
+                    if (_log.IsDebugEnabled)
+                        _log.DebugFormat("Updating subscription Rule: {0} ({1} -> {2})", rule.Name,
+                            ruleDescription.Filter.ToString(),
+                            rule.Filter.ToString());
+
+                    await _namespaceManager.UpdateRuleAsync(description.TopicPath, description.SubscriptionName, rule).ConfigureAwait(false);
                 }
 
                 create = false;
