@@ -1,10 +1,10 @@
 ﻿namespace MassTransit.AspNetCoreIntegration
 {
     using System;
+    using System.Diagnostics;
+    using Context;
     using ExtensionsDependencyInjectionIntegration;
     using HealthChecks;
-    using Logging;
-    using Logging.Tracing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -26,10 +26,7 @@
             {
                 x.AddBus(provider =>
                 {
-                    var loggerFactory = provider.GetService<ILoggerFactory>();
-
-                    if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
-                        ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
+                    ConfigureLogging(provider);
 
                     return createBus(provider);
                 });
@@ -61,10 +58,7 @@
 
                 x.AddBus(provider =>
                 {
-                    var loggerFactory = provider.GetService<ILoggerFactory>();
-
-                    if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
-                        ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
+                    ConfigureLogging(provider);
 
                     return createBus(provider);
                 });
@@ -90,11 +84,7 @@
             {
                 x.AddBus(provider =>
                 {
-                    if (loggerFactory == null)
-                        loggerFactory = provider.GetService<ILoggerFactory>();
-
-                    if (loggerFactory != null && Logger.Current.GetType() == typeof(TraceLogger))
-                        ExtensionsLoggingIntegration.ExtensionsLogger.Use(loggerFactory);
+                    ConfigureLogging(provider, loggerFactory);
 
                     return bus;
                 });
@@ -103,6 +93,16 @@
             services.AddSimplifiedHostedService(configureHealthChecks);
 
             return services;
+        }
+
+        static void ConfigureLogging(IServiceProvider provider, ILoggerFactory loggerFactory = null)
+        {
+            if (loggerFactory == null)
+                loggerFactory = provider.GetService<ILoggerFactory>();
+            var diagnosticSource = provider.GetService<DiagnosticSource>();
+
+            if (loggerFactory != null)
+                LogContext.ConfigureCurrentLogContext(loggerFactory, diagnosticSource);
         }
 
         static void AddSimplifiedHostedService(this IServiceCollection services, Action<HealthCheckOptions> configureHealthChecks)
@@ -120,9 +120,8 @@
             services.AddSingleton<IHostedService>(p =>
             {
                 var bus = p.GetRequiredService<IBusControl>();
-                var loggerFactory = p.GetService<ILoggerFactory>();
 
-                return new MassTransitHostedService(bus, loggerFactory, busCheck, receiveEndpointCheck);
+                return new MassTransitHostedService(bus, busCheck, receiveEndpointCheck);
             });
         }
     }

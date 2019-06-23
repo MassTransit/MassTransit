@@ -146,7 +146,7 @@
             }
             else
             {
-                var messageReceiver = new BrokeredMessageReceiver(InputAddress, Logger.Get<Receiver>(), context);
+                var messageReceiver = new BrokeredMessageReceiver(InputAddress,  context);
 
                 var errorTransport = CreateErrorTransport(_hostConfiguration.Host);
                 var deadLetterTransport = CreateDeadLetterTransport(_hostConfiguration.Host);

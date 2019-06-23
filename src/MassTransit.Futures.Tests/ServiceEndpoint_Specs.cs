@@ -13,7 +13,6 @@
 namespace MassTransit.Tests
 {
     using System;
-    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -21,10 +20,7 @@ namespace MassTransit.Tests
     using Contracts;
     using GreenPipes;
     using GreenPipes.Caching;
-    using GreenPipes.Payloads;
     using Initializers;
-    using log4net.Filter;
-    using Logging;
     using NUnit.Framework;
     using Subjects;
     using TestFramework;
@@ -275,8 +271,6 @@ namespace MassTransit.Tests
             IFilter<ConsumeContext<T>>
             where T : class
         {
-            readonly ILog _log = Logger.Get<RequestLimitFilter<T>>();
-
             readonly IEndpointRuntime _runtime;
 
             public RequestLimitFilter(IEndpointRuntime runtime)
@@ -362,11 +356,9 @@ namespace MassTransit.Tests
         class DeployPayloadConsumer :
             IConsumer<DeployPayload>
         {
-            readonly ILog _log = Logger.Get<DeployPayloadConsumer>();
-
             public async Task Consume(ConsumeContext<DeployPayload> context)
             {
-                _log.InfoFormat("Deploying Payload: {0}", context.Message.Target);
+                LogContext.Info?.Log("Deploying Payload: {Target}", context.Message.Target);
 
                 await context.RespondAsync<PayloadDeployed>(new { });
             }

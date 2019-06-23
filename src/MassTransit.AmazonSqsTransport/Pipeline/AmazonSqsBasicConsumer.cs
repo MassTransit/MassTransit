@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Pipeline
 {
     using System;
@@ -17,11 +5,11 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using System.Linq;
     using System.Threading.Tasks;
     using Amazon.SQS.Model;
+    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Logging;
     using Topology;
     using Transports.Metrics;
 
@@ -36,7 +24,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     {
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly Uri _inputAddress;
-        readonly ILog _log = Logger.Get<AmazonSqsBasicConsumer>();
         readonly ClientContext _client;
         readonly ConcurrentDictionary<string, AmazonSqsReceiveContext> _pending;
         readonly ReceiveSettings _receiveSettings;
@@ -95,8 +82,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                 try
                 {
                     if (!_pending.TryAdd(message.MessageId, context))
-                        if (_log.IsErrorEnabled)
-                            _log.ErrorFormat("Duplicate BasicDeliver: {0}", message.MessageId);
+                        LogContext.Error?.Log("Duplicate message: {MessageId}", message.MessageId);
 
                     await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
@@ -129,8 +115,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         {
             if (IsStopping)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer shutdown completed: {0}", _context.InputAddress);
+                LogContext.Debug?.Log("Consumer shutdown completed: {InputAddress}", _context.InputAddress);
 
                 _deliveryComplete.TrySetResult(true);
             }
@@ -144,15 +129,13 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             }
             catch (Exception exception)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Debug("Shutting down, deliveryComplete Faulted: {_topology.InputAddress}", exception);
+                LogContext.Error?.Log(exception, "DeliveryComplete faulted during shutdown: {InputAddress}", _context.InputAddress);
             }
         }
 
         protected override async Task StopSupervisor(StopSupervisorContext context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping consumer: {0}", _context.InputAddress);
+            LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
@@ -171,8 +154,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                 }
                 catch (OperationCanceledException)
                 {
-                    if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _context.InputAddress);
+                    LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
                 }
             }
         }

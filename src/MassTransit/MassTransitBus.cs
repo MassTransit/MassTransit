@@ -1,15 +1,3 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
     using System;
@@ -18,10 +6,9 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
-    using Context.Converters;
+    using Context;
     using Events;
     using GreenPipes;
-    using Logging;
     using Pipeline;
     using Topology;
     using Transports;
@@ -31,7 +18,6 @@ namespace MassTransit
     public class MassTransitBus :
         IBusControl
     {
-        static readonly ILog _log = Logger.Get<MassTransitBus>();
         readonly IBusObserver _busObservable;
         readonly IConsumePipe _consumePipe;
         readonly IReadOnlyHostCollection _hosts;
@@ -90,12 +76,12 @@ namespace MassTransit
 
         Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
         {
-            return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
+            return _publishEndpoint.Value.Publish(message, messageType, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
+            return _publishEndpoint.Value.Publish(message, messageType, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
@@ -126,7 +112,7 @@ namespace MassTransit
         {
             if (_busHandle != null)
             {
-                _log.Warn($"The bus was already started, additional Start attempts are ignored: {Address}");
+                LogContext.Warning?.Log("StartAsync called, but the bus was already started: {Address} ({Reason})", Address, "Already Started");
                 return _busHandle;
             }
 
@@ -138,9 +124,6 @@ namespace MassTransit
             var hosts = new List<HostHandle>();
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Starting bus hosts...");
-
                 if (cancellationToken == default)
                 {
                     tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(60));
@@ -170,8 +153,7 @@ namespace MassTransit
                 {
                     if (busHandle != null)
                     {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Stopping bus hosts...");
+                        LogContext.Debug?.Log("Bus start faulted, stopping hosts");
 
                         await busHandle.StopAsync(cancellationToken).ConfigureAwait(false);
                     }
@@ -184,7 +166,7 @@ namespace MassTransit
                 }
                 catch (Exception stopException)
                 {
-                    _log.Error("Failed to stop partially created bus", stopException);
+                    LogContext.Warning?.Log(stopException, "Bus start faulted, and failed to stop started hosts");
                 }
 
                 await _busObservable.StartFaulted(this, ex).ConfigureAwait(false);
@@ -201,7 +183,7 @@ namespace MassTransit
         {
             if (_busHandle == null)
             {
-                _log.Warn($"The bus could not be stopped as it was never started: {Address}");
+                LogContext.Warning?.Log("Failed to stop bus: {Address} ({Reason})", Address, "Not Started");
                 return TaskUtil.Completed;
             }
 
@@ -241,10 +223,7 @@ namespace MassTransit
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("bus");
-            scope.Set(new
-            {
-                Address
-            });
+            scope.Add("address", Address);
 
             foreach (var host in _hosts)
                 host.Probe(scope);
@@ -277,8 +256,7 @@ namespace MassTransit
 
                 try
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Stopping hosts...");
+                    LogContext.Debug?.Log("Stopping hosts");
 
                     await Task.WhenAll(_hostHandles.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 
@@ -288,8 +266,7 @@ namespace MassTransit
                 {
                     await _busObserver.StopFaulted(_bus, exception).ConfigureAwait(false);
 
-                    if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Exception occurred while stopping hosts", exception);
+                    LogContext.Warning?.Log(exception, "Bus stop faulted");
 
                     throw;
                 }

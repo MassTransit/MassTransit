@@ -24,7 +24,8 @@ namespace MassTransit.Transports.InMemory.Configuration
         /// Create a receive endpoint configuration using the specified host
         /// </summary>
         /// <param name="queueName">The queue name for the receive endpoint</param>
+        /// <param name="endpointConfiguration"></param>
         /// <returns></returns>
-        IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName);
+        IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, IInMemoryEndpointConfiguration endpointConfiguration = null);
     }
 }

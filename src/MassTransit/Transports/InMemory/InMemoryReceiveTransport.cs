@@ -1,14 +1,14 @@
 // Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory
 {
@@ -21,6 +21,7 @@ namespace MassTransit.Transports.InMemory
     using Fabric;
     using GreenPipes;
     using GreenPipes.Agents;
+    using Logging;
     using Metrics;
     using Util;
 
@@ -54,40 +55,44 @@ namespace MassTransit.Transports.InMemory
             if (IsStopped)
                 return;
 
+            LogContext.Current = _receiveEndpointContext.LogContext;
+
             var context = new InMemoryReceiveContext(_inputAddress, message, _receiveEndpointContext);
+            var delivery = _tracker.BeginDelivery();
 
-            using (_tracker.BeginDelivery())
+            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
+            activity.AddReceiveContextHeaders(context);
+
+            try
             {
-                try
-                {
-                    await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
-                    await _receiveEndpointContext.ReceivePipe.Send(context).ConfigureAwait(false);
+                await _receiveEndpointContext.ReceivePipe.Send(context).ConfigureAwait(false);
 
-                    await context.ReceiveCompleted.ConfigureAwait(false);
+                await context.ReceiveCompleted.ConfigureAwait(false);
 
-                    await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
-                    message.DeliveryCount++;
-                }
-                finally
-                {
-                    context.Dispose();
-                }
+                message.DeliveryCount++;
+            }
+            finally
+            {
+                activity?.Stop();
+
+                delivery.Dispose();
+
+                context.Dispose();
             }
         }
 
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("inMemoryReceiveTransport");
-            scope.Set(new
-            {
-                Address = _inputAddress
-            });
+            scope.Set(new {Address = _inputAddress});
         }
 
         ReceiveTransportHandle IReceiveTransport.Start()

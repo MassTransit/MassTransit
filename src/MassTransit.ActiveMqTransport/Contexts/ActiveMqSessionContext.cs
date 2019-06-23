@@ -1,25 +1,13 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.ActiveMqTransport.Contexts
+﻿namespace MassTransit.ActiveMqTransport.Contexts
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
     using Apache.NMS.Util;
+    using Context;
     using GreenPipes;
     using GreenPipes.Payloads;
-    using Logging;
     using Util;
 
 
@@ -28,8 +16,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
         SessionContext,
         IAsyncDisposable
     {
-        static readonly ILog _log = Logger.Get<ActiveMqSessionContext>();
-
         readonly ConnectionContext _connectionContext;
         readonly ISession _session;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
@@ -48,8 +34,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
         public async Task DisposeAsync(CancellationToken cancellationToken)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Closing session: {0}", _connectionContext.Description);
+            LogContext.Debug?.Log("Closing session: {Host}", _connectionContext.Description);
 
             if (_session != null)
             {
@@ -61,7 +46,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
                 }
                 catch (Exception ex)
                 {
-                    _log.Warn("Session close faulted", ex);
+                    LogContext.Warning?.Log(ex, "Close session faulted: {Host}", _connectionContext.Description);
                 }
 
                 _session.Dispose();

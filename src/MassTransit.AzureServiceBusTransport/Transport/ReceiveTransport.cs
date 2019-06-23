@@ -1,25 +1,25 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
     using Pipeline;
     using Policies;
     using Transports;
@@ -29,21 +29,21 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         Supervisor,
         IReceiveTransport
     {
-        static readonly ILog _log = Logger.Get<ReceiveTransport>();
         readonly IClientContextSupervisor _clientContextSupervisor;
         readonly IPipe<ClientContext> _clientPipe;
-        readonly ServiceBusReceiveEndpointContext _receiveEndpointContext;
+        readonly ServiceBusReceiveEndpointContext _context;
         readonly IServiceBusHost _host;
         readonly ClientSettings _settings;
 
-        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IClientContextSupervisor clientContextSupervisor, IPipe<ClientContext> clientPipe,
-            ServiceBusReceiveEndpointContext receiveEndpointContext)
+        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IClientContextSupervisor clientContextSupervisor,
+            IPipe<ClientContext> clientPipe,
+            ServiceBusReceiveEndpointContext context)
         {
             _host = host;
             _settings = settings;
             _clientContextSupervisor = clientContextSupervisor;
             _clientPipe = clientPipe;
-            _receiveEndpointContext = receiveEndpointContext;
+            _context = context;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -60,11 +60,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         public ReceiveTransportHandle Start()
         {
-            var inputAddress = _settings.GetInputAddress(_host.Settings.ServiceUri, _settings.Path);
-
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting receive transport: {0}", inputAddress);
-
             Task.Factory.StartNew(Receiver, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
 
             return new Handle(this);
@@ -72,22 +67,22 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveObserver(observer);
+            return _context.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveTransportObserver(observer);
+            return _context.ConnectReceiveTransportObserver(observer);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveEndpointContext.ConnectPublishObserver(observer);
+            return _context.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            return _receiveEndpointContext.ConnectSendObserver(observer);
+            return _context.ConnectSendObserver(observer);
         }
 
         async Task Receiver()
@@ -100,9 +95,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 {
                     await _host.RetryPolicy.Retry(async () =>
                     {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Connecting receive transport: {0}", inputAddress);
-
                         try
                         {
                             await _clientContextSupervisor.Send(_clientPipe, Stopped).ConfigureAwait(false);
@@ -112,10 +104,9 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                         }
                         catch (Exception ex)
                         {
-                            if (_log.IsErrorEnabled)
-                                _log.Error($"ReceiveTransport Faulted: {inputAddress}", ex);
+                            LogContext.Error?.Log(ex, "Receive transport faulted: {InputAddress}", _context.InputAddress);
 
-                            await _receiveEndpointContext.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(inputAddress, ex)).ConfigureAwait(false);
+                            await _context.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(inputAddress, ex)).ConfigureAwait(false);
 
                             throw;
                         }

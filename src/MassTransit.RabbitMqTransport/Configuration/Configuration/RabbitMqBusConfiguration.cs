@@ -44,7 +44,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             var hostTopology = new RabbitMqHostTopology(_exchangeTypeSelector, _messageNameFormatter, hostSettings.HostAddress, Topology);
 
             var hostConfiguration = new RabbitMqHostConfiguration(this, hostSettings, hostTopology);
-
             _hosts.Add(hostConfiguration);
 
             return hostConfiguration;
@@ -56,7 +55,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             if (_hosts.Count == 0)
                 throw new ConfigurationException("At least one host must be configured");
 
-            return new RabbitMqReceiveEndpointConfiguration(_hosts[0], settings, endpointConfiguration);
+            return _hosts[0].CreateReceiveEndpointConfiguration(settings, endpointConfiguration);
         }
 
         public IReadOnlyHostCollection Hosts => _hosts;

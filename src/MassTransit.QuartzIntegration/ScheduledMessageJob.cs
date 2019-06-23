@@ -13,10 +13,9 @@
 namespace MassTransit.QuartzIntegration
 {
     using System;
-    using System.Globalization;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
-    using Logging;
     using Quartz;
     using Serialization;
 
@@ -25,7 +24,6 @@ namespace MassTransit.QuartzIntegration
         IJob,
         SerializedMessage
     {
-        static readonly ILog _log = Logger.Get<ScheduledMessageJob>();
         readonly IBus _bus;
 
         public ScheduledMessageJob(IBus bus)
@@ -52,9 +50,7 @@ namespace MassTransit.QuartzIntegration
             }
             catch (Exception ex)
             {
-                var message = string.Format(CultureInfo.InvariantCulture,
-                    "An exception occurred sending message {0} to {1}", MessageType, Destination);
-                _log.Error(message, ex);
+                LogContext.Error?.Log(ex, "Failed to send scheduled message, type: {MessageType}, destination: {DestinationAddress}", MessageType, Destination);
 
                 throw new JobExecutionException(ex, context.RefireCount < 5);
             }

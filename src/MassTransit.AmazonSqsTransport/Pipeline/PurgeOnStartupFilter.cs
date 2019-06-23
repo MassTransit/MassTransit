@@ -13,8 +13,8 @@
 namespace MassTransit.AmazonSqsTransport.Pipeline
 {
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
-    using Logging;
 
 
     /// <summary>
@@ -23,7 +23,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     public class PurgeOnStartupFilter :
         IFilter<ClientContext>
     {
-        static readonly ILog _log = Logger.Get<PurgeOnStartupFilter>();
         readonly string _queueName;
         bool _queueAlreadyPurged;
 
@@ -48,20 +47,15 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         {
             if (!_queueAlreadyPurged)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Purging queue {1}", queueName);
-
                 await context.PurgeQueue(queueName, context.CancellationToken).ConfigureAwait(false);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Purged queue {1}", queueName);
+                LogContext.Debug?.Log("Purged queue {QueueName}", queueName);
 
                 _queueAlreadyPurged = true;
             }
             else
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Queue {0} already purged at startup, skipping", queueName);
+                LogContext.Debug?.Log("Queue {QueueName} was purged at startup, skipping", queueName);
             }
         }
     }

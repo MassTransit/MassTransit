@@ -1,21 +1,10 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
     using System;
     using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -38,11 +27,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     {
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly Uri _inputAddress;
-        readonly ILog _log = Logger.Get<RabbitMqBasicConsumer>();
         readonly ModelContext _model;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly ReceiveSettings _receiveSettings;
-        readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
+        readonly RabbitMqReceiveEndpointContext _context;
         readonly IDeliveryTracker _tracker;
 
         string _consumerTag;
@@ -52,12 +40,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// </summary>
         /// <param name="model">The model context for the consumer</param>
         /// <param name="inputAddress">The input address for messages received by the consumer</param>
-        /// <param name="receiveEndpointContext">The topology</param>
-        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, RabbitMqReceiveEndpointContext receiveEndpointContext)
+        /// <param name="context">The topology</param>
+        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, RabbitMqReceiveEndpointContext context)
         {
             _model = model;
             _inputAddress = inputAddress;
-            _receiveEndpointContext = receiveEndpointContext;
+            _context = context;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
@@ -74,8 +62,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// <param name="consumerTag"></param>
         void IBasicConsumer.HandleBasicConsumeOk(string consumerTag)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("ConsumerOk: {0} - {1}", _receiveEndpointContext.InputAddress, consumerTag);
+            LogContext.Current = _context.LogContext;
+
+            LogContext.Debug?.Log("Consumer Ok: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
 
             _consumerTag = consumerTag;
 
@@ -89,8 +78,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// <param name="consumerTag">The consumerTag that was shut down.</param>
         void IBasicConsumer.HandleBasicCancelOk(string consumerTag)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Consumer Cancel Ok: {0} - {1}", _receiveEndpointContext.InputAddress, consumerTag);
+            LogContext.Current = _context.LogContext;
+
+            LogContext.Debug?.Log("Consumer Cancel Ok: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
 
             _deliveryComplete.TrySetResult(true);
             SetCompleted(TaskUtil.Completed);
@@ -103,8 +93,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// <param name="consumerTag">The consumerTag that is being cancelled.</param>
         void IBasicConsumer.HandleBasicCancel(string consumerTag)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Consumer Canceled: {0}", consumerTag);
+            LogContext.Current = _context.LogContext;
+
+            LogContext.Debug?.Log("Consumer Canceled: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
 
             foreach (var context in _pending.Values)
                 context.Cancel();
@@ -117,10 +108,11 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         void IBasicConsumer.HandleModelShutdown(object model, ShutdownEventArgs reason)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Consumer Model Shutdown ({0}), Concurrent Peak: {1}, {2}-{3}", _consumerTag, _tracker.MaxConcurrentDeliveryCount,
-                    reason.ReplyCode,
-                    reason.ReplyText);
+            LogContext.Current = _context.LogContext;
+
+            LogContext.Debug?.Log(
+                "Consumer Model Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}, {ReplyCode}-{ReplyText}",
+                _context.InputAddress, _consumerTag, _tracker.MaxConcurrentDeliveryCount, reason.ReplyCode, reason.ReplyText);
 
             _deliveryComplete.TrySetResult(false);
             SetCompleted(TaskUtil.Completed);
@@ -130,57 +122,61 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             string routingKey,
             IBasicProperties properties, byte[] body)
         {
+            LogContext.Current = _context.LogContext;
+
             if (IsStopping)
             {
                 await WaitAndAbandonMessage(deliveryTag).ConfigureAwait(false);
                 return;
             }
 
-            using (var delivery = _tracker.BeginDelivery())
-            {
-                var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
-                    _receiveEndpointContext);
+            var delivery = _tracker.BeginDelivery();
 
-                context.GetOrAddPayload(() => _receiveSettings);
-                context.GetOrAddPayload(() => _model);
-                context.GetOrAddPayload(() => _model.ConnectionContext);
+            var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
+                _context);
+            context.GetOrAddPayload(() => _receiveSettings);
+            context.GetOrAddPayload(() => _model);
+            context.GetOrAddPayload(() => _model.ConnectionContext);
+
+            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
+            activity.AddReceiveContextHeaders(context);
+
+            try
+            {
+                if (!_pending.TryAdd(deliveryTag, context))
+                    LogContext.Error?.Log("Duplicate BasicDeliver: {DeliveryTag}", deliveryTag);
+
+                await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+
+                await _context.ReceivePipe.Send(context).ConfigureAwait(false);
+
+                await context.ReceiveCompleted.ConfigureAwait(false);
+
+                _model.BasicAck(deliveryTag, false);
+
+                await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
                 try
                 {
-                    if (!_pending.TryAdd(deliveryTag, context))
-                        if (_log.IsErrorEnabled)
-                            _log.ErrorFormat("Duplicate BasicDeliver: {0}", deliveryTag);
-
-                    await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
-
-                    await _receiveEndpointContext.ReceivePipe.Send(context).ConfigureAwait(false);
-
-                    await context.ReceiveCompleted.ConfigureAwait(false);
-
-                    _model.BasicAck(deliveryTag, false);
-
-                    await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                    _model.BasicNack(deliveryTag, false, true);
                 }
-                catch (Exception ex)
+                catch (Exception ackEx)
                 {
-                    await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
-
-                    try
-                    {
-                        _model.BasicNack(deliveryTag, false, true);
-                    }
-                    catch (Exception ackEx)
-                    {
-                        if (_log.IsErrorEnabled)
-                            _log.ErrorFormat("An error occurred trying to NACK a message with delivery tag {0}: {1}", deliveryTag, ackEx.ToString());
-                    }
+                    LogContext.Error?.Log(ackEx, "Message NACK failed: {DeliveryTag}", deliveryTag);
                 }
-                finally
-                {
-                    _pending.TryRemove(deliveryTag, out _);
+            }
+            finally
+            {
+                activity?.Stop();
 
-                    context.Dispose();
-                }
+                delivery.Dispose();
+
+                _pending.TryRemove(deliveryTag, out _);
+                context.Dispose();
             }
         }
 
@@ -198,8 +194,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             if (IsStopping)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer shutdown completed: {0}", _receiveEndpointContext.InputAddress);
+                LogContext.Debug?.Log("Consumer shutdown completed: {InputAddress}", _context.InputAddress);
 
                 _deliveryComplete.TrySetResult(true);
             }
@@ -215,15 +210,14 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
             catch (Exception exception)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Debug("Shutting down, nack message faulted: {_topology.InputAddress}", exception);
+                LogContext.Error?.Log(exception, "Message NACK faulted during shutdown: {InputAddress} - {ConsumerTag}", _context.InputAddress,
+                    _consumerTag);
             }
         }
 
         protected override async Task StopSupervisor(StopSupervisorContext context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping consumer: {0}", _receiveEndpointContext.InputAddress);
+            LogContext.Debug?.Log("Stopping Consumer: {InputAddress} - {ConsumerTag}", _context.InputAddress, _consumerTag);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
@@ -254,8 +248,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 }
                 catch (OperationCanceledException)
                 {
-                    if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _receiveEndpointContext.InputAddress);
+                    LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress} - {ConsumerTag}",
+                        _context.InputAddress, _consumerTag);
                 }
             }
 
@@ -265,8 +259,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
             catch (OperationCanceledException)
             {
-                if (_log.IsWarnEnabled)
-                    _log.WarnFormat("Exception canceling the consumer: {0}", _receiveEndpointContext.InputAddress);
+                LogContext.Warning?.Log("Stop canceled waiting for consumer cancellation: {InputAddress} - {ConsumerTag}", _context.InputAddress,
+                    _consumerTag);
             }
         }
     }

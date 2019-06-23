@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Pipeline
 {
     using System;
@@ -17,11 +5,11 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using System.Linq;
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Logging;
     using Topology;
     using Transports.Metrics;
 
@@ -35,7 +23,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     {
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly Uri _inputAddress;
-        readonly ILog _log = Logger.Get<ActiveMqBasicConsumer>();
         readonly SessionContext _session;
         readonly IMessageConsumer _messageConsumer;
         readonly ConcurrentDictionary<string, ActiveMqReceiveContext> _pending;
@@ -78,7 +65,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 return;
             }
 
-            using (var delivery = _tracker.BeginDelivery())
+            using (_tracker.BeginDelivery())
             {
                 var context = new ActiveMqReceiveContext(_inputAddress, message, _context);
 
@@ -89,8 +76,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 try
                 {
                     if (!_pending.TryAdd(message.NMSMessageId, context))
-                        if (_log.IsErrorEnabled)
-                            _log.ErrorFormat("Duplicate BasicDeliver: {0}", message.NMSMessageId);
+                        LogContext.Warning?.Log("Duplicate message: {MessageId}", message.NMSMessageId);
 
                     await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
@@ -105,15 +91,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 catch (Exception ex)
                 {
                     await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
-                    try
-                    {
-                        //                        _session.BasicNack(deliveryTag, false, true);
-                    }
-                    catch (Exception ackEx)
-                    {
-                        if (_log.IsErrorEnabled)
-                            _log.ErrorFormat("An error occurred trying to NACK a message with delivery tag {0}: {1}", message.NMSMessageId, ackEx.ToString());
-                    }
                 }
                 finally
                 {
@@ -132,8 +109,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         {
             if (IsStopping)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer shutdown completed: {0}", _context.InputAddress);
+                LogContext.Debug?.Log("Consumer shutdown completed: {InputAddress}", _context.InputAddress);
 
                 _deliveryComplete.TrySetResult(true);
             }
@@ -147,15 +123,13 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             }
             catch (Exception exception)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Debug("Shutting down, deliveryComplete Faulted: {_topology.InputAddress}", exception);
+                LogContext.Error?.Log(exception, "DeliveryComplete faulted during shutdown: {InputAddress}", _context.InputAddress);
             }
         }
 
         protected override async Task StopSupervisor(StopSupervisorContext context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping consumer: {0}", _context.InputAddress);
+            LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
@@ -174,8 +148,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 }
                 catch (OperationCanceledException)
                 {
-                    if (_log.IsWarnEnabled)
-                        _log.WarnFormat("Stop canceled waiting for message consumers to complete: {0}", _context.InputAddress);
+                    LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
                 }
             }
 
@@ -186,8 +159,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             }
             catch (OperationCanceledException)
             {
-                if (_log.IsWarnEnabled)
-                    _log.WarnFormat("Exception canceling the consumer: {0}", _context.InputAddress);
+                LogContext.Warning?.Log("Stop canceled waiting for consumer shutdown: {InputAddress}", _context.InputAddress);
             }
         }
     }

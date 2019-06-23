@@ -1,20 +1,21 @@
 // Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
     using Configuration;
+    using Context;
     using Definition;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -61,10 +62,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             if (Settings.Ssl)
             {
-                context.Set(new
-                {
-                    Settings.SslServerName
-                });
+                context.Set(new {Settings.SslServerName});
             }
 
             ConnectionContextSupervisor.Probe(context);
@@ -96,6 +94,10 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
         {
+            LogContext.SetCurrentIfNull(DefaultLogContext);
+
+            LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
+
             var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
             configure?.Invoke(configuration.Configurator);
@@ -107,11 +109,9 @@ namespace MassTransit.RabbitMqTransport.Transport
             return ReceiveEndpoints.Start(queueName);
         }
 
-        protected override async Task StopSupervisor(StopSupervisorContext context)
+        protected override IAgent[] GetAgentHandles()
         {
-            await base.StopSupervisor(context).ConfigureAwait(false);
-
-            await ConnectionContextSupervisor.Stop(context).ConfigureAwait(false);
+            return new IAgent[] {ConnectionContextSupervisor};
         }
     }
 }

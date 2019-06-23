@@ -19,6 +19,7 @@ namespace MassTransit.BusConfigurators
     using Builders;
     using Configuration;
     using ConsumeConfigurators;
+    using Context;
     using EndpointConfigurators;
     using EndpointSpecifications;
     using GreenPipes;
@@ -49,6 +50,9 @@ namespace MassTransit.BusConfigurators
 
             _specifications = new List<IBusFactorySpecification>();
             _endpointSpecifications = new List<IReceiveEndpointSpecification<IBusBuilder>>();
+
+            if (LogContext.Current == null)
+                LogContext.ConfigureCurrentLogContext();
         }
 
         protected BusObservable BusObservable { get; }

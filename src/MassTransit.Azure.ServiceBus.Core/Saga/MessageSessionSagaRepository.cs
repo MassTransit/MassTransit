@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Azure.ServiceBus.Core.Saga
+﻿namespace MassTransit.Azure.ServiceBus.Core.Saga
 {
     using System;
     using System.IO;
@@ -26,7 +14,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Saga
 
 
     /// <summary>
-    /// A saga repository that uses the message session in Azure Service Bus to store the state 
+    /// A saga repository that uses the message session in Azure Service Bus to store the state
     /// of the saga.
     /// </summary>
     /// <typeparam name="TSaga">The saga state type</typeparam>
@@ -34,15 +22,10 @@ namespace MassTransit.Azure.ServiceBus.Core.Saga
         ISagaRepository<TSaga>
         where TSaga : class, ISaga
     {
-        static readonly ILog _log = Logger.Get(typeof(MessageSessionSagaRepository<TSaga>));
-
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("sagaRepository");
-            scope.Set(new
-            {
-                Persistence = "messageSession"
-            });
+            scope.Set(new {Persistence = "messageSession"});
         }
 
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
@@ -54,30 +37,37 @@ namespace MassTransit.Azure.ServiceBus.Core.Saga
             if (Guid.TryParse(sessionContext.SessionId, out var sessionId))
                 context = new CorrelationIdConsumeContextProxy<T>(context, sessionId);
 
-            var saga = await ReadSagaState(sessionContext).ConfigureAwait(false);
-            if (saga == null)
+            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartActivity(new {context.CorrelationId});
+            try
             {
-                var missingSagaPipe = new MissingPipe<T>(next, WriteSagaState);
-
-                await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
-            }
-            else
-            {
-                SagaConsumeContext<TSaga, T> sagaConsumeContext = new MessageSessionSagaConsumeContext<TSaga, T>(context, sessionContext, saga);
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Existing {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId, TypeMetadataCache<T>.ShortName);
-
-                await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
-
-                if (!sagaConsumeContext.IsCompleted)
+                var saga = await ReadSagaState(sessionContext).ConfigureAwait(false);
+                if (saga == null)
                 {
-                    await WriteSagaState(sessionContext, saga).ConfigureAwait(false);
+                    var missingSagaPipe = new MissingPipe<T>(next, WriteSagaState);
 
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("SAGA:{0}:{1} Updated {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
-                            TypeMetadataCache<T>.ShortName);
+                    await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
                 }
+                else
+                {
+                    SagaConsumeContext<TSaga, T> sagaConsumeContext = new MessageSessionSagaConsumeContext<TSaga, T>(context, sessionContext, saga);
+
+                    LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
+                        context.CorrelationId, TypeMetadataCache<T>.ShortName);
+
+                    await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
+
+                    if (!sagaConsumeContext.IsCompleted)
+                    {
+                        await WriteSagaState(sessionContext, saga).ConfigureAwait(false);
+
+                        LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Updated {MessageType}", TypeMetadataCache<TSaga>.ShortName,
+                            context.CorrelationId, TypeMetadataCache<T>.ShortName);
+                    }
+                }
+            }
+            finally
+            {
+                activity?.Stop();
             }
         }
 
@@ -157,9 +147,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Saga
 
                 var proxy = new MessageSessionSagaConsumeContext<TSaga, TMessage>(context, sessionContext, context.Saga);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Created {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
-                        TypeMetadataCache<TMessage>.ShortName);
+                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Created {MessageType}", TypeMetadataCache<TSaga>.ShortName,
+                    context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
 
                 try
                 {
@@ -168,16 +157,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Saga
                     if (!proxy.IsCompleted)
                     {
                         await _writeSagaState(sessionContext, proxy.Saga).ConfigureAwait(false);
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("SAGA:{0}:{1} Saved {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
-                                TypeMetadataCache<TMessage>.ShortName);
+
+                        LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Saved {MessageType}", TypeMetadataCache<TSaga>.ShortName,
+                            context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
                     }
                 }
                 catch (Exception)
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("SAGA:{0}:{1} Unsaved(Fault) {2}", TypeMetadataCache<TSaga>.ShortName, sessionContext.SessionId,
-                            TypeMetadataCache<TMessage>.ShortName);
+                    LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Removed(Fault) {MessageType}", TypeMetadataCache<TSaga>.ShortName,
+                        context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
 
                     throw;
                 }

@@ -19,6 +19,7 @@ namespace MassTransit.Pipeline.Filters.DiagnosticActivity
     using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Logging;
     using Util;
 
 

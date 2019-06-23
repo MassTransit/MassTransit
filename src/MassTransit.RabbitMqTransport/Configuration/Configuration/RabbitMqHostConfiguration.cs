@@ -1,20 +1,10 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
     using System.Text;
     using System.Threading.Tasks;
+    using Context;
+    using Contexts;
     using GreenPipes;
     using Integration;
     using MassTransit.Configuration;
@@ -30,9 +20,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IRabbitMqHostConfiguration
     {
         readonly IRabbitMqBusConfiguration _busConfiguration;
+        readonly RabbitMqHost _host;
         readonly RabbitMqHostSettings _hostSettings;
         readonly IRabbitMqHostTopology _hostTopology;
-        readonly IRabbitMqHostControl _host;
 
         public RabbitMqHostConfiguration(IRabbitMqBusConfiguration busConfiguration, RabbitMqHostSettings hostSettings, IRabbitMqHostTopology hostTopology)
         {
@@ -61,6 +51,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
             return new RabbitMqReceiveEndpointConfiguration(this, settings, _busConfiguration.CreateEndpointConfiguration());
         }
 
+        public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(RabbitMqReceiveSettings settings,
+            IRabbitMqEndpointConfiguration endpointConfiguration)
+        {
+            return new RabbitMqReceiveEndpointConfiguration(this, settings, endpointConfiguration);
+        }
+
         public bool Matches(Uri address)
         {
             switch (address.Scheme.ToLowerInvariant())
@@ -84,31 +80,17 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public bool PublisherConfirmation => _hostSettings.PublisherConfirmation;
         public RabbitMqHostSettings Settings => _hostSettings;
 
-        public IModelContextSupervisor CreateModelContextSupervisor()
-        {
-            return new ModelContextSupervisor(_host.ConnectionContextSupervisor);
-        }
-
-        public ISendTransport CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IFilter<ModelContext> modelFilter, string exchangeName)
-        {
-            var transport = new RabbitMqSendTransport(modelContextSupervisor, modelFilter, exchangeName);
-
-            _host.Add(transport);
-
-            return transport;
-        }
-
         public Task<ISendTransport> CreateSendTransport(Uri address)
         {
             var settings = _hostTopology.GetSendSettings(address);
 
             var brokerTopology = settings.GetBrokerTopology();
 
-            IModelContextSupervisor supervisor = CreateModelContextSupervisor();
+            var supervisor = CreateModelContextSupervisor();
 
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology);
+            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
 
-            var transport = CreateSendTransport(supervisor, configureTopologyFilter, settings.ExchangeName);
+            var transport = CreateSendTransport(supervisor, pipe, settings.ExchangeName);
 
             return Task.FromResult(transport);
         }
@@ -122,13 +104,28 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             var brokerTopology = publishTopology.GetBrokerTopology();
 
-            IModelContextSupervisor supervisor = CreateModelContextSupervisor();
+            var supervisor = CreateModelContextSupervisor();
 
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology);
+            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology).ToPipe();
 
-            var transport = CreateSendTransport(supervisor, configureTopologyFilter, publishTopology.Exchange.ExchangeName);
+            var transport = CreateSendTransport(supervisor, pipe, publishTopology.Exchange.ExchangeName);
 
             return Task.FromResult(transport);
+        }
+
+        ISendTransport CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> pipe, string exchangeName)
+        {
+            var sendTransportContext = new HostRabbitMqSendTransportContext(modelContextSupervisor, pipe, exchangeName, _host.SendLogContext);
+
+            var transport = new RabbitMqSendTransport(sendTransportContext);
+            _host.Add(transport);
+
+            return transport;
+        }
+
+        IModelContextSupervisor CreateModelContextSupervisor()
+        {
+            return new ModelContextSupervisor(_host.ConnectionContextSupervisor);
         }
 
         static string FormatDescription(RabbitMqHostSettings settings)
@@ -155,6 +152,25 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 sb.Append("/").Append(settings.VirtualHost);
 
             return sb.ToString();
+        }
+
+
+        class HostRabbitMqSendTransportContext :
+            BaseSendTransportContext,
+            RabbitMqSendTransportContext
+        {
+            public HostRabbitMqSendTransportContext(IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> configureTopologyPipe, string exchange,
+                ILogContext logContext)
+                : base(logContext)
+            {
+                ModelContextSupervisor = modelContextSupervisor;
+                ConfigureTopologyPipe = configureTopologyPipe;
+                Exchange = exchange;
+            }
+
+            public IPipe<ModelContext> ConfigureTopologyPipe { get; }
+            public string Exchange { get; }
+            public IModelContextSupervisor ModelContextSupervisor { get; }
         }
     }
 }

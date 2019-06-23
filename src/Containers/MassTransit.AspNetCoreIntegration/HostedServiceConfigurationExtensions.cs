@@ -6,7 +6,6 @@ namespace MassTransit
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
 
 
     /// <summary>
@@ -44,9 +43,8 @@ namespace MassTransit
             collection.AddSingleton<IHostedService>(p =>
             {
                 var bus = p.GetRequiredService<IBusControl>();
-                var loggerFactory = p.GetService<ILoggerFactory>();
 
-                return new MassTransitHostedService(bus, loggerFactory, new SimplifiedBusHealthCheck(), receiveEndpointCheck);
+                return new MassTransitHostedService(bus, new SimplifiedBusHealthCheck(), receiveEndpointCheck);
             });
         }
 

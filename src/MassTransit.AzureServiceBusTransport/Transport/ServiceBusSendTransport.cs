@@ -15,10 +15,10 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
     using MassTransit.Pipeline.Observables;
     using MassTransit.Scheduling;
     using Microsoft.ServiceBus.Messaging;
@@ -35,7 +35,6 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         Supervisor,
         ISendTransport
     {
-        static readonly ILog _log = Logger.Get<ServiceBusSendTransport>();
         readonly Uri _address;
         readonly SendObservable _observers;
 
@@ -62,8 +61,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         protected override Task StopSupervisor(StopSupervisorContext context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping transport: {0}", _address);
+            LogContext.Debug?.Log("Stopping send transport: {Address}", _address);
 
             return base.StopSupervisor(context);
         }
@@ -139,8 +137,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 var enqueueTimeUtc = context.ScheduledEnqueueTimeUtc.Value;
                 if (enqueueTimeUtc < now)
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("The scheduled time was in the past, sending: {0}", context.ScheduledEnqueueTimeUtc);
+                    LogContext.Debug?.Log("The scheduled time was in the past, sending: {ScheduledTime}", context.ScheduledEnqueueTimeUtc);
 
                     return false;
                 }
@@ -159,8 +156,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 }
                 catch (ArgumentOutOfRangeException)
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("The scheduled time was rejected by the server, sending: {0}", context.MessageId);
+                    LogContext.Debug?.Log("The scheduled time was rejected by the server, sending: {MessageId}", context.MessageId);
 
                     return false;
                 }
@@ -172,13 +168,12 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 {
                     await clientContext.CancelScheduledSend(sequenceNumber).ConfigureAwait(false);
 
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Canceled Scheduled: {0} {1}", sequenceNumber, clientContext.EntityPath);
+                    LogContext.Debug?.Log("Canceled scheduled message {SequenceNumber} {EntityPath}", sequenceNumber, clientContext.EntityPath);
                 }
                 catch (MessageNotFoundException exception)
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("The scheduled message was not found: {0}", exception.Message);
+                    LogContext.Warning?.Log(exception, "The scheduled message was not found: {SequenceNumber} {EntityPath}", sequenceNumber,
+                        clientContext.EntityPath);
                 }
             }
 

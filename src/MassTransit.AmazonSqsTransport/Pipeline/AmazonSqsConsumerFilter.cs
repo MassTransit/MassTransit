@@ -13,11 +13,11 @@
 namespace MassTransit.AmazonSqsTransport.Pipeline
 {
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
     using Topology;
     using Transports.Metrics;
 
@@ -29,7 +29,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         Supervisor,
         IFilter<ClientContext>
     {
-        static readonly ILog _log = Logger.Get<AmazonSqsConsumerFilter>();
         readonly SqsReceiveEndpointContext _context;
 
         public AmazonSqsConsumerFilter(SqsReceiveEndpointContext context)
@@ -64,10 +63,11 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             finally
             {
                 DeliveryMetrics metrics = consumer;
+
                 await _context.TransportObservers.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer completed: {0} received, {0} concurrent", metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+                LogContext.Debug?.Log("Consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent", inputAddress,
+                    metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
             }
         }
     }

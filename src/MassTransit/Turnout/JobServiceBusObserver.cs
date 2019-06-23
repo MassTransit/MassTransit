@@ -1,20 +1,20 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Turnout
 {
     using System;
     using System.Threading.Tasks;
-    using Logging;
+    using Context;
     using Util;
 
 
@@ -22,7 +22,6 @@ namespace MassTransit.Turnout
         IBusObserver
     {
         readonly IJobService _jobService;
-        readonly ILog _log = Logger.Get<JobServiceBusObserver>();
 
         public JobServiceBusObserver(IJobService jobService)
         {
@@ -46,13 +45,11 @@ namespace MassTransit.Turnout
 
         public async Task PostStart(IBus bus, Task<BusReady> busReady)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Job Service Starting: {0}", _jobService.InputAddress);
+            LogContext.Debug?.Log("Job Service starting: {InputAddress}", _jobService.InputAddress);
 
             await busReady.ConfigureAwait(false);
 
-            if (_log.IsInfoEnabled)
-                _log.InfoFormat("Job Service Started: {0}", _jobService.InputAddress);
+            LogContext.Info?.Log("Job Service started: {InputAddress}", _jobService.InputAddress);
         }
 
         public Task StartFaulted(IBus bus, Exception exception)
@@ -62,13 +59,11 @@ namespace MassTransit.Turnout
 
         public async Task PreStop(IBus bus)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Job Service Shutting Down: {0}", _jobService.InputAddress);
+            LogContext.Debug?.Log("Job Service shutting down: {InputAddress}", _jobService.InputAddress);
 
             await _jobService.Stop().ConfigureAwait(false);
 
-            if (_log.IsInfoEnabled)
-                _log.InfoFormat("Job Service Shut Down: {0}", _jobService.InputAddress);
+            LogContext.Info?.Log("Job Service shut down: {InputAddress}", _jobService.InputAddress);
         }
 
         public Task PostStop(IBus bus)

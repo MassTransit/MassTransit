@@ -1,39 +1,61 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.ActiveMqTransport.Contexts
+﻿namespace MassTransit.ActiveMqTransport.Contexts
 {
     using System;
     using System.Collections.Generic;
     using Apache.NMS;
+    using Initializers.TypeConverters;
 
 
     public static class TransportHeaderExtensions
     {
-        public static void SetTextHeaders(this IPrimitiveMap dictionary, SendHeaders headers)
+        public static void SetHeaders(this IPrimitiveMap dictionary, SendHeaders headers)
         {
             foreach (KeyValuePair<string, object> header in headers.GetAll())
             {
                 if (header.Value == null)
+                {
+                    if (dictionary.Contains(header.Key))
+                        dictionary.Remove(header.Key);
+
                     continue;
+                }
 
                 if (dictionary.Contains(header.Key))
                     continue;
 
-                if (header.Value is string stringValue)
-                    dictionary[header.Key] = stringValue;
-                else if (header.Value is IFormattable formatValue && formatValue.GetType().IsValueType)
-                    dictionary[header.Key] = formatValue.ToString();
+                switch (header.Value)
+                {
+                    case DateTimeOffset dateTimeOffset:
+                        if (_dateTimeOffsetConverter.TryConvert(dateTimeOffset, out long result))
+                            dictionary[header.Key] = result;
+                        else if (_dateTimeOffsetConverter.TryConvert(dateTimeOffset, out string text))
+                            dictionary[header.Key] = text;
+
+                        break;
+
+                    case DateTime dateTime:
+                        if (_dateTimeConverter.TryConvert(dateTime, out result))
+                            dictionary[header.Key] = result;
+                        else if (_dateTimeConverter.TryConvert(dateTime, out string text))
+                            dictionary[header.Key] = text;
+
+                        break;
+
+                    case string s:
+                        dictionary[header.Key] = s;
+                        break;
+
+                    case IFormattable formatValue:
+                        if (header.Value.GetType().IsValueType)
+                            dictionary[header.Key] = header.Value;
+                        else
+                            dictionary[header.Key] = formatValue.ToString();
+                        break;
+                }
             }
         }
+
+        static readonly DateTimeOffsetTypeConverter _dateTimeOffsetConverter = new DateTimeOffsetTypeConverter();
+        static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
     }
 }

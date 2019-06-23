@@ -1,23 +1,11 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.MartenIntegration
+﻿namespace MassTransit.MartenIntegration
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
-    using Logging;
     using Marten;
     using Saga;
     using Util;
@@ -28,7 +16,6 @@ namespace MassTransit.MartenIntegration
         IRetrieveSagaFromRepository<TSaga>
         where TSaga : class, ISaga
     {
-        static readonly ILog _log = Logger.Get<MartenSagaRepository<TSaga>>();
         readonly IDocumentStore _store;
 
         public MartenSagaRepository(IDocumentStore store)
@@ -62,10 +49,7 @@ namespace MassTransit.MartenIntegration
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("sagaRepository");
-            scope.Set(new
-            {
-                Persistence = "marten"
-            });
+            scope.Set(new {Persistence = "marten"});
         }
 
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy,
@@ -78,8 +62,7 @@ namespace MassTransit.MartenIntegration
 
             using (var session = _store.DirtyTrackedSession())
             {
-                TSaga instance;
-                if (policy.PreInsertInstance(context, out instance))
+                if (policy.PreInsertInstance(context, out var instance))
                     await PreInsertSagaInstance<T>(session, instance).ConfigureAwait(false);
 
                 if (instance == null)
@@ -122,15 +105,13 @@ namespace MassTransit.MartenIntegration
                 }
                 catch (SagaException sex)
                 {
-                    if (_log.IsErrorEnabled)
-                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+                    LogContext.Error?.Log(sex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
 
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    if (_log.IsErrorEnabled)
-                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+                    LogContext.Error?.Log(ex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
 
                     throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                 }
@@ -146,17 +127,13 @@ namespace MassTransit.MartenIntegration
                 await session.SaveChangesAsync().ConfigureAwait(false);
                 inserted = true;
 
-                _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                    TypeMetadataCache<T>.ShortName);
+                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Insert {MessageType}", TypeMetadataCache<TSaga>.ShortName,
+                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
             }
             catch (Exception ex)
             {
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName,
-                        instance.CorrelationId,
-                        TypeMetadataCache<T>.ShortName, ex.Message);
-                }
+                LogContext.Debug?.Log(ex, "SAGA:{SagaType}:{CorrelationId} Dupe {MessageType}", TypeMetadataCache<TSaga>.ShortName,
+                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
             }
 
             return inserted;
@@ -169,9 +146,8 @@ namespace MassTransit.MartenIntegration
         {
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                        TypeMetadataCache<T>.ShortName);
+                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
+                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
 
                 var sagaConsumeContext = new MartenSagaConsumeContext<TSaga, T>(session, context, instance);
 
@@ -180,12 +156,18 @@ namespace MassTransit.MartenIntegration
                 if (!sagaConsumeContext.IsCompleted)
                     await session.SaveChangesAsync().ConfigureAwait(false);
             }
-            catch (SagaException)
+            catch (SagaException sex)
             {
+                LogContext.Error?.Log(sex, "SAGA:{SagaType}:{CorrelationId} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName,
+                    instance?.CorrelationId, TypeMetadataCache<T>.ShortName);
+
                 throw;
             }
             catch (Exception ex)
             {
+                LogContext.Error?.Log(ex, "SAGA:{SagaType}:{CorrelationId} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName,
+                    instance?.CorrelationId, TypeMetadataCache<T>.ShortName);
+
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), instance.CorrelationId, ex);
             }
         }
@@ -215,12 +197,8 @@ namespace MassTransit.MartenIntegration
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName,
-                        context.Saga.CorrelationId,
-                        TypeMetadataCache<TMessage>.ShortName);
-                }
+                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Added {MessageType}", TypeMetadataCache<TSaga>.ShortName,
+                    context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
 
                 SagaConsumeContext<TSaga, TMessage> proxy = new MartenSagaConsumeContext<TSaga, TMessage>(_session,
                     context, context.Saga);

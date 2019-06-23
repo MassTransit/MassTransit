@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory
 {
     using System;
@@ -18,24 +6,22 @@ namespace MassTransit.Transports.InMemory
     using Builders;
     using Configuration;
     using Context;
+    using Contexts;
     using Definition;
     using Fabric;
     using GreenPipes;
     using GreenPipes.Caching;
-    using Logging;
     using MassTransit.Configurators;
     using Topology.Builders;
 
 
     /// <summary>
-    ///     Caches InMemory transport instances so that they are only created and used once
+    /// Caches InMemory transport instances so that they are only created and used once
     /// </summary>
     public class InMemoryHost :
         BaseHost,
         IInMemoryHostControl
     {
-        static readonly ILog _log = Logger.Get<InMemoryHost>();
-
         readonly IInMemoryHostConfiguration _hostConfiguration;
         readonly IIndex<string, InMemorySendTransport> _index;
         readonly IMessageFabric _messageFabric;
@@ -55,8 +41,9 @@ namespace MassTransit.Transports.InMemory
 
         public IReceiveTransport GetReceiveTransport(string queueName, ReceiveEndpointContext receiveEndpointContext)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Creating receive transport for queue: {0}", queueName);
+            LogContext.SetCurrentIfNull(DefaultLogContext);
+
+            LogContext.Debug?.Log("Create receive transport: {Queue}", queueName);
 
             var queue = _messageFabric.GetQueue(queueName);
 
@@ -87,6 +74,10 @@ namespace MassTransit.Transports.InMemory
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configure = null)
         {
+            LogContext.SetCurrentIfNull(DefaultLogContext);
+
+            LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
+
             var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
             configure?.Invoke(configuration.Configurator);
@@ -100,18 +91,19 @@ namespace MassTransit.Transports.InMemory
 
         public async Task<ISendTransport> GetSendTransport(Uri address)
         {
+            LogContext.SetCurrentIfNull(DefaultLogContext);
+
             var queueName = address.AbsolutePath.Split('/').Last();
 
             return await _index.Get(queueName, async key =>
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Creating send transport for exchange: {0}", queueName);
+                LogContext.Debug?.Log("Create send transport: {Exchange}", queueName);
 
                 var exchange = _messageFabric.GetExchange(queueName);
 
-                var transport = new InMemorySendTransport(exchange);
+                var context = new ExchangeInMemorySendTransportContext(exchange, SendLogContext);
 
-                return transport;
+                return new InMemorySendTransport(context);
             }).ConfigureAwait(false);
         }
 
@@ -133,22 +125,10 @@ namespace MassTransit.Transports.InMemory
 
         protected override void Probe(ProbeContext context)
         {
-            context.Set(new
-            {
-                Type = "InMemory",
-                BaseAddress = _hostConfiguration.HostAddress
-            });
+            context.Add("type", "InMemory");
+            context.Add("baseAddress", _hostConfiguration.HostAddress);
 
             _messageFabric.Probe(context);
-        }
-
-        public IInMemoryExchange GetExchange(Uri address)
-        {
-            var queueName = address.AbsolutePath.Split('/').Last();
-
-            var exchange = _messageFabric.GetExchange(queueName);
-
-            return exchange;
         }
     }
 }

@@ -1,28 +1,14 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit
+﻿namespace MassTransit
 {
     using System;
     using ConsumeConfigurators;
-    using Logging;
+    using Context;
     using Pipeline.ConsumerFactories;
     using Util;
 
 
     public static class BatchConsumerExtensions
     {
-        static readonly ILog _log = Logger.Get(typeof(BatchConsumerExtensions));
-
         /// <summary>
         /// Configure a Batch&lt;<typeparamref name="TMessage"/>&gt; consumer, which allows messages to be collected into an array and consumed
         /// at once. This feature is experimental, but often requested. Be sure to configure the transport with sufficient concurrent message
@@ -35,8 +21,7 @@ namespace MassTransit
         public static void Batch<TMessage>(this IReceiveEndpointConfigurator configurator, Action<IBatchConfigurator<TMessage>> configure)
             where TMessage : class
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Configuring batch: {0}", TypeMetadataCache<TMessage>.ShortName);
+            LogContext.Debug?.Log("Configuring batch: {MessageType}", TypeMetadataCache<TMessage>.ShortName);
 
             var batchConfigurator = new BatchConfigurator<TMessage>(configurator);
 
@@ -55,12 +40,28 @@ namespace MassTransit
             where TConsumer : class, IConsumer<Batch<TMessage>>
             where TMessage : class
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Batch Consumer: {0} (using delegate consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
+            LogContext.Debug?.Log("Subscribing Batch Consumer: {ConsumerType} (using delegate consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
 
             var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactoryMethod);
 
             configurator.Consumer(delegateConsumerFactory);
+        }
+
+        /// <summary>
+        /// Connect a consumer with a consumer factory method
+        /// </summary>
+        /// <typeparam name="TConsumer"></typeparam>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="consumerFactory"></param>
+        /// <returns></returns>
+        public static void Consumer<TConsumer, TMessage>(this IBatchConfigurator<TMessage> configurator, IConsumerFactory<TConsumer> consumerFactory)
+            where TConsumer : class, IConsumer<Batch<TMessage>>
+            where TMessage : class
+        {
+            LogContext.Debug?.Log("Subscribing Batch Consumer: {ConsumerType} (using supplied consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
+
+            configurator.Consumer(consumerFactory);
         }
     }
 }

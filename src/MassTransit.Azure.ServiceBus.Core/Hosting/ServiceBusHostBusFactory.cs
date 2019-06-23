@@ -1,52 +1,31 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Hosting
 {
     using System;
+    using Context;
     using Contexts;
-    using Logging;
     using MassTransit.Hosting;
-    using Microsoft.Azure.Amqp;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Primitives;
+
 
     public class ServiceBusHostBusFactory :
         IHostBusFactory
     {
-        readonly ServiceBusAmqpTransportSettings _ampAmqpTransportSettings;
-        readonly ILog _log = Logger.Get<ServiceBusHostBusFactory>();
-
         readonly ServiceBusSettings _settings;
 
         public ServiceBusHostBusFactory(ISettingsProvider settingsProvider)
         {
-            ServiceBusSettings settings;
-            if (!settingsProvider.TryGetSettings("ServiceBus", out settings))
+            if (!settingsProvider.TryGetSettings("ServiceBus", out ServiceBusSettings settings))
                 throw new ConfigurationException("The ServiceBus settings were not available");
 
             _settings = settings;
-
-            ServiceBusAmqpTransportSettings amqpTransportSettings;
-            if (!settingsProvider.TryGetSettings("ServiceBusAmqpTransport", out amqpTransportSettings))
-                throw new ConfigurationException("The ServiceBusAmqpTransport settings were not available");
-            _ampAmqpTransportSettings = amqpTransportSettings;
         }
 
         public IBusControl CreateBus(IBusServiceConfigurator busServiceConfigurator, string serviceName)
         {
             serviceName = serviceName.ToLowerInvariant().Trim().Replace(" ", "_");
 
-            var hostSettings = new SettingsAdapter(_settings, _ampAmqpTransportSettings, serviceName);
+            var hostSettings = new SettingsAdapter(_settings, serviceName);
 
             if (hostSettings.ServiceUri == null)
                 throw new ConfigurationException("The ServiceBus ServiceUri setting has not been configured");
@@ -71,8 +50,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
                     }
                 });
 
-                if (_log.IsInfoEnabled)
-                    _log.Info($"Configuring Host: {hostSettings.ServiceUri}");
+                LogContext.Info?.Log("Configuring Host: {Host}", hostSettings.ServiceUri);
 
                 var serviceConfigurator = new ServiceBusServiceConfigurator(configurator, host);
 
@@ -84,16 +62,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
         class SettingsAdapter :
             ServiceBusHostSettings
         {
-            private readonly ServiceBusAmqpTransportSettings _ampAmqpTransportSettings;
+            readonly ServiceBusSettings _settings;
 
-            private readonly ServiceBusSettings _settings;
-
-            public SettingsAdapter(ServiceBusSettings settings, 
-                ServiceBusAmqpTransportSettings ampAmqpTransportSettings,
-                string serviceName)
+            public SettingsAdapter(ServiceBusSettings settings, string serviceName)
             {
                 _settings = settings;
-                _ampAmqpTransportSettings = ampAmqpTransportSettings;
 
                 if (string.IsNullOrWhiteSpace(settings.ConnectionString))
                 {
@@ -105,7 +78,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
                         throw new ConfigurationException("The ServiceBus SharedAccessKey setting has not been configured");
 
                     ServiceUri = AzureServiceBusEndpointUriCreator.Create(_settings.Namespace, _settings.ServicePath ?? serviceName);
-                    TokenProvider = Microsoft.Azure.ServiceBus.Primitives.TokenProvider.CreateSharedAccessSignatureTokenProvider(settings.KeyName, settings.SharedAccessKey);
+                    TokenProvider = Microsoft.Azure.ServiceBus.Primitives.TokenProvider.CreateSharedAccessSignatureTokenProvider(settings.KeyName,
+                        settings.SharedAccessKey);
                 }
                 else
                 {

@@ -4,10 +4,10 @@ namespace MassTransit.Conductor.Client
     using System.Threading;
     using System.Threading.Tasks;
     using Clients;
+    using Context;
     using Contracts;
     using GreenPipes;
     using GreenPipes.Caching;
-    using Logging;
     using MassTransit.Pipeline;
     using Util;
 
@@ -15,7 +15,6 @@ namespace MassTransit.Conductor.Client
     public class ServiceClient :
         IServiceClient
     {
-        readonly ILog _log = Logger.Get<ServiceClient>();
         readonly ICache<IMessageClient> _cache;
         readonly IIndex<Type, IMessageClient> _index;
         readonly IClientFactory _clientFactory;
@@ -41,12 +40,12 @@ namespace MassTransit.Conductor.Client
         public async Task<ISendEndpoint> GetServiceSendEndpoint<T>(ISendEndpointProvider sendEndpointProvider, CancellationToken cancellationToken)
             where T : class
         {
-            var messageClient = await _index.Get(typeof(T), type => CreateMessageClient<T>(type, cancellationToken)).ConfigureAwait(false);
+            var messageClient = await _index.Get(typeof(T), type => CreateMessageClient<T>(cancellationToken)).ConfigureAwait(false);
 
             return await messageClient.GetServiceSendEndpoint(sendEndpointProvider).ConfigureAwait(false);
         }
 
-        async Task<IMessageClient> CreateMessageClient<T>(Type messageType, CancellationToken cancellationToken)
+        async Task<IMessageClient> CreateMessageClient<T>(CancellationToken cancellationToken)
             where T : class
         {
             var messageClient = new MessageClient<T>(this);
@@ -54,8 +53,7 @@ namespace MassTransit.Conductor.Client
             var handle = _consumePipeConnector.ConnectInstance(messageClient);
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Requesting Link to {0} (client-id: {1})", TypeMetadataCache<T>.ShortName, ClientId);
+                LogContext.Debug?.Log("Requesting Link to {MessageType} (client-id: {ClientId})", TypeMetadataCache<T>.ShortName, ClientId);
 
                 var request = _clientFactory.CreateRequestClient<Link<T>>().Create(new {ClientId}, cancellationToken);
 

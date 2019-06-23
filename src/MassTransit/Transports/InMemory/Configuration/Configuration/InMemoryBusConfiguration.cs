@@ -50,7 +50,7 @@ namespace MassTransit.Transports.InMemory.Configuration
             if (_hosts.Count == 0)
                 throw new ConfigurationException("At least one host must be configured");
 
-            return new InMemoryReceiveEndpointConfiguration(_hosts[0], queueName, endpointConfiguration);
+            return _hosts[0].CreateReceiveEndpointConfiguration(queueName, endpointConfiguration);
         }
 
         IReadOnlyHostCollection IBusConfiguration.Hosts => _hosts;

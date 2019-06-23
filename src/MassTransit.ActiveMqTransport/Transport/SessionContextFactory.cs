@@ -1,30 +1,17 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.ActiveMqTransport.Transport
+﻿namespace MassTransit.ActiveMqTransport.Transport
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
 
 
     public class SessionContextFactory :
         IPipeContextFactory<SessionContext>
     {
-        static readonly ILog _log = Logger.Get<SessionContextFactory>();
         readonly IConnectionContextSupervisor _connectionContextSupervisor;
 
         public SessionContextFactory(IConnectionContextSupervisor connectionContextSupervisor)
@@ -58,18 +45,19 @@ namespace MassTransit.ActiveMqTransport.Transport
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Creating session: {0}", connectionContext.Description);
-
                 try
                 {
                     var session = await connectionContext.CreateSession().ConfigureAwait(false);
+
+                    LogContext.Debug?.Log("Created session: {Host}", connectionContext.Description);
 
                     var sessionContext = new ActiveMqSessionContext(connectionContext, session, cancellationToken);
 
                     void HandleException(Exception exception)
                     {
-                        var disposeAsync = sessionContext.DisposeAsync(CancellationToken.None);
+                    #pragma warning disable 4014
+                        sessionContext.DisposeAsync(CancellationToken.None);
+                    #pragma warning restore 4014
                     }
 
                     connectionContext.Connection.ExceptionListener += HandleException;
@@ -91,6 +79,8 @@ namespace MassTransit.ActiveMqTransport.Transport
                 }
                 catch (Exception exception)
                 {
+                    LogContext.Error?.Log(exception, "Create session failed: {Host}", connectionContext.Description);
+
                     await asyncContext.CreateFaulted(exception).ConfigureAwait(false);
                 }
             });

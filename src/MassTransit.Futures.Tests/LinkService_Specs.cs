@@ -205,6 +205,7 @@ namespace MassTransit.Tests
 
     namespace TestService
     {
+        using Context;
         using Contracts;
 
 
@@ -238,6 +239,8 @@ namespace MassTransit.Tests
         {
             public Task Consume(ConsumeContext<DeployPayload> context)
             {
+                LogContext.Info?.Log("Deploying Payload: {Target}", context.Message.Target);
+
                 return context.RespondAsync<PayloadDeployed>(new
                 {
                     InVar.Timestamp,

@@ -15,6 +15,7 @@ namespace MassTransit
 {
     using System.Diagnostics;
     using ConsumePipeSpecifications;
+    using Logging;
     using PublishPipeSpecifications;
     using SendPipeSpecifications;
 
@@ -22,7 +23,7 @@ namespace MassTransit
     public static class DiagnosticsActivityPipeConfiguratorExtensions
     {
         public static void UseDiagnosticsActivity(this IBusFactoryConfigurator configurator, DiagnosticSource diagnosticSource,
-            string activityIdKey = DiagnosticHeaders.ActivityIdHeader,
+            string activityIdKey = DiagnosticHeaders.ActivityId,
             string activityCorrelationContextKey = DiagnosticHeaders.ActivityCorrelationContext)
         {
             configurator.ConfigureSend(x =>

@@ -1,19 +1,8 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Azure.ServiceBus.Core.Configuration
+﻿namespace MassTransit.Azure.ServiceBus.Core.Configuration
 {
     using System;
     using System.Threading.Tasks;
+    using Contexts;
     using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Topology;
@@ -64,8 +53,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
 
             var endpointContextSupervisor = CreateQueueSendEndpointContextSupervisor(settings);
 
-            var transport = new ServiceBusSendTransport(endpointContextSupervisor, address);
+            var transportContext = new HostServiceBusSendTransportContext(address, endpointContextSupervisor, _host.SendLogContext);
 
+            var transport = new ServiceBusSendTransport(transportContext);
             _host.Add(transport);
 
             return Task.FromResult<ISendTransport>(transport);
@@ -83,8 +73,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
 
             var endpointContextSupervisor = CreateTopicSendEndpointContextSupervisor(settings);
 
-            var transport = new ServiceBusSendTransport(endpointContextSupervisor, publishAddress);
+            var transportContext = new HostServiceBusSendTransportContext(publishAddress, endpointContextSupervisor, _host.SendLogContext);
 
+            var transport = new ServiceBusSendTransport(transportContext);
             _host.Add(transport);
 
             return Task.FromResult<ISendTransport>(transport);

@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace Automatonymous
 {
@@ -19,8 +19,8 @@ namespace Automatonymous
     using System.Reflection;
     using CorrelationConfigurators;
     using MassTransit;
+    using MassTransit.Context;
     using MassTransit.Internals.Extensions;
-    using MassTransit.Logging;
     using MassTransit.Scheduling;
     using Requests;
     using SagaConfigurators;
@@ -39,14 +39,11 @@ namespace Automatonymous
         where TInstance : class, SagaStateMachineInstance
     {
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
-        readonly ILog _log;
         readonly Lazy<StateMachineRegistration[]> _registrations;
         Func<TInstance, bool> _isCompleted;
 
         protected MassTransitStateMachine()
         {
-            _log = Logger.Get(GetType());
-
             _registrations = new Lazy<StateMachineRegistration[]>(GetRegistrations);
 
             _eventCorrelations = new Dictionary<Event, EventCorrelation>();
@@ -74,7 +71,7 @@ namespace Automatonymous
         }
 
         /// <summary>
-        /// Sets the method used to determine if a state machine instance is completed. A completed 
+        /// Sets the method used to determine if a state machine instance is completed. A completed
         /// state machine instance is removed from the saga repository.
         /// </summary>
         /// <param name="completed"></param>
@@ -235,7 +232,7 @@ namespace Automatonymous
 
             Event(propertyExpression, x => x.Completed, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
             Event(propertyExpression, x => x.Faulted, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy<Guid>(requestIdExpression, context => context.Message.RequestId));
+            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy(requestIdExpression, context => context.Message.RequestId));
 
             State(propertyExpression, x => x.Pending);
 
@@ -248,7 +245,6 @@ namespace Automatonymous
                     .ClearRequest(request),
                 When(request.TimeoutExpired, request.EventFilter)
                     .ClearRequest(request));
-
         }
 
         /// <summary>
@@ -308,16 +304,15 @@ namespace Automatonymous
                     {
                         Guid? tokenId = schedule.GetTokenId(context.Instance);
 
-                        ConsumeContext consumeContext;
-                        if (context.TryGetPayload(out consumeContext))
+                        if (context.TryGetPayload(out ConsumeContext consumeContext))
                         {
                             Guid? messageTokenId = consumeContext.GetSchedulingTokenId();
                             if (messageTokenId.HasValue)
                             {
                                 if (!tokenId.HasValue || (messageTokenId.Value != tokenId.Value))
                                 {
-                                    if (_log.IsDebugEnabled)
-                                        _log.DebugFormat("SAGA: {0} Scheduled message not current: {1}", context.Instance.CorrelationId, messageTokenId.Value);
+                                    LogContext.Debug?.Log("SAGA: {CorrelationId} Scheduled message not current: {TokenId}", context.Instance.CorrelationId,
+                                        messageTokenId.Value);
 
                                     return;
                                 }
@@ -328,7 +323,7 @@ namespace Automatonymous
 
                         await ((StateMachine<TInstance>)this).RaiseEvent(eventContext).ConfigureAwait(false);
 
-                        if(schedule.GetTokenId(context.Instance) == tokenId)
+                        if (schedule.GetTokenId(context.Instance) == tokenId)
                             schedule.SetTokenId(context.Instance, default(Guid?));
                     }));
         }

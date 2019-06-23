@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SignalR
 {
@@ -17,6 +17,7 @@ namespace MassTransit.SignalR
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contracts;
     using Logging;
     using Microsoft.AspNetCore.SignalR;
@@ -27,8 +28,6 @@ namespace MassTransit.SignalR
     public class MassTransitHubLifetimeManager<THub> : BaseMassTransitHubLifetimeManager<THub>
         where THub : Hub
     {
-        static readonly ILog _logger = Logger.Get<MassTransitHubLifetimeManager<THub>>();
-
         public MassTransitHubLifetimeManager(
             IPublishEndpoint publishEndpoint,
             IClientFactory clientFactory,
@@ -66,14 +65,14 @@ namespace MassTransit.SignalR
 
         public override Task SendAllAsync(string methodName, object[] args, CancellationToken cancellationToken = default)
         {
-            _logger.Info("Publishing All<THub> message to MassTransit.");
+            LogContext.Info?.Log("Publishing All<THub> message to MassTransit.");
             return _publishEndpoint.Publish<All<THub>>(new {Messages = _protocols.ToProtocolDictionary(methodName, args)}, cancellationToken);
         }
 
         public override Task SendAllExceptAsync(string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds,
             CancellationToken cancellationToken = default)
         {
-            _logger.Info("Publishing All<THub> message to MassTransit, with exceptions.");
+            LogContext.Info?.Log("Publishing All<THub> message to MassTransit, with exceptions.");
             return _publishEndpoint.Publish<All<THub>>(
                 new {Messages = _protocols.ToProtocolDictionary(methodName, args), ExcludedConnectionIds = excludedConnectionIds.ToArray()}, cancellationToken);
         }
@@ -92,7 +91,7 @@ namespace MassTransit.SignalR
                 return connection.WriteAsync(new InvocationMessage(methodName, args)).AsTask();
             }
 
-            _logger.Info("Publishing Connection<THub> message to MassTransit.");
+            LogContext.Info?.Log("Publishing Connection<THub> message to MassTransit.");
             return _publishEndpoint.Publish<Connection<THub>>(new {ConnectionId = connectionId, Messages = _protocols.ToProtocolDictionary(methodName, args)},
                 cancellationToken);
         }
@@ -112,7 +111,7 @@ namespace MassTransit.SignalR
                     publishTasks.Add(_publishEndpoint.Publish<Connection<THub>>(new {ConnectionId = connectionId, Messages = protocolDictionary},
                         cancellationToken));
 
-                _logger.Info("Publishing multiple Connection<THub> messages to MassTransit.");
+                LogContext.Info?.Log("Publishing multiple Connection<THub> messages to MassTransit.");
                 return Task.WhenAll(publishTasks);
             }
 
@@ -124,7 +123,7 @@ namespace MassTransit.SignalR
             if (groupName == null)
                 throw new ArgumentNullException(nameof(groupName));
 
-            _logger.Info("Publishing Group<THub> message to MassTransit.");
+            LogContext.Info?.Log("Publishing Group<THub> message to MassTransit.");
             return _publishEndpoint.Publish<Group<THub>>(new {GroupName = groupName, Messages = _protocols.ToProtocolDictionary(methodName, args)},
                 cancellationToken);
         }
@@ -135,7 +134,7 @@ namespace MassTransit.SignalR
             if (groupName == null)
                 throw new ArgumentNullException(nameof(groupName));
 
-            _logger.Info("Publishing Group<THub> message to MassTransit, with exceptions.");
+            LogContext.Info?.Log("Publishing Group<THub> message to MassTransit, with exceptions.");
             return _publishEndpoint.Publish<Group<THub>>(
                 new
                 {
@@ -159,7 +158,7 @@ namespace MassTransit.SignalR
                         publishTasks.Add(_publishEndpoint.Publish<Group<THub>>(new {GroupName = groupName, Messages = protocolDictionary}, cancellationToken));
                 }
 
-                _logger.Info("Publishing multiple Group<THub> messages to MassTransit.");
+                LogContext.Info?.Log("Publishing multiple Group<THub> messages to MassTransit.");
                 return Task.WhenAll(publishTasks);
             }
 
@@ -168,7 +167,7 @@ namespace MassTransit.SignalR
 
         public override Task SendUserAsync(string userId, string methodName, object[] args, CancellationToken cancellationToken = default)
         {
-            _logger.Info("Publishing User<THub> message to MassTransit.");
+            LogContext.Info?.Log("Publishing User<THub> message to MassTransit.");
             return _publishEndpoint.Publish<User<THub>>(new {UserId = userId, Messages = _protocols.ToProtocolDictionary(methodName, args)}, cancellationToken);
         }
 
@@ -185,7 +184,7 @@ namespace MassTransit.SignalR
                 foreach (var userId in userIds)
                     publishTasks.Add(_publishEndpoint.Publish<User<THub>>(new {UserId = userId, Messages = protocolDictionary}, cancellationToken));
 
-                _logger.Info("Publishing multiple User<THub> messages to MassTransit.");
+                LogContext.Info?.Log("Publishing multiple User<THub> messages to MassTransit.");
                 return Task.WhenAll(publishTasks);
             }
 
@@ -212,18 +211,18 @@ namespace MassTransit.SignalR
             // Publish to mass transit group management instead, but it waits for an ack...
             try
             {
-                _logger.Info("Publishing add GroupManagement<THub> message to MassTransit.");
+                LogContext.Info?.Log("Publishing add GroupManagement<THub> message to MassTransit.");
                 RequestHandle<GroupManagement<THub>> request =
                     _groupManagementRequestClient.Create(new {ConnectionId = connectionId, GroupName = groupName, ServerName, Action = GroupAction.Add},
                         cancellationToken);
 
                 Response<Ack<THub>> ack = await request.GetResponse<Ack<THub>>().ConfigureAwait(false);
-                _logger.Info($"Request Received for add GroupManagement<THub> from {ack.Message.ServerName}.");
+                LogContext.Info?.Log($"Request Received for add GroupManagement<THub> from {ack.Message.ServerName}.");
             }
             catch (RequestTimeoutException e)
             {
                 // That's okay, just log and swallow
-                _logger.Warn("GroupManagement<THub> add ack timed out.", e);
+                LogContext.Warning?.Log(e, "GroupManagement<THub> add ack timed out.", e);
             }
         }
 
@@ -247,18 +246,18 @@ namespace MassTransit.SignalR
             // Publish to mass transit group management instead, but it waits for an ack...
             try
             {
-                _logger.Info("Publishing remove GroupManagement<THub> message to MassTransit.");
+                LogContext.Info?.Log("Publishing remove GroupManagement<THub> message to MassTransit.");
                 RequestHandle<GroupManagement<THub>> request =
                     _groupManagementRequestClient.Create(new {ConnectionId = connectionId, GroupName = groupName, ServerName, Action = GroupAction.Remove},
                         cancellationToken);
 
                 Response<Ack<THub>> ack = await request.GetResponse<Ack<THub>>().ConfigureAwait(false);
-                _logger.Info($"Request Received for remove GroupManagement<THub> from {ack.Message.ServerName}.");
+                LogContext.Info?.Log($"Request Received for remove GroupManagement<THub> from {ack.Message.ServerName}.");
             }
             catch (RequestTimeoutException e)
             {
                 // That's okay, just log and swallow
-                _logger.Warn("GroupManagement<THub> remove ack timed out.", e);
+                LogContext.Warning?.Log(e, "GroupManagement<THub> remove ack timed out.", e);
             }
         }
 

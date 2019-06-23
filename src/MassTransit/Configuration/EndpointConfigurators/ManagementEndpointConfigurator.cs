@@ -15,6 +15,7 @@ namespace MassTransit.EndpointConfigurators
     using System;
     using System.Net.Mime;
     using ConsumeConfigurators;
+    using Context;
     using GreenPipes;
     using SagaConfigurators;
     using Transports;

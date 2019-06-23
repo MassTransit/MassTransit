@@ -4,17 +4,16 @@ namespace MassTransit.Conductor.Server
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Context;
     using Contracts;
     using GreenPipes;
     using GreenPipes.Util;
-    using Logging;
     using Observers;
 
 
     public class ServiceEndpoint :
         IServiceEndpoint
     {
-        readonly ILog _log = Logger.Get<ServiceEndpoint>();
         readonly IServiceInstance _instance;
         readonly Lazy<EndpointInfo> _endpointInfo;
         readonly IList<ConnectHandle> _handles;
@@ -93,8 +92,7 @@ namespace MassTransit.Conductor.Server
             }
             catch (Exception exception)
             {
-                if (_log.IsWarnEnabled)
-                    _log.Warn($"Failed to notify service endpoint available: {EndpointInfo.InstanceAddress}", exception);
+                LogContext.Warning?.Log(exception, "Failed to notify service endpoint up: {InstanceAddress}", EndpointInfo.InstanceAddress);
             }
         }
 
@@ -106,8 +104,7 @@ namespace MassTransit.Conductor.Server
             }
             catch (Exception exception)
             {
-                if (_log.IsWarnEnabled)
-                    _log.Warn($"Failed to notify service endpoint available: {EndpointInfo.InstanceAddress}", exception);
+                LogContext.Warning?.Log(exception, "Failed to notify service endpoint down: {InstanceAddress}", EndpointInfo.InstanceAddress);
             }
         }
 

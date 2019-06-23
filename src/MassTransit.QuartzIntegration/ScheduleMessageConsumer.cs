@@ -14,12 +14,13 @@ namespace MassTransit.QuartzIntegration
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using System.Xml.Linq;
-    using Logging;
+    using Context;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Quartz;
@@ -31,7 +32,6 @@ namespace MassTransit.QuartzIntegration
         IConsumer<ScheduleMessage>,
         IConsumer<ScheduleRecurringMessage>
     {
-        static readonly ILog _log = Logger.Get<ScheduleMessageConsumer>();
         readonly IScheduler _scheduler;
 
         public ScheduleMessageConsumer(IScheduler scheduler)
@@ -44,8 +44,8 @@ namespace MassTransit.QuartzIntegration
             var correlationId = context.Message.CorrelationId.ToString("N");
 
             var jobKey = new JobKey(correlationId);
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("ScheduleMessage: {0} at {1}", jobKey, context.Message.ScheduledTime);
+
+            LogContext.Debug?.Log("ScheduleMessage: {Id} at {ScheduledTime}", jobKey, context.Message.ScheduledTime);
 
             var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
@@ -64,10 +64,9 @@ namespace MassTransit.QuartzIntegration
 
         public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("ScheduleRecurringMessage: {0} at {1}", context.Message.CorrelationId, context.Message.Schedule.ScheduleId);
-
             var jobKey = new JobKey(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
+
+            LogContext.Debug?.Log("Schedule recurring message: {Id}", jobKey);
 
             var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
@@ -113,7 +112,7 @@ namespace MassTransit.QuartzIntegration
             return triggerBuilder.Build();
         }
 
-        static async Task<IJobDetail> CreateJobDetail(ConsumeContext context, Uri destination, JobKey jobKey, Guid? tokenId = default(Guid?))
+        static async Task<IJobDetail> CreateJobDetail(ConsumeContext context, Uri destination, JobKey jobKey, Guid? tokenId = default)
         {
             string body = Encoding.UTF8.GetString(context.ReceiveContext.GetBody());
 
@@ -151,7 +150,7 @@ namespace MassTransit.QuartzIntegration
                 builder = builder.UsingJobData("RequestId", context.RequestId.Value.ToString());
 
             if (context.ExpirationTime.HasValue)
-                builder = builder.UsingJobData("ExpirationTime", context.ExpirationTime.Value.ToString());
+                builder = builder.UsingJobData("ExpirationTime", context.ExpirationTime.Value.ToString(CultureInfo.InvariantCulture));
 
             if (tokenId.HasValue)
                 builder = builder.UsingJobData("TokenId", tokenId.Value.ToString("N"));

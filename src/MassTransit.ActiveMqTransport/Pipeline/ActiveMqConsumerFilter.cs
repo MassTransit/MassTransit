@@ -1,26 +1,14 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Pipeline
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
     using Topology;
     using Transports.Metrics;
 
@@ -32,7 +20,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         Supervisor,
         IFilter<SessionContext>
     {
-        static readonly ILog _log = Logger.Get<ActiveMqConsumerFilter>();
         readonly ActiveMqReceiveEndpointContext _context;
 
         public ActiveMqConsumerFilter(ActiveMqReceiveEndpointContext context)
@@ -50,12 +37,12 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostAddress);
 
-            List<Task<ActiveMqBasicConsumer>> consumers = new List<Task<ActiveMqBasicConsumer>>();
+            List<Task<ActiveMqBasicConsumer>> consumers = new List<Task<ActiveMqBasicConsumer>>
+            {
+                CreateConsumer(context, receiveSettings.EntityName, receiveSettings.Selector)
+            };
 
-            consumers.Add(CreateConsumer(context, inputAddress, receiveSettings.EntityName, receiveSettings.Selector));
-
-            consumers.AddRange(_context.BrokerTopology.Consumers.Select(x =>
-                CreateConsumer(context, inputAddress, x.Destination.EntityName, x.Selector)));
+            consumers.AddRange(_context.BrokerTopology.Consumers.Select(x => CreateConsumer(context, x.Destination.EntityName, x.Selector)));
 
             var actualConsumers = await Task.WhenAll(consumers).ConfigureAwait(false);
 
@@ -71,13 +58,13 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             {
                 var consumerMetrics = actualConsumers.Cast<DeliveryMetrics>().ToArray();
 
-                DeliveryMetrics metrics =
-                    new CombinedDeliveryMetrics(consumerMetrics.Sum(x => x.DeliveryCount), consumerMetrics.Max(x => x.ConcurrentDeliveryCount));
+                DeliveryMetrics metrics = new CombinedDeliveryMetrics(consumerMetrics.Sum(x => x.DeliveryCount),
+                    consumerMetrics.Max(x => x.ConcurrentDeliveryCount));
 
                 await _context.TransportObservers.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Consumer completed: {0} received, {0} concurrent", metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+                LogContext.Debug?.Log("Consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent", inputAddress,
+                    metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
             }
         }
 
@@ -106,13 +93,13 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             return supervisor;
         }
 
-        async Task<ActiveMqBasicConsumer> CreateConsumer(SessionContext context, Uri inputAddress, string entityName, string selector)
+        async Task<ActiveMqBasicConsumer> CreateConsumer(SessionContext context, string entityName, string selector)
         {
             var queue = await context.GetQueue(entityName).ConfigureAwait(false);
 
             var messageConsumer = await context.CreateMessageConsumer(queue, selector, false).ConfigureAwait(false);
 
-            var consumer = new ActiveMqBasicConsumer(context, messageConsumer, inputAddress, _context);
+            var consumer = new ActiveMqBasicConsumer(context, messageConsumer, _context.InputAddress, _context);
 
             await consumer.Ready.ConfigureAwait(false);
 
