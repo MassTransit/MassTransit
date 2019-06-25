@@ -27,9 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-        <PackageReference Include="GreenPipes" Version="2.1.4" />
         <PackageReference Include="Marten" Version="3.6.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
         <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
