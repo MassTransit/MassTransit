@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../netfx.props" />
   <Import Project="../signing.props" />
 
@@ -14,9 +14,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <PackageReference Include="GreenPipes" Version="2.1.4"/>
-      <PackageReference Include="NewId" Version="3.0.1"/>
-      <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
       <PackageReference Include="Quartz" Version="3.0.7"/>
       <ProjectReference Include="..\MassTransit\MassTransit.csproj"/>
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>

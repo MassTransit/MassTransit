@@ -25,9 +25,6 @@
     <PackageReference Include="Apache.NMS" Version="1.7.1" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.4" />
-    <PackageReference Include="NewId" Version="3.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
   </ItemGroup>
 

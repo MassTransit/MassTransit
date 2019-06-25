@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../../netfx.props" />
   <Import Project="../../signing.props" />
 
@@ -19,9 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GreenPipes" Version="2.1.4"/>
     <PackageReference Include="log4net" Version="2.0.8"/>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2"/>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
   </ItemGroup>

@@ -7,14 +7,9 @@
 
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
-    <PackageReference Include="GreenPipes" Version="2.1.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    <PackageReference Include="System.Reactive.Core" Version="4.1.5" />
-    <PackageReference Include="System.Reactive.Interfaces" Version="4.1.5" />
-    <PackageReference Include="System.Reactive.Linq" Version="4.1.5" />
     <ProjectReference Include="..\MassTransit.Reactive\MassTransit.Reactive.csproj" />
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
