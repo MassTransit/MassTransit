@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
     using System;
@@ -19,7 +7,6 @@ namespace MassTransit.Serialization
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading;
-    using GreenPipes.Internals.Extensions;
     using JsonConverters;
     using Newtonsoft.Json;
     using Util;
@@ -32,54 +19,60 @@ namespace MassTransit.Serialization
         public static readonly ContentType JsonContentType = new ContentType(ContentTypeHeaderValue);
 
         static readonly Lazy<JsonSerializer> _deserializer;
-
-        static readonly Lazy<Encoding> _encoding = new Lazy<Encoding>(() => new UTF8Encoding(false, true),
-            LazyThreadSafetyMode.PublicationOnly);
-
+        static readonly Lazy<Encoding> _encoding;
         static readonly Lazy<JsonSerializer> _serializer;
 
-        public static JsonSerializerSettings DeserializerSettings = new JsonSerializerSettings
-        {
-            NullValueHandling = NullValueHandling.Ignore,
-            DefaultValueHandling = DefaultValueHandling.Ignore,
-            MissingMemberHandling = MissingMemberHandling.Ignore,
-            ObjectCreationHandling = ObjectCreationHandling.Auto,
-            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-            ContractResolver = new JsonContractResolver(),
-            TypeNameHandling = TypeNameHandling.None,
-            DateParseHandling = DateParseHandling.None,
-            DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
-            Converters = new List<JsonConverter>(new JsonConverter[]
-            {
-                new ByteArrayConverter(),
-                new ListJsonConverter(),
-                new InterfaceProxyConverter(TypeCache.ImplementationBuilder),
-                new StringDecimalConverter(),
-                new MessageDataJsonConverter(),
-            })
-        };
+        public static readonly ByteArrayConverter ByteArrayConverter;
+        public static readonly ListJsonConverter ListJsonConverter;
+        public static readonly InterfaceProxyConverter InterfaceProxyConverter;
+        public static readonly MessageDataJsonConverter MessageDataJsonConverter;
+        public static readonly StringDecimalConverter StringDecimalConverter;
 
-        public static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
-        {
-            NullValueHandling = NullValueHandling.Ignore,
-            DefaultValueHandling = DefaultValueHandling.Ignore,
-            MissingMemberHandling = MissingMemberHandling.Ignore,
-            ObjectCreationHandling = ObjectCreationHandling.Auto,
-            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-            ContractResolver = new JsonContractResolver(),
-            TypeNameHandling = TypeNameHandling.None,
-            DateParseHandling = DateParseHandling.None,
-            DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
-            Converters = new List<JsonConverter>(new JsonConverter[]
-            {
-                new ByteArrayConverter(),
-                new MessageDataJsonConverter(),
-                new StringDecimalConverter()
-            }),
-        };
+        public static JsonSerializerSettings DeserializerSettings;
+
+        public static JsonSerializerSettings SerializerSettings;
 
         static JsonMessageSerializer()
         {
+            _encoding = new Lazy<Encoding>(() => new UTF8Encoding(false, true), LazyThreadSafetyMode.PublicationOnly);
+
+            ByteArrayConverter = new ByteArrayConverter();
+            ListJsonConverter = new ListJsonConverter();
+            InterfaceProxyConverter = new InterfaceProxyConverter();
+            MessageDataJsonConverter = new MessageDataJsonConverter();
+            StringDecimalConverter = new StringDecimalConverter();
+
+            DeserializerSettings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                ObjectCreationHandling = ObjectCreationHandling.Auto,
+                ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+                ContractResolver = new JsonContractResolver(),
+                TypeNameHandling = TypeNameHandling.None,
+                DateParseHandling = DateParseHandling.None,
+                DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
+                Converters = new List<JsonConverter>(new JsonConverter[]
+                {
+                    ByteArrayConverter, ListJsonConverter, InterfaceProxyConverter, StringDecimalConverter, MessageDataJsonConverter
+                })
+            };
+
+            SerializerSettings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                ObjectCreationHandling = ObjectCreationHandling.Auto,
+                ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+                ContractResolver = new JsonContractResolver(),
+                TypeNameHandling = TypeNameHandling.None,
+                DateParseHandling = DateParseHandling.None,
+                DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
+                Converters = new List<JsonConverter>(new JsonConverter[] {ByteArrayConverter, MessageDataJsonConverter, StringDecimalConverter}),
+            };
+
             _deserializer = new Lazy<JsonSerializer>(() => JsonSerializer.Create(DeserializerSettings));
             _serializer = new Lazy<JsonSerializer>(() => JsonSerializer.Create(SerializerSettings));
         }

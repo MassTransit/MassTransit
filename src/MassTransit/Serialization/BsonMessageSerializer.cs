@@ -17,7 +17,6 @@ namespace MassTransit.Serialization
     using System.Globalization;
     using System.IO;
     using System.Net.Mime;
-    using GreenPipes.Internals.Extensions;
     using JsonConverters;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
@@ -45,7 +44,7 @@ namespace MassTransit.Serialization
             Converters = new List<JsonConverter>(new JsonConverter[]
             {
                 new ListJsonConverter(),
-                new InterfaceProxyConverter(TypeCache.ImplementationBuilder),
+                new InterfaceProxyConverter(),
                 new IsoDateTimeConverter {DateTimeStyles = DateTimeStyles.RoundtripKind},
             })
         };
