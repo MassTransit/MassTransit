@@ -1,7 +1,6 @@
 namespace MassTransit.Serialization
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Net.Mime;
     using System.Runtime.Serialization;
@@ -30,21 +29,26 @@ namespace MassTransit.Serialization
         public static readonly StringDecimalConverter StringDecimalConverter;
 
         public static JsonSerializerSettings DeserializerSettings;
-
         public static JsonSerializerSettings SerializerSettings;
-        static readonly DefaultContractResolver _contractResolver;
 
         static JsonMessageSerializer()
         {
-            _contractResolver = new JsonContractResolver {NamingStrategy = new CamelCaseNamingStrategy()};
-
-            _encoding = new Lazy<Encoding>(() => new UTF8Encoding(false, true), LazyThreadSafetyMode.PublicationOnly);
-
             ByteArrayConverter = new ByteArrayConverter();
             ListJsonConverter = new ListJsonConverter();
             InterfaceProxyConverter = new InterfaceProxyConverter();
             MessageDataJsonConverter = new MessageDataJsonConverter();
             StringDecimalConverter = new StringDecimalConverter();
+
+            var namingStrategy = new CamelCaseNamingStrategy();
+
+            DefaultContractResolver deserializerContractResolver = new JsonContractResolver(ByteArrayConverter, ListJsonConverter, InterfaceProxyConverter,
+                MessageDataJsonConverter,
+                StringDecimalConverter) {NamingStrategy = namingStrategy};
+
+            DefaultContractResolver serializerContractResolver =
+                new JsonContractResolver(ByteArrayConverter, MessageDataJsonConverter, StringDecimalConverter) {NamingStrategy = namingStrategy};
+
+            _encoding = new Lazy<Encoding>(() => new UTF8Encoding(false, true), LazyThreadSafetyMode.PublicationOnly);
 
             DeserializerSettings = new JsonSerializerSettings
             {
@@ -53,14 +57,10 @@ namespace MassTransit.Serialization
                 MissingMemberHandling = MissingMemberHandling.Ignore,
                 ObjectCreationHandling = ObjectCreationHandling.Auto,
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                ContractResolver = _contractResolver,
+                ContractResolver = deserializerContractResolver,
                 TypeNameHandling = TypeNameHandling.None,
                 DateParseHandling = DateParseHandling.None,
-                DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
-                Converters = new List<JsonConverter>(new JsonConverter[]
-                {
-                    ByteArrayConverter, ListJsonConverter, InterfaceProxyConverter, StringDecimalConverter, MessageDataJsonConverter
-                })
+                DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind
             };
 
             SerializerSettings = new JsonSerializerSettings
@@ -70,11 +70,10 @@ namespace MassTransit.Serialization
                 MissingMemberHandling = MissingMemberHandling.Ignore,
                 ObjectCreationHandling = ObjectCreationHandling.Auto,
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                ContractResolver = _contractResolver,
+                ContractResolver = serializerContractResolver,
                 TypeNameHandling = TypeNameHandling.None,
                 DateParseHandling = DateParseHandling.None,
-                DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
-                Converters = new List<JsonConverter>(new JsonConverter[] {ByteArrayConverter, MessageDataJsonConverter, StringDecimalConverter}),
+                DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind
             };
 
             _deserializer = new Lazy<JsonSerializer>(() => JsonSerializer.Create(DeserializerSettings));
