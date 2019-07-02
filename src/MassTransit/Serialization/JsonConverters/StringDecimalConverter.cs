@@ -22,9 +22,9 @@ namespace MassTransit.Serialization.JsonConverters
             writer.WriteValue(text);
         }
 
-        protected override IConverter ValueFactory(Type type)
+        protected override IConverter ValueFactory(Type objectType)
         {
-            if (type == typeof(decimal) || type == typeof(decimal?))
+            if (objectType == typeof(decimal) || objectType == typeof(decimal?))
                 return new CachedConverter();
 
             return new Unsupported();

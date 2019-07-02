@@ -103,7 +103,7 @@ namespace MassTransit.Serialization
                     return existing != null;
             }
 
-            string typeUrn = new MessageUrn(messageType).ToString();
+            string typeUrn = MessageUrn.ForType(messageType).ToString();
 
             return _supportedTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
         }
@@ -124,9 +124,9 @@ namespace MassTransit.Serialization
                     return true;
                 }
 
-                string typeUrn = new MessageUrn(typeof(T)).ToString();
+                string typeUrn = MessageUrn.ForType(typeof(T)).ToString();
 
-                if (_supportedTypes.Any(typeUrn.Equals))
+                if (_supportedTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase)))
                 {
                     object obj;
                     Type deserializeType = typeof(T);
@@ -156,10 +156,7 @@ namespace MassTransit.Serialization
         static JToken GetMessageToken(object message)
         {
             var messageToken = message as JToken;
-            if (messageToken == null)
-                return new JObject();
-
-            if (messageToken.Type == JTokenType.Null)
+            if (messageToken == null || messageToken.Type == JTokenType.Null)
                 return new JObject();
 
             return messageToken;

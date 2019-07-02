@@ -80,15 +80,18 @@ namespace MassTransit.Serialization
         {
             var headers = new List<Header>();
 
-            headers.Add(MessageTypeKey, new MessageUrn(typeof(T)));
+            headers.Add(MessageTypeKey, MessageUrn.ForType(typeof(T)));
             headers.Add(new Header(PolymorphicMessageTypesKey, string.Join(";", TypeMetadataCache<T>.MessageTypeNames)));
 
             if (context.CorrelationId.HasValue)
                 headers.Add(RequestIdKey, context.CorrelationId.Value.ToString());
+
             if (context.RequestId.HasValue)
                 headers.Add(RequestIdKey, context.RequestId.Value.ToString());
+
             if (context.ConversationId.HasValue)
                 headers.Add(ConversationIdKey, context.ConversationId.Value.ToString());
+
             if (context.InitiatorId.HasValue)
                 headers.Add(InitiatorIdKey, context.InitiatorId.Value.ToString());
 
@@ -97,6 +100,7 @@ namespace MassTransit.Serialization
 
             if (context.ResponseAddress != null)
                 headers.Add(ResponseAddressKey, context.ResponseAddress);
+
             if (context.FaultAddress != null)
                 headers.Add(FaultAddressKey, context.FaultAddress);
 

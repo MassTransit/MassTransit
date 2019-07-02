@@ -14,10 +14,10 @@
             serializer.Serialize(writer, value);
         }
 
-        protected override IConverter ValueFactory(Type type)
+        protected override IConverter ValueFactory(Type objectType)
         {
-            if (type.GetTypeInfo().IsInterface && TypeMetadataCache.IsValidMessageType(type))
-                return (IConverter)Activator.CreateInstance(typeof(CachedConverter<>).MakeGenericType(type));
+            if (objectType.GetTypeInfo().IsInterface && TypeMetadataCache.IsValidMessageType(objectType))
+                return (IConverter)Activator.CreateInstance(typeof(CachedConverter<>).MakeGenericType(objectType));
 
             return new Unsupported();
         }

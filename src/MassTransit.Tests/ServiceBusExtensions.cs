@@ -30,7 +30,7 @@ namespace MassTransit.Tests
         /// <returns>The normalized name for this type</returns>
         public static string ToMessageName(this Type messageType)
         {
-            return new MessageUrn(messageType).ToString();
+            return MessageUrn.ForType(messageType).ToString();
         }
     }
 }

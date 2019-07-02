@@ -18,9 +18,9 @@ namespace MassTransit.Serialization.JsonConverters
             throw new NotSupportedException("This converter should not be used for writing as it can create loops");
         }
 
-        protected override IConverter ValueFactory(Type type)
+        protected override IConverter ValueFactory(Type objectType)
         {
-            if (CanConvert(type, out var elementType))
+            if (CanConvert(objectType, out var elementType))
                 return (IConverter)Activator.CreateInstance(typeof(CachedConverter<>).MakeGenericType(elementType));
 
             return new Unsupported();

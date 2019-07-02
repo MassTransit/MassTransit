@@ -21,9 +21,9 @@
             serializer.Serialize(writer, reference);
         }
 
-        protected override IConverter ValueFactory(Type type)
+        protected override IConverter ValueFactory(Type objectType)
         {
-            if (type.ClosesType(typeof(MessageData<>), out Type[] dataTypes))
+            if (objectType.ClosesType(typeof(MessageData<>), out Type[] dataTypes))
             {
                 var elementType = dataTypes[0];
                 if (elementType == typeof(string) || elementType == typeof(byte[]))

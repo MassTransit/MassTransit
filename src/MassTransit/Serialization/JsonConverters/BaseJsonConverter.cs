@@ -12,12 +12,17 @@ namespace MassTransit.Serialization.JsonConverters
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return _cached.GetOrAdd(objectType, ValueFactory).Deserialize(reader, objectType, serializer);
+            return _cached.GetOrAdd(objectType, CreateMissingConverter).Deserialize(reader, objectType, serializer);
         }
 
         public override bool CanConvert(Type objectType)
         {
-            return _cached.GetOrAdd(objectType, ValueFactory).IsSupported;
+            return _cached.GetOrAdd(objectType, CreateMissingConverter).IsSupported;
+        }
+
+        IConverter CreateMissingConverter(Type objectType)
+        {
+            return ValueFactory(objectType);
         }
 
         protected abstract IConverter ValueFactory(Type objectType);
