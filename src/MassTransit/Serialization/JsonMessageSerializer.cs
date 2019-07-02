@@ -9,6 +9,7 @@ namespace MassTransit.Serialization
     using System.Threading;
     using JsonConverters;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
     using Util;
 
 
@@ -31,9 +32,12 @@ namespace MassTransit.Serialization
         public static JsonSerializerSettings DeserializerSettings;
 
         public static JsonSerializerSettings SerializerSettings;
+        static readonly DefaultContractResolver _contractResolver;
 
         static JsonMessageSerializer()
         {
+            _contractResolver = new JsonContractResolver {NamingStrategy = new CamelCaseNamingStrategy()};
+
             _encoding = new Lazy<Encoding>(() => new UTF8Encoding(false, true), LazyThreadSafetyMode.PublicationOnly);
 
             ByteArrayConverter = new ByteArrayConverter();
@@ -49,7 +53,7 @@ namespace MassTransit.Serialization
                 MissingMemberHandling = MissingMemberHandling.Ignore,
                 ObjectCreationHandling = ObjectCreationHandling.Auto,
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                ContractResolver = new JsonContractResolver(),
+                ContractResolver = _contractResolver,
                 TypeNameHandling = TypeNameHandling.None,
                 DateParseHandling = DateParseHandling.None,
                 DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
@@ -66,7 +70,7 @@ namespace MassTransit.Serialization
                 MissingMemberHandling = MissingMemberHandling.Ignore,
                 ObjectCreationHandling = ObjectCreationHandling.Auto,
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                ContractResolver = new JsonContractResolver(),
+                ContractResolver = _contractResolver,
                 TypeNameHandling = TypeNameHandling.None,
                 DateParseHandling = DateParseHandling.None,
                 DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
