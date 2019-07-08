@@ -148,7 +148,7 @@ The events that are observed by the state machine (the correlations are defined 
 The state machine is generic, and requires a state class (because sagas are stateful), so that is defined below. The state class has the values that are persisted between events.
 
 ```csharp
-class ShoppingCartState :
+class ShoppingCart :
     SagaStateMachineInstance
 {
     public Guid CorrelationId { get; set; }
@@ -185,7 +185,7 @@ The remainder of the properties are relevant to the application, and are saved w
 To connect the state machine saga to a receive endpoint, a saga repository is used, along with the state machine instance.
 
 ```csharp
-var repository = new InMemorySagaRepository<ShoppingCartState>();
+var repository = new InMemorySagaRepository<ShoppingCart>();
 
 _busControl = Bus.Factory.CreateUsingRabbitMq(x =>
 {
