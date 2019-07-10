@@ -35,7 +35,7 @@ namespace MassTransit.QuartzIntegration
             var correlationId = context.Message.TokenId.ToString("N");
 
             var jobKey = new JobKey(correlationId);
-            var deletedJob = await _scheduler.DeleteJob(jobKey).ConfigureAwait(false);
+            var deletedJob = await _scheduler.DeleteJob(jobKey, context.CancellationToken).ConfigureAwait(false);
 
             if (_log.IsDebugEnabled)
             {
@@ -53,11 +53,10 @@ namespace MassTransit.QuartzIntegration
             string scheduleId = context.Message.ScheduleId;
 
             if (!scheduleId.StartsWith(prependedValue))
-            {
                 scheduleId = string.Concat(prependedValue, scheduleId);
-            }
 
-            bool unscheduledJob = await _scheduler.UnscheduleJob(new TriggerKey(scheduleId, context.Message.ScheduleGroup)).ConfigureAwait(false);
+            bool unscheduledJob = await _scheduler.UnscheduleJob(new TriggerKey(scheduleId, context.Message.ScheduleGroup), context.CancellationToken)
+                .ConfigureAwait(false);
 
             if (_log.IsDebugEnabled)
             {

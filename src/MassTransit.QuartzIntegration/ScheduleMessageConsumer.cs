@@ -56,10 +56,10 @@ namespace MassTransit.QuartzIntegration
                 .WithIdentity(new TriggerKey(correlationId))
                 .Build();
 
-            if (await _scheduler.CheckExists(trigger.Key).ConfigureAwait(false))
-               await _scheduler.RescheduleJob(trigger.Key, trigger).ConfigureAwait(false);
-            else
-                await _scheduler.ScheduleJob(jobDetail, trigger).ConfigureAwait(false);
+            if (await _scheduler.CheckExists(trigger.Key, context.CancellationToken).ConfigureAwait(false))
+                await _scheduler.UnscheduleJob(trigger.Key, context.CancellationToken).ConfigureAwait(false);
+
+            await _scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
         }
 
         public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
@@ -75,10 +75,10 @@ namespace MassTransit.QuartzIntegration
 
             var trigger = CreateTrigger(context.Message.Schedule, jobDetail, triggerKey);
 
-            if (await _scheduler.CheckExists(triggerKey).ConfigureAwait(false))
-                await _scheduler.RescheduleJob(triggerKey, trigger).ConfigureAwait(false);
-            else
-                await _scheduler.ScheduleJob(jobDetail, trigger).ConfigureAwait(false);
+            if (await _scheduler.CheckExists(triggerKey, context.CancellationToken).ConfigureAwait(false))
+                await _scheduler.UnscheduleJob(triggerKey, context.CancellationToken).ConfigureAwait(false);
+
+            await _scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
         }
 
         ITrigger CreateTrigger(RecurringSchedule schedule, IJobDetail jobDetail, TriggerKey triggerKey)
@@ -100,6 +100,7 @@ namespace MassTransit.QuartzIntegration
                         case MissedEventPolicy.Skip:
                             x.WithMisfireHandlingInstructionDoNothing();
                             break;
+
                         case MissedEventPolicy.Send:
                             x.WithMisfireHandlingInstructionFireAndProceed();
                             break;
@@ -136,14 +137,19 @@ namespace MassTransit.QuartzIntegration
 
             if (context.MessageId.HasValue)
                 builder = builder.UsingJobData("MessageId", context.MessageId.Value.ToString());
+
             if (context.CorrelationId.HasValue)
                 builder = builder.UsingJobData("CorrelationId", context.CorrelationId.Value.ToString());
+
             if (context.ConversationId.HasValue)
                 builder = builder.UsingJobData("ConversationId", context.ConversationId.Value.ToString());
+
             if (context.InitiatorId.HasValue)
                 builder = builder.UsingJobData("InitiatorId", context.InitiatorId.Value.ToString());
+
             if (context.RequestId.HasValue)
                 builder = builder.UsingJobData("RequestId", context.RequestId.Value.ToString());
+
             if (context.ExpirationTime.HasValue)
                 builder = builder.UsingJobData("ExpirationTime", context.ExpirationTime.Value.ToString());
 
