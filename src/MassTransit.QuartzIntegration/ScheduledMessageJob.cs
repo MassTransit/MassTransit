@@ -48,7 +48,7 @@ namespace MassTransit.QuartzIntegration
 
                 var scheduled = new Scheduled();
 
-                await endpoint.Send(scheduled, sendPipe).ConfigureAwait(false);
+                await endpoint.Send(scheduled, sendPipe, context.CancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -99,10 +99,9 @@ namespace MassTransit.QuartzIntegration
         static Guid? ConvertIdToGuid(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
-                return default(Guid?);
+                return default;
 
-            Guid messageId;
-            if (Guid.TryParse(id, out messageId))
+            if (Guid.TryParse(id, out var messageId))
                 return messageId;
 
             throw new FormatException("The Id was not a Guid: " + id);
