@@ -75,11 +75,6 @@ namespace MassTransit.Context
             return false;
         }
 
-        public override Task<ISendEndpoint> GetSendEndpoint(Uri address)
-        {
-            return _context.GetSendEndpoint(address);
-        }
-
         public override Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
             return _context.NotifyConsumed(context, duration, consumerType);
