@@ -19,7 +19,7 @@
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.9.2" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Topshelf.Log4Net" Version="4.2.0" />
+    <PackageReference Include="Topshelf.Log4Net" Version="4.2.1" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -27,5 +27,9 @@
     <ProjectReference Include="..\Containers\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj" />
     <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0"/>
   </ItemGroup>
 </Project>
