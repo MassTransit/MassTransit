@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../netfx.props"/>
-  <Import Project="../signing.props"/>
+  <Import Project="../netfx.props" />
+  <Import Project="../signing.props" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -17,15 +17,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.9.2"/>
-    <PackageReference Include="log4net" Version="2.0.8"/>
-    <PackageReference Include="Topshelf.Log4Net" Version="4.2.0"/>
-    <Reference Include="System"/>
-    <Reference Include="System.Configuration"/>
-    <Reference Include="System.Core"/>
-    <Reference Include="System.Xml"/>
-    <ProjectReference Include="..\Containers\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj"/>
-    <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj"/>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj"/>
+    <PackageReference Include="Autofac" Version="4.9.2" />
+    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="Topshelf.Serilog" Version="4.2.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.0.0" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+    <ProjectReference Include="..\Containers\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj" />
+    <ProjectReference Include="..\Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
   </ItemGroup>
 </Project>
