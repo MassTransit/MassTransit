@@ -41,7 +41,7 @@
             _settings.QueueConfigurator.BasePath = hostConfiguration.Host.BasePath;
 
             HostAddress = hostConfiguration.Host.Address;
-            InputAddress = new Uri(hostConfiguration.Host.Address, $"{settings.Name}");
+            InputAddress = settings.GetInputAddress(hostConfiguration.HostAddress, settings.Name);
 
             SubscribeMessageTopics = true;
         }
