@@ -37,7 +37,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
 
         protected override ClientContext CreateClientContext(NamespaceContext leftContext, MessagingFactoryContext rightContext)
         {
-            var inputAddress = _settings.GetInputAddress(rightContext.ServiceAddress, _settings.Path);
+            var inputAddress = new Uri(rightContext.ServiceAddress, $"{_settings.Path}");
 
             if (_log.IsDebugEnabled)
                 _log.DebugFormat("Creating client: {0}", inputAddress);
