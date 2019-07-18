@@ -195,19 +195,19 @@ namespace MassTransit.Context
         public virtual Task RespondAsync<T>(object values)
             where T : class
         {
-            return RespondAsyncInternal(values, new ResponsePipe<T>(this));
+            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this));
         }
 
         public virtual Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe)
             where T : class
         {
-            return RespondAsyncInternal(values, new ResponsePipe<T>(this, sendPipe));
+            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this, sendPipe));
         }
 
         public virtual Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe)
             where T : class
         {
-            return RespondAsyncInternal(values, new ResponsePipe<T>(this, sendPipe));
+            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this, sendPipe));
         }
 
         async Task RespondAsyncInternal<T>(object values, IPipe<SendContext<T>> responsePipe)

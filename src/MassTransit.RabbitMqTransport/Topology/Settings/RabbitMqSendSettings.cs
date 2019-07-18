@@ -62,7 +62,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
 
             if (_bindToQueue)
             {
-                var queue = builder.QueueDeclare(_queueName, Durable, AutoDelete, false, QueueArguments);
+                var queue = builder.QueueDeclare(_queueName ?? ExchangeName, Durable, AutoDelete, false, QueueArguments);
 
                 builder.QueueBind(builder.Exchange, queue, "", new Dictionary<string, object>());
             }
