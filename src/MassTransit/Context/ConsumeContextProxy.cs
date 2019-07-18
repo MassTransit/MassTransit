@@ -90,11 +90,6 @@ namespace MassTransit.Context
             _context.AddConsumeTask(task);
         }
 
-        protected override IPublishEndpoint CreatePublishEndpoint()
-        {
-            return _context;
-        }
-
         public override bool HasPayloadType(Type payloadType)
         {
             if (base.HasPayloadType(payloadType))
