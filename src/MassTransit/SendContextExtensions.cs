@@ -89,7 +89,7 @@ namespace MassTransit
         /// <param name="consumeContext"></param>
         public static void TransferConsumeContextHeaders(this SendContext sendContext, ConsumeContext consumeContext)
         {
-            sendContext.GetOrAddPayload(() => consumeContext);
+            sendContext.AddOrUpdatePayload(() => consumeContext, _ => consumeContext);
 
             sendContext.SourceAddress = consumeContext.ReceiveContext.InputAddress;
 
