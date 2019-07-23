@@ -33,7 +33,8 @@ namespace MassTransit.Serialization.JsonConverters
             {
                 if (typeInfo.ClosesType(typeof(IDictionary<,>))
                     || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>))
-                    || typeInfo.ClosesType(typeof(Dictionary<,>)))
+                    || typeInfo.ClosesType(typeof(Dictionary<,>))
+                    || typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType) && enumerableType[0].ClosesType(typeof(KeyValuePair<,>)))
                 {
                     elementType = default;
                     return false;
