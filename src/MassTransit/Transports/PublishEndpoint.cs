@@ -45,21 +45,21 @@ namespace MassTransit.Transports
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            var adapter = new PublishEndpointPipeAdapter<T>(_publishPipe, _publishObserver, _sourceAddress, _consumeContext);
+            var adapter = new PublishEndpointPipeAdapter<T>(message, _publishPipe, _publishObserver, _sourceAddress, _consumeContext);
 
             return Publish(cancellationToken, message, adapter);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishEndpointPipeAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext);
+            var adapter = new PublishEndpointPipeAdapter<T>(message, publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext);
 
             return Publish(cancellationToken, message, adapter);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishEndpointPipeAdapter<T>(publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext);
+            var adapter = new PublishEndpointPipeAdapter<T>(message, publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext);
 
             return Publish(cancellationToken, message, adapter);
         }
