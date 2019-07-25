@@ -4,12 +4,12 @@
         IInitializerConvention<TMessage>
         where TMessage : class
     {
-        readonly IConventionTypeCache<IMessageTypeInitializerConvention<TMessage>> _typeCache;
+        readonly IConventionTypeCache<IMessageInputInitializerConvention<TMessage>> _typeCache;
 
-        protected InitializerConvention(IConventionTypeCacheFactory<IMessageTypeInitializerConvention<TMessage>> cacheFactory, IInitializerConvention
+        protected InitializerConvention(IConventionTypeCacheFactory<IMessageInputInitializerConvention<TMessage>> cacheFactory, IInitializerConvention
             convention)
         {
-            _typeCache = new ConventionTypeCache<IMessageTypeInitializerConvention<TMessage>>(cacheFactory, convention);
+            _typeCache = new ConventionTypeCache<IMessageInputInitializerConvention<TMessage>>(cacheFactory, convention);
         }
 
         public bool TryGetPropertyInitializer<TInput, TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
@@ -29,21 +29,41 @@
         {
             return _typeCache.GetOrAdd<TInput, IInitializerConvention<TMessage, TInput>>().TryGetHeaderInitializer(propertyName, out initializer);
         }
+
+
+        protected class Unsupported<TInput> :
+            IInitializerConvention<TMessage, TInput>
+            where TInput : class
+        {
+            public bool TryGetPropertyInitializer<TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
+            {
+                initializer = default;
+                return false;
+            }
+
+            public bool TryGetHeaderInitializer<TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+            {
+                initializer = default;
+                return false;
+            }
+
+            public bool TryGetHeaderInitializer(string inputPropertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+            {
+                initializer = default;
+                return false;
+            }
+        }
     }
 
 
-    /// <summary>
-    /// Looks for a property that can be used as a CorrelationId message header, and
-    /// applies a filter to set it on message send if available
-    /// </summary>
     public abstract class InitializerConvention :
         IInitializerConvention
     {
-        readonly IConventionTypeCache<IMessageTypeInitializerConvention> _typeCache;
+        readonly IConventionTypeCache<IMessageInitializerConvention> _typeCache;
 
-        protected InitializerConvention(IConventionTypeCacheFactory<IMessageTypeInitializerConvention> cacheFactory)
+        protected InitializerConvention(IConventionTypeCacheFactory<IMessageInitializerConvention> cacheFactory)
         {
-            _typeCache = new ConventionTypeCache<IMessageTypeInitializerConvention>(cacheFactory, this);
+            _typeCache = new ConventionTypeCache<IMessageInitializerConvention>(cacheFactory, this);
         }
 
         public bool TryGetPropertyInitializer<TMessage, TInput, TProperty>(string propertyName,

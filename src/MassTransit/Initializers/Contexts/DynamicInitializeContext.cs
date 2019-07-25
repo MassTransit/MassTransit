@@ -30,11 +30,7 @@
         public DynamicInitializeContext(InitializeContext context, TMessage message, TInput input)
             : base(context, message)
         {
-            if (input != null)
-            {
-                HasInput = true;
-                Input = input;
-            }
+            HasInput = (Input = input) != null;
         }
 
         public bool HasInput { get; }

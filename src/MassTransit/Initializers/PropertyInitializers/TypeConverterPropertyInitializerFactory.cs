@@ -16,20 +16,21 @@ namespace MassTransit.Initializers.PropertyInitializers
         }
 
         public IPropertyInitializer<TMessage, TInput> CreatePropertyInitializer<TMessage, TInput>(string messagePropertyName,
-            string inputPropertyName)
+            IPropertyProviderFactory<TInput> providerFactory)
             where TMessage : class
             where TInput : class
         {
-            var provider = new TypeConvertInputValuePropertyProvider<TInput, TProperty, TInputProperty>(_converter, inputPropertyName ?? messagePropertyName);
+            var provider = CreatePropertyProvider(providerFactory);
 
             return new ProviderPropertyInitializer<TMessage, TInput, TProperty>(provider, messagePropertyName);
         }
 
-        public IHeaderInitializer<TMessage, TInput> CreateHeaderInitializer<TMessage, TInput>(string headerPropertyName, string inputPropertyName = null)
+        public IHeaderInitializer<TMessage, TInput> CreateHeaderInitializer<TMessage, TInput>(string headerPropertyName,
+            IPropertyProviderFactory<TInput> providerFactory)
             where TMessage : class
             where TInput : class
         {
-            var provider = new TypeConvertInputValuePropertyProvider<TInput, TProperty, TInputProperty>(_converter, inputPropertyName ?? headerPropertyName);
+            var provider = CreatePropertyProvider(providerFactory);
 
             return new ProviderHeaderInitializer<TMessage, TInput, TProperty>(provider, headerPropertyName);
         }
@@ -51,6 +52,14 @@ namespace MassTransit.Initializers.PropertyInitializers
 
             propertyConverter = null;
             return false;
+        }
+
+        IPropertyProvider<TInput, TProperty> CreatePropertyProvider<TInput>(IPropertyProviderFactory<TInput> providerFactory)
+            where TInput : class
+        {
+            var inputPropertyProvider = providerFactory.CreatePropertyProvider<TInputProperty>();
+
+            return new TypeConverterPropertyProvider<TInput, TProperty, TInputProperty>(_converter, inputPropertyProvider);
         }
     }
 }

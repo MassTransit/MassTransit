@@ -4,6 +4,7 @@ namespace MassTransit.Initializers.PropertyInitializers
     using System.Threading.Tasks;
     using Internals.Reflection;
     using PropertyProviders;
+    using Util;
 
 
     /// <summary>
@@ -33,9 +34,21 @@ namespace MassTransit.Initializers.PropertyInitializers
             _messageProperty = WritePropertyCache<TMessage>.GetProperty<TProperty>(propertyName);
         }
 
-        public async Task Apply(InitializeContext<TMessage, TInput> context)
+        public Task Apply(InitializeContext<TMessage, TInput> context)
         {
-            var propertyValue = await _propertyProvider.GetProperty(context).ConfigureAwait(false);
+            var propertyTask = _propertyProvider.GetProperty(context);
+            if (propertyTask.IsCompleted)
+            {
+                _messageProperty.Set(context.Message, propertyTask.Result);
+                return TaskUtil.Completed;
+            }
+
+            return ApplyAsync(context, propertyTask);
+        }
+
+        async Task ApplyAsync(InitializeContext<TMessage, TInput> context, Task<TProperty> propertyTask)
+        {
+            var propertyValue = await propertyTask.ConfigureAwait(false);
 
             _messageProperty.Set(context.Message, propertyValue);
         }

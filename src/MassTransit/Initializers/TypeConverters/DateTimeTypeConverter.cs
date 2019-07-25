@@ -8,6 +8,7 @@
         ITypeConverter<int, DateTime>,
         ITypeConverter<long, DateTime>,
         ITypeConverter<DateTime, string>,
+        ITypeConverter<DateTime, object>,
         ITypeConverter<DateTime, DateTimeOffset>,
         ITypeConverter<DateTime, int>,
         ITypeConverter<DateTime, long>
@@ -69,6 +70,18 @@
                     result = (long)timeSpan.TotalMilliseconds;
                     return true;
                 }
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(object input, out DateTime result)
+        {
+            if (input != null)
+            {
+                result = Convert.ToDateTime(input);
+                return true;
             }
 
             result = default;

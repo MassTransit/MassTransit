@@ -1,12 +1,14 @@
 ﻿namespace MassTransit.Initializers.Conventions
 {
     using System;
+    using System.Collections.Generic;
     using System.Text;
     using HeaderInitializers;
+    using Internals.Extensions;
     using PropertyInitializers;
 
 
-    public class CopyInitializerConvention<TMessage, TInput> :
+    public class DefaultInitializerConvention<TMessage, TInput> :
         IInitializerConvention<TMessage, TInput>
         where TMessage : class
         where TInput : class
@@ -36,7 +38,9 @@
 
                 if (PropertyInitializerCache.TryGetFactory<TProperty>(inputPropertyType, out var propertyConverter))
                 {
-                    initializer = propertyConverter.CreatePropertyInitializer<TMessage, TInput>(propertyName);
+                    var providerFactory = new InputValuePropertyProviderFactory<TInput>(propertyName);
+
+                    initializer = propertyConverter.CreatePropertyInitializer<TMessage, TInput>(propertyName, providerFactory);
                     return true;
                 }
             }
@@ -66,7 +70,9 @@
 
                 if (PropertyInitializerCache.TryGetFactory<TProperty>(inputPropertyType, out var propertyConverter))
                 {
-                    initializer = propertyConverter.CreateHeaderInitializer<TMessage, TInput>(propertyName, inputPropertyName);
+                    var providerFactory = new InputValuePropertyProviderFactory<TInput>(inputPropertyName);
+
+                    initializer = propertyConverter.CreateHeaderInitializer<TMessage, TInput>(propertyName, providerFactory);
                     return true;
                 }
             }
@@ -105,43 +111,43 @@
     }
 
 
-    public class CopyInitializerConvention<TMessage> :
+    public class DefaultInitializerConvention<TMessage> :
         InitializerConvention<TMessage>
         where TMessage : class
     {
-        public CopyInitializerConvention(IInitializerConvention convention)
+        public DefaultInitializerConvention(IInitializerConvention convention)
             : base(new CacheFactory(), convention)
         {
         }
 
 
         class CacheFactory :
-            IConventionTypeCacheFactory<IMessageTypeInitializerConvention<TMessage>>
+            IConventionTypeCacheFactory<IMessageInputInitializerConvention<TMessage>>
         {
-            IMessageTypeInitializerConvention<TMessage> IConventionTypeCacheFactory<IMessageTypeInitializerConvention<TMessage>>.Create<T>(
+            IMessageInputInitializerConvention<TMessage> IConventionTypeCacheFactory<IMessageInputInitializerConvention<TMessage>>.Create<T>(
                 IInitializerConvention convention)
             {
-                return new CopyInitializerConvention<TMessage, T>();
+                return new DefaultInitializerConvention<TMessage, T>();
             }
         }
     }
 
 
-    public class CopyMessageInitializerConvention :
+    public class DefaultInitializerConvention :
         InitializerConvention
     {
-        public CopyMessageInitializerConvention()
+        public DefaultInitializerConvention()
             : base(new CacheFactory())
         {
         }
 
 
         class CacheFactory :
-            IConventionTypeCacheFactory<IMessageTypeInitializerConvention>
+            IConventionTypeCacheFactory<IMessageInitializerConvention>
         {
-            IMessageTypeInitializerConvention IConventionTypeCacheFactory<IMessageTypeInitializerConvention>.Create<T>(IInitializerConvention convention)
+            IMessageInitializerConvention IConventionTypeCacheFactory<IMessageInitializerConvention>.Create<T>(IInitializerConvention convention)
             {
-                return new CopyInitializerConvention<T>(convention);
+                return new DefaultInitializerConvention<T>(convention);
             }
         }
     }

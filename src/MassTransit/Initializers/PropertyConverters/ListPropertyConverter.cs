@@ -10,22 +10,22 @@ namespace MassTransit.Initializers.PropertyConverters
         IPropertyConverter<IList<TElement>, IEnumerable<TElement>>,
         IPropertyConverter<IEnumerable<TElement>, IEnumerable<TElement>>
     {
-        public async Task<List<TElement>> Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<TElement> input)
+        public Task<List<TElement>> Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<TElement> input)
             where TMessage : class
         {
-            return input?.ToList();
+            return Task.FromResult(input?.ToList());
         }
 
-        async Task<IList<TElement>> IPropertyConverter<IList<TElement>, IEnumerable<TElement>>.Convert<TMessage>(InitializeContext<TMessage>
+        Task<IList<TElement>> IPropertyConverter<IList<TElement>, IEnumerable<TElement>>.Convert<TMessage>(InitializeContext<TMessage>
             context, IEnumerable<TElement> input)
         {
-            return await Convert(context, input).ConfigureAwait(false);
+            return Task.FromResult<IList<TElement>>(input?.ToList());
         }
 
-        async Task<IEnumerable<TElement>> IPropertyConverter<IEnumerable<TElement>, IEnumerable<TElement>>.Convert<TMessage>(
+        Task<IEnumerable<TElement>> IPropertyConverter<IEnumerable<TElement>, IEnumerable<TElement>>.Convert<TMessage>(
             InitializeContext<TMessage> context, IEnumerable<TElement> input)
         {
-            return await Convert(context, input).ConfigureAwait(false);
+            return Task.FromResult<IEnumerable<TElement>>(input?.ToList());
         }
     }
 
@@ -56,13 +56,23 @@ namespace MassTransit.Initializers.PropertyConverters
         async Task<IList<TElement>> IPropertyConverter<IList<TElement>, IEnumerable<TInputElement>>.Convert<TMessage>(InitializeContext<TMessage> context,
             IEnumerable<TInputElement> input)
         {
-            return await Convert(context, input).ConfigureAwait(false);
+            if (input == null)
+                return default;
+
+            TElement[] elements = await Task.WhenAll(input.Select(x => _converter.Convert(context, x))).ConfigureAwait(false);
+
+            return elements.ToList();
         }
 
         async Task<IEnumerable<TElement>> IPropertyConverter<IEnumerable<TElement>, IEnumerable<TInputElement>>.Convert<TMessage>(
             InitializeContext<TMessage> context, IEnumerable<TInputElement> input)
         {
-            return await Convert(context, input).ConfigureAwait(false);
+            if (input == null)
+                return default;
+
+            TElement[] elements = await Task.WhenAll(input.Select(x => _converter.Convert(context, x))).ConfigureAwait(false);
+
+            return elements.ToList();
         }
     }
 }

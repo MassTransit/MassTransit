@@ -7,7 +7,8 @@
         ITypeConverter<string, DateTimeOffset>,
         ITypeConverter<int, DateTimeOffset>,
         ITypeConverter<long, DateTimeOffset>,
-        ITypeConverter<DateTimeOffset, string>
+        ITypeConverter<DateTimeOffset, string>,
+        ITypeConverter<DateTimeOffset, object>
     {
         readonly DateTime _epoch = new DateTime(1970, 1, 1);
 
@@ -53,5 +54,18 @@
             result = default;
             return false;
         }
+
+        public bool TryConvert(object input, out DateTimeOffset result)
+        {
+            if (input != null)
+            {
+                result = Convert.ToDateTime(input);
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
     }
 }

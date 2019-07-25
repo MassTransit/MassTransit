@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.Initializers.Conventions
 {
     public interface IInitializerConvention<TMessage, TInput> :
-        IMessageTypeInitializerConvention<TMessage>
+        IMessageInputInitializerConvention<TMessage>
         where TMessage : class
         where TInput : class
     {
@@ -12,7 +12,7 @@
 
 
     public interface IInitializerConvention<TMessage> :
-        IMessageTypeInitializerConvention
+        IMessageInitializerConvention
         where TMessage : class
     {
         bool TryGetPropertyInitializer<TInput, TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)

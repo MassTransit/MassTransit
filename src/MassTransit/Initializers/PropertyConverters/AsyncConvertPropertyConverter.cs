@@ -18,11 +18,19 @@ namespace MassTransit.Initializers.PropertyConverters
             _converter = converter;
         }
 
-        async Task<TResult> IPropertyConverter<TResult, Task<TInput>>.Convert<TMessage>(InitializeContext<TMessage> context, Task<TInput> input)
+        Task<TResult> IPropertyConverter<TResult, Task<TInput>>.Convert<TMessage>(InitializeContext<TMessage> context, Task<TInput> input)
         {
             if (input == null)
                 return default;
 
+            if (input.IsCompleted)
+                return Task.FromResult(_converter.TryConvert(input.Result, out var result) ? result : default);
+
+            return ConvertAsync(input);
+        }
+
+        async Task<TResult> ConvertAsync(Task<TInput> input)
+        {
             var inputValue = await input.ConfigureAwait(false);
 
             return _converter.TryConvert(inputValue, out var result) ? result : default;

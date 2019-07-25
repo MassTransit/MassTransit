@@ -6,6 +6,7 @@
     public class BooleanTypeConverter :
         ITypeConverter<string, bool>,
         ITypeConverter<bool, string>,
+        ITypeConverter<bool, object>,
         ITypeConverter<bool, sbyte>,
         ITypeConverter<bool, byte>,
         ITypeConverter<bool, short>,
@@ -72,6 +73,18 @@
         {
             result = input.ToString();
             return true;
+        }
+
+        public bool TryConvert(object input, out bool result)
+        {
+            if (input != null)
+            {
+                result = Convert.ToBoolean(input);
+                return true;
+            }
+
+            result = default;
+            return false;
         }
     }
 }

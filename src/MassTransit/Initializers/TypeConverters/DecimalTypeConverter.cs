@@ -7,6 +7,7 @@
     public class DecimalTypeConverter :
         ITypeConverter<string, decimal>,
         ITypeConverter<decimal, string>,
+        ITypeConverter<decimal, object>,
         ITypeConverter<decimal, sbyte>,
         ITypeConverter<decimal, byte>,
         ITypeConverter<decimal, short>,
@@ -74,5 +75,18 @@
             result = input.ToString(CultureInfo.InvariantCulture);
             return true;
         }
+
+        public bool TryConvert(object input, out decimal result)
+        {
+            if (input != null)
+            {
+                result = Convert.ToDecimal(input);
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
     }
 }

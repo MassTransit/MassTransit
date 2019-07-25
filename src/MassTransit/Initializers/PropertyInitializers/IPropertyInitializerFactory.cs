@@ -12,12 +12,12 @@ namespace MassTransit.Initializers.PropertyInitializers
     public interface IPropertyInitializerFactory
     {
         IPropertyInitializer<TMessage, TInput> CreatePropertyInitializer<TMessage, TInput>(string messagePropertyName,
-            string inputPropertyName = null)
+            IPropertyProviderFactory<TInput> providerFactory)
             where TInput : class
             where TMessage : class;
 
         IHeaderInitializer<TMessage, TInput> CreateHeaderInitializer<TMessage, TInput>(string headerPropertyName,
-            string inputPropertyName = null)
+            IPropertyProviderFactory<TInput> providerFactory)
             where TInput : class
             where TMessage : class;
     }

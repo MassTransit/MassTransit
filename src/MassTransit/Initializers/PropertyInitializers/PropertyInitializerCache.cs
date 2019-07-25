@@ -100,7 +100,10 @@ namespace MassTransit.Initializers.PropertyInitializers
                 && enumerableTypes[0].ClosesType(typeof(KeyValuePair<,>), out Type[] keyValueTypes))
                 return (DictionaryCandidate)Activator.CreateInstance(typeof(DictionaryCandidate<,>).MakeGenericType(keyValueTypes));
 
-            return (DictionaryCandidate)Activator.CreateInstance(typeof(UnsupportedDictionaryCandidate).MakeGenericType(type));
+            if (type.IsInterface && !type.IsValueTypeOrObject())
+                return (DictionaryCandidate)Activator.CreateInstance(typeof(DictionaryObjectSourceCandidate<>).MakeGenericType(type));
+
+            return new UnsupportedDictionaryCandidate();
         }
 
 
@@ -278,6 +281,29 @@ namespace MassTransit.Initializers.PropertyInitializers
 
                         return true;
                     }
+                }
+
+                converter = default;
+                return false;
+            }
+        }
+
+
+        class DictionaryObjectSourceCandidate<TSource> :
+            DictionaryCandidate
+            where TSource : class
+        {
+            public bool TryGetDictionaryFactory<T, TInputKey, TInputValue>(out IPropertyInitializerFactory<T> converter)
+            {
+                if (typeof(T) == typeof(TSource) && typeof(T).IsInterface)
+                {
+                    var converterType = typeof(InitializePropertyConverter<,>).MakeGenericType(typeof(T), typeof(IDictionary<TInputKey, TInputValue>));
+
+                    var propertyConverter = (IPropertyConverter<T, IDictionary<TInputKey, TInputValue>>)Activator.CreateInstance(converterType);
+
+                    converter = new PropertyInitializerFactory<T, IDictionary<TInputKey, TInputValue>>(propertyConverter);
+
+                    return true;
                 }
 
                 converter = default;

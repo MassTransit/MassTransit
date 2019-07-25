@@ -5,6 +5,7 @@
 
     public class EnumTypeConverter<T> :
         ITypeConverter<T, string>,
+        ITypeConverter<T, object>,
         ITypeConverter<T, sbyte>,
         ITypeConverter<T, byte>,
         ITypeConverter<T, short>,
@@ -110,6 +111,21 @@
             {
                 result = (T)Enum.ToObject(typeof(T), input);
                 return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(object input, out T result)
+        {
+            if (input != null)
+            {
+                if (Enum.IsDefined(typeof(T), input))
+                {
+                    result = (T)Enum.Parse(typeof(T), Enum.GetName(typeof(T), input));
+                    return true;
+                }
             }
 
             result = default;
