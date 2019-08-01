@@ -29,7 +29,23 @@
 
         public bool TryConvert(object input, out Guid result)
         {
-            return Guid.TryParse(input?.ToString(), out result);
+            switch (input)
+            {
+                case Guid guid:
+                    result = guid;
+                    return true;
+
+                case NewId newId:
+                    result = newId.ToGuid();
+                    return true;
+
+                case string text when !string.IsNullOrWhiteSpace(text):
+                    return TryConvert(text, out result);
+
+                default:
+                    result = default;
+                    return false;
+            }
         }
     }
 }

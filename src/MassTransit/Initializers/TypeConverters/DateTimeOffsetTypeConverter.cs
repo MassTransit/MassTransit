@@ -57,15 +57,23 @@
 
         public bool TryConvert(object input, out DateTimeOffset result)
         {
-            if (input != null)
+            switch (input)
             {
-                result = Convert.ToDateTime(input);
-                return true;
+                case DateTime dateTime:
+                    result = dateTime;
+                    return true;
+
+                case DateTimeOffset dateTimeOffset:
+                    result = dateTimeOffset;
+                    return true;
+
+                case string text when !string.IsNullOrWhiteSpace(text):
+                    return TryConvert(text, out result);
+
+                default:
+                    result = default;
+                    return false;
             }
-
-            result = default;
-            return false;
         }
-
     }
 }

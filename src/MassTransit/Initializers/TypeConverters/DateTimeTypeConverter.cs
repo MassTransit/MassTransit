@@ -78,14 +78,23 @@
 
         public bool TryConvert(object input, out DateTime result)
         {
-            if (input != null)
+            switch (input)
             {
-                result = Convert.ToDateTime(input);
-                return true;
-            }
+                case DateTime dateTime:
+                    result = dateTime;
+                    return true;
 
-            result = default;
-            return false;
+                case DateTimeOffset dateTimeOffset:
+                    result = dateTimeOffset.UtcDateTime;
+                    return true;
+
+                case string text when !string.IsNullOrWhiteSpace(text):
+                    return TryConvert(text, out result);
+
+                default:
+                    result = default;
+                    return false;
+            }
         }
     }
 }

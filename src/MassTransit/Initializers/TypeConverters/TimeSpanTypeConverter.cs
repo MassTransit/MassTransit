@@ -6,6 +6,7 @@
     public class TimeSpanTypeConverter :
         ITypeConverter<string, TimeSpan>,
         ITypeConverter<TimeSpan, string>,
+        ITypeConverter<TimeSpan, object>,
         ITypeConverter<TimeSpan, sbyte>,
         ITypeConverter<TimeSpan, byte>,
         ITypeConverter<TimeSpan, short>,
@@ -80,6 +81,23 @@
         {
             result = input.ToString("c");
             return true;
+        }
+
+        public bool TryConvert(object input, out TimeSpan result)
+        {
+            switch (input)
+            {
+                case TimeSpan timeSpan:
+                    result = timeSpan;
+                    return true;
+
+                case string text when !string.IsNullOrWhiteSpace(text):
+                    return TryConvert(text, out result);
+
+                default:
+                    result = default;
+                    return false;
+            }
         }
     }
 }
