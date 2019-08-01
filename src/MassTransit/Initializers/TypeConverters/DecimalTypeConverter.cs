@@ -19,7 +19,7 @@
     {
         public bool TryConvert(string input, out decimal result)
         {
-            return decimal.TryParse(input, out result);
+            return decimal.TryParse(input,NumberStyles.Any, CultureInfo.InvariantCulture, out result);
         }
 
         public bool TryConvert(sbyte input, out decimal result)

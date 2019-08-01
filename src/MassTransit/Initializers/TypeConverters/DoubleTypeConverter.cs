@@ -19,7 +19,7 @@
     {
         public bool TryConvert(string input, out double result)
         {
-            return double.TryParse(input, out result);
+            return double.TryParse(input,NumberStyles.Any,CultureInfo.InvariantCulture, out result);
         }
 
         public bool TryConvert(sbyte input, out double result)
