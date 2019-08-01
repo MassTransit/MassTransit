@@ -63,3 +63,4 @@ tools/**
 # Artifacts
 artifacts/**
 artifacts_old/**
+/src/.ionide
