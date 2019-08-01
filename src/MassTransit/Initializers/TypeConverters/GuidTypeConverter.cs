@@ -6,8 +6,7 @@
     public class GuidTypeConverter :
         ITypeConverter<string, Guid>,
         ITypeConverter<Guid, string>,
-        ITypeConverter<Guid, NewId>,
-        ITypeConverter<Guid, object>
+        ITypeConverter<Guid, NewId>
     {
         public bool TryConvert(string input, out Guid result)
         {
@@ -25,11 +24,6 @@
         {
             result = input.ToString("D");
             return true;
-        }
-
-        public bool TryConvert(object input, out Guid result)
-        {
-            return Guid.TryParse(input?.ToString(),out result);
         }
     }
 }

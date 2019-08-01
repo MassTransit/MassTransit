@@ -1,6 +1,5 @@
 namespace MassTransit.Tests.Initializers
 {
-    using System;
     using System.Collections.Generic;
     using System.Dynamic;
     using System.Threading.Tasks;
@@ -51,17 +50,14 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_do_the_right_thing()
         {
-            var uniqueId = Guid.NewGuid();
             IDictionary<string, object> dto = new ExpandoObject();
             dto.Add(nameof(MessageContract.Id), 27);
             dto.Add(nameof(MessageContract.CustomerId), "SuperMart");
-            dto.Add(nameof(MessageContract.UniqueId), uniqueId);
 
             var message = await MessageInitializerCache<MessageContract>.Initialize(dto);
 
             Assert.That(message.Message.Id, Is.EqualTo(27));
             Assert.That(message.Message.CustomerId, Is.EqualTo("SuperMart"));
-            Assert.That(message.Message.UniqueId, Is.EqualTo(uniqueId));
         }
 
 
@@ -69,7 +65,6 @@ namespace MassTransit.Tests.Initializers
         {
             int Id { get; }
             string CustomerId { get; }
-            Guid UniqueId { get; }
         }
 
 
