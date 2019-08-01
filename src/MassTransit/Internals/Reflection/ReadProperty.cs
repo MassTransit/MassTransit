@@ -87,7 +87,7 @@
 
                 var lambdaExpression = Expression.Lambda<Func<T, TProperty>>(call, instance);
 
-                return ExpressionCompiler.CompileFast<Func<T, TProperty>>(lambdaExpression);
+                return lambdaExpression.CompileFast<Func<T, TProperty>>();
             }
             catch (Exception ex)
             {

@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
     using System.Text;
     using HeaderInitializers;
     using Internals.Extensions;
@@ -13,10 +15,18 @@
         where TMessage : class
         where TInput : class
     {
-        public bool TryGetPropertyInitializer<TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
+        readonly IReadOnlyDictionary<string, PropertyInfo> _inputProperties;
+
+        public DefaultInitializerConvention()
         {
-            var inputPropertyInfo = typeof(TInput).GetProperty(propertyName);
-            if (inputPropertyInfo != null)
+            _inputProperties = typeof(TInput).GetAllProperties().GroupBy(x => x.Name).ToDictionary(x => x.Key, x => x.Last());
+        }
+
+        public bool TryGetPropertyInitializer<TProperty>(PropertyInfo propertyInfo, out IPropertyInitializer<TMessage, TInput> initializer)
+        {
+            var propertyName = propertyInfo?.Name ?? throw new ArgumentNullException(nameof(propertyInfo));
+
+            if (_inputProperties.TryGetValue(propertyName, out var inputPropertyInfo))
             {
                 var propertyType = typeof(TProperty);
                 var inputPropertyType = inputPropertyInfo.PropertyType;
@@ -24,7 +34,7 @@
                 // exactly the same type, we just copy it over unmodified
                 if (inputPropertyType == propertyType)
                 {
-                    initializer = new CopyPropertyInitializer<TMessage, TInput, TProperty>(propertyName);
+                    initializer = new CopyPropertyInitializer<TMessage, TInput, TProperty>(propertyInfo, inputPropertyInfo);
                     return true;
                 }
 
@@ -32,15 +42,15 @@
                 if (propertyType == typeof(object))
                 {
                     var type = typeof(CopyObjectPropertyInitializer<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), inputPropertyType);
-                    initializer = (IPropertyInitializer<TMessage, TInput>)Activator.CreateInstance(type, propertyName, propertyName);
+                    initializer = (IPropertyInitializer<TMessage, TInput>)Activator.CreateInstance(type, propertyInfo, inputPropertyInfo);
                     return true;
                 }
 
                 if (PropertyInitializerCache.TryGetFactory<TProperty>(inputPropertyType, out var propertyConverter))
                 {
-                    var providerFactory = new InputValuePropertyProviderFactory<TInput>(propertyName);
+                    var providerFactory = new InputValuePropertyProviderFactory<TInput>(inputPropertyInfo);
 
-                    initializer = propertyConverter.CreatePropertyInitializer<TMessage, TInput>(propertyName, providerFactory);
+                    initializer = propertyConverter.CreatePropertyInitializer<TMessage, TInput>(propertyInfo, providerFactory);
                     return true;
                 }
             }
@@ -49,14 +59,14 @@
             return false;
         }
 
-        public bool TryGetHeaderInitializer<TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+        public bool TryGetHeaderInitializer<TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
         {
-            // headers use a double underscore prefix
+            var propertyName = propertyInfo?.Name ?? throw new ArgumentNullException(nameof(propertyInfo));
 
+            // headers use a double underscore prefix
             string inputPropertyName = new StringBuilder(propertyName.Length + 2).Append("__").Append(propertyName).ToString();
 
-            var inputPropertyInfo = typeof(TInput).GetProperty(inputPropertyName);
-            if (inputPropertyInfo != null)
+            if (_inputProperties.TryGetValue(inputPropertyName, out var inputPropertyInfo))
             {
                 var propertyType = typeof(TProperty);
                 var inputPropertyType = inputPropertyInfo.PropertyType;
@@ -64,15 +74,15 @@
                 // exactly the same type, we just copy it over unmodified
                 if (inputPropertyType == propertyType)
                 {
-                    initializer = new CopyHeaderInitializer<TMessage, TInput, TProperty>(propertyName, inputPropertyName);
+                    initializer = new CopyHeaderInitializer<TMessage, TInput, TProperty>(propertyInfo, inputPropertyInfo);
                     return true;
                 }
 
                 if (PropertyInitializerCache.TryGetFactory<TProperty>(inputPropertyType, out var propertyConverter))
                 {
-                    var providerFactory = new InputValuePropertyProviderFactory<TInput>(inputPropertyName);
+                    var providerFactory = new InputValuePropertyProviderFactory<TInput>(inputPropertyInfo);
 
-                    initializer = propertyConverter.CreateHeaderInitializer<TMessage, TInput>(propertyName, providerFactory);
+                    initializer = propertyConverter.CreateHeaderInitializer<TMessage, TInput>(propertyInfo, providerFactory);
                     return true;
                 }
             }
@@ -81,26 +91,24 @@
             return false;
         }
 
-        public bool TryGetHeaderInitializer(string inputPropertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+        public bool TryGetHeaderInitializer(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
         {
-            var inputPropertyInfo = typeof(TInput).GetProperty(inputPropertyName);
-            if (inputPropertyInfo != null)
             {
-                if (inputPropertyName.StartsWith("__Header_") && inputPropertyName.Length > 9)
+                if (propertyInfo.Name.StartsWith("__Header_") && propertyInfo.Name.Length > 9)
                 {
-                    string headerName = inputPropertyName.Substring(9).Replace("__", " ").Replace("_", "-").Replace(" ", "_");
+                    string headerName = propertyInfo.Name.Substring(9).Replace("__", " ").Replace("_", "-").Replace(" ", "_");
 
-                    var inputPropertyType = inputPropertyInfo.PropertyType;
+                    var inputPropertyType = propertyInfo.PropertyType;
 
                     // exactly the same type, we just copy it over unmodified
                     if (inputPropertyType == typeof(string))
                     {
-                        initializer = new SetStringHeaderInitializer<TMessage, TInput>(headerName, inputPropertyName);
+                        initializer = new SetStringHeaderInitializer<TMessage, TInput>(headerName, propertyInfo);
                         return true;
                     }
 
                     var type = typeof(SetHeaderInitializer<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), inputPropertyType);
-                    initializer = (IHeaderInitializer<TMessage, TInput>)Activator.CreateInstance(type, headerName, inputPropertyName);
+                    initializer = (IHeaderInitializer<TMessage, TInput>)Activator.CreateInstance(type, headerName, propertyInfo);
                     return true;
                 }
             }

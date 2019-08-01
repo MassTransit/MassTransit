@@ -2,6 +2,7 @@ namespace MassTransit.Initializers.HeaderInitializers
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Reflection;
     using Util;
@@ -15,13 +16,13 @@ namespace MassTransit.Initializers.HeaderInitializers
         readonly IWriteProperty<SendContext, THeader> _headerProperty;
         readonly string _key;
 
-        public DictionaryCopyHeaderInitializer(string headerName, string inputPropertyName = null)
+        public DictionaryCopyHeaderInitializer(PropertyInfo propertyInfo, string key)
         {
-            if (headerName == null)
-                throw new ArgumentNullException(nameof(headerName));
+            if (propertyInfo == null)
+                throw new ArgumentNullException(nameof(propertyInfo));
 
-            _key = inputPropertyName ?? headerName;
-            _headerProperty = WritePropertyCache<SendContext>.GetProperty<THeader>(headerName);
+            _key = key;
+            _headerProperty = WritePropertyCache<SendContext>.GetProperty<THeader>(propertyInfo);
         }
 
         public Task Apply(InitializeContext<TMessage, TInput> context, SendContext sendContext)

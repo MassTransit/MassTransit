@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Initializers.HeaderInitializers
 {
     using System;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Reflection;
     using Util;
@@ -20,13 +21,13 @@
         readonly IWriteProperty<SendContext, THeader> _headerProperty;
         readonly IReadProperty<TInput, THeader> _inputProperty;
 
-        public CopyHeaderInitializer(string headerName, string inputPropertyName = null)
+        public CopyHeaderInitializer(PropertyInfo headerPropertyInfo, PropertyInfo inputPropertyInfo)
         {
-            if (headerName == null)
-                throw new ArgumentNullException(nameof(headerName));
+            if (headerPropertyInfo == null)
+                throw new ArgumentNullException(nameof(headerPropertyInfo));
 
-            _inputProperty = ReadPropertyCache<TInput>.GetProperty<THeader>(inputPropertyName ?? headerName);
-            _headerProperty = WritePropertyCache<SendContext>.GetProperty<THeader>(headerName);
+            _inputProperty = ReadPropertyCache<TInput>.GetProperty<THeader>(inputPropertyInfo);
+            _headerProperty = WritePropertyCache<SendContext>.GetProperty<THeader>(headerPropertyInfo);
         }
 
         public Task Apply(InitializeContext<TMessage, TInput> context, SendContext sendContext)

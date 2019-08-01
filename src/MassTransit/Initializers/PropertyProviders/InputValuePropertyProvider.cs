@@ -1,6 +1,7 @@
 namespace MassTransit.Initializers.PropertyProviders
 {
     using System;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Reflection;
 
@@ -16,12 +17,12 @@ namespace MassTransit.Initializers.PropertyProviders
     {
         readonly IReadProperty<TInput, TProperty> _inputProperty;
 
-        public InputValuePropertyProvider(string inputPropertyName)
+        public InputValuePropertyProvider(PropertyInfo propertyInfo)
         {
-            if (inputPropertyName == null)
-                throw new ArgumentNullException(nameof(inputPropertyName));
+            if (propertyInfo == null)
+                throw new ArgumentNullException(nameof(propertyInfo));
 
-            _inputProperty = ReadPropertyCache<TInput>.GetProperty<TProperty>(inputPropertyName);
+            _inputProperty = ReadPropertyCache<TInput>.GetProperty<TProperty>(propertyInfo);
         }
 
         public Task<TProperty> GetProperty<T>(InitializeContext<T, TInput> context)

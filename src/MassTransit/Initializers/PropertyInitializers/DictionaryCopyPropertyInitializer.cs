@@ -2,6 +2,7 @@ namespace MassTransit.Initializers.PropertyInitializers
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Reflection;
     using Util;
@@ -21,13 +22,13 @@ namespace MassTransit.Initializers.PropertyInitializers
         readonly string _key;
         readonly IWriteProperty<TMessage, TProperty> _messageProperty;
 
-        public DictionaryCopyPropertyInitializer(string messagePropertyName, string inputPropertyName = null)
+        public DictionaryCopyPropertyInitializer(PropertyInfo propertyInfo, string key)
         {
-            if (messagePropertyName == null)
-                throw new ArgumentNullException(nameof(messagePropertyName));
+            if (propertyInfo == null)
+                throw new ArgumentNullException(nameof(propertyInfo));
 
-            _key = inputPropertyName ?? messagePropertyName;
-            _messageProperty = WritePropertyCache<TMessage>.GetProperty<TProperty>(messagePropertyName);
+            _key = key;
+            _messageProperty = WritePropertyCache<TMessage>.GetProperty<TProperty>(propertyInfo);
         }
 
         public Task Apply(InitializeContext<TMessage, TInput> context)

@@ -1,5 +1,6 @@
 namespace MassTransit.Initializers.Factories
 {
+    using System.Reflection;
     using Conventions;
 
 
@@ -8,23 +9,23 @@ namespace MassTransit.Initializers.Factories
         where TMessage : class
         where TInput : class
     {
-        readonly string _propertyName;
+        readonly PropertyInfo _propertyInfo;
 
-        public HeaderInitializerInspector(string propertyName)
+        public HeaderInitializerInspector(PropertyInfo propertyInfo)
         {
-            _propertyName = propertyName;
+            _propertyInfo = propertyInfo;
         }
 
         public bool Apply(IMessageInitializerBuilder<TMessage, TInput> builder, IInitializerConvention convention)
         {
-            if (builder.IsInputPropertyUsed(_propertyName))
+            if (builder.IsInputPropertyUsed(_propertyInfo.Name))
                 return false;
 
-            if (convention.TryGetHeaderInitializer<TMessage, TInput, TProperty>(_propertyName, out IHeaderInitializer<TMessage, TInput> initializer))
+            if (convention.TryGetHeaderInitializer<TMessage, TInput, TProperty>(_propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer))
             {
                 builder.Add(initializer);
 
-                builder.SetInputPropertyUsed(_propertyName);
+                builder.SetInputPropertyUsed(_propertyInfo.Name);
                 return true;
             }
 

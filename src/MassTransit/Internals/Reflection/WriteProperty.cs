@@ -14,20 +14,20 @@
     {
         Action<T, TProperty> _setMethod;
 
-        public WriteProperty(Type implementationType, string propertyName)
+        public WriteProperty(Type implementationType, PropertyInfo propertyInfo)
         {
             if (typeof(T).GetTypeInfo().IsValueType)
                 throw new ArgumentException("The message type must be a reference type");
 
-            var propertyInfo = implementationType.GetProperty(propertyName);
+            var implementationPropertyInfo = implementationType.GetProperty(propertyInfo.Name);
             if (propertyInfo == null)
-                throw new ArgumentException("The implementation does not have a property named: " + propertyName);
+                throw new ArgumentException("The implementation does not have a property named: " + propertyInfo.Name);
 
-            var setMethod = propertyInfo.GetSetMethod(true);
+            var setMethod = implementationPropertyInfo.GetSetMethod(true);
             if (setMethod == null)
                 throw new ArgumentException("The property does not have an accessible set method");
 
-            Name = propertyName;
+            Name = propertyInfo.Name;
 
             void SetUsingReflection(T entity, TProperty property) => setMethod.Invoke(entity, new object[] {property});
 
@@ -42,6 +42,12 @@
             }
 
             _setMethod = Initialize;
+        }
+
+        public WriteProperty(Type implementationType, string propertyName)
+            : this(implementationType, typeof(T).GetProperty(propertyName) ?? throw new ArgumentException("The implementation does not have a property named: "
+                + propertyName))
+        {
         }
 
         public string Name { get; }
@@ -86,7 +92,7 @@
 
                 var lambdaExpression = Expression.Lambda<Action<T, TProperty>>(call, instance, value);
 
-                return ExpressionCompiler.CompileFast<Action<T, TProperty>>(lambdaExpression);
+                return lambdaExpression.CompileFast<Action<T, TProperty>>();
             }
             catch (Exception ex)
             {

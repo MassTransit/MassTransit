@@ -34,12 +34,14 @@
         {
             lock (_properties)
             {
-                if (_properties.TryGetValue(propertyInfo.Name, out var property))
+                var name = propertyInfo?.Name ?? throw new ArgumentNullException(nameof(propertyInfo));
+
+                if (_properties.TryGetValue(name, out var property))
                     return property as IReadProperty<T, TProperty>;
 
                 var readProperty = new ReadProperty<T, TProperty>(propertyInfo);
 
-                _properties[propertyInfo.Name] = readProperty;
+                _properties[name] = readProperty;
 
                 return readProperty;
             }

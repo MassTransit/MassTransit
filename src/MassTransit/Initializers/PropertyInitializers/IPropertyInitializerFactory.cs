@@ -1,5 +1,8 @@
 namespace MassTransit.Initializers.PropertyInitializers
 {
+    using System.Reflection;
+
+
     public interface IPropertyInitializerFactory<TProperty> :
         IPropertyInitializerFactory
     {
@@ -11,12 +14,12 @@ namespace MassTransit.Initializers.PropertyInitializers
 
     public interface IPropertyInitializerFactory
     {
-        IPropertyInitializer<TMessage, TInput> CreatePropertyInitializer<TMessage, TInput>(string messagePropertyName,
+        IPropertyInitializer<TMessage, TInput> CreatePropertyInitializer<TMessage, TInput>(PropertyInfo propertyInfo,
             IPropertyProviderFactory<TInput> providerFactory)
             where TInput : class
             where TMessage : class;
 
-        IHeaderInitializer<TMessage, TInput> CreateHeaderInitializer<TMessage, TInput>(string headerPropertyName,
+        IHeaderInitializer<TMessage, TInput> CreateHeaderInitializer<TMessage, TInput>(PropertyInfo propertyInfo,
             IPropertyProviderFactory<TInput> providerFactory)
             where TInput : class
             where TMessage : class;

@@ -186,6 +186,7 @@ namespace MassTransit.Tests.Initializers
                 OtherAddress = "http://github.com",
                 StringAddress = new Uri("loopback://localhost"),
                 StringList = new[] {"Frank", "Estelle"},
+                NewProperty = new SubProperty {NewProperty = "Hello"},
                 Strings = new Dictionary<string, string>
                 {
                     {"Hello", "World"},
@@ -308,6 +309,13 @@ namespace MassTransit.Tests.Initializers
         public void Should_handle_task_of_task_of_int()
         {
             Assert.That(_response.Message.AsyncValue, Is.EqualTo(37));
+        }
+
+        [Test]
+        public void Should_handle_duplicate_input_property_names()
+        {
+            Assert.That(_response.Message.NewProperty, Is.Not.Null);
+            Assert.That(_response.Message.NewProperty.NewProperty, Is.EqualTo("Hello"));
         }
 
         [Test]
@@ -455,6 +463,7 @@ namespace MassTransit.Tests.Initializers
             Uri OtherAddress { get; }
             string StringAddress { get; }
             List<string> StringList { get; }
+            AProperty NewProperty { get; }
 
             IDictionary<string, string> Strings { get; }
             IDictionary<string, SubValue> StringSubValues { get; }
@@ -489,6 +498,7 @@ namespace MassTransit.Tests.Initializers
             Uri OtherAddress { get; }
             string StringAddress { get; }
             IList<string> StringList { get; }
+            AProperty NewProperty { get; }
 
             IDictionary<string, string> Strings { get; }
             IDictionary<string, SubValue> StringSubValues { get; }
@@ -499,6 +509,25 @@ namespace MassTransit.Tests.Initializers
         public interface SubValue
         {
             string Text { get; }
+        }
+
+
+        public interface AProperty
+        {
+            string NewProperty { get; }
+        }
+
+
+        class BaseProperty
+        {
+            public string NewProperty { get; set; }
+        }
+
+
+        class SubProperty :
+            BaseProperty
+        {
+            public new string NewProperty { get; set; }
         }
     }
 }

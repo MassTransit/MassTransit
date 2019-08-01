@@ -1,5 +1,6 @@
 namespace MassTransit.Initializers.PropertyInitializers
 {
+    using System.Reflection;
     using PropertyProviders;
 
 
@@ -7,16 +8,16 @@ namespace MassTransit.Initializers.PropertyInitializers
         IPropertyProviderFactory<TInput>
         where TInput : class
     {
-        readonly string _inputPropertyName;
+        readonly PropertyInfo _propertyInfo;
 
-        public InputValuePropertyProviderFactory(string inputPropertyName)
+        public InputValuePropertyProviderFactory(PropertyInfo propertyInfo)
         {
-            _inputPropertyName = inputPropertyName;
+            _propertyInfo = propertyInfo;
         }
 
         public IPropertyProvider<TInput, TInputProperty> CreatePropertyProvider<TInputProperty>()
         {
-            return new InputValuePropertyProvider<TInput, TInputProperty>(_inputPropertyName);
+            return new InputValuePropertyProvider<TInput, TInputProperty>(_propertyInfo);
         }
     }
 }

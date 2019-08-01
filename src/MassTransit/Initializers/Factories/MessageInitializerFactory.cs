@@ -58,14 +58,14 @@ namespace MassTransit.Initializers.Factories
         {
             return typeof(TMessage).GetAllProperties().Where(x => x.CanRead)
                 .Select(x => (IPropertyInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
-                    typeof(PropertyInitializerInspector<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), x.PropertyType), x.Name));
+                    typeof(PropertyInitializerInspector<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), x.PropertyType), x));
         }
 
         static IEnumerable<IHeaderInitializerInspector<TMessage, TInput>> CreateInputHeaderInspectors()
         {
             return typeof(TInput).GetAllProperties().Where(x => x.CanRead)
                 .Select(x => (IHeaderInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
-                    typeof(InputHeaderInitializerInspector<,>).MakeGenericType(typeof(TMessage), typeof(TInput)), x.Name));
+                    typeof(InputHeaderInitializerInspector<,>).MakeGenericType(typeof(TMessage), typeof(TInput)), x));
         }
 
         static IEnumerable<IHeaderInitializerInspector<TMessage, TInput>> CreateHeaderInspectors()
@@ -91,22 +91,22 @@ namespace MassTransit.Initializers.Factories
 
         static IHeaderInitializerInspector<TMessage, TInput> CreateHeaderInspector(Expression<Func<SendContext, Guid?>> expression)
         {
-            return new HeaderInitializerInspector<TMessage, TInput, Guid?>(expression.GetMemberName());
+            return new HeaderInitializerInspector<TMessage, TInput, Guid?>(expression.GetPropertyInfo());
         }
 
         static IHeaderInitializerInspector<TMessage, TInput> CreateHeaderInspector(Expression<Func<SendContext, TimeSpan?>> expression)
         {
-            return new HeaderInitializerInspector<TMessage, TInput, TimeSpan?>(expression.GetMemberName());
+            return new HeaderInitializerInspector<TMessage, TInput, TimeSpan?>(expression.GetPropertyInfo());
         }
 
         static IHeaderInitializerInspector<TMessage, TInput> CreateHeaderInspector(Expression<Func<SendContext, Uri>> expression)
         {
-            return new HeaderInitializerInspector<TMessage, TInput, Uri>(expression.GetMemberName());
+            return new HeaderInitializerInspector<TMessage, TInput, Uri>(expression.GetPropertyInfo());
         }
 
         static IHeaderInitializerInspector<TMessage, TInput> CreateHeaderInspector(Expression<Func<SendContext, bool>> expression)
         {
-            return new HeaderInitializerInspector<TMessage, TInput, bool>(expression.GetMemberName());
+            return new HeaderInitializerInspector<TMessage, TInput, bool>(expression.GetPropertyInfo());
         }
     }
 }
