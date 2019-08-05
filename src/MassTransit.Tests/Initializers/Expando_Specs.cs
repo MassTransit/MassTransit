@@ -62,12 +62,16 @@ namespace MassTransit.Tests.Initializers
             dto.Add(nameof(MessageContract.Id), 27);
             dto.Add(nameof(MessageContract.CustomerId), "SuperMart");
             dto.Add(nameof(MessageContract.UniqueId), uniqueId);
+            dto.Add(nameof(MessageContract.CustomerType),(long)1);
+            dto.Add(nameof(MessageContract.TypeByName),"Internal");
 
             var message = await MessageInitializerCache<MessageContract>.Initialize(dto);
 
             Assert.That(message.Message.Id, Is.EqualTo(27));
             Assert.That(message.Message.CustomerId, Is.EqualTo("SuperMart"));
             Assert.That(message.Message.UniqueId, Is.EqualTo(uniqueId));
+            Assert.That(message.Message.CustomerType, Is.EqualTo(CustomerType.Public));
+            Assert.That(message.Message.TypeByName, Is.EqualTo(CustomerType.Internal));
         }
 
 
@@ -76,8 +80,15 @@ namespace MassTransit.Tests.Initializers
             int Id { get; }
             string CustomerId { get; }
             Guid UniqueId { get; }
+            CustomerType CustomerType { get; }
+            CustomerType TypeByName { get; }
         }
 
+        public enum CustomerType
+        {
+            Public = 1,
+            Internal = 2
+        }
 
         public interface MessageEnvelope
         {
