@@ -119,11 +119,16 @@
 
         public bool TryConvert(object input, out T result)
         {
+            if (input is string)
+                return TryConvert(input as string, out result);
+
             if (input != null)
             {
-                if (Enum.IsDefined(typeof(T), input))
+                var value = Convert.ChangeType(input, Enum.GetUnderlyingType(typeof(T)));
+
+                if (Enum.IsDefined(typeof(T), value))
                 {
-                    result = (T)Enum.Parse(typeof(T), Enum.GetName(typeof(T), input));
+                    result = (T)Enum.Parse(typeof(T), Enum.GetName(typeof(T), value));
                     return true;
                 }
             }
