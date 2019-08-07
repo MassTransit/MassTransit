@@ -55,20 +55,54 @@ namespace MassTransit.Initializers.TypeConverters
                 if (enumConverterType.HasInterface(neededType))
                 {
                     AddSupportedTypes(enumConverterType);
-
-                    if (_typeConverters.TryGetValue(neededType, out converter))
+                }
+            }
+            else if (propertyType.IsNullable(out var underlyingType))
+            {
+                if (underlyingType == typeof(TInput))
+                {
+                    var nullableType = typeof(ToNullableTypeConverter<>).MakeGenericType(underlyingType);
+                    AddSupportedTypes(nullableType);
+                }
+                else
+                {
+                    var converterType = typeof(ITypeConverter<,>).MakeGenericType(underlyingType, typeof(TInput));
+                    if (_typeConverters.TryGetValue(converterType, out converter))
                     {
-                        typeConverter = converter as ITypeConverter<TProperty, TInput>;
-                        return typeConverter != null;
+                        var nullableType = typeof(ToNullableTypeConverter<,>).MakeGenericType(underlyingType, typeof(TInput));
+                        AddSupportedTypes(nullableType, converter);
                     }
                 }
+            }
+            else if (typeof(TInput).IsNullable(out underlyingType))
+            {
+                if (underlyingType == propertyType)
+                {
+                    var nullableType = typeof(FromNullableTypeConverter<>).MakeGenericType(underlyingType);
+                    AddSupportedTypes(nullableType);
+                }
+                else
+                {
+                    var converterType = typeof(ITypeConverter<,>).MakeGenericType(propertyType, underlyingType);
+                    if (_typeConverters.TryGetValue(converterType, out converter))
+                    {
+                        var nullableType = typeof(FromNullableTypeConverter<,>).MakeGenericType(propertyType, underlyingType);
+                        AddSupportedTypes(nullableType, converter);
+                    }
+                }
+            }
+
+            if (_typeConverters.TryGetValue(neededType, out converter))
+            {
+                typeConverter = converter as ITypeConverter<TProperty, TInput>;
+                return typeConverter != null;
             }
 
             typeConverter = null;
             return false;
         }
 
-        void AddSupportedTypes(Type converterType)
+        void AddSupportedTypes(Type converterType, params object[] args)
         {
             Type[] interfaceTypes = converterType.GetInterfaces();
 
@@ -77,7 +111,7 @@ namespace MassTransit.Initializers.TypeConverters
             {
                 try
                 {
-                    var converter = Activator.CreateInstance(converterType);
+                    var converter = Activator.CreateInstance(converterType, args);
                     _converters.Add(converter);
 
                     foreach (var type in types)

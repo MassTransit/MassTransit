@@ -1,8 +1,9 @@
-﻿namespace MassTransit.Initializers.Factories
+namespace MassTransit.Initializers
 {
     using System;
     using System.Threading;
     using Contexts;
+    using Factories;
     using GreenPipes.Internals.Extensions;
     using Util;
 

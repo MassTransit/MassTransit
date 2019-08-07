@@ -6,17 +6,17 @@ namespace MassTransit.Initializers
     /// <summary>
     /// A message property converter, which is async, and has access to the context
     /// </summary>
+    /// <typeparam name="TResult"></typeparam>
     /// <typeparam name="TProperty"></typeparam>
-    /// <typeparam name="TInputProperty"></typeparam>
-    public interface IPropertyConverter<TProperty, in TInputProperty>
+    public interface IPropertyConverter<TResult, in TProperty>
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="context"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<TProperty> Convert<TMessage>(InitializeContext<TMessage> context, TInputProperty input)
-            where TMessage : class;
+        Task<TResult> Convert<T>(InitializeContext<T> context, TProperty input)
+            where T : class;
     }
 }

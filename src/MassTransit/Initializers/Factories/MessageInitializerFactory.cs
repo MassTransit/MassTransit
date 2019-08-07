@@ -65,7 +65,7 @@ namespace MassTransit.Initializers.Factories
         {
             return typeof(TInput).GetAllProperties().Where(x => x.CanRead)
                 .Select(x => (IHeaderInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
-                    typeof(InputHeaderInitializerInspector<,>).MakeGenericType(typeof(TMessage), typeof(TInput)), x));
+                    typeof(InputHeaderInitializerInspector<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), x.PropertyType), x));
         }
 
         static IEnumerable<IHeaderInitializerInspector<TMessage, TInput>> CreateHeaderInspectors()

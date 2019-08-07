@@ -10,7 +10,7 @@
     {
         bool TryGetPropertyInitializer<TProperty>(PropertyInfo propertyInfo, out IPropertyInitializer<TMessage, TInput> initializer);
         bool TryGetHeaderInitializer<TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer);
-        bool TryGetHeaderInitializer(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer);
+        bool TryGetHeadersInitializer<TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer);
     }
 
 
@@ -24,7 +24,7 @@
         bool TryGetHeaderInitializer<TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
             where TInput : class;
 
-        bool TryGetHeaderInitializer<TInput>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
+        bool TryGetHeadersInitializer<TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
             where TInput : class;
     }
 
@@ -39,7 +39,7 @@
             where TMessage : class
             where TInput : class;
 
-        bool TryGetHeaderInitializer<TMessage, TInput>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
+        bool TryGetHeadersInitializer<TMessage, TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
             where TMessage : class
             where TInput : class;
     }

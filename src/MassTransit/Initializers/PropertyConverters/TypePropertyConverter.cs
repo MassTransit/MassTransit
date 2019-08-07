@@ -9,12 +9,12 @@ namespace MassTransit.Initializers.PropertyConverters
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
     /// <typeparam name="TInput"></typeparam>
-    public class ConvertPropertyConverter<TResult, TInput> :
+    public class TypePropertyConverter<TResult, TInput> :
         IPropertyConverter<TResult, TInput>
     {
         readonly ITypeConverter<TResult, TInput> _converter;
 
-        public ConvertPropertyConverter(ITypeConverter<TResult, TInput> converter)
+        public TypePropertyConverter(ITypeConverter<TResult, TInput> converter)
         {
             _converter = converter;
         }

@@ -4,7 +4,7 @@ namespace MassTransit.Initializers.Factories
     using Conventions;
 
 
-    public class InputHeaderInitializerInspector<TMessage, TInput> :
+    public class InputHeaderInitializerInspector<TMessage, TInput, TProperty> :
         IHeaderInitializerInspector<TMessage, TInput>
         where TMessage : class
         where TInput : class
@@ -21,7 +21,7 @@ namespace MassTransit.Initializers.Factories
             if (builder.IsInputPropertyUsed(_propertyInfo.Name))
                 return false;
 
-            if (convention.TryGetHeaderInitializer(_propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer))
+            if (convention.TryGetHeadersInitializer<TMessage, TInput, TProperty>(_propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer))
             {
                 builder.Add(initializer);
 

@@ -2,11 +2,13 @@ namespace MassTransit.Initializers.Conventions
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using System.Text;
     using HeaderInitializers;
     using Internals.Extensions;
     using PropertyInitializers;
+    using PropertyProviders;
 
 
     public class DictionaryInitializerConvention<TMessage, TInput, TValue> :
@@ -14,6 +16,13 @@ namespace MassTransit.Initializers.Conventions
         where TMessage : class
         where TInput : class, IDictionary<string, TValue>
     {
+        readonly Initializers.IPropertyProviderFactory<TInput> _providerFactory;
+
+        public DictionaryInitializerConvention()
+        {
+            _providerFactory = new PropertyProviderFactory<TInput>();
+        }
+
         public bool TryGetPropertyInitializer<TProperty>(PropertyInfo propertyInfo, out IPropertyInitializer<TMessage, TInput> initializer)
         {
             var propertyName = propertyInfo?.Name ?? throw new ArgumentNullException(nameof(propertyInfo));
@@ -24,11 +33,29 @@ namespace MassTransit.Initializers.Conventions
                 return true;
             }
 
-            if (PropertyInitializerCache.TryGetFactory<TProperty>(typeof(TValue), out var propertyConverter))
+            if (_providerFactory.TryGetPropertyConverter(out IPropertyConverter<TProperty, TValue> converter))
             {
-                var providerFactory = new DictionaryInputValuePropertyProviderFactory<TInput>(propertyName);
+                var providerType = typeof(InputDictionaryValuePropertyProvider<,>).MakeGenericType(typeof(TInput), typeof(TValue));
 
-                initializer = propertyConverter.CreatePropertyInitializer<TMessage, TInput>(propertyInfo, providerFactory);
+                var provider = (IPropertyProvider<TInput, TValue>)Activator.CreateInstance(providerType, propertyName);
+
+                var convertProvider = new PropertyConverterPropertyProvider<TInput, TProperty, TValue>(converter, provider);
+
+                initializer = new ProviderPropertyInitializer<TMessage, TInput, TProperty>(convertProvider, propertyInfo);
+                return true;
+            }
+
+            if (typeof(TValue) == typeof(object))
+            {
+                var inputProviderType = typeof(InputDictionaryValuePropertyProvider<,>).MakeGenericType(typeof(TInput), typeof(TValue));
+
+                var valueProvider = (IPropertyProvider<TInput, TValue>)Activator.CreateInstance(inputProviderType, propertyName);
+
+                var providerType = typeof(ObjectPropertyProvider<,>).MakeGenericType(typeof(TInput), typeof(TProperty));
+
+                var provider = (IPropertyProvider<TInput, TProperty>)Activator.CreateInstance(providerType, _providerFactory, valueProvider);
+
+                initializer = new ProviderPropertyInitializer<TMessage, TInput, TProperty>(provider, propertyInfo);
                 return true;
             }
 
@@ -49,11 +76,15 @@ namespace MassTransit.Initializers.Conventions
                 return true;
             }
 
-            if (PropertyInitializerCache.TryGetFactory<TProperty>(typeof(TValue), out var propertyConverter))
+            if (_providerFactory.TryGetPropertyConverter(out IPropertyConverter<TProperty, TValue> converter))
             {
-                var providerFactory = new DictionaryInputValuePropertyProviderFactory<TInput>(inputPropertyName);
+                var providerType = typeof(InputDictionaryValuePropertyProvider<,>).MakeGenericType(typeof(TInput), typeof(TValue));
 
-                initializer = propertyConverter.CreateHeaderInitializer<TMessage, TInput>(propertyInfo, providerFactory);
+                var provider = (IPropertyProvider<TInput, TValue>)Activator.CreateInstance(providerType, propertyName);
+
+                var convertProvider = new PropertyConverterPropertyProvider<TInput, TProperty, TValue>(converter, provider);
+
+                initializer = new ProviderHeaderInitializer<TMessage, TInput, TProperty>(convertProvider, propertyInfo);
                 return true;
             }
 
@@ -61,7 +92,7 @@ namespace MassTransit.Initializers.Conventions
             return false;
         }
 
-        public bool TryGetHeaderInitializer(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
+        public bool TryGetHeadersInitializer<TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
         {
             initializer = default;
             return false;

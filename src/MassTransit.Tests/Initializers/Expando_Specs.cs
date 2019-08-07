@@ -5,7 +5,8 @@ namespace MassTransit.Tests.Initializers
     using System.Dynamic;
     using System.Threading.Tasks;
     using MassTransit.Initializers;
-    using MassTransit.Initializers.PropertyInitializers;
+    using MassTransit.Initializers.PropertyProviders;
+    using Newtonsoft.Json;
     using NUnit.Framework;
 
 
@@ -15,7 +16,8 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public void Should_have_an_interface_from_dictionary_converter()
         {
-            Assert.IsTrue(PropertyInitializerCache.TryGetFactory<MessageContract>(typeof(IDictionary<string, object>), out var propertyConverter));
+            var factory = new PropertyProviderFactory<IDictionary<string, object>>();
+            Assert.IsTrue(factory.TryGetPropertyConverter(out IPropertyConverter<MessageContract, object> converter));
         }
 
         [Test]
@@ -35,6 +37,42 @@ namespace MassTransit.Tests.Initializers
         }
 
         [Test]
+        public async Task Should_work_with_a_list()
+        {
+            var dto = new
+            {
+                Id = 32,
+                CustomerId = "CustomerXp",
+                Product = new
+                {
+                    Name = "Foo",
+                    Category = "Bar"
+                },
+                Orders = new[]
+                {
+                    new
+                    {
+                        Id = Guid.NewGuid(),
+                        Product = new
+                        {
+                            Name = "Product",
+                            Category = "Category"
+                        },
+                        Quantity = 10,
+                        Price = 10.0m
+                    }
+                }
+            };
+
+            var expando = JsonConvert.DeserializeObject<ExpandoObject>(JsonConvert.SerializeObject(dto));
+
+            var message = await MessageInitializerCache<MessageContract>.Initialize(expando); // doesn't work (orders not included)
+
+            Assert.That(message.Message.Id, Is.EqualTo(32));
+            Assert.That(message.Message.Orders, Is.Not.Null);
+        }
+
+        [Test]
         public async Task Should_work_with_a_dictionary_sourced_object_property()
         {
             var uniqueId = Guid.NewGuid();
@@ -43,10 +81,7 @@ namespace MassTransit.Tests.Initializers
             dto.Add(nameof(MessageContract.CustomerId), "SuperMart");
             dto.Add(nameof(MessageContract.UniqueId), uniqueId);
 
-            var message = await MessageInitializerCache<MessageEnvelope>.Initialize(new
-            {
-                Contract = dto
-            });
+            var message = await MessageInitializerCache<MessageEnvelope>.Initialize(new {Contract = dto});
 
             Assert.That(message.Message.Contract, Is.Not.Null);
             Assert.That(message.Message.Contract.Id, Is.EqualTo(27));
@@ -62,8 +97,8 @@ namespace MassTransit.Tests.Initializers
             dto.Add(nameof(MessageContract.Id), 27);
             dto.Add(nameof(MessageContract.CustomerId), "SuperMart");
             dto.Add(nameof(MessageContract.UniqueId), uniqueId);
-            dto.Add(nameof(MessageContract.CustomerType),(long)1);
-            dto.Add(nameof(MessageContract.TypeByName),"Internal");
+            dto.Add(nameof(MessageContract.CustomerType), (long)1);
+            dto.Add(nameof(MessageContract.TypeByName), "Internal");
 
             var message = await MessageInitializerCache<MessageContract>.Initialize(dto);
 
@@ -82,13 +117,31 @@ namespace MassTransit.Tests.Initializers
             Guid UniqueId { get; }
             CustomerType CustomerType { get; }
             CustomerType TypeByName { get; }
+            List<IOrder> Orders { get; }
         }
+
 
         public enum CustomerType
         {
             Public = 1,
             Internal = 2
         }
+
+
+        public interface IOrder
+        {
+            Guid Id { get; }
+            IProduct Product { get; }
+            int Quantity { get; }
+        }
+
+
+        public interface IProduct
+        {
+            string Name { get; }
+            string Category { get; }
+        }
+
 
         public interface MessageEnvelope
         {

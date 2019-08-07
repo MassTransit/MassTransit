@@ -4,7 +4,6 @@ namespace MassTransit.Initializers.HeaderInitializers
     using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Reflection;
-    using PropertyProviders;
     using Util;
 
 

@@ -1,7 +1,7 @@
 namespace MassTransit.Initializers.PropertyConverters
 {
     using System.Threading.Tasks;
-    using Factories;
+    using Util;
 
 
     public class InitializePropertyConverter<TProperty, TInput> :
@@ -12,7 +12,7 @@ namespace MassTransit.Initializers.PropertyConverters
         Task<TProperty> IPropertyConverter<TProperty, TInput>.Convert<TMessage>(InitializeContext<TMessage> context, TInput input)
         {
             if (input == null)
-                return null;
+                return TaskUtil.Default<TProperty>();
 
             InitializeContext<TProperty> messageContext = MessageFactoryCache<TProperty>.Factory.Create(context);
 
@@ -24,15 +24,14 @@ namespace MassTransit.Initializers.PropertyConverters
             if (initTask.IsCompleted)
                 return Task.FromResult(initTask.Result.Message);
 
-            return ConvertAsync<TMessage>(initTask);
-        }
+            async Task<TProperty> ConvertAsync()
+            {
+                InitializeContext<TProperty> result = await initTask.ConfigureAwait(false);
 
-        async Task<TProperty> ConvertAsync<TMessage>(Task<InitializeContext<TProperty>> initTask)
-            where TMessage : class
-        {
-            InitializeContext<TProperty> result = await initTask.ConfigureAwait(false);
+                return result.Message;
+            }
 
-            return result.Message;
+            return ConvertAsync();
         }
     }
 }

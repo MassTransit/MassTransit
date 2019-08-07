@@ -4,7 +4,6 @@ namespace MassTransit.Initializers.PropertyInitializers
     using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Reflection;
-    using PropertyProviders;
     using Util;
 
 
@@ -22,17 +21,17 @@ namespace MassTransit.Initializers.PropertyInitializers
         readonly IPropertyProvider<TInput, TProperty> _propertyProvider;
         readonly IWriteProperty<TMessage, TProperty> _messageProperty;
 
-        public ProviderPropertyInitializer(IPropertyProvider<TInput, TProperty> propertyProvider, PropertyInfo propertyName)
+        public ProviderPropertyInitializer(IPropertyProvider<TInput, TProperty> propertyProvider, PropertyInfo propertyInfo)
         {
             if (propertyProvider == null)
                 throw new ArgumentNullException(nameof(propertyProvider));
 
-            if (propertyName == null)
-                throw new ArgumentNullException(nameof(propertyName));
+            if (propertyInfo == null)
+                throw new ArgumentNullException(nameof(propertyInfo));
 
             _propertyProvider = propertyProvider;
 
-            _messageProperty = WritePropertyCache<TMessage>.GetProperty<TProperty>(propertyName);
+            _messageProperty = WritePropertyCache<TMessage>.GetProperty<TProperty>(propertyInfo);
         }
 
         public Task Apply(InitializeContext<TMessage, TInput> context)

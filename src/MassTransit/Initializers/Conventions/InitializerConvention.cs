@@ -27,10 +27,10 @@
             return _typeCache.GetOrAdd<TInput, IInitializerConvention<TMessage, TInput>>().TryGetHeaderInitializer<TProperty>(propertyInfo, out initializer);
         }
 
-        public bool TryGetHeaderInitializer<TInput>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
+        public bool TryGetHeadersInitializer<TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
             where TInput : class
         {
-            return _typeCache.GetOrAdd<TInput, IInitializerConvention<TMessage, TInput>>().TryGetHeaderInitializer(propertyInfo, out initializer);
+            return _typeCache.GetOrAdd<TInput, IInitializerConvention<TMessage, TInput>>().TryGetHeadersInitializer<TProperty>(propertyInfo, out initializer);
         }
 
 
@@ -50,7 +50,7 @@
                 return false;
             }
 
-            public bool TryGetHeaderInitializer(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
+            public bool TryGetHeadersInitializer<TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
             {
                 initializer = default;
                 return false;
@@ -84,11 +84,11 @@
             return _typeCache.GetOrAdd<TMessage, IInitializerConvention<TMessage>>().TryGetHeaderInitializer<TInput, TProperty>(propertyInfo, out initializer);
         }
 
-        public bool TryGetHeaderInitializer<TMessage, TInput>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
+        public bool TryGetHeadersInitializer<TMessage, TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
             where TMessage : class
             where TInput : class
         {
-            return _typeCache.GetOrAdd<TMessage, IInitializerConvention<TMessage>>().TryGetHeaderInitializer(propertyInfo, out initializer);
+            return _typeCache.GetOrAdd<TMessage, IInitializerConvention<TMessage>>().TryGetHeadersInitializer<TInput, TProperty>(propertyInfo, out initializer);
         }
     }
 }

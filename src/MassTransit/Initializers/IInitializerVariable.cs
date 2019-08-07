@@ -1,4 +1,4 @@
-namespace MassTransit.Initializers.Variables
+namespace MassTransit.Initializers
 {
     using System.Threading.Tasks;
 

@@ -1,9 +1,7 @@
 namespace MassTransit.Initializers.HeaderInitializers
 {
     using System;
-    using System.Reflection;
     using System.Threading.Tasks;
-    using Internals.Reflection;
     using Util;
 
 
@@ -19,25 +17,34 @@ namespace MassTransit.Initializers.HeaderInitializers
         where TInput : class
     {
         readonly string _headerName;
-        readonly IReadProperty<TInput, THeader> _inputProperty;
+        readonly IPropertyProvider<TInput, THeader> _provider;
 
-        public SetHeaderInitializer(string headerName, PropertyInfo propertyInfo)
+        public SetHeaderInitializer(string headerName, IPropertyProvider<TInput, THeader> provider)
         {
             if (headerName == null)
                 throw new ArgumentNullException(nameof(headerName));
 
             _headerName = headerName;
-
-            _inputProperty = ReadPropertyCache<TInput>.GetProperty<THeader>(propertyInfo);
+            _provider = provider;
         }
 
         public Task Apply(InitializeContext<TMessage, TInput> context, SendContext sendContext)
         {
-            var inputPropertyValue = _inputProperty.Get(context.Input);
+            var propertyTask = _provider.GetProperty(context);
+            if (propertyTask.IsCompleted)
+            {
+                sendContext.Headers.Set(_headerName, propertyTask.Result);
+                return TaskUtil.Completed;
+            }
 
-            sendContext.Headers.Set(_headerName, inputPropertyValue);
+            async Task ApplyAsync()
+            {
+                var value = await propertyTask.ConfigureAwait(false);
 
-            return TaskUtil.Completed;
+                sendContext.Headers.Set(_headerName, value);
+            }
+
+            return ApplyAsync();
         }
     }
 }

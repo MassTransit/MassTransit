@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+    using Util;
 
 
     public class ReadPropertyCache<T> :
@@ -38,6 +39,11 @@
 
                 if (_properties.TryGetValue(name, out var property))
                     return property as IReadProperty<T, TProperty>;
+
+                if (propertyInfo.PropertyType != typeof(TProperty))
+                    throw new ArgumentException(
+                        $"Property type mismatch, {TypeMetadataCache<TProperty>.ShortName} != {TypeMetadataCache.GetShortName(propertyInfo.PropertyType)}",
+                        nameof(propertyInfo));
 
                 var readProperty = new ReadProperty<T, TProperty>(propertyInfo);
 

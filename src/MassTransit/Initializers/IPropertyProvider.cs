@@ -1,4 +1,4 @@
-namespace MassTransit.Initializers.PropertyProviders
+namespace MassTransit.Initializers
 {
     using System.Threading.Tasks;
 

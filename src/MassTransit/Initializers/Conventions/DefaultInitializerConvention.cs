@@ -8,6 +8,7 @@
     using HeaderInitializers;
     using Internals.Extensions;
     using PropertyInitializers;
+    using PropertyProviders;
 
 
     public class DefaultInitializerConvention<TMessage, TInput> :
@@ -16,10 +17,12 @@
         where TInput : class
     {
         readonly IReadOnlyDictionary<string, PropertyInfo> _inputProperties;
+        readonly IPropertyProviderFactory<TInput> _providerFactory;
 
         public DefaultInitializerConvention()
         {
             _inputProperties = typeof(TInput).GetAllProperties().GroupBy(x => x.Name).ToDictionary(x => x.Key, x => x.Last());
+            _providerFactory = new PropertyProviderFactory<TInput>();
         }
 
         public bool TryGetPropertyInitializer<TProperty>(PropertyInfo propertyInfo, out IPropertyInitializer<TMessage, TInput> initializer)
@@ -46,11 +49,9 @@
                     return true;
                 }
 
-                if (PropertyInitializerCache.TryGetFactory<TProperty>(inputPropertyType, out var propertyConverter))
+                if (_providerFactory.TryGetPropertyProvider(inputPropertyInfo, out IPropertyProvider<TInput, TProperty> provider))
                 {
-                    var providerFactory = new InputValuePropertyProviderFactory<TInput>(inputPropertyInfo);
-
-                    initializer = propertyConverter.CreatePropertyInitializer<TMessage, TInput>(propertyInfo, providerFactory);
+                    initializer = new ProviderPropertyInitializer<TMessage, TInput, TProperty>(provider, propertyInfo);
                     return true;
                 }
             }
@@ -78,11 +79,9 @@
                     return true;
                 }
 
-                if (PropertyInitializerCache.TryGetFactory<TProperty>(inputPropertyType, out var propertyConverter))
+                if (_providerFactory.TryGetPropertyProvider(inputPropertyInfo, out IPropertyProvider<TInput, TProperty> provider))
                 {
-                    var providerFactory = new InputValuePropertyProviderFactory<TInput>(inputPropertyInfo);
-
-                    initializer = propertyConverter.CreateHeaderInitializer<TMessage, TInput>(propertyInfo, providerFactory);
+                    initializer = new ProviderHeaderInitializer<TMessage, TInput, TProperty>(provider, propertyInfo);
                     return true;
                 }
             }
@@ -91,26 +90,24 @@
             return false;
         }
 
-        public bool TryGetHeaderInitializer(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
+        public bool TryGetHeadersInitializer<TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
         {
+            if (propertyInfo.Name.StartsWith("__Header_") && propertyInfo.Name.Length > 9)
             {
-                if (propertyInfo.Name.StartsWith("__Header_") && propertyInfo.Name.Length > 9)
+                string headerName = propertyInfo.Name.Substring(9).Replace("__", " ").Replace("_", "-").Replace(" ", "_");
+
+                var inputPropertyType = propertyInfo.PropertyType;
+
+                // exactly the same type, we just copy it over unmodified
+                if (inputPropertyType == typeof(string))
                 {
-                    string headerName = propertyInfo.Name.Substring(9).Replace("__", " ").Replace("_", "-").Replace(" ", "_");
-
-                    var inputPropertyType = propertyInfo.PropertyType;
-
-                    // exactly the same type, we just copy it over unmodified
-                    if (inputPropertyType == typeof(string))
-                    {
-                        initializer = new SetStringHeaderInitializer<TMessage, TInput>(headerName, propertyInfo);
-                        return true;
-                    }
-
-                    var type = typeof(SetHeaderInitializer<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), inputPropertyType);
-                    initializer = (IHeaderInitializer<TMessage, TInput>)Activator.CreateInstance(type, headerName, propertyInfo);
+                    initializer = new SetStringHeaderInitializer<TMessage, TInput>(headerName, propertyInfo);
                     return true;
                 }
+
+                var type = typeof(SetHeaderInitializer<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), inputPropertyType);
+                initializer = (IHeaderInitializer<TMessage, TInput>)Activator.CreateInstance(type, headerName, propertyInfo);
+                return true;
             }
 
             initializer = default;
