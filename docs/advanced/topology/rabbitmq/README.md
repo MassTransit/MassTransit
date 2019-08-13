@@ -25,9 +25,6 @@ In versions of MassTransit prior to 4.x, every implemented type was connected di
 ```csharp
 Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
 {
-    cfg.PublishTopology(x =>
-    {
-        x.BrokerTopologyOptions = PublishBrokerTopologyOptions.MaintainHierarchy;
-    });
+    cfg.PublishTopology.BrokerTopologyOptions = PublishBrokerTopologyOptions.MaintainHierarchy;
 });
 ```
