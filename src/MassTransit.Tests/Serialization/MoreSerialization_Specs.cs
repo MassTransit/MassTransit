@@ -158,6 +158,120 @@ namespace MassTransit.Tests.Serialization
         }
 
 
+        public class PrimitiveHashSetClass
+        {
+            public PrimitiveHashSetClass()
+            {
+                Values = new HashSet<int>();
+            }
+
+            public HashSet<int> Values { get; set; }
+
+            public bool Equals(PrimitiveHashSetClass other)
+            {
+                if (ReferenceEquals(null, other))
+                    return false;
+
+                if (ReferenceEquals(this, other))
+                    return true;
+
+                if (ReferenceEquals(other.Values, Values))
+                    return true;
+
+                if (other.Values == null && Values != null)
+                    return false;
+
+                if (other.Values != null && Values == null)
+                    return false;
+
+                if (other.Values != null && Values != null)
+                {
+                    if (other.Values.Count != Values.Count)
+                        return false;
+
+                    return other.Values.SetEquals(Values);
+                }
+
+                return true;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+
+                if (ReferenceEquals(this, obj))
+                    return true;
+
+                if (obj.GetType() != typeof(PrimitiveHashSetClass))
+                    return false;
+
+                return Equals((PrimitiveHashSetClass)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return (Values != null ? Values.GetHashCode() : 0);
+            }
+        }
+
+        public class PrimitiveSetClass
+        {
+            public PrimitiveSetClass()
+            {
+                Values = new HashSet<int>();
+            }
+
+            public ISet<int> Values { get; set; }
+
+            public bool Equals(PrimitiveSetClass other)
+            {
+                if (ReferenceEquals(null, other))
+                    return false;
+
+                if (ReferenceEquals(this, other))
+                    return true;
+
+                if (ReferenceEquals(other.Values, Values))
+                    return true;
+
+                if (other.Values == null && Values != null)
+                    return false;
+
+                if (other.Values != null && Values == null)
+                    return false;
+
+                if (other.Values != null && Values != null)
+                {
+                    if (other.Values.Count != Values.Count)
+                        return false;
+
+                    return other.Values.SetEquals(Values);
+                }
+
+                return true;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+
+                if (ReferenceEquals(this, obj))
+                    return true;
+
+                if (obj.GetType() != typeof(PrimitiveSetClass))
+                    return false;
+
+                return Equals((PrimitiveSetClass)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return (Values != null ? Values.GetHashCode() : 0);
+            }
+        }
+
         [Serializable]
         public class PrimitiveArrayClass
         {
@@ -586,6 +700,38 @@ namespace MassTransit.Tests.Serialization
         public void A_readonly_dictionary_list_message()
         {
             var message = new SucceededCommandResult(NewId.NextGuid());
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_hashset_of_integers_should_be_properly_serialized()
+        {
+            var message = new PrimitiveHashSetClass()
+            {
+                Values =
+                {
+                    1,
+                    2,
+                    3
+                }
+            };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_set_of_integers_should_be_properly_serialized()
+        {
+            var message = new PrimitiveSetClass()
+            {
+                Values =
+                {
+                    1,
+                    2,
+                    3
+                }
+            };
 
             TestSerialization(message);
         }

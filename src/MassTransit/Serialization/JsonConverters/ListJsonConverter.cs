@@ -87,8 +87,8 @@ namespace MassTransit.Serialization.JsonConverters
                 if (reader.TokenType == JsonToken.Null)
                     return null;
 
-                IList<T> list = contract.DefaultCreator != null
-                    ? contract.DefaultCreator() as IList<T>
+                ICollection<T> list = contract.DefaultCreator != null
+                    ? contract.DefaultCreator() as ICollection<T>
                     : new List<T>();
 
                 if (reader.TokenType == JsonToken.StartArray)
