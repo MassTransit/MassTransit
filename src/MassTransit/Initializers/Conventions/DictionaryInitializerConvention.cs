@@ -2,7 +2,6 @@ namespace MassTransit.Initializers.Conventions
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Reflection;
     using System.Text;
     using HeaderInitializers;
@@ -16,7 +15,7 @@ namespace MassTransit.Initializers.Conventions
         where TMessage : class
         where TInput : class, IDictionary<string, TValue>
     {
-        readonly Initializers.IPropertyProviderFactory<TInput> _providerFactory;
+        readonly IPropertyProviderFactory<TInput> _providerFactory;
 
         public DictionaryInitializerConvention()
         {
@@ -25,19 +24,19 @@ namespace MassTransit.Initializers.Conventions
 
         public bool TryGetPropertyInitializer<TProperty>(PropertyInfo propertyInfo, out IPropertyInitializer<TMessage, TInput> initializer)
         {
-            var propertyName = propertyInfo?.Name ?? throw new ArgumentNullException(nameof(propertyInfo));
+            var key = propertyInfo?.Name ?? throw new ArgumentNullException(nameof(propertyInfo));
 
             if (typeof(TValue) == typeof(TProperty))
             {
-                initializer = new DictionaryCopyPropertyInitializer<TMessage, TInput, TValue>(propertyInfo, propertyName);
+                initializer = new DictionaryCopyPropertyInitializer<TMessage, TInput, TValue>(propertyInfo, key);
                 return true;
             }
 
             if (_providerFactory.TryGetPropertyConverter(out IPropertyConverter<TProperty, TValue> converter))
             {
-                var providerType = typeof(InputDictionaryValuePropertyProvider<,>).MakeGenericType(typeof(TInput), typeof(TValue));
+                var providerType = typeof(InputDictionaryPropertyProvider<,>).MakeGenericType(typeof(TInput), typeof(TValue));
 
-                var provider = (IPropertyProvider<TInput, TValue>)Activator.CreateInstance(providerType, propertyName);
+                var provider = (IPropertyProvider<TInput, TValue>)Activator.CreateInstance(providerType, key);
 
                 var convertProvider = new PropertyConverterPropertyProvider<TInput, TProperty, TValue>(converter, provider);
 
@@ -47,9 +46,9 @@ namespace MassTransit.Initializers.Conventions
 
             if (typeof(TValue) == typeof(object))
             {
-                var inputProviderType = typeof(InputDictionaryValuePropertyProvider<,>).MakeGenericType(typeof(TInput), typeof(TValue));
+                var inputProviderType = typeof(InputDictionaryPropertyProvider<,>).MakeGenericType(typeof(TInput), typeof(TValue));
 
-                var valueProvider = (IPropertyProvider<TInput, TValue>)Activator.CreateInstance(inputProviderType, propertyName);
+                var valueProvider = (IPropertyProvider<TInput, TValue>)Activator.CreateInstance(inputProviderType, key);
 
                 var providerType = typeof(ObjectPropertyProvider<,>).MakeGenericType(typeof(TInput), typeof(TProperty));
 
@@ -68,17 +67,17 @@ namespace MassTransit.Initializers.Conventions
             var propertyName = propertyInfo?.Name ?? throw new ArgumentNullException(nameof(propertyInfo));
 
             // headers use a double underscore prefix
-            string inputPropertyName = new StringBuilder(propertyName.Length + 2).Append("__").Append(propertyName).ToString();
+            string key = new StringBuilder(propertyName.Length + 2).Append("__").Append(propertyName).ToString();
 
             if (typeof(TValue) == typeof(TProperty))
             {
-                initializer = new DictionaryCopyHeaderInitializer<TMessage, TInput, TValue>(propertyInfo, inputPropertyName);
+                initializer = new DictionaryCopyHeaderInitializer<TMessage, TInput, TValue>(propertyInfo, key);
                 return true;
             }
 
             if (_providerFactory.TryGetPropertyConverter(out IPropertyConverter<TProperty, TValue> converter))
             {
-                var providerType = typeof(InputDictionaryValuePropertyProvider<,>).MakeGenericType(typeof(TInput), typeof(TValue));
+                var providerType = typeof(InputDictionaryPropertyProvider<,>).MakeGenericType(typeof(TInput), typeof(TValue));
 
                 var provider = (IPropertyProvider<TInput, TValue>)Activator.CreateInstance(providerType, propertyName);
 

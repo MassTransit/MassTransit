@@ -100,7 +100,7 @@ namespace MassTransit.Initializers.PropertyProviders
             {
                 if (typeof(T) == typeof(TResult))
                 {
-                    provider = new InputValuePropertyProvider<TInput, T>(propertyInfo);
+                    provider = new InputPropertyProvider<TInput, T>(propertyInfo);
                     return true;
                 }
 
@@ -188,13 +188,13 @@ namespace MassTransit.Initializers.PropertyProviders
             {
                 if (typeof(T) == typeof(TTask))
                 {
-                    provider = new AsyncPropertyProvider<TInput, T>(new InputValuePropertyProvider<TInput, Task<T>>(propertyInfo));
+                    provider = new AsyncPropertyProvider<TInput, T>(new InputPropertyProvider<TInput, Task<T>>(propertyInfo));
                     return true;
                 }
 
                 if (_factory.TryGetPropertyConverter(out IPropertyConverter<T, TTask> converter))
                 {
-                    var inputValuePropertyProvider = new InputValuePropertyProvider<TInput, Task<TTask>>(propertyInfo);
+                    var inputValuePropertyProvider = new InputPropertyProvider<TInput, Task<TTask>>(propertyInfo);
 
                     provider = new AsyncPropertyProvider<TInput, T, TTask>(inputValuePropertyProvider, converter);
                     return true;
@@ -339,7 +339,7 @@ namespace MassTransit.Initializers.PropertyProviders
             {
                 if (typeof(T) == typeof(TValue))
                 {
-                    var propertyProvider = new InputValuePropertyProvider<TInput, TValue?>(propertyInfo);
+                    var propertyProvider = new InputPropertyProvider<TInput, TValue?>(propertyInfo);
 
                     provider = new FromNullablePropertyProvider<TInput, TValue>(propertyProvider) as IPropertyProvider<TInput, T>;
                     return provider != null;
@@ -347,7 +347,7 @@ namespace MassTransit.Initializers.PropertyProviders
 
                 if (TryGetConverter(out IPropertyConverter<T, TValue?> converter))
                 {
-                    var inputProvider = new InputValuePropertyProvider<TInput, TValue?>(propertyInfo);
+                    var inputProvider = new InputPropertyProvider<TInput, TValue?>(propertyInfo);
 
                     provider = new PropertyConverterPropertyProvider<TInput, T, TValue?>(converter, inputProvider);
                     return true;
@@ -403,7 +403,7 @@ namespace MassTransit.Initializers.PropertyProviders
             {
                 if (TryGetConverter(out IPropertyConverter<T, TVariable> propertyConverter))
                 {
-                    var inputValuePropertyProvider = new InputValuePropertyProvider<TInput, TVariable>(propertyInfo);
+                    var inputValuePropertyProvider = new InputPropertyProvider<TInput, TVariable>(propertyInfo);
 
                     provider = new PropertyConverterPropertyProvider<TInput, T, TVariable>(propertyConverter, inputValuePropertyProvider);
                     return true;
@@ -499,7 +499,7 @@ namespace MassTransit.Initializers.PropertyProviders
                 {
                     if (TryGetConverter(out IPropertyConverter<T, TInputProperty> propertyConverter))
                     {
-                        var inputProvider = new InputValuePropertyProvider<TInput, TInputProperty>(propertyInfo);
+                        var inputProvider = new InputPropertyProvider<TInput, TInputProperty>(propertyInfo);
 
                         provider = new PropertyConverterPropertyProvider<TInput, T, TInputProperty>(propertyConverter, inputProvider);
                         return provider != null;
@@ -543,7 +543,7 @@ namespace MassTransit.Initializers.PropertyProviders
                 {
                     if (TryGetConverter(out IPropertyConverter<T, TInputProperty> propertyConverter))
                     {
-                        var inputProvider = new InputValuePropertyProvider<TInput, TInputProperty>(propertyInfo);
+                        var inputProvider = new InputPropertyProvider<TInput, TInputProperty>(propertyInfo);
 
                         provider = new PropertyConverterPropertyProvider<TInput, T, TInputProperty>(propertyConverter, inputProvider);
                         return provider != null;
@@ -643,7 +643,7 @@ namespace MassTransit.Initializers.PropertyProviders
                 {
                     if (TryGetConverter(out IPropertyConverter<T, TInputProperty> propertyConverter))
                     {
-                        var inputProvider = new InputValuePropertyProvider<TInput, TInputProperty>(propertyInfo);
+                        var inputProvider = new InputPropertyProvider<TInput, TInputProperty>(propertyInfo);
 
                         provider = new PropertyConverterPropertyProvider<TInput, T, TInputProperty>(propertyConverter, inputProvider);
                         return provider != null;
@@ -699,7 +699,7 @@ namespace MassTransit.Initializers.PropertyProviders
                 {
                     if (TryGetConverter(out IPropertyConverter<T, TInputProperty> propertyConverter))
                     {
-                        var inputProvider = new InputValuePropertyProvider<TInput, TInputProperty>(propertyInfo);
+                        var inputProvider = new InputPropertyProvider<TInput, TInputProperty>(propertyInfo);
 
                         provider = new PropertyConverterPropertyProvider<TInput, T, TInputProperty>(propertyConverter, inputProvider);
                         return provider != null;

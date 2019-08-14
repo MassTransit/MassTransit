@@ -11,13 +11,13 @@ namespace MassTransit.Initializers.PropertyProviders
     /// </summary>
     /// <typeparam name="TInput"></typeparam>
     /// <typeparam name="TProperty"></typeparam>
-    public class InputValuePropertyProvider<TInput, TProperty> :
+    public class InputPropertyProvider<TInput, TProperty> :
         IPropertyProvider<TInput, TProperty>
         where TInput : class
     {
         readonly IReadProperty<TInput, TProperty> _inputProperty;
 
-        public InputValuePropertyProvider(PropertyInfo propertyInfo)
+        public InputPropertyProvider(PropertyInfo propertyInfo)
         {
             if (propertyInfo == null)
                 throw new ArgumentNullException(nameof(propertyInfo));

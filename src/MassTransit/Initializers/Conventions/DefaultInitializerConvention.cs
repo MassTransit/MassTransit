@@ -21,7 +21,7 @@
 
         public DefaultInitializerConvention()
         {
-            _inputProperties = typeof(TInput).GetAllProperties().GroupBy(x => x.Name).ToDictionary(x => x.Key, x => x.Last());
+            _inputProperties = typeof(TInput).GetAllProperties().GroupBy(x => x.Name).ToDictionary(x => x.Key, x => x.Last(), StringComparer.OrdinalIgnoreCase);
             _providerFactory = new PropertyProviderFactory<TInput>();
         }
 
