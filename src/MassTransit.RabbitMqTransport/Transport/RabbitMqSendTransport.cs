@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Transport
+﻿namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
     using System.Collections.Generic;
@@ -20,11 +8,12 @@ namespace MassTransit.RabbitMqTransport.Transport
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
-    using GreenPipes.Pipes;
+    using Initializers.TypeConverters;
     using Integration;
     using Internals.Extensions;
     using Logging;
     using MassTransit.Pipeline.Observables;
+    using RabbitMQ.Client;
     using Transports;
 
 
@@ -125,7 +114,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
                     properties.Headers["Content-Type"] = context.ContentType.MediaType;
 
-                    properties.Headers.SetTextHeaders(context.Headers, (_, text) => text);
+                    SetHeaders(properties.Headers, context.Headers);
 
                     properties.Persistent = context.Durable;
 
@@ -162,6 +151,58 @@ namespace MassTransit.RabbitMqTransport.Transport
             public void Probe(ProbeContext context)
             {
             }
+
+            void SetHeaders(IDictionary<string, object> dictionary, SendHeaders headers)
+            {
+                foreach (var header in headers.GetAll())
+                {
+                    if (header.Value == null)
+                    {
+                        if (dictionary.ContainsKey(header.Key))
+                            dictionary.Remove(header.Key);
+
+                        continue;
+                    }
+
+                    if (dictionary.ContainsKey(header.Key))
+                        continue;
+
+                    switch (header.Value)
+                    {
+                        case DateTimeOffset value:
+                            if (_dateTimeOffsetConverter.TryConvert(value, out long result))
+                                dictionary[header.Key] = new AmqpTimestamp(result);
+                            else if (_dateTimeOffsetConverter.TryConvert(value, out string text))
+                                dictionary[header.Key] = text;
+
+                            break;
+
+                        case DateTime value:
+                            if (_dateTimeConverter.TryConvert(value, out result))
+                                dictionary[header.Key] = new AmqpTimestamp(result);
+                            else if (_dateTimeConverter.TryConvert(value, out string text))
+                                dictionary[header.Key] = text;
+
+                            break;
+
+                        case string value:
+                            dictionary[header.Key] = value;
+                            break;
+
+                        case IFormattable formatValue:
+                            if (header.Value.GetType().IsValueType)
+                                dictionary[header.Key] = header.Value;
+                            else
+                                dictionary[header.Key] = formatValue.ToString();
+
+                            break;
+                    }
+                }
+            }
         }
+
+
+        static readonly DateTimeOffsetTypeConverter _dateTimeOffsetConverter = new DateTimeOffsetTypeConverter();
+        static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
     }
 }
