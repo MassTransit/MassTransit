@@ -24,6 +24,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
+    using Microsoft.EntityFrameworkCore.Storage;
     using Util;
 
 
@@ -120,116 +121,137 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             if (!context.CorrelationId.HasValue)
                 throw new SagaException("The CorrelationId was not specified", typeof(TSaga), typeof(T));
 
-            var sagaId = context.CorrelationId.Value;
-
             var dbContext = _sagaDbContextFactory.CreateScoped(context);
             try
             {
-                using (var transaction = await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
+                var execStrategy = dbContext.Database.CreateExecutionStrategy();
+                if (execStrategy is SqlServerRetryingExecutionStrategy)
                 {
-                    if (policy.PreInsertInstance(context, out var instance))
+                    await execStrategy.Execute(async () =>
                     {
-                        var inserted = await PreInsertSagaInstance<T>(dbContext, instance, context.CancellationToken).ConfigureAwait(false);
-                        if (!inserted) instance = null; // Reset this back to null if the insert failed. We will use the MissingPipe to create instead
-                    }
-
-                    try
+                        using (var transaction = await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
+                        {
+                            await SendLogic(transaction, dbContext, context, policy, next);
+                        }
+                    });
+                }
+                else
+                {
+                    using (var transaction = await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
                     {
-                        if (instance == null)
-                        {
-                            IQueryable<TSaga> queryable = QuerySagas(dbContext);
-
-                            // Query with a row Lock instead using FromSql. Still a single trip to the DB (unlike EF6, which has to make one dummy call to row lock)
-                            var rowLockQuery = _rawSqlLockStatements?.GetRowLockStatement<TSaga>(dbContext);
-                            if (rowLockQuery != null)
-                                instance = await queryable.FromSql(rowLockQuery, new object[] { sagaId }).SingleOrDefaultAsync(context.CancellationToken).ConfigureAwait(false);
-                            else
-                                instance = await queryable.SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken).ConfigureAwait(false);
-                        }
-
-                        if (instance == null)
-                        {
-                            var missingSagaPipe = new MissingPipe<T>(dbContext, next);
-
-                            await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            if (_log.IsDebugEnabled)
-                            {
-                                _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                                    TypeMetadataCache<T>.ShortName);
-                            }
-
-                            var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
-
-                            await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
-                        }
-
-                        await dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
-
-                        transaction.Commit();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        try
-                        {
-                            transaction.Rollback();
-                        }
-                        catch (Exception innerException)
-                        {
-                            if (_log.IsWarnEnabled)
-                                _log.Warn("The transaction rollback failed", innerException);
-                        }
-
-                        throw;
-                    }
-                    catch (DbUpdateException ex)
-                    {
-                        if (IsDeadlockException(ex))
-                        {
-                            // deadlock, no need to rollback
-                        }
-                        else
-                        {
-                            if (_log.IsErrorEnabled)
-                                _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
-
-                            try
-                            {
-                                transaction.Rollback();
-                            }
-                            catch (Exception innerException)
-                            {
-                                if (_log.IsWarnEnabled)
-                                    _log.Warn("The transaction rollback failed", innerException);
-                            }
-                        }
-
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        if (_log.IsErrorEnabled)
-                            _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
-
-                        try
-                        {
-                            transaction.Rollback();
-                        }
-                        catch (Exception innerException)
-                        {
-                            if (_log.IsWarnEnabled)
-                                _log.Warn("The transaction rollback failed", innerException);
-                        }
-
-                        throw;
+                        await SendLogic(transaction, dbContext, context, policy, next);
                     }
                 }
             }
             finally
             {
                 _sagaDbContextFactory.Release(dbContext);
+            }
+        }
+
+        private async Task SendLogic<T>(IDbContextTransaction transaction, DbContext dbContext, ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
+            where T : class
+        {
+            var sagaId = context.CorrelationId.Value;
+
+            if (policy.PreInsertInstance(context, out var instance))
+            {
+                var inserted = await PreInsertSagaInstance<T>(dbContext, instance, context.CancellationToken).ConfigureAwait(false);
+                if (!inserted) instance = null; // Reset this back to null if the insert failed. We will use the MissingPipe to create instead
+            }
+
+            try
+            {
+                if (instance == null)
+                {
+                    IQueryable<TSaga> queryable = QuerySagas(dbContext);
+
+                    // Query with a row Lock instead using FromSql. Still a single trip to the DB (unlike EF6, which has to make one dummy call to row lock)
+                    var rowLockQuery = _rawSqlLockStatements?.GetRowLockStatement<TSaga>(dbContext);
+                    if (rowLockQuery != null)
+                        instance = await queryable.FromSql(rowLockQuery, new object[] { sagaId }).SingleOrDefaultAsync(context.CancellationToken).ConfigureAwait(false);
+                    else
+                        instance = await queryable.SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken).ConfigureAwait(false);
+                }
+
+                if (instance == null)
+                {
+                    var missingSagaPipe = new MissingPipe<T>(dbContext, next);
+
+                    await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
+                }
+                else
+                {
+                    if (_log.IsDebugEnabled)
+                    {
+                        _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
+                            TypeMetadataCache<T>.ShortName);
+                    }
+
+                    var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
+
+                    await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
+                }
+
+                await dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
+
+                transaction.Commit();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception innerException)
+                {
+                    if (_log.IsWarnEnabled)
+                        _log.Warn("The transaction rollback failed", innerException);
+                }
+
+                throw;
+            }
+            catch (DbUpdateException ex)
+            {
+                if (IsDeadlockException(ex))
+                {
+                    // deadlock, no need to rollback
+                }
+                else
+                {
+                    if (_log.IsErrorEnabled)
+                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception innerException)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The transaction rollback failed", innerException);
+                    }
+                }
+
+                throw;
+            }
+            catch (Exception ex)
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception innerException)
+                {
+                    if (_log.IsWarnEnabled)
+                        _log.Warn("The transaction rollback failed", innerException);
+                }
+
+                throw;
             }
         }
 
@@ -255,143 +277,163 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                         .ConfigureAwait(false);
                 }
 
-                using (var transaction =
-                    await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
+                var execStrategy = dbContext.Database.CreateExecutionStrategy();
+                if (execStrategy is SqlServerRetryingExecutionStrategy)
                 {
-                    try
+                    await execStrategy.Execute(async () =>
                     {
-                        // Simple path for Optimistic Concurrency
-                        if (_rawSqlLockStatements == null)
+                        using (var transaction = await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
                         {
-                            var instances = await QuerySagas(dbContext)
-                                .Where(context.Query.FilterExpression)
-                                .ToListAsync(context.CancellationToken)
-                                .ConfigureAwait(false);
-
-                            if (!instances.Any())
-                            {
-                                var missingSagaPipe = new MissingPipe<T>(dbContext, next);
-                                await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
-                            }
-                            else
-                                await Task.WhenAll(instances.Select(instance => SendToInstance(context, dbContext, policy, instance, next))).ConfigureAwait(false);
+                            await SendQueryLogic(nonTrackedInstances, transaction, dbContext, context, policy, next);
                         }
-                        // Pessimistic Concurrency
-                        else
-                        {
-                            // Hack for locking row for the duration of the transaction. 
-                            // We only lock one at a time, since we don't want an accidental range lock.
-                            var rowLockQuery = _rawSqlLockStatements.GetRowLockStatement<TSaga>(dbContext);
-
-                            var missingCorrelationIds = new List<Guid>();
-                            if (nonTrackedInstances.Any())
-                            {
-                                var foundInstances = new List<Task>();
-
-                                foreach (var nonTrackedInstance in nonTrackedInstances)
-                                {
-                                    // Query with a row Lock instead using FromSql. Still a single trip to the DB (unlike EF6, which has to make one dummy call to row lock)
-                                    var instance = await QuerySagas(dbContext)
-                                        .FromSql(rowLockQuery, new object[] { nonTrackedInstance })
-                                        .SingleOrDefaultAsync(context.CancellationToken)
-                                        .ConfigureAwait(false);
-
-                                    if (instance != null)
-                                        foundInstances.Add(SendToInstance(context, dbContext, policy, instance, next));
-                                    else
-                                        missingCorrelationIds.Add(nonTrackedInstance);
-                                }
-
-                                if (foundInstances.Any()) await Task.WhenAll(foundInstances).ConfigureAwait(false);
-                            }
-
-                            // If no sagas are found or all are missing
-                            if (nonTrackedInstances.Count == missingCorrelationIds.Count)
-                            {
-                                var missingSagaPipe = new MissingPipe<T>(dbContext, next);
-
-                                await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
-                            }
-                        }
-
-                        await dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
-
-                        transaction.Commit();
-                    }
-                    catch (DbUpdateConcurrencyException)
+                    });
+                }
+                else
+                {
+                    using (var transaction = await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
                     {
-                        try
-                        {
-                            transaction.Rollback();
-                        }
-                        catch (Exception innerException)
-                        {
-                            if (_log.IsWarnEnabled)
-                                _log.Warn("The transaction rollback failed", innerException);
-                        }
-
-                        throw;
-                    }
-                    catch (DbUpdateException ex)
-                    {
-                        if (IsDeadlockException(ex))
-                        {
-                            // deadlock, no need to rollback
-                        }
-                        else
-                        {
-                            try
-                            {
-                                transaction.Rollback();
-                            }
-                            catch (Exception innerException)
-                            {
-                                if (_log.IsWarnEnabled)
-                                    _log.Warn("The transaction rollback failed", innerException);
-                            }
-                        }
-
-                        throw;
-                    }
-                    catch (SagaException sex)
-                    {
-                        if (_log.IsErrorEnabled)
-                            _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
-
-                        try
-                        {
-                            transaction.Rollback();
-                        }
-                        catch (Exception innerException)
-                        {
-                            if (_log.IsWarnEnabled)
-                                _log.Warn("The transaction rollback failed", innerException);
-                        }
-
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        try
-                        {
-                            transaction.Rollback();
-                        }
-                        catch (Exception innerException)
-                        {
-                            if (_log.IsWarnEnabled)
-                                _log.Warn("The transaction rollback failed", innerException);
-                        }
-
-                        if (_log.IsErrorEnabled)
-                            _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
-
-                        throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
+                        await SendQueryLogic(nonTrackedInstances, transaction, dbContext, context, policy, next);
                     }
                 }
             }
             finally
             {
                 _sagaDbContextFactory.Release(dbContext);
+            }
+        }
+
+        private async Task SendQueryLogic<T>(IList<Guid> nonTrackedInstances, IDbContextTransaction transaction, DbContext dbContext, SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
+            where T : class
+        {
+            try
+            {
+                // Simple path for Optimistic Concurrency
+                if (_rawSqlLockStatements == null)
+                {
+                    var instances = await QuerySagas(dbContext)
+                        .Where(context.Query.FilterExpression)
+                        .ToListAsync(context.CancellationToken)
+                        .ConfigureAwait(false);
+
+                    if (!instances.Any())
+                    {
+                        var missingSagaPipe = new MissingPipe<T>(dbContext, next);
+                        await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
+                    }
+                    else
+                        await Task.WhenAll(instances.Select(instance => SendToInstance(context, dbContext, policy, instance, next))).ConfigureAwait(false);
+                }
+                // Pessimistic Concurrency
+                else
+                {
+                    // Hack for locking row for the duration of the transaction. 
+                    // We only lock one at a time, since we don't want an accidental range lock.
+                    var rowLockQuery = _rawSqlLockStatements.GetRowLockStatement<TSaga>(dbContext);
+
+                    var missingCorrelationIds = new List<Guid>();
+                    if (nonTrackedInstances?.Any() == true)
+                    {
+                        var foundInstances = new List<Task>();
+
+                        foreach (var nonTrackedInstance in nonTrackedInstances)
+                        {
+                            // Query with a row Lock instead using FromSql. Still a single trip to the DB (unlike EF6, which has to make one dummy call to row lock)
+                            var instance = await QuerySagas(dbContext)
+                                .FromSql(rowLockQuery, new object[] { nonTrackedInstance })
+                                .SingleOrDefaultAsync(context.CancellationToken)
+                                .ConfigureAwait(false);
+
+                            if (instance != null)
+                                foundInstances.Add(SendToInstance(context, dbContext, policy, instance, next));
+                            else
+                                missingCorrelationIds.Add(nonTrackedInstance);
+                        }
+
+                        if (foundInstances.Any()) await Task.WhenAll(foundInstances).ConfigureAwait(false);
+                    }
+
+                    // If no sagas are found or all are missing
+                    if (nonTrackedInstances.Count == missingCorrelationIds.Count)
+                    {
+                        var missingSagaPipe = new MissingPipe<T>(dbContext, next);
+
+                        await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
+                    }
+                }
+
+                await dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
+
+                transaction.Commit();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception innerException)
+                {
+                    if (_log.IsWarnEnabled)
+                        _log.Warn("The transaction rollback failed", innerException);
+                }
+
+                throw;
+            }
+            catch (DbUpdateException ex)
+            {
+                if (IsDeadlockException(ex))
+                {
+                    // deadlock, no need to rollback
+                }
+                else
+                {
+                    try
+                    {
+                        transaction.Rollback();
+                    }
+                    catch (Exception innerException)
+                    {
+                        if (_log.IsWarnEnabled)
+                            _log.Warn("The transaction rollback failed", innerException);
+                    }
+                }
+
+                throw;
+            }
+            catch (SagaException sex)
+            {
+                if (_log.IsErrorEnabled)
+                    _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception innerException)
+                {
+                    if (_log.IsWarnEnabled)
+                        _log.Warn("The transaction rollback failed", innerException);
+                }
+
+                throw;
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception innerException)
+                {
+                    if (_log.IsWarnEnabled)
+                        _log.Warn("The transaction rollback failed", innerException);
+                }
+
+                if (_log.IsErrorEnabled)
+                    _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+
+                throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
             }
         }
 
