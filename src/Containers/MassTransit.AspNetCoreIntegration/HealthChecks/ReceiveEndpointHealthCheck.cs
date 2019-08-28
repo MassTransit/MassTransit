@@ -50,6 +50,11 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
             return TaskUtil.Completed;
         }
 
+        public Task Stopping(ReceiveEndpointStopping stopping)
+        {
+            return TaskUtil.Completed;
+        }
+
         public Task Completed(ReceiveEndpointCompleted completed)
         {
             return TaskUtil.Completed;

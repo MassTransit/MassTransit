@@ -29,14 +29,13 @@ namespace MassTransit.Clients
             _endpoint = endpoint;
         }
 
-        public async Task<T> CreateMessage(object values, CancellationToken cancellationToken)
+        public Task<InitializeContext<T>> CreateMessage(object values, CancellationToken cancellationToken)
         {
             var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
-            if (_endpoint is ConsumeContext context)
-                return (await initializer.Initialize(initializer.Create(context), values).ConfigureAwait(false)).Message;
-
-            return (await initializer.Initialize(values, cancellationToken).ConfigureAwait(false)).Message;
+            return _endpoint is ConsumeContext context
+                ? initializer.Initialize(initializer.Create(context), values)
+                : initializer.Initialize(values, cancellationToken);
         }
 
         public Task Send(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)

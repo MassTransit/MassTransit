@@ -101,9 +101,14 @@ namespace MassTransit.Transports.InMemory
             {
                 _queue.ConnectConsumer(this);
 
-                TaskUtil.Await(() => _receiveEndpointContext.TransportObservers.Ready(new ReceiveTransportReadyEvent(_inputAddress)));
+                void NotifyReady()
+                {
+                    _receiveEndpointContext.TransportObservers.Ready(new ReceiveTransportReadyEvent(_inputAddress));
 
-                SetReady();
+                    SetReady();
+                }
+
+                Task.Factory.StartNew(NotifyReady, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
 
                 return new Handle(this);
             }

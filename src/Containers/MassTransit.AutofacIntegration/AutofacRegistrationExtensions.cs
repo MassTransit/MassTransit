@@ -50,7 +50,7 @@ namespace MassTransit
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
         public static void ConfigureEndpoints<T>(this T configurator, IComponentContext context, IEndpointNameFormatter endpointNameFormatter = null)
-            where T : IBusFactoryConfigurator
+            where T : IReceiveConfigurator
         {
             var registration = context.Resolve<IRegistration>();
 

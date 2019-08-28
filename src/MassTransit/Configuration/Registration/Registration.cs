@@ -107,7 +107,7 @@ namespace MassTransit.Registration
         }
 
         public void ConfigureEndpoints<T>(T configurator, IEndpointNameFormatter endpointNameFormatter)
-            where T : IBusFactoryConfigurator
+            where T : IReceiveConfigurator
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));

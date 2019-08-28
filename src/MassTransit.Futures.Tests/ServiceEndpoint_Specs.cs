@@ -397,13 +397,14 @@ namespace MassTransit.Tests
             _pipe?.Probe(context);
         }
 
-        public async Task Send(SendContext<T> context)
+        public Task Send(SendContext<T> context)
         {
             context.Headers.Set(MessageHeaders.ClientId, _clientContext.ClientId.ToString("N"));
             context.Headers.Set(MessageHeaders.Request.Remaining, _clientContext.Remaining.Value.ToString());
 
-            if (_pipe.IsNotEmpty())
-                await _pipe.Send(context).ConfigureAwait(false);
+            return _pipe.IsNotEmpty()
+                ? _pipe.Send(context)
+                : TaskUtil.Completed;
         }
     }
 

@@ -39,6 +39,27 @@ namespace MassTransit.Tests.Initializers
 
 
     [TestFixture]
+    public class Creating_a_message_with_the_same_type_included :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_initialize_the_properties()
+        {
+            var context = await MessageInitializerCache<ExceptionInfo>.Initialize(new
+            {
+                Message = "Hello",
+                ExceptionType = TypeMetadataCache<ArgumentException>.ShortName,
+            });
+
+            var message = context.Message;
+
+            Assert.That(message.Message, Is.EqualTo("Hello"));
+            Assert.That(message.ExceptionType, Is.EqualTo(TypeMetadataCache<ArgumentException>.ShortName));
+        }
+    }
+
+
+    [TestFixture]
     public class Creating_a_message_via_an_initializer_with_missing_properties :
         InMemoryTestFixture
     {

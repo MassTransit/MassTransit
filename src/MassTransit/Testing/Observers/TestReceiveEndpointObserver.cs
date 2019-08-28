@@ -36,6 +36,11 @@ namespace MassTransit.Testing.Observers
             return TaskUtil.Completed;
         }
 
+        public Task Stopping(ReceiveEndpointStopping stopping)
+        {
+            return TaskUtil.Completed;
+        }
+
         public Task Completed(ReceiveEndpointCompleted completed)
         {
             LogContext.Debug?.Log("Endpoint Complete: {DeliveryCount}/{ConcurrentDeliveryCount} {InputAddress}", completed.DeliveryCount,

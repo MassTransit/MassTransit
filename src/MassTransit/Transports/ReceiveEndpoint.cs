@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
     using System;
@@ -24,7 +12,7 @@ namespace MassTransit.Transports
     /// <summary>
     /// A receive endpoint is called by the receive transport to push messages to consumers.
     /// The receive endpoint is where the initial deserialization occurs, as well as any additional
-    /// filters on the receive context. 
+    /// filters on the receive context.
     /// </summary>
     public class ReceiveEndpoint :
         IReceiveEndpointControl
@@ -47,7 +35,7 @@ namespace MassTransit.Transports
         {
             var transportHandle = _receiveTransport.Start();
 
-            return new Handle(transportHandle);
+            return new Handle(this, transportHandle, _context);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -146,16 +134,22 @@ namespace MassTransit.Transports
         class Handle :
             ReceiveEndpointHandle
         {
+            readonly ReceiveEndpoint _endpoint;
             readonly ReceiveTransportHandle _transportHandle;
+            readonly ReceiveEndpointContext _context;
 
-            public Handle(ReceiveTransportHandle transportHandle)
+            public Handle(ReceiveEndpoint endpoint, ReceiveTransportHandle transportHandle, ReceiveEndpointContext context)
             {
+                _endpoint = endpoint;
                 _transportHandle = transportHandle;
+                _context = context;
             }
 
-            Task ReceiveEndpointHandle.Stop(CancellationToken cancellationToken)
+            async Task ReceiveEndpointHandle.Stop(CancellationToken cancellationToken)
             {
-                return _transportHandle.Stop(cancellationToken);
+                await _context.EndpointObservers.Stopping(new ReceiveEndpointStoppingEvent(_context.InputAddress, _endpoint)).ConfigureAwait(false);
+
+                await _transportHandle.Stop(cancellationToken).ConfigureAwait(false);
             }
         }
     }
