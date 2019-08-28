@@ -98,7 +98,9 @@ namespace MassTransit.AmazonSqsTransport.Tests
         public async Task Should_support_a_simple_handler_on_publish()
         {
             await _harness.Bus.Publish(new A());
-            Assert.That(_handler.Consumed.Select().Count(), Is.AtLeast(2));
+
+            var publishedMessageId = _harness.Published.Select<A>().First().Context.MessageId;
+            Assert.That(_handler.Consumed.Select(c => c.Context.MessageId == publishedMessageId).Any(), Is.True);
         }
 
 
