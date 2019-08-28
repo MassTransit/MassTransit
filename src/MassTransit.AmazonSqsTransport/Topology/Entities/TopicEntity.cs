@@ -58,7 +58,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
 
         private void EnsureRawDeliveryIsSet()
         {
-            TopicSubscriptionAttributes["RawMessageDelivery"] = true;
+            TopicSubscriptionAttributes["RawMessageDelivery"] = "true";
         }
 
 

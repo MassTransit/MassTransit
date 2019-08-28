@@ -94,6 +94,13 @@ namespace MassTransit.AmazonSqsTransport.Tests
             Assert.That(_handler.Consumed.Select().Any(), Is.True);
         }
 
+        [Test]
+        public async Task Should_support_a_simple_handler_on_publish()
+        {
+            await _harness.Bus.Publish(new A());
+            Assert.That(_handler.Consumed.Select().Count(), Is.AtLeast(2));
+        }
+
 
         class A
         {
