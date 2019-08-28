@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Threading;
+    using Clients;
     using GreenPipes;
 
 
@@ -113,5 +114,7 @@ namespace MassTransit
         /// <returns></returns>
         IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, Uri destinationAddress, RequestTimeout timeout = default)
             where T : class;
+
+        ClientFactoryContext Context { get; }
     }
 }

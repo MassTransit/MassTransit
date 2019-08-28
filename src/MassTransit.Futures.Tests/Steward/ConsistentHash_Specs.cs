@@ -19,7 +19,7 @@
             for (int i = 0; i < 1000; i++)
                 servers.Add(new Server(i));
 
-            var ch = new ConsistentHashDistributionStrategy<Server>(new Murmur3AUnsafeHashGenerator(), x => x.Key);
+            var ch = new ConsistentHashDistributionStrategy<Server>(new Murmur3AUnsafeHashGenerator(), x => Encoding.UTF8.GetBytes(x.Key));
             ch.Init(servers);
 
             int search = 100000;
@@ -80,7 +80,7 @@
             for (int i = 0; i < 1000; i++)
                 servers.Add(new Server(i));
 
-            var ch = new ConsistentHashDistributionStrategy<Server>(new Murmur3AUnsafeHashGenerator(), x => x.Key);
+            var ch = new ConsistentHashDistributionStrategy<Server>(new Murmur3AUnsafeHashGenerator(), x => Encoding.UTF8.GetBytes(x.Key));
             ch.Init(servers);
 
             int search = 100000;

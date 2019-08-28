@@ -165,9 +165,12 @@ namespace MassTransit.Tests
         {
             _serviceEndpointName = KebabCaseEndpointNameFormatter.Instance.Consumer<DeployPayloadConsumer>();
 
-            configurator.ServiceEndpoint(_serviceEndpointName, x =>
+            configurator.ServiceInstance(instance =>
             {
-                x.Consumer<DeployPayloadConsumer>();
+                instance.ReceiveEndpoint(_serviceEndpointName, x =>
+                {
+                    x.Consumer<DeployPayloadConsumer>();
+                });
             });
         }
     }
@@ -199,6 +202,87 @@ namespace MassTransit.Tests
                     x.Consumer<DeployPayloadConsumer>();
                 });
             });
+        }
+    }
+
+
+    [TestFixture]
+    public class Linking_a_service_that_later_gets_a_second_instance
+    {
+        [Test]
+        public async Task Should_work()
+        {
+            var bus = await CreateClientBus();
+            try
+            {
+                var instanceA = await CreateInstance();
+                try
+                {
+                    var serviceClient = bus.CreateServiceClient();
+
+                    var requestClient = serviceClient.CreateRequestClient<DeployPayload>();
+
+                    var response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "A"});
+
+                    Assert.That(response.Message.Target, Is.EqualTo("A"));
+
+                    var instanceB = await CreateInstance();
+                    try
+                    {
+                        await instanceA.StopAsync();
+
+                        response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "B"});
+
+                        Assert.That(response.Message.Target, Is.EqualTo("B"));
+                    }
+                    finally
+                    {
+                        await instanceB.StopAsync();
+                    }
+                }
+                finally
+                {
+                    //                    await instanceA.StopAsync();
+                }
+            }
+            finally
+            {
+                await bus.StopAsync();
+            }
+        }
+
+        static async Task<IBusControl> CreateInstance()
+        {
+            var bus = Bus.Factory.CreateUsingRabbitMq(cfg =>
+            {
+                var host = cfg.Host("localhost", "/");
+
+                cfg.ServiceInstance(host, instance =>
+                {
+                    var serviceEndpointName = KebabCaseEndpointNameFormatter.Instance.Consumer<DeployPayloadConsumer>();
+
+                    instance.ReceiveEndpoint(serviceEndpointName, x =>
+                    {
+                        x.Consumer<DeployPayloadConsumer>();
+                    });
+                });
+            });
+
+            await bus.StartAsync();
+
+            return bus;
+        }
+
+        static async Task<IBusControl> CreateClientBus()
+        {
+            var bus = Bus.Factory.CreateUsingRabbitMq(cfg =>
+            {
+                var host = cfg.Host("localhost", "/");
+            });
+
+            await bus.StartAsync();
+
+            return bus;
         }
     }
 

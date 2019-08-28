@@ -20,6 +20,7 @@ namespace MassTransit.Clients
     /// The client factory context, which contains multiple interfaces and properties used by clients
     /// </summary>
     public interface ClientFactoryContext :
+        IConsumePipeConnector,
         IRequestPipeConnector,
         ISendEndpointProvider
     {

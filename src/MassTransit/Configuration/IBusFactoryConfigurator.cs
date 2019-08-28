@@ -1,31 +1,26 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
     using System;
     using System.ComponentModel;
     using System.Net.Mime;
     using Builders;
-    using EndpointConfigurators;
     using GreenPipes;
     using Topology;
 
 
+    public interface IBusFactoryConfigurator<out TEndpointConfigurator> :
+        IBusFactoryConfigurator,
+        IReceiveConfigurator<TEndpointConfigurator>
+        where TEndpointConfigurator : IReceiveEndpointConfigurator
+    {
+    }
+
+
     public interface IBusFactoryConfigurator :
+        IReceiveConfigurator,
         IConsumePipeConfigurator,
         ISendPipelineConfigurator,
-        IPublishPipelineConfigurator,
-        IEndpointConfigurationObserverConnector
+        IPublishPipelineConfigurator
     {
         /// <summary>
         /// Connects a bus observer to the bus to observe lifecycle events on the bus
@@ -84,21 +79,5 @@ namespace MassTransit
         /// Clears all message deserializers
         /// </summary>
         void ClearMessageDeserializers();
-
-        /// <summary>
-        /// Specify a receive endpoint for the bus, using an endpoint definition
-        /// </summary>
-        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
-        /// <param name="endpointNameFormatter"></param>
-        /// <param name="configureEndpoint">The configuration callback</param>
-        void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null);
-
-        /// <summary>
-        /// Specify a receive endpoint for the bus, with the specified queue name
-        /// </summary>
-        /// <param name="queueName">The queue name for the receiving endpoint</param>
-        /// <param name="configureEndpoint">The configuration callback</param>
-        void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint);
     }
 }

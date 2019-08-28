@@ -94,6 +94,6 @@ namespace MassTransit
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
         void ConfigureEndpoints<T>(T configurator, IEndpointNameFormatter endpointNameFormatter)
-            where T : IBusFactoryConfigurator;
+            where T : IReceiveConfigurator;
     }
 }

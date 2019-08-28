@@ -254,6 +254,11 @@
                     return TaskUtil.Completed;
                 }
 
+                public Task Stopping(ReceiveEndpointStopping stopping)
+                {
+                    return TaskUtil.Completed;
+                }
+
                 Task IReceiveEndpointObserver.Completed(ReceiveEndpointCompleted completed)
                 {
                     return TaskUtil.Completed;
