@@ -20,7 +20,7 @@
                 throw new ArgumentException("The message type must be a reference type");
 
             var implementationPropertyInfo = implementationType.GetProperty(propertyInfo.Name);
-            if (propertyInfo == null)
+            if (implementationPropertyInfo == null)
                 throw new ArgumentException("The implementation does not have a property named: " + propertyInfo.Name);
 
             var setMethod = implementationPropertyInfo.GetSetMethod(true);
