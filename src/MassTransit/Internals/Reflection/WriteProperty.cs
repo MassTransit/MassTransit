@@ -19,10 +19,10 @@
             if (typeof(T).GetTypeInfo().IsValueType)
                 throw new ArgumentException("The message type must be a reference type");
 
-            var implementationPropertyInfo = implementationType.GetProperty(propertyInfo.Name);
             if (propertyInfo == null)
                 throw new ArgumentException("The implementation does not have a property named: " + propertyInfo.Name);
 
+            var implementationPropertyInfo = implementationType.GetProperty(propertyInfo.Name);
             var setMethod = implementationPropertyInfo.GetSetMethod(true);
             if (setMethod == null)
                 throw new ArgumentException("The property does not have an accessible set method");
