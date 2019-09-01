@@ -45,7 +45,7 @@ namespace MassTransit.RabbitMqTransport
 
             if (address.IsDefaultPort)
                 connectionFactory.Port = 5672;
-            else if (!address.IsDefaultPort)
+            else
                 connectionFactory.Port = address.Port;
 
             string name = address.AbsolutePath.Substring(1);
