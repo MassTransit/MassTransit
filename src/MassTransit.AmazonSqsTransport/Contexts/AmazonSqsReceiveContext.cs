@@ -50,7 +50,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 return _body = Encoding.UTF8.GetBytes(TransportMessage.Body);
             }
 
-            throw new AmazonSqsTransportException($"The message type is not supported: {TypeMetadataCache.GetShortName(TransportMessage.GetType())}");
+            throw new AmazonSqsTransportException($"The message type is not supported: {TypeMetadataCache.GetShortName(typeof(Message))}");
         }
 
         public override Stream GetBodyStream()
