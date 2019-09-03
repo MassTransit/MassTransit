@@ -52,10 +52,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         public bool TryGetHeader(string key, out object value)
         {
-            var found = _attributes.ContainsKey(key);
-            if (found)
+            if (_attributes.TryGetValue(key, out var val))
             {
-                value = _attributes[key].StringValue;
+                value = val.StringValue;
                 return true;
             }
 

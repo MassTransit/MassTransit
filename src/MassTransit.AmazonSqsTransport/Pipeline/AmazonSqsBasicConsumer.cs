@@ -83,9 +83,8 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             using (_tracker.BeginDelivery())
             {
-                var redelivered = message.Attributes.ContainsKey("ApproximateReceiveCount")
-                    && (int.TryParse(message.Attributes["ApproximateReceiveCount"], out var receiveCount)
-                        && receiveCount > 1);
+                var redelivered = message.Attributes.TryGetValue("ApproximateReceiveCount", out var receiveCountStr)
+                    && int.TryParse(receiveCountStr, out var receiveCount) && receiveCount > 1;
 
                 var context = new AmazonSqsReceiveContext(_inputAddress, message, redelivered, _context);
 

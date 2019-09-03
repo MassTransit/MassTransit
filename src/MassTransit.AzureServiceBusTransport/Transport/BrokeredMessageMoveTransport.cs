@@ -64,9 +64,9 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
                     await clientContext.Send(message).ConfigureAwait(false);
 
-                    var reason = message.Properties.ContainsKey(MessageHeaders.Reason) ? message.Properties[MessageHeaders.Reason].ToString() : "";
+                    var reason = message.Properties.TryGetValue(MessageHeaders.Reason, out var reasonProperty) ? reasonProperty.ToString() : "";
                     if (reason == "fault")
-                        reason = message.Properties.ContainsKey(MessageHeaders.FaultMessage) ? $"Fault: {message.Properties[MessageHeaders.FaultMessage]}" : "Fault";
+                        reason = message.Properties.TryGetValue(MessageHeaders.FaultMessage, out var fault) ? $"Fault: {fault}" : "Fault";
 
                     context.LogMoved(clientContext.EntityPath, reason);
                 }
