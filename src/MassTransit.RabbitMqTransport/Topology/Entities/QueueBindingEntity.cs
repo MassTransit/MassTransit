@@ -67,7 +67,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Entities
                 if (x.GetType() != y.GetType())
                     return false;
                 return x._exchange.Equals(y._exchange) && x._queue.Equals(y._queue) && string.Equals(x.RoutingKey, y.RoutingKey)
-                    && x.Arguments.All(a => y.Arguments.ContainsKey(a.Key) && a.Value.Equals(y.Arguments[a.Key]));
+                    && x.Arguments.All(a => y.Arguments.TryGetValue(a.Key, out var value) && a.Value.Equals(value));
             }
 
             public int GetHashCode(QueueBindingEntity obj)

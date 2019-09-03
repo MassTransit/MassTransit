@@ -117,8 +117,8 @@ namespace MassTransit.Transformation.TransformBuilders
             Dictionary<string, PropertyInfo> inputProperties = TypeMetadataCache<TInput>.Properties.ToDictionary(x => x.Name);
 
             return TypeMetadataCache<TResult>.Properties.Where(x => !_resultTransforms.ContainsKey(x.Name))
-                .Where(x => inputProperties.ContainsKey(x.Name))
-                .Where(x => inputProperties[x.Name].PropertyType == x.PropertyType);
+                .Where(x => inputProperties.TryGetValue(x.Name, out var propertyInfo) &&
+                    propertyInfo == x.PropertyType);
         }
 
         IEnumerable<PropertyInfo> GetUnmappedProperties()

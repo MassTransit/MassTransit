@@ -107,8 +107,8 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
             if (!string.IsNullOrWhiteSpace(_queueName))
                 yield return "queue=" + WebUtility.UrlEncode(_queueName);
 
-            if (ExchangeArguments != null && ExchangeArguments.ContainsKey("x-delayed-type"))
-                yield return "delayedType=" + ExchangeArguments["x-delayed-type"];
+            if (ExchangeArguments != null && ExchangeArguments.TryGetValue("x-delayed-type", out var delayedType))
+                yield return "delayedType=" + delayedType;
 
             foreach (var binding in _exchangeBindings)
                 yield return $"bindexchange={binding.ExchangeName}";
