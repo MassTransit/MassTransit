@@ -54,8 +54,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             if (!TableNames.TryGetValue(t, out var result))
             {
-                result = new SchemaTablePair();
-
                 var sql = RelationalEntityTypeAnnotations(context.Model.FindEntityType(t));
 
                 result = new SchemaTablePair
