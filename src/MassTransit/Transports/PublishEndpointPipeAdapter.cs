@@ -46,6 +46,7 @@ namespace MassTransit.Transports
         public PublishEndpointPipeAdapter(T message, IPipe<PublishContext> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
             ConsumeContext consumeContext)
         {
+            _message = message;
             _pipe = pipe;
             _publishPipe = publishPipe;
             _observer = observer;
@@ -55,6 +56,7 @@ namespace MassTransit.Transports
 
         public PublishEndpointPipeAdapter(T message, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, ConsumeContext consumeContext)
         {
+            _message = message;
             _pipe = Pipe.Empty<PublishContext<T>>();
             _publishPipe = publishPipe;
             _observer = observer;
