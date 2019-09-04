@@ -191,9 +191,9 @@
 
         public override IEnumerable<ValidationResult> Validate()
         {
-            var queueName = $"{_settings.EntityName}";
+            var queueName = _settings.EntityName;
 
-            if (!AmazonSqsEntityNameValidator.Validator.IsValidEntityName(_settings.EntityName))
+            if (!AmazonSqsEntityNameValidator.Validator.IsValidEntityName(queueName))
                 yield return this.Failure(queueName, "must be a valid queue name");
 
             if (_settings.PurgeOnStartup)

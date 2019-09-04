@@ -39,7 +39,7 @@ namespace MassTransit.HttpTransport.Configuration
             _endpointConfiguration = endpointConfiguration;
 
             HostAddress = hostConfiguration.HostAddress;
-            InputAddress = new Uri(hostConfiguration.HostAddress, $"{pathMatch}");
+            InputAddress = new Uri(hostConfiguration.HostAddress, pathMatch);
 
             _httpHostPipeConfigurator = new PipeConfigurator<HttpHostContext>();
         }

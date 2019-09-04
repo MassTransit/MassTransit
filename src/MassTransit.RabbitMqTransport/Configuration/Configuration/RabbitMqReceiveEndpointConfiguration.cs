@@ -268,9 +268,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public override IEnumerable<ValidationResult> Validate()
         {
-            var queueName = $"{_settings.QueueName}";
+            var queueName = _settings.QueueName;
 
-            if (!RabbitMqEntityNameValidator.Validator.IsValidEntityName(_settings.QueueName))
+            if (!RabbitMqEntityNameValidator.Validator.IsValidEntityName(queueName))
                 yield return this.Failure(queueName, "must be a valid queue name");
 
             if (_settings.PurgeOnStartup)

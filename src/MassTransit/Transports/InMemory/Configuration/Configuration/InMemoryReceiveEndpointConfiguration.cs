@@ -35,7 +35,7 @@ namespace MassTransit.Transports.InMemory.Configuration
             _endpointConfiguration = endpointConfiguration;
 
             HostAddress = hostConfiguration.Host.Address;
-            InputAddress = new Uri(hostConfiguration.Host.Address, $"{queueName}");
+            InputAddress = new Uri(hostConfiguration.Host.Address, queueName);
         }
 
         IInMemoryReceiveEndpointConfigurator IInMemoryReceiveEndpointConfiguration.Configurator => this;
