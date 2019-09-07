@@ -11,7 +11,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
 
     public class WindsorCompensateActivityScopeProvider<TActivity, TLog> :
         ICompensateActivityScopeProvider<TActivity, TLog>
-        where TActivity : class, CompensateActivity<TLog>
+        where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
         readonly IKernel _kernel;

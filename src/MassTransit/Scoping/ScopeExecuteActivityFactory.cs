@@ -11,8 +11,8 @@
     /// <typeparam name="TActivity"></typeparam>
     /// <typeparam name="TArguments"></typeparam>
     public class ScopeExecuteActivityFactory<TActivity, TArguments> :
-        ExecuteActivityFactory<TActivity, TArguments>
-        where TActivity : class, ExecuteActivity<TArguments>
+        IExecuteActivityFactory<TActivity, TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         readonly IExecuteActivityScopeProvider<TActivity, TArguments> _scopeProvider;

@@ -12,14 +12,14 @@ namespace MassTransit.Courier.Hosts
 
     public class ExecuteActivityHost<TActivity, TArguments> :
         IFilter<ConsumeContext<RoutingSlip>>
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
-        readonly ExecuteActivityFactory<TActivity, TArguments> _activityFactory;
+        readonly IExecuteActivityFactory<TActivity, TArguments> _activityFactory;
         readonly Uri _compensateAddress;
         readonly IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> _executePipe;
 
-        public ExecuteActivityHost(ExecuteActivityFactory<TActivity, TArguments> activityFactory, IPipe<RequestContext> executePipe, Uri compensateAddress)
+        public ExecuteActivityHost(IExecuteActivityFactory<TActivity, TArguments> activityFactory, IPipe<RequestContext> executePipe, Uri compensateAddress)
             : this(activityFactory, executePipe)
         {
             if (compensateAddress == null)
@@ -28,7 +28,7 @@ namespace MassTransit.Courier.Hosts
             _compensateAddress = compensateAddress;
         }
 
-        public ExecuteActivityHost(ExecuteActivityFactory<TActivity, TArguments> activityFactory, IPipe<RequestContext> executePipe)
+        public ExecuteActivityHost(IExecuteActivityFactory<TActivity, TArguments> activityFactory, IPipe<RequestContext> executePipe)
         {
             if (activityFactory == null)
                 throw new ArgumentNullException(nameof(activityFactory));

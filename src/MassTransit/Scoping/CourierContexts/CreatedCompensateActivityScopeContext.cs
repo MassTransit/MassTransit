@@ -7,7 +7,7 @@
     public class CreatedCompensateActivityScopeContext<TScope, TActivity, TLog> :
         ICompensateActivityScopeContext<TActivity, TLog>
         where TScope : IDisposable
-        where TActivity : class, CompensateActivity<TLog>
+        where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
         readonly TScope _scope;

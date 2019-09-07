@@ -14,7 +14,7 @@
     /// <typeparam name="TLog"></typeparam>
     public class CompensateActivitySplitFilter<TActivity, TLog> :
         IFilter<CompensateActivityContext<TActivity, TLog>>
-        where TActivity : class, CompensateActivity<TLog>
+        where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
         readonly IFilter<CompensateActivityContext<TLog>> _next;

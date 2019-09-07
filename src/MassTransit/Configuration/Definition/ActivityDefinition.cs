@@ -7,7 +7,7 @@ namespace MassTransit.Definition
     public class ActivityDefinition<TActivity, TArguments, TLog> :
         ExecuteActivityDefinition<TActivity, TArguments>,
         IActivityDefinition<TActivity, TArguments, TLog>
-        where TActivity : class, Activity<TArguments, TLog>
+        where TActivity : class, IActivity<TArguments, TLog>
         where TLog : class
         where TArguments : class
     {

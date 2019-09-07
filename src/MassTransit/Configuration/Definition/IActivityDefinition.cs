@@ -24,7 +24,7 @@ namespace MassTransit.Definition
     public interface IActivityDefinition<TActivity, TArguments, TLog> :
         IActivityDefinition,
         IExecuteActivityDefinition<TActivity, TArguments>
-        where TActivity : class, Activity<TArguments, TLog>
+        where TActivity : class, IActivity<TArguments, TLog>
         where TLog : class
         where TArguments : class
     {

@@ -13,7 +13,7 @@ namespace MassTransit.Courier.Pipeline
     /// <typeparam name="TLog"></typeparam>
     public class CompensateActivityMergePipe<TActivity, TLog> :
         IPipe<CompensateActivityContext<TLog>>
-        where TActivity : class, CompensateActivity<TLog>
+        where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
         readonly IPipe<CompensateActivityContext<TActivity, TLog>> _output;

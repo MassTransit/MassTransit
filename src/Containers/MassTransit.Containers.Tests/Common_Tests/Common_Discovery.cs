@@ -211,7 +211,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
 
         public class PingActivity :
-            Courier.Activity<PingArguments, PingLog>
+            IActivity<PingArguments, PingLog>
         {
             public async Task<ExecutionResult> Execute(ExecuteContext<PingArguments> context)
             {
@@ -226,7 +226,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
 
         public class PingSecondActivity :
-            Courier.ExecuteActivity<PingArguments>
+            IExecuteActivity<PingArguments>
         {
             public async Task<ExecutionResult> Execute(ExecuteContext<PingArguments> context)
             {

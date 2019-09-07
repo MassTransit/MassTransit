@@ -14,7 +14,7 @@
     /// <typeparam name="TArguments"></typeparam>
     public class ExecuteActivitySplitFilter<TActivity, TArguments> :
         IFilter<ExecuteActivityContext<TActivity, TArguments>>
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         readonly IFilter<ExecuteActivityContext<TArguments>> _next;

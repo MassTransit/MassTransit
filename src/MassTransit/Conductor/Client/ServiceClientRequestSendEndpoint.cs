@@ -13,17 +13,17 @@ namespace MassTransit.Conductor.Client
         IRequestSendEndpoint<TMessage>
         where TMessage : class
     {
-        readonly Task<IMessageClient> _messageClient;
+        readonly Task<IMessageClient<TMessage>> _messageClient;
         readonly ConsumeContext _consumeContext;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public ServiceClientRequestSendEndpoint(Task<IMessageClient> messageClient, ISendEndpointProvider sendEndpointProvider)
+        public ServiceClientRequestSendEndpoint(Task<IMessageClient<TMessage>> messageClient, ISendEndpointProvider sendEndpointProvider)
         {
             _messageClient = messageClient;
             _sendEndpointProvider = sendEndpointProvider;
         }
 
-        public ServiceClientRequestSendEndpoint(Task<IMessageClient> messageClient, ConsumeContext consumeContext)
+        public ServiceClientRequestSendEndpoint(Task<IMessageClient<TMessage>> messageClient, ConsumeContext consumeContext)
         {
             _messageClient = messageClient;
             _sendEndpointProvider = consumeContext;

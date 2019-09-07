@@ -4,11 +4,11 @@ namespace MassTransit.Definition
 
 
     public class ExecuteActivityEndpointDefinition<TActivity, TArguments> :
-        SettingsEndpointDefinition<ExecuteActivity<TArguments>>
-        where TActivity : class, ExecuteActivity<TArguments>
+        SettingsEndpointDefinition<IExecuteActivity<TArguments>>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
-        public ExecuteActivityEndpointDefinition(IEndpointSettings<IEndpointDefinition<ExecuteActivity<TArguments>>> settings)
+        public ExecuteActivityEndpointDefinition(IEndpointSettings<IEndpointDefinition<IExecuteActivity<TArguments>>> settings)
             : base(settings)
         {
         }

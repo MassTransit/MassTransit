@@ -20,7 +20,7 @@
         /// <param name="keyProvider">Provides the key from the message</param>
         public static void UsePartitioner<TActivity, TLog>(this IPipeConfigurator<CompensateActivityContext<TActivity, TLog>> configurator,
             int partitionCount, Func<CompensateActivityContext<TActivity, TLog>, Guid> keyProvider)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             if (configurator == null)
@@ -46,7 +46,7 @@
         /// <param name="keyProvider">Provides the key from the message</param>
         public static void UsePartitioner<TActivity, TLog>(this IPipeConfigurator<CompensateActivityContext<TActivity, TLog>> configurator,
             IPartitioner partitioner, Func<CompensateActivityContext<TActivity, TLog>, Guid> keyProvider)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             if (configurator == null)
@@ -75,7 +75,7 @@
         /// <param name="encoding">The text encoding to use to convert the string to byte[] (defaults to UTF8)</param>
         public static void UsePartitioner<TActivity, TLog>(this IPipeConfigurator<CompensateActivityContext<TActivity, TLog>> configurator,
             int partitionCount, Func<CompensateActivityContext<TActivity, TLog>, string> keyProvider, Encoding encoding = null)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             if (configurator == null)
@@ -108,7 +108,7 @@
         /// <param name="encoding">The text encoding to use to convert the string to byte[] (defaults to UTF8)</param>
         public static void UsePartitioner<TActivity, TLog>(this IPipeConfigurator<CompensateActivityContext<TActivity, TLog>> configurator,
             IPartitioner partitioner, Func<CompensateActivityContext<TActivity, TLog>, string> keyProvider, Encoding encoding = null)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             if (configurator == null)

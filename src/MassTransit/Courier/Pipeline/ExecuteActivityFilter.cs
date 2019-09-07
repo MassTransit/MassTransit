@@ -11,7 +11,7 @@
     /// <typeparam name="TActivity"></typeparam>
     public class ExecuteActivityFilter<TActivity, TArguments> :
         IFilter<RequestContext<ExecuteActivityContext<TActivity, TArguments>>>
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         void IProbeSite.Probe(ProbeContext context)

@@ -10,7 +10,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
 
     public class StructureMapExecuteActivityScopeProvider<TActivity, TArguments> :
         IExecuteActivityScopeProvider<TActivity, TArguments>
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         readonly IContainer _container;

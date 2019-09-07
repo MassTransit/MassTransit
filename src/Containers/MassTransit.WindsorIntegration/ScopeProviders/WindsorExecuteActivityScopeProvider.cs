@@ -11,7 +11,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
 
     public class WindsorExecuteActivityScopeProvider<TActivity, TArguments> :
         IExecuteActivityScopeProvider<TActivity, TArguments>
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         readonly IKernel _kernel;

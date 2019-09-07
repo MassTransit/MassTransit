@@ -1,15 +1,3 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Registration
 {
     using System;
@@ -59,7 +47,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             _collection.TryAddScoped<TActivity>();
@@ -70,7 +58,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
 
         public void RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>()
             where TDefinition : class, IActivityDefinition<TActivity, TArguments, TLog>
-            where TActivity : class, Activity<TArguments, TLog>
+            where TActivity : class, IActivity<TArguments, TLog>
             where TArguments : class
             where TLog : class
         {
@@ -79,7 +67,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
 
         public void RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>()
             where TDefinition : class, IExecuteActivityDefinition<TActivity, TArguments>
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             _collection.AddTransient<IExecuteActivityDefinition<TActivity, TArguments>, TDefinition>();
@@ -138,13 +126,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Configuration.Reg
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             _collection.TryAddScoped<TActivity>();
 
-            _collection.AddTransient<ICompensateActivityScopeProvider<TActivity, TLog>,
-                DependencyInjectionCompensateActivityScopeProvider<TActivity, TLog>>();
+            _collection.AddTransient<ICompensateActivityScopeProvider<TActivity, TLog>, DependencyInjectionCompensateActivityScopeProvider<TActivity, TLog>>();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace MassTransit.Courier.Pipeline
     /// <typeparam name="TArguments"></typeparam>
     public class ExecuteActivityMergePipe<TActivity, TArguments> :
         IPipe<ExecuteActivityContext<TArguments>>
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         readonly IPipe<ExecuteActivityContext<TActivity, TArguments>> _output;

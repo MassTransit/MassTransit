@@ -12,13 +12,13 @@ namespace MassTransit.Courier.Hosts
 
     public class CompensateActivityHost<TActivity, TLog> :
         IFilter<ConsumeContext<RoutingSlip>>
-        where TActivity : class, CompensateActivity<TLog>
+        where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
-        readonly CompensateActivityFactory<TActivity, TLog> _activityFactory;
+        readonly ICompensateActivityFactory<TActivity, TLog> _activityFactory;
         readonly IRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult> _compensatePipe;
 
-        public CompensateActivityHost(CompensateActivityFactory<TActivity, TLog> activityFactory, IPipe<RequestContext> compensatePipe)
+        public CompensateActivityHost(ICompensateActivityFactory<TActivity, TLog> activityFactory, IPipe<RequestContext> compensatePipe)
         {
             _activityFactory = activityFactory;
 

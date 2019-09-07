@@ -64,7 +64,7 @@ namespace MassTransit.Definition
         }
 
         public string ExecuteActivity<T, TArguments>()
-            where T : class, ExecuteActivity<TArguments>
+            where T : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             var activityName = GetActivityName(typeof(T).Name);
@@ -73,7 +73,7 @@ namespace MassTransit.Definition
         }
 
         public string CompensateActivity<T, TLog>()
-            where T : class, CompensateActivity<TLog>
+            where T : class, ICompensateActivity<TLog>
             where TLog : class
         {
             var activityName = GetActivityName(typeof(T).Name);

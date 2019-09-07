@@ -44,7 +44,7 @@ namespace MassTransit.Conductor.Client
             if (consumeContext == null)
                 throw new ArgumentNullException(nameof(consumeContext));
 
-            Task<IMessageClient> messageClient = GetMessageClient<T>();
+            Task<IMessageClient<T>> messageClient = GetMessageClient<T>();
 
             return new ServiceClientRequestSendEndpoint<T>(messageClient, consumeContext);
         }
@@ -52,7 +52,7 @@ namespace MassTransit.Conductor.Client
         public IRequestSendEndpoint<T> CreateRequestSendEndpoint<T>()
             where T : class
         {
-            Task<IMessageClient> messageClient = GetMessageClient<T>();
+            Task<IMessageClient<T>> messageClient = GetMessageClient<T>();
 
             return new ServiceClientRequestSendEndpoint<T>(messageClient, _clientFactory.Context);
         }
@@ -87,13 +87,15 @@ namespace MassTransit.Conductor.Client
             await _clientFactory.DisposeAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        Task<IMessageClient> GetMessageClient<T>()
+        async Task<IMessageClient<T>> GetMessageClient<T>()
             where T : class
         {
             if (_disposed.IsCancellationRequested)
                 throw new ObjectDisposedException("The service client has been disposed.");
 
-            return _index.Get(typeof(T), type => CreateMessageClient<T>(_disposed.Token));
+            var client = await _index.Get(typeof(T), type => CreateMessageClient<T>(_disposed.Token)).ConfigureAwait(false);
+
+            return client as IMessageClient<T>;
         }
 
         async Task<IMessageClient> CreateMessageClient<T>(CancellationToken cancellationToken)

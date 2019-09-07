@@ -12,7 +12,7 @@
     public class CompensateActivityFilter<TActivity, TLog> :
         IFilter<RequestContext<CompensateActivityContext<TActivity, TLog>>>
         where TLog : class
-        where TActivity : class, CompensateActivity<TLog>
+        where TActivity : class, ICompensateActivity<TLog>
     {
         void IProbeSite.Probe(ProbeContext context)
         {

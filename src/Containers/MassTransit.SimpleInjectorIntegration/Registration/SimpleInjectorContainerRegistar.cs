@@ -50,7 +50,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             RegisterIfNotRegistered<TActivity>();
@@ -61,7 +61,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         public void RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>()
             where TDefinition : class, IActivityDefinition<TActivity, TArguments, TLog>
-            where TActivity : class, Activity<TArguments, TLog>
+            where TActivity : class, IActivity<TArguments, TLog>
             where TArguments : class
             where TLog : class
         {
@@ -70,7 +70,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         public void RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>()
             where TDefinition : class, IExecuteActivityDefinition<TActivity, TArguments>
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             _container.Register<IExecuteActivityDefinition<TActivity, TArguments>, TDefinition>(Lifestyle.Transient);
@@ -115,7 +115,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             RegisterIfNotRegistered<TActivity>();

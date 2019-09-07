@@ -11,8 +11,8 @@
     /// <typeparam name="TActivity"></typeparam>
     /// <typeparam name="TArguments"></typeparam>
     public class ScopeCompensateActivityFactory<TActivity, TArguments> :
-        CompensateActivityFactory<TActivity, TArguments>
-        where TActivity : class, CompensateActivity<TArguments>
+        ICompensateActivityFactory<TActivity, TArguments>
+        where TActivity : class, ICompensateActivity<TArguments>
         where TArguments : class
     {
         readonly ICompensateActivityScopeProvider<TActivity, TArguments> _scopeProvider;

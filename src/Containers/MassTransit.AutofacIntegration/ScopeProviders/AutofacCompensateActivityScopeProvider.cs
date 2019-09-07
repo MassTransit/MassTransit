@@ -11,7 +11,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
 
     public class AutofacCompensateActivityScopeProvider<TActivity, TLog> :
         ICompensateActivityScopeProvider<TActivity, TLog>
-        where TActivity : class, CompensateActivity<TLog>
+        where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
         readonly string _name;

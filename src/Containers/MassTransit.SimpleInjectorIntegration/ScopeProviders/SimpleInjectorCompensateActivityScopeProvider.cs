@@ -11,7 +11,7 @@
 
     public class SimpleInjectorCompensateActivityScopeProvider<TActivity, TLog> :
         ICompensateActivityScopeProvider<TActivity, TLog>
-        where TActivity : class, CompensateActivity<TLog>
+        where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
         readonly Container _container;

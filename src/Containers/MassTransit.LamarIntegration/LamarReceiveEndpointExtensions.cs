@@ -1,15 +1,3 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
     using System;
@@ -92,7 +80,7 @@ namespace MassTransit
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
             IServiceContext context, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             ExecuteActivityHost(configurator, compensateAddress, context.GetInstance<IContainer>(), configure);
@@ -100,7 +88,7 @@ namespace MassTransit
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
             IContainer container, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             var executeActivityScopeProvider = new LamarExecuteActivityScopeProvider<TActivity, TArguments>(container);
@@ -112,7 +100,7 @@ namespace MassTransit
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
             IServiceContext context, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             ExecuteActivityHost(configurator, context.GetInstance<IContainer>(), configure);
@@ -120,7 +108,7 @@ namespace MassTransit
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, IContainer container,
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             var executeActivityScopeProvider = new LamarExecuteActivityScopeProvider<TActivity, TArguments>(container);
@@ -132,7 +120,7 @@ namespace MassTransit
 
         public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IServiceContext context,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configure = null)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             CompensateActivityHost(configurator, context.GetInstance<IContainer>(), configure);
@@ -140,7 +128,7 @@ namespace MassTransit
 
         public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IContainer container,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configure = null)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             var compensateActivityScopeProvider = new LamarCompensateActivityScopeProvider<TActivity, TLog>(container);

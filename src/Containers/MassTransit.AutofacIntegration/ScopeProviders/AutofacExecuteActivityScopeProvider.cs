@@ -11,7 +11,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
 
     public class AutofacExecuteActivityScopeProvider<TActivity, TArguments> :
         IExecuteActivityScopeProvider<TActivity, TArguments>
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         readonly string _name;

@@ -20,8 +20,5 @@ namespace MassTransit.Conductor.Client
         Guid ClientId { get; }
 
         Type MessageType { get; }
-
-        Task<ISendEndpoint> GetServiceSendEndpoint<T>(ISendEndpointProvider sendEndpointProvider, T message, CancellationToken cancellationToken = default)
-            where T : class;
     }
 }

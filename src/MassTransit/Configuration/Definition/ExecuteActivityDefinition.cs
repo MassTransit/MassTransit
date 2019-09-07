@@ -7,7 +7,7 @@ namespace MassTransit.Definition
 
     public class ExecuteActivityDefinition<TActivity, TArguments> :
         IExecuteActivityDefinition<TActivity, TArguments>
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         int? _concurrentMessageLimit;

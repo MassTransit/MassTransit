@@ -8,6 +8,7 @@ namespace MassTransit.Conductor.Client
     using Context;
     using Contracts;
     using Distribution;
+    using GreenPipes;
     using GreenPipes.Caching;
     using Util;
 
@@ -75,16 +76,6 @@ namespace MassTransit.Conductor.Client
         public Guid ClientId { get; }
         public Type MessageType => typeof(TMessage);
 
-        public Task<ISendEndpoint> GetServiceSendEndpoint<T>(ISendEndpointProvider sendEndpointProvider, T message,
-            CancellationToken cancellationToken = default)
-            where T : class
-        {
-            if (message is TMessage msg)
-                return GetServiceSendEndpoint(sendEndpointProvider, msg, cancellationToken);
-
-            return TaskUtil.Faulted<ISendEndpoint>(new ArgumentException($"Invalid message type: {TypeMetadataCache<T>.ShortName}", nameof(message)));
-        }
-
         public async Task<ISendEndpoint> GetServiceSendEndpoint(ISendEndpointProvider sendEndpointProvider, TMessage message,
             CancellationToken cancellationToken = default)
         {
@@ -105,7 +96,7 @@ namespace MassTransit.Conductor.Client
             return await sendEndpointProvider.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
         }
 
-        public async Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
+        async Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
         {
             // say goodbye to service endpoints?
         }

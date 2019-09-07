@@ -6,7 +6,7 @@
 
     public class ExistingExecuteActivityScopeContext<TActivity, TArguments> :
         IExecuteActivityScopeContext<TActivity, TArguments>
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         readonly Action<TActivity> _disposeCallback;
