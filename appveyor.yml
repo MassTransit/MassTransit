@@ -14,7 +14,7 @@ skip_commits:
 
 image:
   - Visual Studio 2017
-  - Previous Ubuntu1804
+  - Ubuntu1804
 
 services:
   - mongodb
