@@ -2,7 +2,7 @@
 {
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Saga;
+    using Saga.Data;
 
 
     [SetUpFixture]

@@ -26,10 +26,9 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <ProjectReference Include="..\Containers\MassTransit.AutofacIntegration\MassTransit.AutofacIntegration.csproj" />
-    <ProjectReference Include="..\Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
   </ItemGroup>

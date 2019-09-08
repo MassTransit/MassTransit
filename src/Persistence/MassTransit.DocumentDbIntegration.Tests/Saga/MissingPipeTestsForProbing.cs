@@ -1,8 +1,10 @@
 ﻿namespace MassTransit.DocumentDbIntegration.Tests.Saga
 {
+    using Data;
     using DocumentDbIntegration.Saga.Context;
     using DocumentDbIntegration.Saga.Pipeline;
     using GreenPipes;
+    using Messages;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Moq;

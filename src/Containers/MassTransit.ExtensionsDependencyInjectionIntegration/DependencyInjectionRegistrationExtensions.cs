@@ -16,7 +16,7 @@ namespace MassTransit
     using ConsumeConfigurators;
     using Definition;
     using ExtensionsDependencyInjectionIntegration;
-    using ExtensionsDependencyInjectionIntegration.Configuration.Registration;
+    using ExtensionsDependencyInjectionIntegration.Registration;
     using Microsoft.Extensions.DependencyInjection;
     using Saga;
 

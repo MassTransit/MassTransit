@@ -19,6 +19,5 @@
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
       <ProjectReference Include="..\MassTransit.Azure.ServiceBus.Core\MassTransit.Azure.ServiceBus.Core.csproj" />
       <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
-      <ProjectReference Include="..\Loggers\MassTransit.ExtensionsLoggingIntegration\MassTransit.ExtensionsLoggingIntegration.csproj" />
   </ItemGroup>
 </Project>

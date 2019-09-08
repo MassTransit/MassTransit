@@ -14,11 +14,13 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
 {
     using System;
     using System.Threading.Tasks;
+    using Data;
     using GreenPipes;
     using MassTransit.Saga;
     using DocumentDbIntegration.Saga;
     using DocumentDbIntegration.Saga.Context;
     using DocumentDbIntegration.Saga.Pipeline;
+    using Messages;
     using Moq;
     using NUnit.Framework;
     using Pipeline;
