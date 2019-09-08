@@ -76,7 +76,9 @@ namespace MassTransit.Clients
 
             _send = SendRequest();
 
+        #pragma warning disable 4014
             HandleFault();
+        #pragma warning restore 4014
         }
 
         async Task IPipe<SendContext<TRequest>>.Send(SendContext<TRequest> context)

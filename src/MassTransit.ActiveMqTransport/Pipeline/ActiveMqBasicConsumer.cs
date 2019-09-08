@@ -10,6 +10,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Logging;
     using Topology;
     using Transports.Metrics;
 
@@ -59,45 +60,54 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
         async void HandleMessage(IMessage message)
         {
+            LogContext.Current = _context.LogContext;
+
             if (IsStopping)
             {
                 await WaitAndAbandonMessage(message).ConfigureAwait(false);
                 return;
             }
 
-            using (_tracker.BeginDelivery())
+            var delivery = _tracker.BeginDelivery();
+
+            var context = new ActiveMqReceiveContext(_inputAddress, message, _context);
+
+            context.GetOrAddPayload(() => _receiveSettings);
+            context.GetOrAddPayload(() => _session);
+            context.GetOrAddPayload(() => _session.ConnectionContext);
+
+
+            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
+            activity.AddReceiveContextHeaders(context);
+
+            try
             {
-                var context = new ActiveMqReceiveContext(_inputAddress, message, _context);
+                if (!_pending.TryAdd(message.NMSMessageId, context))
+                    LogContext.Warning?.Log("Duplicate message: {MessageId}", message.NMSMessageId);
 
-                context.GetOrAddPayload(() => _receiveSettings);
-                context.GetOrAddPayload(() => _session);
-                context.GetOrAddPayload(() => _session.ConnectionContext);
+                await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
-                try
-                {
-                    if (!_pending.TryAdd(message.NMSMessageId, context))
-                        LogContext.Warning?.Log("Duplicate message: {MessageId}", message.NMSMessageId);
+                await _context.ReceivePipe.Send(context).ConfigureAwait(false);
 
-                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                await context.ReceiveCompleted.ConfigureAwait(false);
 
-                    await _context.ReceivePipe.Send(context).ConfigureAwait(false);
+                message.Acknowledge();
 
-                    await context.ReceiveCompleted.ConfigureAwait(false);
+                await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+            }
+            finally
+            {
+                activity?.Stop();
 
-                    message.Acknowledge();
+                delivery.Dispose();
 
-                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
-                }
-                finally
-                {
-                    _pending.TryRemove(message.NMSMessageId, out _);
+                _pending.TryRemove(message.NMSMessageId, out _);
 
-                    context.Dispose();
-                }
+                context.Dispose();
             }
         }
 

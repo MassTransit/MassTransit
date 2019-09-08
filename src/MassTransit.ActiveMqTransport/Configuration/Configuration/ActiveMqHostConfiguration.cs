@@ -4,6 +4,8 @@
     using System.Threading.Tasks;
     using Apache.NMS;
     using Configurators;
+    using Context;
+    using Contexts;
     using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Topology;
@@ -19,7 +21,7 @@
         readonly IActiveMqBusConfiguration _busConfiguration;
         readonly ActiveMqHostSettings _hostSettings;
         readonly IActiveMqHostTopology _hostTopology;
-        readonly IActiveMqHostControl _host;
+        readonly ActiveMqHost _host;
 
         public ActiveMqHostConfiguration(IActiveMqBusConfiguration busConfiguration, ActiveMqHostSettings hostSettings, IActiveMqHostTopology hostTopology)
         {
@@ -59,9 +61,9 @@
 
             var sessionContextSupervisor = CreateSessionContextSupervisor();
 
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology());
+            var configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
 
-            return CreateSendTransport(sessionContextSupervisor, configureTopologyFilter, settings.EntityName, DestinationType.Queue);
+            return CreateSendTransport(sessionContextSupervisor, configureTopology, settings.EntityName, DestinationType.Queue);
         }
 
         public Task<ISendTransport> CreatePublishTransport<T>()
@@ -73,9 +75,9 @@
 
             var sessionContextSupervisor = CreateSessionContextSupervisor();
 
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, publishTopology.GetBrokerTopology());
+            var configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
 
-            return CreateSendTransport(sessionContextSupervisor, configureTopologyFilter, settings.EntityName, DestinationType.Topic);
+            return CreateSendTransport(sessionContextSupervisor, configureTopology, settings.EntityName, DestinationType.Topic);
         }
 
         ISessionContextSupervisor CreateSessionContextSupervisor()
@@ -83,12 +85,12 @@
             return new ActiveMqSessionContextSupervisor(_host.ConnectionContextSupervisor);
         }
 
-        Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor sessionContextSupervisor, IFilter<SessionContext> configureTopologyFilter,
+        Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor sessionContextSupervisor, IPipe<SessionContext> pipe,
             string entityName, DestinationType destinationType)
         {
-            var transport = new ActiveMqSendTransport(sessionContextSupervisor, configureTopologyFilter, entityName, destinationType);
-            transport.Add(sessionContextSupervisor);
+            var sendTransportContext = new HostActiveMqSendTransportContext(sessionContextSupervisor, pipe, entityName, destinationType, _host.SendLogContext);
 
+            var transport = new ActiveMqSendTransport(sendTransportContext);
             _host.Add(transport);
 
             return Task.FromResult<ISendTransport>(transport);
@@ -97,6 +99,27 @@
         public IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
         {
             return new ActiveMqReceiveEndpointConfiguration(this, queueName, _busConfiguration.CreateEndpointConfiguration());
+        }
+
+
+        class HostActiveMqSendTransportContext :
+            BaseSendTransportContext,
+            ActiveMqSendTransportContext
+        {
+            public HostActiveMqSendTransportContext(ISessionContextSupervisor sessionContextSupervisor, IPipe<SessionContext> configureTopologyPipe, string
+                entityName, DestinationType destinationType, ILogContext logContext)
+                : base(logContext)
+            {
+                SessionContextSupervisor = sessionContextSupervisor;
+                ConfigureTopologyPipe = configureTopologyPipe;
+                EntityName = entityName;
+                DestinationType = destinationType;
+            }
+
+            public IPipe<SessionContext> ConfigureTopologyPipe { get; }
+            public string EntityName { get; }
+            public DestinationType DestinationType { get; }
+            public ISessionContextSupervisor SessionContextSupervisor { get; }
         }
     }
 }

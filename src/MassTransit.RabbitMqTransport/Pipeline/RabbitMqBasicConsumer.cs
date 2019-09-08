@@ -144,7 +144,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             try
             {
                 if (!_pending.TryAdd(deliveryTag, context))
-                    LogContext.Error?.Log("Duplicate BasicDeliver: {DeliveryTag}", deliveryTag);
+                    LogContext.Warning?.Log("Duplicate BasicDeliver: {DeliveryTag}", deliveryTag);
 
                 await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 

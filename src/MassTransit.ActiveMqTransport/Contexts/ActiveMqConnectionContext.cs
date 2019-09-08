@@ -34,9 +34,15 @@ namespace MassTransit.ActiveMqTransport.Contexts
         public Uri HostAddress => _configuration.HostAddress;
         public IActiveMqHostTopology Topology => _configuration.Topology;
 
-        public Task<ISession> CreateSession()
+        public async Task<ISession> CreateSession(CancellationToken cancellationToken)
         {
-            return Task.Factory.StartNew(() => _connection.CreateSession(), CancellationToken, TaskCreationOptions.None, _taskScheduler);
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken))
+            {
+                var model = await Task.Factory.StartNew(() => _connection.CreateSession(), tokenSource.Token, TaskCreationOptions.None, _taskScheduler)
+                    .ConfigureAwait(false);
+
+                return model;
+            }
         }
 
         IConnection ConnectionContext.Connection => _connection;

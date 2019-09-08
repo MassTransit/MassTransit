@@ -61,24 +61,6 @@ namespace MassTransit.Azure.ServiceBus.Core
         IServiceBusHost Host(ServiceBusHostSettings settings);
 
         /// <summary>
-        /// Declare a ReceiveEndpoint on the broker and configure the endpoint settings and message consumers.
-        /// </summary>
-        /// <param name="host">The host for this endpoint</param>
-        /// <param name="queueName">The input queue name</param>
-        /// <param name="configure">The configuration method</param>
-        void ReceiveEndpoint(IServiceBusHost host, string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure);
-
-        /// <summary>
-        /// Specify a receive endpoint for the bus, using an endpoint definition
-        /// </summary>
-        /// <param name="host"></param>
-        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
-        /// <param name="endpointNameFormatter"></param>
-        /// <param name="configureEndpoint">The configuration callback</param>
-        void ReceiveEndpoint(IServiceBusHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
-            Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint = null);
-
-        /// <summary>
         /// Declare a subscription endpoint on the broker and configure the endpoint settings and message consumers
         /// </summary>
         /// <typeparam name="T"></typeparam>

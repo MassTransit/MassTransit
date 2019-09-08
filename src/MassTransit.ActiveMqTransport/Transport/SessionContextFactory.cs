@@ -47,7 +47,7 @@
             {
                 try
                 {
-                    var session = await connectionContext.CreateSession().ConfigureAwait(false);
+                    var session = await connectionContext.CreateSession(cancellationToken).ConfigureAwait(false);
 
                     LogContext.Debug?.Log("Created session: {Host}", connectionContext.Description);
 
