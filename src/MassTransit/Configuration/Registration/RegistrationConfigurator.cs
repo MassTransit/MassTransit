@@ -1,15 +1,3 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Registration
 {
     using System;
@@ -110,6 +98,28 @@ namespace MassTransit.Registration
         void IRegistrationConfigurator.AddSaga(Type sagaType, Type sagaDefinitionType)
         {
             _sagaRegistrations.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, sagaDefinitionType, _containerRegistrar));
+        }
+
+        ISagaRegistrationConfigurator<T> IRegistrationConfigurator.AddSagaStateMachine<TStateMachine, T>(Type sagaDefinitionType)
+        {
+            ISagaRegistration Factory(IContainerRegistrar containerRegistrar)
+            {
+                SagaStateMachineRegistrationCache.Register(typeof(TStateMachine), containerRegistrar);
+
+                if (sagaDefinitionType != null)
+                    SagaDefinitionRegistrationCache.Register(sagaDefinitionType, containerRegistrar);
+
+                return new SagaStateMachineRegistration<T>();
+            }
+
+            var registration = _sagaRegistrations.GetOrAdd(typeof(T), _ => Factory(_containerRegistrar));
+
+            return new SagaRegistrationConfigurator<T>(this, registration, _containerRegistrar);
+        }
+
+        void IRegistrationConfigurator.AddSagaStateMachine(Type sagaType, Type sagaDefinitionType)
+        {
+            SagaStateMachineRegistrationCache.AddSagaStateMachine(this, sagaType, sagaDefinitionType);
         }
 
         IExecuteActivityRegistrationConfigurator<TActivity, TArguments> IRegistrationConfigurator.AddExecuteActivity<TActivity, TArguments>(

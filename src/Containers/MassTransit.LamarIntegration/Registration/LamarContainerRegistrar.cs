@@ -1,11 +1,13 @@
 namespace MassTransit.LamarIntegration.Registration
 {
     using System;
+    using Automatonymous;
     using Courier;
     using Definition;
     using Lamar;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Saga;
     using ScopeProviders;
     using Scoping;
@@ -38,6 +40,17 @@ namespace MassTransit.LamarIntegration.Registration
         public void RegisterSaga<T>()
             where T : class, ISaga
         {
+        }
+
+        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+            where TStateMachine : class, SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            _registry.TryAddSingleton<IStateMachineActivityFactory, LamarStateMachineActivityFactory>();
+            _registry.TryAddSingleton<ISagaStateMachineFactory, LamarSagaStateMachineFactory>();
+
+            _registry.AddSingleton<TStateMachine>();
+            _registry.AddSingleton<SagaStateMachine<TInstance>>(provider => provider.GetRequiredService<TStateMachine>());
         }
 
         public void RegisterSagaDefinition<TDefinition, TSaga>()
@@ -94,8 +107,8 @@ namespace MassTransit.LamarIntegration.Registration
             {
                 var clientFactory = context.GetInstance<IClientFactory>();
 
-                ConsumeContext consumeContext = context.TryGetInstance<ConsumeContext>();
-                return (consumeContext != null)
+                var consumeContext = context.TryGetInstance<ConsumeContext>();
+                return consumeContext != null
                     ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
                     : clientFactory.CreateRequestClient<T>(timeout);
             }).Scoped();
@@ -108,8 +121,8 @@ namespace MassTransit.LamarIntegration.Registration
             {
                 var clientFactory = context.GetInstance<IClientFactory>();
 
-                ConsumeContext consumeContext = context.TryGetInstance<ConsumeContext>();
-                return (consumeContext != null)
+                var consumeContext = context.TryGetInstance<ConsumeContext>();
+                return consumeContext != null
                     ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
                     : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
             }).Scoped();

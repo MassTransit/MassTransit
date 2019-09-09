@@ -3,8 +3,9 @@ namespace MassTransit
     using System;
     using ConsumeConfigurators;
     using Courier;
+    using ExtensionsDependencyInjectionIntegration.Registration;
     using ExtensionsDependencyInjectionIntegration.ScopeProviders;
-    using Microsoft.Extensions.DependencyInjection;
+    using Registration;
     using Saga;
     using Scoping;
 
@@ -41,11 +42,9 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var repository = provider.GetRequiredService<ISagaRepository<T>>();
+            ISagaRepositoryFactory factory = new DependencyInjectionSagaRepositoryFactory(provider);
 
-            ISagaScopeProvider<T> scopeProvider = new DependencyInjectionSagaScopeProvider<T>(provider);
-
-            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+            ISagaRepository<T> sagaRepository = factory.CreateSagaRepository<T>();
 
             configurator.Saga(sagaRepository, configure);
         }

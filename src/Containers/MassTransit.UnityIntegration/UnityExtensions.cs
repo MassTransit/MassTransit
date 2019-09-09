@@ -38,7 +38,8 @@ namespace MassTransit
             }
         }
 
-        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IUnityContainer container, Action<IConsumerConfigurator<T>> configure = null)
+        public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IUnityContainer container,
+            Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
             var consumerFactory = new ScopeConsumerFactory<T>(new UnityConsumerScopeProvider(container));
@@ -58,7 +59,8 @@ namespace MassTransit
             configurator.Saga(sagaRepository, configure);
         }
 
-        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress, IUnityContainer container)
+        public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
+            IUnityContainer container)
             where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {

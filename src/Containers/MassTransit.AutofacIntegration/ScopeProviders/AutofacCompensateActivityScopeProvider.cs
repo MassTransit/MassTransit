@@ -14,8 +14,8 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
-        readonly string _name;
         readonly Action<ContainerBuilder, CompensateContext<TLog>> _configureScope;
+        readonly string _name;
         readonly ILifetimeScopeProvider _scopeProvider;
 
         public AutofacCompensateActivityScopeProvider(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, CompensateContext<TLog>>

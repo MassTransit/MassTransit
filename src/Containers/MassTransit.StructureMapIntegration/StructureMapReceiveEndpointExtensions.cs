@@ -3,9 +3,11 @@ namespace MassTransit
     using System;
     using ConsumeConfigurators;
     using Courier;
+    using Registration;
     using Saga;
     using Scoping;
     using StructureMap;
+    using StructureMapIntegration.Registration;
     using StructureMapIntegration.ScopeProviders;
 
 
@@ -94,11 +96,9 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var repository = container.GetInstance<ISagaRepository<T>>();
+            ISagaRepositoryFactory factory = new StructureMapSagaRepositoryFactory(container);
 
-            ISagaScopeProvider<T> scopeProvider = new StructureMapSagaScopeProvider<T>(container);
-
-            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+            ISagaRepository<T> sagaRepository = factory.CreateSagaRepository<T>();
 
             configurator.Saga(sagaRepository, configure);
         }

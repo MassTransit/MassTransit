@@ -1,15 +1,3 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration.Registration
 {
     using System;
@@ -52,11 +40,6 @@ namespace MassTransit.WindsorIntegration.Registration
             );
         }
 
-        IConsumerScopeProvider CreateConsumerScopeProvider(IKernel kernel)
-        {
-            return new WindsorConsumerScopeProvider(kernel);
-        }
-
         public IWindsorContainer Container => _container;
 
         public void AddBus(Func<IKernel, IBusControl> busFactory)
@@ -72,15 +55,20 @@ namespace MassTransit.WindsorIntegration.Registration
                     .UsingFactoryMethod(GetCurrentPublishEndpoint)
                     .LifestyleTransient(),
                 Component.For<IClientFactory>()
-                    .UsingFactoryMethod(kernel => kernel.Resolve<IBus>().CreateClientFactory(default))
+                    .UsingFactoryMethod(kernel => kernel.Resolve<IBus>().CreateClientFactory())
                     .LifestyleSingleton()
             );
+        }
+
+        IConsumerScopeProvider CreateConsumerScopeProvider(IKernel kernel)
+        {
+            return new WindsorConsumerScopeProvider(kernel);
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IKernel context)
         {
             var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
-            return (currentScope != null)
+            return currentScope != null
                 ? context.Resolve<ConsumeContext>()
                 : (ISendEndpointProvider)context.Resolve<IBus>();
         }
@@ -88,7 +76,7 @@ namespace MassTransit.WindsorIntegration.Registration
         static IPublishEndpoint GetCurrentPublishEndpoint(IKernel context)
         {
             var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
-            return (currentScope != null)
+            return currentScope != null
                 ? context.Resolve<ConsumeContext>()
                 : (IPublishEndpoint)context.Resolve<IBus>();
         }

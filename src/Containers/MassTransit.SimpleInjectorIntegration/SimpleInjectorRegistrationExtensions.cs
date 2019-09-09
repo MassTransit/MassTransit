@@ -1,10 +1,9 @@
 namespace MassTransit
 {
+    using System;
     using ConsumeConfigurators;
     using Definition;
     using Saga;
-
-    using System;
     using SimpleInjector;
     using SimpleInjectorIntegration;
     using SimpleInjectorIntegration.Registration;
@@ -57,9 +56,7 @@ namespace MassTransit
             var registration = container.GetInstance<IRegistration>();
 
             foreach (var consumerType in consumerTypes)
-            {
                 registration.ConfigureConsumer(consumerType, configurator);
-            }
         }
 
         /// <summary>
@@ -100,9 +97,7 @@ namespace MassTransit
             var registration = container.GetInstance<IRegistration>();
 
             foreach (var sagaType in sagaTypes)
-            {
                 registration.ConfigureSaga(sagaType, configurator);
-            }
         }
 
         /// <summary>

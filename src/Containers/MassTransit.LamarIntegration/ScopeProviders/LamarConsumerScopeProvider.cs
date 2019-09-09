@@ -59,7 +59,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                var consumerContext = context.PushConsumer(consumer);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumer(consumer);
 
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext);
             }
@@ -71,7 +71,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                var consumerContext = context.PushConsumerScope(consumer, nestedContainer);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, nestedContainer);
                 consumerContext.UpdatePayload(nestedContainer);
 
                 return new CreatedConsumerScopeContext<INestedContainer, TConsumer, T>(nestedContainer, consumerContext);

@@ -2,6 +2,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 {
     using System;
     using System.Linq;
+    using Automatonymous;
     using Courier;
     using Definition;
     using MassTransit.Registration;
@@ -40,6 +41,17 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         public void RegisterSaga<T>()
             where T : class, ISaga
         {
+        }
+
+        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+            where TStateMachine : class, SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            _container.RegisterSingleton<IStateMachineActivityFactory, SimpleInjectorStateMachineActivityFactory>();
+            _container.RegisterSingleton<ISagaStateMachineFactory, SimpleInjectorSagaStateMachineFactory>();
+
+            _container.RegisterSingleton<TStateMachine>();
+            _container.RegisterSingleton<SagaStateMachine<TInstance>>(() => _container.GetInstance<TStateMachine>());
         }
 
         public void RegisterSagaDefinition<TDefinition, TSaga>()
@@ -130,9 +142,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             var notExists = _container.GetCurrentRegistrations().SingleOrDefault(r => r.Registration.ImplementationType == typeof(TActivity)) == null;
 
             if (notExists)
-            {
                 _container.Register<TActivity>(Lifestyle.Scoped);
-            }
         }
     }
 }

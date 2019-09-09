@@ -1,15 +1,3 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
 {
     using System;
@@ -28,8 +16,8 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
         ISagaScopeProvider<TSaga>
         where TSaga : class, ISaga
     {
-        readonly IList<Action<ConsumeContext>> _scopeActions;
         readonly Container _container;
+        readonly IList<Action<ConsumeContext>> _scopeActions;
 
         public SimpleInjectorSagaScopeProvider(Container container)
         {
@@ -42,14 +30,14 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
             context.Add("provider", "simpleInjector");
         }
 
-        public ISagaScopeContext<T> GetScope<T>(ConsumeContext<T> context) where T : class
+        public ISagaScopeContext<T> GetScope<T>(ConsumeContext<T> context)
+            where T : class
         {
             if (context.TryGetPayload<Scope>(out var existingScope))
             {
                 existingScope.UpdateScope(context);
 
                 return new ExistingSagaScopeContext<T>(context);
-
             }
 
             var scope = AsyncScopedLifestyle.BeginScope(_container);
@@ -74,7 +62,8 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
             }
         }
 
-        public ISagaQueryScopeContext<TSaga, T> GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context) where T : class
+        public ISagaQueryScopeContext<TSaga, T> GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
+            where T : class
         {
             if (context.TryGetPayload<Scope>(out var existingScope))
             {

@@ -1,7 +1,6 @@
-﻿namespace MassTransit.AutomatonymousSimpleInjectorIntegration.Registration
+﻿namespace MassTransit.SimpleInjectorIntegration.Registration
 {
     using Automatonymous;
-    using Automatonymous.Registration;
     using SimpleInjector;
 
 

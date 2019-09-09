@@ -1,6 +1,7 @@
 namespace MassTransit.Registration
 {
     using System;
+    using Automatonymous;
     using Courier;
     using Definition;
     using Saga;
@@ -17,6 +18,10 @@ namespace MassTransit.Registration
 
         void RegisterSaga<T>()
             where T : class, ISaga;
+
+        void RegisterStateMachineSaga<TStateMachine, TInstance>()
+            where TStateMachine : class, SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance;
 
         void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>

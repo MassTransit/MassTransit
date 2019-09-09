@@ -1,15 +1,3 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
     using System;
@@ -17,7 +5,6 @@ namespace MassTransit
     using System.Linq;
     using System.Reflection;
     using Automatonymous;
-    using Automatonymous.Registration;
     using Definition;
     using Internals.Extensions;
     using Registration;
@@ -27,47 +14,19 @@ namespace MassTransit
     public static class AutomatonymousRegistrationExtensions
     {
         /// <summary>
-        /// Adds a SagaStateMachine to the registry, using the factory method, and updates the registrar prior to registering so that the default
-        /// saga registrar isn't notified.
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="registrar"></param>
-        /// <param name="sagaDefinitionType"></param>
-        /// <typeparam name="TStateMachine"></typeparam>
-        /// <typeparam name="TInstance"></typeparam>
-        public static ISagaRegistrationConfigurator<TInstance> AddSagaStateMachine<TStateMachine, TInstance>(this IRegistrationConfigurator configurator,
-            ISagaStateMachineRegistrar registrar, Type sagaDefinitionType = null)
-            where TStateMachine : class, SagaStateMachine<TInstance>
-            where TInstance : class, SagaStateMachineInstance
-        {
-            ISagaRegistration Factory(IContainerRegistrar containerRegistrar)
-            {
-                SagaStateMachineRegistrationCache.Register(typeof(TStateMachine), registrar);
-
-                if (sagaDefinitionType != null)
-                    SagaDefinitionRegistrationCache.Register(sagaDefinitionType, containerRegistrar);
-
-                return new SagaStateMachineRegistration<TInstance>();
-            }
-
-            return configurator.AddSaga<TInstance>(Factory);
-        }
-
-        /// <summary>
         /// Adds SagaStateMachines to the registry, using the factory method, and updates the registrar prior to registering so that the default
         /// saga registrar isn't notified.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="registrar"></param>
         /// <param name="assemblies">The assemblies to scan for state machines</param>
-        public static void AddSagaStateMachines(this IRegistrationConfigurator configurator, ISagaStateMachineRegistrar registrar, params Assembly[] assemblies)
+        public static void AddSagaStateMachines(this IRegistrationConfigurator configurator, params Assembly[] assemblies)
         {
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             var types = AssemblyTypeCache.FindTypes(assemblies, IsSagaStateMachineOrDefinition).GetAwaiter().GetResult();
 
-            configurator.AddSagaStateMachines(registrar, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
+            configurator.AddSagaStateMachines(types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
 
         /// <summary>
@@ -75,11 +34,9 @@ namespace MassTransit
         /// sure to call AddSagaStateMachinesFromNamespaceContaining prior to calling this one.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="registrar"></param>
         /// <param name="type">The type to use to identify the assembly and namespace to scan</param>
         /// <param name="filter"></param>
-        public static void AddSagaStateMachinesFromNamespaceContaining(this IRegistrationConfigurator configurator, ISagaStateMachineRegistrar registrar,
-            Type type, Func<Type, bool> filter)
+        public static void AddSagaStateMachinesFromNamespaceContaining(this IRegistrationConfigurator configurator, Type type, Func<Type, bool> filter = null)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
@@ -100,7 +57,7 @@ namespace MassTransit
             else
                 types = FindTypesInNamespace(type, IsSagaStateMachineOrDefinition);
 
-            AddSagaStateMachines(configurator, registrar, types.ToArray());
+            AddSagaStateMachines(configurator, types.ToArray());
         }
 
         static bool IsSagaStateMachineOrDefinition(Type type)
@@ -126,9 +83,8 @@ namespace MassTransit
         /// saga registrar isn't notified.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="registrar"></param>
         /// <param name="types">The state machine types to add</param>
-        public static void AddSagaStateMachines(this IRegistrationConfigurator configurator, ISagaStateMachineRegistrar registrar, params Type[] types)
+        public static void AddSagaStateMachines(this IRegistrationConfigurator configurator, params Type[] types)
         {
             IEnumerable<Type> sagaTypes = types.Where(x => x.HasInterface(typeof(SagaStateMachine<>)));
             IEnumerable<Type> sagaDefinitionTypes = types.Where(x => x.HasInterface(typeof(ISagaDefinition<>)));
@@ -137,13 +93,17 @@ namespace MassTransit
                 join d in sagaDefinitionTypes on c.GetClosingArguments(typeof(SagaStateMachine<>)).Single()
                     equals d.GetClosingArguments(typeof(ISagaDefinition<>)).Single() into dc
                 from d in dc.DefaultIfEmpty()
-                select new {SagaType = c, DefinitionType = d};
+                select new
+                {
+                    SagaType = c,
+                    DefinitionType = d
+                };
 
             foreach (var saga in sagas)
-                SagaStateMachineRegistrationCache.AddSagaStateMachine(configurator, saga.SagaType, saga.DefinitionType, registrar);
+                configurator.AddSagaStateMachine(saga.SagaType, saga.DefinitionType);
         }
 
-        public static void RegisterSagaStateMachines(this ISagaStateMachineRegistrar registrar, params Assembly[] assemblies)
+        public static void RegisterSagaStateMachines(this IContainerRegistrar registrar, params Assembly[] assemblies)
         {
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -153,7 +113,7 @@ namespace MassTransit
             registrar.RegisterSagaStateMachines(types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
 
-        public static void RegisterSagaStateMachines(this ISagaStateMachineRegistrar registrar, params Type[] types)
+        public static void RegisterSagaStateMachines(this IContainerRegistrar registrar, params Type[] types)
         {
             foreach (var type in types)
             {

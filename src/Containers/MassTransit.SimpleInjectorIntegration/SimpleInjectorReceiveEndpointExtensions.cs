@@ -4,10 +4,12 @@ namespace MassTransit
     using ConsumeConfigurators;
     using Courier;
     using PipeConfigurators;
-    using SimpleInjector;
-    using SimpleInjectorIntegration.ScopeProviders;
+    using Registration;
     using Saga;
     using Scoping;
+    using SimpleInjector;
+    using SimpleInjectorIntegration.Registration;
+    using SimpleInjectorIntegration.ScopeProviders;
 
 
     public static class SimpleInjectorReceiveEndpointExtensions
@@ -23,11 +25,9 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, Container container, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var repository = container.GetInstance<ISagaRepository<T>>();
+            ISagaRepositoryFactory factory = new SimpleInjectorSagaRepositoryFactory(container);
 
-            var scopeProvider = new SimpleInjectorSagaScopeProvider<T>(container);
-
-            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+            ISagaRepository<T> sagaRepository = factory.CreateSagaRepository<T>();
 
             configurator.Saga(sagaRepository, configure);
         }

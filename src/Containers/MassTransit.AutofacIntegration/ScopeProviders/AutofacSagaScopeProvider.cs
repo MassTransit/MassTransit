@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AutofacIntegration.ScopeProviders
+﻿namespace MassTransit.AutofacIntegration.ScopeProviders
 {
     using System;
     using System.Collections.Generic;
@@ -27,10 +15,10 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
         ISagaScopeProvider<TSaga>
         where TSaga : class, ISaga
     {
-        readonly string _name;
         readonly Action<ContainerBuilder, ConsumeContext> _configureScope;
-        readonly ILifetimeScopeProvider _scopeProvider;
+        readonly string _name;
         readonly IList<Action<ConsumeContext>> _scopeActions;
+        readonly ILifetimeScopeProvider _scopeProvider;
 
         public AutofacSagaScopeProvider(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configureScope)
         {

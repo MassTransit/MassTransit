@@ -3,10 +3,12 @@ namespace MassTransit
     using System;
     using Autofac;
     using AutofacIntegration;
+    using AutofacIntegration.Registration;
     using AutofacIntegration.ScopeProviders;
     using ConsumeConfigurators;
     using Courier;
     using PipeConfigurators;
+    using Registration;
     using Saga;
     using Scoping;
 
@@ -63,7 +65,7 @@ namespace MassTransit
             Action<ContainerBuilder, ConsumeContext> configureScope = null)
             where T : class, IConsumer
         {
-            ILifetimeScopeRegistry<TId> registry = context.Resolve<ILifetimeScopeRegistry<TId>>();
+            var registry = context.Resolve<ILifetimeScopeRegistry<TId>>();
 
             IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new RegistryLifetimeScopeProvider<TId>(registry), name, configureScope);
 
@@ -141,11 +143,9 @@ namespace MassTransit
             Action<ContainerBuilder, ConsumeContext> configureScope = null)
             where T : class, ISaga
         {
-            var repository = scope.Resolve<ISagaRepository<T>>();
+            ISagaRepositoryFactory factory = new AutofacSagaRepositoryFactory(new SingleLifetimeScopeProvider(scope), name, configureScope);
 
-            ISagaScopeProvider<T> scopeProvider = new AutofacSagaScopeProvider<T>(new SingleLifetimeScopeProvider(scope), name, configureScope);
-
-            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+            ISagaRepository<T> sagaRepository = factory.CreateSagaRepository<T>();
 
             configurator.Saga(sagaRepository);
         }

@@ -1,13 +1,14 @@
 namespace MassTransit.StructureMapIntegration.Registration
 {
     using System;
+    using Automatonymous;
     using Courier;
     using Definition;
-    using StructureMap;
     using MassTransit.Registration;
     using Saga;
     using ScopeProviders;
     using Scoping;
+    using StructureMap;
 
 
     public class StructureMapContainerRegistrar :
@@ -37,6 +38,17 @@ namespace MassTransit.StructureMapIntegration.Registration
         public void RegisterSaga<T>()
             where T : class, ISaga
         {
+        }
+
+        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+            where TStateMachine : class, SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            _expression.For<ISagaStateMachineFactory>().Use<StructureMapSagaStateMachineFactory>().Singleton();
+            _expression.For<IStateMachineActivityFactory>().Use<StructureMapStateMachineActivityFactory>().Singleton();
+
+            _expression.For<TStateMachine>().Singleton();
+            _expression.For<SagaStateMachine<TInstance>>().Use(provider => provider.GetInstance<TStateMachine>()).Singleton();
         }
 
         public void RegisterSagaDefinition<TDefinition, TSaga>()
@@ -98,6 +110,16 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IRequestClient<T>>().Use(context => CreateRequestClient<T>(destinationAddress, timeout, context));
         }
 
+        public void RegisterCompensateActivity<TActivity, TLog>()
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            _expression.ForConcreteType<TActivity>();
+
+            _expression.For<ICompensateActivityScopeProvider<TActivity, TLog>>()
+                .Use(context => CreateCompensateActivityScopeProvider<TActivity, TLog>(context));
+        }
+
         static IRequestClient<T> CreateRequestClient<T>(RequestTimeout timeout, IContext context)
             where T : class
         {
@@ -118,16 +140,6 @@ namespace MassTransit.StructureMapIntegration.Registration
             return consumeContext != null
                 ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
                 : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-        }
-
-        public void RegisterCompensateActivity<TActivity, TLog>()
-            where TActivity : class, ICompensateActivity<TLog>
-            where TLog : class
-        {
-            _expression.ForConcreteType<TActivity>();
-
-            _expression.For<ICompensateActivityScopeProvider<TActivity, TLog>>()
-                .Use(context => CreateCompensateActivityScopeProvider<TActivity, TLog>(context));
         }
 
         IExecuteActivityScopeProvider<TActivity, TArguments> CreateExecuteActivityScopeProvider<TActivity, TArguments>(IContext context)

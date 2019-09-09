@@ -1,6 +1,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 {
     using System;
+    using Automatonymous;
     using Courier;
     using Definition;
     using MassTransit.Registration;
@@ -37,6 +38,17 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         public void RegisterSaga<T>()
             where T : class, ISaga
         {
+        }
+
+        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+            where TStateMachine : class, SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            _collection.TryAddSingleton<IStateMachineActivityFactory, DependencyInjectionStateMachineActivityFactory>();
+            _collection.TryAddSingleton<ISagaStateMachineFactory, DependencyInjectionSagaStateMachineFactory>();
+
+            _collection.AddSingleton<TStateMachine>();
+            _collection.AddSingleton<SagaStateMachine<TInstance>>(provider => provider.GetRequiredService<TStateMachine>());
         }
 
         public void RegisterSagaDefinition<TDefinition, TSaga>()
@@ -98,7 +110,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 var clientFactory = context.GetRequiredService<IClientFactory>();
 
                 var consumeContext = context.GetService<ConsumeContext>();
-                return (consumeContext != null)
+                return consumeContext != null
                     ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
                     : clientFactory.CreateRequestClient<T>(timeout);
             });

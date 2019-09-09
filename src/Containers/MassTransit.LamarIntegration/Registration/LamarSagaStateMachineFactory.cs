@@ -2,7 +2,6 @@
 {
     using System;
     using Automatonymous;
-    using Automatonymous.Registration;
     using Microsoft.Extensions.DependencyInjection;
 
 

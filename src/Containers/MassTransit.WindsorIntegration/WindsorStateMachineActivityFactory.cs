@@ -1,4 +1,4 @@
-﻿namespace MassTransit.AutomatonymousWindsorIntegration
+﻿namespace MassTransit.WindsorIntegration
 {
     using Automatonymous;
     using Castle.MicroKernel;

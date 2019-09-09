@@ -22,11 +22,6 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             _scopeActions = new List<Action<ConsumeContext>>();
         }
 
-        public void AddScopeAction(Action<ConsumeContext> action)
-        {
-            _scopeActions.Add(action);
-        }
-
         public void Probe(ProbeContext context)
         {
             context.Add("provider", "windsor");
@@ -71,7 +66,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                var consumerContext = context.PushConsumer(consumer);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumer(consumer);
 
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext, ReleaseComponent);
             }
@@ -83,7 +78,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                var consumerContext = context.PushConsumerScope(consumer, scope);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, scope);
                 consumerContext.UpdatePayload(_kernel);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
@@ -96,6 +91,11 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 scope?.Dispose();
                 throw;
             }
+        }
+
+        public void AddScopeAction(Action<ConsumeContext> action)
+        {
+            _scopeActions.Add(action);
         }
 
         void ReleaseComponent<T>(T component)

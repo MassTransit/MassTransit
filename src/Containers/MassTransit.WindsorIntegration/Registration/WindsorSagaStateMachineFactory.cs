@@ -1,7 +1,6 @@
-﻿namespace MassTransit.AutomatonymousWindsorIntegration.Registration
+﻿namespace MassTransit.WindsorIntegration.Registration
 {
     using Automatonymous;
-    using Automatonymous.Registration;
     using Castle.MicroKernel;
 
 
@@ -14,7 +13,9 @@
         {
             _container = container;
         }
-        public SagaStateMachine<T> CreateStateMachine<T>() where T : class, SagaStateMachineInstance
+
+        public SagaStateMachine<T> CreateStateMachine<T>()
+            where T : class, SagaStateMachineInstance
         {
             return _container.Resolve<SagaStateMachine<T>>();
         }

@@ -4,7 +4,9 @@ namespace MassTransit
     using ConsumeConfigurators;
     using Courier;
     using Lamar;
+    using LamarIntegration.Registration;
     using LamarIntegration.ScopeProviders;
+    using Registration;
     using Saga;
     using Scoping;
 
@@ -69,11 +71,9 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var repository = container.GetInstance<ISagaRepository<T>>();
+            ISagaRepositoryFactory factory = new LamarSagaRepositoryFactory(container);
 
-            ISagaScopeProvider<T> scopeProvider = new LamarSagaScopeProvider<T>(container);
-
-            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+            ISagaRepository<T> sagaRepository = factory.CreateSagaRepository<T>();
 
             configurator.Saga(sagaRepository, configure);
         }

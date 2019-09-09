@@ -14,8 +14,8 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
-        readonly string _name;
         readonly Action<ContainerBuilder, ExecuteContext<TArguments>> _configureScope;
+        readonly string _name;
         readonly ILifetimeScopeProvider _scopeProvider;
 
         public AutofacExecuteActivityScopeProvider(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ExecuteContext<TArguments>>

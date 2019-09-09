@@ -1,6 +1,7 @@
 namespace MassTransit.WindsorIntegration.Registration
 {
     using System;
+    using Automatonymous;
     using Castle.MicroKernel.Lifestyle.Scoped;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
@@ -42,6 +43,22 @@ namespace MassTransit.WindsorIntegration.Registration
         public void RegisterSaga<T>()
             where T : class, ISaga
         {
+        }
+
+        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+            where TStateMachine : class, SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            if (!_container.Kernel.HasComponent(typeof(IStateMachineActivityFactory)))
+                _container.Register(Component.For<IStateMachineActivityFactory>().ImplementedBy<WindsorStateMachineActivityFactory>().LifestyleSingleton());
+
+            if (!_container.Kernel.HasComponent(typeof(ISagaStateMachineFactory)))
+                _container.Register(Component.For<ISagaStateMachineFactory>().ImplementedBy<WindsorSagaStateMachineFactory>().LifestyleSingleton());
+
+            _container.Register(
+                Component.For<TStateMachine>().LifestyleSingleton(),
+                Component.For<SagaStateMachine<TInstance>>().UsingFactoryMethod(provider => provider.Resolve<TStateMachine>()).LifestyleSingleton()
+            );
         }
 
         public void RegisterSagaDefinition<TDefinition, TSaga>()
@@ -103,7 +120,7 @@ namespace MassTransit.WindsorIntegration.Registration
                 var clientFactory = kernel.Resolve<IClientFactory>();
 
                 var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
-                return (currentScope != null)
+                return currentScope != null
                     ? clientFactory.CreateRequestClient<T>(kernel.Resolve<ConsumeContext>(), timeout)
                     : clientFactory.CreateRequestClient<T>(timeout);
             }));
@@ -117,7 +134,7 @@ namespace MassTransit.WindsorIntegration.Registration
                 var clientFactory = kernel.Resolve<IClientFactory>();
 
                 var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
-                return (currentScope != null)
+                return currentScope != null
                     ? clientFactory.CreateRequestClient<T>(kernel.Resolve<ConsumeContext>(), destinationAddress, timeout)
                     : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
             }));

@@ -2,6 +2,7 @@ namespace MassTransit.AutofacIntegration.Registration
 {
     using System;
     using Autofac;
+    using Automatonymous;
     using Courier;
     using Definition;
     using MassTransit.Registration;
@@ -37,6 +38,24 @@ namespace MassTransit.AutofacIntegration.Registration
         public void RegisterSaga<T>()
             where T : class, ISaga
         {
+        }
+
+        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+            where TStateMachine : class, SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            _builder.RegisterType<AutofacStateMachineActivityFactory>()
+                .As<IStateMachineActivityFactory>()
+                .SingleInstance();
+
+            _builder.RegisterType<AutofacSagaStateMachineFactory>()
+                .As<ISagaStateMachineFactory>()
+                .SingleInstance();
+
+            _builder.RegisterType<TStateMachine>()
+                .AsSelf()
+                .As<SagaStateMachine<TInstance>>()
+                .SingleInstance();
         }
 
         public void RegisterSagaDefinition<TDefinition, TSaga>()

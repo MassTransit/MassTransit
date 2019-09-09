@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit
+﻿namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
@@ -20,10 +8,8 @@ namespace MassTransit
     using AutofacIntegration;
     using AutofacIntegration.Registration;
     using Automatonymous;
-    using Automatonymous.Registration;
-    using AutomatonymousAutofacIntegration;
-    using AutomatonymousAutofacIntegration.Registration;
     using Internals.Extensions;
+    using Registration;
 
 
     public static class AutofacStateMachineLoadSagaExtensions
@@ -58,15 +44,17 @@ namespace MassTransit
             var activityFactory = new AutofacStateMachineActivityFactory();
 
             foreach (var sagaType in sagaTypes)
-            {
                 StateMachineSagaConfiguratorCache.Configure(sagaType, configurator, stateMachineFactory, repositoryFactory, activityFactory);
-            }
         }
 
         static IEnumerable<Type> FindStateMachineSagaTypes(IComponentContext context)
         {
             return context.ComponentRegistry.Registrations
-                .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new {r, s})
+                .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => new
+                {
+                    r,
+                    s
+                })
                 .Where(rs => rs.s.ServiceType.HasInterface(typeof(SagaStateMachine<>)))
                 .Select(rs => rs.s.ServiceType.GetClosingArguments(typeof(SagaStateMachine<>)).Single())
                 .Distinct()

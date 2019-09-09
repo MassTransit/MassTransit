@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System;
+    using Automatonymous;
     using ConsumeConfigurators;
     using Courier;
     using Definition;
@@ -49,6 +50,24 @@ namespace MassTransit
         /// <param name="sagaType">The saga type</param>
         /// <param name="sagaDefinitionType">The saga definition type</param>
         void AddSaga(Type sagaType, Type sagaDefinitionType = null);
+
+        /// <summary>
+        /// Adds a SagaStateMachine to the registry, using the factory method, and updates the registrar prior to registering so that the default
+        /// saga registrar isn't notified.
+        /// </summary>
+        /// <param name="sagaDefinitionType"></param>
+        /// <typeparam name="TStateMachine"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Type sagaDefinitionType = null)
+            where TStateMachine : class, SagaStateMachine<T>
+            where T : class, SagaStateMachineInstance;
+
+        /// <summary>
+        /// Adds the state machine saga, along with an optional saga definition
+        /// </summary>
+        /// <param name="sagaType">The saga type</param>
+        /// <param name="sagaDefinitionType">The saga definition type</param>
+        void AddSagaStateMachine(Type sagaType, Type sagaDefinitionType = null);
 
         /// <summary>
         /// Adds an execute activity (Courier), allowing configuration when it is configured on the endpoint.

@@ -1,4 +1,4 @@
-﻿namespace MassTransit.AutomatonymousSimpleInjectorIntegration
+﻿namespace MassTransit.SimpleInjectorIntegration
 {
     using Automatonymous;
     using GreenPipes;
@@ -16,7 +16,8 @@
             return (TActivity)container.GetInstance(typeof(TActivity));
         }
 
-        public Activity<TInstance> GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context) where TActivity : Activity<TInstance>
+        public Activity<TInstance> GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context)
+            where TActivity : Activity<TInstance>
         {
             var container = context.GetPayload<Container>();
 

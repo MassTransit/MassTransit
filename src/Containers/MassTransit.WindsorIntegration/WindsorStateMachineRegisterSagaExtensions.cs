@@ -1,11 +1,11 @@
 ﻿namespace MassTransit
 {
     using System;
+    using System.Reflection;
     using Automatonymous;
+    using Castle.MicroKernel;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
-    using System.Reflection;
-    using Castle.MicroKernel;
 
 
     public static class WindsorStateMachineRegisterSagaExtensions
