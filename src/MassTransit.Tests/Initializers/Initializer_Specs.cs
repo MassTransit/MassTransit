@@ -1,12 +1,10 @@
 ﻿namespace MassTransit.Tests.Initializers
 {
     using System;
-    using System.Diagnostics;
     using System.Globalization;
     using System.Threading.Tasks;
     using MassTransit.Initializers;
     using NUnit.Framework;
-    using Util;
 
 
     [TestFixture]
@@ -47,50 +45,6 @@
             Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
             Assert.That(message.DayValue, Is.EqualTo(_dayValue));
             Assert.That(message.ObjectValue, Is.EqualTo(_objectValue));
-        }
-
-        [Test, Explicit, Category("SlowAF")]
-        public async Task Should_be_faster_than_json()
-        {
-            var inputObject = new
-            {
-                StringValue = _stringValue,
-                BoolValue = _boolValue,
-                ByteValue = _byteValue,
-                ShortValue = _shortValue,
-                IntValue = _intValue,
-                LongValue = _longValue,
-                DoubleValue = _doubleValue,
-                DecimalValue = _decimalValue,
-                DateTimeValue = _dateTimeValue,
-                DateTimeOffsetValue = _dateTimeOffsetValue,
-                TimeSpanValue = _timeSpanValue,
-                DayValue = _dayValue,
-                ObjectValue = _objectValue,
-            };
-
-            var context = await MessageInitializerCache<TestInitializerMessage>.Initialize(inputObject);
-
-            var timer = Stopwatch.StartNew();
-            for (int i = 0; i < 100000; i++)
-            {
-                context = await MessageInitializerCache<TestInitializerMessage>.Initialize(inputObject);
-            }
-
-            timer.Stop();
-
-            var message = TypeMetadataCache<TestInitializerMessage>.InitializeFromObject(inputObject);
-
-            var jsonTimer = Stopwatch.StartNew();
-            for (int i = 0; i < 100000; i++)
-            {
-                message = TypeMetadataCache<TestInitializerMessage>.InitializeFromObject(inputObject);
-            }
-
-            jsonTimer.Stop();
-
-            Console.WriteLine("Initializer: {0}", timer.ElapsedMilliseconds);
-            Console.WriteLine("JsonMessage: {0}", jsonTimer.ElapsedMilliseconds);
         }
 
         [Test]

@@ -6,10 +6,9 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading;
+    using GreenPipes.Internals.Extensions;
     using Internals.Extensions;
-    using Newtonsoft.Json.Linq;
     using Saga;
-    using Serialization;
 
 
     public static class TypeMetadataCache
@@ -21,7 +20,7 @@
 
         public static string GetShortName(Type type)
         {
-            return GetOrAdd(type).ShortName;
+            return TypeCache.GetShortName(type);
         }
 
         public static bool IsValidMessageType(Type type)
@@ -63,7 +62,6 @@
             bool IsTemporaryMessageType { get; }
             bool IsValidMessageType { get; }
             Type[] MessageTypes { get; }
-            string ShortName { get; }
         }
 
 
@@ -75,7 +73,6 @@
             public bool IsTemporaryMessageType => TypeMetadataCache<T>.IsTemporaryMessageType;
             public bool IsValidMessageType => TypeMetadataCache<T>.IsValidMessageType;
             public Type[] MessageTypes => TypeMetadataCache<T>.MessageTypes;
-            public string ShortName => TypeMetadataCache<T>.ShortName;
         }
     }
 
@@ -96,18 +93,18 @@
 
         TypeMetadataCache()
         {
-            _shortName = typeof(T).GetTypeName();
+            _shortName = TypeCache<T>.ShortName;
 
             _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
             _hasConsumerInterfaces = new Lazy<bool>(() => !_hasSagaInterfaces.Value && ScanForConsumerInterfaces(), LazyThreadSafetyMode.PublicationOnly);
 
-            _properties = new Lazy<List<PropertyInfo>>(() => typeof(T).GetAllProperties().ToList());
+            _properties = new Lazy<List<PropertyInfo>>(() => Internals.Extensions.TypeExtensions.GetAllProperties(typeof(T)).ToList());
 
             _isValidMessageType = new Lazy<bool>(CheckIfValidMessageType);
             _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T).GetTypeInfo()));
             _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
-            _implementationType = new Lazy<Type>(() => GreenPipes.Internals.Extensions.TypeCache.GetImplementationType(typeof(T)));
+            _implementationType = new Lazy<Type>(() => TypeCache.GetImplementationType(typeof(T)));
         }
 
         public static string ShortName => Cached.Metadata.Value.ShortName;
@@ -127,17 +124,6 @@
         string ITypeMetadataCache<T>.InvalidMessageTypeReason => _invalidMessageTypeReason;
         Type[] ITypeMetadataCache<T>.MessageTypes => _messageTypes.Value;
         Type ITypeMetadataCache<T>.ImplementationType => _implementationType.Value;
-
-        T ITypeMetadataCache<T>.InitializeFromObject(object values)
-        {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            var objValues = JObject.FromObject(values, JsonMessageSerializer.Serializer);
-
-            return objValues.ToObject<T>(JsonMessageSerializer.Deserializer);
-        }
-
         bool ITypeMetadataCache<T>.HasConsumerInterfaces => _hasConsumerInterfaces.Value;
         bool ITypeMetadataCache<T>.HasSagaInterfaces => _hasSagaInterfaces.Value;
         string ITypeMetadataCache<T>.ShortName => _shortName;
@@ -183,7 +169,7 @@
                 return false;
             }
 
-            if (typeInfo.HasInterface<SendContext>() || typeInfo.HasInterface<ConsumeContext>() || typeInfo.HasInterface<ReceiveContext>())
+            if (Internals.Extensions.InterfaceExtensions.HasInterface<SendContext>(typeInfo) || Internals.Extensions.InterfaceExtensions.HasInterface<ConsumeContext>(typeInfo) || Internals.Extensions.InterfaceExtensions.HasInterface<ReceiveContext>(typeInfo))
             {
                 _invalidMessageTypeReason = $"ConsumeContext, ReceiveContext, and SendContext are not valid message types: {ShortName}";
                 return false;
@@ -218,7 +204,7 @@
 
                 if (typeDefinition == typeof(Observes<,>))
                 {
-                    var closingArguments = typeof(T).GetClosingArguments(typeof(Observes<,>)).ToArray();
+                    var closingArguments = Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(Observes<,>)).ToArray();
                     _invalidMessageTypeReason = $"Observes<{closingArguments[0].Name},{closingArguments[1].Name} is not a valid message type";
                     return false;
                 }
@@ -282,16 +268,11 @@
             return MessageTypes.Select(x => MessageUrn.ForType(x).ToString());
         }
 
-        public static T InitializeFromObject(object values)
-        {
-            return Cached.Metadata.Value.InitializeFromObject(values);
-        }
-
         static bool ScanForConsumerInterfaces()
         {
             Type[] interfaces = typeof(T).GetTypeInfo().GetInterfaces();
 
-            return interfaces.Any(t => t.HasInterface(typeof(IConsumer<>)));
+            return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IConsumer<>)));
         }
 
         static bool ScanForSagaInterfaces()
@@ -301,9 +282,9 @@
             if (interfaces.Contains(typeof(ISaga)))
                 return true;
 
-            return interfaces.Any(t => t.HasInterface(typeof(InitiatedBy<>))
-                || t.HasInterface(typeof(Orchestrates<>))
-                || t.HasInterface(typeof(Observes<,>)));
+            return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(InitiatedBy<>))
+                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Orchestrates<>))
+                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Observes<,>)));
         }
 
 

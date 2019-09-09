@@ -4,7 +4,6 @@ namespace MassTransit.Initializers
     using System.Threading;
     using Contexts;
     using Factories;
-    using GreenPipes.Internals.Extensions;
     using Util;
 
 
@@ -30,7 +29,7 @@ namespace MassTransit.Initializers
 
                 var implementationType = typeof(TMessage);
                 if (typeof(TMessage).IsInterface)
-                    implementationType = TypeCache.GetImplementationType(typeof(TMessage));
+                    implementationType = TypeMetadataCache<TMessage>.ImplementationType;
 
                 return (IMessageFactory<TMessage>)Activator.CreateInstance(typeof(DynamicMessageFactory<,>).MakeGenericType(typeof(TMessage),
                     implementationType));

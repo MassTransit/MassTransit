@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Linq;
@@ -59,25 +47,21 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_allow_reconfiguration()
         {
-            IRequestClient<SetConcurrencyLimit, ConcurrencyLimitUpdated> client = new PublishRequestClient<SetConcurrencyLimit, ConcurrencyLimitUpdated>(Bus,
-                TestTimeout);
+            var client = Bus.CreateRequestClient<SetConcurrencyLimit>(TestTimeout);
 
-            SetConcurrencyLimit request = TypeMetadataCache<SetConcurrencyLimit>.InitializeFromObject(new
+            var response = await client.GetResponse<ConcurrencyLimitUpdated>(new
             {
                 ConcurrencyLimit = 16,
                 Timestamp = DateTime.UtcNow
-            });
+            }, TestCancellationToken);
 
-            var concurrencyLimitUpdated = await client.Request(request, TestCancellationToken);
-
-            Assert.AreEqual(request.ConcurrencyLimit, concurrencyLimitUpdated.ConcurrencyLimit);
+            Assert.AreEqual(16, response.Message.ConcurrencyLimit);
         }
 
         [Test, Explicit, Category("SlowAF")]
         public async Task Should_allow_reconfiguration_of_prefetch_count()
         {
-            IRequestClient<SetPrefetchCount, PrefetchCountUpdated> client = new PublishRequestClient<SetPrefetchCount, PrefetchCountUpdated>(Bus,
-                TestTimeout);
+            var client = Bus.CreateRequestClient<SetPrefetchCount>(TestTimeout);
 
             for (int i = 0; i < 50; i++)
             {
@@ -86,14 +70,12 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await Task.Delay(20);
             }
 
-            SetPrefetchCount request = TypeMetadataCache<SetPrefetchCount>.InitializeFromObject(new
+            await client.GetResponse<PrefetchCountUpdated>(new
             {
                 PrefetchCount = (ushort)32,
                 Timestamp = DateTime.UtcNow,
                 QueueName = "input_queue",
-            });
-
-            await client.Request(request, TestCancellationToken);
+            }, TestCancellationToken);
 
             for (int i = 0; i < 50; i++)
             {
