@@ -1,6 +1,7 @@
-namespace MassTransit
+namespace MassTransit.Logging
 {
     using System.Diagnostics;
+    using Context;
 
 
     public readonly struct EnabledDiagnosticSource
@@ -18,7 +19,11 @@ namespace MassTransit
         {
             Activity activity = new Activity(_name);
 
-            return new StartedActivity(_source, _source.StartActivity(activity, args));
+            var startActivity = _source.StartActivity(activity, args);
+
+            var scope = LogContext.BeginScope();
+
+            return new StartedActivity(_source, startActivity, scope);
         }
     }
 }

@@ -8,10 +8,10 @@ namespace MassTransit.Context
     public class BusLogContext :
         ILogContext
     {
-        readonly DiagnosticSource _source;
+        readonly ILogger _logger;
         readonly ILoggerFactory _loggerFactory;
-        readonly Microsoft.Extensions.Logging.ILogger _logger;
         readonly ILogContext _messageLogger;
+        readonly DiagnosticSource _source;
 
         public BusLogContext(ILoggerFactory loggerFactory, DiagnosticSource source)
         {
@@ -22,7 +22,7 @@ namespace MassTransit.Context
             _messageLogger = new BusLogContext(source, loggerFactory, loggerFactory.CreateLogger("MassTransit.Messages"));
         }
 
-        protected BusLogContext(DiagnosticSource source, ILoggerFactory loggerFactory, ILogContext messageLogger, Microsoft.Extensions.Logging.ILogger logger)
+        protected BusLogContext(DiagnosticSource source, ILoggerFactory loggerFactory, ILogContext messageLogger, ILogger logger)
         {
             _source = source;
             _loggerFactory = loggerFactory;
@@ -30,7 +30,7 @@ namespace MassTransit.Context
             _logger = logger;
         }
 
-        BusLogContext(DiagnosticSource source, ILoggerFactory loggerFactory, Microsoft.Extensions.Logging.ILogger logger)
+        BusLogContext(DiagnosticSource source, ILoggerFactory loggerFactory, ILogger logger)
         {
             _source = source;
             _loggerFactory = loggerFactory;
@@ -60,39 +60,26 @@ namespace MassTransit.Context
             return new BusLogContext(_source, _loggerFactory, _messageLogger, logger);
         }
 
-        public EnabledLogger? IfEnabled(Microsoft.Extensions.Logging.LogLevel level)
+        public EnabledLogger? IfEnabled(LogLevel level)
         {
             return _logger.IsEnabled(level) ? new EnabledLogger(_logger, level) : default(EnabledLogger?);
         }
 
-        public EnabledLogger? Critical
-        {
-            get { return _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Critical) ? new EnabledLogger(_logger, Microsoft.Extensions.Logging.LogLevel.Critical) : default(EnabledLogger?); }
-        }
+        public EnabledLogger? Critical => _logger.IsEnabled(LogLevel.Critical) ? new EnabledLogger(_logger, LogLevel.Critical) : default(EnabledLogger?);
 
-        public EnabledLogger? Debug
-        {
-            get { return _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug) ? new EnabledLogger(_logger, Microsoft.Extensions.Logging.LogLevel.Debug) : default(EnabledLogger?); }
-        }
+        public EnabledLogger? Debug => _logger.IsEnabled(LogLevel.Debug) ? new EnabledLogger(_logger, LogLevel.Debug) : default(EnabledLogger?);
 
-        public EnabledLogger? Error
-        {
-            get { return _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Error) ? new EnabledLogger(_logger, Microsoft.Extensions.Logging.LogLevel.Error) : default(EnabledLogger?); }
-        }
+        public EnabledLogger? Error => _logger.IsEnabled(LogLevel.Error) ? new EnabledLogger(_logger, LogLevel.Error) : default(EnabledLogger?);
 
-        public EnabledLogger? Info
-        {
-            get { return _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information) ? new EnabledLogger(_logger, Microsoft.Extensions.Logging.LogLevel.Information) : default(EnabledLogger?); }
-        }
+        public EnabledLogger? Info => _logger.IsEnabled(LogLevel.Information) ? new EnabledLogger(_logger, LogLevel.Information) : default(EnabledLogger?);
 
-        public EnabledLogger? Trace
-        {
-            get { return _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Trace) ? new EnabledLogger(_logger, Microsoft.Extensions.Logging.LogLevel.Trace) : default(EnabledLogger?); }
-        }
+        public EnabledLogger? Trace => _logger.IsEnabled(LogLevel.Trace) ? new EnabledLogger(_logger, LogLevel.Trace) : default(EnabledLogger?);
 
-        public EnabledLogger? Warning
+        public EnabledLogger? Warning => _logger.IsEnabled(LogLevel.Warning) ? new EnabledLogger(_logger, LogLevel.Warning) : default(EnabledLogger?);
+
+        public EnabledScope? BeginScope()
         {
-            get { return _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning) ? new EnabledLogger(_logger, Microsoft.Extensions.Logging.LogLevel.Warning) : default(EnabledLogger?); }
+            return new EnabledScope(_logger);
         }
     }
 

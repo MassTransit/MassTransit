@@ -1,4 +1,4 @@
-namespace MassTransit
+namespace MassTransit.Logging
 {
     using System;
     using Microsoft.Extensions.Logging;

@@ -1,5 +1,6 @@
 namespace MassTransit.Context
 {
+    using Logging;
     using Microsoft.Extensions.Logging;
 
 
@@ -40,6 +41,12 @@ namespace MassTransit.Context
         EnabledLogger? Info { get; }
         EnabledLogger? Trace { get; }
         EnabledLogger? Warning { get; }
+
+        /// <summary>
+        /// Begin a scope for the logger
+        /// </summary>
+        /// <returns></returns>
+        EnabledScope? BeginScope();
     }
 
 

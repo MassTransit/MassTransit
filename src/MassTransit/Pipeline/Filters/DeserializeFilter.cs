@@ -2,6 +2,7 @@ namespace MassTransit.Pipeline.Filters
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
 
 
@@ -34,8 +35,8 @@ namespace MassTransit.Pipeline.Filters
         {
             ConsumeContext consumeContext = _deserializer.Deserialize(context);
 
-            if (context.TryGetPayload<Activity>(out var activity) || (activity = Activity.Current) != null)
-                activity.AddConsumeContextHeaders(consumeContext);
+            if (context.TryGetPayload<StartedActivityContext>(out var activityContext))
+                activityContext.AddConsumeContextHeaders(consumeContext);
 
             await _output.Send(consumeContext).ConfigureAwait(false);
 

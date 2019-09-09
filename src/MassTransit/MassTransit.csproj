@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Automatonymous" Version="4.1.6"/>
+    <PackageReference Include="Automatonymous" Version="4.1.6" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.0.2" />
     <PackageReference Include="NewId" Version="3.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />

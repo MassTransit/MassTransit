@@ -8,6 +8,13 @@ namespace MassTransit.Context
 
     public partial class LogContext
     {
+        public static EnabledLogger? Critical => Current?.Critical;
+        public static EnabledLogger? Debug => Current?.Debug;
+        public static EnabledLogger? Error => Current?.Error;
+        public static EnabledLogger? Info => Current?.Info;
+        public static EnabledLogger? Trace => Current?.Trace;
+        public static EnabledLogger? Warning => Current?.Warning;
+
         public static void ConfigureCurrentLogContext(ILoggerFactory loggerFactory = null, DiagnosticSource source = null)
         {
             Current = new BusLogContext(loggerFactory ?? NullLoggerFactory.Instance, source ?? Cached.Default.Value);
@@ -19,9 +26,14 @@ namespace MassTransit.Context
         /// </summary>
         /// <param name="logger">An existing logger</param>
         /// <param name="source">An optional custom <see cref="DiagnosticSource"/></param>
-        public static void ConfigureCurrentLogContext(Microsoft.Extensions.Logging.ILogger logger, DiagnosticSource source = null)
+        public static void ConfigureCurrentLogContext(ILogger logger, DiagnosticSource source = null)
         {
             Current = new BusLogContext(new SingleLoggerFactory(logger), source ?? Cached.Default.Value);
+        }
+
+        public static EnabledScope? BeginScope()
+        {
+            return Current?.BeginScope();
         }
 
         public static ILogContext CreateLogContext(string categoryName)
@@ -51,21 +63,16 @@ namespace MassTransit.Context
             return new BusLogContext(loggerFactory, source);
         }
 
+        public static EnabledDiagnosticSource? IfEnabled(string name)
+        {
+            return Current?.IfEnabled(name);
+        }
+
 
         static class Cached
         {
             internal static readonly Lazy<DiagnosticListener> Default =
                 new Lazy<DiagnosticListener>(() => new DiagnosticListener(DiagnosticHeaders.DefaultListenerName));
         }
-
-
-        public static EnabledDiagnosticSource? IfEnabled(string name) => Current?.IfEnabled(name);
-
-        public static EnabledLogger? Critical => Current?.Critical;
-        public static EnabledLogger? Debug => Current?.Debug;
-        public static EnabledLogger? Error => Current?.Error;
-        public static EnabledLogger? Info => Current?.Info;
-        public static EnabledLogger? Trace => Current?.Trace;
-        public static EnabledLogger? Warning => Current?.Warning;
     }
 }
