@@ -46,6 +46,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2C8A15
 		..\build.ps1 = ..\build.ps1
 		..\build.sh = ..\build.sh
 		Directory.Build.props = Directory.Build.props
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.AzureServiceBusTransport", "MassTransit.AzureServiceBusTransport\MassTransit.AzureServiceBusTransport.csproj", "{A84B8D78-6592-4340-9E78-4AC608F53EFD}"
