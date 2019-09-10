@@ -43,14 +43,14 @@ namespace MassTransit.Initializers.PropertyInitializers
                 return TaskUtil.Completed;
             }
 
-            return ApplyAsync(context, propertyTask);
-        }
+            async Task ApplyAsync()
+            {
+                var propertyValue = await propertyTask.ConfigureAwait(false);
 
-        async Task ApplyAsync(InitializeContext<TMessage, TInput> context, Task<TProperty> propertyTask)
-        {
-            var propertyValue = await propertyTask.ConfigureAwait(false);
+                _messageProperty.Set(context.Message, propertyValue);
+            }
 
-            _messageProperty.Set(context.Message, propertyValue);
+            return ApplyAsync();
         }
     }
 }

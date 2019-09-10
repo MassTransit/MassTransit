@@ -28,15 +28,8 @@ namespace MassTransit.Initializers.PropertyProviders
         public Task<TProperty> GetProperty<T>(InitializeContext<T, TInput> context)
             where T : class
         {
-            if (!context.HasInput)
-                return TaskUtil.Default<TProperty>();
-
-            if (context.Input.TryGetValue(_key, out var value))
+            if (context.HasInput && context.Input.TryGetValue(_key, out var value))
                 return Task.FromResult(value);
-
-            // var matchingKey = context.Input.Keys.FirstOrDefault(x => string.Compare(x, _key, StringComparison.OrdinalIgnoreCase) == 0);
-            // if (matchingKey != default && context.Input.TryGetValue(matchingKey, out value))
-            //     return Task.FromResult(value);
 
             return TaskUtil.Default<TProperty>();
         }

@@ -125,7 +125,7 @@ namespace MassTransit.Tests.Initializers
                 ExpirationMonth = "12",
                 ExpirationYear = "2019",
                 PublicKey = new JObject(new JProperty("key", "12345")),
-                Token = new JObject(new JProperty("value","Token123"))
+                Token = new JObject(new JProperty("value", "Token123"))
             };
 
             var correlationId = Guid.NewGuid();

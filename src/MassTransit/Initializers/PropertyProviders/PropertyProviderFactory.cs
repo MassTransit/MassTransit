@@ -155,9 +155,11 @@ namespace MassTransit.Initializers.PropertyProviders
                         return true;
                     }
 
-                    if (typeof(T).IsInterface && TypeMetadataCache<T>.IsValidMessageType && !typeof(TProperty).IsValueTypeOrObject())
+                    if (typeof(T).IsInterfaceOrConcreteClass() && TypeMetadataCache<T>.IsValidMessageType && !typeof(TProperty).IsValueTypeOrObject())
                     {
-                        var converterType = typeof(InitializePropertyConverter<,>).MakeGenericType(typeof(T), typeof(TProperty));
+                        var converterType = typeof(TProperty) == typeof(object)
+                            ? typeof(InitializePropertyConverter<>).MakeGenericType(typeof(T))
+                            : typeof(InitializePropertyConverter<,>).MakeGenericType(typeof(T), typeof(TProperty));
 
                         converter = (IPropertyConverter<T, TProperty>)Activator.CreateInstance(converterType);
                         return true;

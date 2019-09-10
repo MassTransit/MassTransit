@@ -25,25 +25,23 @@ namespace MassTransit.Initializers.PropertyProviders
         public Task<TValue> GetProperty<T>(InitializeContext<T, TInput> context)
             where T : class
         {
-            if (context.HasInput)
+            if (!context.HasInput)
+                return TaskUtil.Default<TValue>();
+
+            var propertyTask = _provider.GetProperty(context);
+            if (propertyTask.IsCompleted)
             {
-                var propertyTask = _provider.GetProperty(context);
-                if (propertyTask.IsCompleted)
-                {
-                    return propertyTask.Result.GetValue(context);
-                }
-
-                async Task<TValue> GetPropertyAsync()
-                {
-                    var property = await propertyTask.ConfigureAwait(false);
-
-                    return await property.GetValue(context).ConfigureAwait(false);
-                }
-
-                return GetPropertyAsync();
+                return propertyTask.Result.GetValue(context);
             }
 
-            return TaskUtil.Default<TValue>();
+            async Task<TValue> GetPropertyAsync()
+            {
+                var property = await propertyTask.ConfigureAwait(false);
+
+                return await property.GetValue(context).ConfigureAwait(false);
+            }
+
+            return GetPropertyAsync();
         }
     }
 }
