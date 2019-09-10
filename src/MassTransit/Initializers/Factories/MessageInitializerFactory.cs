@@ -57,6 +57,7 @@ namespace MassTransit.Initializers.Factories
         static IEnumerable<IPropertyInitializerInspector<TMessage, TInput>> CreatePropertyInspectors()
         {
             return typeof(TMessage).GetAllProperties().Where(x => x.CanRead)
+                .GroupBy(x => x.Name, (key,values) => values.Last())
                 .Select(x => (IPropertyInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
                     typeof(PropertyInitializerInspector<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), x.PropertyType), x));
         }
@@ -64,6 +65,7 @@ namespace MassTransit.Initializers.Factories
         static IEnumerable<IHeaderInitializerInspector<TMessage, TInput>> CreateInputHeaderInspectors()
         {
             return typeof(TInput).GetAllProperties().Where(x => x.CanRead)
+                .GroupBy(x => x.Name, (key, values) => values.Last())
                 .Select(x => (IHeaderInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
                     typeof(InputHeaderInitializerInspector<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), x.PropertyType), x));
         }

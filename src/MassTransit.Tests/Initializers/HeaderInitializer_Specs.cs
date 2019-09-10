@@ -26,6 +26,7 @@ namespace MassTransit.Tests.Initializers
                 __RequestId = requestId,
                 __TimeToLive = 5000,
                 __Header_Custom_Header_Value = "Frankie Say Relax",
+                __Header_Custom_Header_Value2 = 27,
                 Text = "Hello"
             });
 
@@ -38,6 +39,9 @@ namespace MassTransit.Tests.Initializers
 
             Assert.That(context.Headers.TryGetHeader("Custom-Header-Value", out object value), Is.True);
             Assert.That(value, Is.EqualTo("Frankie Say Relax"));
+
+            Assert.That(context.Headers.TryGetHeader("Custom-Header-Value2", out value), Is.True);
+            Assert.That(value, Is.EqualTo(27));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

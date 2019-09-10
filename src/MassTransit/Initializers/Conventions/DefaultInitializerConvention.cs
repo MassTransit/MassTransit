@@ -105,9 +105,12 @@
                     return true;
                 }
 
-                var type = typeof(SetHeaderInitializer<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), inputPropertyType);
-                initializer = (IHeaderInitializer<TMessage, TInput>)Activator.CreateInstance(type, headerName, propertyInfo);
-                return true;
+                if (_providerFactory.TryGetPropertyProvider(propertyInfo, out IPropertyProvider<TInput, TProperty> provider))
+                {
+                    var type = typeof(SetHeaderInitializer<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), inputPropertyType);
+                    initializer = (IHeaderInitializer<TMessage, TInput>)Activator.CreateInstance(type, headerName, provider);
+                    return true;
+                }
             }
 
             initializer = default;
