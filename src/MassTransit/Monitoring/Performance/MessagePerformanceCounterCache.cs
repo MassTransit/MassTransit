@@ -13,7 +13,6 @@
 namespace MassTransit.Monitoring.Performance
 {
     using System;
-    using Windows;
 
 
     public static class MessagePerformanceCounterCache<T>

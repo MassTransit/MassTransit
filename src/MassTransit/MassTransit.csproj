@@ -23,8 +23,7 @@
         <Compile Remove="Serialization/ExtensionsForBinaryMessageSerializer.cs" />
         <Compile Remove="Serialization/BinaryMessageSerializer.cs" />
         <Compile Remove="Serialization/BinaryMessageDeserializer.cs" />
-        <Compile Remove="Monitoring/Performance/**" />
-        <Compile Remove="Configuration/PerformanceCounterExtensions.cs" />
+        <Compile Remove="Monitoring/Performance/Windows/**" />
   </ItemGroup>
 
   <ItemGroup>

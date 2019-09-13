@@ -15,11 +15,15 @@ namespace MassTransit
     using System;
     using Monitoring.Performance;
     using Monitoring.Performance.StatsD;
+
+#if !NETCORE
     using Monitoring.Performance.Windows;
+#endif
 
 
     public static class PerformanceCounterExtensions
     {
+#if !NETCORE
         [Obsolete("This method was improperly named, use EnablePerformanceCounters instead")]
         public static void EnabledPerformanceCounters(this IBusFactoryConfigurator configurator)
         {
@@ -45,6 +49,7 @@ namespace MassTransit
             var observer = new PerformanceCounterBusObserver(new WindowsCounterFactory());
             configurator.ConnectBusObserver(observer);
         }
+#endif
 
         public static void EnableStatsdPerformanceCounters(this IBusFactoryConfigurator configurator, Action<StatsDConfiguration> action)
         {
