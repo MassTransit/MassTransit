@@ -26,8 +26,8 @@
         public static readonly MessageDataJsonConverter MessageDataJsonConverter;
         public static readonly IsoDateTimeConverter IsoDateTimeConverter;
 
-        public static readonly JsonSerializerSettings DeserializerSettings;
-        public static readonly JsonSerializerSettings SerializerSettings;
+        public static JsonSerializerSettings DeserializerSettings;
+        public static JsonSerializerSettings SerializerSettings;
 
         static BsonMessageSerializer()
         {
