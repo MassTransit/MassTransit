@@ -2,6 +2,7 @@ namespace MassTransit.Transports.InMemory.GraphValidation
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
 
 
@@ -37,6 +38,13 @@ namespace MassTransit.Transports.InMemory.GraphValidation
             }
         }
 
+        public IEnumerable<T> GetItemsInOrder()
+        {
+            var sort = new TopologicalSort<T, DependencyGraphNode<T>>(_adjacencyList);
+
+            return sort.Result.Select(x => x.Value);
+        }
+
         public void EnsureGraphIsAcyclic()
         {
             var tarjan = new Tarjan<T, DependencyGraphNode<T>>(_adjacencyList);
@@ -55,6 +63,7 @@ namespace MassTransit.Transports.InMemory.GraphValidation
 
                     message.Append(cycle[i].Value);
                 }
+
                 message.Append(")");
             }
 

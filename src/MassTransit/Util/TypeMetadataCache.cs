@@ -48,6 +48,11 @@
             return GetOrAdd(type).MessageTypes;
         }
 
+        public static string[] GetMessageTypeNames(Type type)
+        {
+            return GetOrAdd(type).MessageTypeNames;
+        }
+
 
         static class Cached
         {
@@ -62,6 +67,7 @@
             bool IsTemporaryMessageType { get; }
             bool IsValidMessageType { get; }
             Type[] MessageTypes { get; }
+            string[] MessageTypeNames { get; }
         }
 
 
@@ -73,6 +79,7 @@
             public bool IsTemporaryMessageType => TypeMetadataCache<T>.IsTemporaryMessageType;
             public bool IsValidMessageType => TypeMetadataCache<T>.IsValidMessageType;
             public Type[] MessageTypes => TypeMetadataCache<T>.MessageTypes;
+            public string[] MessageTypeNames => TypeMetadataCache<T>.MessageTypeNames;
         }
     }
 
@@ -169,7 +176,9 @@
                 return false;
             }
 
-            if (Internals.Extensions.InterfaceExtensions.HasInterface<SendContext>(typeInfo) || Internals.Extensions.InterfaceExtensions.HasInterface<ConsumeContext>(typeInfo) || Internals.Extensions.InterfaceExtensions.HasInterface<ReceiveContext>(typeInfo))
+            if (Internals.Extensions.InterfaceExtensions.HasInterface<SendContext>(typeInfo)
+                || Internals.Extensions.InterfaceExtensions.HasInterface<ConsumeContext>(typeInfo)
+                || Internals.Extensions.InterfaceExtensions.HasInterface<ReceiveContext>(typeInfo))
             {
                 _invalidMessageTypeReason = $"ConsumeContext, ReceiveContext, and SendContext are not valid message types: {ShortName}";
                 return false;

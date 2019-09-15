@@ -28,6 +28,7 @@ namespace MassTransit
         {
         }
 
+
         public Type GetType(bool throwOnError = true, bool ignoreCase = true)
         {
             if (Segments.Length == 0)
@@ -52,7 +53,6 @@ namespace MassTransit
 
             return messageType;
         }
-
 
         static string GetUrnForType(Type type)
         {
