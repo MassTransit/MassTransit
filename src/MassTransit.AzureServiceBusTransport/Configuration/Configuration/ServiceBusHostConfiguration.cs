@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Contexts;
     using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Topology;
@@ -11,7 +12,6 @@
     using Topology;
     using Transport;
     using Transports;
-    using Util;
 
 
     public class ServiceBusHostConfiguration :
@@ -53,8 +53,9 @@
 
             var endpointContextSupervisor = CreateQueueSendEndpointContextSupervisor(settings);
 
-            var transport = new ServiceBusSendTransport(endpointContextSupervisor, address);
+            var transportContext = new HostServiceBusSendTransportContext(address, endpointContextSupervisor, _host.SendLogContext);
 
+            var transport = new ServiceBusSendTransport(transportContext);
             _host.Add(transport);
 
             return Task.FromResult<ISendTransport>(transport);
@@ -72,8 +73,9 @@
 
             var endpointContextSupervisor = CreateTopicSendEndpointContextSupervisor(settings);
 
-            var transport = new ServiceBusSendTransport(endpointContextSupervisor, publishAddress);
+            var transportContext = new HostServiceBusSendTransportContext(publishAddress, endpointContextSupervisor, _host.SendLogContext);
 
+            var transport = new ServiceBusSendTransport(transportContext);
             _host.Add(transport);
 
             return Task.FromResult<ISendTransport>(transport);

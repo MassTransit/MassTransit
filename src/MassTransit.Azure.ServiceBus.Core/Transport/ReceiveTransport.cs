@@ -30,7 +30,6 @@
             _settings = settings;
             _clientContextSupervisor = clientContextSupervisor;
             _clientPipe = clientPipe;
-
             _context = context;
         }
 

@@ -28,11 +28,13 @@
         public ServiceBusSendTransport(ServiceBusSendTransportContext context)
         {
             _context = context;
+
+            Add(context.Source);
         }
 
         Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
-            var clientPipe = new SendClientPipe<T>(_context, message, pipe, cancellationToken);
+            var clientPipe = new SendPipe<T>(_context, message, pipe, cancellationToken);
 
             return _context.Source.Send(clientPipe, cancellationToken);
         }
@@ -50,7 +52,7 @@
         }
 
 
-        struct SendClientPipe<T> :
+        struct SendPipe<T> :
             IPipe<SendEndpointContext>
             where T : class
         {
@@ -59,7 +61,7 @@
             readonly CancellationToken _cancellationToken;
             readonly IPipe<SendContext<T>> _pipe;
 
-            public SendClientPipe(ServiceBusSendTransportContext context, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+            public SendPipe(ServiceBusSendTransportContext context, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             {
                 _context = context;
                 _message = message;
@@ -81,6 +83,8 @@
                     activity.AddSendContextHeaders(context);
 
                     CopyIncomingIdentifiersIfPresent(context);
+
+                    AddTransportHeaders(activity, context);
 
                     if (IsCancelScheduledSend(context, out var sequenceNumber))
                     {
@@ -231,6 +235,18 @@
                         sendContext.PartitionKey = brokeredMessageContext.PartitionKey;
                 }
             }
+
+            static void AddTransportHeaders(StartedActivity? startedActivity, AzureServiceBusSendContext<T> context)
+            {
+                if (!startedActivity.HasValue)
+                    return;
+
+                var activity = startedActivity.Value;
+
+                activity.AddTag(nameof(context.PartitionKey), context.PartitionKey);
+                activity.AddTag(nameof(context.SessionId), context.SessionId);
+            }
+
         }
     }
 }

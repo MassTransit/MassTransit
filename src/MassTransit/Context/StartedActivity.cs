@@ -21,6 +21,9 @@ namespace MassTransit.Context
 
         public void AddTag(string key, string value)
         {
+            if (string.IsNullOrWhiteSpace(value))
+                return;
+
             Activity.AddTag(key, value);
         }
 
@@ -38,6 +41,9 @@ namespace MassTransit.Context
 
         public void AddBaggage(string key, string value)
         {
+            if (string.IsNullOrWhiteSpace(value))
+                return;
+
             Activity.AddBaggage(key, value);
 
             Scope?.Add(key, value);

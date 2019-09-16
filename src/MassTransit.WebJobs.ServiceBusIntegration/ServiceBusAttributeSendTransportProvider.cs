@@ -38,7 +38,7 @@
 
             var sendEndpointContext = new CollectorMessageSendEndpointContext(queueOrTopicName, collector, _cancellationToken);
 
-            var source = new CollectorSendEndpointContextSource(sendEndpointContext);
+            var source = new CollectorSendEndpointContextSupervisor(sendEndpointContext);
 
             var transportContext = new HostServiceBusSendTransportContext(address, source, LogContext.Current.CreateLogContext(LogCategoryName.Transport.Send));
 

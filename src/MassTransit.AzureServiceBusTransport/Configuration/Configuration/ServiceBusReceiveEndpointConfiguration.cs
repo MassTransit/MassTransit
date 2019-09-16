@@ -163,14 +163,14 @@
         {
             var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.QueueConfigurator);
 
-            return new BrokeredMessageErrorTransport(CreateSendEndpointContextCache(host, settings));
+            return new BrokeredMessageErrorTransport(CreateSendEndpointContextSupervisor(host, settings));
         }
 
         protected override IDeadLetterTransport CreateDeadLetterTransport(IServiceBusHostControl host)
         {
             var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.QueueConfigurator);
 
-            return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextCache(host, settings));
+            return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextSupervisor(host, settings));
         }
 
         protected override IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings,

@@ -18,12 +18,12 @@
         IBrokeredMessageReceiver
     {
         readonly Uri _inputAddress;
-        readonly ReceiveEndpointContext _receiveEndpointContext;
+        readonly ReceiveEndpointContext _context;
 
-        public BrokeredMessageReceiver(Uri inputAddress, ReceiveEndpointContext receiveEndpointContext)
+        public BrokeredMessageReceiver(Uri inputAddress, ReceiveEndpointContext context)
         {
             _inputAddress = inputAddress;
-            _receiveEndpointContext = receiveEndpointContext;
+            _context = context;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -31,29 +31,29 @@
             var scope = context.CreateScope("receiver");
             scope.Add("type", "brokeredMessage");
 
-            _receiveEndpointContext.ReceivePipe.Probe(scope);
+            _context.ReceivePipe.Probe(scope);
         }
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveObserver(observer);
+            return _context.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveEndpointContext.ConnectPublishObserver(observer);
+            return _context.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            return _receiveEndpointContext.ConnectSendObserver(observer);
+            return _context.ConnectSendObserver(observer);
         }
 
         async Task IBrokeredMessageReceiver.Handle(Message message, Action<ReceiveContext> contextCallback)
         {
-            LogContext.Current = _receiveEndpointContext.LogContext;
+            LogContext.Current = _context.LogContext;
 
-            var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveEndpointContext);
+            var context = new ServiceBusReceiveContext(_inputAddress, message, _context);
             contextCallback?.Invoke(context);
 
             context.TryGetPayload<MessageLockContext>(out var lockContext);
@@ -63,7 +63,7 @@
 
             try
             {
-                await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
                 if (message.SystemProperties.LockedUntilUtc <= DateTime.UtcNow)
                     throw new MessageLockExpiredException(_inputAddress, $"The message lock expired: {message.MessageId}");
@@ -71,30 +71,30 @@
                 if (message.ExpiresAtUtc < DateTime.UtcNow)
                     throw new MessageTimeToLiveExpiredException(_inputAddress, $"The message TTL expired: {message.MessageId}");
 
-                await _receiveEndpointContext.ReceivePipe.Send(context).ConfigureAwait(false);
+                await _context.ReceivePipe.Send(context).ConfigureAwait(false);
 
                 await context.ReceiveCompleted.ConfigureAwait(false);
 
                 if (lockContext != null)
                     await lockContext.Complete().ConfigureAwait(false);
 
-                await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (SessionLockLostException ex)
             {
                 LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId", message.MessageId);
 
-                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             catch (MessageLockLostException ex)
             {
                 LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId", message.MessageId);
 
-                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
                 if (lockContext == null)
                     throw;
@@ -118,12 +118,12 @@
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
-            return _receiveEndpointContext.ReceivePipe.ConnectConsumeMessageObserver(observer);
+            return _context.ReceivePipe.ConnectConsumeMessageObserver(observer);
         }
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
-            return _receiveEndpointContext.ReceivePipe.ConnectConsumeObserver(observer);
+            return _context.ReceivePipe.ConnectConsumeObserver(observer);
         }
     }
 }

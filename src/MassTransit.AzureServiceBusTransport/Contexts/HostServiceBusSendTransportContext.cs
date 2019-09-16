@@ -1,4 +1,4 @@
-namespace MassTransit.Azure.ServiceBus.Core.Contexts
+namespace MassTransit.AzureServiceBusTransport.Contexts
 {
     using System;
     using Context;

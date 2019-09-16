@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Transport
+﻿namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
     using System.Collections.Generic;
@@ -19,16 +7,17 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using Contexts;
     using GreenPipes;
     using Microsoft.ServiceBus.Messaging;
+    using Pipeline;
     using Transports;
 
 
     public class BrokeredMessageMoveTransport
     {
-        readonly IPipeContextSource<SendEndpointContext> _source;
+        readonly ISendEndpointContextSupervisor _supervisor;
 
-        protected BrokeredMessageMoveTransport(IPipeContextSource<SendEndpointContext> source)
+        protected BrokeredMessageMoveTransport(ISendEndpointContextSupervisor supervisor)
         {
-            _source = source;
+            _supervisor = supervisor;
         }
 
         protected Task Move(ReceiveContext context, Action<BrokeredMessage, SendHeaders> preSend)
@@ -72,7 +61,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 }
             });
 
-            return _source.Send(clientPipe, context.CancellationToken);
+            return _supervisor.Send(clientPipe, context.CancellationToken);
         }
     }
 }

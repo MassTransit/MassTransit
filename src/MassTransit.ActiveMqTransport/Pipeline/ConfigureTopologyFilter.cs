@@ -1,5 +1,6 @@
 namespace MassTransit.ActiveMqTransport.Pipeline
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using Context;
@@ -57,9 +58,16 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
         async Task DeleteAutoDelete(SessionContext context)
         {
-            await Task.WhenAll(_brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic))).ConfigureAwait(false);
+            try
+            {
+                await Task.WhenAll(_brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic))).ConfigureAwait(false);
 
-            await Task.WhenAll(_brokerTopology.Queues.Where(x => x.AutoDelete).Select(queue => Delete(context, queue))).ConfigureAwait(false);
+                await Task.WhenAll(_brokerTopology.Queues.Where(x => x.AutoDelete).Select(queue => Delete(context, queue))).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                LogContext.Error?.Log(exception, "Failure removing auto-delete queues/topics");
+            }
         }
 
         Task Declare(SessionContext context, Topic topic)

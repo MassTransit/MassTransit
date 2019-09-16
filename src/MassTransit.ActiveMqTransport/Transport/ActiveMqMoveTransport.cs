@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Transport
 {
@@ -33,7 +33,7 @@ namespace MassTransit.ActiveMqTransport.Transport
         protected async Task Move(ReceiveContext context, Action<IMessage, SendHeaders> preSend)
         {
             if (!context.TryGetPayload(out SessionContext sessionContext))
-                throw new ArgumentException("The ReceiveContext must contain a BrokeredMessageContext (from Azure Service Bus)", nameof(context));
+                throw new ArgumentException("The ReceiveContext must contain a SessionContext", nameof(context));
 
             await _topologyFilter.Send(sessionContext, Pipe.Empty<SessionContext>()).ConfigureAwait(false);
 
@@ -57,14 +57,7 @@ namespace MassTransit.ActiveMqTransport.Transport
             message.Content = body;
 
             var task = Task.Run(() => producer.Send(message));
-            var closeTask = task.ContinueWith(_ =>
-            {
-                producer.Close();
-                producer.Dispose();
-            });
-
             context.AddReceiveTask(task);
-            context.AddReceiveTask(closeTask);
         }
     }
 }

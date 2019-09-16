@@ -3,6 +3,9 @@
     using System;
     using System.Threading.Tasks;
     using Configurators;
+    using Context;
+    using Contexts;
+    using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Topology;
     using Pipeline;
@@ -15,7 +18,7 @@
         IAmazonSqsHostConfiguration
     {
         readonly IAmazonSqsBusConfiguration _busConfiguration;
-        readonly IAmazonSqsHostControl _host;
+        readonly AmazonSqsHost _host;
         readonly IAmazonSqsHostTopology _topology;
 
         public AmazonSqsHostConfiguration(IAmazonSqsBusConfiguration busConfiguration, AmazonSqsHostSettings settings, IAmazonSqsHostTopology topology)
@@ -53,11 +56,11 @@
 
             var clientContextSupervisor = new AmazonSqsClientContextSupervisor(_host.ConnectionContextSupervisor);
 
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology());
+            var configureTopologyPipe = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
 
-            var transport = new QueueSendTransport(clientContextSupervisor, configureTopologyFilter, settings.EntityName);
-            transport.Add(clientContextSupervisor);
+            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, _host.SendLogContext);
 
+            var transport = new QueueSendTransport(transportContext);
             _host.Add(transport);
 
             return Task.FromResult<ISendTransport>(transport);
@@ -68,23 +71,42 @@
         {
             IAmazonSqsMessagePublishTopology<T> publishTopology = _topology.Publish<T>();
 
-            var sendSettings = publishTopology.GetPublishSettings();
+            var settings = publishTopology.GetPublishSettings();
 
             var clientContextSupervisor = new AmazonSqsClientContextSupervisor(_host.ConnectionContextSupervisor);
 
-            var configureTopologyFilter = new ConfigureTopologyFilter<PublishSettings>(sendSettings, publishTopology.GetBrokerTopology());
+            var configureTopologyPipe = new ConfigureTopologyFilter<PublishSettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
 
-            var sendTransport = new TopicSendTransport(clientContextSupervisor, configureTopologyFilter, sendSettings.EntityName);
-            sendTransport.Add(clientContextSupervisor);
+            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, _host.SendLogContext);
 
-            _host.Add(sendTransport);
+            var transport = new TopicSendTransport(transportContext);
+            _host.Add(transport);
 
-            return Task.FromResult<ISendTransport>(sendTransport);
+            return Task.FromResult<ISendTransport>(transport);
         }
 
         public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
         {
             return new AmazonSqsReceiveEndpointConfiguration(this, queueName, _busConfiguration.CreateEndpointConfiguration());
+        }
+
+
+        class HostSqsSendTransportContext :
+            BaseSendTransportContext,
+            SqsSendTransportContext
+        {
+            public HostSqsSendTransportContext(IClientContextSupervisor clientContextSupervisor, IPipe<ClientContext> configureTopologyPipe, string entityName,
+                ILogContext logContext)
+                : base(logContext)
+            {
+                ClientContextSupervisor = clientContextSupervisor;
+                ConfigureTopologyPipe = configureTopologyPipe;
+                EntityName = entityName;
+            }
+
+            public IPipe<ClientContext> ConfigureTopologyPipe { get; }
+            public string EntityName { get; }
+            public IClientContextSupervisor ClientContextSupervisor { get; }
         }
     }
 }

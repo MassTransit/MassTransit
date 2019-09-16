@@ -8,7 +8,6 @@
     using GreenPipes.Agents;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
-    using Logging;
     using MassTransit.Configuration;
     using MassTransit.Pipeline.Filters;
     using Pipeline;
@@ -182,7 +181,7 @@
         protected abstract IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings,
             IPipe<NamespaceContext> namespacePipe);
 
-        protected ISendEndpointContextSupervisor CreateSendEndpointContextCache(IServiceBusHostControl host, SendSettings settings)
+        protected ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(IServiceBusHostControl host, SendSettings settings)
         {
             var brokerTopology = settings.GetBrokerTopology();
 
@@ -190,10 +189,10 @@
 
             IPipeContextFactory<SendEndpointContext> factory = CreateSendEndpointContextFactory(host, settings, namespacePipe);
 
-            var cache = new SendEndpointContextSupervisor(factory);
-            host.Add(cache);
+            var supervisor = new SendEndpointContextSupervisor(factory);
+            host.Add(supervisor);
 
-            return cache;
+            return supervisor;
         }
     }
 }

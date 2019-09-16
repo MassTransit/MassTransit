@@ -63,6 +63,7 @@
                     connectionContext.Connection.ExceptionListener += HandleException;
 
                 #pragma warning disable 4014
+                    // ReSharper disable once MethodSupportsCancellation
                     asyncContext.Completed.ContinueWith(task =>
                 #pragma warning restore 4014
                     {

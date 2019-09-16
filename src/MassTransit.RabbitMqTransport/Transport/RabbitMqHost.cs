@@ -13,7 +13,6 @@
 namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
-    using System.Threading.Tasks;
     using Configuration;
     using Context;
     using Definition;
