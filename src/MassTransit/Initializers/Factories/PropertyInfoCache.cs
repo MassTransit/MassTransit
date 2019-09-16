@@ -6,6 +6,7 @@ namespace MassTransit.Initializers.Factories
     using System.Reflection;
     using Contracts;
     using Internals.Extensions;
+    using Metadata;
     using Util;
 
 

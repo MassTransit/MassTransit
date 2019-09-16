@@ -6,6 +6,7 @@ namespace MassTransit.Conductor.Server
     using Consumers;
     using Contracts;
     using Initializers;
+    using Metadata;
     using Util;
 
 

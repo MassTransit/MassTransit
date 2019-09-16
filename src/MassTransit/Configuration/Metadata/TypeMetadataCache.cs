@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Util
+﻿namespace MassTransit.Metadata
 {
     using System;
     using System.Collections.Concurrent;

@@ -19,6 +19,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using Amazon.SQS.Model;
     using Context;
     using Exceptions;
+    using Metadata;
     using Util;
 
 

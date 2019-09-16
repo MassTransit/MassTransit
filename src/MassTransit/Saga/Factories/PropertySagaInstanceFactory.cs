@@ -5,6 +5,7 @@ namespace MassTransit.Saga.Factories
     using GreenPipes.Internals.Extensions;
     using GreenPipes.Internals.Reflection;
     using Internals.Reflection;
+    using Metadata;
     using Util;
 
 

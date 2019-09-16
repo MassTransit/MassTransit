@@ -25,6 +25,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using Context;
     using GreenPipes;
     using MassTransit.Saga;
+    using Metadata;
     using Util;
 
 

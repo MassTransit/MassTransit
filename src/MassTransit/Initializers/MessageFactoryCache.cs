@@ -4,6 +4,7 @@ namespace MassTransit.Initializers
     using System.Threading;
     using Contexts;
     using Factories;
+    using Metadata;
     using Util;
 
 

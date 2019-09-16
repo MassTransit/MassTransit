@@ -22,6 +22,7 @@ namespace MassTransit.DapperIntegration
     using Dapper;
     using Dapper.Contrib.Extensions;
     using GreenPipes;
+    using Metadata;
     using Saga;
     using Sql;
     using Util;

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace MassTransit.Tests.Serialization {
     using Events;
     using MassTransit.Serialization;
+    using Metadata;
     using NUnit.Framework;
     using Shouldly;
     using Util;

@@ -8,6 +8,7 @@
     using GreenPipes;
     using Logging;
     using MassTransit.Saga;
+    using Metadata;
     using Newtonsoft.Json;
     using Serialization;
     using Util;

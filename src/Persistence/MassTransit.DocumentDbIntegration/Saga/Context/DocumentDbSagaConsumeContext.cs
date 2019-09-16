@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit.Context;
+    using Metadata;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Util;

@@ -17,6 +17,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using System.Threading.Tasks;
     using Context;
     using MassTransit.Saga;
+    using Metadata;
     using Util;
 
     public class EntityFrameworkSagaConsumeContext<TSaga, TMessage> :

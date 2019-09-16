@@ -18,6 +18,7 @@ namespace MassTransit.Registration
     using ConsumeConfigurators;
     using Context;
     using Definition;
+    using Metadata;
     using Util;
 
 

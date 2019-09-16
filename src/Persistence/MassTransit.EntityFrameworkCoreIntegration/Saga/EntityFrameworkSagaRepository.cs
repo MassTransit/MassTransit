@@ -10,6 +10,7 @@
     using Context;
     using GreenPipes;
     using MassTransit.Saga;
+    using Metadata;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
     using Microsoft.EntityFrameworkCore.Storage;

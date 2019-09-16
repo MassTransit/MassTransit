@@ -5,6 +5,7 @@ namespace MassTransit.Initializers.PropertyProviders
     using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Extensions;
+    using Metadata;
     using PropertyConverters;
     using TypeConverters;
     using Util;

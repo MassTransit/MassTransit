@@ -17,6 +17,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
     using System.Text;
     using Apache.NMS;
     using Context;
+    using Metadata;
     using Util;
 
 

@@ -19,6 +19,7 @@ namespace MassTransit.Pipeline.Filters
     using Context;
     using GreenPipes;
     using Logging;
+    using Metadata;
     using Util;
 
 

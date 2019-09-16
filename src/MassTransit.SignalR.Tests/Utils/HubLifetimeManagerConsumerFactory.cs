@@ -1,10 +1,11 @@
-﻿namespace MassTransit.SignalR.Tests
+﻿namespace MassTransit.SignalR.Tests.Utils
 {
-    using GreenPipes;
-    using MassTransit.Util;
-    using Microsoft.AspNetCore.SignalR;
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
+    using Metadata;
+    using Microsoft.AspNetCore.SignalR;
+
 
     public class HubLifetimeManagerConsumerFactory<TConsumer, THub> :
         IConsumerFactory<TConsumer>,

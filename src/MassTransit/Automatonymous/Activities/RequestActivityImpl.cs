@@ -17,6 +17,7 @@ namespace Automatonymous.Activities
     using Events;
     using GreenPipes;
     using MassTransit;
+    using MassTransit.Metadata;
     using MassTransit.Util;
 
 

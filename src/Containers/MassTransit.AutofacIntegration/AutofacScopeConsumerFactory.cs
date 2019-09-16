@@ -4,6 +4,7 @@ namespace MassTransit.AutofacIntegration
     using System.Threading.Tasks;
     using Autofac;
     using GreenPipes;
+    using Metadata;
     using Util;
 
 

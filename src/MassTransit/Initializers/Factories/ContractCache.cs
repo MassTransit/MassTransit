@@ -6,6 +6,7 @@ namespace MassTransit.Initializers.Factories
     using System.Threading;
     using Contexts;
     using Internals.Extensions;
+    using Metadata;
     using Transports.InMemory.GraphValidation;
     using Util;
 

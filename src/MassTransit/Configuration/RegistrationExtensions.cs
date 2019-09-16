@@ -7,6 +7,7 @@ namespace MassTransit
     using Courier;
     using Definition;
     using Internals.Extensions;
+    using Metadata;
     using Saga;
     using Util;
 

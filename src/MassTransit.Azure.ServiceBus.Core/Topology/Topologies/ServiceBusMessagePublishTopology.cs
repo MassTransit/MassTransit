@@ -19,6 +19,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
     using Configuration.Configurators;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
+    using Metadata;
     using Microsoft.Azure.ServiceBus.Management;
     using Settings;
     using Transport;

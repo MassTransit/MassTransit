@@ -20,6 +20,7 @@ namespace MassTransit
     using GreenPipes;
     using Internals.Extensions;
     using MessageData;
+    using Metadata;
     using Transformation.TransformConfigurators;
     using Util;
 

@@ -4,6 +4,7 @@
     using System.Threading;
     using Context;
     using MassTransit.Serialization;
+    using Metadata;
     using Util;
 
 

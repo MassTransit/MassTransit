@@ -9,6 +9,7 @@ namespace MassTransit.Context
     using GreenPipes;
     using GreenPipes.Payloads;
     using Initializers;
+    using Metadata;
     using Pipeline.Pipes;
     using Util;
 

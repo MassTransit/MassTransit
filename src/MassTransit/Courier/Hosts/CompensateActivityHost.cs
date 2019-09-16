@@ -7,6 +7,7 @@ namespace MassTransit.Courier.Hosts
     using Contracts;
     using GreenPipes;
     using Logging;
+    using Metadata;
     using Util;
 
 

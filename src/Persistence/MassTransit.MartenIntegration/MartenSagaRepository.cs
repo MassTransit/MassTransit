@@ -7,6 +7,7 @@
     using Context;
     using GreenPipes;
     using Marten;
+    using Metadata;
     using Saga;
     using Util;
 

@@ -6,6 +6,7 @@ namespace Automatonymous.Activities
     using GreenPipes;
     using MassTransit.Contracts;
     using MassTransit.Initializers;
+    using MassTransit.Metadata;
     using MassTransit.Util;
 
 

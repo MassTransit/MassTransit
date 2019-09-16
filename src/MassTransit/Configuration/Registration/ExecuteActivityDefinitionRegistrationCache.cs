@@ -6,6 +6,7 @@ namespace MassTransit.Registration
     using Courier;
     using Definition;
     using Internals.Extensions;
+    using Metadata;
     using Util;
 
 

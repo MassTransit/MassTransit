@@ -7,6 +7,7 @@ namespace MassTransit.NHibernateIntegration.Saga
     using Context;
     using GreenPipes;
     using MassTransit.Saga;
+    using Metadata;
     using NHibernate;
     using NHibernate.Exceptions;
     using Util;

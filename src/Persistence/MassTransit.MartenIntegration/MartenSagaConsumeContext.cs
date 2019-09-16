@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Context;
     using Marten;
+    using Metadata;
     using Saga;
     using Util;
 

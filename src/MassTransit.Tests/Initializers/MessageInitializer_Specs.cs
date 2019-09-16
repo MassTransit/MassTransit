@@ -7,6 +7,7 @@ namespace MassTransit.Tests.Initializers
     using System.Threading.Tasks;
     using InitializerTestMessages;
     using MassTransit.Initializers;
+    using Metadata;
     using NUnit.Framework;
     using TestFramework;
     using Util;

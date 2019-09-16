@@ -3,6 +3,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
     using Context;
     using GreenPipes;
     using Lamar;
+    using Metadata;
     using Scoping;
     using Scoping.ConsumerContexts;
     using Util;

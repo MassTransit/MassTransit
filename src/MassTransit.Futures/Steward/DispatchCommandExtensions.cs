@@ -17,6 +17,7 @@ namespace MassTransit.Steward
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts;
+    using Metadata;
     using Util;
 
 

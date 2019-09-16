@@ -16,6 +16,7 @@ namespace MassTransit.ActiveMqTransport.Tests
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Metadata;
     using NUnit.Framework;
     using TestFramework.Messages;
     using Util;

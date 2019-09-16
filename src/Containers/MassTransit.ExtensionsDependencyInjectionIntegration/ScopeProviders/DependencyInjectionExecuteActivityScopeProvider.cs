@@ -4,6 +4,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
     using Courier;
     using Courier.Hosts;
     using GreenPipes;
+    using Metadata;
     using Microsoft.Extensions.DependencyInjection;
     using Scoping;
     using Scoping.CourierContexts;

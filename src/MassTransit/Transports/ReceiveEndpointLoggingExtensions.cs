@@ -2,6 +2,7 @@ namespace MassTransit.Transports
 {
     using System;
     using Context;
+    using Metadata;
     using Util;
 
 

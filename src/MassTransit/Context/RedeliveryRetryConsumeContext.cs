@@ -14,6 +14,7 @@ namespace MassTransit.Context
 {
     using System;
     using GreenPipes;
+    using Metadata;
     using Util;
 
 

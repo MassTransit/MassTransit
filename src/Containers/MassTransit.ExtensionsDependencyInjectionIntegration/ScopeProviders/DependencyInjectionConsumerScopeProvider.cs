@@ -3,6 +3,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
     using System;
     using Context;
     using GreenPipes;
+    using Metadata;
     using Microsoft.Extensions.DependencyInjection;
     using Scoping;
     using Scoping.ConsumerContexts;

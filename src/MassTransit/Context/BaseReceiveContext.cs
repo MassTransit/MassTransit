@@ -8,6 +8,7 @@ namespace MassTransit.Context
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Payloads;
+    using Metadata;
     using Serialization;
     using Topology;
     using Transports;

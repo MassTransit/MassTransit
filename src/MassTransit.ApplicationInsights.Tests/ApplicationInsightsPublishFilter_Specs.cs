@@ -19,6 +19,7 @@ namespace MassTransit.ApplicationInsights.Tests
     using NUnit.Framework;
     using System.Threading.Tasks;
     using Context;
+    using Metadata;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
     using Pipeline;
@@ -138,7 +139,7 @@ namespace MassTransit.ApplicationInsights.Tests
             Assert.AreEqual(capturedTelemetry.Properties["DestinationAddress"], destinationAddress.ToString());
             Assert.AreEqual(capturedTelemetry.Properties["RequestId"], requestId.ToString());
         }
-
+        
         [Test]
         public async Task Should_not_fail_if_properties_are_already_defined()
         {

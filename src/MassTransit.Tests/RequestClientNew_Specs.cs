@@ -18,6 +18,7 @@ namespace MassTransit.Tests
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
+    using Metadata;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;

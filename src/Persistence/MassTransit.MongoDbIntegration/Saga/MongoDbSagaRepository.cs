@@ -10,6 +10,7 @@
     using GreenPipes.Internals.Extensions;
     using MassTransit.Context;
     using MassTransit.Saga;
+    using Metadata;
     using MongoDB.Driver;
     using Pipeline;
     using Util;

@@ -5,6 +5,7 @@ namespace MassTransit.Initializers.Factories
     using System.Collections.Generic;
     using System.Linq;
     using Contracts;
+    using Metadata;
     using Transports.InMemory.GraphValidation;
     using Util;
 

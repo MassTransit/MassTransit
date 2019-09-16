@@ -18,9 +18,9 @@ namespace MassTransit.Transports.Tests
         using System.Runtime.Serialization;
         using System.Threading.Tasks;
         using AmazonSqsTransport.Testing;
+        using Metadata;
         using NUnit.Framework;
         using Testing;
-        using Util;
 
 
         public class A_published_fault :

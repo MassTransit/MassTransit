@@ -5,6 +5,7 @@
     using System.IO;
     using System.Net.Mime;
     using JsonConverters;
+    using Metadata;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
     using Newtonsoft.Json.Converters;

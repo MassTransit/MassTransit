@@ -5,6 +5,7 @@ namespace MassTransit.Registration
     using System.Linq;
     using ConsumeConfigurators;
     using Definition;
+    using Metadata;
     using Util;
 
 

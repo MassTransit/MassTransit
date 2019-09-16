@@ -14,6 +14,7 @@ namespace MassTransit.Context.Converters
 {
     using System;
     using System.Threading.Tasks;
+    using Metadata;
     using Util;
 
 

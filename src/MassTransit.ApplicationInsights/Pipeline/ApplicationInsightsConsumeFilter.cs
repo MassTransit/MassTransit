@@ -15,6 +15,7 @@ namespace MassTransit.ApplicationInsights.Pipeline
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Metadata;
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;

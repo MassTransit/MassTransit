@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Security.Cryptography.X509Certificates;
     using System.Text.RegularExpressions;
     using Configurators;
+    using Metadata;
     using RabbitMQ.Client;
     using Topology;
     using Topology.Settings;

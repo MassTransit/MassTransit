@@ -19,6 +19,7 @@ namespace MassTransit.Serialization
     using System.Reflection;
     using System.Runtime.Remoting.Messaging;
     using System.Runtime.Serialization.Formatters.Binary;
+    using Metadata;
     using Util;
 
 

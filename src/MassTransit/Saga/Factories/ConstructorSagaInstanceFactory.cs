@@ -16,6 +16,7 @@ namespace MassTransit.Saga.Factories
     using System.Linq.Expressions;
     using System.Reflection;
     using Internals.Reflection;
+    using Metadata;
     using Util;
 
 

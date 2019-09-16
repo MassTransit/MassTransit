@@ -2,6 +2,7 @@
 {
     using Context;
     using GreenPipes;
+    using Metadata;
     using Scoping;
     using Scoping.ConsumerContexts;
     using SimpleInjector;

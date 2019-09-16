@@ -2,6 +2,7 @@ namespace MassTransit.Initializers.Conventions
 {
     using System;
     using System.Collections.Concurrent;
+    using Metadata;
     using Util;
 
 

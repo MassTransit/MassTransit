@@ -5,6 +5,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
     using Castle.MicroKernel;
     using Context;
     using GreenPipes;
+    using Metadata;
     using Scoping;
     using Scoping.ConsumerContexts;
     using Util;

@@ -13,6 +13,7 @@
 namespace MassTransit.Context
 {
     using System;
+    using Metadata;
     using Util;
 
 

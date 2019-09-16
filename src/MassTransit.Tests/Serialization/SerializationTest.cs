@@ -19,6 +19,7 @@ namespace MassTransit.Tests.Serialization
     using MassTransit.Serialization;
     using MassTransit.Transports.InMemory.Contexts;
     using MassTransit.Transports.InMemory.Fabric;
+    using Metadata;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;

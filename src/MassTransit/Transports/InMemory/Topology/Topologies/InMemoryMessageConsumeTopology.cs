@@ -19,6 +19,7 @@ namespace MassTransit.Transports.InMemory.Topology.Topologies
     using InMemory.Builders;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
+    using Metadata;
     using Specifications;
     using Util;
 

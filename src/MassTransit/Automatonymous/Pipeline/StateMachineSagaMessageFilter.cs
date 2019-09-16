@@ -19,9 +19,9 @@ namespace Automatonymous.Pipeline
     using Contexts;
     using GreenPipes;
     using MassTransit;
+    using MassTransit.Metadata;
     using MassTransit.Saga;
     using MassTransit.Saga.Pipeline.Filters;
-    using MassTransit.Util;
 
 
     /// <summary>

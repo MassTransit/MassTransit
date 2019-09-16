@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Internals.Extensions
+﻿namespace MassTransit.Internals.Extensions
 {
     using System;
     using System.Collections.Generic;
@@ -22,8 +10,6 @@ namespace MassTransit.Internals.Extensions
 
     public static class TypeExtensions
     {
-        static readonly TypeNameFormatter _typeNameFormatter = new TypeNameFormatter();
-
         public static IEnumerable<PropertyInfo> GetAllProperties(this Type type)
         {
             TypeInfo typeInfo = type.GetTypeInfo();
@@ -180,16 +166,6 @@ namespace MassTransit.Internals.Extensions
         {
             TypeInfo typeInfo = type.GetTypeInfo();
             return !typeInfo.IsValueType || type.IsNullable() || type == typeof(string);
-        }
-
-        /// <summary>
-        /// Returns an easy-to-read type name from the specified Type
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public static string GetTypeName(this Type type)
-        {
-            return _typeNameFormatter.GetTypeName(type);
         }
 
         /// <summary>

@@ -4,6 +4,7 @@
     using Context;
     using GreenPipes;
     using MassTransit.Context;
+    using Metadata;
     using MongoDB.Driver;
     using Util;
 

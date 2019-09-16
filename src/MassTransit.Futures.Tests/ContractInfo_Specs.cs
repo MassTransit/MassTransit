@@ -3,6 +3,7 @@ namespace MassTransit.Tests
     using System;
     using Contracts;
     using Initializers.Factories;
+    using Metadata;
     using NUnit.Framework;
     using TestContracts;
     using Util;

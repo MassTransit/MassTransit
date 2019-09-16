@@ -20,6 +20,7 @@ namespace MassTransit.QuartzIntegration
     using GreenPipes.Internals.Extensions;
     using GreenPipes.Internals.Reflection;
     using Internals.Reflection;
+    using Metadata;
     using Newtonsoft.Json;
     using Quartz;
     using Quartz.Spi;

@@ -19,6 +19,7 @@ namespace MassTransit.Courier
     using Contracts;
     using InternalMessages;
     using MassTransit.Serialization;
+    using Metadata;
     using Newtonsoft.Json;
     using Serialization;
     using Util;

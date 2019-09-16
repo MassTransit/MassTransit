@@ -19,6 +19,7 @@ namespace MassTransit.Turnout
     using Context;
     using Contracts;
     using GreenPipes;
+    using Metadata;
     using Util;
 
 

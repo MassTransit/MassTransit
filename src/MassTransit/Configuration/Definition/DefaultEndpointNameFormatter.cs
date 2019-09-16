@@ -3,6 +3,7 @@ namespace MassTransit.Definition
     using System;
     using System.Text;
     using Courier;
+    using Metadata;
     using Saga;
     using Util;
 

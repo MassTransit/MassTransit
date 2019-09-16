@@ -4,6 +4,8 @@
     using MassTransit.Testing;
     using Microsoft.AspNetCore.SignalR;
     using System.Collections.Generic;
+    using Utils;
+
 
     public class SignalRBackplaneConsumersTestHarness<THub>
         where THub : Hub

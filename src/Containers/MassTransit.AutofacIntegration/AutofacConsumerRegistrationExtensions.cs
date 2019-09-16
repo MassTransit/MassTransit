@@ -4,6 +4,7 @@
     using Autofac;
     using Autofac.Builder;
     using Autofac.Features.Scanning;
+    using Metadata;
     using Saga;
     using Util;
 

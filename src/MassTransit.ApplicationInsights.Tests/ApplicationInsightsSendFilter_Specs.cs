@@ -19,6 +19,7 @@ namespace MassTransit.ApplicationInsights.Tests
     using NUnit.Framework;
     using System.Threading.Tasks;
     using Context;
+    using Metadata;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
     using Pipeline;

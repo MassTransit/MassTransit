@@ -18,6 +18,7 @@ namespace MassTransit.ConsumerSpecifications
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
+    using Metadata;
     using Util;
 
 

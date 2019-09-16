@@ -3,6 +3,7 @@
     using System;
     using ConsumeConfigurators;
     using Context;
+    using Metadata;
     using Pipeline.ConsumerFactories;
     using Util;
 

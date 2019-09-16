@@ -15,6 +15,7 @@ namespace MassTransit.Transformation.Contexts
     using System;
     using GreenPipes;
     using GreenPipes.Payloads;
+    using Metadata;
     using Util;
 
 

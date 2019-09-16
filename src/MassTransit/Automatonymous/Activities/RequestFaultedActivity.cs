@@ -7,6 +7,7 @@ namespace Automatonymous.Activities
     using MassTransit;
     using MassTransit.Contracts;
     using MassTransit.Initializers;
+    using MassTransit.Metadata;
     using MassTransit.Util;
 
 

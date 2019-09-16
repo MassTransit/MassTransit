@@ -17,6 +17,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
     using Configuration;
     using EndpointSpecifications;
     using MassTransit.Topology.Topologies;
+    using Metadata;
     using Settings;
     using Specifications;
     using Transports;

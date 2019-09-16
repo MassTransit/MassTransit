@@ -5,6 +5,7 @@ namespace MassTransit.Registration
     using System.Linq;
     using Courier;
     using Internals.Extensions;
+    using Metadata;
     using Util;
 
 

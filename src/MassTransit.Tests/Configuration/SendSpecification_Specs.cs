@@ -27,6 +27,7 @@ namespace MassTransit.Tests.Configuration
     using MassTransit.Topology.Topologies;
     using MassTransit.Transports.InMemory;
     using MassTransit.Transports.InMemory.Contexts;
+    using Metadata;
     using NUnit.Framework;
     using SendPipeSpecifications;
     using Util;

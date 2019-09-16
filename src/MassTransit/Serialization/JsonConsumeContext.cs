@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
     using System;
@@ -18,9 +6,9 @@ namespace MassTransit.Serialization
     using System.Reflection;
     using System.Threading.Tasks;
     using Context;
+    using Metadata;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Util;
 
 
     public class JsonConsumeContext :
@@ -31,7 +19,6 @@ namespace MassTransit.Serialization
         readonly MessageEnvelope _envelope;
         readonly JToken _messageToken;
         readonly IDictionary<Type, ConsumeContext> _messageTypes;
-        readonly IObjectTypeDeserializer _objectTypeDeserializer;
         readonly string[] _supportedTypes;
 
         Guid? _conversationId;
@@ -45,7 +32,7 @@ namespace MassTransit.Serialization
         Uri _responseAddress;
         Uri _sourceAddress;
 
-        public JsonConsumeContext(JsonSerializer deserializer, IObjectTypeDeserializer objectTypeDeserializer, ReceiveContext receiveContext,
+        public JsonConsumeContext(JsonSerializer deserializer, ReceiveContext receiveContext,
             MessageEnvelope envelope)
             : base(receiveContext)
         {
@@ -54,7 +41,6 @@ namespace MassTransit.Serialization
 
             _envelope = envelope;
             _deserializer = deserializer;
-            _objectTypeDeserializer = objectTypeDeserializer;
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, ConsumeContext>();
@@ -74,7 +60,7 @@ namespace MassTransit.Serialization
         public override Uri ResponseAddress => _responseAddress ?? (_responseAddress = ConvertToUri(_envelope.ResponseAddress));
         public override Uri FaultAddress => _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress));
         public override DateTime? SentTime => _envelope.SentTime;
-        public override Headers Headers => _headers ?? (_headers = new JsonMessageHeaders(_objectTypeDeserializer, _envelope.Headers));
+        public override Headers Headers => _headers ?? (_headers = new JsonMessageHeaders(_envelope.Headers));
         public override HostInfo Host => _envelope.Host;
         public override IEnumerable<string> SupportedMessageTypes => _supportedTypes;
 

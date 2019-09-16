@@ -10,6 +10,7 @@ namespace MassTransit.Conductor.Client
     using Distribution;
     using GreenPipes;
     using GreenPipes.Caching;
+    using Metadata;
     using Util;
 
 

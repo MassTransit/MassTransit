@@ -6,7 +6,7 @@ namespace MassTransit.Registration
     using Courier;
     using Definition;
     using Internals.Extensions;
-    using Util;
+    using Metadata;
 
 
     public static class ActivityDefinitionRegistrationCache

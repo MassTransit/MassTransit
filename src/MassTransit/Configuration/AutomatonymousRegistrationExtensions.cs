@@ -7,6 +7,7 @@ namespace MassTransit
     using Automatonymous;
     using Definition;
     using Internals.Extensions;
+    using Metadata;
     using Registration;
     using Util;
 

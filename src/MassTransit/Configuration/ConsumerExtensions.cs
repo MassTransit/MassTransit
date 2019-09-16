@@ -7,6 +7,7 @@
     using Context;
     using GreenPipes;
     using Internals.Extensions;
+    using Metadata;
     using Pipeline;
     using Pipeline.ConsumerFactories;
     using Util;

@@ -3,6 +3,7 @@ namespace MassTransit.Initializers.Factories
     using System;
     using System.Collections.Concurrent;
     using Contracts;
+    using Metadata;
     using Util;
 
 

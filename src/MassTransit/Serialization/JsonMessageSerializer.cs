@@ -7,6 +7,7 @@ namespace MassTransit.Serialization
     using System.Text;
     using System.Threading;
     using JsonConverters;
+    using Metadata;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
     using Util;

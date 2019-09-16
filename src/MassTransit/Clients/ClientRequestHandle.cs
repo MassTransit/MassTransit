@@ -20,6 +20,7 @@ namespace MassTransit.Clients
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
+    using Metadata;
     using Util;
 
 

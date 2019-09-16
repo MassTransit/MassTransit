@@ -3,6 +3,7 @@ namespace MassTransit.Conductor.Pipeline
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Metadata;
     using Server;
     using Util;
 

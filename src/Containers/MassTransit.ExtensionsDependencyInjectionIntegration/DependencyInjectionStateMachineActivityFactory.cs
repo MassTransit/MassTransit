@@ -3,6 +3,7 @@
     using System;
     using Automatonymous;
     using GreenPipes;
+    using Metadata;
     using Microsoft.Extensions.DependencyInjection;
     using Util;
 

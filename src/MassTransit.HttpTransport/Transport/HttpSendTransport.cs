@@ -14,11 +14,9 @@ namespace MassTransit.HttpTransport.Transport
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Headers;
-    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Clients;
@@ -27,8 +25,8 @@ namespace MassTransit.HttpTransport.Transport
     using GreenPipes.Agents;
     using Context;
     using MassTransit.Pipeline.Observables;
+    using Metadata;
     using Transports;
-    using Util;
 
 
     public class HttpSendTransport :
@@ -131,24 +129,6 @@ namespace MassTransit.HttpTransport.Transport
             });
 
             await _clientContextSupervisor.Send(clientPipe, cancellationToken).ConfigureAwait(false);
-        }
-
-        public Task Move(ReceiveContext context, IPipe<SendContext> pipe)
-        {
-            return TaskUtil.Completed;
-        }
-
-        static string GetAssemblyFileVersion(Assembly assembly)
-        {
-            var attribute = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
-            if (attribute != null)
-                return attribute.Version;
-
-            var assemblyLocation = assembly.Location;
-            if (assemblyLocation != null)
-                return FileVersionInfo.GetVersionInfo(assemblyLocation).FileVersion;
-
-            return "Unknown";
         }
     }
 }

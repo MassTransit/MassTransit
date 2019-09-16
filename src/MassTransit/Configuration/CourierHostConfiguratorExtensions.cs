@@ -4,6 +4,7 @@
     using Context;
     using Courier;
     using Courier.Factories;
+    using Metadata;
     using PipeConfigurators;
     using Util;
 

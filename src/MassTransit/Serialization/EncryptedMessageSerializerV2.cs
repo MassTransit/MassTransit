@@ -14,6 +14,7 @@ namespace MassTransit.Serialization
 {
     using System.IO;
     using System.Net.Mime;
+    using Metadata;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Bson;
     using Util;

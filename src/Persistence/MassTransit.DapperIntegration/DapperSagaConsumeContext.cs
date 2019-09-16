@@ -16,6 +16,7 @@ namespace MassTransit.DapperIntegration
     using System.Threading.Tasks;
     using Context;
     using Dapper;
+    using Metadata;
     using Saga;
     using Util;
 

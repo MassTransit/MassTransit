@@ -4,6 +4,7 @@
     using Context;
     using GreenPipes;
     using MassTransit.Context;
+    using Metadata;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Newtonsoft.Json;

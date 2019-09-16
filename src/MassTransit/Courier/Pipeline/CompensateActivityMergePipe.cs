@@ -3,6 +3,7 @@ namespace MassTransit.Courier.Pipeline
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Metadata;
     using Util;
 
 

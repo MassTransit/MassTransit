@@ -17,6 +17,7 @@ namespace MassTransit
     using System.Threading.Tasks;
     using GreenPipes;
     using Initializers;
+    using Metadata;
     using RabbitMqTransport;
     using Scheduling;
     using Util;

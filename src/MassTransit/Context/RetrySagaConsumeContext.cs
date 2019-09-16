@@ -15,6 +15,7 @@ namespace MassTransit.Context
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Metadata;
     using Saga;
     using Util;
 

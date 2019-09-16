@@ -3,6 +3,7 @@
     using System;
     using Context;
     using GreenPipes;
+    using Metadata;
     using Pipeline;
     using Saga;
     using Saga.Connectors;

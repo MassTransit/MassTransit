@@ -16,6 +16,7 @@ namespace MassTransit.Registration
     using System.Collections.Concurrent;
     using System.Linq;
     using Internals.Extensions;
+    using Metadata;
     using Util;
 
 

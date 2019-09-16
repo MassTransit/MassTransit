@@ -19,6 +19,7 @@ namespace MassTransit.Host
     using Context;
     using Hosting;
     using Internals.Extensions;
+    using Metadata;
     using Util;
     using Util.Scanning;
 
@@ -106,7 +107,7 @@ namespace MassTransit.Host
         {
             foreach (var interfaceType in type.GetInterfaces())
             {
-                var name = interfaceType.GetTypeName();
+                var name = TypeMetadataCache.GetShortName(interfaceType);
 
                 if (name.Equals(_endpointSpecificationTypeName, StringComparison.InvariantCultureIgnoreCase))
                     return true;
@@ -122,7 +123,7 @@ namespace MassTransit.Host
         {
             foreach (var interfaceType in type.GetInterfaces())
             {
-                var name = interfaceType.GetTypeName();
+                var name = TypeMetadataCache.GetShortName(interfaceType);
 
                 if (name.Equals(_hostBusFactoryTypeName, StringComparison.InvariantCultureIgnoreCase))
                     return true;

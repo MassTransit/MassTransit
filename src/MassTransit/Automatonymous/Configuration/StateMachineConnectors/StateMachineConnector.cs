@@ -18,6 +18,7 @@ namespace Automatonymous.StateMachineConnectors
     using System.Reflection;
     using GreenPipes;
     using MassTransit;
+    using MassTransit.Metadata;
     using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Saga.Connectors;

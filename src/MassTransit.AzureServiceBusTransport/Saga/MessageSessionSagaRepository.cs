@@ -19,6 +19,7 @@ namespace MassTransit.AzureServiceBusTransport.Saga
     using Context;
     using GreenPipes;
     using MassTransit.Saga;
+    using Metadata;
     using Newtonsoft.Json;
     using Serialization;
     using Util;

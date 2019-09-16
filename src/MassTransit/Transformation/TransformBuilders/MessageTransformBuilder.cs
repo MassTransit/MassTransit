@@ -18,6 +18,7 @@ namespace MassTransit.Transformation.TransformBuilders
     using System.Reflection;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
+    using Metadata;
     using TransformConfigurators;
     using Transforms;
     using Util;

@@ -16,6 +16,7 @@ namespace MassTransit.RedisIntegration
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using Metadata;
     using Saga;
     using StackExchange.Redis;
     using Util;

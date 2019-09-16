@@ -15,6 +15,7 @@ namespace MassTransit.ConsumerSpecifications
     using System.Collections.Generic;
     using GreenPipes;
     using Internals.Extensions;
+    using Metadata;
     using Pipeline.Filters;
     using Util;
 

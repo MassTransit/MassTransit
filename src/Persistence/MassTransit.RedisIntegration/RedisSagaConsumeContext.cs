@@ -15,6 +15,7 @@ namespace MassTransit.RedisIntegration
     using System;
     using System.Threading.Tasks;
     using Context;
+    using Metadata;
     using Util;
 
 

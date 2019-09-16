@@ -8,6 +8,7 @@ namespace MassTransit.Transports.InMemory
     using Fabric;
     using GreenPipes;
     using Logging;
+    using Metadata;
     using Util;
 
 

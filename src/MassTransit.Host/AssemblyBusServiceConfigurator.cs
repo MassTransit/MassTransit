@@ -19,6 +19,7 @@ namespace MassTransit.Host
     using Context;
     using Hosting;
     using Internals.Extensions;
+    using Metadata;
     using Util;
 
 

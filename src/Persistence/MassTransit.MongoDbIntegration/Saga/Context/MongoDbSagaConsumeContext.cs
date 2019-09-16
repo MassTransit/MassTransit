@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit.Context;
+    using Metadata;
     using MongoDB.Driver;
     using Util;
 

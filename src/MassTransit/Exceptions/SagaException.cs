@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using System.Linq.Expressions;
+    using Metadata;
     using Util;
 
 

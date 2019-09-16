@@ -17,6 +17,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using System.Collections.Generic;
     using Internals.Extensions;
     using MassTransit.Saga;
+    using Metadata;
     using Microsoft.EntityFrameworkCore;
     using Util;
 

@@ -17,6 +17,7 @@ namespace MassTransit.Pipeline.Pipes
     using System.Diagnostics;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Metadata;
     using Observables;
     using PublishPipeSpecifications;
     using Util;

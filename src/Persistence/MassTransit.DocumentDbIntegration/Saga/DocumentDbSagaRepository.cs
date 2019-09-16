@@ -10,6 +10,7 @@
     using GreenPipes.Internals.Extensions;
     using MassTransit.Context;
     using MassTransit.Saga;
+    using Metadata;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Newtonsoft.Json;

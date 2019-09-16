@@ -3,6 +3,7 @@ namespace MassTransit.Saga.Factories
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using Metadata;
     using Util;
 
 

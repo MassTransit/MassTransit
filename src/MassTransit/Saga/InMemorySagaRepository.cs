@@ -8,7 +8,7 @@ namespace MassTransit.Saga
     using Context;
     using GreenPipes;
     using Logging;
-    using Util;
+    using Metadata;
 
 
     public class InMemorySagaRepository<TSaga> :

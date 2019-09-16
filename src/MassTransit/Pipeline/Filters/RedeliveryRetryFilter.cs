@@ -17,6 +17,7 @@ namespace MassTransit.Pipeline.Filters
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Observers;
+    using Metadata;
     using Util;
 
 

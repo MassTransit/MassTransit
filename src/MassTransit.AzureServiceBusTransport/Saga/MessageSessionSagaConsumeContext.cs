@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Saga
     using System.Threading.Tasks;
     using Context;
     using MassTransit.Saga;
+    using Metadata;
     using Util;
 
 
