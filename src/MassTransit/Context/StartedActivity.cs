@@ -1,5 +1,6 @@
 namespace MassTransit.Context
 {
+    using System;
     using System.Diagnostics;
     using Logging;
 
@@ -18,20 +19,34 @@ namespace MassTransit.Context
             Scope = scope;
         }
 
-        public StartedActivity AddTag(string key, string value)
+        public void AddTag(string key, string value)
         {
             Activity.AddTag(key, value);
-
-            return this;
         }
 
-        public StartedActivity AddBaggage(string key, string value)
+        public void AddTag(string key, Guid? value)
+        {
+            if (value.HasValue)
+                Activity.AddTag(key, value.Value.ToString("D"));
+        }
+
+        public void AddTag(string key, Uri value)
+        {
+            if (value != null)
+                Activity.AddTag(key, value.ToString());
+        }
+
+        public void AddBaggage(string key, string value)
         {
             Activity.AddBaggage(key, value);
 
             Scope?.Add(key, value);
+        }
 
-            return this;
+        public void AddBaggage(string key, Guid? value)
+        {
+            if (value.HasValue)
+                Activity.AddBaggage(key, value.Value.ToString("D"));
         }
 
         public void SetParentId(string parentId)

@@ -20,19 +20,13 @@ namespace MassTransit
             if (activity.Activity.Baggage.Any())
                 context.Headers.Set(DiagnosticHeaders.ActivityCorrelationContext, activity.Activity.Baggage.ToList());
 
-            if (context.MessageId.HasValue)
-                activity.AddTag(DiagnosticHeaders.MessageId, context.MessageId.Value.ToString());
-            if (context.InitiatorId.HasValue)
-                activity.AddTag(DiagnosticHeaders.InitiatorId, context.InitiatorId.Value.ToString());
-            if (context.SourceAddress != null)
-                activity.AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress.ToString());
-            if (context.DestinationAddress != null)
-                activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString());
+            activity.AddTag(DiagnosticHeaders.MessageId, context.MessageId);
+            activity.AddTag(DiagnosticHeaders.InitiatorId, context.InitiatorId);
+            activity.AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress);
+            activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
 
-            if (context.CorrelationId.HasValue)
-                activity.AddBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId.Value.ToString());
-            if (context.ConversationId.HasValue)
-                activity.AddBaggage(DiagnosticHeaders.CorrelationConversationId, context.ConversationId.Value.ToString());
+            activity.AddBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId);
+            activity.AddBaggage(DiagnosticHeaders.ConversationId, context.ConversationId);
         }
 
         public static void AddReceiveContextHeaders(this StartedActivity? startedActivity, ReceiveContext context)
@@ -42,7 +36,7 @@ namespace MassTransit
 
             var activity = startedActivity.Value;
 
-            activity.AddTag(DiagnosticHeaders.InputAddress, context.InputAddress.ToString());
+            activity.AddTag(DiagnosticHeaders.InputAddress, context.InputAddress);
 
             if (context.TransportHeaders.TryGetHeader("MessageId", out var messageIdHeader) && messageIdHeader != null)
                 activity.AddTag(DiagnosticHeaders.MessageId, messageIdHeader.ToString());
@@ -52,14 +46,11 @@ namespace MassTransit
 
         public static void AddConsumeContextHeaders(this StartedActivityContext activity, ConsumeContext context)
         {
-            if (context.MessageId.HasValue)
-                activity.AddTag(DiagnosticHeaders.MessageId, context.MessageId.Value.ToString());
-            if (context.InitiatorId.HasValue)
-                activity.AddTag(DiagnosticHeaders.InitiatorId, context.InitiatorId.Value.ToString());
-            if (context.SourceAddress != null)
-                activity.AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress.ToString());
-            if (context.DestinationAddress != null)
-                activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString());
+            activity.AddTag(DiagnosticHeaders.MessageId, context.MessageId);
+            activity.AddTag(DiagnosticHeaders.InitiatorId, context.InitiatorId);
+            activity.AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress);
+            activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
+
             if (context.Host != null)
             {
                 activity.AddTag(DiagnosticHeaders.SourceHostMachine, context.Host.MachineName);
@@ -71,10 +62,8 @@ namespace MassTransit
             if (context.SupportedMessageTypes != null)
                 activity.AddTag(DiagnosticHeaders.MessageTypes, string.Join(",", context.SupportedMessageTypes));
 
-            if (context.CorrelationId != null)
-                activity.AddBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId.Value.ToString());
-            if (context.ConversationId != null)
-                activity.AddBaggage(DiagnosticHeaders.CorrelationConversationId, context.ConversationId.Value.ToString());
+            activity.AddBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId);
+            activity.AddBaggage(DiagnosticHeaders.ConversationId, context.ConversationId);
 
             if (context.Headers.TryGetHeader(DiagnosticHeaders.ActivityId, out var activityIdHeader)
                 && activityIdHeader is string activityId && !string.IsNullOrWhiteSpace(activityId))

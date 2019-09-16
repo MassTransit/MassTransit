@@ -13,7 +13,7 @@ namespace MassTransit.Logging
         public const string SourceAddress = "source-address";
         public const string DestinationAddress = "destination-address";
         public const string InputAddress = "input-address";
-        public const string ConversationId = "correlation-conversation-id";
+        public const string ConversationId = "conversation-id";
         public const string CorrelationConversationId = "correlation-conversation-id";
 
         public const string SourceHostMachine = "source-host-machine";
