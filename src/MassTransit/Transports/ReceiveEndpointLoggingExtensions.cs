@@ -2,6 +2,7 @@ namespace MassTransit.Transports
 {
     using System;
     using Context;
+    using Internals.Extensions;
     using Metadata;
     using Util;
 
@@ -33,14 +34,15 @@ namespace MassTransit.Transports
             where T : class
         {
             LogContext.Current?.Messages.Debug?.Log("RECEIVE {InputAddress} {MessageId} {MessageType} {ConsumerType}({Duration})",
-                context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache<T>.ShortName, consumerType, duration);
+                context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache<T>.ShortName, consumerType, duration.ToFriendlyString());
         }
 
         public static void LogFaulted<T>(this ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
             LogContext.Current?.Messages.Error?.Log("R-FAULT {InputAddress} {MessageId} {MessageType} {ConsumerType}({Duration}) {Exception}",
-                context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache<T>.ShortName, consumerType, duration, GetFaultMessage(exception));
+                context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache<T>.ShortName, consumerType, duration.ToFriendlyString(),
+                GetFaultMessage(exception));
         }
 
         public static void LogFaulted(this ReceiveContext context, Exception exception)

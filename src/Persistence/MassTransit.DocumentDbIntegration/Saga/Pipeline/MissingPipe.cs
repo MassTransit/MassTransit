@@ -3,12 +3,10 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using MassTransit.Context;
-    using Metadata;
+    using MassTransit.Saga;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Newtonsoft.Json;
-    using Util;
 
 
     public class MissingPipe<TSaga, TMessage> :
@@ -44,11 +42,10 @@
 
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
         {
-            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Added {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
-
             SagaConsumeContext<TSaga, TMessage> proxy =
                 _documentDbSagaConsumeContextFactory.Create(_client, _databaseName, _collectionName, context, context.Saga, false, _requestOptions);
+
+            proxy.LogAdded();
 
             await _next.Send(proxy).ConfigureAwait(false);
 

@@ -5,16 +5,13 @@
     using System.Data;
     using System.Data.SqlClient;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
     using MassTransit.Saga;
-    using Metadata;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
     using Microsoft.EntityFrameworkCore.Storage;
-    using Util;
 
 
     public class EntityFrameworkSagaRepository<TSaga> :
@@ -137,7 +134,7 @@
 
             if (policy.PreInsertInstance(context, out var instance))
             {
-                var inserted = await PreInsertSagaInstance<T>(dbContext, instance, context.CancellationToken).ConfigureAwait(false);
+                var inserted = await PreInsertSagaInstance(dbContext, context, instance).ConfigureAwait(false);
                 if (!inserted)
                     instance = null; // Reset this back to null if the insert failed. We will use the MissingPipe to create instead
             }
@@ -165,10 +162,9 @@
                 }
                 else
                 {
-                    LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                        instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-
                     var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
+
+                    sagaConsumeContext.LogUsed();
 
                     await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
                 }
@@ -198,8 +194,7 @@
                 }
                 else
                 {
-                    LogContext.Error?.Log(ex, "SAGA:{SagaType}:{CorrelationId} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                        instance?.CorrelationId, TypeMetadataCache<T>.ShortName);
+                    context.LogFault(this, ex, instance?.CorrelationId);
 
                     try
                     {
@@ -215,8 +210,7 @@
             }
             catch (Exception ex)
             {
-                LogContext.Error?.Log(ex, "SAGA:{SagaType}:{CorrelationId} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance?.CorrelationId, TypeMetadataCache<T>.ShortName);
+                context.LogFault(this, ex, instance?.CorrelationId);
 
                 try
                 {
@@ -380,7 +374,7 @@
             }
             catch (SagaException sex)
             {
-                LogContext.Error?.Log(sex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
+                context.LogFault(sex);
 
                 try
                 {
@@ -395,6 +389,8 @@
             }
             catch (Exception ex)
             {
+                context.LogFault(ex);
+
                 try
                 {
                     transaction.Rollback();
@@ -403,8 +399,6 @@
                 {
                     LogContext.Warning?.Log(innerException, "Transaction rollback failed");
                 }
-
-                LogContext.Error?.Log(ex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
 
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
             }
@@ -417,16 +411,16 @@
             return baseException != null && baseException.Number == 1205;
         }
 
-        static async Task<bool> PreInsertSagaInstance<T>(DbContext dbContext, TSaga instance, CancellationToken cancellationToken)
+        async Task<bool> PreInsertSagaInstance<T>(DbContext dbContext, ConsumeContext<T> context, TSaga instance)
+            where T : class
         {
             EntityEntry<TSaga> entry = null;
             try
             {
                 entry = dbContext.Set<TSaga>().Add(instance);
-                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
 
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Insert {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                context.LogInsert(this, instance.CorrelationId);
 
                 return true;
             }
@@ -437,8 +431,7 @@
                 // see here for details: https://www.davideguida.com/how-to-reset-the-entities-state-on-a-entity-framework-db-context/
                 entry.State = EntityState.Detached;
 
-                LogContext.Debug?.Log(ex, "SAGA:{SagaType}:{CorrelationId} Dupe {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                context.LogInsertFault(this, ex, instance.CorrelationId);
             }
 
             return false;
@@ -450,10 +443,9 @@
         {
             try
             {
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-
                 var sagaConsumeContext = new EntityFrameworkSagaConsumeContext<TSaga, T>(dbContext, context, instance);
+
+                sagaConsumeContext.LogUsed();
 
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
             }
@@ -502,10 +494,9 @@
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Added {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
-
                 var proxy = new EntityFrameworkSagaConsumeContext<TSaga, TMessage>(_dbContext, context, context.Saga, false);
+
+                proxy.LogAdded();
 
                 await _next.Send(proxy).ConfigureAwait(false);
 

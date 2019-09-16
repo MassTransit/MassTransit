@@ -8,14 +8,12 @@
     using Context;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
-    using MassTransit.Context;
     using MassTransit.Saga;
     using Metadata;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Newtonsoft.Json;
     using Pipeline;
-    using Util;
 
 
     public class DocumentDbSagaRepository<TSaga> :
@@ -178,13 +176,13 @@
             }
             catch (SagaException sex)
             {
-                LogContext.Error?.Log(sex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
+                context.LogFault(sex);
 
                 throw;
             }
             catch (Exception ex)
             {
-                LogContext.Error?.Log(ex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
+                context.LogFault(ex);
 
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
             }
@@ -199,15 +197,13 @@
                     await _client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), instance, _requestOptions, true)
                         .ConfigureAwait(false);
 
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Insert {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                context.LogInsert(this, instance.CorrelationId);
 
                 return JsonConvert.DeserializeObject<TSaga>(response.Resource.ToString(), _jsonSerializerSettings);
             }
             catch (Exception ex)
             {
-                LogContext.Debug?.Log(ex, "SAGA:{SagaType}:{CorrelationId} Dupe {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                context.LogInsertFault(this, ex, instance.CorrelationId);
             }
 
             return null;
@@ -218,11 +214,10 @@
         {
             try
             {
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-
                 SagaConsumeContext<TSaga, T> sagaConsumeContext =
                     _documentDbSagaConsumeContextFactory.Create(_client, _databaseName, _collectionName, context, instance, true, _requestOptions);
+
+                sagaConsumeContext.LogUsed();
 
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 

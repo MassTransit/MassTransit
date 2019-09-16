@@ -4,12 +4,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Context;
     using GreenPipes;
     using Marten;
-    using Metadata;
     using Saga;
-    using Util;
 
 
     public class MartenSagaRepository<TSaga> : ISagaRepository<TSaga>,
@@ -64,7 +61,7 @@
             using (var session = _store.DirtyTrackedSession())
             {
                 if (policy.PreInsertInstance(context, out var instance))
-                    await PreInsertSagaInstance<T>(session, instance).ConfigureAwait(false);
+                    await PreInsertSagaInstance(session, context, instance).ConfigureAwait(false);
 
                 if (instance == null)
                     instance = session.Load<TSaga>(sagaId);
@@ -106,51 +103,45 @@
                 }
                 catch (SagaException sex)
                 {
-                    LogContext.Error?.Log(sex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
+                    context.LogFault(sex);
 
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    LogContext.Error?.Log(ex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
+                    context.LogFault(ex);
 
                     throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                 }
             }
         }
 
-        static async Task<bool> PreInsertSagaInstance<T>(IDocumentSession session, TSaga instance)
-        {
-            var inserted = false;
-            try
-            {
-                session.Store(instance);
-                await session.SaveChangesAsync().ConfigureAwait(false);
-                inserted = true;
-
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Insert {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-            }
-            catch (Exception ex)
-            {
-                LogContext.Debug?.Log(ex, "SAGA:{SagaType}:{CorrelationId} Dupe {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-            }
-
-            return inserted;
-        }
-
-        static async Task SendToInstance<T>(ConsumeContext<T> context,
-            ISagaPolicy<TSaga, T> policy, TSaga instance,
-            IPipe<SagaConsumeContext<TSaga, T>> next, IDocumentSession session)
+        async Task PreInsertSagaInstance<T>(IDocumentSession session, ConsumeContext<T> context, TSaga instance)
             where T : class
         {
             try
             {
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                session.Store(instance);
+                await session.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
 
-                var sagaConsumeContext = new MartenSagaConsumeContext<TSaga, T>(session, context, instance);
+                context.LogInsert(this, instance.CorrelationId);
+            }
+            catch (Exception ex)
+            {
+                context.LogInsertFault(this, ex, instance.CorrelationId);
+            }
+        }
+
+        async Task SendToInstance<T>(ConsumeContext<T> context,
+            ISagaPolicy<TSaga, T> policy, TSaga instance,
+            IPipe<SagaConsumeContext<TSaga, T>> next, IDocumentSession session)
+            where T : class
+        {
+            var sagaConsumeContext = new MartenSagaConsumeContext<TSaga, T>(session, context, instance);
+
+            try
+            {
+                sagaConsumeContext.LogUsed();
 
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
@@ -159,15 +150,13 @@
             }
             catch (SagaException sex)
             {
-                LogContext.Error?.Log(sex, "SAGA:{SagaType}:{CorrelationId} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance?.CorrelationId, TypeMetadataCache<T>.ShortName);
+                sagaConsumeContext.LogFault(sex);
 
                 throw;
             }
             catch (Exception ex)
             {
-                LogContext.Error?.Log(ex, "SAGA:{SagaType}:{CorrelationId} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance?.CorrelationId, TypeMetadataCache<T>.ShortName);
+                sagaConsumeContext.LogFault(ex);
 
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), instance.CorrelationId, ex);
             }
@@ -198,11 +187,9 @@
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Added {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
+                SagaConsumeContext<TSaga, TMessage> proxy = new MartenSagaConsumeContext<TSaga, TMessage>(_session,context, context.Saga);
 
-                SagaConsumeContext<TSaga, TMessage> proxy = new MartenSagaConsumeContext<TSaga, TMessage>(_session,
-                    context, context.Saga);
+                proxy.LogAdded();
 
                 await _next.Send(proxy).ConfigureAwait(false);
 

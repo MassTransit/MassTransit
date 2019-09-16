@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.DapperIntegration
+﻿namespace MassTransit.DapperIntegration
 {
     using System;
     using System.Collections.Generic;
@@ -25,7 +13,6 @@ namespace MassTransit.DapperIntegration
     using Metadata;
     using Saga;
     using Sql;
-    using Util;
 
 
     public class DapperSagaRepository<TSaga> :
@@ -69,7 +56,7 @@ namespace MassTransit.DapperIntegration
             {
                 using (var connection = new SqlConnection(_connectionString))
                 {
-                    await PreInsertSagaInstance<T>(connection, preInsertInstance).ConfigureAwait(false);
+                    await PreInsertSagaInstance<T>(connection, context, preInsertInstance).ConfigureAwait(false);
                 }
             }
 
@@ -92,9 +79,6 @@ namespace MassTransit.DapperIntegration
                     }
                     else
                     {
-                        LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                            instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-
                         await SendToInstance(context, connection, policy, instance, tableName, next).ConfigureAwait(false);
                     }
 
@@ -165,12 +149,12 @@ namespace MassTransit.DapperIntegration
                 }
                 catch (SagaException sex)
                 {
-                    LogContext.Error?.Log(sex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
+                    context.LogFault(sex);
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    LogContext.Error?.Log(ex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
+                    context.LogFault(ex);
 
                     throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                 }
@@ -182,16 +166,18 @@ namespace MassTransit.DapperIntegration
             return $"{typeof(TSaga).Name}s";
         }
 
-        async Task PreInsertSagaInstance<T>(SqlConnection sqlConnection, TSaga instance)
+        async Task PreInsertSagaInstance<T>(SqlConnection sqlConnection, ConsumeContext<T> context, TSaga instance)
+            where T : class
         {
             try
             {
                 await InsertSagaInstance(sqlConnection, instance).ConfigureAwait(false);
+
+                context.LogInsert(this, instance.CorrelationId);
             }
             catch (Exception ex)
             {
-                LogContext.Debug?.Log(ex, "SAGA:{SagaType}:{CorrelationId} Dupe {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                context.LogInsertFault(this, ex, instance.CorrelationId);
             }
         }
 
@@ -201,10 +187,9 @@ namespace MassTransit.DapperIntegration
         {
             try
             {
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-
                 var sagaConsumeContext = new DapperSagaConsumeContext<TSaga, T>(sqlConnection, context, instance, tableName);
+
+                sagaConsumeContext.LogUsed();
 
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
@@ -263,10 +248,9 @@ namespace MassTransit.DapperIntegration
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Added {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
-
                 var sagaConsumeContext = new DapperSagaConsumeContext<TSaga, TMessage>(_sqlConnection, context, context.Saga, _tableName, false);
+
+                sagaConsumeContext.LogAdded();
 
                 await _next.Send(sagaConsumeContext).ConfigureAwait(false);
 

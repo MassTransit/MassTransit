@@ -3,10 +3,9 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit.Context;
-    using Metadata;
+    using MassTransit.Saga;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
-    using Util;
 
 
     public class DocumentDbSagaConsumeContext<TSaga, TMessage> :
@@ -44,8 +43,7 @@
                 await _client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, Saga.CorrelationId.ToString()), _requestOptions)
                     .ConfigureAwait(false);
 
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Removed {MessageType}", TypeMetadataCache<TSaga>.ShortName, Saga.CorrelationId,
-                    TypeMetadataCache<TMessage>.ShortName);
+                this.LogRemoved();
             }
         }
 

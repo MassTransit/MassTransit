@@ -8,12 +8,10 @@
     using Context;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
-    using MassTransit.Context;
     using MassTransit.Saga;
     using Metadata;
     using MongoDB.Driver;
     using Pipeline;
-    using Util;
 
 
     public class MongoDbSagaRepository<TSaga> :
@@ -112,13 +110,13 @@
             }
             catch (SagaException sex)
             {
-                LogContext.Error?.Log(sex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
+                context.LogFault(sex);
 
                 throw;
             }
             catch (Exception ex)
             {
-                LogContext.Error?.Log(ex, "SAGA:{SagaType} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<T>.ShortName);
+                context.LogFault(ex);
 
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
             }
@@ -131,13 +129,11 @@
             {
                 await _collection.InsertOneAsync(instance, cancellationToken: context.CancellationToken).ConfigureAwait(false);
 
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Insert {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                context.LogInsert(this, instance.CorrelationId);
             }
             catch (Exception ex)
             {
-                LogContext.Debug?.Log(ex, "SAGA:{SagaType}:{CorrelationId} Dupe {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                context.LogInsertFault(this, ex, instance.CorrelationId);
             }
         }
 
@@ -146,10 +142,9 @@
         {
             try
             {
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-
                 SagaConsumeContext<TSaga, T> sagaConsumeContext = _mongoDbSagaConsumeContextFactory.Create(_collection, context, instance);
+
+                sagaConsumeContext.LogUsed();
 
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
@@ -158,8 +153,7 @@
             }
             catch (SagaException sex)
             {
-                LogContext.Error?.Log(sex, "SAGA:{SagaType}:{CorrelationId} Exception {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    instance?.CorrelationId, TypeMetadataCache<T>.ShortName);
+                context.LogFault(this, sex, instance?.CorrelationId);
 
                 throw;
             }

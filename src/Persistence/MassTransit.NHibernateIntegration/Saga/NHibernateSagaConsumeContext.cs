@@ -4,9 +4,7 @@
     using System.Threading.Tasks;
     using Context;
     using MassTransit.Saga;
-    using Metadata;
     using NHibernate;
-    using Util;
 
 
     public class NHibernateSagaConsumeContext<TSaga, TMessage> :
@@ -31,8 +29,7 @@
             await _session.DeleteAsync(Saga).ConfigureAwait(false);
             IsCompleted = true;
 
-            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Removed {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
+            this.LogRemoved();
         }
 
         public bool IsCompleted { get; private set; }

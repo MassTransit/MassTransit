@@ -4,9 +4,7 @@
     using System.Threading.Tasks;
     using Context;
     using Marten;
-    using Metadata;
     using Saga;
-    using Util;
 
 
     public class MartenSagaConsumeContext<TSaga, TMessage> :
@@ -34,8 +32,7 @@
 
             IsCompleted = true;
 
-            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Removed {MessageType}", TypeMetadataCache<TSaga>.ShortName, Saga.CorrelationId,
-                TypeMetadataCache<TMessage>.ShortName);
+            this.LogRemoved();
         }
 
         public TSaga Saga { get; }

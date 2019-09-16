@@ -3,8 +3,6 @@ namespace MassTransit.Saga.Factories
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using Metadata;
-    using Util;
 
 
     /// <summary>
@@ -39,10 +37,9 @@ namespace MassTransit.Saga.Factories
 
             TSaga instance = _factoryMethod(context);
 
-            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Created {MessageType}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                TypeMetadataCache<TMessage>.ShortName);
-
             var proxy = new NewSagaConsumeContext<TSaga, TMessage>(context, instance);
+
+            proxy.LogCreated();
 
             return next.Send(proxy);
         }

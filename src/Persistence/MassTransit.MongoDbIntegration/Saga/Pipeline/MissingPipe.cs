@@ -3,10 +3,8 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using MassTransit.Context;
-    using Metadata;
+    using MassTransit.Saga;
     using MongoDB.Driver;
-    using Util;
 
 
     public class MissingPipe<TSaga, TMessage> :
@@ -33,10 +31,9 @@
 
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
         {
-            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Added {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
-
             SagaConsumeContext<TSaga, TMessage> proxy = _mongoDbSagaConsumeContextFactory.Create(_collection, context, context.Saga, false);
+
+            proxy.LogAdded();
 
             await _next.Send(proxy).ConfigureAwait(false);
 

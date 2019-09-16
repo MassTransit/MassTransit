@@ -2,9 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Metadata;
     using Saga;
-    using Util;
 
 
     public class InMemorySagaConsumeContext<TSaga, TMessage> :
@@ -31,8 +29,7 @@
 
             IsCompleted = true;
 
-            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Removed {MessageType}", TypeMetadataCache<TSaga>.ShortName, Saga.CorrelationId,
-                TypeMetadataCache<TMessage>.ShortName);
+            this.LogRemoved();
         }
 
         public bool IsCompleted { get; private set; }

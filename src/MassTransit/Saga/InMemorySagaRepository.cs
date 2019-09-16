@@ -8,7 +8,6 @@ namespace MassTransit.Saga
     using Context;
     using GreenPipes;
     using Logging;
-    using Metadata;
 
 
     public class InMemorySagaRepository<TSaga> :
@@ -71,11 +70,10 @@ namespace MassTransit.Saga
                         }
                         else
                         {
-                            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                                sagaId, TypeMetadataCache<T>.ShortName);
-
                             SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(context, saga.Instance,
                                 () => Remove(saga, context.CancellationToken));
+
+                            sagaConsumeContext.LogUsed();
 
                             await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
                         }
@@ -138,11 +136,10 @@ namespace MassTransit.Saga
                 if (saga.IsRemoved)
                     return;
 
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    saga.Instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-
                 SagaConsumeContext<TSaga, T> sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, T>(context, saga.Instance,
                     () => Remove(saga, context.CancellationToken));
+
+                sagaConsumeContext.LogUsed();
 
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
             }
@@ -238,7 +235,7 @@ namespace MassTransit.Saga
                 var activity = LogContext.IfEnabled(OperationName.Saga.Add)?.StartActivity(new {context.Saga.CorrelationId});
                 try
                 {
-                    var proxy =
+                    var sagaConsumeContext =
                         new InMemorySagaConsumeContext<TSaga, TMessage>(context, context.Saga, () => RemoveNewSaga(instance, context.CancellationToken));
 
                     if (_withinLock)
@@ -246,27 +243,24 @@ namespace MassTransit.Saga
                     else
                         await _repository.Add(instance, context.CancellationToken).ConfigureAwait(false);
 
-                    LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Added {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                        context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
+                    sagaConsumeContext.LogAdded();
 
                     try
                     {
-                        await _next.Send(proxy).ConfigureAwait(false);
+                        await _next.Send(sagaConsumeContext).ConfigureAwait(false);
 
-                        if (proxy.IsCompleted)
+                        if (sagaConsumeContext.IsCompleted)
                         {
-                            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Removed {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                                context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
-
                             await RemoveNewSaga(instance, context.CancellationToken).ConfigureAwait(false);
+
+                            sagaConsumeContext.LogRemoved();
                         }
                     }
-                    catch (Exception)
+                    catch (Exception exception)
                     {
-                        LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Removed(Fault) {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                            context.Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
-
                         await RemoveNewSaga(instance, context.CancellationToken).ConfigureAwait(false);
+
+                        sagaConsumeContext.LogRemoved(exception);
 
                         throw;
                     }

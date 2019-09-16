@@ -3,9 +3,8 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit.Context;
-    using Metadata;
+    using MassTransit.Saga;
     using MongoDB.Driver;
-    using Util;
 
 
     public class MongoDbSagaConsumeContext<TSaga, TMessage> :
@@ -39,8 +38,7 @@
                 if (result.DeletedCount == 0)
                     throw new MongoDbConcurrencyException("Unable to delete saga. It may not have been found or may have been updated by another process.");
 
-                LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Removed {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                    Saga.CorrelationId, TypeMetadataCache<TMessage>.ShortName);
+                this.LogRemoved();
             }
         }
 
