@@ -5,7 +5,7 @@ namespace MassTransit.TestFramework.Logging
     using MassTransit.Logging;
 
 
-    class DiagnosticListenerObserver :
+    public class DiagnosticListenerObserver :
         IObserver<DiagnosticListener>
     {
         IDisposable _handle;

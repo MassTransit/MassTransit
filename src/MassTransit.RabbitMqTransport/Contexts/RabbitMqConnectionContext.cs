@@ -20,8 +20,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly IConnection _connection;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
-        public RabbitMqConnectionContext(IConnection connection, IRabbitMqHostConfiguration configuration, string description,
-            CancellationToken cancellationToken)
+        public RabbitMqConnectionContext(IConnection connection, IRabbitMqHostConfiguration configuration, IRabbitMqHostTopology hostTopology,
+            string description, CancellationToken cancellationToken)
             : base(new PayloadCache(), cancellationToken)
         {
             _connection = connection;
@@ -29,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             Description = description;
             HostAddress = configuration.HostAddress;
             PublisherConfirmation = configuration.PublisherConfirmation;
-            Topology = configuration.Topology;
+            Topology = hostTopology;
 
             StopTimeout = TimeSpan.FromSeconds(30);
 

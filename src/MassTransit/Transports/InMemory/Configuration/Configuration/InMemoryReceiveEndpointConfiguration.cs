@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.InMemory.Configuration
+﻿namespace MassTransit.Transports.InMemory.Configuration
 {
     using System;
     using Builders;
@@ -23,19 +11,18 @@ namespace MassTransit.Transports.InMemory.Configuration
         IInMemoryReceiveEndpointConfigurator
     {
         readonly IInMemoryEndpointConfiguration _endpointConfiguration;
-        readonly IInMemoryHostConfiguration _hostConfiguration;
         readonly string _queueName;
 
         public InMemoryReceiveEndpointConfiguration(IInMemoryHostConfiguration hostConfiguration, string queueName,
             IInMemoryEndpointConfiguration endpointConfiguration)
-            : base(hostConfiguration, endpointConfiguration)
+            : base(endpointConfiguration)
         {
-            _hostConfiguration = hostConfiguration;
-            _queueName = queueName;
-            _endpointConfiguration = endpointConfiguration;
+            _queueName = queueName ?? throw new ArgumentNullException(nameof(queueName));
+            _endpointConfiguration = endpointConfiguration ?? throw new ArgumentNullException(nameof(endpointConfiguration));
 
-            HostAddress = hostConfiguration.Host.Address;
-            InputAddress = new Uri(hostConfiguration.Host.Address, $"{queueName}");
+            HostAddress = hostConfiguration?.HostAddress ?? throw new ArgumentNullException(nameof(hostConfiguration.HostAddress));
+
+            InputAddress = new Uri(hostConfiguration.HostAddress, queueName);
         }
 
         IInMemoryReceiveEndpointConfigurator IInMemoryReceiveEndpointConfiguration.Configurator => this;
@@ -48,17 +35,21 @@ namespace MassTransit.Transports.InMemory.Configuration
 
         public override Uri InputAddress { get; }
 
-        public override IReceiveEndpoint Build()
+        public void Build(IInMemoryHostControl host)
         {
-            var builder = new InMemoryReceiveEndpointBuilder(_hostConfiguration.Host, this);
+            var builder = new InMemoryReceiveEndpointBuilder(host, this);
 
             ApplySpecifications(builder);
 
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
-            var transport = _hostConfiguration.Host.GetReceiveTransport(_queueName, receiveEndpointContext);
+            var transport = host.GetReceiveTransport(_queueName, receiveEndpointContext);
 
-            return CreateReceiveEndpoint(_queueName, transport, receiveEndpointContext);
+            var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
+
+            host.AddReceiveEndpoint(_queueName, receiveEndpoint);
+
+            ReceiveEndpoint = receiveEndpoint;
         }
     }
 }

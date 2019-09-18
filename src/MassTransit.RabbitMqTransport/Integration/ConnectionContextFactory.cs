@@ -12,18 +12,21 @@
     using GreenPipes.Agents;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
+    using Topology;
 
 
     public class ConnectionContextFactory :
         IPipeContextFactory<ConnectionContext>
     {
         readonly IRabbitMqHostConfiguration _configuration;
+        readonly IRabbitMqHostTopology _hostTopology;
         readonly Lazy<ConnectionFactory> _connectionFactory;
         readonly string _description;
 
-        public ConnectionContextFactory(IRabbitMqHostConfiguration configuration)
+        public ConnectionContextFactory(IRabbitMqHostConfiguration configuration, IRabbitMqHostTopology hostTopology)
         {
             _configuration = configuration;
+            _hostTopology = hostTopology;
 
             _description = configuration.Settings.ToDescription();
 
@@ -92,7 +95,7 @@
                 LogContext.Debug?.Log("Connected: {Host} (address: {RemoteAddress}, local: {LocalAddress})", _description, connection.Endpoint,
                     connection.LocalPort);
 
-                var connectionContext = new RabbitMqConnectionContext(connection, _configuration, _description, supervisor.Stopped);
+                var connectionContext = new RabbitMqConnectionContext(connection, _configuration, _hostTopology, _description, supervisor.Stopped);
 
                 connectionContext.GetOrAddPayload(() => _configuration.Settings);
 

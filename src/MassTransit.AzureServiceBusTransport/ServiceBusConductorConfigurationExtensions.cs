@@ -14,19 +14,18 @@ namespace MassTransit
         /// Configure a service instance, which supports one or more receive endpoints, all of which are managed by conductor.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="host"></param>
         /// <param name="configure"></param>
-        public static void ServiceInstance(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host,
+        public static void ServiceInstance(this IServiceBusBusFactoryConfigurator configurator,
             Action<IServiceInstanceConfigurator<IServiceBusReceiveEndpointConfigurator>> configure)
         {
             var instanceId = NewId.Next();
             var instanceEndpointName = ServiceEndpointNameFormatter.Instance.EndpointName(instanceId);
 
-            configurator.ReceiveEndpoint(host, instanceEndpointName, endpointConfigurator =>
+            configurator.ReceiveEndpoint(instanceEndpointName, endpointConfigurator =>
             {
                 var instance = new ServiceInstance(instanceId, endpointConfigurator);
 
-                var instanceConfigurator = new ServiceBusServiceInstanceConfigurator(configurator, host, instance);
+                var instanceConfigurator = new ServiceBusServiceInstanceConfigurator(configurator, instance);
 
                 instanceConfigurator.ConfigureInstanceEndpoint(endpointConfigurator);
 

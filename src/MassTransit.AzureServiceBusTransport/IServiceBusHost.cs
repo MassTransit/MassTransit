@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
@@ -22,20 +10,9 @@ namespace MassTransit.AzureServiceBusTransport
     /// An Azure ServiceBus Host, which caches the messaging factory and namespace manager
     /// </summary>
     public interface IServiceBusHost :
-        IHost
+        IHost,
+        IReceiveConnector<IServiceBusReceiveEndpointConfigurator>
     {
-        ServiceBusHostSettings Settings { get; }
-
-        /// <summary>
-        /// The base path used for queues on this host
-        /// </summary>
-        string BasePath { get; }
-
-        /// <summary>
-        /// Returns the topology of the service bus host
-        /// </summary>
-        new IServiceBusHostTopology Topology { get; }
-
         /// <summary>
         /// The default messaging factory cache, could be AMQP or NET-TCP, depending upon configuration
         /// </summary>
@@ -52,22 +29,9 @@ namespace MassTransit.AzureServiceBusTransport
         /// </summary>
         IRetryPolicy RetryPolicy { get; }
 
-        /// <summary>
-        /// Connect a receive endpoint for the host, using an endpoint definition
-        /// </summary>
-        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
-        /// <param name="endpointNameFormatter"></param>
-        /// <param name="configureEndpoint">The configuration callback</param>
-        HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
-            Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint = null);
+        ServiceBusHostSettings Settings { get; }
 
-        /// <summary>
-        /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint
-        /// </summary>
-        /// <param name="queueName"></param>
-        /// <param name="configure"></param>
-        /// <returns></returns>
-        HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure = null);
+        new IServiceBusHostTopology Topology { get; }
 
         /// <summary>
         /// Create a subscription endpoint on the host, which can be stopped independently from the bus

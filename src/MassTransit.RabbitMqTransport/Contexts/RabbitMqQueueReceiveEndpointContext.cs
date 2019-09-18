@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Contexts
+﻿namespace MassTransit.RabbitMqTransport.Contexts
 {
     using Configuration;
     using Context;
@@ -22,17 +10,14 @@ namespace MassTransit.RabbitMqTransport.Contexts
         BaseReceiveEndpointContext,
         RabbitMqReceiveEndpointContext
     {
-        readonly IRabbitMqBusConfiguration _busConfiguration;
-        readonly IRabbitMqHostConfiguration _hostConfiguration;
+        readonly IRabbitMqHostControl _host;
 
-        public RabbitMqQueueReceiveEndpointContext(IRabbitMqReceiveEndpointConfiguration configuration, BrokerTopology brokerTopology)
+        public RabbitMqQueueReceiveEndpointContext(IRabbitMqHostControl host, IRabbitMqReceiveEndpointConfiguration configuration, BrokerTopology brokerTopology)
             : base(configuration)
         {
-            _busConfiguration = configuration.HostConfiguration.BusConfiguration;
-            _hostConfiguration = configuration.HostConfiguration;
+            _host = host;
 
             ExclusiveConsumer = configuration.Settings.ExclusiveConsumer;
-
             BrokerTopology = brokerTopology;
         }
 
@@ -42,12 +27,12 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendTransportProvider(_busConfiguration, _hostConfiguration.HostAddress);
+            return new SendTransportProvider(_host);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_hostConfiguration);
+            return new PublishTransportProvider(_host);
         }
     }
 }

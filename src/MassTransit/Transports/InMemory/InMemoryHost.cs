@@ -1,7 +1,6 @@
 namespace MassTransit.Transports.InMemory
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using Builders;
     using Configuration;
@@ -13,6 +12,7 @@ namespace MassTransit.Transports.InMemory
     using GreenPipes.Caching;
     using MassTransit.Configurators;
     using Topology.Builders;
+    using Topology.Topologies;
 
 
     /// <summary>
@@ -26,16 +26,14 @@ namespace MassTransit.Transports.InMemory
         readonly IIndex<string, InMemorySendTransport> _index;
         readonly IMessageFabric _messageFabric;
 
-        public InMemoryHost(IInMemoryHostConfiguration hostConfiguration, int concurrencyLimit)
-            : base(hostConfiguration)
+        public InMemoryHost(IInMemoryHostConfiguration hostConfiguration, IInMemoryHostTopology hostTopology)
+            : base(hostConfiguration, hostTopology)
         {
             _hostConfiguration = hostConfiguration;
 
-            _messageFabric = new MessageFabric(concurrencyLimit);
+            _messageFabric = new MessageFabric(hostConfiguration.TransportConcurrencyLimit);
 
-            var cacheSettings = new CacheSettings(10000, TimeSpan.FromMinutes(1), TimeSpan.FromHours(24));
-
-            var cache = new GreenCache<InMemorySendTransport>(cacheSettings);
+            var cache = new GreenCache<InMemorySendTransport>(hostConfiguration.SendTransportCacheSettings);
             _index = cache.AddIndex("exchangeName", x => x.ExchangeName);
         }
 
@@ -62,6 +60,11 @@ namespace MassTransit.Transports.InMemory
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IReceiveEndpointConfigurator> configureEndpoint = null)
         {
+            return ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint = null)
+        {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
 
             return ConnectReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
@@ -78,13 +81,11 @@ namespace MassTransit.Transports.InMemory
 
             LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
 
-            var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
-
-            configure?.Invoke(configuration.Configurator);
+            var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, configure);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
 
-            configuration.Build();
+            configuration.Build(this);
 
             return ReceiveEndpoints.Start(queueName);
         }
@@ -93,7 +94,7 @@ namespace MassTransit.Transports.InMemory
         {
             LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            var queueName = address.AbsolutePath.Split('/').Last();
+            var queueName = address.GetQueueOrExchangeName();
 
             return await _index.Get(queueName, async key =>
             {
@@ -107,18 +108,12 @@ namespace MassTransit.Transports.InMemory
             }).ConfigureAwait(false);
         }
 
-        public int TransportConcurrencyLimit
-        {
-            set => _messageFabric.ConcurrencyLimit = value;
-        }
-
-        public IInMemoryPublishTopologyBuilder CreatePublishTopologyBuilder(
-            PublishEndpointTopologyBuilder.Options options = PublishEndpointTopologyBuilder.Options.MaintainHierarchy)
+        IInMemoryPublishTopologyBuilder IInMemoryHostControl.CreatePublishTopologyBuilder(PublishEndpointTopologyBuilder.Options options)
         {
             return new PublishEndpointTopologyBuilder(_messageFabric, options);
         }
 
-        public IInMemoryConsumeTopologyBuilder CreateConsumeTopologyBuilder()
+        IInMemoryConsumeTopologyBuilder IInMemoryHostControl.CreateConsumeTopologyBuilder()
         {
             return new InMemoryConsumeTopologyBuilder(_messageFabric);
         }

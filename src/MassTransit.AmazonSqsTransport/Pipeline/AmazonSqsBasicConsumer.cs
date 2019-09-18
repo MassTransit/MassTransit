@@ -10,6 +10,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Logging;
     using Topology;
     using Transports.Metrics;
 
@@ -68,42 +69,48 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                 return;
             }
 
-            using (_tracker.BeginDelivery())
+            var redelivered = message.Attributes.TryGetValue("ApproximateReceiveCount", out var receiveCountStr)
+                && int.TryParse(receiveCountStr, out var receiveCount) && receiveCount > 1;
+
+            var delivery = _tracker.BeginDelivery();
+
+            var context = new AmazonSqsReceiveContext(_inputAddress, message, redelivered, _context);
+
+            context.GetOrAddPayload(() => _receiveSettings);
+            context.GetOrAddPayload(() => _client);
+            context.GetOrAddPayload(() => _client.ConnectionContext);
+
+            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
+            activity.AddReceiveContextHeaders(context);
+
+            try
             {
-                var redelivered = message.Attributes.TryGetValue("ApproximateReceiveCount", out var receiveCountStr)
-                    && int.TryParse(receiveCountStr, out var receiveCount) && receiveCount > 1;
+                if (!_pending.TryAdd(message.MessageId, context))
+                    LogContext.Error?.Log("Duplicate message: {MessageId}", message.MessageId);
 
-                var context = new AmazonSqsReceiveContext(_inputAddress, message, redelivered, _context);
+                await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
-                context.GetOrAddPayload(() => _receiveSettings);
-                context.GetOrAddPayload(() => _client);
-                context.GetOrAddPayload(() => _client.ConnectionContext);
+                await _context.ReceivePipe.Send(context).ConfigureAwait(false);
 
-                try
-                {
-                    if (!_pending.TryAdd(message.MessageId, context))
-                        LogContext.Error?.Log("Duplicate message: {MessageId}", message.MessageId);
+                await context.ReceiveCompleted.ConfigureAwait(false);
 
-                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                await _client.DeleteMessage(_receiveSettings.EntityName, message.ReceiptHandle).ConfigureAwait(false);
 
-                    await _context.ReceivePipe.Send(context).ConfigureAwait(false);
+                await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+            }
+            finally
+            {
+                activity?.Stop();
 
-                    await context.ReceiveCompleted.ConfigureAwait(false);
+                delivery.Dispose();
 
-                    await _client.DeleteMessage(_receiveSettings.EntityName, message.ReceiptHandle).ConfigureAwait(false);
+                _pending.TryRemove(message.MessageId, out _);
 
-                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
-                }
-                finally
-                {
-                    _pending.TryRemove(message.MessageId, out _);
-
-                    context.Dispose();
-                }
+                context.Dispose();
             }
         }
 

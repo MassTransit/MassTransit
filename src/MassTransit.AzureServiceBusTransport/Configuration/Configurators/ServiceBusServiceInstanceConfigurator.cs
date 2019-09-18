@@ -6,11 +6,10 @@ namespace MassTransit.AzureServiceBusTransport.Configurators
 
 
     public class ServiceBusServiceInstanceConfigurator :
-        ServiceInstanceConfigurator<IServiceBusHost, IServiceBusReceiveEndpointConfigurator>
+        ServiceInstanceConfigurator<IServiceBusReceiveEndpointConfigurator>
     {
-        public ServiceBusServiceInstanceConfigurator(IReceiveConfigurator<IServiceBusHost, IServiceBusReceiveEndpointConfigurator> configurator,
-            IServiceBusHost host, IServiceInstance instance)
-            : base(configurator, host, instance)
+        public ServiceBusServiceInstanceConfigurator(IReceiveConfigurator<IServiceBusReceiveEndpointConfigurator> configurator, IServiceInstance instance)
+            : base(configurator, instance)
         {
         }
 

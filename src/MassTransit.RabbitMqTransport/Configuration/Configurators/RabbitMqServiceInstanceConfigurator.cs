@@ -6,11 +6,10 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
 
     public class RabbitMqServiceInstanceConfigurator :
-        ServiceInstanceConfigurator<IRabbitMqHost, IRabbitMqReceiveEndpointConfigurator>
+        ServiceInstanceConfigurator<IRabbitMqReceiveEndpointConfigurator>
     {
-        public RabbitMqServiceInstanceConfigurator(IReceiveConfigurator<IRabbitMqHost, IRabbitMqReceiveEndpointConfigurator> configurator, IRabbitMqHost host,
-            IServiceInstance instance)
-            : base(configurator, host, instance)
+        public RabbitMqServiceInstanceConfigurator(IReceiveConfigurator<IRabbitMqReceiveEndpointConfigurator> configurator, IServiceInstance instance)
+            : base(configurator, instance)
         {
         }
 

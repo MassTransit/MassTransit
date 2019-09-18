@@ -14,19 +14,18 @@ namespace MassTransit
         /// Configure a service instance, which supports one or more receive endpoints, all of which are managed by conductor.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="host"></param>
         /// <param name="configure"></param>
-        public static void ServiceInstance(this IActiveMqBusFactoryConfigurator configurator, IActiveMqHost host,
+        public static void ServiceInstance(this IActiveMqBusFactoryConfigurator configurator,
             Action<IServiceInstanceConfigurator<IActiveMqReceiveEndpointConfigurator>> configure)
         {
             var instanceId = NewId.Next();
             var instanceEndpointName = ServiceEndpointNameFormatter.Instance.EndpointName(instanceId);
 
-            configurator.ReceiveEndpoint(host, instanceEndpointName, endpointConfigurator =>
+            configurator.ReceiveEndpoint(instanceEndpointName, endpointConfigurator =>
             {
                 var instance = new ServiceInstance(instanceId, endpointConfigurator);
 
-                var instanceConfigurator = new ActiveMqServiceInstanceConfigurator(configurator, host, instance);
+                var instanceConfigurator = new ActiveMqServiceInstanceConfigurator(configurator, instance);
 
                 instanceConfigurator.ConfigureInstanceEndpoint(endpointConfigurator);
 

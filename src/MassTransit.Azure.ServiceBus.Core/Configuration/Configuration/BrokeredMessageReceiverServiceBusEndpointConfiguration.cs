@@ -12,11 +12,11 @@
     public class BrokeredMessageReceiverServiceBusEndpointConfiguration :
         ReceiveEndpointConfiguration
     {
-        public BrokeredMessageReceiverServiceBusEndpointConfiguration(IHostConfiguration hostConfiguration, IEndpointConfiguration configuration)
-            : base(hostConfiguration, configuration)
+        public BrokeredMessageReceiverServiceBusEndpointConfiguration(IBusConfiguration busConfiguration)
+            : base(busConfiguration)
         {
-            HostAddress = hostConfiguration.Host.Address;
-            InputAddress = new Uri(hostConfiguration.Host.Address, "no-queue-specified");
+            HostAddress = busConfiguration.HostConfiguration.HostAddress;
+            InputAddress = new Uri(busConfiguration.HostConfiguration.HostAddress, "no-queue-specified");
         }
 
         public override Uri HostAddress { get; }
@@ -38,11 +38,6 @@
 
         protected override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport,
             ReceiveEndpointContext topology)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override IReceiveEndpoint Build()
         {
             throw new NotImplementedException();
         }

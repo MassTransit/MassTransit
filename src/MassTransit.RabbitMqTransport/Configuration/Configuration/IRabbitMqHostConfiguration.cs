@@ -1,41 +1,34 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
-    using System.Threading.Tasks;
+    using System;
     using MassTransit.Configuration;
-    using Topology;
     using Topology.Settings;
-    using Transport;
-    using Transports;
 
 
     public interface IRabbitMqHostConfiguration :
-        IHostConfiguration
+        IHostConfiguration,
+        IReceiveConfigurator<IRabbitMqReceiveEndpointConfigurator>
     {
-        IRabbitMqBusConfiguration BusConfiguration { get; }
-
         string Description { get; }
 
-        new IRabbitMqHostControl Host { get; }
-
-        /// <summary>
-        /// Create a receive endpoint configuration using the specified host
-        /// </summary>
-        /// <returns></returns>
-        IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName);
-
-        IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(RabbitMqReceiveSettings settings,
-            IRabbitMqEndpointConfiguration endpointConfiguration);
-
-        new IRabbitMqHostTopology Topology { get; }
+        RabbitMqHostSettings Settings { get; set; }
 
         /// <summary>
         /// True if the broker is confirming published messages
         /// </summary>
         bool PublisherConfirmation { get; }
 
-        RabbitMqHostSettings Settings { get; }
+        /// <summary>
+        /// If true, only the broker topology will be deployed
+        /// </summary>
+        bool DeployTopologyOnly { get; set; }
 
-        Task<ISendTransport> CreatePublishTransport<T>()
-            where T : class;
+        IRabbitMqHost Proxy { get; }
+
+        IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
+
+        IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(RabbitMqReceiveSettings settings,
+            IRabbitMqEndpointConfiguration endpointConfiguration, Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
     }
 }

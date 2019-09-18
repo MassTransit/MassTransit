@@ -6,11 +6,10 @@ namespace MassTransit.ActiveMqTransport.Configurators
 
 
     public class ActiveMqServiceInstanceConfigurator :
-        ServiceInstanceConfigurator<IActiveMqHost, IActiveMqReceiveEndpointConfigurator>
+        ServiceInstanceConfigurator<IActiveMqReceiveEndpointConfigurator>
     {
-        public ActiveMqServiceInstanceConfigurator(IReceiveConfigurator<IActiveMqHost, IActiveMqReceiveEndpointConfigurator> configurator,
-            IActiveMqHost host, IServiceInstance instance)
-            : base(configurator, host, instance)
+        public ActiveMqServiceInstanceConfigurator(IReceiveConfigurator<IActiveMqReceiveEndpointConfigurator> configurator, IServiceInstance instance)
+            : base(configurator, instance)
         {
         }
 

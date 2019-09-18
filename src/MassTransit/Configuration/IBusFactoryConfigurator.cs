@@ -4,7 +4,7 @@ namespace MassTransit
     using System.ComponentModel;
     using System.Net.Mime;
     using Builders;
-    using GreenPipes;
+    using BusConfigurators;
     using Topology;
 
 
@@ -20,15 +20,9 @@ namespace MassTransit
         IReceiveConfigurator,
         IConsumePipeConfigurator,
         ISendPipelineConfigurator,
-        IPublishPipelineConfigurator
+        IPublishPipelineConfigurator,
+        IBusObserverConnector
     {
-        /// <summary>
-        /// Connects a bus observer to the bus to observe lifecycle events on the bus
-        /// </summary>
-        /// <param name="observer"></param>
-        /// <returns></returns>
-        ConnectHandle ConnectBusObserver(IBusObserver observer);
-
         IMessageTopologyConfigurator MessageTopology { get; }
 
         ISendTopologyConfigurator SendTopology { get; }

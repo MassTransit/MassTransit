@@ -36,7 +36,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             ActiveMqTestHarness.OnConfigureActiveMqHost += ConfigureActiveMqHost;
             ActiveMqTestHarness.OnConfigureActiveMqBus += ConfigureActiveMqBus;
             ActiveMqTestHarness.OnConfigureActiveMqBusHost += ConfigureActiveMqBusHost;
-            ActiveMqTestHarness.OnConfigureActiveMqReceiveEndoint += ConfigureActiveMqReceiveEndpoint;
+            ActiveMqTestHarness.OnConfigureActiveMqReceiveEndpoint += ConfigureActiveMqReceiveEndpoint;
         }
 
         protected ActiveMqTestHarness ActiveMqTestHarness { get; }

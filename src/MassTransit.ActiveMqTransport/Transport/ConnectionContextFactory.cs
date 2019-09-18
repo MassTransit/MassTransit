@@ -9,16 +9,19 @@
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using Topology;
 
 
     public class ConnectionContextFactory :
         IPipeContextFactory<ConnectionContext>
     {
         readonly IActiveMqHostConfiguration _configuration;
+        readonly IActiveMqHostTopology _hostTopology;
 
-        public ConnectionContextFactory(IActiveMqHostConfiguration configuration)
+        public ConnectionContextFactory(IActiveMqHostConfiguration configuration, IActiveMqHostTopology hostTopology)
         {
             _configuration = configuration;
+            _hostTopology = hostTopology;
         }
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
@@ -75,7 +78,7 @@
                 LogContext.Debug?.Log("Connected: {Host} (client-id: {ClientId}, version: {Version})", _configuration.Description, connection.ClientId,
                     connection.MetaData.NMSVersion);
 
-                var connectionContext = new ActiveMqConnectionContext(connection, _configuration, supervisor.Stopped);
+                var connectionContext = new ActiveMqConnectionContext(connection, _configuration, _hostTopology, supervisor.Stopped);
 
                 await asyncContext.Created(connectionContext).ConfigureAwait(false);
 

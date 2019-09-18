@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../netfx.props" />
+  <Import Project="../netfx.props"/>
 
   <PropertyGroup>
     <TargetFrameworks>net452;netcoreapp2.2</TargetFrameworks>
@@ -15,6 +15,11 @@
     <ProjectReference Include="..\MassTransit.AmazonSqsTransport\MassTransit.AmazonSqsTransport.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}"/>
   </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+    <Reference Include="System.Runtime"/>
+  </ItemGroup>
+
+
 </Project>

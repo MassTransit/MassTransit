@@ -19,11 +19,11 @@ namespace MassTransit
             var instanceId = NewId.Next();
             var instanceEndpointName = ServiceEndpointNameFormatter.Instance.EndpointName(instanceId);
 
-            configurator.ReceiveEndpoint(configurator.Host, instanceEndpointName, endpointConfigurator =>
+            configurator.ReceiveEndpoint(instanceEndpointName, endpointConfigurator =>
             {
                 var instance = new ServiceInstance(instanceId, endpointConfigurator);
 
-                var instanceConfigurator = new InMemoryServiceInstanceConfigurator(configurator, configurator.Host, instance);
+                var instanceConfigurator = new InMemoryServiceInstanceConfigurator(configurator, instance);
 
                 configure?.Invoke(instanceConfigurator);
             });

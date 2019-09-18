@@ -1,23 +1,16 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.ActiveMqTransport.Transport
+﻿namespace MassTransit.ActiveMqTransport.Transport
 {
     using System;
+    using System.Threading.Tasks;
+    using Apache.NMS;
     using Configuration;
+    using Context;
+    using Contexts;
     using Definition;
     using GreenPipes;
     using GreenPipes.Agents;
     using MassTransit.Configurators;
+    using Pipeline;
     using Topology;
     using Transports;
 
@@ -27,11 +20,13 @@ namespace MassTransit.ActiveMqTransport.Transport
         IActiveMqHostControl
     {
         readonly IActiveMqHostConfiguration _hostConfiguration;
+        readonly IActiveMqHostTopology _hostTopology;
 
-        public ActiveMqHost(IActiveMqHostConfiguration hostConfiguration)
-            : base(hostConfiguration)
+        public ActiveMqHost(IActiveMqHostConfiguration hostConfiguration, IActiveMqHostTopology hostTopology)
+            : base(hostConfiguration, hostTopology)
         {
             _hostConfiguration = hostConfiguration;
+            _hostTopology = hostTopology;
 
             ConnectionRetryPolicy = Retry.CreatePolicy(x =>
             {
@@ -40,13 +35,13 @@ namespace MassTransit.ActiveMqTransport.Transport
                 x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
             });
 
-            ConnectionContextSupervisor = new ActiveMqConnectionContextSupervisor(hostConfiguration);
+            ConnectionContextSupervisor = new ActiveMqConnectionContextSupervisor(hostConfiguration, hostTopology);
         }
 
         public IConnectionContextSupervisor ConnectionContextSupervisor { get; }
         public IRetryPolicy ConnectionRetryPolicy { get; }
         public ActiveMqHostSettings Settings => _hostConfiguration.Settings;
-        public IActiveMqHostTopology Topology => _hostConfiguration.Topology;
+        IActiveMqHostTopology IActiveMqHost.Topology => _hostTopology;
 
         protected override void Probe(ProbeContext context)
         {
@@ -83,15 +78,58 @@ namespace MassTransit.ActiveMqTransport.Transport
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IActiveMqReceiveEndpointConfigurator> configure = null)
         {
-            var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
+            LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            configure?.Invoke(configuration.Configurator);
+            LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
+
+            var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, configure);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
 
-            configuration.Build();
+            configuration.Build(this);
 
             return ReceiveEndpoints.Start(queueName);
+        }
+
+        public Task<ISendTransport> CreateSendTransport(Uri address)
+        {
+            var settings = _hostTopology.SendTopology.GetSendSettings(address);
+
+            var sessionContextSupervisor = CreateSessionContextSupervisor();
+
+            var configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
+
+            return CreateSendTransport(sessionContextSupervisor, configureTopology, settings.EntityName, DestinationType.Queue);
+        }
+
+        public Task<ISendTransport> CreatePublishTransport<T>()
+            where T : class
+        {
+            IActiveMqMessagePublishTopology<T> publishTopology = _hostTopology.Publish<T>();
+
+            var settings = publishTopology.GetSendSettings();
+
+            var sessionContextSupervisor = CreateSessionContextSupervisor();
+
+            var configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
+
+            return CreateSendTransport(sessionContextSupervisor, configureTopology, settings.EntityName, DestinationType.Topic);
+        }
+
+        ISessionContextSupervisor CreateSessionContextSupervisor()
+        {
+            return new ActiveMqSessionContextSupervisor(ConnectionContextSupervisor);
+        }
+
+        Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor sessionContextSupervisor, IPipe<SessionContext> pipe,
+            string entityName, DestinationType destinationType)
+        {
+            var sendTransportContext = new HostActiveMqSendTransportContext(sessionContextSupervisor, pipe, entityName, destinationType, SendLogContext);
+
+            var transport = new ActiveMqSendTransport(sendTransportContext);
+            Add(transport);
+
+            return Task.FromResult<ISendTransport>(transport);
         }
 
         protected override IAgent[] GetAgentHandles()

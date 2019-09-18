@@ -1,15 +1,13 @@
 namespace MassTransit.Conductor.Configuration.Configurators
 {
     using Server;
-    using Transports.InMemory;
 
 
     public class InMemoryServiceInstanceConfigurator :
-        ServiceInstanceConfigurator<IInMemoryHost, IInMemoryReceiveEndpointConfigurator>
+        ServiceInstanceConfigurator<IInMemoryReceiveEndpointConfigurator>
     {
-        public InMemoryServiceInstanceConfigurator(IReceiveConfigurator<IInMemoryHost, IInMemoryReceiveEndpointConfigurator> configurator, IInMemoryHost host,
-            IServiceInstance instance)
-            : base(configurator, host, instance)
+        public InMemoryServiceInstanceConfigurator(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator, IServiceInstance instance)
+            : base(configurator, instance)
         {
         }
     }

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.ActiveMqTransport.Builders
+﻿namespace MassTransit.ActiveMqTransport.Builders
 {
     using Configuration;
     using Contexts;
@@ -27,11 +15,13 @@ namespace MassTransit.ActiveMqTransport.Builders
         ReceiveEndpointBuilder,
         IReceiveEndpointBuilder
     {
+        readonly IActiveMqHostControl _host;
         readonly IActiveMqReceiveEndpointConfiguration _configuration;
 
-        public ActiveMqReceiveEndpointBuilder(IActiveMqReceiveEndpointConfiguration configuration)
+        public ActiveMqReceiveEndpointBuilder(IActiveMqHostControl host, IActiveMqReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
+            _host = host;
             _configuration = configuration;
         }
 
@@ -54,7 +44,7 @@ namespace MassTransit.ActiveMqTransport.Builders
             IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport();
             IErrorTransport errorTransport = CreateErrorTransport();
 
-            var receiveEndpointContext = new ActiveMqConsumerReceiveEndpointContext(_configuration, brokerTopology);
+            var receiveEndpointContext = new ActiveMqConsumerReceiveEndpointContext(_host, _configuration, brokerTopology);
 
             receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
             receiveEndpointContext.GetOrAddPayload(() => errorTransport);

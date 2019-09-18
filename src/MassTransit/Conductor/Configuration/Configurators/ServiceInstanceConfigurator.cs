@@ -7,30 +7,27 @@ namespace MassTransit.Conductor.Configuration.Configurators
     using Server;
 
 
-    public class ServiceInstanceConfigurator<THost, TEndpointConfigurator> :
+    public class ServiceInstanceConfigurator<TEndpointConfigurator> :
         IServiceInstanceConfigurator<TEndpointConfigurator>
         where TEndpointConfigurator : IReceiveEndpointConfigurator
-        where THost : IHost
     {
-        readonly IReceiveConfigurator<THost, TEndpointConfigurator> _configurator;
-        readonly THost _host;
+        readonly IReceiveConfigurator<TEndpointConfigurator> _configurator;
         readonly IServiceInstance _instance;
 
-        public ServiceInstanceConfigurator(IReceiveConfigurator<THost, TEndpointConfigurator> configurator, THost host, IServiceInstance instance)
+        public ServiceInstanceConfigurator(IReceiveConfigurator<TEndpointConfigurator> configurator, IServiceInstance instance)
         {
             _configurator = configurator;
-            _host = host;
             _instance = instance;
         }
 
         public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter
             endpointNameFormatter, Action<TEndpointConfigurator> configureEndpoint)
         {
-            _configurator.ReceiveEndpoint(_host, definition, endpointNameFormatter, endpointConfigurator =>
+            _configurator.ReceiveEndpoint(definition, endpointNameFormatter, endpointConfigurator =>
             {
                 var instanceDefinition = new InstanceEndpointDefinition(definition, _instance);
 
-                _configurator.ReceiveEndpoint(_host, instanceDefinition, endpointNameFormatter, instanceEndpointConfigurator =>
+                _configurator.ReceiveEndpoint(instanceDefinition, endpointNameFormatter, instanceEndpointConfigurator =>
                 {
                     ConfigureInstanceEndpoint(instanceEndpointConfigurator);
 
@@ -46,9 +43,9 @@ namespace MassTransit.Conductor.Configuration.Configurators
         {
             string instanceEndpointName = ServiceEndpointNameFormatter.Instance.EndpointName(_instance.InstanceId, queueName);
 
-            _configurator.ReceiveEndpoint(_host, queueName, endpointConfigurator =>
+            _configurator.ReceiveEndpoint(queueName, endpointConfigurator =>
             {
-                _configurator.ReceiveEndpoint(_host, instanceEndpointName, instanceEndpointConfigurator =>
+                _configurator.ReceiveEndpoint(instanceEndpointName, instanceEndpointConfigurator =>
                 {
                     ConfigureInstanceEndpoint(instanceEndpointConfigurator);
 

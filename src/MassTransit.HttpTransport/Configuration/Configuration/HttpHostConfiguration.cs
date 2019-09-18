@@ -1,72 +1,101 @@
 ﻿namespace MassTransit.HttpTransport.Configuration
 {
     using System;
-    using System.Threading.Tasks;
-    using Clients;
-    using Context;
+    using Configurators;
+    using Definition;
     using Hosting;
-    using MassTransit.Configuration;
-    using MassTransit.Topology;
+    using Topology;
     using Transport;
     using Transports;
 
 
     public class HttpHostConfiguration :
+        BaseHostConfiguration<IHttpReceiveEndpointConfiguration>,
         IHttpHostConfiguration
     {
         readonly IHttpBusConfiguration _busConfiguration;
-        readonly HttpHostSettings _settings;
-        readonly IHostTopology _hostTopology;
-        readonly HttpHost _host;
+        readonly IHttpTopologyConfiguration _topologyConfiguration;
+        HttpHostSettings _hostSettings;
 
-        public HttpHostConfiguration(IHttpBusConfiguration busConfiguration, HttpHostSettings settings, IHostTopology hostTopology)
+        public HttpHostConfiguration(IHttpBusConfiguration busConfiguration, IHttpTopologyConfiguration topologyConfiguration)
         {
             _busConfiguration = busConfiguration;
-            _settings = settings;
-            _hostTopology = hostTopology;
-
-            HostAddress = settings.GetInputAddress();
-
-            _host = new HttpHost(this);
+            _hostSettings = new ConfigurationHostSettings();
+            _topologyConfiguration = topologyConfiguration;
         }
 
-        public Uri HostAddress { get; }
+        public override Uri HostAddress => _hostSettings.GetInputAddress();
 
-        IBusHostControl IHostConfiguration.Host => _host;
-        IHostTopology IHostConfiguration.Topology => _hostTopology;
-
-        IHttpHost IHttpHostConfiguration.Host => _host;
-        IHttpBusConfiguration IHttpHostConfiguration.BusConfiguration => _busConfiguration;
-        HttpHostSettings IHttpHostConfiguration.Settings => _settings;
-
-        public bool Matches(Uri address)
+        public HttpHostSettings Settings
         {
-            var settings = address.GetHostSettings();
-
-            return HttpHostEqualityComparer.Default.Equals(_settings, settings);
+            get => _hostSettings;
+            set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public Task<ISendTransport> CreateSendTransport(Uri address)
+        public IHttpReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string pathMatch, Action<IHttpReceiveEndpointConfigurator> configure)
         {
-            throw new NotImplementedException();
+            var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+
+            return CreateReceiveEndpointConfiguration(pathMatch, endpointConfiguration, configure);
         }
 
-        public IHttpReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string pathMatch)
+        public IHttpReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string pathMatch, IHttpEndpointConfiguration endpointConfiguration,
+            Action<IHttpReceiveEndpointConfigurator> configure)
         {
-            return new HttpReceiveEndpointConfiguration(this, pathMatch, _busConfiguration.CreateEndpointConfiguration());
+            if (pathMatch == null)
+                throw new ArgumentNullException(nameof(pathMatch));
+
+            var configuration = new HttpReceiveEndpointConfiguration(this, pathMatch, endpointConfiguration);
+
+            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
+            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
+            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
+
+            configure?.Invoke(configuration);
+
+            Observers.EndpointConfigured(configuration);
+
+            Add(configuration);
+
+            return configuration;
         }
 
-        public Task<ISendTransport> CreateSendTransport(Uri address, ReceiveEndpointContext receiveEndpointContext)
+        void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            var clientContextSupervisor = new HttpClientContextSupervisor(receiveEndpointContext.ReceivePipe);
+            ReceiveEndpoint(queueName, configureEndpoint);
+        }
 
-            var sendSettings = address.GetSendSettings();
+        void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
 
-            var transport = new HttpSendTransport(clientContextSupervisor, sendSettings, receiveEndpointContext);
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IHttpReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
 
-            _host.Add(transport);
+            ReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+        }
 
-            return Task.FromResult<ISendTransport>(transport);
+        public void ReceiveEndpoint(string queueName, Action<IHttpReceiveEndpointConfigurator> configureEndpoint)
+        {
+            CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
+        }
+
+        public override IBusHostControl Build()
+        {
+            var hostTopology = new HttpHostTopology(_topologyConfiguration);
+
+            var host = new HttpHost(this, hostTopology);
+
+            foreach (var endpointConfiguration in Endpoints)
+            {
+                endpointConfiguration.Build(host);
+            }
+
+            return host;
         }
     }
 }

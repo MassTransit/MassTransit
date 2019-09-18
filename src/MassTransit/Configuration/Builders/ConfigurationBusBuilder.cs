@@ -2,8 +2,6 @@ namespace MassTransit.Builders
 {
     using System;
     using Configuration;
-    using EndpointSpecifications;
-    using Pipeline.Observables;
     using Util;
 
 
@@ -11,36 +9,29 @@ namespace MassTransit.Builders
         IBusBuilder
     {
         readonly IReceiveEndpointConfiguration _busEndpointConfiguration;
-        readonly ConfigurationReceiveEndpointSpecification _busEndpointSpecification;
-        readonly BusObservable _busObservable;
-        readonly IBusConfiguration _configuration;
+        readonly IBusConfiguration _busConfiguration;
 
-        public ConfigurationBusBuilder(IBusConfiguration configuration, IReceiveEndpointConfiguration busReceiveEndpointConfiguration,
-            BusObservable busObservable)
+        public ConfigurationBusBuilder(IBusConfiguration busConfiguration, IReceiveEndpointConfiguration busReceiveEndpointConfiguration)
         {
-            _busEndpointSpecification = new ConfigurationReceiveEndpointSpecification(busReceiveEndpointConfiguration);
-            _configuration = configuration;
+            _busConfiguration = busConfiguration;
             _busEndpointConfiguration = busReceiveEndpointConfiguration;
-
-            _busObservable = busObservable;
         }
 
         public IBusControl Build()
         {
             try
             {
-                _busEndpointSpecification.Apply(this);
+                var host = _busConfiguration.HostConfiguration.Build();
 
-                var bus = new MassTransitBus(_busEndpointConfiguration.InputAddress, _busEndpointConfiguration.ConsumePipe,
-                    _busEndpointSpecification.SendEndpointProvider, _busEndpointSpecification.PublishEndpointProvider, _configuration.Hosts, _busObservable);
+                var bus = new MassTransitBus(host, _busConfiguration.BusObservers, _busEndpointConfiguration);
 
-                TaskUtil.Await(() => _busObservable.PostCreate(bus));
+                TaskUtil.Await(() => _busConfiguration.BusObservers.PostCreate(bus));
 
                 return bus;
             }
             catch (Exception exception)
             {
-                TaskUtil.Await(() => _busObservable.CreateFaulted(exception));
+                TaskUtil.Await(() => _busConfiguration.BusObservers.CreateFaulted(exception));
 
                 throw;
             }

@@ -4,9 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
-    using Contexts;
     using GreenPipes;
-    using GreenPipes.Agents;
     using Microsoft.ServiceBus.Messaging;
     using Pipeline;
     using Settings;
@@ -24,16 +22,8 @@
         readonly SubscriptionEndpointSettings _settings;
 
         public ServiceBusSubscriptionEndpointConfiguration(IServiceBusHostConfiguration hostConfiguration,
-            IServiceBusEndpointConfiguration endpointConfiguration,
-            string subscriptionName, string topicPath)
-            : this(hostConfiguration, endpointConfiguration, new SubscriptionEndpointSettings(topicPath, subscriptionName))
-        {
-        }
-
-        public ServiceBusSubscriptionEndpointConfiguration(IServiceBusHostConfiguration hostConfiguration,
-            IServiceBusEndpointConfiguration endpointConfiguration,
-            SubscriptionEndpointSettings settings)
-            : base(hostConfiguration, endpointConfiguration, settings)
+            SubscriptionEndpointSettings settings, IServiceBusEndpointConfiguration endpointConfiguration)
+            : base(hostConfiguration, settings, endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
@@ -43,20 +33,11 @@
             InputAddress = settings.GetInputAddress(hostConfiguration.HostAddress, settings.Name);
         }
 
-        IServiceBusSubscriptionEndpointConfigurator IServiceBusSubscriptionEndpointConfiguration.Configurator => this;
-
         IServiceBusTopologyConfiguration IServiceBusEndpointConfiguration.Topology => _endpointConfiguration.Topology;
-
-        public IServiceBusEndpointConfiguration CreateEndpointConfiguration()
-        {
-            return _endpointConfiguration.CreateEndpointConfiguration();
-        }
 
         public override Uri HostAddress { get; }
 
         public override Uri InputAddress { get; }
-
-        public IServiceBusHost Host => _hostConfiguration.Host;
 
         public Filter Filter
         {
@@ -76,24 +57,24 @@
                 .Concat(base.Validate());
         }
 
-        public override IReceiveEndpoint Build()
+        public void Build(IServiceBusHostControl host)
         {
-            var builder = new ServiceBusSubscriptionEndpointBuilder(this);
+            var builder = new ServiceBusSubscriptionEndpointBuilder(host, this);
 
             ApplySpecifications(builder);
 
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
             NamespacePipeConfigurator.UseFilter(new ConfigureTopologyFilter<SubscriptionSettings>(_settings, receiveEndpointContext.BrokerTopology,
-                _settings.RemoveSubscriptions, _hostConfiguration.Host.Stopping));
+                _settings.RemoveSubscriptions, host.Stopping));
 
-            return CreateReceiveEndpoint(receiveEndpointContext);
+            CreateReceiveEndpoint(host, receiveEndpointContext);
         }
 
         protected override IErrorTransport CreateErrorTransport(IServiceBusHostControl host)
         {
             var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.SubscriptionConfigurator,
-                _hostConfiguration.Host.Address.AbsolutePath);
+                _hostConfiguration.HostAddress.AbsolutePath);
 
             return new BrokeredMessageErrorTransport(CreateSendEndpointContextSupervisor(host, settings));
         }
@@ -101,19 +82,13 @@
         protected override IDeadLetterTransport CreateDeadLetterTransport(IServiceBusHostControl host)
         {
             var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.SubscriptionConfigurator,
-                _hostConfiguration.Host.Address.AbsolutePath);
+                _hostConfiguration.HostAddress.AbsolutePath);
 
             return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextSupervisor(host, settings));
         }
 
-        protected override IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings,
-            IPipe<NamespaceContext> namespacePipe)
-        {
-            return new QueueSendEndpointContextFactory(host.MessagingFactoryContextSupervisor, host.NamespaceContextSupervisor, Pipe.Empty<MessagingFactoryContext>(), namespacePipe,
-                settings);
-        }
-
-        protected override IClientContextSupervisor CreateClientCache(Uri inputAddress, IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor, INamespaceContextSupervisor namespaceContextSupervisor)
+        protected override IClientContextSupervisor CreateClientCache(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor,
+            INamespaceContextSupervisor namespaceContextSupervisor)
         {
             return new ClientContextSupervisor(new SubscriptionClientContextFactory(messagingFactoryContextSupervisor, namespaceContextSupervisor,
                 MessagingFactoryPipeConfigurator.Build(), NamespacePipeConfigurator.Build(), _settings));

@@ -65,7 +65,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             protected override void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)
             {
-                configurator.ServiceInstance(Host, instance =>
+                configurator.ServiceInstance(instance =>
                 {
                     var serviceEndpointName = KebabCaseEndpointNameFormatter.Instance.Consumer<DeployPayloadConsumer>();
 

@@ -12,7 +12,6 @@
         BaseReceiveContext,
         ActiveMqMessageContext
     {
-        readonly ActiveMqReceiveEndpointContext _context;
         readonly IMessage _transportMessage;
         byte[] _body;
 
@@ -20,7 +19,6 @@
             : base(inputAddress, transportMessage.NMSRedelivered, context)
         {
             _transportMessage = transportMessage;
-            _context = context;
         }
 
         protected override IHeaderProvider HeaderProvider => new ActiveMqHeaderProvider(_transportMessage);
@@ -28,16 +26,6 @@
         public IMessage TransportMessage => _transportMessage;
 
         public IPrimitiveMap Properties => _transportMessage.Properties;
-
-        protected override ISendEndpointProvider GetSendEndpointProvider()
-        {
-            return _context.CreateSendEndpointProvider(this);
-        }
-
-        protected override IPublishEndpointProvider GetPublishEndpointProvider()
-        {
-            return _context.CreatePublishEndpointProvider(this);
-        }
 
         public override byte[] GetBody()
         {

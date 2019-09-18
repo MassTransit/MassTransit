@@ -67,7 +67,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
             {
-                configurator.ServiceInstance(Host, instance =>
+                configurator.ServiceInstance(instance =>
                 {
                     var serviceEndpointName = KebabCaseEndpointNameFormatter.Instance.Consumer<DeployPayloadConsumer>();
 

@@ -257,7 +257,7 @@ namespace MassTransit.Tests
             {
                 var host = cfg.Host("localhost", "/");
 
-                cfg.ServiceInstance(host, instance =>
+                cfg.ServiceInstance(instance =>
                 {
                     var serviceEndpointName = KebabCaseEndpointNameFormatter.Instance.Consumer<DeployPayloadConsumer>();
 

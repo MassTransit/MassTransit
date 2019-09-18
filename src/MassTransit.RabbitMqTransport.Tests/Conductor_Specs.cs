@@ -67,7 +67,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
             {
-                configurator.ServiceInstance(Host, instance =>
+                configurator.ServiceInstance(instance =>
                 {
                     var serviceEndpointName = KebabCaseEndpointNameFormatter.Instance.Consumer<DeployPayloadConsumer>();
 

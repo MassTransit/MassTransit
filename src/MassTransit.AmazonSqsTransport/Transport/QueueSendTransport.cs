@@ -7,6 +7,7 @@
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using Logging;
     using Transports;
 
 
@@ -62,44 +63,52 @@
 
                 await _context.ConfigureTopologyPipe.Send(clientContext).ConfigureAwait(false);
 
-                var sendContext = new TransportAmazonSqsSendContext<T>(_message, _cancellationToken);
+                var context = new TransportAmazonSqsSendContext<T>(_message, _cancellationToken);
+
+                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartActivity(new {_context.EntityName});
                 try
                 {
-                    await _pipe.Send(sendContext).ConfigureAwait(false);
+                    await _pipe.Send(context).ConfigureAwait(false);
 
-                    var transportMessage = clientContext.CreateSendRequest(_context.EntityName, sendContext.Body);
+                    activity.AddSendContextHeaders(context);
 
-                    transportMessage.MessageAttributes.Set(sendContext.Headers);
+                    var transportMessage = clientContext.CreateSendRequest(_context.EntityName, context.Body);
 
-                    if (!string.IsNullOrEmpty(sendContext.DeduplicationId))
-                        transportMessage.MessageDeduplicationId = sendContext.DeduplicationId;
+                    transportMessage.MessageAttributes.Set(context.Headers);
 
-                    if (!string.IsNullOrEmpty(sendContext.GroupId))
-                        transportMessage.MessageGroupId = sendContext.GroupId;
+                    if (!string.IsNullOrEmpty(context.DeduplicationId))
+                        transportMessage.MessageDeduplicationId = context.DeduplicationId;
 
-                    if (sendContext.DelaySeconds.HasValue)
-                        transportMessage.DelaySeconds = sendContext.DelaySeconds.Value;
+                    if (!string.IsNullOrEmpty(context.GroupId))
+                        transportMessage.MessageGroupId = context.GroupId;
 
-                    transportMessage.MessageAttributes.Set("Content-Type", sendContext.ContentType.MediaType);
-                    transportMessage.MessageAttributes.Set(nameof(sendContext.MessageId), sendContext.MessageId);
-                    transportMessage.MessageAttributes.Set(nameof(sendContext.CorrelationId), sendContext.CorrelationId);
-                    transportMessage.MessageAttributes.Set(nameof(sendContext.TimeToLive), sendContext.TimeToLive);
+                    if (context.DelaySeconds.HasValue)
+                        transportMessage.DelaySeconds = context.DelaySeconds.Value;
 
-                    await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
+                    transportMessage.MessageAttributes.Set("Content-Type", context.ContentType.MediaType);
+                    transportMessage.MessageAttributes.Set(nameof(context.MessageId), context.MessageId);
+                    transportMessage.MessageAttributes.Set(nameof(context.CorrelationId), context.CorrelationId);
+                    transportMessage.MessageAttributes.Set(nameof(context.TimeToLive), context.TimeToLive);
 
-                    await clientContext.SendMessage(transportMessage, sendContext.CancellationToken).ConfigureAwait(false);
+                    await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
-                    sendContext.LogSent();
+                    await clientContext.SendMessage(transportMessage, context.CancellationToken).ConfigureAwait(false);
 
-                    await _context.SendObservers.PostSend(sendContext).ConfigureAwait(false);
+                    context.LogSent();
+
+                    await _context.SendObservers.PostSend(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    sendContext.LogFaulted(ex);
+                    context.LogFaulted(ex);
 
-                    await _context.SendObservers.SendFault(sendContext, ex).ConfigureAwait(false);
+                    await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
 
                     throw;
+                }
+                finally
+                {
+                    activity?.Stop();
                 }
             }
 

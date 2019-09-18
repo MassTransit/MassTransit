@@ -1,23 +1,15 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
     using System;
+    using System.Threading.Tasks;
     using Configuration;
+    using Context;
+    using Contexts;
     using Definition;
     using GreenPipes;
     using GreenPipes.Agents;
     using MassTransit.Configurators;
+    using Metadata;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
     using Pipeline;
@@ -31,11 +23,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         IServiceBusHostControl
     {
         readonly IServiceBusHostConfiguration _hostConfiguration;
+        readonly IServiceBusHostTopology _hostTopology;
 
-        public ServiceBusHost(IServiceBusHostConfiguration hostConfiguration)
-            : base(hostConfiguration)
+        public ServiceBusHost(IServiceBusHostConfiguration hostConfiguration, IServiceBusHostTopology hostTopology)
+            : base(hostConfiguration, hostTopology)
         {
             _hostConfiguration = hostConfiguration;
+            _hostTopology = hostTopology;
 
             RetryPolicy = Retry.CreatePolicy(x =>
             {
@@ -50,22 +44,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 x.Interval(5, TimeSpan.FromSeconds(10));
             });
 
-            BasePath = _hostConfiguration.HostAddress.AbsolutePath.Trim('/');
-
             MessagingFactoryContextSupervisor = new MessagingFactoryContextSupervisor(hostConfiguration);
 
             NamespaceContextSupervisor = new NamespaceContextSupervisor(hostConfiguration);
         }
 
+        public IMessagingFactoryContextSupervisor MessagingFactoryContextSupervisor { get; }
+        public INamespaceContextSupervisor NamespaceContextSupervisor { get; }
         public IRetryPolicy RetryPolicy { get; }
         public ServiceBusHostSettings Settings => _hostConfiguration.Settings;
-        public string BasePath { get; }
-
-        public IServiceBusHostTopology Topology => _hostConfiguration.Topology;
-
-        public IMessagingFactoryContextSupervisor MessagingFactoryContextSupervisor { get; }
-
-        public INamespaceContextSupervisor NamespaceContextSupervisor { get; }
+        public IServiceBusHostTopology Topology => _hostTopology;
 
         protected override void Probe(ProbeContext context)
         {
@@ -102,13 +90,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure = null)
         {
-            var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
+            LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            configure?.Invoke(configuration.Configurator);
+            LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
+
+            var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, configure);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
 
-            configuration.Build();
+            configuration.Build(this);
 
             return ReceiveEndpoints.Start(configuration.Settings.Path);
         }
@@ -119,7 +109,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             var settings = new SubscriptionEndpointSettings(Topology.Publish<T>().TopicDescription, subscriptionName);
 
-            return CreateSubscriptionEndpoint(configure, settings);
+            return ConnectSubscriptionEndpoint(settings, configure);
         }
 
         public HostReceiveEndpointHandle ConnectSubscriptionEndpoint(string subscriptionName, string topicName,
@@ -127,26 +117,89 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             var settings = new SubscriptionEndpointSettings(topicName, subscriptionName);
 
-            return CreateSubscriptionEndpoint(configure, settings);
+            return ConnectSubscriptionEndpoint(settings, configure);
+        }
+
+        HostReceiveEndpointHandle ConnectSubscriptionEndpoint(SubscriptionEndpointSettings settings,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+        {
+            LogContext.SetCurrentIfNull(DefaultLogContext);
+
+            LogContext.Debug?.Log("Connect subscription endpoint: {Topic}/{SubscriptionName}", settings.Path, settings.Name);
+
+            var configuration = _hostConfiguration.CreateSubscriptionEndpointConfiguration(settings, configure);
+
+            BusConfigurationResult.CompileResults(configuration.Validate());
+
+            configuration.Build(this);
+
+            return ReceiveEndpoints.Start(configuration.Settings.Path);
+        }
+
+        public Task<ISendTransport> CreateSendTransport(Uri address)
+        {
+            var settings = _hostTopology.SendTopology.GetSendSettings(address);
+
+            var endpointContextSupervisor = CreateQueueSendEndpointContextSupervisor(settings);
+
+            var transportContext = new HostServiceBusSendTransportContext(address, endpointContextSupervisor, SendLogContext);
+
+            var transport = new ServiceBusSendTransport(transportContext);
+            Add(transport);
+
+            return Task.FromResult<ISendTransport>(transport);
+        }
+
+        public Task<ISendTransport> CreatePublishTransport<T>()
+            where T : class
+        {
+            var publishTopology = _hostTopology.Publish<T>();
+
+            if (!publishTopology.TryGetPublishAddress(_hostConfiguration.Settings.ServiceUri, out Uri publishAddress))
+                throw new ArgumentException($"The type did not return a valid publish address: {TypeMetadataCache<T>.ShortName}");
+
+            var settings = publishTopology.GetSendSettings();
+
+            var endpointContextSupervisor = CreateTopicSendEndpointContextSupervisor(settings);
+
+            var transportContext = new HostServiceBusSendTransportContext(publishAddress, endpointContextSupervisor, SendLogContext);
+
+            var transport = new ServiceBusSendTransport(transportContext);
+            Add(transport);
+
+            return Task.FromResult<ISendTransport>(transport);
+        }
+
+        ISendEndpointContextSupervisor CreateQueueSendEndpointContextSupervisor(SendSettings settings)
+        {
+            IPipe<NamespaceContext> namespacePipe = CreateConfigureTopologyPipe(settings);
+
+            var contextFactory = new QueueSendEndpointContextFactory(MessagingFactoryContextSupervisor, NamespaceContextSupervisor,
+                Pipe.Empty<MessagingFactoryContext>(), namespacePipe, settings);
+
+            return new SendEndpointContextSupervisor(contextFactory);
+        }
+
+        ISendEndpointContextSupervisor CreateTopicSendEndpointContextSupervisor(SendSettings settings)
+        {
+            IPipe<NamespaceContext> namespacePipe = CreateConfigureTopologyPipe(settings);
+
+            var contextFactory = new TopicSendEndpointContextFactory(MessagingFactoryContextSupervisor, NamespaceContextSupervisor,
+                Pipe.Empty<MessagingFactoryContext>(), namespacePipe, settings);
+
+            return new SendEndpointContextSupervisor(contextFactory);
+        }
+
+        IPipe<NamespaceContext> CreateConfigureTopologyPipe(SendSettings settings)
+        {
+            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false, Stopping);
+
+            return configureTopologyFilter.ToPipe();
         }
 
         protected override IAgent[] GetAgentHandles()
         {
             return new IAgent[] {NamespaceContextSupervisor, MessagingFactoryContextSupervisor};
-        }
-
-        HostReceiveEndpointHandle CreateSubscriptionEndpoint(Action<IServiceBusSubscriptionEndpointConfigurator> configure,
-            SubscriptionEndpointSettings settings)
-        {
-            var configuration = _hostConfiguration.CreateSubscriptionEndpointConfiguration(settings);
-
-            configure?.Invoke(configuration.Configurator);
-
-            BusConfigurationResult.CompileResults(configuration.Validate());
-
-            configuration.Build();
-
-            return ReceiveEndpoints.Start(settings.Path);
         }
     }
 }

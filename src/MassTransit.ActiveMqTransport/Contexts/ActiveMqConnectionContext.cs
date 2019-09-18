@@ -18,21 +18,26 @@ namespace MassTransit.ActiveMqTransport.Contexts
         IAsyncDisposable
     {
         readonly IConnection _connection;
-        readonly IActiveMqHostConfiguration _configuration;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
-        public ActiveMqConnectionContext(IConnection connection, IActiveMqHostConfiguration configuration, CancellationToken cancellationToken)
+        public ActiveMqConnectionContext(IConnection connection, IActiveMqHostConfiguration configuration, IActiveMqHostTopology hostTopology,
+            CancellationToken cancellationToken)
             : base(new PayloadCache(), cancellationToken)
         {
             _connection = connection;
-            _configuration = configuration;
+
+            Description = configuration.Description;
+            HostAddress = configuration.HostAddress;
+
+            Topology = hostTopology;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
         }
 
-        public string Description => _configuration.Description;
-        public Uri HostAddress => _configuration.HostAddress;
-        public IActiveMqHostTopology Topology => _configuration.Topology;
+        IConnection ConnectionContext.Connection => _connection;
+        public string Description { get; }
+        public Uri HostAddress { get; }
+        public IActiveMqHostTopology Topology { get; }
 
         public async Task<ISession> CreateSession(CancellationToken cancellationToken)
         {
@@ -44,8 +49,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
                 return model;
             }
         }
-
-        IConnection ConnectionContext.Connection => _connection;
 
         Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
         {
