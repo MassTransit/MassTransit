@@ -247,11 +247,9 @@
 
                 Task IReceiveEndpointObserver.Ready(ReceiveEndpointReady ready)
                 {
-                    _ready.TrySetResult(ready);
-
                     _handle.Disconnect();
 
-                    return TaskUtil.Completed;
+                    return Task.Factory.StartNew(() => _ready.TrySetResult(ready), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
                 }
 
                 public Task Stopping(ReceiveEndpointStopping stopping)
@@ -268,9 +266,10 @@
                 {
                     if (_cancellationToken.IsCancellationRequested)
                     {
-                        _ready.TrySetExceptionWithBackgroundContinuations(faulted.Exception);
-
                         _handle.Disconnect();
+
+                        return Task.Factory.StartNew(() => _ready.TrySetException(faulted.Exception), CancellationToken.None, TaskCreationOptions.None,
+                            TaskScheduler.Default);
                     }
 
                     return TaskUtil.Completed;

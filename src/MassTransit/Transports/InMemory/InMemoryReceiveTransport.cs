@@ -1,15 +1,3 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory
 {
     using System;
@@ -23,7 +11,6 @@ namespace MassTransit.Transports.InMemory
     using GreenPipes.Agents;
     using Logging;
     using Metrics;
-    using Util;
 
 
     /// <summary>
@@ -99,7 +86,7 @@ namespace MassTransit.Transports.InMemory
         {
             try
             {
-                _queue.ConnectConsumer(this);
+                var consumerHandle = _queue.ConnectConsumer(this);
 
                 void NotifyReady()
                 {
@@ -110,7 +97,7 @@ namespace MassTransit.Transports.InMemory
 
                 Task.Factory.StartNew(NotifyReady, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
 
-                return new Handle(this);
+                return new Handle(this, consumerHandle);
             }
             catch (Exception exception)
             {
@@ -148,15 +135,21 @@ namespace MassTransit.Transports.InMemory
             ReceiveTransportHandle
         {
             readonly InMemoryReceiveTransport _transport;
+            readonly ConnectHandle _consumerHandle;
 
-            public Handle(InMemoryReceiveTransport transport)
+            public Handle(InMemoryReceiveTransport transport, ConnectHandle consumerHandle)
             {
                 _transport = transport;
+                _consumerHandle = consumerHandle;
             }
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
+                LogContext.SetCurrentIfNull(_transport._receiveEndpointContext.LogContext);
+
                 await _transport.Stop("Stop", cancellationToken).ConfigureAwait(false);
+
+                _consumerHandle.Disconnect();
 
                 var completed = new ReceiveTransportCompletedEvent(_transport._inputAddress, _transport._tracker.GetDeliveryMetrics());
 
