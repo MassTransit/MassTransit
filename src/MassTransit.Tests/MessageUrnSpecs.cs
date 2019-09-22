@@ -8,7 +8,7 @@ namespace MassTransit.Tests
     [TestFixture]
     public class MessageUrnSpecs
     {
-        
+
         [Test]
         public void SimpleMessage()
         {
@@ -26,9 +26,7 @@ namespace MassTransit.Tests
         [Test]
         public void OpenGenericMessage()
         {
-            var urn = MessageUrn.ForType(typeof (G<>));
-            var expected = new Uri("urn:message:MassTransit.Tests:G[[]]");
-            Assert.AreEqual(expected.AbsolutePath, urn.AbsolutePath);
+            Assert.That(() => MessageUrn.ForType(typeof(G<>)), Throws.TypeOf<ArgumentException>());
         }
 
         [Test]

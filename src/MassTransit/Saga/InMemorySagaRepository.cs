@@ -235,8 +235,8 @@ namespace MassTransit.Saga
                 var activity = LogContext.IfEnabled(OperationName.Saga.Add)?.StartActivity(new {context.Saga.CorrelationId});
                 try
                 {
-                    var sagaConsumeContext =
-                        new InMemorySagaConsumeContext<TSaga, TMessage>(context, context.Saga, () => RemoveNewSaga(instance, context.CancellationToken));
+                    var sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, TMessage>(context, context.Saga,
+                        () => RemoveNewSaga(instance, context.CancellationToken));
 
                     if (_withinLock)
                         _repository.AddWithinLock(instance);

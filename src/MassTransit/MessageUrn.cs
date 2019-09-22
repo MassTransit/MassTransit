@@ -11,12 +11,52 @@ namespace MassTransit
     public class MessageUrn :
         Uri
     {
-        static readonly ConcurrentDictionary<Type, MessageUrn> _cache = new ConcurrentDictionary<Type, MessageUrn>();
+        static readonly ConcurrentDictionary<Type, Cached> _cache = new ConcurrentDictionary<Type, Cached>();
+
+        public static MessageUrn ForType<T>() => MessageUrnCache<T>.Urn;
+        public static string ForTypeString<T>() => MessageUrnCache<T>.UrnString;
 
         public static MessageUrn ForType(Type type)
         {
-            return _cache.GetOrAdd(type, _ => new MessageUrn(GetUrnForType(type)));
+            if (type.ContainsGenericParameters)
+                throw new ArgumentException("A message type may not contain generic parameters", nameof(type));
+
+            return _cache.GetOrAdd(type, _ => (Cached)Activator.CreateInstance(typeof(Cached<>).MakeGenericType(type))).Urn;
         }
+
+        public static string ForTypeString(Type type)
+        {
+            return _cache.GetOrAdd(type, _ => (Cached)Activator.CreateInstance(typeof(Cached<>).MakeGenericType(type))).UrnString;
+        }
+
+
+        static class MessageUrnCache<T>
+        {
+            internal static readonly MessageUrn Urn;
+            internal static readonly string UrnString;
+
+            static MessageUrnCache()
+            {
+                Urn = new MessageUrn(GetUrnForType(typeof(T)));
+                UrnString = Urn.ToString();
+            }
+        }
+
+
+        interface Cached
+        {
+            MessageUrn Urn { get; }
+            string UrnString { get; }
+        }
+
+
+        class Cached<T> :
+            Cached
+        {
+            public MessageUrn Urn => MessageUrnCache<T>.Urn;
+            public string UrnString => MessageUrnCache<T>.UrnString;
+        }
+
 
         MessageUrn(string uriString)
             : base(uriString)
@@ -28,30 +68,34 @@ namespace MassTransit
         {
         }
 
-
-        public Type GetType(bool throwOnError = true, bool ignoreCase = true)
+        public void Deconstruct(out string name, out string ns, out string assemblyName)
         {
-            if (Segments.Length == 0)
-                return null;
+            name = null;
+            ns = null;
+            assemblyName = null;
 
-            string[] names = Segments[0].Split(':');
-            if (names[0] != "message")
-                return null;
-
-            string typeName;
-
-            if (names.Length == 2)
-                typeName = names[1];
-            else if (names.Length == 3)
-                typeName = names[1] + "." + names[2] + ", " + names[1];
-            else if (names.Length >= 4)
-                typeName = names[1] + "." + names[2] + ", " + names[3];
-            else
-                return null;
-
-            Type messageType = Type.GetType(typeName, true, true);
-
-            return messageType;
+            if (Segments.Length > 0)
+            {
+                string[] names = Segments[0].Split(':');
+                if (string.Compare(names[0], "message", StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    if (names.Length == 2)
+                    {
+                        name = names[1];
+                    }
+                    else if (names.Length == 3)
+                    {
+                        name = names[2];
+                        ns = names[1];
+                    }
+                    else if (names.Length >= 4)
+                    {
+                        name = names[2];
+                        ns = names[1];
+                        assemblyName = names[3];
+                    }
+                }
+            }
         }
 
         static string GetUrnForType(Type type)

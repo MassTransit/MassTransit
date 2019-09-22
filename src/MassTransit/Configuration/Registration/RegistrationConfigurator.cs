@@ -3,10 +3,11 @@ namespace MassTransit.Registration
     using System;
     using System.Collections.Concurrent;
     using System.Linq;
+    using Automatonymous;
     using ConsumeConfigurators;
     using Definition;
+    using Internals.Extensions;
     using Metadata;
-    using Util;
 
 
     /// <summary>
@@ -73,6 +74,9 @@ namespace MassTransit.Registration
 
         ISagaRegistrationConfigurator<T> IRegistrationConfigurator.AddSaga<T>(Action<ISagaConfigurator<T>> configure)
         {
+            if (typeof(T).HasInterface<SagaStateMachineInstance>())
+                throw new ArgumentException($"State machine sagas must be registered using AddSagaStateMachine: {TypeMetadataCache<T>.ShortName}");
+
             ISagaRegistration ValueFactory(Type type)
             {
                 SagaRegistrationCache.Register(type, _containerRegistrar);
@@ -87,17 +91,11 @@ namespace MassTransit.Registration
             return new SagaRegistrationConfigurator<T>(this, registration, _containerRegistrar);
         }
 
-        ISagaRegistrationConfigurator<T> IRegistrationConfigurator.AddSaga<T>(SagaRegistrationFactory<T> factory, Action<ISagaConfigurator<T>> configure)
-        {
-            var registration = _sagaRegistrations.GetOrAdd(typeof(T), _ => factory(_containerRegistrar));
-
-            registration.AddConfigureAction(configure);
-
-            return new SagaRegistrationConfigurator<T>(this, registration, _containerRegistrar);
-        }
-
         void IRegistrationConfigurator.AddSaga(Type sagaType, Type sagaDefinitionType)
         {
+            if (sagaType.HasInterface<SagaStateMachineInstance>())
+                throw new ArgumentException($"State machine sagas must be registered using AddSagaStateMachine: {TypeMetadataCache.GetShortName(sagaType)}");
+
             _sagaRegistrations.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, sagaDefinitionType, _containerRegistrar));
         }
 

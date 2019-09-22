@@ -2,11 +2,11 @@ namespace MassTransit.Tests
 {
     using System;
     using Contracts;
-    using Initializers.Factories;
+    using Internals.Reflection;
     using Metadata;
     using NUnit.Framework;
     using TestContracts;
-    using Util;
+    using TestFramework.Courier;
 
 
     namespace TestContracts
@@ -53,6 +53,62 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
+    public class Using_contract_info_to_generate_a_contract
+    {
+        [Test]
+        public void Should_create_a_simple_type()
+        {
+            var messageInfo = MessageInfoCache.GetMessageInfo<SimpleArgument>();
+
+            var contract = ObjectInfoContractCache.GetOrAddContract(messageInfo);
+
+            var factory = ContractCache.GetMessageFactory(contract);
+
+            var message = factory.Create();
+
+            var properties = message.GetType().GetProperties();
+
+            Assert.That(properties.Length, Is.EqualTo(2));
+            Assert.That(properties[0].Name, Is.EqualTo("Name"));
+            Assert.That(properties[0].PropertyType, Is.EqualTo(typeof(string)));
+            Assert.That(properties[1].Name, Is.EqualTo("Age"));
+            Assert.That(properties[1].PropertyType, Is.EqualTo(typeof(int)));
+        }
+
+        [Test]
+        public void Should_create_an_overarching_type()
+        {
+            var messageInfo = MessageInfoCache.GetMessageInfo<OverarchingArgument>();
+
+            ObjectInfo[] objectInfos = MessageInfoCache.GetMessageObjectInfo(messageInfo);
+
+            ObjectInfoContractCache.AddContracts(objectInfos);
+
+            var contract = ObjectInfoContractCache.GetOrAddContract(messageInfo);
+
+            var factory = ContractCache.GetMessageFactory(contract);
+
+            var message = factory.Create();
+
+            var properties = message.GetType().GetProperties();
+
+            Assert.That(properties.Length, Is.EqualTo(2));
+            Assert.That(properties[0].Name, Is.EqualTo("CommandId"));
+            Assert.That(properties[0].PropertyType, Is.EqualTo(typeof(Guid)));
+            Assert.That(properties[1].Name, Is.EqualTo("Argument"));
+
+            properties = properties[1].PropertyType.GetProperties();
+
+            Assert.That(properties.Length, Is.EqualTo(2));
+            Assert.That(properties[0].Name, Is.EqualTo("Name"));
+            Assert.That(properties[0].PropertyType, Is.EqualTo(typeof(string)));
+            Assert.That(properties[1].Name, Is.EqualTo("Age"));
+            Assert.That(properties[1].PropertyType, Is.EqualTo(typeof(int)));
+        }
+    }
+
+
+    [TestFixture]
     public class Generating_a_contract
     {
         [Test]
@@ -62,7 +118,7 @@ namespace MassTransit.Tests
 
             Assert.That(messageInfo, Is.Not.Null);
 
-            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForType(typeof(SimpleArgument)).ToString()));
+            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForTypeString<SimpleArgument>()));
         }
 
         [Test]
@@ -72,12 +128,12 @@ namespace MassTransit.Tests
 
             Assert.That(messageInfo, Is.Not.Null);
 
-            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForType(typeof(OverarchingArgument)).ToString()));
+            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForTypeString<OverarchingArgument>()));
 
             Assert.That(messageInfo.Properties, Is.Not.Null);
             Assert.That(messageInfo.Properties.Length, Is.EqualTo(2));
             Assert.That(messageInfo.Properties[1].Kind, Is.EqualTo(PropertyKind.Object));
-            Assert.That(messageInfo.Properties[1].PropertyType, Is.EqualTo(TypeMetadataCache<SimpleArgument>.ShortName));
+            Assert.That(messageInfo.Properties[1].PropertyType, Is.EqualTo(MessageUrn.ForTypeString<SimpleArgument>()));
         }
 
         [Test]
@@ -91,10 +147,10 @@ namespace MassTransit.Tests
 
             Assert.That(objectInfos, Is.Not.Null);
             Assert.That(objectInfos.Length, Is.EqualTo(4));
-            Assert.That(objectInfos[0].ObjectType, Is.EqualTo(TypeMetadataCache<SimpleArgument>.ShortName));
-            Assert.That(objectInfos[1].ObjectType, Is.EqualTo(TypeMetadataCache<OverarchingArgument>.ShortName));
-            Assert.That(objectInfos[2].ObjectType, Is.EqualTo(TypeMetadataCache<DictionaryArgument>.ShortName));
-            Assert.That(objectInfos[3].ObjectType, Is.EqualTo(TypeMetadataCache<NestedArgument>.ShortName));
+            Assert.That(objectInfos[0].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<SimpleArgument>()));
+            Assert.That(objectInfos[1].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<OverarchingArgument>()));
+            Assert.That(objectInfos[2].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<DictionaryArgument>()));
+            Assert.That(objectInfos[3].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<NestedArgument>()));
         }
 
         [Test]
@@ -108,7 +164,7 @@ namespace MassTransit.Tests
 
             Assert.That(objectInfos, Is.Not.Null);
             Assert.That(objectInfos.Length, Is.EqualTo(1));
-            Assert.That(objectInfos[0].ObjectType, Is.EqualTo(TypeMetadataCache<ExceptionInfo>.ShortName));
+            Assert.That(objectInfos[0].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<ExceptionInfo>()));
         }
 
         [Test]
@@ -118,7 +174,7 @@ namespace MassTransit.Tests
 
             Assert.That(messageInfo, Is.Not.Null);
 
-            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForType(typeof(ArrayArgument)).ToString()));
+            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForTypeString<ArrayArgument>()));
 
             Assert.That(messageInfo.Properties, Is.Not.Null);
             Assert.That(messageInfo.Properties.Length, Is.EqualTo(3));
@@ -127,7 +183,7 @@ namespace MassTransit.Tests
             Assert.That(messageInfo.Properties[1].Kind.HasFlag(PropertyKind.Array), Is.True);
             Assert.That(messageInfo.Properties[1].PropertyType, Is.EqualTo(TypeMetadataCache<string>.ShortName));
             Assert.That(messageInfo.Properties[2].Kind.HasFlag(PropertyKind.Array), Is.True);
-            Assert.That(messageInfo.Properties[2].PropertyType, Is.EqualTo(TypeMetadataCache<SimpleArgument>.ShortName));
+            Assert.That(messageInfo.Properties[2].PropertyType, Is.EqualTo(MessageUrn.ForTypeString<SimpleArgument>()));
         }
 
         [Test]
@@ -137,7 +193,7 @@ namespace MassTransit.Tests
 
             Assert.That(messageInfo, Is.Not.Null);
 
-            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForType(typeof(DictionaryArgument)).ToString()));
+            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForTypeString<DictionaryArgument>()));
 
             Assert.That(messageInfo.Properties, Is.Not.Null);
             Assert.That(messageInfo.Properties.Length, Is.EqualTo(3));
@@ -149,7 +205,17 @@ namespace MassTransit.Tests
             Assert.That(messageInfo.Properties[1].PropertyType, Is.EqualTo(TypeMetadataCache<string>.ShortName));
             Assert.That(messageInfo.Properties[2].Kind.HasFlag(PropertyKind.Dictionary), Is.True);
             Assert.That(messageInfo.Properties[2].KeyType, Is.EqualTo(TypeMetadataCache<string>.ShortName));
-            Assert.That(messageInfo.Properties[2].PropertyType, Is.EqualTo(TypeMetadataCache<OverarchingArgument>.ShortName));
+            Assert.That(messageInfo.Properties[2].PropertyType, Is.EqualTo(MessageUrn.ForTypeString<OverarchingArgument>()));
+        }
+
+        [Test]
+        public void Should_get_info_for_an_activity()
+        {
+            var argumentInfo = MessageInfoCache.GetMessageInfo<TestArguments>();
+            var logInfo = MessageInfoCache.GetMessageInfo<TestLog>();
+            var objectInfos = MessageInfoCache.GetMessageObjectInfo(argumentInfo, logInfo);
+
+            Assert.That(objectInfos.Length, Is.EqualTo(2));
         }
     }
 }

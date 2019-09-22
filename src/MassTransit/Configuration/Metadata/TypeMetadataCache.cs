@@ -105,7 +105,13 @@
             _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
             _hasConsumerInterfaces = new Lazy<bool>(() => !_hasSagaInterfaces.Value && ScanForConsumerInterfaces(), LazyThreadSafetyMode.PublicationOnly);
 
-            _properties = new Lazy<List<PropertyInfo>>(() => Internals.Extensions.TypeExtensions.GetAllProperties(typeof(T)).ToList());
+            List<PropertyInfo> PropertyListFactory() =>
+                Internals.Extensions.TypeExtensions.GetAllProperties(typeof(T))
+                    .GroupBy(x => x.Name)
+                    .Select(x => x.Last())
+                    .ToList();
+
+            _properties = new Lazy<List<PropertyInfo>>(PropertyListFactory);
 
             _isValidMessageType = new Lazy<bool>(CheckIfValidMessageType);
             _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T).GetTypeInfo()));
@@ -274,7 +280,7 @@
 
         static IEnumerable<string> GetMessageTypeNames()
         {
-            return MessageTypes.Select(x => MessageUrn.ForType(x).ToString());
+            return MessageTypes.Select(MessageUrn.ForTypeString);
         }
 
         static bool ScanForConsumerInterfaces()

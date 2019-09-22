@@ -6,7 +6,6 @@ namespace MassTransit.Registration
     using Automatonymous;
     using Internals.Extensions;
     using Metadata;
-    using Util;
 
 
     public static class SagaStateMachineRegistrationCache

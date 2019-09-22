@@ -1,12 +1,10 @@
 namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
-    using Events;
     using FaultMessages;
     using Metadata;
     using NUnit.Framework;
     using TestFramework;
-    using Util;
 
 
     [TestFixture]

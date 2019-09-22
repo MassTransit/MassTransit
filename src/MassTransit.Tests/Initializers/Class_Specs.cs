@@ -6,7 +6,6 @@ namespace MassTransit.Tests.Initializers
     using Metadata;
     using NUnit.Framework;
     using TestFramework;
-    using Util;
 
 
     [TestFixture]

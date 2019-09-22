@@ -21,6 +21,7 @@ namespace MassTransit.Logging
             public const string Send = "Saga.Send";
             public const string SendQuery = "Saga.SendQuery";
             public const string Add = "Saga.Add";
+            public const string RaiseEvent = "Saga.RaiseEvent";
         }
 
         public static class Courier

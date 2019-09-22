@@ -5,7 +5,12 @@ namespace MassTransit.Initializers
     using Contexts;
     using Factories;
     using Metadata;
-    using Util;
+
+
+    public static class MessageFactoryCache
+    {
+
+    }
 
 
     public static class MessageFactoryCache<TMessage>

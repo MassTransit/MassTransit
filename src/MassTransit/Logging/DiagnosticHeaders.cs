@@ -14,6 +14,7 @@ namespace MassTransit.Logging
         public const string DestinationAddress = "destination-address";
         public const string InputAddress = "input-address";
         public const string ConversationId = "conversation-id";
+        public const string TrackingNumber = "tracking-number";
         public const string CorrelationConversationId = "correlation-conversation-id";
 
         public const string SourceHostMachine = "source-host-machine";
@@ -21,5 +22,12 @@ namespace MassTransit.Logging
         public const string SourceHostFrameworkVersion = "source-host-framework-version";
         public const string SourceHostMassTransitVersion = "source-host-masstransit-version";
         public const string MessageTypes = "message-types";
+
+
+        public static class StateMachine
+        {
+            public const string BeginState = "begin-state";
+            public const string EndState = "end-state";
+        }
     }
 }

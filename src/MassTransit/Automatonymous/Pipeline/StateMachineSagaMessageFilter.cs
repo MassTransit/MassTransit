@@ -19,6 +19,8 @@ namespace Automatonymous.Pipeline
     using Contexts;
     using GreenPipes;
     using MassTransit;
+    using MassTransit.Context;
+    using MassTransit.Logging;
     using MassTransit.Metadata;
     using MassTransit.Saga;
     using MassTransit.Saga.Pipeline.Filters;
@@ -73,6 +75,7 @@ namespace Automatonymous.Pipeline
 
             State<TInstance> currentState = await _machine.Accessor.Get(eventContext).ConfigureAwait(false);
 
+            var activity = LogContext.IfEnabled(OperationName.Saga.RaiseEvent)?.StartActivity(new {BeginState = currentState.Name});
             try
             {
                 await _machine.RaiseEvent(eventContext).ConfigureAwait(false);
@@ -83,6 +86,10 @@ namespace Automatonymous.Pipeline
             catch (UnhandledEventException ex)
             {
                 throw new NotAcceptedStateMachineException(typeof(TInstance), typeof(TData), context.CorrelationId ?? Guid.Empty, currentState.Name, ex);
+            }
+            finally
+            {
+                activity?.Stop(new {EndState = (await _machine.Accessor.Get(eventContext).ConfigureAwait(false)).Name});
             }
         }
     }

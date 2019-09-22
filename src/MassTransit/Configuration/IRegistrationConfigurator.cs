@@ -35,16 +35,6 @@ namespace MassTransit
             where T : class, ISaga;
 
         /// <summary>
-        /// Adds the saga, using the specified factory, allowing configuration when it is configured on the endpoint. This is used
-        /// to add advanced sagas, such as state machines, to the standard saga registration.
-        /// </summary>
-        /// <param name="factory">The saga registration factory</param>
-        /// <param name="configure"></param>
-        /// <typeparam name="T">The saga type (or instance type, if it's a state machine)</typeparam>
-        ISagaRegistrationConfigurator<T> AddSaga<T>(SagaRegistrationFactory<T> factory, Action<ISagaConfigurator<T>> configure = null)
-            where T : class, ISaga;
-
-        /// <summary>
         /// Adds the saga, along with an optional saga definition
         /// </summary>
         /// <param name="sagaType">The saga type</param>

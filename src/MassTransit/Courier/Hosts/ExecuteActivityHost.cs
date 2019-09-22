@@ -47,6 +47,8 @@ namespace MassTransit.Courier.Hosts
                 ArgumentType = TypeMetadataCache<TArguments>.ShortName
             });
 
+            activity?.AddBaggage(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber);
+
             var timer = Stopwatch.StartNew();
             try
             {

@@ -12,6 +12,6 @@ namespace MassTransit.Contracts
         Dictionary = 4,
         Nullable = 8,
 
-        CollectionMask = 0xC
+        CollectionMask = 0x6
     }
 }

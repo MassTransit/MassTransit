@@ -72,7 +72,7 @@ namespace MassTransit.Serialization
                     return existing != null;
             }
 
-            string typeUrn = MessageUrn.ForType(messageType).ToString();
+            string typeUrn = MessageUrn.ForTypeString(messageType);
 
             return _supportedTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
         }
@@ -93,7 +93,7 @@ namespace MassTransit.Serialization
                     return true;
                 }
 
-                string typeUrn = MessageUrn.ForType(typeof(T)).ToString();
+                string typeUrn = MessageUrn.ForTypeString<T>();
 
                 if (_supportedTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase)))
                 {

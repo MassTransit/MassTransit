@@ -6,7 +6,7 @@
     using System.Reflection;
     using System.Text;
     using HeaderInitializers;
-    using Internals.Extensions;
+    using Metadata;
     using PropertyInitializers;
     using PropertyProviders;
 
@@ -21,7 +21,7 @@
 
         public DefaultInitializerConvention()
         {
-            _inputProperties = typeof(TInput).GetAllProperties().GroupBy(x => x.Name).ToDictionary(x => x.Key, x => x.Last(), StringComparer.OrdinalIgnoreCase);
+            _inputProperties = TypeMetadataCache<TInput>.Properties.ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
             _providerFactory = new PropertyProviderFactory<TInput>();
         }
 

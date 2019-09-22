@@ -2,10 +2,8 @@ namespace MassTransit.Tests.Initializers
 {
     using System.Linq;
     using System.Reflection;
-    using MassTransit.Initializers.Factories;
-    using Newtonsoft.Json.Serialization;
+    using Internals.Reflection;
     using NUnit.Framework;
-    using NUnit.Framework.Interfaces;
     using TestContracts;
 
 
