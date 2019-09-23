@@ -47,7 +47,7 @@ namespace MassTransit.Context
             lock (_listLock)
                 scheduledMessages = _scheduledMessages.ToArray();
 
-            var tasks = new List<Task>();
+            var tasks = new List<Task>(scheduledMessages.Length);
             foreach (var scheduledMessage in scheduledMessages)
             {
                 tasks.Add(_context.CancelScheduledSend(scheduledMessage.Destination, scheduledMessage.TokenId));
