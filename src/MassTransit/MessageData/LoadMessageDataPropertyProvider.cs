@@ -1,44 +1,51 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.MessageData
+﻿namespace MassTransit.MessageData
 {
-    using System.Reflection;
-    using Internals.Reflection;
-    using Transformation;
+    using System.Threading.Tasks;
+    using Initializers;
+    using Util;
 
 
     public class LoadMessageDataPropertyProvider<TInput, TValue> :
-        IPropertyProvider<MessageData<TValue>, TInput>
+        IPropertyProvider<TInput, MessageData<TValue>>
+        where TInput : class
     {
-        readonly IReadProperty<TInput, MessageData<TValue>> _property;
+        readonly IPropertyProvider<TInput, MessageData<TValue>> _inputProvider;
         readonly IMessageDataRepository _repository;
 
-        public LoadMessageDataPropertyProvider(IMessageDataRepository repository, PropertyInfo property)
+        public LoadMessageDataPropertyProvider(IPropertyProvider<TInput, MessageData<TValue>> inputProvider, IMessageDataRepository repository)
         {
             _repository = repository;
-            _property = ReadPropertyCache<TInput>.GetProperty<MessageData<TValue>>(property);
+            _inputProvider = inputProvider;
         }
 
-        public MessageData<TValue> GetProperty(TransformContext<TInput> context)
+        public Task<MessageData<TValue>> GetProperty<T>(InitializeContext<T, TInput> context)
+            where T : class
         {
-            if (context.HasInput)
+            if (!context.HasInput)
+                return TaskUtil.Default<MessageData<TValue>>();
+
+            Task<MessageData<TValue>> inputTask = _inputProvider.GetProperty(context);
+            if (inputTask.IsCompleted)
             {
-                MessageData<TValue> value = _property.Get(context.Input);
-                if (value?.Address != null)
-                    return MessageDataFactory.Load<TValue>(_repository, value.Address, context);
+                MessageData<TValue> messageData = inputTask.Result;
+
+                if (messageData?.Address != null)
+                    return Task.FromResult(MessageDataFactory.Load<TValue>(_repository, messageData.Address, context.CancellationToken));
+
+                return Task.FromResult<MessageData<TValue>>(new EmptyMessageData<TValue>());
             }
 
-            return new EmptyMessageData<TValue>();
+            async Task<MessageData<TValue>> GetPropertyAsync()
+            {
+                MessageData<TValue> messageData = await inputTask.ConfigureAwait(false);
+
+                if (messageData?.Address != null)
+                    return MessageDataFactory.Load<TValue>(_repository, messageData.Address, context.CancellationToken);
+
+                return new EmptyMessageData<TValue>();
+            }
+
+            return GetPropertyAsync();
         }
     }
 }

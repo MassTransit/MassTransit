@@ -253,10 +253,8 @@ namespace MassTransit.Tests
 
         static async Task<IBusControl> CreateInstance()
         {
-            var bus = Bus.Factory.CreateUsingRabbitMq(cfg =>
+            var bus = Bus.Factory.CreateUsingInMemory(cfg =>
             {
-                var host = cfg.Host("localhost", "/");
-
                 cfg.ServiceInstance(instance =>
                 {
                     var serviceEndpointName = KebabCaseEndpointNameFormatter.Instance.Consumer<DeployPayloadConsumer>();
@@ -275,9 +273,8 @@ namespace MassTransit.Tests
 
         static async Task<IBusControl> CreateClientBus()
         {
-            var bus = Bus.Factory.CreateUsingRabbitMq(cfg =>
+            var bus = Bus.Factory.CreateUsingInMemory(cfg =>
             {
-                var host = cfg.Host("localhost", "/");
             });
 
             await bus.StartAsync();

@@ -2,25 +2,22 @@ namespace MassTransit.Transformation.Contexts
 {
     using System;
     using GreenPipes;
-    using Metadata;
 
 
-    /// <summary>
-    /// Sits in front of the consume context and allows the inbound message to be
-    /// transformed.
-    /// </summary>
-    /// <typeparam name="TMessage"></typeparam>
-    public class SendTransformContext<TMessage> :
+    public class MessageTransformPropertyContext<TProperty, TInput> :
         BasePipeContext,
-        TransformContext<TMessage>
-        where TMessage : class
+        TransformPropertyContext<TProperty, TInput>
+        where TInput : class
     {
-        readonly SendContext<TMessage> _context;
+        readonly TransformContext<TInput> _context;
 
-        public SendTransformContext(SendContext<TMessage> context)
+        public MessageTransformPropertyContext(TransformContext<TInput> context, TProperty value)
             : base(context)
         {
             _context = context;
+
+            Value = value;
+            HasValue = true;
         }
 
         Guid? MessageContext.MessageId => _context.MessageId;
@@ -28,17 +25,19 @@ namespace MassTransit.Transformation.Contexts
         Guid? MessageContext.CorrelationId => _context.CorrelationId;
         Guid? MessageContext.ConversationId => _context.ConversationId;
         Guid? MessageContext.InitiatorId => _context.InitiatorId;
-        DateTime? MessageContext.ExpirationTime => DateTime.UtcNow + _context.TimeToLive;
+        DateTime? MessageContext.ExpirationTime => _context.ExpirationTime;
         Uri MessageContext.SourceAddress => _context.SourceAddress;
         Uri MessageContext.DestinationAddress => _context.DestinationAddress;
         Uri MessageContext.ResponseAddress => _context.ResponseAddress;
         Uri MessageContext.FaultAddress => _context.FaultAddress;
-        DateTime? MessageContext.SentTime => default;
+        DateTime? MessageContext.SentTime => _context.SentTime;
         Headers MessageContext.Headers => _context.Headers;
-        HostInfo MessageContext.Host => HostMetadataCache.Host;
+        HostInfo MessageContext.Host => _context.Host;
 
-        public bool HasInput => true;
+        public bool HasInput => _context.HasInput;
+        public TInput Input => _context.Input;
 
-        public TMessage Input => _context.Message;
+        public bool HasValue { get; }
+        public TProperty Value { get; }
     }
 }

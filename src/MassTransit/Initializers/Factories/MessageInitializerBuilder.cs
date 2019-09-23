@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Metadata;
-    using Util;
 
 
     public class MessageInitializerBuilder<TMessage, TInput> :
@@ -12,14 +11,17 @@
         where TMessage : class
         where TInput : class
     {
+        readonly IMessageFactory<TMessage> _messageFactory;
         readonly IDictionary<string, IPropertyInitializer<TMessage, TInput>> _initializers;
         readonly IList<IHeaderInitializer<TMessage, TInput>> _headerInitializers;
         readonly HashSet<string> _inputPropertyUsed;
 
-        public MessageInitializerBuilder()
+        public MessageInitializerBuilder(IMessageFactory<TMessage> messageFactory)
         {
             if (!TypeMetadataCache<TMessage>.IsValidMessageType)
                 throw new ArgumentException(TypeMetadataCache<TMessage>.InvalidMessageTypeReason, nameof(TMessage));
+
+            _messageFactory = messageFactory;
 
             _initializers = new Dictionary<string, IPropertyInitializer<TMessage, TInput>>(StringComparer.OrdinalIgnoreCase);
             _headerInitializers = new List<IHeaderInitializer<TMessage, TInput>>();
@@ -28,7 +30,7 @@
 
         public IMessageInitializer<TMessage> Build()
         {
-            IMessageFactory<TMessage> messageFactory = MessageFactoryCache<TMessage>.Factory;
+            IMessageFactory<TMessage> messageFactory = _messageFactory ?? MessageFactoryCache<TMessage>.Factory;
 
             return new MessageInitializer<TMessage, TInput>(messageFactory, _initializers.Values, _headerInitializers);
         }
