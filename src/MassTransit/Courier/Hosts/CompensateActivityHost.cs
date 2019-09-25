@@ -8,7 +8,6 @@ namespace MassTransit.Courier.Hosts
     using GreenPipes;
     using Logging;
     using Metadata;
-    using Util;
 
 
     public class CompensateActivityHost<TActivity, TLog> :
@@ -39,8 +38,6 @@ namespace MassTransit.Courier.Hosts
             var timer = Stopwatch.StartNew();
             try
             {
-                await Task.Yield();
-
                 CompensateContext<TLog> compensateContext = new HostCompensateContext<TLog>(HostMetadataCache.Host, context);
 
                 LogContext.Debug?.Log("Compensate Activity: {TrackingNumber} ({Activity}, {Host})", compensateContext.TrackingNumber,
@@ -48,6 +45,7 @@ namespace MassTransit.Courier.Hosts
 
                 try
                 {
+                    await Task.Yield();
                     var result = await _activityFactory.Compensate(compensateContext, _compensatePipe).Result().ConfigureAwait(false);
 
                     await result.Evaluate().ConfigureAwait(false);
@@ -62,6 +60,15 @@ namespace MassTransit.Courier.Hosts
                 await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName).ConfigureAwait(false);
 
                 await next.Send(context).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException exception)
+            {
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName, exception).ConfigureAwait(false);
+
+                if (exception.CancellationToken == context.CancellationToken)
+                    throw;
+
+                throw new ConsumerCanceledException($"The operation was cancelled by the activity: {TypeMetadataCache<TActivity>.ShortName}");
             }
             catch (Exception ex)
             {

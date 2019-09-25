@@ -51,7 +51,6 @@ namespace MassTransit.Saga
             await _sagas.MarkInUse(context.CancellationToken).ConfigureAwait(false);
             var needToLeaveSagas = true;
 
-            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartActivity(new {context.CorrelationId});
             try
             {
                 SagaInstance<TSaga> saga = _sagas[sagaId];
@@ -98,30 +97,20 @@ namespace MassTransit.Saga
             {
                 if (needToLeaveSagas)
                     _sagas.Release();
-
-                activity?.Stop();
             }
         }
 
-        async Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
+        Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            var activity = LogContext.IfEnabled(OperationName.Saga.SendQuery)?.StartActivity();
-            try
+            SagaInstance<TSaga>[] existingSagas = _sagas.Where(context.Query).ToArray();
+            if (existingSagas.Length == 0)
             {
-                SagaInstance<TSaga>[] existingSagas = _sagas.Where(context.Query).ToArray();
-                if (existingSagas.Length == 0)
-                {
-                    var missingSagaPipe = new MissingPipe<T>(this, next);
-                    await policy.Missing(context, missingSagaPipe).ConfigureAwait(false);
-                }
-                else
-                    await Task.WhenAll(existingSagas.Select(instance => SendToInstance(context, policy, instance, next))).ConfigureAwait(false);
+                var missingSagaPipe = new MissingPipe<T>(this, next);
+                return policy.Missing(context, missingSagaPipe);
             }
-            finally
-            {
-                activity?.Stop();
-            }
+
+            return Task.WhenAll(existingSagas.Select(instance => SendToInstance(context, policy, instance, next)));
         }
 
         async Task SendToInstance<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, SagaInstance<TSaga> saga,
@@ -130,7 +119,6 @@ namespace MassTransit.Saga
         {
             await saga.MarkInUse(context.CancellationToken).ConfigureAwait(false);
 
-            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartActivity(new {saga.Instance.CorrelationId});
             try
             {
                 if (saga.IsRemoved)
@@ -146,8 +134,6 @@ namespace MassTransit.Saga
             finally
             {
                 saga.Release();
-
-                activity?.Stop();
             }
         }
 
