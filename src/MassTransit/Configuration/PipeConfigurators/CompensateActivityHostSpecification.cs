@@ -22,14 +22,18 @@ namespace MassTransit.PipeConfigurators
         readonly Func<IPipe<RequestContext>, IFilter<ConsumeContext<RoutingSlip>>> _filterFactory;
         readonly List<IPipeSpecification<CompensateActivityContext<TActivity, TLog>>> _pipeSpecifications;
         readonly RoutingSlipConfigurator _routingSlipConfigurator;
+        readonly ActivityConfigurationObservable _observers;
 
-        public CompensateActivityHostSpecification(ICompensateActivityFactory<TActivity, TLog> activityFactory)
+        public CompensateActivityHostSpecification(ICompensateActivityFactory<TActivity, TLog> activityFactory, IActivityConfigurationObserver observer)
         {
             _activityFactory = activityFactory;
 
             _pipeSpecifications = new List<IPipeSpecification<CompensateActivityContext<TActivity, TLog>>>();
             _routingSlipConfigurator = new RoutingSlipConfigurator();
             _filterFactory = compensatePipe => new CompensateActivityHost<TActivity, TLog>(_activityFactory, compensatePipe);
+            _observers = new ActivityConfigurationObservable();
+
+            _observers.Connect(observer);
         }
 
         public void AddPipeSpecification(IPipeSpecification<CompensateActivityContext<TActivity, TLog>> specification)
@@ -51,6 +55,12 @@ namespace MassTransit.PipeConfigurators
 
         public IEnumerable<ValidationResult> Validate()
         {
+            _observers.All(observer =>
+            {
+                observer.CompensateActivityConfigured(this);
+                return true;
+            });
+
             if (_filterFactory == null)
                 yield return this.Failure("FilterFactory", "must not be null");
 
@@ -68,6 +78,11 @@ namespace MassTransit.PipeConfigurators
             });
 
             builder.ConnectConsumePipe(messagePipe);
+        }
+
+        public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return _observers.Connect(observer);
         }
     }
 }

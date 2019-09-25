@@ -1,21 +1,11 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.PipeConfigurators
+﻿namespace MassTransit.PipeConfigurators
 {
     using System;
     using System.Collections.Generic;
+    using Automatonymous;
     using ConsumeConfigurators;
     using GreenPipes.Util;
+    using Saga;
     using SagaConfigurators;
 
 
@@ -27,7 +17,8 @@ namespace MassTransit.PipeConfigurators
         Connectable<IMessageConfigurationObserver>,
         IConsumerConfigurationObserver,
         ISagaConfigurationObserver,
-        IHandlerConfigurationObserver
+        IHandlerConfigurationObserver,
+        IActivityConfigurationObserver
     {
         readonly IConsumePipeConfigurator _configurator;
         readonly HashSet<Type> _messageTypes;
@@ -41,6 +32,7 @@ namespace MassTransit.PipeConfigurators
             configurator.ConnectConsumerConfigurationObserver(this);
             configurator.ConnectSagaConfigurationObserver(this);
             configurator.ConnectHandlerConfigurationObserver(this);
+            configurator.ConnectActivityConfigurationObserver(this);
         }
 
         void IConsumerConfigurationObserver.ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
@@ -61,9 +53,27 @@ namespace MassTransit.PipeConfigurators
         {
         }
 
+        public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+            where TInstance : class, ISaga, SagaStateMachineInstance
+        {
+        }
+
         void ISagaConfigurationObserver.SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
         {
             NotifyObserver<TMessage>();
+        }
+
+        void IActivityConfigurationObserver.ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator,
+            Uri compensateAddress)
+        {
+        }
+
+        void IActivityConfigurationObserver.ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
+        {
+        }
+
+        void IActivityConfigurationObserver.CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
+        {
         }
 
         void NotifyObserver<TMessage>()

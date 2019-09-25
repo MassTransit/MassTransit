@@ -65,7 +65,7 @@ namespace MassTransit.Registration
 
             var activityFactory = new ScopeCompensateActivityFactory<TActivity, TLog>(activityScopeProvider);
 
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(activityFactory);
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(activityFactory, configurator);
 
             GetActivityDefinition(configurationServiceProvider)
                 .Configure(configurator, specification);
@@ -82,7 +82,7 @@ namespace MassTransit.Registration
 
             var activityFactory = new ScopeExecuteActivityFactory<TActivity, TArguments>(activityScopeProvider);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(activityFactory, compensateAddress);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(activityFactory, compensateAddress, configurator);
 
             GetActivityDefinition(configurationServiceProvider)
                 .Configure(configurator, specification);

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.AutomatonymousIntegration
+﻿namespace MassTransit.Tests.AutomatonymousIntegration
 {
     using System;
     using System.Collections.Generic;
@@ -61,6 +49,7 @@ namespace MassTransit.Tests.AutomatonymousIntegration
             });
 
             Assert.That(observer.SagaTypes.Contains(typeof(Instance)));
+            Assert.That(observer.StateMachineTypes.Contains(typeof(TestStateMachine)));
             Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(Instance), typeof(Start))));
             Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(Instance), typeof(Stop))));
         }
@@ -124,20 +113,30 @@ namespace MassTransit.Tests.AutomatonymousIntegration
         {
             readonly HashSet<Tuple<Type, Type>> _messageTypes;
             readonly HashSet<Type> _sagaTypes;
+            readonly HashSet<Type> _stateMachineTypes;
 
             public SagaConfigurationObserver()
             {
                 _sagaTypes = new HashSet<Type>();
+                _stateMachineTypes = new HashSet<Type>();
                 _messageTypes = new HashSet<Tuple<Type, Type>>();
             }
 
             public HashSet<Type> SagaTypes => _sagaTypes;
+
+            public HashSet<Type> StateMachineTypes => _stateMachineTypes;
 
             public HashSet<Tuple<Type, Type>> MessageTypes => _messageTypes;
 
             void ISagaConfigurationObserver.SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
             {
                 _sagaTypes.Add(typeof(TSaga));
+            }
+
+            public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+                where TInstance : class, ISaga, SagaStateMachineInstance
+            {
+                _stateMachineTypes.Add(stateMachine.GetType());
             }
 
             void ISagaConfigurationObserver.SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)

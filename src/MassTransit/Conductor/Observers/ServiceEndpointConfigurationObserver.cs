@@ -1,6 +1,7 @@
 namespace MassTransit.Conductor.Observers
 {
     using ConsumeConfigurators;
+    using Courier.Contracts;
     using GreenPipes;
     using GreenPipes.Specifications;
     using PipeConfigurators;
@@ -25,6 +26,10 @@ namespace MassTransit.Conductor.Observers
         public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
             where TMessage : class
         {
+            // Do not setup discovery for routing slip endpoints, these should be managed separately
+            if (typeof(TMessage) == typeof(RoutingSlip))
+                return;
+
             IFilter<ConsumeContext<TMessage>> filter = new ConductorMessageFilter<TMessage>(_endpoint.GetMessageEndpoint<TMessage>());
 
             configurator.AddPipeSpecification(new FilterPipeSpecification<ConsumeContext<TMessage>>(filter));

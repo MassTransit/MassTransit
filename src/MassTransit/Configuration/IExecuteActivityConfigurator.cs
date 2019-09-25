@@ -13,6 +13,7 @@
     /// <typeparam name="TArguments"></typeparam>
     public interface IExecuteActivityConfigurator<TActivity, TArguments> :
         IPipeConfigurator<ExecuteActivityContext<TActivity, TArguments>>,
+        IActivityConfigurationObserverConnector,
         IConsumeConfigurator
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class

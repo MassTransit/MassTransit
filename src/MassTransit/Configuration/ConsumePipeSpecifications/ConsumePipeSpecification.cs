@@ -1,23 +1,13 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumePipeSpecifications
 {
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using Automatonymous;
     using ConsumeConfigurators;
     using Context.Converters;
+    using Courier;
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Filters;
@@ -40,6 +30,7 @@ namespace MassTransit.ConsumePipeSpecifications
         readonly ConsumePipeSpecificationObservable _observers;
         readonly SagaConfigurationObservable _sagaObservers;
         readonly IList<IPipeSpecification<ConsumeContext>> _specifications;
+        readonly ActivityConfigurationObservable _activityObservers;
 
         public ConsumePipeSpecification()
         {
@@ -51,6 +42,7 @@ namespace MassTransit.ConsumePipeSpecifications
             _consumerObservers = new ConsumerConfigurationObservable();
             _sagaObservers = new SagaConfigurationObservable();
             _handlerObservers = new HandlerConfigurationObservable();
+            _activityObservers = new ActivityConfigurationObservable();
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
@@ -73,10 +65,15 @@ namespace MassTransit.ConsumePipeSpecifications
         {
             return _sagaObservers.Connect(observer);
         }
-        
+
         public ConnectHandle ConnectHandlerConfigurationObserver(IHandlerConfigurationObserver observer)
         {
             return _handlerObservers.Connect(observer);
+        }
+
+        public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return _activityObservers.Connect(observer);
         }
 
         public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
@@ -111,6 +108,12 @@ namespace MassTransit.ConsumePipeSpecifications
             _sagaObservers.SagaConfigured(configurator);
         }
 
+        public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+            where TInstance : class, ISaga, SagaStateMachineInstance
+        {
+            _sagaObservers.StateMachineSagaConfigured(configurator, stateMachine);
+        }
+
         public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
             where TSaga : class, ISaga
             where TMessage : class
@@ -122,6 +125,27 @@ namespace MassTransit.ConsumePipeSpecifications
             where TMessage : class
         {
             _handlerObservers.HandlerConfigured(configurator);
+        }
+
+        public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            _activityObservers.ActivityConfigured(configurator, compensateAddress);
+        }
+
+        public void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            _activityObservers.ExecuteActivityConfigured(configurator);
+        }
+
+        public void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            _activityObservers.CompensateActivityConfigured(configurator);
         }
 
         public IEnumerable<ValidationResult> Validate()

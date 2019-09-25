@@ -6,7 +6,6 @@
     using Courier.Factories;
     using Metadata;
     using PipeConfigurators;
-    using Util;
 
 
     public static class CourierHostConfiguratorExtensions
@@ -78,15 +77,17 @@
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
+
             if (compensateAddress == null)
                 throw new ArgumentNullException(nameof(compensateAddress));
+
             if (factory == null)
                 throw new ArgumentNullException(nameof(factory));
 
             LogContext.Debug?.Log("Configuring Execute Activity: {ActivityType}, {ArgumentType}", TypeMetadataCache<TActivity>.ShortName,
                 TypeMetadataCache<TArguments>.ShortName);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress, configurator);
 
             configure?.Invoke(specification);
 
@@ -100,13 +101,14 @@
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
+
             if (factory == null)
                 throw new ArgumentNullException(nameof(factory));
 
             LogContext.Debug?.Log("Configuring Execute Activity: {ActivityType}, {ArgumentType}", TypeMetadataCache<TActivity>.ShortName,
                 TypeMetadataCache<TArguments>.ShortName);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, configurator);
 
             configure?.Invoke(specification);
 
@@ -152,13 +154,14 @@
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
+
             if (factory == null)
                 throw new ArgumentNullException(nameof(factory));
 
             LogContext.Debug?.Log("Configuring Compensate Activity: {ActivityType}, {LogType}", TypeMetadataCache<TActivity>.ShortName,
                 TypeMetadataCache<TLog>.ShortName);
 
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory, configurator);
 
             configure?.Invoke(specification);
 

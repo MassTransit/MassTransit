@@ -1,5 +1,6 @@
 namespace MassTransit.PipeConfigurators
 {
+    using Automatonymous;
     using Saga;
     using SagaConfigurators;
 
@@ -16,6 +17,11 @@ namespace MassTransit.PipeConfigurators
         }
 
         void ISagaConfigurationObserver.SagaConfigured<T>(ISagaConfigurator<T> configurator)
+        {
+        }
+
+        public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+            where TInstance : class, ISaga, SagaStateMachineInstance
         {
         }
 

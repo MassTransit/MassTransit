@@ -1,17 +1,6 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.SagaConfigurators
+﻿namespace MassTransit.SagaConfigurators
 {
+    using Automatonymous;
     using GreenPipes.Util;
     using Saga;
 
@@ -20,7 +9,7 @@ namespace MassTransit.SagaConfigurators
         Connectable<ISagaConfigurationObserver>,
         ISagaConfigurationObserver
     {
-        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator) 
+        public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
             where TSaga : class, ISaga
         {
             All(observer =>
@@ -31,7 +20,18 @@ namespace MassTransit.SagaConfigurators
             });
         }
 
-        public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator) 
+        public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+            where TInstance : class, ISaga, SagaStateMachineInstance
+        {
+            All(observer =>
+            {
+                observer.StateMachineSagaConfigured(configurator, stateMachine);
+
+                return true;
+            });
+        }
+
+        public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
             where TSaga : class, ISaga
             where TMessage : class
         {

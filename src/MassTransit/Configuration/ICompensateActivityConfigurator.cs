@@ -13,6 +13,7 @@
     /// <typeparam name="TLog"></typeparam>
     public interface ICompensateActivityConfigurator<TActivity, TLog> :
         IPipeConfigurator<CompensateActivityContext<TActivity, TLog>>,
+        IActivityConfigurationObserverConnector,
         IConsumeConfigurator
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class

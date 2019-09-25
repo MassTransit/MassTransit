@@ -3,7 +3,9 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Automatonymous;
     using ConsumeConfigurators;
+    using Courier;
     using GreenPipes;
     using Saga;
     using SagaConfigurators;
@@ -90,6 +92,12 @@
             Consume.Configurator.SagaConfigured(configurator);
         }
 
+        public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+            where TInstance : class, ISaga, SagaStateMachineInstance
+        {
+            Consume.Configurator.StateMachineSagaConfigured(configurator, stateMachine);
+        }
+
         public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
             where TSaga : class, ISaga
             where TMessage : class
@@ -106,6 +114,33 @@
             where TMessage : class
         {
             Consume.Configurator.HandlerConfigured(configurator);
+        }
+
+        public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return Consume.Configurator.ConnectActivityConfigurationObserver(observer);
+        }
+
+        public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator,
+            Uri compensateAddress)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            Consume.Configurator.ActivityConfigured(configurator, compensateAddress);
+        }
+
+        public void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            Consume.Configurator.ExecuteActivityConfigured(configurator);
+        }
+
+        public void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            Consume.Configurator.CompensateActivityConfigured(configurator);
         }
 
         public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace Automatonymous.StateMachineConnectors
+﻿namespace Automatonymous.StateMachineConnectors
 {
     using System;
     using System.Collections.Generic;
@@ -22,7 +10,6 @@ namespace Automatonymous.StateMachineConnectors
     using MassTransit.Pipeline;
     using MassTransit.Saga;
     using MassTransit.Saga.Connectors;
-    using MassTransit.SagaSpecifications;
     using MassTransit.Util;
 
 
@@ -47,14 +34,16 @@ namespace Automatonymous.StateMachineConnectors
             }
         }
 
-        public ISagaSpecification<T> CreateSagaSpecification<T>() where T : class, ISaga
+        public ISagaSpecification<T> CreateSagaSpecification<T>()
+            where T : class, ISaga
         {
-            List<ISagaMessageSpecification<T>> messageSpecifications =
+            List<ISagaMessageSpecification<TInstance>> messageSpecifications =
                 _connectors.Select(x => x.CreateSagaMessageSpecification())
-                    .Cast<ISagaMessageSpecification<T>>()
                     .ToList();
 
-            return new SagaSpecification<T>(messageSpecifications);
+            var specification = new StateMachineSagaSpecification<TInstance>(_stateMachine, messageSpecifications);
+
+            return specification as ISagaSpecification<T> ?? throw new ArgumentException("The generic argument did not match the connector type", nameof(T));
         }
 
         public ConnectHandle ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository, ISagaSpecification<T> specification)
@@ -76,6 +65,7 @@ namespace Automatonymous.StateMachineConnectors
             {
                 foreach (var handle in handles)
                     handle.Dispose();
+
                 throw;
             }
         }

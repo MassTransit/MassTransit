@@ -4,10 +4,12 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Mime;
+    using Automatonymous;
     using Builders;
     using Configuration;
     using ConsumeConfigurators;
     using Context;
+    using Courier;
     using EndpointConfigurators;
     using GreenPipes;
     using Saga;
@@ -70,6 +72,11 @@
             return _busConfiguration.Consume.Configurator.ConnectHandlerConfigurationObserver(observer);
         }
 
+        public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return _busConfiguration.ConnectActivityConfigurationObserver(observer);
+        }
+
         public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
             return _busConfiguration.ConnectEndpointConfigurationObserver(observer);
@@ -99,6 +106,12 @@
             _busConfiguration.Consume.Configurator.SagaConfigured(configurator);
         }
 
+        public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+            where TInstance : class, ISaga, SagaStateMachineInstance
+        {
+            _busConfiguration.Consume.Configurator.StateMachineSagaConfigured(configurator, stateMachine);
+        }
+
         public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
             where TSaga : class, ISaga
             where TMessage : class
@@ -110,6 +123,27 @@
             where TMessage : class
         {
             _busConfiguration.Consume.Configurator.HandlerConfigured(configurator);
+        }
+
+        public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            _busConfiguration.Consume.Configurator.ActivityConfigured(configurator, compensateAddress);
+        }
+
+        public void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            _busConfiguration.Consume.Configurator.ExecuteActivityConfigured(configurator);
+        }
+
+        public void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            _busConfiguration.Consume.Configurator.CompensateActivityConfigured(configurator);
         }
 
         public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)

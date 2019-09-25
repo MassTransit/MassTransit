@@ -63,6 +63,7 @@ namespace MassTransit.Conductor.Server
             _configurationHandles.Add(configurator.ConnectConsumerConfigurationObserver(configurationObserver));
             _configurationHandles.Add(configurator.ConnectHandlerConfigurationObserver(configurationObserver));
             _configurationHandles.Add(configurator.ConnectSagaConfigurationObserver(configurationObserver));
+            _configurationHandles.Add(configurator.ConnectActivityConfigurationObserver(configurationObserver));
         }
 
         EndpointInfo CreateEndpointInfo()

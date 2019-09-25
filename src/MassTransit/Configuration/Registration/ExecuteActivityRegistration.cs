@@ -33,7 +33,7 @@ namespace MassTransit.Registration
 
             var executeActivityFactory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(executeActivityFactory);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(executeActivityFactory, configurator);
 
             foreach (var action in _configureActions)
                 action(specification);
