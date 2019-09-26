@@ -38,6 +38,7 @@ string DestinationAddress
 string ResponseAddress
 string FaultAddress
 DateTime? ExpirationTime
+DateTime? SentTime
 IDictionary<string, object> Headers
 object Message
 string[] MessageType
