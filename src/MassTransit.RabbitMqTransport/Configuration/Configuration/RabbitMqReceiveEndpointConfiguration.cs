@@ -179,6 +179,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set => _settings.Lazy = value;
         }
 
+        public bool BindQueue
+        {
+            set => _settings.BindQueue = value;
+        }
+
         public TimeSpan? QueueExpiration
         {
             set => _settings.QueueExpiration = value;
@@ -186,7 +191,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public string DeadLetterExchange
         {
-            set => SetQueueArgument("x-dead-letter-exchange", value);
+            set => SetQueueArgument(RabbitMQ.Client.Headers.XDeadLetterExchange, value);
         }
 
         public void SetQueueArgument(string key, object value)

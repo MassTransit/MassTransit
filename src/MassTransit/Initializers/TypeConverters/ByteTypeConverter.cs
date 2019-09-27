@@ -6,6 +6,7 @@
     public class ByteTypeConverter :
         ITypeConverter<string, byte>,
         ITypeConverter<byte, string>,
+        ITypeConverter<byte, object>,
         ITypeConverter<byte, sbyte>,
         ITypeConverter<byte, short>,
         ITypeConverter<byte, ushort>,
@@ -65,6 +66,18 @@
         {
             result = input.ToString();
             return true;
+        }
+
+        public bool TryConvert(object input, out byte result)
+        {
+            if (input != null)
+            {
+                result = Convert.ToByte(input);
+                return true;
+            }
+
+            result = default;
+            return false;
         }
     }
 }

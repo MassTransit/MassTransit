@@ -6,6 +6,7 @@
     public class LongTypeConverter :
         ITypeConverter<string, long>,
         ITypeConverter<long, string>,
+        ITypeConverter<long, object>,
         ITypeConverter<long, sbyte>,
         ITypeConverter<long, byte>,
         ITypeConverter<long, short>,
@@ -66,5 +67,18 @@
             result = input.ToString();
             return true;
         }
+
+        public bool TryConvert(object input, out long result)
+        {
+            if (input != null)
+            {
+                result = Convert.ToInt64(input);
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
     }
 }

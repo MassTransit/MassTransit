@@ -18,12 +18,11 @@ namespace MassTransit.Context
         ConsumeContext
     {
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
-        readonly ReceiveContext _receiveContext;
 
         protected BaseConsumeContext(ReceiveContext receiveContext)
             : base(receiveContext)
         {
-            _receiveContext = receiveContext;
+            ReceiveContext = receiveContext;
 
             _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
         }
@@ -31,7 +30,7 @@ namespace MassTransit.Context
         protected BaseConsumeContext(ConsumeContext consumeContext)
             : base(consumeContext)
         {
-            _receiveContext = consumeContext.ReceiveContext;
+            ReceiveContext = consumeContext.ReceiveContext;
 
             _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
         }
@@ -39,12 +38,12 @@ namespace MassTransit.Context
         protected BaseConsumeContext(ConsumeContext consumeContext, IPayloadCache payloadCache)
             : base(payloadCache, consumeContext.CancellationToken)
         {
-            _receiveContext = consumeContext.ReceiveContext;
+            ReceiveContext = consumeContext.ReceiveContext;
 
             _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
         }
 
-        public ReceiveContext ReceiveContext => _receiveContext;
+        public virtual ReceiveContext ReceiveContext { get; }
 
         public abstract Task ConsumeCompleted { get; }
 
@@ -73,14 +72,16 @@ namespace MassTransit.Context
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
+            var responsePipe = new ResponsePipe<T>(this);
+
             if (ResponseAddress != null)
             {
                 var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await ConsumeTask(endpoint.Send(message, new ResponsePipe<T>(this), CancellationToken)).ConfigureAwait(false);
+                await ConsumeTask(endpoint.Send(message, responsePipe, CancellationToken)).ConfigureAwait(false);
             }
             else
-                await Publish(message, new ResponsePipe<T>(this), CancellationToken).ConfigureAwait(false);
+                await Publish(message, responsePipe, CancellationToken).ConfigureAwait(false);
         }
 
         public virtual async Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
@@ -92,14 +93,16 @@ namespace MassTransit.Context
             if (sendPipe == null)
                 throw new ArgumentNullException(nameof(sendPipe));
 
+            var responsePipe = new ResponsePipe<T>(this, sendPipe);
+
             if (ResponseAddress != null)
             {
                 var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await ConsumeTask(endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken)).ConfigureAwait(false);
+                await ConsumeTask(endpoint.Send(message, responsePipe, CancellationToken)).ConfigureAwait(false);
             }
             else
-                await Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
+                await Publish(message, responsePipe, CancellationToken).ConfigureAwait(false);
         }
 
         public virtual async Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe)
@@ -111,14 +114,16 @@ namespace MassTransit.Context
             if (sendPipe == null)
                 throw new ArgumentNullException(nameof(sendPipe));
 
+            var responsePipe = new ResponsePipe<T>(this, sendPipe);
+
             if (ResponseAddress != null)
             {
                 var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await ConsumeTask(endpoint.Send(message, new ResponsePipe<T>(this, sendPipe), CancellationToken)).ConfigureAwait(false);
+                await ConsumeTask(endpoint.Send(message, responsePipe, CancellationToken)).ConfigureAwait(false);
             }
             else
-                await Publish(message, new ResponsePipe<T>(this, sendPipe), CancellationToken).ConfigureAwait(false);
+                await Publish(message, responsePipe, CancellationToken).ConfigureAwait(false);
         }
 
         public virtual Task RespondAsync(object message)
@@ -139,15 +144,15 @@ namespace MassTransit.Context
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
+            var responsePipe = new ResponsePipe(this);
             if (ResponseAddress != null)
             {
                 var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await ConsumeTask(SendEndpointConverterCache.Send(endpoint, message, messageType, new ResponsePipe(this), CancellationToken)).ConfigureAwait
-                    (false);
+                await ConsumeTask(SendEndpointConverterCache.Send(endpoint, message, messageType, responsePipe, CancellationToken)).ConfigureAwait(false);
             }
             else
-                await Publish(message, messageType, new ResponsePipe(this), CancellationToken).ConfigureAwait(false);
+                await Publish(message, messageType, responsePipe, CancellationToken).ConfigureAwait(false);
         }
 
         public virtual Task RespondAsync(object message, IPipe<SendContext> sendPipe)
@@ -174,15 +179,16 @@ namespace MassTransit.Context
             if (sendPipe == null)
                 throw new ArgumentNullException(nameof(sendPipe));
 
+            var responsePipe = new ResponsePipe(this, sendPipe);
+
             if (ResponseAddress != null)
             {
                 var endpoint = await GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
 
-                await ConsumeTask(SendEndpointConverterCache.Send(endpoint, message, messageType, new ResponsePipe(this, sendPipe), CancellationToken))
-                    .ConfigureAwait(false);
+                await ConsumeTask(SendEndpointConverterCache.Send(endpoint, message, messageType, responsePipe, CancellationToken)).ConfigureAwait(false);
             }
             else
-                await Publish(message, messageType, new ResponsePipe(this, sendPipe), CancellationToken).ConfigureAwait(false);
+                await Publish(message, messageType, responsePipe, CancellationToken).ConfigureAwait(false);
         }
 
         public virtual Task RespondAsync<T>(object values)
@@ -230,7 +236,7 @@ namespace MassTransit.Context
 
         public virtual async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            var sendEndpoint = await _receiveContext.SendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
+            var sendEndpoint = await ReceiveContext.SendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
 
             return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask);
         }
@@ -238,7 +244,7 @@ namespace MassTransit.Context
         public virtual Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class
         {
-            return _receiveContext.NotifyConsumed(context, duration, consumerType);
+            return ReceiveContext.NotifyConsumed(context, duration, consumerType);
         }
 
         public virtual Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
@@ -246,7 +252,7 @@ namespace MassTransit.Context
         {
             AddConsumeTask(GenerateFault(context, exception));
 
-            return _receiveContext.NotifyFaulted(context, duration, consumerType, exception);
+            return ReceiveContext.NotifyFaulted(context, duration, consumerType, exception);
         }
 
         public virtual Task Publish<T>(T message, CancellationToken cancellationToken)
@@ -312,14 +318,14 @@ namespace MassTransit.Context
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _receiveContext.SendEndpointProvider.ConnectSendObserver(observer);
+            return ReceiveContext.SendEndpointProvider.ConnectSendObserver(observer);
         }
 
         public abstract void AddConsumeTask(Task task);
 
-        protected virtual IPublishEndpoint CreatePublishEndpoint()
+        IPublishEndpoint CreatePublishEndpoint()
         {
-            return _receiveContext.PublishEndpointProvider.CreatePublishEndpoint(_receiveContext.InputAddress, this);
+            return ReceiveContext.PublishEndpointProvider.CreatePublishEndpoint(ReceiveContext.InputAddress, this);
         }
 
         Task ConsumeTask(Task task)

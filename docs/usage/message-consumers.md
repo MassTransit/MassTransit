@@ -24,7 +24,7 @@ public class UpdateCustomerConsumer :
 }
 ```
 
-When a consumer is subscribed to a receive endpoint, and a message consumed by the consumer is received by the endpoint, an instance of the consumer is created (using a consumer factory, which is covered --> here <--). The message (wrapped in a `ConsumeContext`) is then delivered to the consumer via the `Consume` method.
+When a consumer is subscribed to a receive endpoint, and a message consumed by the consumer is received by the endpoint, an instance of the consumer is created (using a consumer factory, which is a delegate, or a container-specific consumer factory from one of the supported container NuGet packages). The message (wrapped in a `ConsumeContext`) is then delivered to the consumer via the `Consume` method.
 
 The `Consume` method is asynchronous, and returns a Task. The task is awaited by MassTransit, during which time the message is unavailable to other receive endpoints. If the consume method completes successfully (a task status of RanToCompletion), the message is acknowledged and removed from the queue.
 

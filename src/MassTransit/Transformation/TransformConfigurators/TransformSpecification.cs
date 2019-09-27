@@ -1,14 +1,14 @@
 // Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transformation.TransformConfigurators
 {
@@ -18,10 +18,9 @@ namespace MassTransit.Transformation.TransformConfigurators
     using System.Linq.Expressions;
     using System.Reflection;
     using GreenPipes;
-    using Initializers.Factories;
+    using Initializers;
     using Internals.Extensions;
     using TransformBuilders;
-    using Util;
 
 
     public abstract class TransformSpecification<TMessage> :
@@ -57,7 +56,7 @@ namespace MassTransit.Transformation.TransformConfigurators
             _specifications.Add(specification);
         }
 
-        public void Replace<TProperty>(PropertyInfo property, IPropertyProvider<TProperty, TMessage> propertyProvider)
+        public void Replace<TProperty>(PropertyInfo property, Transformation.IPropertyProvider<TProperty, TMessage> propertyProvider)
         {
             var specification = new InputPropertyTransformSpecification<TMessage, TMessage, TProperty>(property, propertyProvider);
 
@@ -72,7 +71,7 @@ namespace MassTransit.Transformation.TransformConfigurators
             _specifications.Add(specification);
         }
 
-        public void Set<TProperty>(PropertyInfo property, IPropertyProvider<TProperty, TMessage> propertyProvider)
+        public void Set<TProperty>(PropertyInfo property, Transformation.IPropertyProvider<TProperty, TMessage> propertyProvider)
         {
             var specification = new SourcePropertyTransformSpecification<TMessage, TMessage, TProperty>(property, propertyProvider);
 

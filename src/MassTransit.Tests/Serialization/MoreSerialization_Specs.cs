@@ -15,6 +15,7 @@ namespace MassTransit.Tests.Serialization
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using MassTransit.Serialization;
     using NUnit.Framework;
 
@@ -36,13 +37,16 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, other))
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
 
                 if (ReferenceEquals(other.Elements, Elements))
                     return true;
+
                 if (other.Elements == null && Elements != null)
                     return false;
+
                 if (other.Elements != null && Elements == null)
                     return false;
 
@@ -65,10 +69,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != typeof(ContainerClass))
                     return false;
+
                 return Equals((ContainerClass)obj);
             }
 
@@ -93,16 +100,19 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, other))
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
 
                 if (ReferenceEquals(other.Elements, Elements))
                     return true;
+
                 if (other.Elements == null && Elements != null)
                 {
                     Trace.WriteLine("other element was null");
                     return false;
                 }
+
                 if (other.Elements != null && Elements == null)
                 {
                     Trace.WriteLine("other element was not null");
@@ -131,10 +141,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != typeof(DictionaryContainerClass))
                     return false;
+
                 return Equals((DictionaryContainerClass)obj);
             }
 
@@ -145,12 +158,126 @@ namespace MassTransit.Tests.Serialization
         }
 
 
+        public class PrimitiveHashSetClass
+        {
+            public PrimitiveHashSetClass()
+            {
+                Values = new HashSet<int>();
+            }
+
+            public HashSet<int> Values { get; set; }
+
+            public bool Equals(PrimitiveHashSetClass other)
+            {
+                if (ReferenceEquals(null, other))
+                    return false;
+
+                if (ReferenceEquals(this, other))
+                    return true;
+
+                if (ReferenceEquals(other.Values, Values))
+                    return true;
+
+                if (other.Values == null && Values != null)
+                    return false;
+
+                if (other.Values != null && Values == null)
+                    return false;
+
+                if (other.Values != null && Values != null)
+                {
+                    if (other.Values.Count != Values.Count)
+                        return false;
+
+                    return other.Values.SetEquals(Values);
+                }
+
+                return true;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+
+                if (ReferenceEquals(this, obj))
+                    return true;
+
+                if (obj.GetType() != typeof(PrimitiveHashSetClass))
+                    return false;
+
+                return Equals((PrimitiveHashSetClass)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return (Values != null ? Values.GetHashCode() : 0);
+            }
+        }
+
+        public class PrimitiveSetClass
+        {
+            public PrimitiveSetClass()
+            {
+                Values = new HashSet<int>();
+            }
+
+            public ISet<int> Values { get; set; }
+
+            public bool Equals(PrimitiveSetClass other)
+            {
+                if (ReferenceEquals(null, other))
+                    return false;
+
+                if (ReferenceEquals(this, other))
+                    return true;
+
+                if (ReferenceEquals(other.Values, Values))
+                    return true;
+
+                if (other.Values == null && Values != null)
+                    return false;
+
+                if (other.Values != null && Values == null)
+                    return false;
+
+                if (other.Values != null && Values != null)
+                {
+                    if (other.Values.Count != Values.Count)
+                        return false;
+
+                    return other.Values.SetEquals(Values);
+                }
+
+                return true;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+
+                if (ReferenceEquals(this, obj))
+                    return true;
+
+                if (obj.GetType() != typeof(PrimitiveSetClass))
+                    return false;
+
+                return Equals((PrimitiveSetClass)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return (Values != null ? Values.GetHashCode() : 0);
+            }
+        }
+
         [Serializable]
         public class PrimitiveArrayClass
         {
             public PrimitiveArrayClass()
             {
-                Values = new int[] {};
+                Values = new int[] { };
             }
 
             public int[] Values { get; set; }
@@ -159,13 +286,16 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, other))
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
 
                 if (ReferenceEquals(other.Values, Values))
                     return true;
+
                 if (other.Values == null && Values != null)
                     return false;
+
                 if (other.Values != null && Values == null)
                     return false;
 
@@ -188,10 +318,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != typeof(PrimitiveArrayClass))
                     return false;
+
                 return Equals((PrimitiveArrayClass)obj);
             }
 
@@ -211,13 +344,16 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, other))
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
 
                 if (ReferenceEquals(other.Values, Values))
                     return true;
+
                 if (other.Values == null && Values != null)
                     return false;
+
                 if (other.Values != null && Values == null)
                     return false;
 
@@ -240,10 +376,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != typeof(GenericArrayClass<T>))
                     return false;
+
                 return Equals((GenericArrayClass<T>)obj);
             }
 
@@ -263,8 +402,10 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, other))
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
+
                 return Equals(other.Inner, Inner);
             }
 
@@ -272,10 +413,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != typeof(OuterClass))
                     return false;
+
                 return Equals((OuterClass)obj);
             }
 
@@ -295,8 +439,10 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, other))
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
+
                 return Equals(other.Name, Name);
             }
 
@@ -304,10 +450,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != typeof(InnerClass))
                     return false;
+
                 return Equals((InnerClass)obj);
             }
 
@@ -330,10 +479,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != typeof(EmptyClass))
                     return false;
+
                 return Equals((EmptyClass)obj);
             }
 
@@ -359,8 +511,10 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, other))
                     return false;
+
                 if (ReferenceEquals(this, other))
                     return true;
+
                 return Equals(other.Setting, Setting);
             }
 
@@ -368,10 +522,13 @@ namespace MassTransit.Tests.Serialization
             {
                 if (ReferenceEquals(null, obj))
                     return false;
+
                 if (ReferenceEquals(this, obj))
                     return true;
+
                 if (obj.GetType() != typeof(EnumClass))
                     return false;
+
                 return Equals((EnumClass)obj);
             }
 
@@ -470,7 +627,7 @@ namespace MassTransit.Tests.Serialization
         {
             var message = new PrimitiveArrayClass
             {
-                Values = new int[] {}
+                Values = new int[] { }
             };
 
             TestSerialization(message);
@@ -517,7 +674,7 @@ namespace MassTransit.Tests.Serialization
         {
             var message = new PrimitiveArrayClass
             {
-                Values = new int[] {}
+                Values = new int[] { }
             };
 
             TestSerialization(message);
@@ -538,6 +695,162 @@ namespace MassTransit.Tests.Serialization
 
             TestSerialization(message);
         }
+
+        [Test]
+        public void A_readonly_dictionary_list_message()
+        {
+            var message = new SucceededCommandResult(NewId.NextGuid());
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_hashset_of_integers_should_be_properly_serialized()
+        {
+            var message = new PrimitiveHashSetClass()
+            {
+                Values =
+                {
+                    1,
+                    2,
+                    3
+                }
+            };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_set_of_integers_should_be_properly_serialized()
+        {
+            var message = new PrimitiveSetClass()
+            {
+                Values =
+                {
+                    1,
+                    2,
+                    3
+                }
+            };
+
+            TestSerialization(message);
+        }
+    }
+
+
+    public interface ICommandResult
+    {
+        bool Succeeded { get; }
+        IValidationResult ValidationResult { get; }
+        Guid CommandId { get; }
+        object ReferenceId { get; }
+    }
+
+
+    public class ValidationResult :
+        IValidationResult
+    {
+        public static readonly IValidationResult Succeeded = new ValidationResult(null);
+
+        private ValidationResult(string errorMessage, IReadOnlyDictionary<string, IReadOnlyList<string>> result = null)
+        {
+            ErrorMessage = errorMessage;
+            Result = result ?? new Dictionary<string, IReadOnlyList<string>>();
+        }
+
+        private ValidationResult(string errorMessage, Dictionary<string, List<string>> result)
+            : this(errorMessage, result?.ToDictionary(x => x.Key, x => (IReadOnlyList<string>)x.Value))
+        {
+        }
+
+        public bool IsValid => string.IsNullOrEmpty(ErrorMessage) && Result?.Any() != true;
+        public string ErrorMessage { get; }
+        public IReadOnlyDictionary<string, IReadOnlyList<string>> Result { get; }
+
+        public static IValidationResult Error(string message) => new ValidationResult(message);
+
+        public static IValidationResult Error(string key, string error) =>
+            new ValidationResult(null, new Dictionary<string, List<string>>(1) {[key] = new List<string>(1) {error}});
+    }
+
+
+    public class CommandResult :
+        ICommandResult,
+        IEquatable<CommandResult>
+    {
+        public bool Equals(CommandResult other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+
+            if (ReferenceEquals(this, other))
+                return true;
+
+            return Equals(ReferenceId, other.ReferenceId) && CommandId.Equals(other.CommandId);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            if (obj.GetType() != this.GetType())
+                return false;
+
+            return Equals((CommandResult)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((ReferenceId != null ? ReferenceId.GetHashCode() : 0) * 397) ^ CommandId.GetHashCode();
+            }
+        }
+
+        public static bool operator ==(CommandResult left, CommandResult right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(CommandResult left, CommandResult right)
+        {
+            return !Equals(left, right);
+        }
+
+        protected CommandResult(Guid commandId, IValidationResult validationResult, object referenceId)
+        {
+            ValidationResult = validationResult;
+            ReferenceId = referenceId;
+            CommandId = commandId;
+        }
+
+        public bool Succeeded => ValidationResult == null || ValidationResult.IsValid;
+        public IValidationResult ValidationResult { get; }
+        public object ReferenceId { get; }
+        public Guid CommandId { get; }
+
+    }
+
+
+    public class SucceededCommandResult : CommandResult
+    {
+        public SucceededCommandResult(Guid commandId, object referenceId = null)
+            : base(commandId, MassTransit.Tests.Serialization.ValidationResult.Succeeded, referenceId)
+        {
+        }
+    }
+
+
+    public interface IValidationResult
+    {
+        bool IsValid { get; }
+        string ErrorMessage { get; }
+
+        IReadOnlyDictionary<string, IReadOnlyList<string>> Result { get; }
     }
 
 
@@ -559,8 +872,10 @@ namespace MassTransit.Tests.Serialization
         {
             if (ReferenceEquals(null, other))
                 return false;
+
             if (ReferenceEquals(this, other))
                 return true;
+
             return Equals(other.Name, Name);
         }
 
@@ -568,10 +883,13 @@ namespace MassTransit.Tests.Serialization
         {
             if (ReferenceEquals(null, obj))
                 return false;
+
             if (ReferenceEquals(this, obj))
                 return true;
+
             if (obj.GetType() != typeof(PrivateSetter))
                 return false;
+
             return Equals((PrivateSetter)obj);
         }
 

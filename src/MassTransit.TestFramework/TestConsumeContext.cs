@@ -135,7 +135,7 @@ namespace MassTransit.TestFramework
 
         public IEnumerable<string> SupportedMessageTypes
         {
-            get { return Enumerable.Repeat(new MessageUrn(typeof(TMessage)).ToString(), 1); }
+            get { return Enumerable.Repeat(MessageUrn.ForType(typeof(TMessage)).ToString(), 1); }
         }
 
         public bool HasMessageType(Type messageType)

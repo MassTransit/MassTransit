@@ -91,7 +91,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Entities
                 if (x.GetType() != y.GetType())
                     return false;
                 return string.Equals(x.ExchangeName, y.ExchangeName) && string.Equals(x.ExchangeType, y.ExchangeType) && x.Durable == y.Durable && x.AutoDelete == y.AutoDelete
-                    && x.ExchangeArguments.All(a => y.ExchangeArguments.ContainsKey(a.Key) && a.Value.Equals(y.ExchangeArguments[a.Key]));
+                    && x.ExchangeArguments.All(a => y.ExchangeArguments.TryGetValue(a.Key, out var value) && a.Value.Equals(value));
             }
 
             public int GetHashCode(ExchangeEntity obj)

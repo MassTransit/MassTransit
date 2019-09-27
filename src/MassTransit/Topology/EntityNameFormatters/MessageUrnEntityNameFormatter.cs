@@ -23,7 +23,7 @@ namespace MassTransit.Topology.EntityNameFormatters
     {
         public string FormatEntityName<T>()
         {
-            return new MessageUrn(typeof(T)).ToString();
+            return MessageUrn.ForType(typeof(T)).ToString();
         }
     }
 }

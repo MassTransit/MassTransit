@@ -18,43 +18,27 @@ namespace MassTransit.Courier.InternalMessages
 
 
     public class CompensationFailed :
-        RoutingSlipActivityCompensationFailed,
         RoutingSlipCompensationFailed
     {
-        readonly TimeSpan _duration;
         readonly DateTime _failureTimestamp;
         readonly TimeSpan _routingSlipDuration;
-        readonly DateTime _timestamp;
 
-        public CompensationFailed(HostInfo host, Guid trackingNumber, string activityName, Guid executionId,
-            DateTime timestamp, TimeSpan duration, DateTime failureTimestamp, TimeSpan routingSlipDuration,
-            ExceptionInfo exceptionInfo, IDictionary<string, object> variables, IDictionary<string, object> data)
+        public CompensationFailed(HostInfo host, Guid trackingNumber, DateTime failureTimestamp, TimeSpan routingSlipDuration, ExceptionInfo exceptionInfo,
+            IDictionary<string, object> variables)
         {
             _failureTimestamp = failureTimestamp;
             _routingSlipDuration = routingSlipDuration;
             Host = host;
-            _duration = duration;
-            _timestamp = timestamp;
 
             TrackingNumber = trackingNumber;
-            ExecutionId = executionId;
-            ActivityName = activityName;
-            Data = data;
             Variables = variables;
             ExceptionInfo = exceptionInfo;
         }
 
         public Guid TrackingNumber { get; }
 
-        DateTime RoutingSlipActivityCompensationFailed.Timestamp => _timestamp;
-
-        public Guid ExecutionId { get; }
-        public string ActivityName { get; }
-        public IDictionary<string, object> Data { get; }
         public ExceptionInfo ExceptionInfo { get; }
         public IDictionary<string, object> Variables { get; }
-
-        TimeSpan RoutingSlipActivityCompensationFailed.Duration => _duration;
 
         public HostInfo Host { get; }
 

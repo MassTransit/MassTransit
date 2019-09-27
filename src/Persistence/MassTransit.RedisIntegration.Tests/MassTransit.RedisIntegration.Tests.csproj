@@ -7,16 +7,10 @@
 
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
-    <PackageReference Include="Automatonymous" Version="4.1.6" />
-    <PackageReference Include="GreenPipes" Version="2.1.4" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
-    <PackageReference Include="NewId" Version="3.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
-    <PackageReference Include="StackExchange.Redis" Version="1.2.6" Condition="'$(TargetFramework)' == 'net452'"/>
-    <PackageReference Include="StackExchange.Redis" Version="2.0.601" Condition="'$(TargetFramework)' == 'netcoreapp2.0'"/>
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
     <ProjectReference Include="..\MassTransit.RedisIntegration\MassTransit.RedisIntegration.csproj" />

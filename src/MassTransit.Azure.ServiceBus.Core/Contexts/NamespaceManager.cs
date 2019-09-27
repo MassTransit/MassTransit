@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Contexts
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
@@ -57,6 +58,11 @@
             return RunOperation(() => _managementClient.SubscriptionExistsAsync(topicPath, subscriptionName));
         }
 
+        public Task<RuleDescription> GetRuleAsync(string topicPath, string subscriptionName, string ruleName)
+        {
+            return RunOperation(() => _managementClient.GetRuleAsync(topicPath, subscriptionName, ruleName));
+        }
+
         public Task<SubscriptionDescription> GetSubscriptionAsync(string topicPath, string subscriptionName)
         {
             return RunOperation(() => _managementClient.GetSubscriptionAsync(topicPath, subscriptionName));
@@ -70,6 +76,11 @@
         public Task<SubscriptionDescription> UpdateSubscriptionAsync(SubscriptionDescription description)
         {
             return RunOperation(() => _managementClient.UpdateSubscriptionAsync(description));
+        }
+
+        public Task<RuleDescription> UpdateRuleAsync(string topicPath, string subscriptionName, RuleDescription ruleDescription)
+        {
+            return RunOperation(() => _managementClient.UpdateRuleAsync(topicPath, subscriptionName, ruleDescription));
         }
 
         public Task<SubscriptionDescription> CreateSubscriptionAsync(SubscriptionDescription description, RuleDescription rule)

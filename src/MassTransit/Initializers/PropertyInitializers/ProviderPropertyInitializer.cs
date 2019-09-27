@@ -1,9 +1,10 @@
 namespace MassTransit.Initializers.PropertyInitializers
 {
     using System;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Reflection;
-    using PropertyProviders;
+    using Util;
 
 
     /// <summary>
@@ -20,22 +21,34 @@ namespace MassTransit.Initializers.PropertyInitializers
         readonly IPropertyProvider<TInput, TProperty> _propertyProvider;
         readonly IWriteProperty<TMessage, TProperty> _messageProperty;
 
-        public ProviderPropertyInitializer(IPropertyProvider<TInput, TProperty> propertyProvider, string propertyName)
+        public ProviderPropertyInitializer(IPropertyProvider<TInput, TProperty> propertyProvider, PropertyInfo propertyInfo)
         {
             if (propertyProvider == null)
                 throw new ArgumentNullException(nameof(propertyProvider));
 
-            if (propertyName == null)
-                throw new ArgumentNullException(nameof(propertyName));
+            if (propertyInfo == null)
+                throw new ArgumentNullException(nameof(propertyInfo));
 
             _propertyProvider = propertyProvider;
 
-            _messageProperty = WritePropertyCache<TMessage>.GetProperty<TProperty>(propertyName);
+            _messageProperty = WritePropertyCache<TMessage>.GetProperty<TProperty>(propertyInfo);
         }
 
-        public async Task Apply(InitializeContext<TMessage, TInput> context)
+        public Task Apply(InitializeContext<TMessage, TInput> context)
         {
-            var propertyValue = await _propertyProvider.GetProperty(context).ConfigureAwait(false);
+            var propertyTask = _propertyProvider.GetProperty(context);
+            if (propertyTask.IsCompleted)
+            {
+                _messageProperty.Set(context.Message, propertyTask.Result);
+                return TaskUtil.Completed;
+            }
+
+            return ApplyAsync(context, propertyTask);
+        }
+
+        async Task ApplyAsync(InitializeContext<TMessage, TInput> context, Task<TProperty> propertyTask)
+        {
+            var propertyValue = await propertyTask.ConfigureAwait(false);
 
             _messageProperty.Set(context.Message, propertyValue);
         }

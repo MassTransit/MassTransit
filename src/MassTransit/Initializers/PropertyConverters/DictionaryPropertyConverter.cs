@@ -8,26 +8,33 @@ namespace MassTransit.Initializers.PropertyConverters
     public class DictionaryPropertyConverter<TKey, TElement> :
         IPropertyConverter<Dictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TElement>>>,
         IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TElement>>>,
+        IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TElement>>>,
         IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TKey, TElement>>>
     {
-        public async Task<Dictionary<TKey, TElement>> Convert<TMessage>(InitializeContext<TMessage> context,
+        public Task<Dictionary<TKey, TElement>> Convert<TMessage>(InitializeContext<TMessage> context,
             IEnumerable<KeyValuePair<TKey, TElement>> input)
             where TMessage : class
         {
-            return input?.ToDictionary(x => x.Key, x => x.Value);
+            return Task.FromResult(input?.ToDictionary(x => x.Key, x => x.Value));
         }
 
-        async Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TElement>>>
+        Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TElement>>>
             .Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TElement>> input)
         {
-            return await Convert(context, input).ConfigureAwait(false);
+            return Task.FromResult<IDictionary<TKey, TElement>>(input?.ToDictionary(x => x.Key, x => x.Value));
         }
 
-        async Task<IEnumerable<KeyValuePair<TKey, TElement>>>
+        Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TElement>>>
+            .Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TElement>> input)
+        {
+            return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(input?.ToDictionary(x => x.Key, x => x.Value));
+        }
+
+        Task<IEnumerable<KeyValuePair<TKey, TElement>>>
             IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TKey, TElement>>>.Convert<TMessage>(
                 InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TElement>> input)
         {
-            return await Convert(context, input).ConfigureAwait(false);
+            return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(input?.ToDictionary(x => x.Key, x => x.Value));
         }
     }
 
@@ -35,6 +42,7 @@ namespace MassTransit.Initializers.PropertyConverters
     public class DictionaryPropertyConverter<TKey, TElement, TInputElement> :
         IPropertyConverter<Dictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TInputElement>>>,
         IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TInputElement>>>,
+        IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TInputElement>>>,
         IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TKey, TInputElement>>>
     {
         readonly IPropertyConverter<TElement, TInputElement> _converter;
@@ -64,6 +72,12 @@ namespace MassTransit.Initializers.PropertyConverters
             return await Convert(context, input).ConfigureAwait(false);
         }
 
+        async Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.
+            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
+        {
+            return await Convert(context, input).ConfigureAwait(false);
+        }
+
         async Task<IEnumerable<KeyValuePair<TKey, TElement>>>
             IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.Convert<TMessage>(
                 InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
@@ -76,6 +90,7 @@ namespace MassTransit.Initializers.PropertyConverters
     public class DictionaryKeyPropertyConverter<TKey, TInputKey, TElement> :
         IPropertyConverter<Dictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TElement>>>,
         IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TElement>>>,
+        IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TElement>>>,
         IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TInputKey, TElement>>>
     {
         readonly IPropertyConverter<TKey, TInputKey> _converter;
@@ -105,6 +120,12 @@ namespace MassTransit.Initializers.PropertyConverters
             return await Convert(context, input).ConfigureAwait(false);
         }
 
+        async Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.
+            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
+        {
+            return await Convert(context, input).ConfigureAwait(false);
+        }
+
         async Task<IEnumerable<KeyValuePair<TKey, TElement>>>
             IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.Convert<TMessage>(
                 InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
@@ -117,6 +138,7 @@ namespace MassTransit.Initializers.PropertyConverters
     public class DictionaryPropertyConverter<TKey, TElement, TInputKey, TInputElement> :
         IPropertyConverter<Dictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>,
         IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>,
+        IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>,
         IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>
     {
         readonly IPropertyConverter<TElement, TInputElement> _elementConverter;
@@ -146,6 +168,13 @@ namespace MassTransit.Initializers.PropertyConverters
 
         async Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>
             .Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
+        {
+            return await Convert(context, input).ConfigureAwait(false);
+        }
+
+        async Task<IReadOnlyDictionary<TKey, TElement>>
+            IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>.
+            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
         {
             return await Convert(context, input).ConfigureAwait(false);
         }

@@ -40,10 +40,7 @@
             _settings = settings;
 
             HostAddress = hostConfiguration.HostAddress;
-            InputAddress = new UriBuilder(hostConfiguration.HostAddress)
-            {
-                Path = settings.Path
-            }.Uri;
+            InputAddress = settings.GetInputAddress(hostConfiguration.HostAddress, settings.Path);
         }
 
         IServiceBusSubscriptionEndpointConfigurator IServiceBusSubscriptionEndpointConfiguration.Configurator => this;

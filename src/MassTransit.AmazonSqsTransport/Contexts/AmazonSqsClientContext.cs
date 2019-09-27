@@ -157,7 +157,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             await _amazonSns.SubscribeAsync(subscribeRequest).ConfigureAwait(false);
 
             var sqsQueueArn = queueAttributes[QueueAttributeName.QueueArn];
-            var topicArnPattern = topicArn.Substring(0, topicArn.LastIndexOf('_') + 1) + "*";
+            var topicArnPattern = topicArn.Substring(0, topicArn.LastIndexOf(':') + 1) + "*";
 
             queueAttributes.TryGetValue(QueueAttributeName.Policy, out var policyStr);
             var policy = string.IsNullOrEmpty(policyStr) ? new Policy() : Policy.FromJson(policyStr);

@@ -7,6 +7,7 @@
     public class DoubleTypeConverter :
         ITypeConverter<string, double>,
         ITypeConverter<double, string>,
+        ITypeConverter<double, object>,
         ITypeConverter<double, sbyte>,
         ITypeConverter<double, byte>,
         ITypeConverter<double, short>,
@@ -18,7 +19,7 @@
     {
         public bool TryConvert(string input, out double result)
         {
-            return double.TryParse(input, out result);
+            return double.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out result);
         }
 
         public bool TryConvert(sbyte input, out double result)
@@ -74,5 +75,18 @@
             result = input.ToString(CultureInfo.InvariantCulture);
             return true;
         }
+
+        public bool TryConvert(object input, out double result)
+        {
+            if (input != null)
+            {
+                result = Convert.ToDouble(input);
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
     }
 }

@@ -75,11 +75,6 @@ namespace MassTransit.Context
             return false;
         }
 
-        public override Task<ISendEndpoint> GetSendEndpoint(Uri address)
-        {
-            return _context.GetSendEndpoint(address);
-        }
-
         public override Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
             return _context.NotifyConsumed(context, duration, consumerType);
@@ -93,11 +88,6 @@ namespace MassTransit.Context
         public override void AddConsumeTask(Task task)
         {
             _context.AddConsumeTask(task);
-        }
-
-        protected override IPublishEndpoint CreatePublishEndpoint()
-        {
-            return _context;
         }
 
         public override bool HasPayloadType(Type payloadType)

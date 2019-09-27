@@ -7,23 +7,12 @@
 
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
-    <PackageReference Include="Autofac" Version="4.9.2" />
-    <PackageReference Include="Automatonymous" Version="4.1.6" />
-    <PackageReference Include="Castle.Core" Version="4.3.1" />
-    <PackageReference Include="Castle.Windsor" Version="5.0.0" />
-    <PackageReference Include="GreenPipes" Version="2.1.4" />
-    <PackageReference Include="Lamar" Version="3.0.3" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
-    <PackageReference Include="NewId" Version="3.0.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
-    <PackageReference Include="SimpleInjector" Version="4.6.0" />
-    <PackageReference Include="StructureMap" Version="4.7.1" />
-    <PackageReference Include="Unity.Container" Version="5.10.3" />
     <ProjectReference Include="..\..\Loggers\MassTransit.SerilogIntegration\MassTransit.SerilogIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.AutomatonymousIntegration\MassTransit.AutomatonymousIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />

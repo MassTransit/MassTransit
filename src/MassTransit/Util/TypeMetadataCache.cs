@@ -279,7 +279,7 @@
 
         static IEnumerable<string> GetMessageTypeNames()
         {
-            return MessageTypes.Select(x => new MessageUrn(x).ToString());
+            return MessageTypes.Select(x => MessageUrn.ForType(x).ToString());
         }
 
         public static T InitializeFromObject(object values)

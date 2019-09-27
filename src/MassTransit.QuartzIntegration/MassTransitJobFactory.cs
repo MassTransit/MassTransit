@@ -155,8 +155,7 @@ namespace MassTransit.QuartzIntegration
         /// <param name="bundle"></param>
         string CreatePayloadHeaderString(TriggerFiredBundle bundle)
         {
-            var timeHeaders = new Dictionary<string, DateTimeOffset?>();
-            timeHeaders.Add(MessageHeaders.Quartz.Sent, bundle.FireTimeUtc);
+            var timeHeaders = new Dictionary<string, DateTimeOffset?> {{MessageHeaders.Quartz.Sent, bundle.FireTimeUtc}};
             if (bundle.ScheduledFireTimeUtc.HasValue)
                 timeHeaders.Add(MessageHeaders.Quartz.Scheduled, bundle.ScheduledFireTimeUtc);
 

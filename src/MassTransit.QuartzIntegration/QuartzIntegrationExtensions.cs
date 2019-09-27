@@ -13,6 +13,8 @@
 namespace MassTransit
 {
     using System;
+    using System.Diagnostics;
+    using System.Threading;
     using GreenPipes;
     using Quartz;
     using Quartz.Impl;
@@ -47,7 +49,7 @@ namespace MassTransit
 
             configurator.ReceiveEndpoint(queueName, e =>
             {
-                var partitioner = configurator.CreatePartitioner(16);
+                var partitioner = configurator.CreatePartitioner(Environment.ProcessorCount);
 
                 e.Consumer(() => new ScheduleMessageConsumer(scheduler), x =>
                     x.Message<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));

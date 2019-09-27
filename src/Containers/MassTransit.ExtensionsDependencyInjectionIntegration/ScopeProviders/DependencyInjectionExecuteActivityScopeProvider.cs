@@ -77,7 +77,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
         public void Probe(ProbeContext context)
         {
-            context.Add("provider", "microsoft");
+            context.Add("provider", "dependencyInjection");
         }
     }
 }

@@ -59,6 +59,28 @@ namespace MassTransit
             JsonMessageSerializer.DeserializerSettings = configure(JsonMessageSerializer.DeserializerSettings);
         }
 
+         ///<summary>
+        /// Configure the serialization settings used to create the BSON message serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void ConfigureBsonSerializer(this IBusFactoryConfigurator configurator,
+            Func<JsonSerializerSettings, JsonSerializerSettings> configure)
+        {
+            BsonMessageSerializer.SerializerSettings = configure(BsonMessageSerializer.SerializerSettings);
+        }
+
+        /// <summary>
+        /// Configure the serialization settings used to create the BSON message deserializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void ConfigureBsonDeserializer(this IBusFactoryConfigurator configurator,
+            Func<JsonSerializerSettings, JsonSerializerSettings> configure)
+        {
+            BsonMessageSerializer.DeserializerSettings = configure(BsonMessageSerializer.DeserializerSettings);
+        }
+
         /// <summary>
         /// Serialize messages using the BSON message serializer
         /// </summary>

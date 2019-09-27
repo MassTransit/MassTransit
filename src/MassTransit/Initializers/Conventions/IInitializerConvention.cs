@@ -1,42 +1,45 @@
 ﻿namespace MassTransit.Initializers.Conventions
 {
+    using System.Reflection;
+
+
     public interface IInitializerConvention<TMessage, TInput> :
-        IMessageTypeInitializerConvention<TMessage>
+        IMessageInputInitializerConvention<TMessage>
         where TMessage : class
         where TInput : class
     {
-        bool TryGetPropertyInitializer<TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer);
-        bool TryGetHeaderInitializer<TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer);
-        bool TryGetHeaderInitializer(string inputPropertyName, out IHeaderInitializer<TMessage, TInput> initializer);
+        bool TryGetPropertyInitializer<TProperty>(PropertyInfo propertyInfo, out IPropertyInitializer<TMessage, TInput> initializer);
+        bool TryGetHeaderInitializer<TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer);
+        bool TryGetHeadersInitializer<TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer);
     }
 
 
     public interface IInitializerConvention<TMessage> :
-        IMessageTypeInitializerConvention
+        IMessageInitializerConvention
         where TMessage : class
     {
-        bool TryGetPropertyInitializer<TInput, TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
+        bool TryGetPropertyInitializer<TInput, TProperty>(PropertyInfo propertyInfo, out IPropertyInitializer<TMessage, TInput> initializer)
             where TInput : class;
 
-        bool TryGetHeaderInitializer<TInput, TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+        bool TryGetHeaderInitializer<TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
             where TInput : class;
 
-        bool TryGetHeaderInitializer<TInput>(string inputPropertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+        bool TryGetHeadersInitializer<TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
             where TInput : class;
     }
 
 
     public interface IInitializerConvention
     {
-        bool TryGetPropertyInitializer<TMessage, TInput, TProperty>(string propertyName, out IPropertyInitializer<TMessage, TInput> initializer)
+        bool TryGetPropertyInitializer<TMessage, TInput, TProperty>(PropertyInfo propertyInfo, out IPropertyInitializer<TMessage, TInput> initializer)
             where TMessage : class
             where TInput : class;
 
-        bool TryGetHeaderInitializer<TMessage, TInput, TProperty>(string propertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+        bool TryGetHeaderInitializer<TMessage, TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
             where TMessage : class
             where TInput : class;
 
-        bool TryGetHeaderInitializer<TMessage, TInput>(string inputPropertyName, out IHeaderInitializer<TMessage, TInput> initializer)
+        bool TryGetHeadersInitializer<TMessage, TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<TMessage, TInput> initializer)
             where TMessage : class
             where TInput : class;
     }

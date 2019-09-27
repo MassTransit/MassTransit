@@ -146,6 +146,21 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                     await _namespaceManager.UpdateSubscriptionAsync(description).ConfigureAwait(false);
                 }
 
+                if (rule != null)
+                {
+                    RuleDescription ruleDescription = await _namespaceManager.GetRuleAsync(description.TopicPath, description.SubscriptionName, rule.Name)
+                        .ConfigureAwait(false);
+                    if (rule.Name == ruleDescription.Name && (rule.Filter != ruleDescription.Filter || rule.Action != ruleDescription.Action))
+                    {
+                        if (_log.IsDebugEnabled)
+                            _log.DebugFormat("Updating subscription Rule: {0} ({1} -> {2})", rule.Name,
+                                ruleDescription.Filter.ToString(),
+                                rule.Filter.ToString());
+
+                        await _namespaceManager.UpdateRuleAsync(description.TopicPath, description.SubscriptionName, rule).ConfigureAwait(false);
+                    } 
+                }
+
                 create = false;
             }
             catch (MessagingEntityNotFoundException)

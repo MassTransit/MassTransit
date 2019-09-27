@@ -107,7 +107,7 @@ public class Startup
 
             x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
-                var host = cfg.Host(new Uri("localhost"), hostConfigurator => 
+                var host = cfg.Host(new Uri("rabbitmq://localhost"), hostConfigurator => 
                 { 
                     hostConfigurator.Username("guest");
                     hostConfigurator.Password("guest");
@@ -166,10 +166,10 @@ public class Startup
     private IBusControl ConfigureBus() =>
         Bus.Factory.CreateUsingRabbitMq(cfg =>
         {
-            var host = cfg.Host("localhost", host => 
+            var host = cfg.Host(new Uri("rabbitmq://localhost"), hc => 
             { 
-                host.Username("guest");
-                host.Password("guest");
+                hc.Username("guest");
+                hc.Password("guest");
             });
 
             cfg.ReceiveEndpoint(host, "submit-order", ep =>

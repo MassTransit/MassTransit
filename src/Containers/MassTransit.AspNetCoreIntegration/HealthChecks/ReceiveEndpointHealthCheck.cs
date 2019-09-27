@@ -23,17 +23,24 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
 
         Task<HealthCheckResult> IHealthCheck.CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken)
         {
-            if (_endpoints.All(x => x.Value.Ready))
-                return Task.FromResult(HealthCheckResult.Healthy("All endpoints ready",
-                    new Dictionary<string, object> {{"Endpoints", _endpoints.Keys.ToArray()}}));
+            var faulted = _endpoints.Where(x => !x.Value.Ready).ToArray();
 
-            KeyValuePair<Uri, EndpointStatus>[] faulted = _endpoints.Where(x => !x.Value.Ready).ToArray();
+            HealthCheckResult healthCheckResult;
+            if (faulted.Any())
+            {
+                healthCheckResult = new HealthCheckResult(
+                    context.Registration.FailureStatus,
+                    $"Failed endpoints: {string.Join(",", faulted.Select(x => x.Key))}",
+                    faulted.Select(x => x.Value.LastException).FirstOrDefault(e => e != null),
+                    new Dictionary<string, object> { ["Endpoints"] = faulted.Select(x => x.Key).ToArray() });
+            }
+            else
+            {
+                healthCheckResult = HealthCheckResult.Healthy("All endpoints ready",
+                    new Dictionary<string, object> { ["Endpoints"] = _endpoints.Keys.ToArray() });
+            }
 
-            var unhealthyMessage = string.Join(",", faulted.Select(x => x.Key));
-
-            return Task.FromResult(HealthCheckResult.Unhealthy($"Failed endpoints: {unhealthyMessage}",
-                faulted.Select(x => x.Value.LastException).FirstOrDefault(e => e != null),
-                new Dictionary<string, object> {{"Endpoints", faulted.Select(x => x.Key).ToArray()}}));
+            return Task.FromResult(healthCheckResult);
         }
 
         public Task Ready(ReceiveEndpointReady ready)

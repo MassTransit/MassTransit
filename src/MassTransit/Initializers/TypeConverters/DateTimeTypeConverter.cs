@@ -8,6 +8,7 @@
         ITypeConverter<int, DateTime>,
         ITypeConverter<long, DateTime>,
         ITypeConverter<DateTime, string>,
+        ITypeConverter<DateTime, object>,
         ITypeConverter<DateTime, DateTimeOffset>,
         ITypeConverter<DateTime, int>,
         ITypeConverter<DateTime, long>
@@ -73,6 +74,27 @@
 
             result = default;
             return false;
+        }
+
+        public bool TryConvert(object input, out DateTime result)
+        {
+            switch (input)
+            {
+                case DateTime dateTime:
+                    result = dateTime;
+                    return true;
+
+                case DateTimeOffset dateTimeOffset:
+                    result = dateTimeOffset.UtcDateTime;
+                    return true;
+
+                case string text when !string.IsNullOrWhiteSpace(text):
+                    return TryConvert(text, out result);
+
+                default:
+                    result = default;
+                    return false;
+            }
         }
     }
 }

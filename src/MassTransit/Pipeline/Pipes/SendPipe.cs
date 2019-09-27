@@ -59,7 +59,7 @@ namespace MassTransit.Pipeline.Pipes
 
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        Task ISendPipe.Send<T>(SendContext<T> context)
+        Task ISendContextPipe.Send<T>(SendContext<T> context)
         {
             return GetPipe<T>().Send(context);
         }
@@ -130,7 +130,6 @@ namespace MassTransit.Pipeline.Pipes
                     return connector.ConnectSendMessageObserver(observer);
 
                 throw new ArgumentException($"The filter is not of the specified type: {typeof(T).Name}", nameof(observer));
-
             }
 
             IMessageSendPipe<TMessage> CreateFilter()

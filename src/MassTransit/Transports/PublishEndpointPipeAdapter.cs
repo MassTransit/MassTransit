@@ -25,15 +25,17 @@ namespace MassTransit.Transports
         where T : class
     {
         readonly IPublishObserver _observer;
+        readonly T _message;
         readonly IPipe<PublishContext<T>> _pipe;
         readonly IPublishPipe _publishPipe;
         readonly Uri _sourceAddress;
         readonly ConsumeContext _consumeContext;
         PublishContext<T> _context;
 
-        public PublishEndpointPipeAdapter(IPipe<PublishContext<T>> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
+        public PublishEndpointPipeAdapter(T message, IPipe<PublishContext<T>> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
             ConsumeContext consumeContext)
         {
+            _message = message;
             _pipe = pipe;
             _publishPipe = publishPipe;
             _observer = observer;
@@ -41,9 +43,10 @@ namespace MassTransit.Transports
             _consumeContext = consumeContext;
         }
 
-        public PublishEndpointPipeAdapter(IPipe<PublishContext> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
+        public PublishEndpointPipeAdapter(T message, IPipe<PublishContext> pipe, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress,
             ConsumeContext consumeContext)
         {
+            _message = message;
             _pipe = pipe;
             _publishPipe = publishPipe;
             _observer = observer;
@@ -51,8 +54,9 @@ namespace MassTransit.Transports
             _consumeContext = consumeContext;
         }
 
-        public PublishEndpointPipeAdapter(IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, ConsumeContext consumeContext)
+        public PublishEndpointPipeAdapter(T message, IPublishPipe publishPipe, IPublishObserver observer, Uri sourceAddress, ConsumeContext consumeContext)
         {
+            _message = message;
             _pipe = Pipe.Empty<PublishContext<T>>();
             _publishPipe = publishPipe;
             _observer = observer;
@@ -96,7 +100,7 @@ namespace MassTransit.Transports
 
         PublishContext<T> GetDefaultPublishContext()
         {
-            return new FaultedPublishContext<T>(default, CancellationToken.None)
+            return new FaultedPublishContext<T>(_message, CancellationToken.None)
             {
                 SourceAddress = _consumeContext?.ReceiveContext?.InputAddress ?? _sourceAddress,
                 ConversationId = _consumeContext?.ConversationId,

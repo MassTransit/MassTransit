@@ -19,8 +19,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Quartz" Version="3.0.7" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.104.0" />
-    <PackageReference Include="Topshelf" Version="4.2.0" />
-    <PackageReference Include="Topshelf.Log4Net" Version="4.2.0" />
+    <PackageReference Include="Topshelf" Version="4.2.1" />
+    <PackageReference Include="Topshelf.Log4Net" Version="4.2.1" />
     <ProjectReference Include="..\..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj" />

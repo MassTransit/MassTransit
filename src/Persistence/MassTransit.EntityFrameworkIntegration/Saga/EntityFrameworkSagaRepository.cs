@@ -289,7 +289,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
                             var missingCorrelationIds = new List<Guid>();
 
-                            if (nonTrackedInstances.Any())
+                            if (nonTrackedInstances?.Any() == true)
                             {
                                 var foundInstances = new List<Task>();
 

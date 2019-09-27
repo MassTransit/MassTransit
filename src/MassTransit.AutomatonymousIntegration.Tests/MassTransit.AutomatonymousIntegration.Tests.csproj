@@ -7,23 +7,11 @@
 
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
-    <PackageReference Include="Automatonymous" Version="4.1.6" />
-    <PackageReference Include="EntityFramework" Version="6.2.0" />
-    <PackageReference Include="GreenPipes" Version="2.1.4" />
-    <PackageReference Include="Iesi.Collections" Version="4.0.4" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />
-    <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.4.0" />
-    <PackageReference Include="NewId" Version="3.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="NHibernate" Version="5.2.5" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    <PackageReference Include="Quartz" Version="3.0.7" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
     <PackageReference Include="System.Data.SqlClient" Version="4.4.3" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.109.1" />
     <ProjectReference Include="..\Loggers\MassTransit.Log4NetIntegration\MassTransit.Log4NetIntegration.csproj" />
@@ -35,7 +23,6 @@
     <ProjectReference Include="..\Persistence\MassTransit.DocumentDbIntegration\MassTransit.DocumentDbIntegration.csproj" />
     <ProjectReference Include="..\Persistence\MassTransit.EntityFrameworkIntegration\MassTransit.EntityFrameworkIntegration.csproj" />
     <ProjectReference Include="..\Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
 
   <ItemGroup>

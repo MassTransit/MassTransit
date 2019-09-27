@@ -14,7 +14,7 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
         {
             return Task.FromResult(_busStarted
                 ? HealthCheckResult.Healthy("Bus started")
-                : HealthCheckResult.Unhealthy("Bus not yet started"));
+                : new HealthCheckResult(context.Registration.FailureStatus, "Bus not yet started"));
         }
 
         public void ReportBusStarted()

@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Initializers.PropertyInitializers
 {
     using System;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Reflection;
     using Util;
@@ -14,13 +15,13 @@
         readonly IReadProperty<TInput, TInputProperty> _inputProperty;
         readonly IWriteProperty<TMessage, object> _messageProperty;
 
-        public CopyObjectPropertyInitializer(string messagePropertyName, string inputPropertyName = null)
+        public CopyObjectPropertyInitializer(PropertyInfo messagePropertyInfo, PropertyInfo inputPropertyInfo)
         {
-            if (messagePropertyName == null)
-                throw new ArgumentNullException(nameof(messagePropertyName));
+            if (messagePropertyInfo == null)
+                throw new ArgumentNullException(nameof(messagePropertyInfo));
 
-            _inputProperty = ReadPropertyCache<TInput>.GetProperty<TInputProperty>(inputPropertyName ?? messagePropertyName);
-            _messageProperty = WritePropertyCache<TMessage>.GetProperty<object>(messagePropertyName);
+            _inputProperty = ReadPropertyCache<TInput>.GetProperty<TInputProperty>(inputPropertyInfo);
+            _messageProperty = WritePropertyCache<TMessage>.GetProperty<object>(messagePropertyInfo);
         }
 
         public Task Apply(InitializeContext<TMessage, TInput> context)

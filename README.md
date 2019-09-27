@@ -59,7 +59,7 @@ MassTransit Nuget Packages
 | [MassTransit.Azure.ServiceBus.Core][AzureSbCore.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.AzureServiceBus][AzureSb.nuget] | 4.5.2 | - |
 | [MassTransit.Http][Http.nuget] | 4.5 | 2.0 |
-| [MassTransit.RabbitMQ][RabbitMQ.nuget] | 4.5 | - |
+| [MassTransit.RabbitMQ][RabbitMQ.nuget] | 4.5 | 2.0 |
 | [MassTransit.WebJobs.EventHubs][EventHubs.nuget] | - | 2.0 |
 | [MassTransit.WebJobs.ServiceBus][AzureFunc.nuget] | - | 2.0 |
 

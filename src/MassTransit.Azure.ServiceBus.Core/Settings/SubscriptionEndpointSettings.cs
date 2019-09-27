@@ -37,13 +37,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
         public SubscriptionEndpointSettings(TopicDescription topicDescription, string subscriptionName)
             : this(topicDescription, new SubscriptionConfigurator(topicDescription.Path, subscriptionName))
         {
-            _topicDescription = topicDescription;
-            _subscriptionConfigurator = new SubscriptionConfigurator(topicDescription.Path, subscriptionName);
-
-            Name = Path = EntityNameFormatter.FormatSubscriptionPath(_subscriptionConfigurator.TopicPath, _subscriptionConfigurator.SubscriptionName);
-
-            MaxConcurrentCalls = Defaults.MaxConcurrentCalls;
-            PrefetchCount = Defaults.PrefetchCount;
         }
 
         SubscriptionEndpointSettings(TopicDescription topicDescription, SubscriptionConfigurator configurator)

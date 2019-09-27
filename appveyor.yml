@@ -1,4 +1,4 @@
-version: 5.5.2.{build}
+version: 5.5.6.{build}
 
 branches:
   only:
@@ -67,13 +67,13 @@ deploy:
 - provider: NuGet
   name: Prerelease
   api_key:
-    secure: 0B2TmwiOnNW+CavGbvgr6S8WcuB2A/5enkf/ZrlRW+8Q8AwW5P9T7+B3QDAtYiEi
+    secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
   on:
     branch: develop
 - provider: NuGet
   name: Release
   api_key:
-    secure: 0B2TmwiOnNW+CavGbvgr6S8WcuB2A/5enkf/ZrlRW+8Q8AwW5P9T7+B3QDAtYiEi
+    secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
   on:
     branch: master
 

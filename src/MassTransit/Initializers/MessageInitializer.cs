@@ -18,7 +18,8 @@
         {
             _conventions = new List<IInitializerConvention>
             {
-                new CopyMessageInitializerConvention(),
+                new DefaultInitializerConvention(),
+                new DictionaryInitializerConvention(),
             };
         }
 

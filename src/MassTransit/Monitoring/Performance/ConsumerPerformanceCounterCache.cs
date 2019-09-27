@@ -14,7 +14,6 @@ namespace MassTransit.Monitoring.Performance
 {
     using System;
     using System.Collections.Concurrent;
-    using Windows;
 
 
     public class ConsumerPerformanceCounterCache

@@ -1,9 +1,9 @@
 namespace MassTransit.Initializers.PropertyProviders
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Threading.Tasks;
-    using Factories;
-    using Internals.Reflection;
+    using Util;
 
 
     public class ObjectPropertyProvider<TInput, TProperty> :
@@ -11,36 +11,75 @@ namespace MassTransit.Initializers.PropertyProviders
         where TInput : class
         where TProperty : class
     {
-        readonly IReadProperty<TInput, TProperty> _inputProperty;
+        readonly IPropertyProviderFactory<TInput> _factory;
+        readonly IPropertyProvider<TInput, object> _provider;
+        readonly ConcurrentDictionary<Type, Converter> _converters;
 
-        public ObjectPropertyProvider(string inputPropertyName)
+        public ObjectPropertyProvider(IPropertyProviderFactory<TInput> factory, IPropertyProvider<TInput, object> provider)
         {
-            if (inputPropertyName == null)
-                throw new ArgumentNullException(nameof(inputPropertyName));
+            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            _provider = provider ?? throw new ArgumentNullException(nameof(provider));
 
-            _inputProperty = ReadPropertyCache<TInput>.GetProperty<TProperty>(inputPropertyName);
+            _converters = new ConcurrentDictionary<Type, Converter>();
         }
 
-        public async Task<TProperty> GetProperty<T>(InitializeContext<T, TInput> context)
+        public Task<TProperty> GetProperty<T>(InitializeContext<T, TInput> context)
             where T : class
         {
-            if (!context.HasInput)
-                return default;
+            var propertyTask = _provider.GetProperty(context);
+            if (propertyTask.IsCompleted)
+            {
+                var propertyValue = propertyTask.Result;
+                if (propertyValue == default)
+                    return TaskUtil.Default<TProperty>();
 
-            var propertyValue = _inputProperty.Get(context.Input);
-            if (propertyValue == null)
-                return default;
+                var converter = _converters.GetOrAdd(propertyValue.GetType(), CreateConverter);
 
-            InitializeContext<TProperty> messageContext = MessageFactoryCache<TProperty>.Factory.Create(context);
+                return converter.Convert(context, propertyValue);
+            }
 
-            IMessageInitializer<TProperty> initializer = typeof(TInput) == typeof(object)
-                ? MessageInitializerCache<TProperty>.GetInitializer(propertyValue.GetType())
-                : MessageInitializerCache<TProperty>.GetInitializer(typeof(TInput));
+            async Task<TProperty> GetPropertyAsync()
+            {
+                var propertyValue = await propertyTask.ConfigureAwait(false);
 
-            InitializeContext<TProperty> result = await initializer.Initialize(messageContext, propertyValue).ConfigureAwait(false);
+                var converter = _converters.GetOrAdd(propertyValue.GetType(), CreateConverter);
 
-            return result.Message;
+                return await converter.Convert(context, propertyValue).ConfigureAwait(false);
+            }
 
+            return GetPropertyAsync();
+        }
+
+        Converter CreateConverter(Type type)
+        {
+            return (Converter)Activator.CreateInstance(typeof(ObjectConverter<>).MakeGenericType(typeof(TInput), typeof(TProperty), type), _factory);
+        }
+
+
+        interface Converter
+        {
+            Task<TProperty> Convert<T>(InitializeContext<T, TInput> context, object propertyValue)
+                where T : class;
+        }
+
+
+        class ObjectConverter<TObject> :
+            Converter
+        {
+            readonly IPropertyConverter<TProperty, TObject> _converter;
+
+            public ObjectConverter(IPropertyProviderFactory<TInput> factory)
+            {
+                factory.TryGetPropertyConverter(out _converter);
+            }
+
+            public Task<TProperty> Convert<T>(InitializeContext<T, TInput> context, object propertyValue)
+                where T : class
+            {
+                return _converter == null
+                    ? TaskUtil.Default<TProperty>()
+                    : _converter.Convert(context, (TObject)propertyValue);
+            }
         }
     }
 }

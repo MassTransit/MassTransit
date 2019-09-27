@@ -54,7 +54,17 @@ namespace MassTransit.ApplicationInsights.Pipeline
             context.CreateFilterScope("TelemetryPublishFilter");
         }
 
-        public async Task Send(PublishContext<T> context, IPipe<PublishContext<T>> next)
+        public Task Send(PublishContext<T> context, IPipe<PublishContext<T>> next)
+        {
+            if (context.TryGetPayload<ApplicationInsightsPayload>(out _))
+                return next.Send(context);
+
+            context.GetOrAddPayload(() => new ApplicationInsightsPayload());
+
+            return SendWithTelemetry(context, next);
+        }
+
+        async Task SendWithTelemetry(PublishContext<T> context, IPipe<PublishContext<T>> next)
         {
             var telemetry = new DependencyTelemetry()
             {

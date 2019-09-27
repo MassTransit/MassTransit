@@ -1,6 +1,7 @@
 namespace MassTransit.Initializers.HeaderInitializers
 {
     using System;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Reflection;
     using Util;
@@ -19,14 +20,14 @@ namespace MassTransit.Initializers.HeaderInitializers
         readonly string _headerName;
         readonly IReadProperty<TInput, string> _inputProperty;
 
-        public SetStringHeaderInitializer(string headerName, string inputPropertyName)
+        public SetStringHeaderInitializer(string headerName, PropertyInfo propertyInfo)
         {
             if (headerName == null)
                 throw new ArgumentNullException(nameof(headerName));
 
             _headerName = headerName;
 
-            _inputProperty = ReadPropertyCache<TInput>.GetProperty<string>(inputPropertyName);
+            _inputProperty = ReadPropertyCache<TInput>.GetProperty<string>(propertyInfo);
         }
 
         public Task Apply(InitializeContext<TMessage, TInput> context, SendContext sendContext)

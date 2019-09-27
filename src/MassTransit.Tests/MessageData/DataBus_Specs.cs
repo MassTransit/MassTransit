@@ -16,7 +16,6 @@ namespace MassTransit.Tests.MessageData
     {
         using System;
         using System.IO;
-        using System.Security.Cryptography;
         using System.Text;
         using System.Threading.Tasks;
         using MassTransit.MessageData;

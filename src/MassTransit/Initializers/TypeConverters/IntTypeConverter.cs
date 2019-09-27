@@ -5,6 +5,7 @@
 
     public class IntTypeConverter :
         ITypeConverter<string, int>,
+        ITypeConverter<int, object>,
         ITypeConverter<int, string>,
         ITypeConverter<int, sbyte>,
         ITypeConverter<int, byte>,
@@ -65,6 +66,18 @@
         {
             result = input.ToString();
             return true;
+        }
+
+        public bool TryConvert(object input, out int result)
+        {
+            if (input != null)
+            {
+                result = Convert.ToInt32(input);
+                return true;
+            }
+
+            result = default;
+            return false;
         }
     }
 }

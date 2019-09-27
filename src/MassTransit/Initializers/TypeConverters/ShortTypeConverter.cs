@@ -6,6 +6,7 @@
     public class ShortTypeConverter :
         ITypeConverter<string, short>,
         ITypeConverter<short, string>,
+        ITypeConverter<short, object>,
         ITypeConverter<short, sbyte>,
         ITypeConverter<short, byte>,
         ITypeConverter<short, ushort>,
@@ -65,6 +66,18 @@
         {
             result = input.ToString();
             return true;
+        }
+
+        public bool TryConvert(object input, out short result)
+        {
+            if (input != null)
+            {
+                result = Convert.ToInt16(input);
+                return true;
+            }
+
+            result = default;
+            return false;
         }
     }
 }

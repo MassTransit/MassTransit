@@ -100,7 +100,7 @@ namespace MassTransit.Serialization
                     return existing != null;
             }
 
-            var typeUrn = new MessageUrn(messageType).ToString();
+            var typeUrn = MessageUrn.ForType(messageType).ToString();
 
             return _supportedTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
         }
@@ -115,7 +115,7 @@ namespace MassTransit.Serialization
                     return message != null;
                 }
 
-                var typeUrn = new MessageUrn(typeof(T)).ToString();
+                var typeUrn = MessageUrn.ForType(typeof(T)).ToString();
 
                 if (_supportedTypes.Any(typeUrn.Equals))
                 {

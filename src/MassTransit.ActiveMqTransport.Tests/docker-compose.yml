@@ -1,0 +1,14 @@
+version: '3'
+services:
+  activemq:
+    image: webcenter/activemq:latest
+    environment:
+      - "ACTIVEMQ_ADMIN_LOGIN=admin"
+      - "ACTIVEMQ_ADMIN_PASSWORD=admin"
+      - "ACTIVEMQ_LOGGER_LOGLEVEL=TRACE"
+      - "ACTIVEMQ_OPTS=-Xms512m -Xms512m"
+      - "ACTIVEMQ_CONFIG_SCHEDULERENABLED=true"
+    ports:
+      - 8161:8161
+      - 61616:61616
+      - 61613:61613
