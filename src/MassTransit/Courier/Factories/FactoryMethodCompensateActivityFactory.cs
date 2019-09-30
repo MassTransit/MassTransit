@@ -3,7 +3,6 @@ namespace MassTransit.Courier.Factories
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Hosts;
 
 
     public class FactoryMethodCompensateActivityFactory<TActivity, TLog> :
@@ -18,22 +17,28 @@ namespace MassTransit.Courier.Factories
             _compensateFactory = compensateFactory;
         }
 
-        public async Task<ResultContext<CompensationResult>> Compensate(CompensateContext<TLog> context,
-            IRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult> next)
+        public async Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
         {
             TActivity activity = null;
             try
             {
                 activity = _compensateFactory(context.Log);
 
-                var activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+                CompensateActivityContext<TActivity, TLog> activityContext = context.CreateActivityContext(activity);
 
-                return await next.Send(activityContext).ConfigureAwait(false);
+                await next.Send(activityContext).ConfigureAwait(false);
             }
             finally
             {
-                var disposable = activity as IDisposable;
-                disposable?.Dispose();
+                switch (activity)
+                {
+                    case IAsyncDisposable asyncDisposable:
+                        await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                        break;
+                    case IDisposable disposable:
+                        disposable.Dispose();
+                        break;
+                }
             }
         }
 

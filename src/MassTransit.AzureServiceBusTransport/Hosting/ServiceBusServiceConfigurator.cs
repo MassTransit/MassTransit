@@ -1,8 +1,8 @@
 namespace MassTransit.AzureServiceBusTransport.Hosting
 {
     using System;
-    using System.Diagnostics;
     using System.Net.Mime;
+    using Automatonymous;
     using ConsumeConfigurators;
     using EndpointConfigurators;
     using GreenPipes;
@@ -21,18 +21,16 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
     {
         readonly IServiceBusBusFactoryConfigurator _configurator;
         readonly int _defaultConsumerLimit;
-        readonly IServiceBusHost _host;
 
-        public ServiceBusServiceConfigurator(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        public ServiceBusServiceConfigurator(IServiceBusBusFactoryConfigurator configurator)
         {
             _configurator = configurator;
-            _host = host;
             _defaultConsumerLimit = Environment.ProcessorCount * 4;
         }
 
         public void ReceiveEndpoint(string queueName, int consumerLimit, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            _configurator.ReceiveEndpoint(_host, queueName, x =>
+            _configurator.ReceiveEndpoint(queueName, x =>
             {
                 x.PrefetchCount = (ushort)consumerLimit;
 
@@ -156,6 +154,11 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
             _configurator.SagaConfigured(configurator);
         }
 
+        void ISagaConfigurationObserver.StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+        {
+            _configurator.StateMachineSagaConfigured(configurator, stateMachine);
+        }
+
         public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
             where TSaga : class, ISaga
             where TMessage : class
@@ -177,6 +180,26 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
         ConnectHandle IEndpointConfigurationObserverConnector.ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
             return _configurator.ConnectEndpointConfigurationObserver(observer);
+        }
+
+        ConnectHandle IActivityConfigurationObserverConnector.ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return _configurator.ConnectActivityConfigurationObserver(observer);
+        }
+
+        void IActivityConfigurationObserver.ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
+        {
+            _configurator.ActivityConfigured(configurator, compensateAddress);
+        }
+
+        void IActivityConfigurationObserver.ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
+        {
+            _configurator.ExecuteActivityConfigured(configurator);
+        }
+
+        void IActivityConfigurationObserver.CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
+        {
+            _configurator.CompensateActivityConfigured(configurator);
         }
     }
 }

@@ -3,7 +3,6 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
     using System;
     using Autofac;
     using Courier;
-    using Courier.Hosts;
     using GreenPipes;
     using Scoping;
     using Scoping.CourierContexts;
@@ -32,16 +31,16 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
             {
                 var activity = existingLifetimeScope.Resolve<TActivity>(TypedParameter.From(context.Arguments));
 
-                ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
 
                 return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext);
             }
 
-            var parentLifetimeScope = _scopeProvider.GetLifetimeScope(context.ConsumeContext);
+            var parentLifetimeScope = _scopeProvider.GetLifetimeScope(context);
 
             var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
             {
-                builder.ConfigureScope(context.ConsumeContext);
+                builder.ConfigureScope(context);
                 _configureScope?.Invoke(builder, context);
             });
 
@@ -49,7 +48,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
             {
                 var activity = lifetimeScope.Resolve<TActivity>(TypedParameter.From(context.Arguments));
 
-                ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
 
                 activityContext.UpdatePayload(lifetimeScope);
 

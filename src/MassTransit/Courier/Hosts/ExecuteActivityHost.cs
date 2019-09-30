@@ -4,7 +4,9 @@ namespace MassTransit.Courier.Hosts
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
+    using Contexts;
     using Contracts;
+    using Exceptions;
     using GreenPipes;
     using Logging;
     using Metadata;
@@ -15,32 +17,18 @@ namespace MassTransit.Courier.Hosts
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
-        readonly IExecuteActivityFactory<TActivity, TArguments> _activityFactory;
         readonly Uri _compensateAddress;
-        readonly IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> _executePipe;
+        readonly IPipe<ExecuteContext<TArguments>> _executePipe;
 
-        public ExecuteActivityHost(IExecuteActivityFactory<TActivity, TArguments> activityFactory, IPipe<RequestContext> executePipe, Uri compensateAddress)
-            : this(activityFactory, executePipe)
+        public ExecuteActivityHost(IPipe<ExecuteContext<TArguments>> executePipe, Uri compensateAddress)
         {
-            if (compensateAddress == null)
-                throw new ArgumentNullException(nameof(compensateAddress));
-
+            _executePipe = executePipe;
             _compensateAddress = compensateAddress;
-        }
-
-        public ExecuteActivityHost(IExecuteActivityFactory<TActivity, TArguments> activityFactory, IPipe<RequestContext> executePipe)
-        {
-            if (activityFactory == null)
-                throw new ArgumentNullException(nameof(activityFactory));
-
-            _activityFactory = activityFactory;
-
-            _executePipe = executePipe.CreateRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult>();
         }
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
         {
-            var activity = LogContext.IfEnabled(OperationName.Courier.Compensate)?.StartActivity(new
+            var activity = LogContext.IfEnabled(OperationName.Courier.Execute)?.StartActivity(new
             {
                 ActivityType = TypeMetadataCache<TActivity>.ShortName,
                 ArgumentType = TypeMetadataCache<TArguments>.ShortName
@@ -51,7 +39,7 @@ namespace MassTransit.Courier.Hosts
             var timer = Stopwatch.StartNew();
             try
             {
-                ExecuteContext<TArguments> executeContext = new HostExecuteContext<TArguments>(HostMetadataCache.Host, _compensateAddress, context);
+                ExecuteContext<TArguments> executeContext = new HostExecuteContext<TArguments>(_compensateAddress, context);
 
                 LogContext.Debug?.Log("Execute Activity: {TrackingNumber} ({Activity}, {Host})", executeContext.TrackingNumber,
                     TypeMetadataCache<TActivity>.ShortName, context.ReceiveContext.InputAddress);
@@ -59,15 +47,16 @@ namespace MassTransit.Courier.Hosts
                 try
                 {
                     await Task.Yield();
-                    var result = await _activityFactory.Execute(executeContext, _executePipe).Result().ConfigureAwait(false);
+                    await _executePipe.Send(executeContext).ConfigureAwait(false);
+
+                    var result = executeContext.Result
+                        ?? executeContext.Faulted(new ActivityExecutionException("The activity execute did not return a result"));
 
                     await result.Evaluate().ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    var result = executeContext.Faulted(ex);
-
-                    await result.Evaluate().ConfigureAwait(false);
+                    await executeContext.Faulted(ex).Evaluate().ConfigureAwait(false);
                 }
 
                 await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName).ConfigureAwait(false);

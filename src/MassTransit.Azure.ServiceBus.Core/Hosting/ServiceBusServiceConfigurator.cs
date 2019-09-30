@@ -1,8 +1,8 @@
 namespace MassTransit.Azure.ServiceBus.Core.Hosting
 {
     using System;
-    using System.Diagnostics;
     using System.Net.Mime;
+    using Automatonymous;
     using ConsumeConfigurators;
     using EndpointConfigurators;
     using GreenPipes;
@@ -10,7 +10,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
     using MassTransit.Hosting;
     using MassTransit.Saga;
     using MassTransit.Topology;
-    using Microsoft.Extensions.Logging;
     using SagaConfigurators;
 
 
@@ -22,18 +21,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
     {
         readonly IServiceBusBusFactoryConfigurator _configurator;
         readonly int _defaultConsumerLimit;
-        readonly IServiceBusHost _host;
 
-        public ServiceBusServiceConfigurator(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        public ServiceBusServiceConfigurator(IServiceBusBusFactoryConfigurator configurator)
         {
             _configurator = configurator;
-            _host = host;
             _defaultConsumerLimit = Environment.ProcessorCount * 4;
         }
 
         public void ReceiveEndpoint(string queueName, int consumerLimit, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            _configurator.ReceiveEndpoint(_host, queueName, x =>
+            _configurator.ReceiveEndpoint(queueName, x =>
             {
                 x.PrefetchCount = (ushort)consumerLimit;
 
@@ -65,11 +62,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
         public IMessageTopologyConfigurator MessageTopology => _configurator.MessageTopology;
         public ISendTopologyConfigurator SendTopology => _configurator.SendTopology;
         public IPublishTopologyConfigurator PublishTopology => _configurator.PublishTopology;
-
-        public bool DeployTopologyOnly
-        {
-            set => _configurator.DeployTopologyOnly = value;
-        }
 
         public void AddBusFactorySpecification(IBusFactorySpecification specification)
         {
@@ -156,6 +148,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
             _configurator.SagaConfigured(configurator);
         }
 
+        void ISagaConfigurationObserver.StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+        {
+            _configurator.StateMachineSagaConfigured(configurator, stateMachine);
+        }
+
         public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
             where TSaga : class, ISaga
             where TMessage : class
@@ -177,6 +174,26 @@ namespace MassTransit.Azure.ServiceBus.Core.Hosting
         ConnectHandle IEndpointConfigurationObserverConnector.ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
             return _configurator.ConnectEndpointConfigurationObserver(observer);
+        }
+
+        ConnectHandle IActivityConfigurationObserverConnector.ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return _configurator.ConnectActivityConfigurationObserver(observer);
+        }
+
+        void IActivityConfigurationObserver.ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
+        {
+            _configurator.ActivityConfigured(configurator, compensateAddress);
+        }
+
+        void IActivityConfigurationObserver.ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
+        {
+            _configurator.ExecuteActivityConfigured(configurator);
+        }
+
+        void IActivityConfigurationObserver.CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
+        {
+            _configurator.CompensateActivityConfigured(configurator);
         }
     }
 }

@@ -9,7 +9,6 @@ namespace MassTransit.Courier
         where TLog : class
         where TActivity : class, ICompensateActivity<TLog>
     {
-        Task<ResultContext<CompensationResult>> Compensate(CompensateContext<TLog> context,
-            IRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult> next);
+        Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next);
     }
 }

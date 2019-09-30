@@ -1,6 +1,8 @@
 ﻿namespace MassTransit.Courier.Pipeline
 {
+    using System;
     using System.Threading.Tasks;
+    using Exceptions;
     using GreenPipes;
 
 
@@ -10,7 +12,7 @@
     /// <typeparam name="TLog"></typeparam>
     /// <typeparam name="TActivity"></typeparam>
     public class CompensateActivityFilter<TActivity, TLog> :
-        IFilter<RequestContext<CompensateActivityContext<TActivity, TLog>>>
+        IFilter<CompensateActivityContext<TActivity, TLog>>
         where TLog : class
         where TActivity : class, ICompensateActivity<TLog>
     {
@@ -19,12 +21,13 @@
             context.CreateFilterScope("compensate");
         }
 
-        public async Task Send(RequestContext<CompensateActivityContext<TActivity, TLog>> context,
-            IPipe<RequestContext<CompensateActivityContext<TActivity, TLog>>> next)
+        public async Task Send(CompensateActivityContext<TActivity, TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
         {
-            var result = await context.Request.Activity.Compensate(context.Request).ConfigureAwait(false);
+            context.Result = await context.Activity.Compensate(context).ConfigureAwait(false);
 
-            context.TrySetResult(result);
+            var result = context.Result ?? context.Failed(new ActivityCompensationException("The activity compensation did not return a result"));
+            if (result.IsFailed(out var exception))
+                throw new AggregateException(exception);
 
             await next.Send(context).ConfigureAwait(false);
         }

@@ -45,7 +45,7 @@ namespace MassTransit.Tests.Courier
                 {
                     h.UseConsoleLog(async log => log.Context.ActivityName);
 
-                    h.Arguments(a => a.UseConsoleLog(async log => log.Context.Arguments.Value));
+                    h.ActivityArguments(a => a.UseConsoleLog(async log => log.Context.Arguments.Value));
 
                     h.RoutingSlip(rs => rs.UseConsoleLog(async log => log.Context.Message.TrackingNumber.ToString("N")));
                 });
@@ -57,7 +57,7 @@ namespace MassTransit.Tests.Courier
                 {
                     h.UseConsoleLog(async log => log.Context.Log.OriginalValue);
 
-                    h.Log(l => l.UseConsoleLog(async log => log.Context.Log.OriginalValue));
+                    h.ActivityLog(l => l.UseConsoleLog(async log => log.Context.Log.OriginalValue));
 
                     h.RoutingSlip(rs => rs.UseConsoleLog(async log => log.Context.Message.TrackingNumber.ToString("N")));
                 });

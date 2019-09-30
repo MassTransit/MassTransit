@@ -3,7 +3,6 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
     using System;
     using Castle.MicroKernel;
     using Courier;
-    using Courier.Hosts;
     using GreenPipes;
     using Scoping;
     using Scoping.CourierContexts;
@@ -25,11 +24,11 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
         {
             if (context.TryGetPayload<IKernel>(out var kernel))
             {
-                kernel.UpdateScope(context.ConsumeContext);
+                kernel.UpdateScope(context);
 
                 var activity = kernel.Resolve<TActivity>(new Arguments().AddTyped(context.Arguments));
 
-                ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
 
                 return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext, ReleaseComponent);
             }
@@ -39,7 +38,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             {
                 var activity = _kernel.Resolve<TActivity>(new Arguments().AddTyped(context.Arguments));
 
-                ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
                 activityContext.UpdatePayload(_kernel);
 
                 return new CreatedExecuteActivityScopeContext<IDisposable, TActivity, TArguments>(scope, activityContext, ReleaseComponent);

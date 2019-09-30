@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
 {
     using Courier;
-    using Courier.Hosts;
     using GreenPipes;
     using Scoping;
     using Scoping.CourierContexts;
@@ -25,13 +24,13 @@
         {
             if (context.TryGetPayload<Scope>(out var existingScope))
             {
-                existingScope.UpdateScope(context.ConsumeContext);
+                existingScope.UpdateScope(context);
 
                 var activity = existingScope
                     .Container
                     .GetInstance<TActivity>();
 
-                ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
 
                 return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext);
             }
@@ -39,13 +38,13 @@
             var scope = AsyncScopedLifestyle.BeginScope(_container);
             try
             {
-                scope.UpdateScope(context.ConsumeContext);
+                scope.UpdateScope(context);
 
                 var activity = scope
                     .Container
                     .GetInstance<TActivity>();
 
-                ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
 
                 activityContext.UpdatePayload(scope);
 

@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.LamarIntegration.ScopeProviders
 {
     using Courier;
-    using Courier.Hosts;
     using GreenPipes;
     using Lamar;
     using Scoping;
@@ -23,21 +22,21 @@
         {
             if (context.TryGetPayload<INestedContainer>(out var existingContainer))
             {
-                existingContainer.Inject(context.ConsumeContext);
+                existingContainer.Inject<ConsumeContext>(context);
 
                 var activity = existingContainer.GetInstance<TActivity>();
 
-                var activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+                var activityContext = context.CreateActivityContext(activity);
 
                 return new ExistingCompensateActivityScopeContext<TActivity, TLog>(activityContext);
             }
 
-            var nestedContainer = _container.GetNestedContainer(context.ConsumeContext);
+            var nestedContainer = _container.GetNestedContainer(context);
             try
             {
                 var activity = nestedContainer.GetInstance<TActivity>();
 
-                CompensateActivityContext<TActivity, TLog> activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+                CompensateActivityContext<TActivity, TLog> activityContext = context.CreateActivityContext(activity);
 
                 activityContext.UpdatePayload(nestedContainer);
 

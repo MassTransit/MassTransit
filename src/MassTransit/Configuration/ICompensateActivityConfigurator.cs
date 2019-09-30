@@ -18,10 +18,12 @@
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
+        void Log(Action<ICompensateLogConfigurator<TLog>> configure);
+
         /// <summary>
         /// Configure the arguments separate from the activity
         /// </summary>
-        void Log(Action<ICompensateActivityLogConfigurator<TLog>> configure);
+        void ActivityLog(Action<ICompensateActivityLogConfigurator<TLog>> configure);
 
         /// <summary>
         /// Configure the routing slip pipe

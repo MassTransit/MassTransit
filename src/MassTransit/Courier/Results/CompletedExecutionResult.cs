@@ -1,14 +1,14 @@
 // Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier.Results
 {
@@ -74,7 +74,7 @@ namespace MassTransit.Courier.Results
             {
                 ISendEndpoint endpoint = await _context.GetSendEndpoint(routingSlip.GetNextExecuteAddress()).ConfigureAwait(false);
 
-                await _context.ConsumeContext.Forward(endpoint, routingSlip).ConfigureAwait(false);
+                await _context.Forward(endpoint, routingSlip).ConfigureAwait(false);
             }
             else
             {
@@ -83,6 +83,12 @@ namespace MassTransit.Courier.Results
 
                 await _publisher.PublishRoutingSlipCompleted(completedTimestamp, completedDuration, routingSlip.Variables).ConfigureAwait(false);
             }
+        }
+
+        public virtual bool IsFaulted(out Exception exception)
+        {
+            exception = default;
+            return false;
         }
 
         protected virtual Task PublishActivityEvents(RoutingSlip routingSlip, RoutingSlipBuilder builder)

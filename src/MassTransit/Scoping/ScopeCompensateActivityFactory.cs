@@ -22,12 +22,11 @@
             _scopeProvider = scopeProvider;
         }
 
-        public async Task<ResultContext<CompensationResult>> Compensate(CompensateContext<TArguments> context,
-            IRequestPipe<CompensateActivityContext<TActivity, TArguments>, CompensationResult> next)
+        public async Task Compensate(CompensateContext<TArguments> context, IPipe<CompensateActivityContext<TActivity, TArguments>> next)
         {
             using (ICompensateActivityScopeContext<TActivity, TArguments> scope = _scopeProvider.GetScope(context))
             {
-                return await next.Send(scope.Context).ConfigureAwait(false);
+                await next.Send(scope.Context).ConfigureAwait(false);
             }
         }
 

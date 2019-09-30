@@ -1,62 +1,13 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier
+﻿namespace MassTransit.Courier
 {
     using System;
     using System.Collections.Generic;
-    using GreenPipes;
+    using Contexts;
 
 
     public interface ExecuteContext :
-        PipeContext,
-        IPublishEndpoint,
-        ISendEndpointProvider
+        CourierContext
     {
-        /// <summary>
-        /// The tracking number for this routing slip
-        /// </summary>
-        Guid TrackingNumber { get; }
-
-        /// <summary>
-        /// The tracking number for this activity within the routing slip
-        /// </summary>
-        Guid ExecutionId { get; }
-
-        /// <summary>
-        /// The host performing the execution
-        /// </summary>
-        HostInfo Host { get; }
-
-        /// <summary>
-        /// The start time for the activity execution
-        /// </summary>
-        DateTime Timestamp { get; }
-
-        /// <summary>
-        /// The time elapsed for the execution operation
-        /// </summary>
-        TimeSpan Elapsed { get; }
-
-        /// <summary>
-        /// The consume context of the execution routing slip
-        /// </summary>
-        ConsumeContext ConsumeContext { get; }
-
-        /// <summary>
-        /// The name of the activity being executed
-        /// </summary>
-        string ActivityName { get; }
-
         /// <summary>
         /// Completes the execution, without passing a compensating log entry
         /// </summary>
@@ -96,7 +47,7 @@ namespace MassTransit.Courier
             where TLog : class;
 
         /// <summary>
-        /// Completes the activity, passing a compensation log entry and additional variables to set on 
+        /// Completes the activity, passing a compensation log entry and additional variables to set on
         /// the routing slip
         /// </summary>
         /// <typeparam name="TLog"></typeparam>
@@ -118,7 +69,7 @@ namespace MassTransit.Courier
             where TLog : class;
 
         /// <summary>
-        /// Completes the activity, passing a compensation log entry and additional variables to set on 
+        /// Completes the activity, passing a compensation log entry and additional variables to set on
         /// the routing slip
         /// </summary>
         /// <typeparam name="TLog"></typeparam>
@@ -172,6 +123,11 @@ namespace MassTransit.Courier
         /// <param name="exception"></param>
         /// <returns></returns>
         ExecutionResult Faulted(Exception exception);
+
+        /// <summary>
+        /// Set the execution result, which completes the activity
+        /// </summary>
+        ExecutionResult Result { get; set; }
     }
 
 
@@ -183,5 +139,8 @@ namespace MassTransit.Courier
         /// The arguments from the routing slip for this activity
         /// </summary>
         TArguments Arguments { get; }
+
+        ExecuteActivityContext<TActivity, TArguments> CreateActivityContext<TActivity>(TActivity activity)
+            where TActivity : class, IExecuteActivity<TArguments>;
     }
 }

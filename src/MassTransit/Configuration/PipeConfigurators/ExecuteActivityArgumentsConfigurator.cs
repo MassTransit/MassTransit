@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.PipeConfigurators
 {
-    using System.Collections.Generic;
     using Courier;
     using GreenPipes;
 
@@ -19,32 +18,7 @@
 
         public void AddPipeSpecification(IPipeSpecification<ExecuteActivityContext<TArguments>> specification)
         {
-            _configurator.AddPipeSpecification(new ConsumeContextSpecificationProxy(specification));
-        }
-
-
-        class ConsumeContextSpecificationProxy :
-            IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>>
-        {
-            readonly IPipeSpecification<ExecuteActivityContext<TArguments>> _specification;
-
-            public ConsumeContextSpecificationProxy(IPipeSpecification<ExecuteActivityContext<TArguments>> specification)
-            {
-                _specification = specification;
-            }
-
-            public void Apply(IPipeBuilder<ExecuteActivityContext<TActivity, TArguments>> builder)
-            {
-                var messageBuilder = builder as IPipeBuilder<ExecuteActivityContext<TArguments>>;
-
-                if (messageBuilder != null)
-                    _specification.Apply(messageBuilder);
-            }
-
-            public IEnumerable<ValidationResult> Validate()
-            {
-                return _specification.Validate();
-            }
+            _configurator.AddPipeSpecification(specification);
         }
     }
 }

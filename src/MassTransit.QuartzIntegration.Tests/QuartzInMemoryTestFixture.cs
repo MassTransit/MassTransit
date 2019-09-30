@@ -17,6 +17,7 @@ namespace MassTransit.QuartzIntegration.Tests
     using NUnit.Framework;
     using Quartz;
     using TestFramework;
+    using Testing;
 
 
     public class QuartzInMemoryTestFixture :

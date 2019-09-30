@@ -22,12 +22,11 @@
             _scopeProvider = scopeProvider;
         }
 
-        public async Task<ResultContext<ExecutionResult>> Execute(ExecuteContext<TArguments> context,
-            IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> next)
+        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
         {
             using (IExecuteActivityScopeContext<TActivity, TArguments> scope = _scopeProvider.GetScope(context))
             {
-                return await next.Send(scope.Context).ConfigureAwait(false);
+                await next.Send(scope.Context).ConfigureAwait(false);
             }
         }
 

@@ -3,7 +3,6 @@ namespace MassTransit.Courier.Factories
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Hosts;
 
 
     public class FactoryMethodExecuteActivityFactory<TActivity, TArguments> :
@@ -18,22 +17,28 @@ namespace MassTransit.Courier.Factories
             _executeFactory = executeFactory;
         }
 
-        public async Task<ResultContext<ExecutionResult>> Execute(ExecuteContext<TArguments> context,
-            IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> next)
+        public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
         {
             TActivity activity = null;
             try
             {
                 activity = _executeFactory(context.Arguments);
 
-                var activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
 
-                return await next.Send(activityContext).ConfigureAwait(false);
+                await next.Send(activityContext).ConfigureAwait(false);
             }
             finally
             {
-                var disposable = activity as IDisposable;
-                disposable?.Dispose();
+                switch (activity)
+                {
+                    case IAsyncDisposable asyncDisposable:
+                        await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                        break;
+                    case IDisposable disposable:
+                        disposable.Dispose();
+                        break;
+                }
             }
         }
 

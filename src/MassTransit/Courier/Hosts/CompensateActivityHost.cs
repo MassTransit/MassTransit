@@ -4,7 +4,9 @@ namespace MassTransit.Courier.Hosts
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Context;
+    using Contexts;
     using Contracts;
+    using Exceptions;
     using GreenPipes;
     using Logging;
     using Metadata;
@@ -15,14 +17,11 @@ namespace MassTransit.Courier.Hosts
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
-        readonly ICompensateActivityFactory<TActivity, TLog> _activityFactory;
-        readonly IRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult> _compensatePipe;
+        readonly IPipe<CompensateContext<TLog>> _compensatePipe;
 
-        public CompensateActivityHost(ICompensateActivityFactory<TActivity, TLog> activityFactory, IPipe<RequestContext> compensatePipe)
+        public CompensateActivityHost(IPipe<CompensateContext<TLog>> compensatePipe)
         {
-            _activityFactory = activityFactory;
-
-            _compensatePipe = compensatePipe.CreateRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult>();
+            _compensatePipe = compensatePipe;
         }
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
@@ -38,7 +37,7 @@ namespace MassTransit.Courier.Hosts
             var timer = Stopwatch.StartNew();
             try
             {
-                CompensateContext<TLog> compensateContext = new HostCompensateContext<TLog>(HostMetadataCache.Host, context);
+                CompensateContext<TLog> compensateContext = new HostCompensateContext<TLog>(context);
 
                 LogContext.Debug?.Log("Compensate Activity: {TrackingNumber} ({Activity}, {Host})", compensateContext.TrackingNumber,
                     TypeMetadataCache<TActivity>.ShortName, context.ReceiveContext.InputAddress);
@@ -46,15 +45,16 @@ namespace MassTransit.Courier.Hosts
                 try
                 {
                     await Task.Yield();
-                    var result = await _activityFactory.Compensate(compensateContext, _compensatePipe).Result().ConfigureAwait(false);
+                    await _compensatePipe.Send(compensateContext).ConfigureAwait(false);
+
+                    var result = compensateContext.Result
+                        ?? compensateContext.Failed(new ActivityCompensationException("The activity compensation did not return a result"));
 
                     await result.Evaluate().ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    var result = compensateContext.Failed(ex);
-
-                    await result.Evaluate().ConfigureAwait(false);
+                    await compensateContext.Failed(ex).Evaluate().ConfigureAwait(false);
                 }
 
                 await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName).ConfigureAwait(false);

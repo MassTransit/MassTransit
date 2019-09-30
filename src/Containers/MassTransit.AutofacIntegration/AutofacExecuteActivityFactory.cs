@@ -30,8 +30,7 @@ namespace MassTransit.AutofacIntegration
             _factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
         }
 
-        public Task<ResultContext<ExecutionResult>> Execute(ExecuteContext<TArguments> context,
-            IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> next)
+        public Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
         {
             return _factory.Execute(context, next);
         }

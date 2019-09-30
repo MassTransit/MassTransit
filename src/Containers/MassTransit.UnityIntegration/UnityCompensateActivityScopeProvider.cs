@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.UnityIntegration
 {
     using Courier;
-    using Courier.Hosts;
     using GreenPipes;
     using Scoping;
     using Scoping.CourierContexts;
@@ -28,7 +27,7 @@
             {
                 var activity = existingContainer.Resolve<TActivity>(new DependencyOverride(typeof(TLog), new InjectionParameter(context.Log)));
 
-                CompensateActivityContext<TActivity, TLog> activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+                CompensateActivityContext<TActivity, TLog> activityContext = context.CreateActivityContext(activity);
 
                 return new ExistingCompensateActivityScopeContext<TActivity, TLog>(activityContext);
             }
@@ -38,7 +37,7 @@
             {
                 var activity = scope.Resolve<TActivity>(new DependencyOverride(typeof(TLog), new InjectionParameter(context.Log)));
 
-                CompensateActivityContext<TActivity, TLog> activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+                CompensateActivityContext<TActivity, TLog> activityContext = context.CreateActivityContext(activity);
 
                 var contextScope = scope;
                 activityContext.GetOrAddPayload(() => contextScope);

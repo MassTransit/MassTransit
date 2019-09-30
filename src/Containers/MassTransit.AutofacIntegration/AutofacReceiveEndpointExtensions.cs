@@ -226,7 +226,7 @@ namespace MassTransit
 
             var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress, configurator);
 
             configurator.AddEndpointSpecification(specification);
         }
@@ -245,7 +245,7 @@ namespace MassTransit
 
             var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress, configurator);
 
             configure(specification);
 
@@ -285,7 +285,7 @@ namespace MassTransit
 
             var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, configurator);
 
             configurator.AddEndpointSpecification(specification);
         }
@@ -303,7 +303,7 @@ namespace MassTransit
 
             var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, configurator);
 
             configure(specification);
 
@@ -341,7 +341,7 @@ namespace MassTransit
 
             var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
 
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory, configurator);
 
             configurator.AddEndpointSpecification(specification);
         }
@@ -359,7 +359,7 @@ namespace MassTransit
 
             var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
 
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory, configurator);
 
             configure(specification);
 

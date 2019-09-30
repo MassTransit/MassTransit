@@ -30,8 +30,7 @@ namespace MassTransit.AutofacIntegration
             _factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
         }
 
-        public Task<ResultContext<CompensationResult>> Compensate(CompensateContext<TLog> context,
-            IRequestPipe<CompensateActivityContext<TActivity, TLog>, CompensationResult> next)
+        public Task Compensate(CompensateContext<TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
         {
             return _factory.Compensate(context, next);
         }

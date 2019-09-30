@@ -42,9 +42,7 @@ namespace Automatonymous.Pipeline
                     }
                 }
 
-                var schedulerContext = context.GetPayload<MessageSchedulerContext>();
-
-                MessageRedeliveryContext redeliveryContext = new ScheduleMessageRedeliveryContext<TData>(context, schedulerContext);
+                MessageRedeliveryContext redeliveryContext = new ScheduleMessageRedeliveryContext<TData>(context);
 
                 var delay = retryContext.Delay ?? TimeSpan.Zero;
 

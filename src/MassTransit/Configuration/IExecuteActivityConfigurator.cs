@@ -1,4 +1,4 @@
-﻿namespace MassTransit
+namespace MassTransit
 {
     using System;
     using ConsumeConfigurators;
@@ -19,9 +19,15 @@
         where TArguments : class
     {
         /// <summary>
+        /// Configure the pipeline prior to the activity factory
+        /// </summary>
+        /// <param name="configure"></param>
+        void Arguments(Action<IExecuteArgumentsConfigurator<TArguments>> configure);
+
+        /// <summary>
         /// Configure the arguments separate from the activity
         /// </summary>
-        void Arguments(Action<IExecuteActivityArgumentsConfigurator<TArguments>> configure);
+        void ActivityArguments(Action<IExecuteActivityArgumentsConfigurator<TArguments>> configure);
 
         /// <summary>
         /// Configure the routing slip pipe

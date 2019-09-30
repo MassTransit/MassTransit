@@ -78,7 +78,7 @@ namespace MassTransit.AzureServiceBusTransport.Hosting
 
                 LogContext.Info?.Log("Configuring Host: {Host}", hostSettings.ServiceUri);
 
-                var serviceConfigurator = new ServiceBusServiceConfigurator(configurator, host);
+                var serviceConfigurator = new ServiceBusServiceConfigurator(configurator);
 
                 busServiceConfigurator.Configure(serviceConfigurator);
             });

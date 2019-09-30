@@ -21,7 +21,6 @@ namespace MassTransit.Courier
         /// <param name="context"></param>
         /// <param name="next"></param>
         /// <returns></returns>
-        Task<ResultContext<ExecutionResult>> Execute(ExecuteContext<TArguments> context,
-            IRequestPipe<ExecuteActivityContext<TActivity, TArguments>, ExecutionResult> next);
+        Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next);
     }
 }
