@@ -22,6 +22,7 @@ namespace MassTransit.TestFramework
         {
             BusTestHarness = harness;
 
+            harness.OnConnectObservers += ConnectObservers;
             harness.OnConfigureBus += ConfigureBus;
         }
 

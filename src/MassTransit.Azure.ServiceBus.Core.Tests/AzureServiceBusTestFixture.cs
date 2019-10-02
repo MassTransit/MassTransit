@@ -41,7 +41,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
             AzureServiceBusTestHarness = harness;
 
-            AzureServiceBusTestHarness.OnConnectObservers += ConnectObservers;
             AzureServiceBusTestHarness.OnConfigureServiceBusBus += ConfigureServiceBusBus;
             AzureServiceBusTestHarness.OnConfigureServiceBusBusHost += ConfigureServiceBusBusHost;
             AzureServiceBusTestHarness.OnConfigureServiceBusReceiveEndpoint += ConfigureServiceBusReceiveEndpoint;

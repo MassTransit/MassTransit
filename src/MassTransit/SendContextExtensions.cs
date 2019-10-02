@@ -15,6 +15,7 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using Context;
+    using GreenPipes;
     using Metadata;
     using Util;
 
@@ -85,6 +86,11 @@ namespace MassTransit
             {
                 headers.Set(MessageHeaders.FaultConsumerType, info.ConsumerType);
                 headers.Set(MessageHeaders.FaultMessageType, info.MessageType);
+            }
+
+            if (exceptionContext.TryGetPayload(out RetryContext retryContext) && retryContext.RetryCount > 0)
+            {
+                headers.Set(MessageHeaders.FaultRetryCount, retryContext.RetryCount);
             }
         }
 

@@ -3,7 +3,7 @@
     public static class MessageHeaders
     {
         /// <summary>
-        /// The reason for a message action being taken 
+        /// The reason for a message action being taken
         /// </summary>
         public const string Reason = "MT-Reason";
 
@@ -36,6 +36,11 @@
         /// The stack trace from a Fault
         /// </summary>
         public const string FaultStackTrace = "MT-Fault-StackTrace";
+
+        /// <summary>
+        /// The number of times the message was retried
+        /// </summary>
+        public const string FaultRetryCount = "MT-Fault-RetryCount";
 
         /// <summary>
         /// The endpoint that forwarded the message to the new destination
