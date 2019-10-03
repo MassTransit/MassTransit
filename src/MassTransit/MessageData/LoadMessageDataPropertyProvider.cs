@@ -12,7 +12,7 @@
         readonly IPropertyProvider<TInput, MessageData<TValue>> _inputProvider;
         readonly IMessageDataRepository _repository;
 
-        public LoadMessageDataPropertyProvider(IPropertyProvider<TInput, MessageData<TValue>> inputProvider, IMessageDataRepository repository)
+        public LoadMessageDataPropertyProvider(IPropertyProvider<TInput, MessageData<TValue>> inputProvider, IMessageDataRepository repository = default)
         {
             _repository = repository;
             _inputProvider = inputProvider;
@@ -30,7 +30,11 @@
                 MessageData<TValue> messageData = inputTask.Result;
 
                 if (messageData?.Address != null)
-                    return Task.FromResult(MessageDataFactory.Load<TValue>(_repository, messageData.Address, context.CancellationToken));
+                {
+                    var repository = _repository;
+                    if (repository != null || context.TryGetPayload(out repository))
+                        return Task.FromResult(MessageDataFactory.Load<TValue>(repository, messageData.Address, context.CancellationToken));
+                }
 
                 return Task.FromResult<MessageData<TValue>>(new EmptyMessageData<TValue>());
             }
@@ -40,7 +44,11 @@
                 MessageData<TValue> messageData = await inputTask.ConfigureAwait(false);
 
                 if (messageData?.Address != null)
-                    return MessageDataFactory.Load<TValue>(_repository, messageData.Address, context.CancellationToken);
+                {
+                    var repository = _repository;
+                    if (repository != null || context.TryGetPayload(out repository))
+                        return MessageDataFactory.Load<TValue>(repository, messageData.Address, context.CancellationToken);
+                }
 
                 return new EmptyMessageData<TValue>();
             }

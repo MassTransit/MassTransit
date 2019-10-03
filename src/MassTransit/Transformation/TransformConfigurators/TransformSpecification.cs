@@ -29,6 +29,8 @@ namespace MassTransit.Transformation.TransformConfigurators
             _convention = new MessageTransformConvention<TMessage>();
         }
 
+        public int Count => _convention.Count;
+
         public bool Replace { get; set; }
 
         public void Default<TProperty>(Expression<Func<TMessage, TProperty>> propertyExpression)

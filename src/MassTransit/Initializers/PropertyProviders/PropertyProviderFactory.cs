@@ -618,7 +618,7 @@ namespace MassTransit.Initializers.PropertyProviders
                     return true;
                 }
 
-                if (type.IsInterface && TypeMetadataCache.IsValidMessageType(type) && !type.IsValueTypeOrObject())
+                if (type.IsInterfaceOrConcreteClass() && TypeMetadataCache.IsValidMessageType(type) && !type.IsValueTypeOrObject())
                 {
                     var factoryType = typeof(InitializerResult<>).MakeGenericType(typeof(TInput), typeof(TInputProperty), typeof(TInputKey),
                         typeof(TInputValue), type);

@@ -102,5 +102,7 @@ namespace MassTransit.Transformation.Conventions
         {
             _initializers.Add(propertyName, initializer);
         }
+
+        public int Count => _initializers.Count;
     }
 }
