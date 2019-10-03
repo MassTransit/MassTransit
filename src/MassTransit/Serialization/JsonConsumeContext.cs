@@ -27,13 +27,13 @@ namespace MassTransit.Serialization
     public class JsonConsumeContext :
         BaseConsumeContext
     {
+        readonly PendingTaskCollection _consumeTasks;
         readonly JsonSerializer _deserializer;
         readonly MessageEnvelope _envelope;
         readonly JToken _messageToken;
         readonly IDictionary<Type, ConsumeContext> _messageTypes;
         readonly IObjectTypeDeserializer _objectTypeDeserializer;
         readonly string[] _supportedTypes;
-        readonly List<Task> _consumeTasks;
 
         Guid? _conversationId;
         Guid? _correlationId;
@@ -59,26 +59,10 @@ namespace MassTransit.Serialization
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, ConsumeContext>();
-            _consumeTasks = new List<Task>();
+            _consumeTasks = new PendingTaskCollection(receiveContext.CancellationToken);
         }
 
-        public override Task ConsumeCompleted => ConsumeTasksCompleted();
-
-        async Task ConsumeTasksCompleted()
-        {
-            Task[] tasks = null;
-            do
-            {
-                lock (_consumeTasks)
-                    tasks = _consumeTasks.Where(x => !x.IsCompleted).ToArray();
-
-                if (tasks.Length == 0)
-                    break;
-
-                await Task.WhenAll(tasks).ConfigureAwait(false);
-            }
-            while (tasks.Length > 0);
-        }
+        public override Task ConsumeCompleted => _consumeTasks.Completed;
 
         public override Guid? MessageId => _messageId ?? (_messageId = ConvertIdToGuid(_envelope.MessageId));
         public override Guid? RequestId => _requestId ?? (_requestId = ConvertIdToGuid(_envelope.RequestId));
@@ -149,8 +133,7 @@ namespace MassTransit.Serialization
 
         public override void AddConsumeTask(Task task)
         {
-            lock (_consumeTasks)
-                _consumeTasks.Add(task);
+            _consumeTasks.Add(task);
         }
 
         static JToken GetMessageToken(object message)
