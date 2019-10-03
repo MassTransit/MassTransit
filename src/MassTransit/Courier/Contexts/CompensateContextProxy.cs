@@ -11,17 +11,27 @@ namespace MassTransit.Courier.Contexts
         where TLog : class
     {
         readonly CompensateContext<TLog> _context;
+        readonly TLog _log;
+
+        public CompensateContextProxy(CompensateContext<TLog> context, TLog log)
+            : base(context)
+        {
+            _context = context;
+            _log = log;
+        }
 
         protected CompensateContextProxy(CompensateContext<TLog> context)
             : base(context)
         {
             _context = context;
+            _log = context.Log;
         }
 
-        public CompensateContextProxy(CompensateContext<TLog> context, IPayloadCache payloadCache)
+        protected CompensateContextProxy(CompensateContext<TLog> context, IPayloadCache payloadCache)
             : base(context, payloadCache)
         {
             _context = context;
+            _log = context.Log;
         }
 
         TLog CompensateContext<TLog>.Log => _context.Log;

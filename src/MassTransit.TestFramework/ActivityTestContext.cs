@@ -8,6 +8,9 @@ namespace MassTransit.TestFramework
 
     public interface ActivityTestContext
     {
+        event Action<IReceiveEndpointConfigurator> OnConfigureExecuteReceiveEndpoint;
+        event Action<IReceiveEndpointConfigurator> OnConfigureCompensateReceiveEndpoint;
+
         string Name { get; }
 
         Uri ExecuteUri { get; }
@@ -32,6 +35,19 @@ namespace MassTransit.TestFramework
         }
 
         public Uri ExecuteUri => _harness.ExecuteAddress;
+
+        public event Action<IReceiveEndpointConfigurator> OnConfigureExecuteReceiveEndpoint
+        {
+            add => _harness.OnConfigureExecuteReceiveEndpoint += value;
+            remove => _harness.OnConfigureExecuteReceiveEndpoint -= value;
+        }
+
+        public event Action<IReceiveEndpointConfigurator> OnConfigureCompensateReceiveEndpoint
+        {
+            add => _harness.OnConfigureCompensateReceiveEndpoint += value;
+            remove => _harness.OnConfigureCompensateReceiveEndpoint -= value;
+        }
+
         public string Name => _harness.Name;
     }
 
@@ -50,6 +66,14 @@ namespace MassTransit.TestFramework
 
             _harness = new ExecuteActivityTestHarness<TActivity, TArguments>(testHarness, factory, configureExecute);
         }
+
+        public event Action<IReceiveEndpointConfigurator> OnConfigureExecuteReceiveEndpoint
+        {
+            add => _harness.OnConfigureExecuteReceiveEndpoint += value;
+            remove => _harness.OnConfigureExecuteReceiveEndpoint -= value;
+        }
+
+        public event Action<IReceiveEndpointConfigurator> OnConfigureCompensateReceiveEndpoint;
 
         public Uri ExecuteUri => _harness.ExecuteAddress;
         public string Name => _harness.Name;

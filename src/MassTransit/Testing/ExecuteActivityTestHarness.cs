@@ -28,10 +28,14 @@ namespace MassTransit.Testing
         public string Name { get; private set; }
         public Uri ExecuteAddress { get; private set; }
 
+        public event Action<IReceiveEndpointConfigurator> OnConfigureExecuteReceiveEndpoint;
+
         void ConfigureBus(IBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint(ExecuteQueueName, x =>
             {
+                OnConfigureExecuteReceiveEndpoint?.Invoke(x);
+
                 x.ExecuteActivityHost(_activityFactory, _configureExecute);
 
                 ExecuteAddress = x.InputAddress;

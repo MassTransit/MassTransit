@@ -11,20 +11,30 @@ namespace MassTransit.Courier.Contexts
         where TArguments : class
     {
         readonly ExecuteContext<TArguments> _context;
+        readonly TArguments _arguments;
+
+        public ExecuteContextProxy(ExecuteContext<TArguments> context, TArguments arguments)
+            : base(context)
+        {
+            _context = context;
+            _arguments = arguments;
+        }
 
         protected ExecuteContextProxy(ExecuteContext<TArguments> context)
             : base(context)
         {
             _context = context;
+            _arguments = context.Arguments;
         }
 
         protected ExecuteContextProxy(ExecuteContext<TArguments> context, IPayloadCache payloadCache)
             : base(context, payloadCache)
         {
             _context = context;
+            _arguments = context.Arguments;
         }
 
-        TArguments ExecuteContext<TArguments>.Arguments => _context.Arguments;
+        TArguments ExecuteContext<TArguments>.Arguments => _arguments;
 
         ExecutionResult ExecuteContext.Result
         {

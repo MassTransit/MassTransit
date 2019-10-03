@@ -1,5 +1,6 @@
 namespace MassTransit.Transformation.TransformConfigurators
 {
+    using System;
     using System.Reflection;
     using Initializers.PropertyProviders;
     using MessageData;
@@ -14,6 +15,9 @@ namespace MassTransit.Transformation.TransformConfigurators
 
         public LoadMessageDataTransformConfiguration(IMessageDataRepository repository, PropertyInfo property)
         {
+            if (repository == null)
+                throw new ArgumentNullException(nameof(repository));
+
             _property = property;
             _repository = repository;
         }

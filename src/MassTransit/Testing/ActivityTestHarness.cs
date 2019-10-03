@@ -35,10 +35,15 @@ namespace MassTransit.Testing
         public string Name { get; private set; }
         public Uri ExecuteAddress { get; private set; }
 
+        public event Action<IReceiveEndpointConfigurator> OnConfigureExecuteReceiveEndpoint;
+        public event Action<IReceiveEndpointConfigurator> OnConfigureCompensateReceiveEndpoint;
+
         void ConfigureBus(IBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint(CompensateQueueName, x =>
             {
+                OnConfigureCompensateReceiveEndpoint?.Invoke(x);
+
                 x.CompensateActivityHost(_activityFactory, _configureCompensate);
 
                 CompensateAddress = x.InputAddress;
@@ -46,6 +51,8 @@ namespace MassTransit.Testing
 
             configurator.ReceiveEndpoint(ExecuteQueueName, x =>
             {
+                OnConfigureExecuteReceiveEndpoint?.Invoke(x);
+
                 x.ExecuteActivityHost(CompensateAddress, _activityFactory, _configureExecute);
 
                 ExecuteAddress = x.InputAddress;

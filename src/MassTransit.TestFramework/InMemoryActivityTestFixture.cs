@@ -35,13 +35,16 @@ namespace MassTransit.TestFramework
             ActivityTestContexts.Add(typeof(T), context);
         }
 
-        protected void AddActivityContext<T, TArguments>(Func<T> activityFactory, Action<IExecuteActivityConfigurator<T, TArguments>> configureExecute = null)
+        protected ActivityTestContext AddActivityContext<T, TArguments>(Func<T> activityFactory,
+            Action<IExecuteActivityConfigurator<T, TArguments>> configureExecute = null)
             where TArguments : class
             where T : class, IExecuteActivity<TArguments>
         {
             var context = new ActivityTestContext<T, TArguments>(BusTestHarness, activityFactory, configureExecute);
 
             ActivityTestContexts.Add(typeof(T), context);
+
+            return context;
         }
 
         protected ActivityTestContext GetActivityContext<T>()

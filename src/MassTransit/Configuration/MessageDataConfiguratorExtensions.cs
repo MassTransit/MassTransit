@@ -34,7 +34,9 @@ namespace MassTransit
 
             configure?.Invoke(transformSpecification);
 
-            configurator.AddPipeSpecification(transformSpecification);
+            IPipeSpecification<ConsumeContext<T>> specification = transformSpecification;
+
+            configurator.AddPipeSpecification(specification);
         }
 
         /// <summary>
@@ -53,7 +55,9 @@ namespace MassTransit
 
             configure?.Invoke(transformSpecification);
 
-            configurator.AddPipeSpecification(transformSpecification);
+            IPipeSpecification<ConsumeContext<T>> specification = transformSpecification;
+
+            configurator.AddPipeSpecification(specification);
         }
     }
 }

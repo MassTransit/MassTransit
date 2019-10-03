@@ -8,18 +8,19 @@ namespace MassTransit.Transformation.Contexts
     /// Sits in front of the consume context and allows the inbound message to be
     /// transformed.
     /// </summary>
-    /// <typeparam name="TMessage"></typeparam>
-    public class ConsumeTransformContext<TMessage> :
+    /// <typeparam name="TInput"></typeparam>
+    public class ConsumeTransformContext<TInput> :
         BasePipeContext,
-        TransformContext<TMessage>
-        where TMessage : class
+        TransformContext<TInput>
+        where TInput : class
     {
-        readonly ConsumeContext<TMessage> _context;
+        readonly ConsumeContext _context;
 
-        public ConsumeTransformContext(ConsumeContext<TMessage> context)
+        public ConsumeTransformContext(ConsumeContext context, TInput input)
             : base(context)
         {
             _context = context;
+            Input = input;
         }
 
         Guid? MessageContext.MessageId => _context.MessageId;
@@ -38,6 +39,6 @@ namespace MassTransit.Transformation.Contexts
 
         public bool HasInput => true;
 
-        public TMessage Input => _context.Message;
+        public TInput Input { get; }
     }
 }
