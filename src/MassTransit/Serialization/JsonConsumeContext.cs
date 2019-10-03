@@ -9,6 +9,7 @@ namespace MassTransit.Serialization
     using Metadata;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Util;
 
 
     public class JsonConsumeContext :
