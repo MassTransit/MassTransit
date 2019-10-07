@@ -7,7 +7,7 @@ namespace MassTransit.Context
 
     public class SendContextProxy<TMessage> :
         SendContextProxy,
-        SendContext<TMessage>
+        PublishContext<TMessage>
         where TMessage : class
     {
         public SendContextProxy(SendContext context, TMessage message)
@@ -22,7 +22,7 @@ namespace MassTransit.Context
 
     public class SendContextProxy :
         BasePipeContext,
-        SendContext
+        PublishContext
     {
         readonly SendContext _context;
 
@@ -169,6 +169,12 @@ namespace MassTransit.Context
             where T : class
         {
             return _context.CreateProxy(message);
+        }
+
+        public bool Mandatory
+        {
+            get => _context.GetPayload<PublishContext>().Mandatory;
+            set => _context.GetPayload<PublishContext>().Mandatory = value;
         }
     }
 }
