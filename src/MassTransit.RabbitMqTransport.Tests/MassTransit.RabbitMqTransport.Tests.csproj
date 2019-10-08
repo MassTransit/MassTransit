@@ -16,4 +16,8 @@
     <ProjectReference Include="..\MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+    <Reference Include="System.Runtime"/>
+  </ItemGroup>
+
 </Project>
