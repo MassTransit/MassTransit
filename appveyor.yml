@@ -4,6 +4,7 @@ branches:
   only:
     - develop
     - master
+    - v6
 
 skip_tags: true
 
