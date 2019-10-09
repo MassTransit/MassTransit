@@ -329,6 +329,21 @@ var redis = ConnectionMultiplexer.Connect(redisConnectionString);
 var repository = new RedisSagaRepository<SagaInstance>(() => redis.GetDatabase());
 ```
 
+If you want to use a key prefix, you can do:
+
+```csharp
+var redisConnectionString = "redis://localhost:6379";
+var redis = ConnectionMultiplexer.Connect(redisConnectionString);
+
+var repository = new RedisSagaRepository<SagaInstance>(() => redis.GetDatabase(), keyPrefix: "your:key:prefix");
+```
+
+After do that your keys would look like:
+
+```
+your:key:prefix:c6cfd285-80b2-4c12-bcd3-56a00d994736
+```
+
 If you use a container, you can use the code like this (example for Autofac):
 
 ```csharp
