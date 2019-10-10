@@ -7,7 +7,6 @@ namespace Automatonymous
     /// Provides an address for the request service
     /// </summary>
     /// <typeparam name="TInstance"></typeparam>
-    /// <typeparam name="TData"></typeparam>
     /// <typeparam name="TException"></typeparam>
     /// <param name="context"></param>
     /// <returns></returns>
