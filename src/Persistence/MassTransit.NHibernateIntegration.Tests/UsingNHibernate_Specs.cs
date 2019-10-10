@@ -1,24 +1,11 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AutomatonymousIntegration.Tests
+﻿namespace MassTransit.NHibernateIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
+    using MassTransit.Saga;
     using NHibernate;
     using NHibernateIntegration;
-    using NHibernateIntegration.Saga;
-    using NHibernateIntegration.Tests;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -70,13 +57,10 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         Task<ShoppingChore> GetSaga(Guid id)
         {
             using (ISession session = _sessionFactory.OpenSession())
-            using (ITransaction transaction = session.BeginTransaction())
             {
                 var result = session.QueryOver<ShoppingChore>()
                     .Where(x => x.CorrelationId == id)
                     .SingleOrDefault<ShoppingChore>();
-
-                transaction.Commit();
 
                 return Task.FromResult(result);
             }
@@ -103,18 +87,12 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             Guid correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
 
             Guid? sagaId = await _repository.ShouldContainSaga(correlationId, TestTimeout);
             Assert.IsTrue(sagaId.HasValue);
 
-            await InputQueueSendEndpoint.Send(new SodOff
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
 
             sagaId = await _repository.ShouldNotContainSaga(correlationId, TestTimeout);
             Assert.IsFalse(sagaId.HasValue);
@@ -125,19 +103,13 @@ namespace MassTransit.AutomatonymousIntegration.Tests
         {
             Guid correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
 
             Guid? sagaId = await _repository.ShouldContainSaga(correlationId, TestTimeout);
 
             Assert.IsTrue(sagaId.HasValue);
 
-            await InputQueueSendEndpoint.Send(new GotHitByACar
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
 
             sagaId = await _repository.ShouldContainSaga(x => x.CorrelationId == correlationId && x.CurrentState == _machine.Dead.Name, TestTimeout);
 
