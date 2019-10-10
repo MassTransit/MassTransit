@@ -33,7 +33,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 return new ExistingCompensateActivityScopeContext<TActivity, TLog>(activityContext, ReleaseComponent);
             }
 
-            var scope = _kernel.CreateNewOrUseExistingMessageScope(context.ConsumeContext);
+            var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
             try
             {
                 var activity = _kernel.Resolve<TActivity>(new Arguments().AddTyped(context.Log));
