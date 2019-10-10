@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.Containers.Tests
 {
-    using System;
     using System.Threading.Tasks;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
