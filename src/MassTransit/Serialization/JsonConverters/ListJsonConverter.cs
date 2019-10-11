@@ -34,6 +34,8 @@ namespace MassTransit.Serialization.JsonConverters
                 if (typeInfo.ClosesType(typeof(IDictionary<,>))
                     || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>))
                     || typeInfo.ClosesType(typeof(Dictionary<,>))
+                    || typeInfo.ClosesType(typeof(IReadOnlyList<>))
+                    || typeInfo.ClosesType(typeof(IReadOnlyCollection<>))
                     || typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType) && enumerableType[0].ClosesType(typeof(KeyValuePair<,>)))
                 {
                     elementType = default;
@@ -41,9 +43,7 @@ namespace MassTransit.Serialization.JsonConverters
                 }
 
                 if (typeInfo.ClosesType(typeof(IList<>), out Type[] elementTypes)
-                    || typeInfo.ClosesType(typeof(IReadOnlyList<>), out elementTypes)
                     || typeInfo.ClosesType(typeof(List<>), out elementTypes)
-                    || typeInfo.ClosesType(typeof(IReadOnlyCollection<>), out elementTypes)
                     || typeInfo.ClosesType(typeof(IEnumerable<>), out elementTypes))
                 {
                     elementType = elementTypes[0];
