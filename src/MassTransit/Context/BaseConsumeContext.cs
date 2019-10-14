@@ -242,12 +242,12 @@ namespace MassTransit.Context
             return ReceiveContext.NotifyConsumed(context, duration, consumerType);
         }
 
-        public virtual Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        public virtual async Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            AddConsumeTask(GenerateFault(context, exception));
+            await GenerateFault(context, exception).ConfigureAwait(false);
 
-            return ReceiveContext.NotifyFaulted(context, duration, consumerType, exception);
+            await ReceiveContext.NotifyFaulted(context, duration, consumerType, exception).ConfigureAwait(false);
         }
 
         public virtual Task Publish<T>(T message, CancellationToken cancellationToken)

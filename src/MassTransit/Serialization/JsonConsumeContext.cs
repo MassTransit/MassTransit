@@ -33,8 +33,7 @@ namespace MassTransit.Serialization
         Uri _responseAddress;
         Uri _sourceAddress;
 
-        public JsonConsumeContext(JsonSerializer deserializer, ReceiveContext receiveContext,
-            MessageEnvelope envelope)
+        public JsonConsumeContext(JsonSerializer deserializer, ReceiveContext receiveContext, MessageEnvelope envelope)
             : base(receiveContext)
         {
             if (envelope == null)
@@ -45,10 +44,10 @@ namespace MassTransit.Serialization
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, ConsumeContext>();
-            _consumeTasks = new PendingTaskCollection(receiveContext.CancellationToken);
+            _consumeTasks = new PendingTaskCollection(4);
         }
 
-        public override Task ConsumeCompleted => _consumeTasks.Completed;
+        public override Task ConsumeCompleted => _consumeTasks.Completed(CancellationToken);
 
         public override Guid? MessageId => _messageId ?? (_messageId = ConvertIdToGuid(_envelope.MessageId));
         public override Guid? RequestId => _requestId ?? (_requestId = ConvertIdToGuid(_envelope.RequestId));

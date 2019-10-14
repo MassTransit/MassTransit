@@ -43,7 +43,7 @@ namespace MassTransit.Context
             _headers = new Lazy<Headers>(() => new JsonHeaders(ObjectTypeDeserializer.Instance, HeaderProvider));
 
             _contentType = new Lazy<ContentType>(GetContentType);
-            _receiveTasks = new PendingTaskCollection(_cancellationTokenSource.Token);
+            _receiveTasks = new PendingTaskCollection(4);
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(GetSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(GetPublishEndpointProvider);
@@ -64,7 +64,7 @@ namespace MassTransit.Context
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
         public IPublishTopology PublishTopology => _receiveEndpointContext.Publish;
 
-        public Task ReceiveCompleted => _receiveTasks.Completed;
+        public Task ReceiveCompleted => _receiveTasks.Completed(CancellationToken);
 
         public void AddReceiveTask(Task task)
         {

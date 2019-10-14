@@ -40,10 +40,10 @@ namespace MassTransit.Serialization
             _binaryHeaders = headers;
             _supportedTypes = GetSupportedMessageTypes().ToArray();
             _messageTypes = new Dictionary<Type, ConsumeContext>();
-            _consumeTasks = new PendingTaskCollection(receiveContext.CancellationToken);
+            _consumeTasks = new PendingTaskCollection(4);
         }
 
-        public override Task ConsumeCompleted => _consumeTasks.Completed;
+        public override Task ConsumeCompleted => _consumeTasks.Completed(CancellationToken);
 
         public override Guid? MessageId => _messageId ?? (_messageId = GetHeaderGuid(BinaryMessageSerializer.MessageIdKey));
         public override Guid? RequestId => _requestId ?? (_requestId = GetHeaderGuid(BinaryMessageSerializer.RequestIdKey));

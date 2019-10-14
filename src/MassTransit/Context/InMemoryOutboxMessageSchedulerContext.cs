@@ -42,7 +42,7 @@
                 tasks.Add(_context.CancelScheduledSend(scheduledMessage.Destination, scheduledMessage.TokenId));
             }
 
-            return tasks.Completed;
+            return tasks.Completed();
         }
 
         Task IMessageScheduler.CancelScheduledSend(Guid tokenId)

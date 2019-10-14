@@ -9,7 +9,6 @@ namespace MassTransit.Context
         ConsumeContextProxy,
         OutboxContext
     {
-        readonly ConsumeContext _context;
         readonly TaskCompletionSource<InMemoryOutboxConsumeContext> _clearToSend;
         readonly List<Func<Task>> _pendingActions;
         readonly InMemoryOutboxMessageSchedulerContext _outboxSchedulerContext;
@@ -17,8 +16,6 @@ namespace MassTransit.Context
         public InMemoryOutboxConsumeContext(ConsumeContext context)
             : base(context)
         {
-            _context = context;
-
             ReceiveContext = new InMemoryOutboxReceiveContext(this, context.ReceiveContext);
 
             _pendingActions = new List<Func<Task>>();
