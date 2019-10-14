@@ -1,7 +1,10 @@
 ﻿namespace MassTransit.Initializers.Contexts
 {
+    using GreenPipes;
+
+
     public class DynamicInitializeContext<TMessage> :
-        BaseInitializeContext,
+        ProxyPipeContext,
         InitializeContext<TMessage>
         where TMessage : class
     {
@@ -16,9 +19,9 @@
 
         public TMessage Message { get; }
 
-        public override int Depth { get; }
+        public int Depth { get; }
 
-        public override InitializeContext Parent { get; }
+        public InitializeContext Parent { get; }
 
         public InitializeContext<TMessage, T> CreateInputContext<T>(T input)
             where T : class
@@ -26,7 +29,8 @@
             return new DynamicInitializeContext<TMessage, T>(this, Message, input);
         }
 
-        public override bool TryGetParent<T>(out InitializeContext<T> parentContext)
+        public bool TryGetParent<T>(out InitializeContext<T> parentContext)
+            where T : class
         {
             if (this is InitializeContext<T> parent || (Parent != null && Parent.TryGetParent(out parent)))
             {
@@ -36,6 +40,12 @@
 
             parentContext = default;
             return false;
+        }
+
+        public InitializeContext<T> CreateMessageContext<T>(T message)
+            where T : class
+        {
+            return new DynamicInitializeContext<T>(this, message);
         }
     }
 

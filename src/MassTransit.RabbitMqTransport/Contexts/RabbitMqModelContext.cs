@@ -9,7 +9,6 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Integration;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
@@ -17,21 +16,23 @@
 
 
     public class RabbitMqModelContext :
-        BasePipeContext,
+        ScopePipeContext,
         ModelContext,
         IAsyncDisposable
     {
         readonly ConnectionContext _connectionContext;
         readonly IModel _model;
+        readonly CancellationToken _cancellationToken;
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         ulong _publishTagMax;
 
         public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
-            : base(new PayloadCacheScope(connectionContext), cancellationToken)
+            : base(connectionContext)
         {
             _connectionContext = connectionContext;
             _model = model;
+            _cancellationToken = cancellationToken;
 
             _published = new ConcurrentDictionary<ulong, PendingPublish>();
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
@@ -80,6 +81,8 @@
 
             return TaskUtil.Completed;
         }
+
+        CancellationToken PipeContext.CancellationToken => _cancellationToken;
 
         IModel ModelContext.Model => _model;
 

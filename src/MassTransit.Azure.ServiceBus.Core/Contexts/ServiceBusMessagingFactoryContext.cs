@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
 
 
     public class ServiceBusMessagingFactoryContext :
@@ -16,7 +15,7 @@
         readonly MessagingFactory _messagingFactory;
 
         public ServiceBusMessagingFactoryContext(MessagingFactory messagingFactory, CancellationToken cancellationToken)
-            : base(new PayloadCache(), cancellationToken)
+            : base(cancellationToken)
         {
             _messagingFactory = messagingFactory;
         }

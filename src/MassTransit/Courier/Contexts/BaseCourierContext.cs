@@ -7,7 +7,7 @@ namespace MassTransit.Courier.Contexts
 
 
     public abstract class BaseCourierContext :
-        ConsumeContextProxyScope<RoutingSlip>,
+        ConsumeContextScope<RoutingSlip>,
         CourierContext
     {
         readonly Stopwatch _timer;

@@ -7,7 +7,6 @@ namespace MassTransit.Context
     using Converters;
     using Events;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Initializers;
     using Metadata;
     using Pipeline.Pipes;
@@ -15,34 +14,29 @@ namespace MassTransit.Context
 
 
     public abstract class BaseConsumeContext :
-        BasePipeContext,
         ConsumeContext
     {
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
 
         protected BaseConsumeContext(ReceiveContext receiveContext)
-            : base(receiveContext)
         {
             ReceiveContext = receiveContext;
 
             _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
         }
 
-        protected BaseConsumeContext(ConsumeContext consumeContext)
-            : base(consumeContext)
-        {
-            ReceiveContext = consumeContext.ReceiveContext;
+        public virtual CancellationToken CancellationToken => ReceiveContext.CancellationToken;
 
-            _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
-        }
+        public abstract bool HasPayloadType(Type payloadType);
 
-        protected BaseConsumeContext(ConsumeContext consumeContext, IPayloadCache payloadCache)
-            : base(payloadCache, consumeContext.CancellationToken)
-        {
-            ReceiveContext = consumeContext.ReceiveContext;
+        public abstract bool TryGetPayload<T>(out T payload)
+            where T : class;
 
-            _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
-        }
+        public abstract T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
+            where T : class;
+
+        public abstract T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+            where T : class;
 
         public virtual ReceiveContext ReceiveContext { get; }
 

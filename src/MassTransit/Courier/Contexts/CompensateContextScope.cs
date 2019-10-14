@@ -4,29 +4,20 @@ namespace MassTransit.Courier.Contexts
     using System.Collections.Generic;
 
 
-    public class CompensateContextProxy<TLog> :
-        CourierContextProxy,
+    public class CompensateContextScope<TLog> :
+        CourierContextScope,
         CompensateContext<TLog>
         where TLog : class
     {
         readonly CompensateContext<TLog> _context;
-        readonly TLog _log;
 
-        public CompensateContextProxy(CompensateContext<TLog> context, TLog log)
+        protected CompensateContextScope(CompensateContext<TLog> context)
             : base(context)
         {
             _context = context;
-            _log = log;
         }
 
-        protected CompensateContextProxy(CompensateContext<TLog> context)
-            : base(context)
-        {
-            _context = context;
-            _log = context.Log;
-        }
-
-        TLog CompensateContext<TLog>.Log => _log;
+        TLog CompensateContext<TLog>.Log => _context.Log;
 
         CompensateActivityContext<TActivity, TLog> CompensateContext<TLog>.CreateActivityContext<TActivity>(TActivity activity)
         {

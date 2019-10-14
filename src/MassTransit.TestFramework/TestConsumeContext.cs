@@ -9,7 +9,6 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using GreenPipes.Util;
     using Transports;
 
@@ -22,7 +21,6 @@
         ReceiveContext _receiveContext;
 
         public TestConsumeContext(TMessage message)
-            : base(new PayloadCache())
         {
             Message = message;
 

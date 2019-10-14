@@ -5,11 +5,10 @@
     using Context;
     using MassTransit.Saga;
     using Metadata;
-    using Util;
 
 
     public class MessageSessionSagaConsumeContext<TSaga, TMessage> :
-        ConsumeContextProxyScope<TMessage>,
+        ConsumeContextScope<TMessage>,
         SagaConsumeContext<TSaga, TMessage>
         where TMessage : class
         where TSaga : class, ISaga

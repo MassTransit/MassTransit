@@ -59,7 +59,7 @@
 
         public InitializeContext<TMessage> Create(PipeContext context)
         {
-            var baseContext = new BaseInitializeContext(context);
+            var baseContext = new ProxyInitializeContext(context);
 
             return _factory.Create(baseContext);
         }

@@ -8,7 +8,7 @@
 
 
     public class MartenSagaConsumeContext<TSaga, TMessage> :
-        ConsumeContextProxyScope<TMessage>,
+        ConsumeContextScope<TMessage>,
         SagaConsumeContext<TSaga, TMessage>
         where TMessage : class
         where TSaga : class, ISaga

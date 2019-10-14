@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Automatonymous;
     using GreenPipes;
     using MassTransit.Saga;
@@ -37,8 +36,8 @@
 
                     e.StateMachineSaga(_machine, _repository, x =>
                     {
-                        x.Message<Start>(m => m.UseConsoleLog(context => Task.FromResult("Hello")));
-                        x.Message<Stop>(m => m.UseConsoleLog(context => Task.FromResult("Hello")));
+                        x.Message<Start>(m => m.UseExecute(context => Console.WriteLine("Hello")));
+                        x.Message<Stop>(m => m.UseExecute(context => Console.WriteLine("Hello")));
                         x.SagaMessage<Start>(m => m.UseExecute(context =>
                         {
                         }));

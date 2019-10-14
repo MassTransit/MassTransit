@@ -7,7 +7,6 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Metadata;
     using Serialization;
     using Topology;
@@ -16,7 +15,7 @@ namespace MassTransit.Context
 
 
     public abstract class BaseReceiveContext :
-        BasePipeContext,
+        ScopePipeContext,
         ReceiveContext,
         IDisposable
     {
@@ -31,16 +30,11 @@ namespace MassTransit.Context
         readonly ReceiveEndpointContext _receiveEndpointContext;
 
         protected BaseReceiveContext(Uri inputAddress, bool redelivered, ReceiveEndpointContext receiveEndpointContext)
-            : this(inputAddress, redelivered, new CancellationTokenSource(), receiveEndpointContext)
-        {
-        }
-
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, CancellationTokenSource source, ReceiveEndpointContext receiveEndpointContext)
-            : base(new PayloadCacheScope(receiveEndpointContext), source.Token)
+            : base(receiveEndpointContext)
         {
             _receiveTimer = Stopwatch.StartNew();
 
-            _cancellationTokenSource = source;
+            _cancellationTokenSource = new CancellationTokenSource();
             _receiveEndpointContext = receiveEndpointContext;
 
             InputAddress = inputAddress;
@@ -49,7 +43,7 @@ namespace MassTransit.Context
             _headers = new Lazy<Headers>(() => new JsonHeaders(ObjectTypeDeserializer.Instance, HeaderProvider));
 
             _contentType = new Lazy<ContentType>(GetContentType);
-            _receiveTasks = new PendingTaskCollection(source.Token);
+            _receiveTasks = new PendingTaskCollection(_cancellationTokenSource.Token);
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(GetSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(GetPublishEndpointProvider);
@@ -61,6 +55,8 @@ namespace MassTransit.Context
         {
             _cancellationTokenSource.Dispose();
         }
+
+        CancellationToken PipeContext.CancellationToken => _cancellationTokenSource.Token;
 
         public bool IsDelivered { get; private set; }
         public bool IsFaulted { get; private set; }

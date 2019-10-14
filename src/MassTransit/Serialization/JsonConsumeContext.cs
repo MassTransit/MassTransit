@@ -13,7 +13,7 @@ namespace MassTransit.Serialization
 
 
     public class JsonConsumeContext :
-        BaseConsumeContext
+        DeserializerConsumeContext
     {
         readonly PendingTaskCollection _consumeTasks;
         readonly JsonSerializer _deserializer;

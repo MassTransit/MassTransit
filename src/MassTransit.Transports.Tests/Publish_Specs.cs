@@ -69,7 +69,7 @@ namespace MassTransit.Transports.Tests
             [Test]
             public void Should_not_call_the_send_observer()
             {
-                Assert.That(async () => await _send.PreSent.UntilCompletedOrTimeout(5000), Throws.TypeOf<TimeoutException>());
+                Assert.That(async () => await _send.PreSent.OrTimeout(s:5), Throws.TypeOf<TimeoutException>());
             }
 
             ConsumerTestHarness<TestCommandConsumer> _consumer;

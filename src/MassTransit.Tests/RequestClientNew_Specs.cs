@@ -244,7 +244,7 @@ namespace MassTransit.Tests
                         var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
 
                         await client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token)
-                            .UntilCompletedOrTimeout(TimeSpan.FromSeconds(5))
+                            .OrTimeout(TimeSpan.FromSeconds(5))
                             .ConfigureAwait(false);
                     }
                 }
@@ -273,7 +273,7 @@ namespace MassTransit.Tests
                         var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
 
                         await client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token)
-                            .UntilCompletedOrTimeout(TimeSpan.FromSeconds(5))
+                            .OrTimeout(TimeSpan.FromSeconds(5))
                             .ConfigureAwait(false);
                     }
                 }

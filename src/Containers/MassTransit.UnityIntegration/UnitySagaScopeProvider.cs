@@ -2,7 +2,6 @@ namespace MassTransit.UnityIntegration
 {
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Saga;
     using Scoping;
     using Scoping.SagaContexts;
@@ -33,7 +32,7 @@ namespace MassTransit.UnityIntegration
             var scope = _container.CreateChildContainer();
             try
             {
-                var proxy = new ConsumeContextProxy<T>(context, new PayloadCacheScope(context));
+                var proxy = new ConsumeContextScope<T>(context);
 
                 var consumerScope = scope;
                 proxy.GetOrAddPayload(() => consumerScope);
@@ -56,7 +55,7 @@ namespace MassTransit.UnityIntegration
             var scope = _container.CreateChildContainer();
             try
             {
-                var proxy = new SagaQueryConsumeContextProxy<TSaga, T>(context, new PayloadCacheScope(context), context.Query);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query);
 
                 var sagaScope = scope;
                 proxy.GetOrAddPayload(() => sagaScope);

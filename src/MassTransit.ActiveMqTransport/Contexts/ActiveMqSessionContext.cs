@@ -7,25 +7,26 @@
     using Apache.NMS.Util;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Util;
 
 
     public class ActiveMqSessionContext :
-        BasePipeContext,
+        ScopePipeContext,
         SessionContext,
         IAsyncDisposable
     {
         readonly ConnectionContext _connectionContext;
         readonly ISession _session;
+        readonly CancellationToken _cancellationToken;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         readonly MessageProducerCache _messageProducerCache;
 
         public ActiveMqSessionContext(ConnectionContext connectionContext, ISession session, CancellationToken cancellationToken)
-            : base(new PayloadCacheScope(connectionContext), cancellationToken)
+            : base(connectionContext)
         {
             _connectionContext = connectionContext;
             _session = session;
+            _cancellationToken = cancellationToken;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
 
@@ -52,6 +53,8 @@
                 _session.Dispose();
             }
         }
+
+        CancellationToken PipeContext.CancellationToken => _cancellationToken;
 
         ISession SessionContext.Session => _session;
 

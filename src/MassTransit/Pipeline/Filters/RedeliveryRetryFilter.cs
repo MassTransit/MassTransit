@@ -40,26 +40,29 @@
         {
             using (RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context))
             {
-                await _observers.PostCreate(policyContext).ConfigureAwait(false);
+                if (_observers.Count > 0)
+                    await _observers.PostCreate(policyContext).ConfigureAwait(false);
 
                 try
                 {
                     await next.Send(policyContext.Context).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException exception) when (exception.CancellationToken == context.CancellationToken)
+                catch (OperationCanceledException exception)
+                    when (exception.CancellationToken == context.CancellationToken || exception.CancellationToken == policyContext.Context.CancellationToken)
                 {
                     throw;
                 }
                 catch (Exception exception)
                 {
-                    if (context.CancellationToken.IsCancellationRequested)
-                        context.CancellationToken.ThrowIfCancellationRequested();
+                    if (policyContext.Context.CancellationToken.IsCancellationRequested)
+                        policyContext.Context.CancellationToken.ThrowIfCancellationRequested();
 
                     if (!policyContext.CanRetry(exception, out RetryContext<TContext> retryContext))
                     {
                         await retryContext.RetryFaulted(exception).ConfigureAwait(false);
 
-                        await _observers.RetryFault(retryContext).ConfigureAwait(false);
+                        if (_observers.Count > 0)
+                            await _observers.RetryFault(retryContext).ConfigureAwait(false);
 
                         if (_retryPolicy.IsHandled(exception))
                             context.GetOrAddPayload(() => retryContext);
@@ -74,7 +77,8 @@
                         {
                             await retryContext.RetryFaulted(exception).ConfigureAwait(false);
 
-                            await _observers.RetryFault(retryContext).ConfigureAwait(false);
+                            if (_observers.Count > 0)
+                                await _observers.RetryFault(retryContext).ConfigureAwait(false);
 
                             if (_retryPolicy.IsHandled(exception))
                                 context.GetOrAddPayload(() => retryContext);
@@ -83,26 +87,24 @@
                         }
                     }
 
-                    await _observers.PostFault(retryContext).ConfigureAwait(false);
+                    if (_observers.Count > 0)
+                        await _observers.PostFault(retryContext).ConfigureAwait(false);
 
                     try
                     {
                         if (!context.TryGetPayload(out MessageRedeliveryContext redeliveryContext))
-                            throw new ContextException(
-                                "The message redelivery context was not available to delay the message", exception);
+                            throw new ContextException("The message redelivery context was not available to delay the message", exception);
 
                         var delay = retryContext.Delay ?? TimeSpan.Zero;
 
                         await redeliveryContext.ScheduleRedelivery(delay).ConfigureAwait(false);
 
                         await context.NotifyConsumed(context, context.ReceiveContext.ElapsedTime,
-                                TypeMetadataCache<RedeliveryRetryFilter<TContext, TMessage>>.ShortName)
-                            .ConfigureAwait(false);
+                            TypeMetadataCache<RedeliveryRetryFilter<TContext, TMessage>>.ShortName).ConfigureAwait(false);
                     }
                     catch (Exception redeliveryException)
                     {
-                        throw new ContextException("The message delivery could not be rescheduled",
-                            new AggregateException(redeliveryException, exception));
+                        throw new ContextException("The message delivery could not be rescheduled", new AggregateException(redeliveryException, exception));
                     }
                 }
             }

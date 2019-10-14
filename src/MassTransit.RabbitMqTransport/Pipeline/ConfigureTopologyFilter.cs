@@ -32,7 +32,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 await ConfigureTopology(context).ConfigureAwait(false);
 
                 context.GetOrAddPayload(() => _settings);
-            }).ConfigureAwait(false);
+            }, () => new Context()).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
         }
@@ -81,6 +81,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             LogContext.Debug?.Log("Bind exchange to queue {Binding}", binding);
 
             return context.QueueBind(binding.Destination.QueueName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments);
+        }
+
+
+        class Context :
+            ConfigureTopologyContext<TSettings>
+        {
         }
     }
 }

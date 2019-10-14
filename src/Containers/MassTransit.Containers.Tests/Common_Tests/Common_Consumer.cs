@@ -68,10 +68,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             await sendEndpoint.Send(new SimpleMessageClass(name));
 
-            SimplerConsumer lastConsumer = await SimplerConsumer.LastConsumer.UntilCompletedOrCanceled(TestCancellationToken);
+            SimplerConsumer lastConsumer = await SimplerConsumer.LastConsumer.OrCanceled(TestCancellationToken);
             lastConsumer.ShouldNotBe(null);
 
-            SimpleMessageInterface last = await lastConsumer.Last.UntilCompletedOrCanceled(TestCancellationToken);
+            SimpleMessageInterface last = await lastConsumer.Last.OrCanceled(TestCancellationToken);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

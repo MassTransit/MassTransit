@@ -104,7 +104,7 @@ namespace MassTransit.ApplicationInsights.Tests
             mockConsumeContext.Setup(c => c.RequestId).Returns(requestId);
             mockConsumeContext.Setup(c => c.DestinationAddress).Returns(destinationAddress);
 
-            var consumeContextProxy = new ConsumeContextProxy<PingMessage>(mockConsumeContext.Object, new Mock<IPayloadCache>().Object);
+            var consumeContextProxy = new ConsumeContextProxy<PingMessage>(mockConsumeContext.Object);
 
             var capturedRequestTelemetry = default(RequestTelemetry);
 
@@ -146,7 +146,7 @@ namespace MassTransit.ApplicationInsights.Tests
             mockConsumeContext.Setup(c => c.RequestId).Returns(requestId);
             mockConsumeContext.Setup(c => c.DestinationAddress).Returns(destinationAddress);
 
-            var consumeContextProxy = new ConsumeContextProxy<PingMessage>(mockConsumeContext.Object, new Mock<IPayloadCache>().Object);
+            var consumeContextProxy = new ConsumeContextProxy<PingMessage>(mockConsumeContext.Object);
 
             var capturedTelemetry = default(RequestTelemetry);
 
@@ -156,7 +156,7 @@ namespace MassTransit.ApplicationInsights.Tests
 
             var configuration = TelemetryConfiguration.CreateDefault();
             configuration.TelemetryInitializers.Add(new CopyPropertiesTelemetryInitializer(capturedTelemetry));
-            
+
             var telemetryClient = new TelemetryClient(configuration);
             filter = new ApplicationInsightsConsumeFilter<PingMessage>(telemetryClient, "", "", (h, c) => { });
 

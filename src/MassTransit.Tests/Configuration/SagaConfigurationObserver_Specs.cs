@@ -29,8 +29,8 @@ namespace MassTransit.Tests.Configuration
 
                     e.Saga(new InMemorySagaRepository<MySaga>(), x =>
                     {
-                        x.Message<PingMessage>(m => m.UseConsoleLog(context => Task.FromResult("Hello")));
-                        x.Message<PongMessage>(m => m.UseConsoleLog(context => Task.FromResult("Hello")));
+                        x.Message<PingMessage>(m => m.UseExecute(context => Console.WriteLine("Hello")));
+                        x.Message<PongMessage>(m => m.UseExecute(context => Console.WriteLine("Hello")));
                         x.SagaMessage<PingMessage>(m => m.UseExecute(context =>
                         {
                         }));

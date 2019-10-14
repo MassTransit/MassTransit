@@ -6,7 +6,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using Configuration;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using RabbitMQ.Client;
     using Topology;
     using Util;
@@ -22,7 +21,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public RabbitMqConnectionContext(IConnection connection, IRabbitMqHostConfiguration configuration, IRabbitMqHostTopology hostTopology,
             string description, CancellationToken cancellationToken)
-            : base(new PayloadCache(), cancellationToken)
+            : base(cancellationToken)
         {
             _connection = connection;
 

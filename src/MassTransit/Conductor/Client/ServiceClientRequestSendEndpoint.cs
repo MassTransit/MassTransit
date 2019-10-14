@@ -41,7 +41,7 @@ namespace MassTransit.Conductor.Client
 
         public async Task Send(TMessage message, IPipe<SendContext<TMessage>> pipe, CancellationToken cancellationToken)
         {
-            var messageClient = await _messageClient.UntilCompletedOrCanceled(cancellationToken).ConfigureAwait(false);
+            var messageClient = await _messageClient.OrCanceled(cancellationToken).ConfigureAwait(false);
 
             var sendEndpoint = await messageClient.GetServiceSendEndpoint(_sendEndpointProvider, message, cancellationToken).ConfigureAwait(false);
 

@@ -119,7 +119,7 @@ namespace MassTransit.HttpTransport.Transport
             {
                 try
                 {
-                    await _deliveryComplete.Task.UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+                    await _deliveryComplete.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {

@@ -3,12 +3,11 @@ namespace MassTransit.Courier.Contexts
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Util;
 
 
     public class RetryCompensateContext<TLog> :
-        CompensateContextProxy<TLog>,
+        CompensateContextScope<TLog>,
         ConsumeRetryContext
         where TLog : class
     {
@@ -16,7 +15,7 @@ namespace MassTransit.Courier.Contexts
         readonly CompensateContext<TLog> _context;
 
         public RetryCompensateContext(CompensateContext<TLog> context, IRetryPolicy retryPolicy, RetryContext retryContext)
-            : base(context, new PayloadCacheScope(context))
+            : base(context)
         {
             _retryPolicy = retryPolicy;
             _context = context;

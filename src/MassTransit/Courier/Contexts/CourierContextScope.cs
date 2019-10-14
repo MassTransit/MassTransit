@@ -5,13 +5,13 @@ namespace MassTransit.Courier.Contexts
     using Contracts;
 
 
-    public abstract class CourierContextProxy :
-        ConsumeContextProxy<RoutingSlip>,
+    public abstract class CourierContextScope :
+        ConsumeContextScope<RoutingSlip>,
         CourierContext
     {
         readonly CourierContext _courierContext;
 
-        protected CourierContextProxy(CourierContext courierContext)
+        protected CourierContextScope(CourierContext courierContext)
             : base(courierContext)
         {
             _courierContext = courierContext;

@@ -4,22 +4,15 @@ namespace MassTransit.Courier.Contexts
     using System.Collections.Generic;
 
 
-    public class ExecuteContextProxy<TArguments> :
-        CourierContextProxy,
+    public class ExecuteContextScope<TArguments> :
+        CourierContextScope,
         ExecuteContext<TArguments>
         where TArguments : class
     {
         readonly ExecuteContext<TArguments> _context;
         readonly TArguments _arguments;
 
-        public ExecuteContextProxy(ExecuteContext<TArguments> context, TArguments arguments)
-            : base(context)
-        {
-            _context = context;
-            _arguments = arguments;
-        }
-
-        protected ExecuteContextProxy(ExecuteContext<TArguments> context)
+        protected ExecuteContextScope(ExecuteContext<TArguments> context)
             : base(context)
         {
             _context = context;

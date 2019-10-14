@@ -86,12 +86,12 @@
 
         async Task ActiveAndActualAgentsCompleted(StopSupervisorContext context)
         {
-            await Task.WhenAll(context.Agents.Select(x => Completed)).UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+            await Task.WhenAll(context.Agents.Select(x => Completed)).OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
             if (Tracker.ActiveDeliveryCount > 0)
                 try
                 {
-                    await _deliveryComplete.Task.UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+                    await _deliveryComplete.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {

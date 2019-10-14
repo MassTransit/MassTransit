@@ -10,7 +10,7 @@ namespace MassTransit.Transformation.Contexts
     /// </summary>
     /// <typeparam name="TInput"></typeparam>
     public class ConsumeTransformContext<TInput> :
-        BasePipeContext,
+        ProxyPipeContext,
         TransformContext<TInput>
         where TInput : class
     {

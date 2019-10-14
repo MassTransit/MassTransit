@@ -13,7 +13,7 @@ namespace MassTransit.Serialization
     /// A static consume context from the Binary serializer
     /// </summary>
     public class StaticConsumeContext :
-        BaseConsumeContext
+        DeserializerConsumeContext
     {
         readonly Header[] _binaryHeaders;
         readonly object _message;

@@ -55,7 +55,7 @@ namespace MassTransit.Pipeline.Pipes
                 return _output.Send(consumerContext);
 
             if (context.TryGetMessage(out ConsumeContext<TMessage> messageContext))
-                return _output.Send(new ConsumerConsumeContextProxy<TConsumer, TMessage>(messageContext, context.Consumer));
+                return _output.Send(new ConsumerConsumeContextProxyScope<TConsumer, TMessage>(messageContext, context.Consumer));
 
             throw new ArgumentException($"THe message could not be retrieved: {TypeMetadataCache<TMessage>.ShortName}", nameof(context));
         }

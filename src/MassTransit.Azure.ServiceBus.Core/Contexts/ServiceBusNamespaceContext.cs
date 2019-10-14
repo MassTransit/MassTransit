@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
     using Util;
@@ -20,7 +19,7 @@
         readonly NamespaceManager _namespaceManager;
 
         public ServiceBusNamespaceContext(NamespaceManager namespaceManager, CancellationToken cancellationToken)
-            : base(new PayloadCache(), cancellationToken)
+            : base(cancellationToken)
         {
             _namespaceManager = namespaceManager;
         }

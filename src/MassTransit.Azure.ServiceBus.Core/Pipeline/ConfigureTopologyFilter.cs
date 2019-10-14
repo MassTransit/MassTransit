@@ -48,7 +48,7 @@
                             LogContext.Warning?.Log(ex, "Failed to remove one or more subscriptions from the endpoint.");
                         }
                     });
-            }).ConfigureAwait(false);
+            }, () => new Context()).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
         }
@@ -108,6 +108,12 @@
         {
             return context.CreateTopicSubscription(subscription.Subscription.SubscriptionDescription, subscription.Subscription.Rule,
                 subscription.Subscription.Filter);
+        }
+
+
+        class Context :
+            ConfigureTopologyContext<TSettings>
+        {
         }
     }
 }

@@ -1,15 +1,14 @@
 namespace MassTransit.Initializers.Contexts
 {
-    using System.Threading;
     using GreenPipes;
 
 
-    public class BaseInitializeContext :
-        BasePipeContext,
+    public class ProxyInitializeContext :
+        ProxyPipeContext,
         InitializeContext
     {
-        public BaseInitializeContext(CancellationToken cancellationToken)
-            : base(cancellationToken)
+        public ProxyInitializeContext(PipeContext context)
+            : base(context)
         {
         }
 

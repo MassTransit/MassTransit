@@ -49,7 +49,7 @@ namespace MassTransit.Util
             do
             {
                 lock (_tasks)
-                    tasks = _tasks.Values.Where(x => x.Status != TaskStatus.RanToCompletion).ToArray();
+                    tasks = _tasks.Values.Where(x => !x.IsCompletedSuccessfully()).ToArray();
 
                 if (tasks.Length == 0)
                     break;
@@ -57,7 +57,7 @@ namespace MassTransit.Util
                 var whenAll = Task.WhenAll(tasks);
 
                 if (_cancellationToken.CanBeCanceled)
-                    whenAll = whenAll.UntilCompletedOrCanceled(_cancellationToken);
+                    whenAll = whenAll.OrCanceled(_cancellationToken);
 
                 await whenAll.ConfigureAwait(false);
             }

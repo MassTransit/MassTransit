@@ -11,7 +11,7 @@ namespace MassTransit.Transformation.Contexts
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
     public class SendTransformContext<TMessage> :
-        BasePipeContext,
+        ProxyPipeContext,
         TransformContext<TMessage>
         where TMessage : class
     {

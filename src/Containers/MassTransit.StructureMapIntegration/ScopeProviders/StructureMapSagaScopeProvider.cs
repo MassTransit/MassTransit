@@ -4,7 +4,6 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
     using System.Collections.Generic;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Saga;
     using Scoping;
     using Scoping.SagaContexts;
@@ -49,7 +48,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
             try
             {
-                var proxy = new ConsumeContextProxy<T>(context, new PayloadCacheScope(context));
+                var proxy = new ConsumeContextScope<T>(context);
                 proxy.UpdatePayload(nestedContainer);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
@@ -77,7 +76,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
             try
             {
-                var proxy = new SagaQueryConsumeContextProxy<TSaga, T>(context, new PayloadCacheScope(context), context.Query);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query);
                 proxy.UpdatePayload(nestedContainer);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)

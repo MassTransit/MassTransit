@@ -5,7 +5,7 @@ namespace MassTransit.Transformation.Contexts
 
 
     public class MessageTransformPropertyContext<TProperty, TInput> :
-        BasePipeContext,
+        ProxyPipeContext,
         TransformPropertyContext<TProperty, TInput>
         where TInput : class
     {

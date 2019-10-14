@@ -185,7 +185,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
             {
                 await busControl.Publish(new PingMessage());
 
-                await received.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(30));
+                await received.Task.OrTimeout(TimeSpan.FromSeconds(30));
             }
             finally
             {
@@ -290,7 +290,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             Assert.That(handler2.Consumed.Select().Any(), Is.True);
 
-            await harness.Stop().UntilCompletedOrTimeout(5000);
+            await harness.Stop().OrTimeout(s:5);
 
             await harness.Stop();
         }
@@ -413,7 +413,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
             var publishTasks = messageTypes.Select(m => busControl.Publish(Activator.CreateInstance(m)));
             await Task.WhenAll(publishTasks);
 
-            var awaitTasks = tasksCompleted.Values.Select(async t => await t.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(20)));
+            var awaitTasks = tasksCompleted.Values.Select(async t => await t.Task.OrTimeout(TimeSpan.FromSeconds(20)));
             await Task.WhenAll(awaitTasks);
 
             await busControl.StopAsync();

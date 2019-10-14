@@ -11,7 +11,7 @@
 
 
     public class HttpResponseReceiveEndpointContext :
-        BasePipeContext,
+        ProxyPipeContext,
         ReceiveEndpointContext
     {
         readonly HttpContext _httpContext;

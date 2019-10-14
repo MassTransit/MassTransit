@@ -175,7 +175,7 @@ namespace MassTransit.Policies
             PipeContext
         {
             public InlinePipeContext(CancellationToken cancellationToken)
-                : base(new PayloadCache(), cancellationToken)
+                : base(cancellationToken)
             {
             }
         }

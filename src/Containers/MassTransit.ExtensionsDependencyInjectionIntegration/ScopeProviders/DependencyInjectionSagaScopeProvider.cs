@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Microsoft.Extensions.DependencyInjection;
     using Saga;
     using Scoping;
@@ -46,7 +45,7 @@
             {
                 serviceScope.UpdateScope(context);
 
-                var proxy = new ConsumeContextProxy<T>(context, new PayloadCacheScope(context));
+                var proxy = new ConsumeContextScope<T>(context);
                 proxy.UpdatePayload(serviceScope);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
@@ -79,7 +78,7 @@
             {
                 serviceScope.UpdateScope(context);
 
-                var proxy = new SagaQueryConsumeContextProxy<TSaga, T>(context, new PayloadCacheScope(context), context.Query);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query);
                 proxy.UpdatePayload(serviceScope);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)

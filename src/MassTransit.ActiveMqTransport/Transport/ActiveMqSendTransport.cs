@@ -122,7 +122,7 @@
 
                     var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
 
-                    await publishTask.UntilCompletedOrCanceled(context.CancellationToken).ConfigureAwait(false);
+                    await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
                     context.LogSent();
 

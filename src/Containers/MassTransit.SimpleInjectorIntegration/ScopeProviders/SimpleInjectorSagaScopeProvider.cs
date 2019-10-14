@@ -4,7 +4,6 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
     using System.Collections.Generic;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Saga;
     using Scoping;
     using Scoping.SagaContexts;
@@ -45,7 +44,7 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
             {
                 scope.UpdateScope(context);
 
-                var proxy = new ConsumeContextProxy<T>(context, new PayloadCacheScope(context));
+                var proxy = new ConsumeContextScope<T>(context);
 
                 proxy.UpdatePayload(scope);
 
@@ -77,7 +76,7 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
             {
                 scope.UpdateScope(context);
 
-                var proxy = new SagaQueryConsumeContextProxy<TSaga, T>(context, new PayloadCacheScope(context), context.Query);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query);
 
                 proxy.UpdatePayload(scope);
 

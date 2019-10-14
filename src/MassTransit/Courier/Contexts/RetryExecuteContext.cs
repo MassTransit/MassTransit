@@ -3,12 +3,11 @@ namespace MassTransit.Courier.Contexts
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Util;
 
 
     public class RetryExecuteContext<TArguments> :
-        ExecuteContextProxy<TArguments>,
+        ExecuteContextScope<TArguments>,
         ConsumeRetryContext
         where TArguments : class
     {
@@ -16,7 +15,7 @@ namespace MassTransit.Courier.Contexts
         readonly ExecuteContext<TArguments> _context;
 
         public RetryExecuteContext(ExecuteContext<TArguments> context, IRetryPolicy retryPolicy, RetryContext retryContext)
-            : base(context, new PayloadCacheScope(context))
+            : base(context)
         {
             _retryPolicy = retryPolicy;
             _context = context;

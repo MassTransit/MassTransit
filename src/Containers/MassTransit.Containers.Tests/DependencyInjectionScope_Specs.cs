@@ -45,7 +45,7 @@ namespace MassTransit.Containers.Tests
 
             await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
 
-            SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer.UntilCompletedOrCanceled(TestCancellationToken);
+            SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer.OrCanceled(TestCancellationToken);
             lastConsumer.ShouldNotBe(null);
 
             SimpleMessageInterface last = await lastConsumer.Last;
@@ -59,10 +59,10 @@ namespace MassTransit.Containers.Tests
             lastConsumer.Dependency.SomethingDone
                 .ShouldBe(true); //Dependency was disposed before consumer executed");
 
-            SimplerConsumer lasterConsumer = await SimplerConsumer.LastConsumer.UntilCompletedOrCanceled(TestCancellationToken);
+            SimplerConsumer lasterConsumer = await SimplerConsumer.LastConsumer.OrCanceled(TestCancellationToken);
             lasterConsumer.ShouldNotBe(null);
 
-            SimpleMessageInterface laster = await lasterConsumer.Last.UntilCompletedOrCanceled(TestCancellationToken);
+            SimpleMessageInterface laster = await lasterConsumer.Last.OrCanceled(TestCancellationToken);
 
         }
 

@@ -5,7 +5,6 @@
     using Autofac;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Saga;
     using Scoping;
     using Scoping.SagaContexts;
@@ -42,7 +41,7 @@
             });
             try
             {
-                var proxy = new ConsumeContextProxy<T>(context, new PayloadCacheScope(context));
+                var proxy = new ConsumeContextScope<T>(context);
                 proxy.UpdatePayload(lifetimeScope);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
@@ -72,7 +71,7 @@
             });
             try
             {
-                var proxy = new SagaQueryConsumeContextProxy<TSaga, T>(context, new PayloadCacheScope(context), context.Query);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query);
                 proxy.UpdatePayload(lifetimeScope);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)

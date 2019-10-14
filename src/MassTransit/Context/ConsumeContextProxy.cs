@@ -1,22 +1,10 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Context
+﻿namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using GreenPipes.Payloads;
 
 
     /// <summary>
@@ -24,21 +12,21 @@ namespace MassTransit.Context
     /// of the context is only added at the scope level and below.
     /// </summary>
     public abstract class ConsumeContextProxy :
-        BaseConsumeContext
+        BaseConsumeContext,
+        ConsumeContext
     {
         readonly ConsumeContext _context;
 
         protected ConsumeContextProxy(ConsumeContext context)
-            : base(context)
+            : base(context.ReceiveContext)
         {
             _context = context;
         }
 
-        protected ConsumeContextProxy(ConsumeContext context, IPayloadCache payloadCache)
-            : base(context, payloadCache)
-        {
-            _context = context;
-        }
+        /// <summary>
+        /// Returns the CancellationToken for the context (implicit interface)
+        /// </summary>
+        public override CancellationToken CancellationToken => _context.CancellationToken;
 
         public override Guid? MessageId => _context.MessageId;
         public override Guid? RequestId => _context.RequestId;
@@ -51,11 +39,11 @@ namespace MassTransit.Context
         public override Uri ResponseAddress => _context.ResponseAddress;
         public override Uri FaultAddress => _context.FaultAddress;
         public override DateTime? SentTime => _context.SentTime;
-
         public override Headers Headers => _context.Headers;
         public override HostInfo Host => _context.Host;
 
         public override Task ConsumeCompleted => _context.ConsumeCompleted;
+
         public override IEnumerable<string> SupportedMessageTypes => _context.SupportedMessageTypes;
 
         public override bool HasMessageType(Type messageType)
@@ -90,51 +78,60 @@ namespace MassTransit.Context
             _context.AddConsumeTask(task);
         }
 
+        /// <summary>
+        /// Returns true if the payload type is included with or supported by the context type
+        /// </summary>
+        /// <param name="payloadType"></param>
+        /// <returns></returns>
         public override bool HasPayloadType(Type payloadType)
         {
-            if (base.HasPayloadType(payloadType))
-                return true;
-
-            return _context.HasPayloadType(payloadType);
+            return payloadType.IsInstanceOfType(this) || _context.HasPayloadType(payloadType);
         }
 
+        /// <summary>
+        /// Attempts to get the specified payload type
+        /// </summary>
+        /// <param name="payload"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public override bool TryGetPayload<T>(out T payload)
         {
-            if (base.TryGetPayload(out payload))
+            if (this is T context)
+            {
+                payload = context;
                 return true;
+            }
 
             return _context.TryGetPayload(out payload);
         }
 
+        /// <summary>
+        /// Get or add a payload to the context, using the provided payload factory.
+        /// </summary>
+        /// <param name="payloadFactory">The payload factory, which is only invoked if the payload is not present.</param>
+        /// <typeparam name="T">The payload type</typeparam>
+        /// <returns></returns>
         public override T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
         {
-            if (base.TryGetPayload<T>(out var existing))
-                return existing;
+            if (this is T context)
+                return context;
 
-            if (_context.TryGetPayload(out existing))
-                return existing;
-
-            return base.GetOrAddPayload(payloadFactory);
+            return _context.GetOrAddPayload(payloadFactory);
         }
 
+        /// <summary>
+        /// Either adds a new payload, or updates an existing payload
+        /// </summary>
+        /// <param name="addFactory">The payload factory called if the payload is not present</param>
+        /// <param name="updateFactory">The payload factory called if the payload already exists</param>
+        /// <typeparam name="T">The payload type</typeparam>
+        /// <returns></returns>
         public override T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
         {
-            if (base.TryGetPayload<T>(out var existing) || _context.TryGetPayload(out existing))
-            {
-                T Update(T _)
-                {
-                    return updateFactory(existing);
-                }
+            if (this is T context)
+                return context;
 
-                T Add()
-                {
-                    return updateFactory(existing);
-                }
-
-                return base.AddOrUpdatePayload(Add, Update);
-            }
-
-            return base.AddOrUpdatePayload(addFactory, updateFactory);
+            return _context.AddOrUpdatePayload(addFactory, updateFactory);
         }
     }
 
@@ -151,14 +148,8 @@ namespace MassTransit.Context
     {
         readonly ConsumeContext<TMessage> _context;
 
-        protected ConsumeContextProxy(ConsumeContext<TMessage> context)
+        public ConsumeContextProxy(ConsumeContext<TMessage> context)
             : base(context)
-        {
-            _context = context;
-        }
-
-        public ConsumeContextProxy(ConsumeContext<TMessage> context, IPayloadCache payloadCache)
-            : base(context, payloadCache)
         {
             _context = context;
         }

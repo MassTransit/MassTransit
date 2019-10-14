@@ -66,7 +66,7 @@ namespace MassTransit.Tests.Courier
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity(), h =>
             {
-                h.UseConsoleLog(async context => GetBodyString(context.Context.ReceiveContext));
+                h.UseExecute(context => Console.WriteLine(GetBodyString(context.ReceiveContext)));
             });
         }
 

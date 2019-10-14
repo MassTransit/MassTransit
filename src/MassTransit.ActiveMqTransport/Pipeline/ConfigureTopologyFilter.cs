@@ -34,7 +34,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 await ConfigureTopology(context).ConfigureAwait(false);
 
                 context.GetOrAddPayload(() => _settings);
-            }).ConfigureAwait(false);
+            }, () => new Context()).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
 
@@ -96,6 +96,12 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             LogContext.Debug?.Log("Delete Queue {Queue}", queue);
 
             return context.DeleteQueue(queue.EntityName);
+        }
+
+
+        class Context :
+            ConfigureTopologyContext<TSettings>
+        {
         }
     }
 }

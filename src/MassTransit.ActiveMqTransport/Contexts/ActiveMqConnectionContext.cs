@@ -7,7 +7,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
     using Configuration;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Topology;
     using Util;
 
@@ -22,7 +21,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
         public ActiveMqConnectionContext(IConnection connection, IActiveMqHostConfiguration configuration, IActiveMqHostTopology hostTopology,
             CancellationToken cancellationToken)
-            : base(new PayloadCache(), cancellationToken)
+            : base(cancellationToken)
         {
             _connection = connection;
 

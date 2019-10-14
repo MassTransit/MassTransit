@@ -4,7 +4,6 @@ namespace MassTransit.LamarIntegration.ScopeProviders
     using System.Collections.Generic;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Lamar;
     using Saga;
     using Scoping;
@@ -42,7 +41,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
             var nestedContainer = _container.GetNestedContainer(context);
             try
             {
-                var proxy = new ConsumeContextProxy<T>(context, new PayloadCacheScope(context));
+                var proxy = new ConsumeContextScope<T>(context);
                 proxy.UpdatePayload(nestedContainer);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
@@ -70,7 +69,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
             var nestedContainer = _container.GetNestedContainer(context);
             try
             {
-                var proxy = new SagaQueryConsumeContextProxy<TSaga, T>(context, new PayloadCacheScope(context), context.Query);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query);
                 proxy.UpdatePayload(nestedContainer);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
