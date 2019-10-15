@@ -108,7 +108,7 @@
         public event Action<IBusFactoryConfigurator> OnConfigureBus;
         public event Action<IBus> OnConnectObservers;
 
-        public virtual async Task Start()
+        public virtual async Task Start(CancellationToken cancellationToken = default)
         {
             _sent = new TestSendObserver(TestTimeout);
             _consumed = new BusTestConsumeObserver(TestTimeout);
@@ -120,7 +120,7 @@
 
             ConnectObservers(_bus);
 
-            _busHandle = await _bus.StartAsync().ConfigureAwait(false);
+            _busHandle = await _bus.StartAsync(cancellationToken).ConfigureAwait(false);
 
             BusSendEndpoint = await GetSendEndpoint(_bus.Address).ConfigureAwait(false);
 

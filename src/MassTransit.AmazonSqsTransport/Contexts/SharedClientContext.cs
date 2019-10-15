@@ -1,24 +1,10 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Contexts
+﻿namespace MassTransit.AmazonSqsTransport.Contexts
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService.Model;
     using Amazon.SQS.Model;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Pipeline;
     using Topology;
     using Topic = Topology.Entities.Topic;
@@ -26,53 +12,19 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
 
     public class SharedClientContext :
+        ProxyPipeContext,
         ClientContext
     {
-        readonly CancellationToken _cancellationToken;
         readonly ClientContext _context;
-        readonly IPayloadCache _payloadCache;
 
         public SharedClientContext(ClientContext context, CancellationToken cancellationToken)
+            : base(context)
         {
             _context = context;
-            _cancellationToken = cancellationToken;
+            CancellationToken = cancellationToken;
         }
 
-        public SharedClientContext(ClientContext context, IPayloadCache payloadCache, CancellationToken cancellationToken)
-        {
-            _context = context;
-            _payloadCache = payloadCache;
-            _cancellationToken = cancellationToken;
-        }
-
-        bool PipeContext.HasPayloadType(Type contextType)
-        {
-            if (_payloadCache != null)
-                return _payloadCache.HasPayloadType(contextType);
-
-            return _context.HasPayloadType(contextType);
-        }
-
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            if (_payloadCache != null)
-                return _payloadCache.TryGetPayload(out payload);
-
-            return _context.TryGetPayload(out payload);
-        }
-
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            if (_payloadCache != null)
-                return _payloadCache.GetOrAddPayload(payloadFactory);
-
-            return _context.GetOrAddPayload(payloadFactory);
-        }
-
-        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
-        {
-            return _context.AddOrUpdatePayload(addFactory, updateFactory);
-        }
+        public override CancellationToken CancellationToken { get; }
 
         ConnectionContext ClientContext.ConnectionContext => _context.ConnectionContext;
 
@@ -135,7 +87,5 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         {
             return _context.SendMessage(request, cancellationToken);
         }
-
-        CancellationToken PipeContext.CancellationToken => _cancellationToken;
     }
 }

@@ -61,9 +61,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
         {
             var connectionContext = await context.ConfigureAwait(false);
 
-            var sharedConnection = new SharedNamespaceContext(connectionContext, cancellationToken);
-
-            return sharedConnection;
+            return new SharedNamespaceContext(connectionContext, cancellationToken);
         }
 
         async Task<NamespaceContext> CreateNamespaceContext(ISupervisor supervisor)

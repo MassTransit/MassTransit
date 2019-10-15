@@ -12,17 +12,16 @@
         ProxyPipeContext,
         ConnectionContext
     {
-        readonly CancellationToken _cancellationToken;
         readonly ConnectionContext _context;
 
         public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;
-            _cancellationToken = cancellationToken;
+            CancellationToken = cancellationToken;
         }
 
-        CancellationToken PipeContext.CancellationToken => _cancellationToken;
+        public override CancellationToken CancellationToken { get; }
 
         IConnection ConnectionContext.Connection => _context.Connection;
         public string Description => _context.Description;

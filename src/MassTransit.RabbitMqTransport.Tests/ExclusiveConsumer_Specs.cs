@@ -12,6 +12,8 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
+    using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using RabbitMqTransport.Testing;
@@ -34,9 +36,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 Assert.That(async () =>
                 {
-                    await secondHarness.Start();
+                    using (var token = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+                    {
+                        await secondHarness.Start(token.Token);
 
-                    await secondHarness.Stop();
+                        await secondHarness.Stop();
+                    }
                 }, Throws.TypeOf<RabbitMqConnectionException>());
             }
             finally

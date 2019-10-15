@@ -8,20 +8,19 @@
 
 
     public class SharedModelContext :
-        ScopePipeContext,
+        ProxyPipeContext,
         ModelContext
     {
-        readonly CancellationToken _cancellationToken;
         readonly ModelContext _context;
 
         public SharedModelContext(ModelContext context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;
-            _cancellationToken = cancellationToken;
+            CancellationToken = cancellationToken;
         }
 
-        CancellationToken PipeContext.CancellationToken => _cancellationToken;
+        public override CancellationToken CancellationToken { get; }
 
         ConnectionContext ModelContext.ConnectionContext => _context.ConnectionContext;
 

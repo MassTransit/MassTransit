@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.WebJobs.EventHubsIntegration.Contexts
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -8,37 +7,19 @@
 
 
     public class SharedEventDataSendEndpointContext :
+        ProxyPipeContext,
         EventDataSendEndpointContext
     {
         readonly EventDataSendEndpointContext _context;
 
         public SharedEventDataSendEndpointContext(EventDataSendEndpointContext context, CancellationToken cancellationToken)
+            : base(context)
         {
             CancellationToken = cancellationToken;
             _context = context;
         }
 
-        bool PipeContext.HasPayloadType(Type payloadType)
-        {
-            return _context.HasPayloadType(payloadType);
-        }
-
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            return _context.TryGetPayload(out payload);
-        }
-
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            return _context.GetOrAddPayload(payloadFactory);
-        }
-
-        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
-        {
-            return _context.AddOrUpdatePayload(addFactory, updateFactory);
-        }
-
-        public CancellationToken CancellationToken { get; }
+        public override CancellationToken CancellationToken { get; }
 
         string EventDataSendEndpointContext.EntityPath => _context.EntityPath;
 
