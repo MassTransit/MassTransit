@@ -2,6 +2,7 @@
 {
     using System;
     using Configuration;
+    using ConsumePipeSpecifications;
     using GreenPipes;
     using Logging;
     using Pipeline;
@@ -37,6 +38,8 @@
 
             _publishTopology = configuration.Topology.Publish;
 
+            ConsumePipeSpecification = configuration.Consume.Specification;
+
             _logContext = LogContext.Current.CreateLogContext(LogCategoryName.Transport.Receive);
 
             SendObservers = new SendObservable();
@@ -62,6 +65,8 @@
         public IMessageSerializer Serializer => _serializer.Value;
 
         protected Uri HostAddress { get; }
+
+        public IConsumePipeSpecification ConsumePipeSpecification { get; }
 
         IReceiveObserver ReceiveEndpointContext.ReceiveObservers => _receiveObservers;
 

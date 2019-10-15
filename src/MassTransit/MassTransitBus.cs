@@ -4,6 +4,7 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
+    using ConsumePipeSpecifications;
     using Context;
     using Events;
     using GreenPipes;
@@ -18,8 +19,9 @@ namespace MassTransit
     {
         readonly IBusObserver _busObservable;
         readonly IConsumePipe _consumePipe;
-        readonly Lazy<IPublishEndpoint> _publishEndpoint;
+        readonly IConsumePipeSpecification _consumePipeSpecification;
         readonly IBusHostControl _host;
+        readonly Lazy<IPublishEndpoint> _publishEndpoint;
         readonly IReceiveEndpoint _receiveEndpoint;
         Handle _busHandle;
 
@@ -27,6 +29,7 @@ namespace MassTransit
         {
             Address = endpointConfiguration.InputAddress;
             _consumePipe = endpointConfiguration.ConsumePipe;
+            _consumePipeSpecification = endpointConfiguration.Consume.Specification;
             _host = host;
             _busObservable = busObservable;
             _receiveEndpoint = endpointConfiguration.ReceiveEndpoint;
@@ -38,12 +41,16 @@ namespace MassTransit
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            return _consumePipe.ConnectConsumePipe(pipe);
+            IPipe<ConsumeContext<T>> messagePipe = _consumePipeSpecification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
+
+            return _consumePipe.ConnectConsumePipe(messagePipe);
         }
 
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
-            return _consumePipe.ConnectRequestPipe(requestId, pipe);
+            IPipe<ConsumeContext<T>> messagePipe = _consumePipeSpecification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
+
+            return _consumePipe.ConnectRequestPipe(requestId, messagePipe);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)

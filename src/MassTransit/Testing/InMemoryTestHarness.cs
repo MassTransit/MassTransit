@@ -13,6 +13,7 @@
 namespace MassTransit.Testing
 {
     using System;
+    using System.Threading.Tasks;
     using Transports.InMemory;
 
 
@@ -49,6 +50,18 @@ namespace MassTransit.Testing
         protected virtual void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             OnConfigureInMemoryReceiveEndpoint?.Invoke(configurator);
+        }
+
+        public virtual Task<IRequestClient<TRequest>> ConnectRequestClient<TRequest>()
+            where TRequest : class
+        {
+            return ConnectRequestClient<TRequest>(InputQueueAddress);
+        }
+
+        public virtual Task<IRequestClient<TRequest>> ConnectRequestClient<TRequest>(Uri destinationAddress)
+            where TRequest : class
+        {
+            return _inMemoryHost.CreateRequestClient<TRequest>(destinationAddress, TestTimeout);
         }
 
         protected override IBusControl CreateBus()

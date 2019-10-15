@@ -1,12 +1,10 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Configuration
 {
     using System;
-    using Context;
     using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Filters;
-    using Transports;
 
 
     public class BrokeredMessageReceiverServiceBusEndpointConfiguration :
@@ -34,12 +32,6 @@
                     x.Ignore<OperationCanceledException>();
                 });
             });
-        }
-
-        protected override IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport,
-            ReceiveEndpointContext topology)
-        {
-            throw new NotImplementedException();
         }
     }
 }

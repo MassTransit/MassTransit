@@ -123,12 +123,12 @@ namespace MassTransit
         /// <summary>
         /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory"/>.
         /// </summary>
-        /// <param name="host">The host to connect the new receive endpoint</param>
+        /// <param name="connector">The host to connect the new receive endpoint</param>
         /// <param name="timeout">The default request timeout</param>
         /// <returns></returns>
-        public static Task<IClientFactory> CreateClientFactory(this IHost host, RequestTimeout timeout = default)
+        public static Task<IClientFactory> CreateClientFactory(this IReceiveConnector connector, RequestTimeout timeout = default)
         {
-            var receiveEndpointHandle = host.ConnectResponseEndpoint();
+            var receiveEndpointHandle = connector.ConnectResponseEndpoint();
 
             return receiveEndpointHandle.CreateClientFactory(timeout);
         }
@@ -136,14 +136,14 @@ namespace MassTransit
         /// <summary>
         /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory"/>.
         /// </summary>
-        /// <param name="host">The host to connect the new receive endpoint</param>
+        /// <param name="connector">The host to connect the new receive endpoint</param>
         /// <param name="destinationAddress">The request service address</param>
         /// <param name="timeout">The default request timeout</param>
         /// <returns></returns>
-        public static async Task<IRequestClient<T>> CreateRequestClient<T>(this IHost host, Uri destinationAddress, RequestTimeout timeout = default)
+        public static async Task<IRequestClient<T>> CreateRequestClient<T>(this IReceiveConnector connector, Uri destinationAddress, RequestTimeout timeout = default)
             where T : class
         {
-            var clientFactory = await CreateClientFactory(host, timeout).ConfigureAwait(false);
+            var clientFactory = await CreateClientFactory(connector, timeout).ConfigureAwait(false);
 
             return clientFactory.CreateRequestClient<T>(destinationAddress);
         }

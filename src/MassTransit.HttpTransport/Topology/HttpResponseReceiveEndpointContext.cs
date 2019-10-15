@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.HttpTransport.Topology
 {
     using System;
+    using ConsumePipeSpecifications;
     using Context;
     using GreenPipes;
     using MassTransit.Pipeline;
@@ -30,6 +31,8 @@
         Uri ReceiveEndpointContext.InputAddress => _context.InputAddress;
         IReceiveObserver ReceiveEndpointContext.ReceiveObservers => _context.ReceiveObservers;
         IReceiveTransportObserver ReceiveEndpointContext.TransportObservers => _context.TransportObservers;
+        public IConsumePipeSpecification ConsumePipeSpecification => _context.ConsumePipeSpecification;
+
         public ILogContext LogContext => _context.LogContext;
         public IReceiveEndpointObserver EndpointObservers => _context.EndpointObservers;
 

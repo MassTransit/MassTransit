@@ -91,6 +91,12 @@ namespace MassTransit.TestFramework
             return InMemoryTestHarness.CreateRequestClient<TRequest>();
         }
 
+        protected Task<IRequestClient<TRequest>> ConnectRequestClient<TRequest>()
+            where TRequest : class
+        {
+            return InMemoryTestHarness.ConnectRequestClient<TRequest>();
+        }
+
         [OneTimeSetUp]
         public Task SetupInMemoryTestFixture()
         {

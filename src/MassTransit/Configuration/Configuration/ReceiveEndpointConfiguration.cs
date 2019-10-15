@@ -6,14 +6,12 @@
     using System.Net.Mime;
     using Automatonymous;
     using ConsumeConfigurators;
-    using Context;
     using Courier;
     using GreenPipes;
     using Pipeline;
     using Pipeline.Observables;
     using Saga;
     using SagaConfigurators;
-    using Transports;
 
 
     public abstract class ReceiveEndpointConfiguration :
@@ -204,12 +202,6 @@
         public virtual IReceivePipe CreateReceivePipe()
         {
             return _endpointConfiguration.Receive.CreatePipe(ConsumePipe, _endpointConfiguration.Serialization.Deserializer);
-        }
-
-        protected virtual IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport,
-            ReceiveEndpointContext receiveEndpointContext)
-        {
-            return new ReceiveEndpoint(receiveTransport, receiveEndpointContext);
         }
 
         public void SetMessageSerializer(SerializerFactory serializerFactory)

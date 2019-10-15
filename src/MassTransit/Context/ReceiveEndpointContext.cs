@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Context
 {
     using System;
+    using ConsumePipeSpecifications;
     using GreenPipes;
     using Pipeline;
     using Topology;
@@ -23,6 +24,8 @@
         IReceiveEndpointObserver EndpointObservers { get; }
         IReceiveObserver ReceiveObservers { get; }
         IReceiveTransportObserver TransportObservers { get; }
+
+        IConsumePipeSpecification ConsumePipeSpecification { get; }
 
         ILogContext LogContext { get; }
 
