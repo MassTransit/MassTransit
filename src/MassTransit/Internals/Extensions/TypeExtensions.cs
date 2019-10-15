@@ -209,6 +209,18 @@
             typeInfo.HasAttribute<CompilerGeneratedAttribute>() && typeInfo.FullName.Contains("AnonymousType");
 
         /// <summary>
+        /// Returns true if the type is an FSharp type (maybe?)
+        /// </summary>
+        /// <param name="typeInfo"></param>
+        /// <returns></returns>
+        public static bool IsFSharpType(this TypeInfo typeInfo)
+        {
+            var attributes = typeInfo.GetCustomAttributes();
+
+            return attributes.Any(attribute => attribute.GetType().FullName == "Microsoft.FSharp.Core.CompilationMappingAttribute");
+        }
+
+        /// <summary>
         /// Returns true if the type is contained within the namespace
         /// </summary>
         /// <param name="type"></param>

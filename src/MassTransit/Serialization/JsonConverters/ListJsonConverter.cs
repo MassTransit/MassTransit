@@ -50,6 +50,9 @@ namespace MassTransit.Serialization.JsonConverters
                     if (elementType.IsAbstract)
                         return false;
 
+                    if (typeInfo.IsFSharpType())
+                        return false;
+
                     return true;
                 }
             }
