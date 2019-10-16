@@ -85,7 +85,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             var request = new CreateTopicRequest(topic.EntityName)
             {
-                Attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString())
+                Attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString()),
+                Tags = topic.TopicTags.Select(x => new Tag { Key = x.Key, Value =  x.Value }).ToList()
             };
 
             var response = await _amazonSns.CreateTopicAsync(request).ConfigureAwait(false);
@@ -116,8 +117,11 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             var request = new CreateQueueRequest(queue.EntityName)
             {
-                Attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString())
+                Attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString()),
+                Tags = queue.QueueTags.ToDictionary(x => x.Key, x => x.Value)
             };
+
+            Console.WriteLine("XXXXXXXXXX: " + queue);
 
             var response = await _amazonSqs.CreateQueueAsync(request).ConfigureAwait(false);
 
@@ -151,7 +155,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 TopicArn = topicArn,
                 Endpoint = queueArn,
                 Protocol = "sqs",
-                Attributes = subscriptionAttributes
+                Attributes = subscriptionAttributes,
             };
 
             await _amazonSns.SubscribeAsync(subscribeRequest).ConfigureAwait(false);

@@ -40,5 +40,10 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         /// Additional <see href="https://docs.aws.amazon.com/sns/latest/api/API_SetSubscriptionAttributes.html">attributes</see> for the topic's subscription.
         /// </summary>
         IDictionary<string, object> TopicSubscriptionAttributes { get; }
+
+        /// <summary>
+        /// Collection of tags to assign to topic when created.
+        /// </summary>
+        IDictionary<string, string> TopicTags { get; }
     }
 }

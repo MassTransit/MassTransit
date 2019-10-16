@@ -97,6 +97,9 @@ namespace MassTransit.AmazonSqsTransport.Transport
                 {
                     await _host.ConnectionRetryPolicy.Retry(async () =>
                     {
+                        if (IsStopping)
+                            return;
+
                         try
                         {
                             await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);

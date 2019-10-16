@@ -44,5 +44,10 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         /// Additional <see href="https://docs.aws.amazon.com/sns/latest/api/API_SetSubscriptionAttributes.html">attributes</see> for the queue's subscription.
         /// </summary>
         IDictionary<string, object> QueueSubscriptionAttributes { get; }
+
+        /// <summary>
+        /// Collection of tags to assign to queue when created.
+        /// </summary>
+        IDictionary<string, string> QueueTags { get; }
     }
 }
