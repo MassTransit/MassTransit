@@ -16,10 +16,10 @@ namespace MassTransit.Serialization.JsonConverters
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             string text = Convert.ToString(value, CultureInfo.InvariantCulture);
-            if (string.IsNullOrEmpty(text))
-                text = "";
-
-            writer.WriteValue(text);
+            if (string.IsNullOrWhiteSpace(text))
+                writer.WriteNull();
+            else
+                writer.WriteValue(text);
         }
 
         protected override IConverter ValueFactory(Type objectType)
@@ -37,15 +37,20 @@ namespace MassTransit.Serialization.JsonConverters
             object IConverter.Deserialize(JsonReader reader, Type objectType, JsonSerializer serializer)
             {
                 if (reader.TokenType == JsonToken.Null)
-                    return default(decimal);
+                    return objectType == typeof(decimal) ? default(decimal) : default(decimal?);
 
                 if (reader.TokenType == JsonToken.Integer || reader.TokenType == JsonToken.Float)
                     return Convert.ToDecimal(reader.Value, CultureInfo.InvariantCulture);
 
-                if (reader.TokenType == JsonToken.String
-                    && decimal.TryParse((string)reader.Value, StringDecimalStyle, CultureInfo.InvariantCulture, out var result))
+                if (reader.TokenType == JsonToken.String)
                 {
-                    return result;
+                    var text = (string)reader.Value;
+
+                    if (string.IsNullOrWhiteSpace(text))
+                        return objectType == typeof(decimal) ? default(decimal) : default(decimal?);
+
+                    if (decimal.TryParse(text, StringDecimalStyle, CultureInfo.InvariantCulture, out var result))
+                        return result;
                 }
 
                 throw new JsonReaderException($"Error reading decimal. Expected a number but got {reader.TokenType}.");

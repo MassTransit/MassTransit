@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Reactive.Linq" Version="4.1.5" />
+    <PackageReference Include="System.Reactive.Linq" Version="4.1.6" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

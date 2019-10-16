@@ -1,10 +1,8 @@
 namespace MassTransit.Context
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
-    using System.Linq;
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
@@ -25,7 +23,7 @@ namespace MassTransit.Context
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly Lazy<ContentType> _contentType;
         readonly Lazy<Headers> _headers;
-        readonly List<Task> _receiveTasks;
+        readonly PendingTaskCollection _receiveTasks;
         readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
         readonly Stopwatch _receiveTimer;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
@@ -50,7 +48,7 @@ namespace MassTransit.Context
             _headers = new Lazy<Headers>(() => new JsonHeaders(ObjectTypeDeserializer.Instance, HeaderProvider));
 
             _contentType = new Lazy<ContentType>(GetContentType);
-            _receiveTasks = new List<Task>(4);
+            _receiveTasks = new PendingTaskCollection(source.Token);
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(GetSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(GetPublishEndpointProvider);
@@ -69,28 +67,11 @@ namespace MassTransit.Context
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
         public IPublishTopology PublishTopology => _receiveEndpointContext.Publish;
 
-        public Task ReceiveCompleted => ReceiveTasksCompleted();
-
-        async Task ReceiveTasksCompleted()
-        {
-            Task[] tasks = null;
-            do
-            {
-                lock (_receiveTasks)
-                    tasks = _receiveTasks.Where(x => !x.IsCompleted).ToArray();
-
-                if (tasks.Length == 0)
-                    break;
-
-                await Task.WhenAll(tasks).ConfigureAwait(false);
-            }
-            while (tasks.Length > 0);
-        }
+        public Task ReceiveCompleted => _receiveTasks.Completed;
 
         public void AddReceiveTask(Task task)
         {
-            lock (_receiveTasks)
-                _receiveTasks.Add(task);
+            _receiveTasks.Add(task);
         }
 
         public bool Redelivered { get; }

@@ -34,11 +34,9 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext, ReleaseComponent);
             }
 
-            var scope = _kernel.CreateNewOrUseExistingMessageScope();
+            var scope = _kernel.CreateNewOrUseExistingMessageScope(context.ConsumeContext);
             try
             {
-                _kernel.UpdateScope(context.ConsumeContext);
-
                 var activity = _kernel.Resolve<TActivity>(new Arguments().AddTyped(context.Arguments));
 
                 ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);

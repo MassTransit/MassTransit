@@ -87,22 +87,25 @@ namespace MassTransit.Serialization.JsonConverters
                 if (reader.TokenType == JsonToken.Null)
                     return null;
 
-                ICollection<T> list = contract.DefaultCreator != null
-                    ? contract.DefaultCreator() as ICollection<T>
-                    : new List<T>();
-
+                object result;
                 if (reader.TokenType == JsonToken.StartArray)
-                    serializer.Populate(reader, list);
+                {
+                    result = contract.DefaultCreator != null
+                        ? contract.DefaultCreator()
+                        : new List<T>();
+
+                    serializer.Populate(reader, result);
+                }
                 else
                 {
                     var item = (T)serializer.Deserialize(reader, typeof(T));
-                    list.Add(item);
+                    result = new List<T>() {item};
                 }
 
-                if (contract.CreatedType.IsArray)
-                    return list.ToArray();
+                if (contract.CreatedType.IsArray && result is IEnumerable<T> enumerable)
+                    return enumerable.ToArray();
 
-                return list;
+                return result;
             }
 
             static JsonArrayContract ResolveContract(Type objectType, JsonSerializer serializer)

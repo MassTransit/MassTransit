@@ -30,16 +30,22 @@ namespace MassTransit.Scoping
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            if (_context == null)
+            lock (this)
             {
-                _context = context;
-                _marker = new ScopedConsumeContext();
+                if (_context == null)
+                {
+                    _context = context;
+                    _marker = new ScopedConsumeContext();
 
-                context.GetOrAddPayload(() => _marker);
-            }
-            else if (!context.TryGetPayload<ScopedConsumeContext>(out _))
-            {
-                throw new InvalidOperationException("The ConsumeContext was already set.");
+                    context.GetOrAddPayload(() => _marker);
+                }
+                else if (ReferenceEquals(_context, context))
+                {
+                }
+                else if (!context.TryGetPayload<ScopedConsumeContext>(out _))
+                {
+                    throw new InvalidOperationException("The ConsumeContext was already set.");
+                }
             }
         }
 

@@ -119,7 +119,7 @@ namespace MassTransit.ApplicationInsights.Tests
             mockSendContext.Setup(c => c.RequestId).Returns(requestId);
             mockSendContext.Setup(c => c.DestinationAddress).Returns(destinationAddress);
 
-            var publishContextProxy = new PublishContextProxy<PingMessage>(mockSendContext.Object, new PingMessage());
+            var publishContextProxy = new SendContextProxy<PingMessage>(mockSendContext.Object, new PingMessage());
 
             var capturedTelemetry = default(DependencyTelemetry);
 
@@ -162,7 +162,7 @@ namespace MassTransit.ApplicationInsights.Tests
             mockSendContext.Setup(c => c.RequestId).Returns(requestId);
             mockSendContext.Setup(c => c.DestinationAddress).Returns(destinationAddress);
 
-            var publishContextProxy = new PublishContextProxy<PingMessage>(mockSendContext.Object, new PingMessage());
+            var publishContextProxy = new SendContextProxy<PingMessage>(mockSendContext.Object, new PingMessage());
 
             var capturedTelemetry = default(DependencyTelemetry);
 

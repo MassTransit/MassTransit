@@ -18,6 +18,7 @@ namespace MassTransit.Serialization
     using System.Runtime.Remoting.Messaging;
     using System.Threading.Tasks;
     using Context;
+    using Util;
 
 
     /// <summary>
@@ -30,7 +31,7 @@ namespace MassTransit.Serialization
         readonly object _message;
         readonly IDictionary<Type, ConsumeContext> _messageTypes;
         readonly string[] _supportedTypes;
-        readonly List<Task> _consumeTasks;
+        readonly PendingTaskCollection _consumeTasks;
         Guid? _conversationId;
         Guid? _correlationId;
         Uri _destinationAddress;
@@ -51,17 +52,10 @@ namespace MassTransit.Serialization
             _binaryHeaders = headers;
             _supportedTypes = GetSupportedMessageTypes().ToArray();
             _messageTypes = new Dictionary<Type, ConsumeContext>();
-            _consumeTasks = new List<Task>();
+            _consumeTasks = new PendingTaskCollection(receiveContext.CancellationToken);
         }
 
-        public override Task ConsumeCompleted
-        {
-            get
-            {
-                lock (_consumeTasks)
-                    return Task.WhenAll(_consumeTasks.ToArray());
-            }
-        }
+        public override Task ConsumeCompleted => _consumeTasks.Completed;
 
         public override Guid? MessageId => _messageId ?? (_messageId = GetHeaderGuid(BinaryMessageSerializer.MessageIdKey));
         public override Guid? RequestId => _requestId ?? (_requestId = GetHeaderGuid(BinaryMessageSerializer.RequestIdKey));
@@ -136,8 +130,7 @@ namespace MassTransit.Serialization
 
         public override void AddConsumeTask(Task task)
         {
-            lock (_consumeTasks)
-                _consumeTasks.Add(task);
+            _consumeTasks.Add(task);
         }
 
         string GetHeaderString(string headerName)

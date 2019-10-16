@@ -15,6 +15,7 @@ namespace MassTransit.RedisIntegration
     using System;
     using System.Threading.Tasks;
     using StackExchange.Redis;
+    using static DatabaseExtensions;
 
 
     public class TypedDatabase<T> :
@@ -32,19 +33,19 @@ namespace MassTransit.RedisIntegration
 
         async Task<T> ITypedDatabase<T>.Get(Guid key)
         {
-            var value = await _db.StringGetAsync(key.ToString()).ConfigureAwait(false);
+            var value = await _db.StringGetAsync(GetKeyWithPrefix(key)).ConfigureAwait(false);
 
             return value.IsNullOrEmpty ? null : SagaSerializer.Deserialize<T>(value);
         }
 
         Task ITypedDatabase<T>.Put(Guid key, T value)
         {
-            return _db.StringSetAsync(key.ToString(), SagaSerializer.Serialize(value));
+            return _db.StringSetAsync(GetKeyWithPrefix(key), SagaSerializer.Serialize(value));
         }
 
         Task ITypedDatabase<T>.Delete(Guid key)
         {
-            return _db.KeyDeleteAsync(key.ToString());
+            return _db.KeyDeleteAsync(GetKeyWithPrefix(key));
         }
     }
 }

@@ -35,15 +35,14 @@ namespace MassTransit.Conductor.Client
         {
             var sendEndpoint = await _serviceClient.GetServiceSendEndpoint<T>(_sendEndpointProvider, cancellationToken).ConfigureAwait(false);
 
-            var clientIdPipe = new ClientIdPipe<T>(_serviceClient.ClientId, pipe);
+            var clientIdPipe = new ClientIdPipe(_serviceClient.ClientId, pipe);
 
             await sendEndpoint.Send(message, clientIdPipe, cancellationToken).ConfigureAwait(false);
         }
 
 
-        readonly struct ClientIdPipe<T> :
+        readonly struct ClientIdPipe :
             IPipe<SendContext<T>>
-            where T : class
         {
             readonly Guid _clientId;
             readonly IPipe<SendContext<T>> _pipe;

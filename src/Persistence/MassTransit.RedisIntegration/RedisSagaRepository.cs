@@ -32,13 +32,14 @@ namespace MassTransit.RedisIntegration
         readonly TimeSpan _lockTimeout;
         readonly TimeSpan _lockRetryTimeout;
 
-        public RedisSagaRepository(Func<IDatabase> redisDbFactory, bool optimistic = true, TimeSpan? lockTimeout = null, TimeSpan? lockRetryTimeout = null)
+        public RedisSagaRepository(Func<IDatabase> redisDbFactory, bool optimistic = true, TimeSpan? lockTimeout = null, TimeSpan? lockRetryTimeout = null, string keyPrefix = "")
         {
             _redisDbFactory = redisDbFactory;
             _optimistic = optimistic;
 
             _lockTimeout = lockTimeout ?? TimeSpan.FromSeconds(30);
             _lockRetryTimeout = lockRetryTimeout ?? TimeSpan.FromSeconds(30);
+            DatabaseExtensions.SetKeyPrefix(keyPrefix);
         }
 
         async Task<TSaga> IRetrieveSagaFromRepository<TSaga>.GetSaga(Guid correlationId)
@@ -178,7 +179,6 @@ namespace MassTransit.RedisIntegration
                     await updateLock.DisposeAsync().ConfigureAwait(false);
             }
         }
-
 
         /// <summary>
         ///     Once the message pipe has processed the saga instance, add it to the saga repository
