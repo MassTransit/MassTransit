@@ -121,8 +121,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 Tags = queue.QueueTags.ToDictionary(x => x.Key, x => x.Value)
             };
 
-            Console.WriteLine("XXXXXXXXXX: " + queue);
-
             var response = await _amazonSqs.CreateQueueAsync(request).ConfigureAwait(false);
 
             await Task.Delay(500).ConfigureAwait(false);
