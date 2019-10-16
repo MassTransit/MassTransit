@@ -118,7 +118,8 @@
 
                     transportMessage.Content = body;
 
-                    await _context.SendObservers.PreSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
                     var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
 
@@ -126,13 +127,15 @@
 
                     context.LogSent();
 
-                    await _context.SendObservers.PostSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PostSend(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     context.LogFaulted(ex);
 
-                    await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
 
                     throw;
                 }

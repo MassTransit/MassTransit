@@ -22,6 +22,12 @@ namespace MassTransit.Context
             _query = query;
         }
 
+        public SagaQueryConsumeContextScope(ConsumeContext<TMessage> context, ISagaQuery<TSaga> query, params object[] payloads)
+            : base(context, payloads)
+        {
+            _query = query;
+        }
+
         ISagaQuery<TSaga> SagaQueryConsumeContext<TSaga, TMessage>.Query => _query;
     }
 }

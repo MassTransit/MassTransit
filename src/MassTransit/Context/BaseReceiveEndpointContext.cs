@@ -68,7 +68,7 @@
 
         public IConsumePipeSpecification ConsumePipeSpecification { get; }
 
-        IReceiveObserver ReceiveEndpointContext.ReceiveObservers => _receiveObservers;
+        ReceiveObservable ReceiveEndpointContext.ReceiveObservers => _receiveObservers;
 
         IReceiveTransportObserver ReceiveEndpointContext.TransportObservers => _transportObservers;
 

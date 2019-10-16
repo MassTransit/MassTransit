@@ -45,8 +45,7 @@
             {
                 serviceScope.UpdateScope(context);
 
-                var proxy = new ConsumeContextScope<T>(context);
-                proxy.UpdatePayload(serviceScope);
+                var proxy = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);
@@ -78,8 +77,7 @@
             {
                 serviceScope.UpdateScope(context);
 
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query);
-                proxy.UpdatePayload(serviceScope);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, serviceScope, serviceScope.ServiceProvider);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);

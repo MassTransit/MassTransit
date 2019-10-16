@@ -4,6 +4,7 @@
     using ConsumePipeSpecifications;
     using GreenPipes;
     using Pipeline;
+    using Pipeline.Observables;
     using Topology;
     using Transports;
 
@@ -22,7 +23,9 @@
         Uri InputAddress { get; }
 
         IReceiveEndpointObserver EndpointObservers { get; }
-        IReceiveObserver ReceiveObservers { get; }
+
+        ReceiveObservable ReceiveObservers { get; }
+
         IReceiveTransportObserver TransportObservers { get; }
 
         IConsumePipeSpecification ConsumePipeSpecification { get; }

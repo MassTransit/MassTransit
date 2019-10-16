@@ -52,17 +52,20 @@ namespace MassTransit.Transports.InMemory
 
             try
             {
-                await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                if (_receiveEndpointContext.ReceiveObservers.Count > 0)
+                    await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
                 await _receiveEndpointContext.ReceivePipe.Send(context).ConfigureAwait(false);
 
                 await context.ReceiveCompleted.ConfigureAwait(false);
 
-                await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                if (_receiveEndpointContext.ReceiveObservers.Count > 0)
+                    await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                if (_receiveEndpointContext.ReceiveObservers.Count > 0)
+                    await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
                 message.DeliveryCount++;
             }

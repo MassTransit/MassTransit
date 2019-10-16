@@ -5,6 +5,7 @@
     using Context;
     using GreenPipes;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using MassTransit.Topology;
     using Microsoft.AspNetCore.Http;
     using Transport;
@@ -29,7 +30,7 @@
         }
 
         Uri ReceiveEndpointContext.InputAddress => _context.InputAddress;
-        IReceiveObserver ReceiveEndpointContext.ReceiveObservers => _context.ReceiveObservers;
+        ReceiveObservable ReceiveEndpointContext.ReceiveObservers => _context.ReceiveObservers;
         IReceiveTransportObserver ReceiveEndpointContext.TransportObservers => _context.TransportObservers;
         public IConsumePipeSpecification ConsumePipeSpecification => _context.ConsumePipeSpecification;
 

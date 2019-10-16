@@ -29,8 +29,8 @@ namespace MassTransit.Context
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ReceiveEndpointContext _receiveEndpointContext;
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, ReceiveEndpointContext receiveEndpointContext)
-            : base(receiveEndpointContext)
+        protected BaseReceiveContext(Uri inputAddress, bool redelivered, ReceiveEndpointContext receiveEndpointContext, params object[] payloads)
+            : base(receiveEndpointContext, payloads)
         {
             _receiveTimer = Stopwatch.StartNew();
 

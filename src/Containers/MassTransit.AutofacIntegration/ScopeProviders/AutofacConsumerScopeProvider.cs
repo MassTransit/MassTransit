@@ -37,8 +37,7 @@
 
             try
             {
-                var proxy = new ConsumeContextProxyScope(context);
-                proxy.UpdatePayload(lifetimeScope);
+                var proxy = new ConsumeContextScope(context, lifetimeScope);
 
                 return new CreatedConsumerScopeContext<ILifetimeScope>(lifetimeScope, proxy);
             }
@@ -70,7 +69,6 @@
             try
             {
                 ConsumerConsumeContext<TConsumer, T> consumerContext = lifetimeScope.GetConsumerScope<TConsumer, T>(context);
-                consumerContext.UpdatePayload(lifetimeScope);
 
                 return new CreatedConsumerScopeContext<ILifetimeScope, TConsumer, T>(lifetimeScope, consumerContext);
             }

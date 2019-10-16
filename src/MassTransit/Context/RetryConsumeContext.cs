@@ -10,7 +10,7 @@
 
 
     public class RetryConsumeContext :
-        ConsumeContextProxyScope,
+        ConsumeContextScope,
         ConsumeRetryContext
     {
         readonly IRetryPolicy _retryPolicy;

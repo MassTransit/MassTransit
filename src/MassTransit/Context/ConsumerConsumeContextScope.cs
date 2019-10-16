@@ -5,14 +5,20 @@
     /// </summary>
     /// <typeparam name="TConsumer"></typeparam>
     /// <typeparam name="TMessage"></typeparam>
-    public class ConsumerConsumeContextProxyScope<TConsumer, TMessage> :
+    public class ConsumerConsumeContextScope<TConsumer, TMessage> :
         ConsumeContextScope<TMessage>,
         ConsumerConsumeContext<TConsumer, TMessage>
         where TMessage : class
         where TConsumer : class
     {
-        public ConsumerConsumeContextProxyScope(ConsumeContext<TMessage> context, TConsumer consumer)
+        public ConsumerConsumeContextScope(ConsumeContext<TMessage> context, TConsumer consumer)
             : base(context)
+        {
+            Consumer = consumer;
+        }
+
+        public ConsumerConsumeContextScope(ConsumeContext<TMessage> context, TConsumer consumer, params object[] payloads)
+            : base(context, payloads)
         {
             Consumer = consumer;
         }

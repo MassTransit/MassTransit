@@ -49,8 +49,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
             try
             {
-                var proxy = new ConsumeContextProxyScope(context);
-                proxy.UpdatePayload(nestedContainer);
+                var proxy = new ConsumeContextScope(context, nestedContainer);
 
                 return new CreatedConsumerScopeContext<IContainer>(nestedContainer, proxy);
             }
@@ -86,7 +85,6 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
                 ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, nestedContainer);
-                consumerContext.UpdatePayload(nestedContainer);
 
                 return new CreatedConsumerScopeContext<IContainer, TConsumer, T>(nestedContainer, consumerContext);
             }

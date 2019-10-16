@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
     using System;
@@ -19,6 +7,7 @@ namespace MassTransit.Transports
     using GreenPipes;
     using Initializers;
     using Pipeline;
+    using Pipeline.Observables;
 
 
     /// <summary>
@@ -29,11 +18,11 @@ namespace MassTransit.Transports
     {
         readonly ConsumeContext _consumeContext;
         readonly IPublishEndpointProvider _endpointProvider;
-        readonly IPublishObserver _publishObserver;
+        readonly PublishObservable _publishObserver;
         readonly IPublishPipe _publishPipe;
         readonly Uri _sourceAddress;
 
-        public PublishEndpoint(Uri sourceAddress, IPublishEndpointProvider endpointProvider, IPublishObserver publishObserver, IPublishPipe publishPipe,
+        public PublishEndpoint(Uri sourceAddress, IPublishEndpointProvider endpointProvider, PublishObservable publishObserver, IPublishPipe publishPipe,
             ConsumeContext consumeContext)
         {
             _sourceAddress = sourceAddress;
@@ -147,11 +136,14 @@ namespace MassTransit.Transports
 
                 await sendEndpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
 
-                await adapter.PostPublish().ConfigureAwait(false);
+                if (adapter.ObserverCount > 0)
+                    await adapter.PostPublish().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await adapter.PublishFaulted(ex).ConfigureAwait(false);
+                if (adapter.ObserverCount > 0)
+                    await adapter.PublishFaulted(ex).ConfigureAwait(false);
+
                 throw;
             }
         }

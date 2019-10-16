@@ -41,8 +41,7 @@
             });
             try
             {
-                var proxy = new ConsumeContextScope<T>(context);
-                proxy.UpdatePayload(lifetimeScope);
+                var proxy = new ConsumeContextScope<T>(context, lifetimeScope);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);
@@ -71,8 +70,7 @@
             });
             try
             {
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query);
-                proxy.UpdatePayload(lifetimeScope);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, lifetimeScope);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);

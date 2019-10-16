@@ -44,9 +44,7 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
             {
                 scope.UpdateScope(context);
 
-                var proxy = new ConsumeContextScope<T>(context);
-
-                proxy.UpdatePayload(scope);
+                var proxy = new ConsumeContextScope<T>(context, scope, scope.Container);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);
@@ -76,9 +74,7 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
             {
                 scope.UpdateScope(context);
 
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query);
-
-                proxy.UpdatePayload(scope);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, scope, scope.Container);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);

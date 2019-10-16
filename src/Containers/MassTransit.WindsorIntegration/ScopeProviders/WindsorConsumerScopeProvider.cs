@@ -40,8 +40,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
             try
             {
-                var proxy = new ConsumeContextProxyScope(context);
-                proxy.UpdatePayload(_kernel);
+                var proxy = new ConsumeContextScope(context, _kernel);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);
@@ -79,8 +78,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, scope);
-                consumerContext.UpdatePayload(_kernel);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, _kernel);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(consumerContext);

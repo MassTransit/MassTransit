@@ -118,7 +118,8 @@
                     if (context.TimeToLive.HasValue)
                         properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
 
-                    await _context.SendObservers.PreSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
                     var publishTask = modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey ?? "", context.Mandatory,
                         context.BasicProperties, body, context.AwaitAck);
@@ -127,13 +128,15 @@
 
                     context.LogSent();
 
-                    await _context.SendObservers.PostSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PostSend(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     context.LogFaulted(ex);
 
-                    await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
 
                     throw;
                 }

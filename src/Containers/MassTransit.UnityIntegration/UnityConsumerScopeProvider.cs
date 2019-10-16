@@ -32,12 +32,9 @@
             var scope = _container.CreateChildContainer();
             try
             {
-                var proxy = new ConsumeContextProxyScope(context);
+                var proxy = new ConsumeContextScope(context, scope);
 
-                var consumerScope = scope;
-                proxy.GetOrAddPayload(() => consumerScope);
-
-                return new CreatedConsumerScopeContext<IUnityContainer>(consumerScope, proxy);
+                return new CreatedConsumerScopeContext<IUnityContainer>(scope, proxy);
             }
             catch
             {

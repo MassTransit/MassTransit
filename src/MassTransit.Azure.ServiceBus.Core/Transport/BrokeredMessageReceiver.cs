@@ -63,7 +63,8 @@
 
             try
             {
-                await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
                 if (message.SystemProperties.LockedUntilUtc <= DateTime.UtcNow)
                     throw new MessageLockExpiredException(_inputAddress, $"The message lock expired: {message.MessageId}");
@@ -78,23 +79,27 @@
                 if (lockContext != null)
                     await lockContext.Complete().ConfigureAwait(false);
 
-                await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (SessionLockLostException ex)
             {
                 LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId", message.MessageId);
 
-                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             catch (MessageLockLostException ex)
             {
                 LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId", message.MessageId);
 
-                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
                 if (lockContext == null)
                     throw;

@@ -13,8 +13,8 @@
         readonly byte[] _body;
 
         public RabbitMqReceiveContext(Uri inputAddress, string exchange, string routingKey, string consumerTag, ulong deliveryTag, byte[] body,
-            bool redelivered, IBasicProperties properties, RabbitMqReceiveEndpointContext receiveEndpointContext)
-            : base(inputAddress, redelivered, receiveEndpointContext)
+            bool redelivered, IBasicProperties properties, RabbitMqReceiveEndpointContext receiveEndpointContext, params object[] payloads)
+            : base(inputAddress, redelivered, receiveEndpointContext, payloads)
         {
             Exchange = exchange;
             RoutingKey = routingKey;

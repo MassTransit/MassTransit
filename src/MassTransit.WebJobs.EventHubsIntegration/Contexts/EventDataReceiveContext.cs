@@ -20,8 +20,6 @@
             : base(inputAddress, false, receiveEndpointContext)
         {
             _eventData = eventData;
-
-            GetOrAddPayload<EventDataContext>(() => this);
         }
 
         protected override IHeaderProvider HeaderProvider => new DictionaryHeaderProvider(_eventData.Properties);

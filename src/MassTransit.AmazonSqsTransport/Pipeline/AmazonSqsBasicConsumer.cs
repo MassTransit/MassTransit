@@ -74,11 +74,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             var delivery = _tracker.BeginDelivery();
 
-            var context = new AmazonSqsReceiveContext(_inputAddress, message, redelivered, _context);
-
-            context.GetOrAddPayload(() => _receiveSettings);
-            context.GetOrAddPayload(() => _client);
-            context.GetOrAddPayload(() => _client.ConnectionContext);
+            var context = new AmazonSqsReceiveContext(_inputAddress, message, redelivered, _context, _receiveSettings, _client, _client.ConnectionContext);
 
             var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
             activity.AddReceiveContextHeaders(context);
@@ -88,7 +84,8 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                 if (!_pending.TryAdd(message.MessageId, context))
                     LogContext.Error?.Log("Duplicate message: {MessageId}", message.MessageId);
 
-                await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
                 await _context.ReceivePipe.Send(context).ConfigureAwait(false);
 
@@ -96,11 +93,13 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
                 await _client.DeleteMessage(_receiveSettings.EntityName, message.ReceiptHandle).ConfigureAwait(false);
 
-                await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             finally
             {

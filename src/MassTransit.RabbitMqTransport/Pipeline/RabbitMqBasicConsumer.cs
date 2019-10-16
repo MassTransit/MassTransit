@@ -133,10 +133,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             var delivery = _tracker.BeginDelivery();
 
             var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
-                _context);
-            context.GetOrAddPayload(() => _receiveSettings);
-            context.GetOrAddPayload(() => _model);
-            context.GetOrAddPayload(() => _model.ConnectionContext);
+                _context, _receiveSettings, _model, _model.ConnectionContext);
 
             var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
             activity.AddReceiveContextHeaders(context);
@@ -146,7 +143,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 if (!_pending.TryAdd(deliveryTag, context))
                     LogContext.Warning?.Log("Duplicate BasicDeliver: {DeliveryTag}", deliveryTag);
 
-                await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
                 await _context.ReceivePipe.Send(context).ConfigureAwait(false);
 
@@ -154,11 +152,13 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 _model.BasicAck(deliveryTag, false);
 
-                await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
                 try
                 {

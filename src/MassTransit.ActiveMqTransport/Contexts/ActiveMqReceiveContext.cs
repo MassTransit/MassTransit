@@ -15,8 +15,8 @@
         readonly IMessage _transportMessage;
         byte[] _body;
 
-        public ActiveMqReceiveContext(Uri inputAddress, IMessage transportMessage, ActiveMqReceiveEndpointContext context)
-            : base(inputAddress, transportMessage.NMSRedelivered, context)
+        public ActiveMqReceiveContext(Uri inputAddress, IMessage transportMessage, ActiveMqReceiveEndpointContext context, params object[] payloads)
+            : base(inputAddress, transportMessage.NMSRedelivered, context, payloads)
         {
             _transportMessage = transportMessage;
         }

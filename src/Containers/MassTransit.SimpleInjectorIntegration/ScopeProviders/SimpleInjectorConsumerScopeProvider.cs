@@ -39,9 +39,7 @@
             {
                 scope.UpdateScope(context);
 
-                var proxy = new ConsumeContextProxyScope(context);
-
-                proxy.UpdatePayload(scope);
+                var proxy = new ConsumeContextScope(context, scope, scope.Container);
 
                 return new CreatedConsumerScopeContext<Scope>(scope, proxy);
             }
@@ -79,9 +77,7 @@
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, scope);
-
-                consumerContext.UpdatePayload(scope);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, scope, scope.Container);
 
                 return new CreatedConsumerScopeContext<Scope, TConsumer, T>(scope, consumerContext);
             }

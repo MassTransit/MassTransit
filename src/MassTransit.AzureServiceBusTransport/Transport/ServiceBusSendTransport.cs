@@ -100,7 +100,8 @@
                             return;
                     }
 
-                    await _context.SendObservers.PreSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
                     var brokeredMessage = CreateBrokeredMessage(context);
 
@@ -108,11 +109,13 @@
 
                     context.LogSent();
 
-                    await _context.SendObservers.PostSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PostSend(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
 
                     throw;
                 }

@@ -349,7 +349,7 @@ namespace MassTransit.Context
         }
 
 
-        struct FaultPipe<T> :
+        readonly struct FaultPipe<T> :
             IPipe<SendContext<Fault<T>>>
             where T : class
         {

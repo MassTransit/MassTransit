@@ -32,12 +32,9 @@ namespace MassTransit.UnityIntegration
             var scope = _container.CreateChildContainer();
             try
             {
-                var proxy = new ConsumeContextScope<T>(context);
+                var proxy = new ConsumeContextScope<T>(context, scope);
 
-                var consumerScope = scope;
-                proxy.GetOrAddPayload(() => consumerScope);
-
-                return new CreatedSagaScopeContext<IUnityContainer, T>(consumerScope, proxy);
+                return new CreatedSagaScopeContext<IUnityContainer, T>(scope, proxy);
             }
             catch
             {
@@ -55,12 +52,9 @@ namespace MassTransit.UnityIntegration
             var scope = _container.CreateChildContainer();
             try
             {
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, scope);
 
-                var sagaScope = scope;
-                proxy.GetOrAddPayload(() => sagaScope);
-
-                return new CreatedSagaQueryScopeContext<IUnityContainer, TSaga, T>(sagaScope, proxy);
+                return new CreatedSagaQueryScopeContext<IUnityContainer, TSaga, T>(scope, proxy);
             }
             catch
             {

@@ -81,19 +81,22 @@
                     transportMessage.MessageAttributes.Set(nameof(context.CorrelationId), context.CorrelationId);
                     transportMessage.MessageAttributes.Set(nameof(context.TimeToLive), context.TimeToLive);
 
-                    await _context.SendObservers.PreSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
                     await clientContext.Publish(transportMessage, context.CancellationToken).ConfigureAwait(false);
 
                     context.LogSent();
 
-                    await _context.SendObservers.PostSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PostSend(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     context.LogFaulted(ex);
 
-                    await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
 
                     throw;
                 }

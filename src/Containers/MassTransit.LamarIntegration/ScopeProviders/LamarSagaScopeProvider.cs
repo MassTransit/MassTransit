@@ -41,8 +41,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
             var nestedContainer = _container.GetNestedContainer(context);
             try
             {
-                var proxy = new ConsumeContextScope<T>(context);
-                proxy.UpdatePayload(nestedContainer);
+                var proxy = new ConsumeContextScope<T>(context, nestedContainer);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);
@@ -69,8 +68,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
             var nestedContainer = _container.GetNestedContainer(context);
             try
             {
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query);
-                proxy.UpdatePayload(nestedContainer);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, nestedContainer);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);

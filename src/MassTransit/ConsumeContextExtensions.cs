@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
@@ -13,32 +14,26 @@
             where T : class
             where TConsumer : class
         {
-            return new ConsumerConsumeContextProxyScope<TConsumer, T>(context, consumer);
+            return new ConsumerConsumeContextScope<TConsumer, T>(context, consumer);
         }
 
         public static ConsumerConsumeContext<TConsumer, TMessage> PushConsumerScope<TConsumer, TMessage, T>(this ConsumeContext<TMessage> context,
-            TConsumer consumer,
-            T scope)
+            TConsumer consumer, T scope, params object[] payloads)
             where TMessage : class
             where TConsumer : class
             where T : class
         {
-            var proxy = new ConsumerConsumeContextProxyScope<TConsumer, TMessage>(context, consumer);
+            if (payloads != null && payloads.Length > 0)
+                return new ConsumerConsumeContextScope<TConsumer, TMessage>(context, consumer, new object[] {scope}.Concat(payloads));
 
-            proxy.GetOrAddPayload(() => scope);
-
-            return proxy;
+            return new ConsumerConsumeContextScope<TConsumer, TMessage>(context, consumer, scope);
         }
 
         public static ConsumeContext<T> CreateScope<T, TScope>(this ConsumeContext<T> context, TScope scope)
             where T : class
             where TScope : class
         {
-            var proxy = new ConsumeContextScope<T>(context);
-
-            proxy.GetOrAddPayload(() => scope);
-
-            return proxy;
+            return new ConsumeContextScope<T>(context, scope);
         }
 
         public static Task Forward<T>(this ConsumeContext<T> context, ISendEndpoint endpoint)

@@ -3,20 +3,29 @@
     using System;
     using System.Reflection;
     using System.Threading;
+    using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Payloads;
 
 
-    public class ConsumeContextProxyScope :
+    public class ConsumeContextScope :
         ConsumeContextProxy
     {
         readonly PipeContext _context;
         IPayloadCache _payloadCache;
 
-        public ConsumeContextProxyScope(ConsumeContext context)
+        public ConsumeContextScope(ConsumeContext context)
             : base(context)
         {
             _context = context;
+        }
+
+        public ConsumeContextScope(ConsumeContext context, params object[] payloads)
+            : base(context)
+        {
+            _context = context;
+
+            _payloadCache = new ListPayloadCache(payloads);
         }
 
         public override CancellationToken CancellationToken => _context.CancellationToken;
@@ -89,12 +98,34 @@
 
 
     public class ConsumeContextScope<TMessage> :
-        ConsumeContextProxy<TMessage>
+        ConsumeContextScope,
+        ConsumeContext<TMessage>
         where TMessage : class
     {
+        readonly ConsumeContext<TMessage> _context;
+
         public ConsumeContextScope(ConsumeContext<TMessage> context)
             : base(context)
         {
+            _context = context;
+        }
+
+        public ConsumeContextScope(ConsumeContext<TMessage> context, params object[] payloads)
+            : base(context, payloads)
+        {
+            _context = context;
+        }
+
+        public TMessage Message => _context.Message;
+
+        public virtual Task NotifyConsumed(TimeSpan duration, string consumerType)
+        {
+            return base.NotifyConsumed(this, duration, consumerType);
+        }
+
+        public virtual Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
+        {
+            return base.NotifyFaulted(this, duration, consumerType, exception);
         }
     }
 }

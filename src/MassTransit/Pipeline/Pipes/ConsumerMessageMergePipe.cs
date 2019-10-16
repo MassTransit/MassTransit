@@ -57,7 +57,7 @@ namespace MassTransit.Pipeline.Pipes
 
             return context is ConsumerConsumeContext<TConsumer, TMessage> consumerContext
                 ? _output.Send(consumerContext)
-                : _output.Send(new ConsumerConsumeContextProxyScope<TConsumer, TMessage>(context, _context.Consumer));
+                : _output.Send(new ConsumerConsumeContextScope<TConsumer, TMessage>(context, _context.Consumer));
         }
     }
 }

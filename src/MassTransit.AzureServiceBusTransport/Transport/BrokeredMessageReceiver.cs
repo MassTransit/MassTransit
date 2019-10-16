@@ -20,7 +20,7 @@
         readonly Uri _inputAddress;
         readonly ReceiveEndpointContext _context;
 
-        public BrokeredMessageReceiver(Uri inputAddress,  ReceiveEndpointContext context)
+        public BrokeredMessageReceiver(Uri inputAddress, ReceiveEndpointContext context)
         {
             _inputAddress = inputAddress;
             _context = context;
@@ -59,7 +59,8 @@
 
             try
             {
-                await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
                 if (message.LockedUntilUtc <= DateTime.UtcNow)
                     throw new MessageLockExpiredException(_inputAddress, $"The message lock expired: {message.MessageId}");
@@ -73,7 +74,8 @@
 
                 await message.CompleteAsync().ConfigureAwait(false);
 
-                await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -86,7 +88,8 @@
                     LogContext.Warning?.Log(exception, "Abandon message faulted: {MessageId", message.MessageId);
                 }
 
-                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             finally
             {

@@ -70,12 +70,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var delivery = _tracker.BeginDelivery();
 
-            var context = new ActiveMqReceiveContext(_inputAddress, message, _context);
-
-            context.GetOrAddPayload(() => _receiveSettings);
-            context.GetOrAddPayload(() => _session);
-            context.GetOrAddPayload(() => _session.ConnectionContext);
-
+            var context = new ActiveMqReceiveContext(_inputAddress, message, _context, _receiveSettings, _session, _session.ConnectionContext);
 
             var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
             activity.AddReceiveContextHeaders(context);
@@ -85,7 +80,8 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 if (!_pending.TryAdd(message.NMSMessageId, context))
                     LogContext.Warning?.Log("Duplicate message: {MessageId}", message.NMSMessageId);
 
-                await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
                 await _context.ReceivePipe.Send(context).ConfigureAwait(false);
 
@@ -93,11 +89,13 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
                 message.Acknowledge();
 
-                await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             finally
             {
