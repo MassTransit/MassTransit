@@ -35,14 +35,12 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_initialize_a_fault()
         {
-            var topContext = await MessageInitializerCache<Top>.Initialize(new
-            {
-                Text = "Hello"
-            });
+            var topContext = await MessageInitializerCache<Top>.Initialize(new {Text = "Hello"});
 
             var context = await MessageInitializerCache<Report>.Initialize(new
             {
-                Fault = new FaultEvent<Top>(topContext.Message, NewId.NextGuid(), HostMetadataCache.Host, new IntentionalTestException())
+                Fault = new FaultEvent<Top>(topContext.Message, NewId.NextGuid(), HostMetadataCache.Host, new IntentionalTestException(),
+                    TypeMetadataCache<Top>.MessageTypeNames)
             });
 
             Assert.That(context.Message, Is.Not.Null);

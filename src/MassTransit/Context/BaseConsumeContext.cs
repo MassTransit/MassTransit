@@ -2,6 +2,7 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Converters;
@@ -333,7 +334,7 @@ namespace MassTransit.Context
         async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
             where T : class
         {
-            Fault<T> fault = new FaultEvent<T>(context.Message, context.MessageId, HostMetadataCache.Host, exception);
+            Fault<T> fault = new FaultEvent<T>(context.Message, context.MessageId, HostMetadataCache.Host, exception, context.SupportedMessageTypes.ToArray());
 
             var faultPipe = new FaultPipe<T>(context);
 

@@ -80,6 +80,7 @@ namespace MassTransit.Tests
             {
                 Assert.That(exception.Fault.Exceptions.First().ExceptionType, Is.EqualTo(TypeMetadataCache<IntentionalTestException>.ShortName));
                 Assert.That(exception.RequestType, Is.EqualTo(TypeMetadataCache<GetValue>.ShortName));
+                Assert.That(exception.Fault.FaultMessageTypes, Is.EqualTo(TypeMetadataCache<GetValue>.MessageTypeNames));
             }
             catch
             {

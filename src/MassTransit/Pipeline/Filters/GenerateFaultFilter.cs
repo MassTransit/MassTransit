@@ -1,6 +1,7 @@
 namespace MassTransit.Pipeline.Filters
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using Context;
     using Events;
@@ -35,11 +36,13 @@ namespace MassTransit.Pipeline.Filters
         {
             IPublishEndpoint publishEndpoint;
             Guid? faultedMessageId;
+            string[] faultMessageTypes = null;
 
             if (context.TryGetPayload(out ConsumeContext consumeContext))
             {
                 publishEndpoint = consumeContext;
                 faultedMessageId = consumeContext.MessageId;
+                faultMessageTypes = consumeContext.SupportedMessageTypes.ToArray();
             }
             else
             {
@@ -48,7 +51,8 @@ namespace MassTransit.Pipeline.Filters
                 publishEndpoint = context.PublishEndpointProvider.CreatePublishEndpoint(context.InputAddress);
             }
 
-            ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType.MediaType, faultedMessageId);
+            ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType.MediaType, faultedMessageId,
+                faultMessageTypes);
 
             var contextPipe = new ConsumeSendContextPipe<ReceiveFault>(consumeContext);
 
