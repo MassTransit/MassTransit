@@ -21,6 +21,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             PublisherConfirmation = true;
 
+            RequestedConnectionTimeout = 10000;
+
             ClientProvidedName = HostMetadataCache.Host.ProcessName;
 
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
@@ -48,6 +50,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public bool PublisherConfirmation { get; set; }
         public Uri HostAddress => _hostAddress.Value;
         public ushort RequestedChannelMax { get; set; }
+        public int RequestedConnectionTimeout { get; set; }
 
         Uri FormatHostAddress()
         {
@@ -63,6 +66,5 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             return builder.Uri;
         }
-
     }
 }

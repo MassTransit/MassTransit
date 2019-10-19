@@ -17,6 +17,7 @@
                 {
                     var host = x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
                     {
+                        h.RequestedConnectionTimeout(2000);
                     });
 
                     x.UseRetry(r =>

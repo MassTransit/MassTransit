@@ -103,24 +103,18 @@
             }
             catch (ConnectFailureException ex)
             {
-                LogContext.Debug?.Log(ex, "RabbitMQ Connect failed: {Host}", _description);
-
                 connection?.Dispose();
 
                 throw new RabbitMqConnectionException("Connect failed: " + _description, ex);
             }
             catch (BrokerUnreachableException ex)
             {
-                LogContext.Debug?.Log(ex, "RabbitMQ unreachable: {Host}", _description);
-
                 connection?.Dispose();
 
                 throw new RabbitMqConnectionException("Broker unreachable: " + _description, ex);
             }
             catch (OperationInterruptedException ex)
             {
-                LogContext.Debug?.Log(ex, "RabbitMQ operation interrupted: {Host}", _description);
-
                 connection?.Dispose();
 
                 throw new RabbitMqConnectionException("Operation interrupted: " + _description, ex);

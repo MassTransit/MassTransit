@@ -151,14 +151,17 @@ namespace MassTransit
                 {
                     if (busHandle != null)
                     {
-                        LogContext.Debug?.Log("Bus start faulted, stopping hosts");
+                        LogContext.Debug?.Log("Bus start faulted, stopping host");
 
                         await busHandle.StopAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                }
                 catch (Exception stopException)
                 {
-                    LogContext.Warning?.Log(stopException, "Bus start faulted, and failed to stop started hosts");
+                    LogContext.Warning?.Log(stopException, "Bus start faulted, and failed to stop host");
                 }
 
                 await _busObservable.StartFaulted(this, ex).ConfigureAwait(false);
@@ -247,11 +250,14 @@ namespace MassTransit
 
                 try
                 {
-                    LogContext.Debug?.Log("Stopping hosts");
+                    LogContext.Debug?.Log("Stopping host");
 
                     await _hostHandle.Stop(cancellationToken).ConfigureAwait(false);
 
                     await _busObserver.PostStop(_bus).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
                 }
                 catch (Exception exception)
                 {
