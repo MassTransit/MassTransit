@@ -80,7 +80,7 @@ MassTransit retry filters execute in memory and maintain a _lock_ on the message
 
 Some errors take a while to resolve, say a remote service is down or a SQL server has crashed. In these situations, it's best to dust off and nuke the site from orbit - at a much later time obviously. Redelivery is a form of retry (some refer to it as _second-level retry_) where the message is removed from the queue and then redelivered to the queue at a future time.
 
-To add message redelivery, first, the bus must be configured with a message scheduler (see the [scheduling](usage/scheduling/README.md) section for more details). With a scheduler configured, the above example that only used retry can be modified to add scheduled redelivery as shown below.
+To add message redelivery, first, the bus must be configured with a message scheduler (see the [scheduling](usage/scheduling/README.md) section for more details). With a scheduler configured, the above example that only used retry can be modified to add scheduled redelivery as shown below. Note, that due to the piped execution the order of the two calls is important.
 
 ```csharp
 var sessionFactory = CreateSessionFactory();
