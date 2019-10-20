@@ -13,6 +13,7 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Builders
 {
     using System.Collections.Generic;
+    using Amazon.SQS.Model;
     using Entities;
 
 
@@ -68,14 +69,14 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
                 return this;
             }
 
-            public TopicHandle CreateTopic(string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null, IDictionary<string, object> topicSubscriptionAttributes = null)
+            public TopicHandle CreateTopic(string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null, IDictionary<string, object> topicSubscriptionAttributes = null, IDictionary<string, string> tags = null)
             {
-                return _builder.CreateTopic(name, durable, autoDelete, topicAttributes, topicSubscriptionAttributes);
+                return _builder.CreateTopic(name, durable, autoDelete, topicAttributes, topicSubscriptionAttributes, tags);
             }
 
-            public QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null, IDictionary<string, object> queueSubscriptionAttributes = null)
+            public QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null, IDictionary<string, object> queueSubscriptionAttributes = null, IDictionary<string, string> tags = null)
             {
-                return _builder.CreateQueue(name, durable, autoDelete, queueAttributes, queueSubscriptionAttributes);
+                return _builder.CreateQueue(name, durable, autoDelete, queueAttributes, queueSubscriptionAttributes, tags);
             }
 
             public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle topic, QueueHandle queue)

@@ -22,20 +22,26 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
         ITopicConfigurator,
         Topic
     {
-        public TopicConfigurator(string topicName, bool durable = true, bool autoDelete = false, IDictionary<string, object> topicAttributes = null, IDictionary<string, object> topicSubscriptionAttributes = null)
+        public TopicConfigurator(string topicName, bool durable = true, bool autoDelete = false, IDictionary<string, object> topicAttributes = null, IDictionary<string, object> topicSubscriptionAttributes = null, IDictionary<string, string> topicTags = null)
             : base(topicName, durable, autoDelete)
         {
             TopicAttributes = topicAttributes ?? new Dictionary<string, object>();
             TopicSubscriptionAttributes = topicSubscriptionAttributes ?? new Dictionary<string, object>();
+            TopicTags = topicTags ?? new Dictionary<string, string>();
         }
 
         public TopicConfigurator(Topic source)
             : base(source.EntityName, source.Durable, source.AutoDelete)
         {
             TopicAttributes = source.TopicAttributes;
+            TopicSubscriptionAttributes = source.TopicSubscriptionAttributes;
+            TopicTags = source.TopicTags;
         }
 
         public IDictionary<string, object> TopicAttributes { get; set; }
         public IDictionary<string, object> TopicSubscriptionAttributes { get; set; }
+        public IDictionary<string, string> TopicTags { get; set; }
+
+        public IDictionary<string, string> Tags => TopicTags;
     }
 }

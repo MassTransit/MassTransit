@@ -65,6 +65,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         IDictionary<string, object> ITopicConfigurator.TopicAttributes => _topic.TopicAttributes;
         IDictionary<string, object> ITopicConfigurator.TopicSubscriptionAttributes => _topic.TopicSubscriptionAttributes;
+        IDictionary<string, string> ITopicConfigurator.TopicTags => _topic.TopicTags;
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
         {

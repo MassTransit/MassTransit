@@ -23,13 +23,14 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         public QueueErrorSettings(EntitySettings source, string queueName)
             : base(queueName, source.Durable, source.AutoDelete)
         {
+            QueueTags = source.Tags;
         }
 
         public BrokerTopology GetBrokerTopology()
         {
             var builder = new PublishEndpointBrokerTopologyBuilder();
 
-            builder.CreateQueue(EntityName, Durable, AutoDelete);
+            builder.CreateQueue(EntityName, Durable, AutoDelete, null, null, QueueTags);
 
             return builder.BuildBrokerTopology();
         }
