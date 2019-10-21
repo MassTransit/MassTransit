@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using Internals.Extensions;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
     using Util;
@@ -61,7 +62,10 @@
                     {
                         queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
                         queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : "",
-                        queueDescription.RequiresSession ? "session" : ""
+                        queueDescription.RequiresSession ? "session" : "",
+                        queueDescription.AutoDeleteOnIdle != Defaults.AutoDeleteOnIdle
+                            ? $"auto-delete: {queueDescription.AutoDeleteOnIdle.ToFriendlyString()}"
+                            : ""
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
 
             return queueDescription;
@@ -90,12 +94,13 @@
             }
 
             LogContext.Debug?.Log("Topic: {Topic} ({Attributes})", topicDescription.Path,
-                string.Join(", ", new[]
-                {
-                    topicDescription.RequiresDuplicateDetection ? "dupe detect" : "",
-                    topicDescription.EnablePartitioning ? "partitioned" : "",
-                    topicDescription.SupportOrdering ? "ordered" : "",
-                }.Where(x => !string.IsNullOrWhiteSpace(x))));
+                string.Join(", ",
+                    new[]
+                    {
+                        topicDescription.RequiresDuplicateDetection ? "dupe detect" : "",
+                        topicDescription.EnablePartitioning ? "partitioned" : "",
+                        topicDescription.SupportOrdering ? "ordered" : "",
+                    }.Where(x => !string.IsNullOrWhiteSpace(x))));
 
             return topicDescription;
         }

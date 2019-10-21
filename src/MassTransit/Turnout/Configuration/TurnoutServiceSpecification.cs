@@ -102,6 +102,11 @@
             _configurator.ClearMessageDeserializers();
         }
 
+        public void AddDependency(IReceiveEndpointObserverConnector connector)
+        {
+            _configurator.AddDependency(connector);
+        }
+
         Uri IReceiveEndpointConfigurator.InputAddress => _configurator.InputAddress;
 
         public int PartitionCount { get; set; }

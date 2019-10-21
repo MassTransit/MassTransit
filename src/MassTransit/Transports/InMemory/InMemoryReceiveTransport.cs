@@ -24,14 +24,14 @@ namespace MassTransit.Transports.InMemory
     {
         readonly Uri _inputAddress;
         readonly IInMemoryQueue _queue;
-        readonly ReceiveEndpointContext _receiveEndpointContext;
+        readonly ReceiveEndpointContext _context;
         readonly IDeliveryTracker _tracker;
 
-        public InMemoryReceiveTransport(Uri inputAddress, IInMemoryQueue queue, ReceiveEndpointContext receiveEndpointContext)
+        public InMemoryReceiveTransport(Uri inputAddress, IInMemoryQueue queue, ReceiveEndpointContext context)
         {
             _inputAddress = inputAddress;
             _queue = queue;
-            _receiveEndpointContext = receiveEndpointContext;
+            _context = context;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
         }
@@ -42,9 +42,9 @@ namespace MassTransit.Transports.InMemory
             if (IsStopped)
                 return;
 
-            LogContext.Current = _receiveEndpointContext.LogContext;
+            LogContext.Current = _context.LogContext;
 
-            var context = new InMemoryReceiveContext(_inputAddress, message, _receiveEndpointContext);
+            var context = new InMemoryReceiveContext(_inputAddress, message, _context);
             var delivery = _tracker.BeginDelivery();
 
             var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
@@ -52,20 +52,20 @@ namespace MassTransit.Transports.InMemory
 
             try
             {
-                if (_receiveEndpointContext.ReceiveObservers.Count > 0)
-                    await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
-                await _receiveEndpointContext.ReceivePipe.Send(context).ConfigureAwait(false);
+                await _context.ReceivePipe.Send(context).ConfigureAwait(false);
 
                 await context.ReceiveCompleted.ConfigureAwait(false);
 
-                if (_receiveEndpointContext.ReceiveObservers.Count > 0)
-                    await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                if (_receiveEndpointContext.ReceiveObservers.Count > 0)
-                    await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
                 message.DeliveryCount++;
             }
@@ -93,7 +93,7 @@ namespace MassTransit.Transports.InMemory
 
                 void NotifyReady()
                 {
-                    _receiveEndpointContext.TransportObservers.Ready(new ReceiveTransportReadyEvent(_inputAddress));
+                    _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(_inputAddress));
 
                     SetReady();
                 }
@@ -111,22 +111,22 @@ namespace MassTransit.Transports.InMemory
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveObserver(observer);
+            return _context.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveTransportObserver(observer);
+            return _context.ConnectReceiveTransportObserver(observer);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveEndpointContext.ConnectPublishObserver(observer);
+            return _context.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            return _receiveEndpointContext.ConnectSendObserver(observer);
+            return _context.ConnectSendObserver(observer);
         }
 
         void HandleDeliveryComplete()
@@ -148,7 +148,7 @@ namespace MassTransit.Transports.InMemory
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
-                LogContext.SetCurrentIfNull(_transport._receiveEndpointContext.LogContext);
+                LogContext.SetCurrentIfNull(_transport._context.LogContext);
 
                 await _transport.Stop("Stop", cancellationToken).ConfigureAwait(false);
 
@@ -156,7 +156,7 @@ namespace MassTransit.Transports.InMemory
 
                 var completed = new ReceiveTransportCompletedEvent(_transport._inputAddress, _transport._tracker.GetDeliveryMetrics());
 
-                await _transport._receiveEndpointContext.TransportObservers.Completed(completed).ConfigureAwait(false);
+                await _transport._context.TransportObservers.Completed(completed).ConfigureAwait(false);
             }
         }
     }

@@ -8,6 +8,7 @@
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Policies;
     using RabbitMQ.Client.Exceptions;
     using Topology;
@@ -22,17 +23,17 @@
         readonly IRabbitMqHost _host;
         readonly Uri _inputAddress;
         readonly ReceiveSettings _settings;
-        readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
+        readonly RabbitMqReceiveEndpointContext _context;
 
         public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IPipe<ConnectionContext> connectionPipe,
-            RabbitMqReceiveEndpointContext receiveEndpointContext)
+            RabbitMqReceiveEndpointContext context)
         {
             _host = host;
             _settings = settings;
-            _receiveEndpointContext = receiveEndpointContext;
+            _context = context;
             _connectionPipe = connectionPipe;
 
-            _inputAddress = receiveEndpointContext.InputAddress;
+            _inputAddress = context.InputAddress;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -41,7 +42,7 @@
             scope.Add("type", "RabbitMQ");
             scope.Set(_settings);
             var topologyScope = scope.CreateScope("topology");
-            _receiveEndpointContext.BrokerTopology.Probe(topologyScope);
+            _context.BrokerTopology.Probe(topologyScope);
         }
 
         /// <summary>
@@ -58,22 +59,22 @@
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveObserver(observer);
+            return _context.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveTransportObserver(observer);
+            return _context.ConnectReceiveTransportObserver(observer);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveEndpointContext.ConnectPublishObserver(observer);
+            return _context.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            return _receiveEndpointContext.ConnectSendObserver(observer);
+            return _context.ConnectSendObserver(observer);
         }
 
         async Task Receiver()
@@ -89,6 +90,8 @@
 
                         try
                         {
+                            await _context.Dependencies.OrCanceled(Stopping).ConfigureAwait(false);
+
                             await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
                         }
                         catch (RabbitMqConnectionException ex)
@@ -135,7 +138,7 @@
         {
             LogContext.Error?.Log(exception, "RabbitMQ Connect Failed: {Host}", _host.Settings.ToDescription());
 
-            return _receiveEndpointContext.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, exception));
+            return _context.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, exception));
         }
 
 

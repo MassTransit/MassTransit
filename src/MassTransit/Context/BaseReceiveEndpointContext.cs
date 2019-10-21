@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Context
 {
     using System;
+    using System.Threading.Tasks;
     using Configuration;
     using ConsumePipeSpecifications;
     using GreenPipes;
@@ -48,6 +49,8 @@
             _endpointObservers = configuration.EndpointObservers;
             _receiveObservers = configuration.ReceiveObservers;
             _transportObservers = configuration.TransportObservers;
+
+            Dependencies = configuration.Dependencies;
 
             _sendPipe = new Lazy<ISendPipe>(() => configuration.Send.CreatePipe());
             _publishPipe = new Lazy<IPublishPipe>(() => configuration.Publish.CreatePipe());
@@ -101,6 +104,8 @@
 
         public Uri InputAddress { get; }
 
+        public Task Dependencies { get; }
+
         ILogContext ReceiveEndpointContext.LogContext => _logContext;
 
         IPublishTopology ReceiveEndpointContext.Publish => _publishTopology;
@@ -108,6 +113,7 @@
         public IReceivePipe ReceivePipe => _receivePipe.Value;
 
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
+
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
 
         protected virtual ISendEndpointProvider CreateSendEndpointProvider()

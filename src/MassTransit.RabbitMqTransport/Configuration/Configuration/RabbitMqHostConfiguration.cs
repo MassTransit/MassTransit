@@ -71,6 +71,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
             configuration.ConnectSagaConfigurationObserver(_busConfiguration);
             configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
+            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
 
             configure?.Invoke(configuration);
 

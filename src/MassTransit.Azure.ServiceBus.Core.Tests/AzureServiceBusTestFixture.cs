@@ -13,6 +13,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Hosting;
     using MassTransit.Testing;
@@ -65,9 +66,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         protected Uri InputQueueAddress => AzureServiceBusTestHarness.InputQueueAddress;
 
         [OneTimeSetUp]
-        public Task SetupAzureServiceBusTestFixture()
+        public async Task SetupAzureServiceBusTestFixture()
         {
-            return AzureServiceBusTestHarness.Start();
+            using (var source = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
+            {
+                await AzureServiceBusTestHarness.Start(source.Token);
+            }
         }
 
         [OneTimeTearDown]

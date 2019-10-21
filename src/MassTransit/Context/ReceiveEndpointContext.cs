@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Context
 {
     using System;
+    using System.Threading.Tasks;
     using ConsumePipeSpecifications;
     using GreenPipes;
     using Pipeline;
@@ -43,5 +44,10 @@
         IPublishEndpointProvider PublishEndpointProvider { get; }
 
         ISendEndpointProvider SendEndpointProvider { get; }
+
+        /// <summary>
+        /// Task completed when dependencies are ready
+        /// </summary>
+        Task Dependencies { get; }
     }
 }

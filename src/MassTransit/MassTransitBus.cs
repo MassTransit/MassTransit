@@ -6,6 +6,7 @@ namespace MassTransit
     using Configuration;
     using ConsumePipeSpecifications;
     using Context;
+    using EndpointConfigurators;
     using Events;
     using GreenPipes;
     using Pipeline;
@@ -213,6 +214,22 @@ namespace MassTransit
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _host.ConnectSendObserver(observer);
+        }
+
+        ConnectHandle IEndpointConfigurationObserverConnector.ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
+        {
+            return _host.ConnectEndpointConfigurationObserver(observer);
+        }
+
+        HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            return _host.ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
+
+        HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            return _host.ConnectReceiveEndpoint(queueName, configureEndpoint);
         }
 
         void IProbeSite.Probe(ProbeContext context)

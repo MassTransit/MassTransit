@@ -8,6 +8,7 @@
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Pipeline;
     using Policies;
     using Transports;
@@ -82,6 +83,8 @@
                     {
                         try
                         {
+                            await _context.Dependencies.OrCanceled(Stopping).ConfigureAwait(false);
+
                             await _clientContextSupervisor.Send(_clientPipe, Stopped).ConfigureAwait(false);
                         }
                         catch (OperationCanceledException)

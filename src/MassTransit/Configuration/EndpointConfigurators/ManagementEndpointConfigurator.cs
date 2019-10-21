@@ -64,6 +64,11 @@ namespace MassTransit.EndpointConfigurators
             _configurator.ClearMessageDeserializers();
         }
 
+        public void AddDependency(IReceiveEndpointObserverConnector connector)
+        {
+            _configurator.AddDependency(connector);
+        }
+
         Uri IReceiveEndpointConfigurator.InputAddress => _configurator.InputAddress;
 
         void ISendPipelineConfigurator.ConfigureSend(Action<ISendPipeConfigurator> callback)

@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Mime;
+    using System.Threading.Tasks;
     using Automatonymous;
     using ConsumeConfigurators;
     using Courier;
@@ -12,6 +13,7 @@
     using Pipeline.Observables;
     using Saga;
     using SagaConfigurators;
+    using Transports;
 
 
     public abstract class ReceiveEndpointConfiguration :
@@ -21,6 +23,7 @@
         readonly Lazy<IConsumePipe> _consumePipe;
         readonly IList<string> _lateConfigurationKeys;
         readonly IList<IReceiveEndpointSpecification> _specifications;
+        readonly IList<IReceiveEndpointDependency> _dependencies;
         IReceiveEndpoint _receiveEndpoint;
 
         protected ReceiveEndpointConfiguration(IEndpointConfiguration endpointConfiguration)
@@ -30,6 +33,7 @@
             _consumePipe = new Lazy<IConsumePipe>(() => _endpointConfiguration.Consume.CreatePipe());
             _specifications = new List<IReceiveEndpointSpecification>();
             _lateConfigurationKeys = new List<string>();
+            _dependencies = new List<IReceiveEndpointDependency>();
 
             EndpointObservers = new ReceiveEndpointObservable();
             ReceiveObservers = new ReceiveObservable();
@@ -174,6 +178,13 @@
             _endpointConfiguration.ConfigureError(callback);
         }
 
+        public void AddDependency(IReceiveEndpointObserverConnector connector)
+        {
+            var dependency = new ReceiveEndpointDependency(connector);
+
+            _dependencies.Add(dependency);
+        }
+
         public virtual IEnumerable<ValidationResult> Validate()
         {
             return _endpointConfiguration.Validate()
@@ -230,6 +241,8 @@
             _specifications.Add(specification);
         }
 
+        public Task Dependencies => Task.WhenAll(_dependencies.Select(x => x.Ready));
+
         protected void Changed(string key)
         {
             if (IsAlreadyConfigured())
@@ -240,6 +253,5 @@
         {
             return false;
         }
-
     }
 }

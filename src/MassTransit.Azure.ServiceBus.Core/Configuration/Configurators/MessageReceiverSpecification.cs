@@ -28,6 +28,10 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
 
         public Uri InputAddress { get; set; }
 
+        public void AddDependency(IReceiveEndpointObserverConnector connector)
+        {
+        }
+
         public override IEnumerable<ValidationResult> Validate()
         {
             foreach (var result in base.Validate())
