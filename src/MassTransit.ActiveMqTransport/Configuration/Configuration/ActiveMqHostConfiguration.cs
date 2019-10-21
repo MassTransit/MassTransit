@@ -26,7 +26,7 @@
             _topologyConfiguration = topologyConfiguration;
             _hostSettings = new ConfigurationHostSettings {Host = "localhost"};
 
-            _proxy = new ActiveMqHostProxy();
+            _proxy = new ActiveMqHostProxy(this);
         }
 
         public string Description => _hostSettings.ToDescription();

@@ -26,7 +26,7 @@
             _hostSettings = new HostSettings();
             _topologyConfiguration = topologyConfiguration;
 
-            _proxy = new ServiceBusHostProxy();
+            _proxy = new ServiceBusHostProxy(this);
         }
 
         public override Uri HostAddress => _hostSettings.ServiceUri;

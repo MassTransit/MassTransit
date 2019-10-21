@@ -31,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 Password = "guest"
             };
 
-            _proxy = new RabbitMqHostProxy();
+            _proxy = new RabbitMqHostProxy(this);
         }
 
         public string Description => _hostSettings.ToDescription();
@@ -48,7 +48,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             get => _hostSettings;
             set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
-
 
         public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)

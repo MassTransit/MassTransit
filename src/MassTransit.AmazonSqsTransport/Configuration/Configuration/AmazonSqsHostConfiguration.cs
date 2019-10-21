@@ -26,7 +26,7 @@
             _topologyConfiguration = topologyConfiguration;
             _hostSettings = new ConfigurationHostSettings();
 
-            _proxy = new AmazonSqsHostProxy();
+            _proxy = new AmazonSqsHostProxy(this);
         }
 
         public override Uri HostAddress => _hostSettings.HostAddress;

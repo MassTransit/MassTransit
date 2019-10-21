@@ -1,93 +1,42 @@
 namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
-    using EndpointConfigurators;
+    using Configuration;
     using GreenPipes;
     using Integration;
-    using MassTransit.Pipeline;
-    using MassTransit.Topology;
     using Topology;
     using Transports;
 
 
     public class RabbitMqHostProxy :
+        BaseHostProxy,
         IRabbitMqHost
     {
+        readonly IRabbitMqHostConfiguration _configuration;
         IRabbitMqHost _host;
 
-        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        public RabbitMqHostProxy(IRabbitMqHostConfiguration configuration)
         {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
-
-            return _host.ConnectSendObserver(observer);
+            _configuration = configuration;
         }
 
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        public void SetComplete(IRabbitMqHost host)
         {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
+            _host = host;
 
-            return _host.ConnectPublishObserver(observer);
+            base.SetComplete(host);
         }
 
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
+        public override Uri Address => _host?.Address ?? _configuration.HostAddress;
 
-            return _host.ConnectConsumeMessageObserver(observer);
-        }
+        IRabbitMqHostTopology IRabbitMqHost.Topology => _host?.Topology ?? throw new InvalidOperationException("The host is not ready.");
 
-        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
+        IConnectionContextSupervisor IRabbitMqHost.ConnectionContextSupervisor =>
+            _host?.ConnectionContextSupervisor ?? throw new InvalidOperationException("The host is not ready.");
 
-            return _host.ConnectConsumeObserver(observer);
-        }
+        IRetryPolicy IRabbitMqHost.ConnectionRetryPolicy => _host?.ConnectionRetryPolicy ?? throw new InvalidOperationException("The host is not ready.");
 
-        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
-
-            return _host.ConnectReceiveObserver(observer);
-        }
-
-        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
-
-            return _host.ConnectReceiveEndpointObserver(observer);
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-        }
-
-        Uri IHost.Address
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Address;
-            }
-        }
-
-        IRabbitMqHostTopology IRabbitMqHost.Topology
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Topology;
-            }
-        }
+        RabbitMqHostSettings IRabbitMqHost.Settings => _configuration.Settings;
 
         HostReceiveEndpointHandle IReceiveConnector<IRabbitMqReceiveEndpointConfigurator>.ConnectReceiveEndpoint(IEndpointDefinition definition,
             IEndpointNameFormatter endpointNameFormatter, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint)
@@ -105,71 +54,6 @@ namespace MassTransit.RabbitMqTransport.Transport
                 throw new InvalidOperationException("The host is not ready.");
 
             return _host.ConnectReceiveEndpoint(queueName, configure);
-        }
-
-        IConnectionContextSupervisor IRabbitMqHost.ConnectionContextSupervisor
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.ConnectionContextSupervisor;
-            }
-        }
-
-        IRetryPolicy IRabbitMqHost.ConnectionRetryPolicy
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.ConnectionRetryPolicy;
-            }
-        }
-
-        RabbitMqHostSettings IRabbitMqHost.Settings
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Settings;
-            }
-        }
-
-        IHostTopology IHost.Topology
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Topology;
-            }
-        }
-
-        HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            return _host.ConnectReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            return _host.ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
-        }
-
-        ConnectHandle IEndpointConfigurationObserverConnector.ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
-        {
-            return _host.ConnectEndpointConfigurationObserver(observer);
-        }
-
-        public void SetComplete(IRabbitMqHost host)
-        {
-            _host = host;
         }
     }
 }

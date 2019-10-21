@@ -2,92 +2,41 @@ namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System;
     using Configuration;
-    using EndpointConfigurators;
+    using Configuration.Configuration;
     using GreenPipes;
-    using MassTransit.Pipeline;
-    using MassTransit.Topology;
     using Topology;
     using Transports;
 
 
     public class AmazonSqsHostProxy :
+        BaseHostProxy,
         IAmazonSqsHost
     {
+        readonly IAmazonSqsHostConfiguration _configuration;
         IAmazonSqsHost _host;
 
-        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        public AmazonSqsHostProxy(IAmazonSqsHostConfiguration configuration)
         {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
-
-            return _host.ConnectSendObserver(observer);
+            _configuration = configuration;
         }
 
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        public void SetComplete(IAmazonSqsHost host)
         {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
+            _host = host;
 
-            return _host.ConnectPublishObserver(observer);
+            base.SetComplete(host);
         }
 
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
+        public override Uri Address => _host?.Address ?? _configuration.HostAddress;
 
-            return _host.ConnectConsumeMessageObserver(observer);
-        }
+        IAmazonSqsHostTopology IAmazonSqsHost.Topology => _host?.Topology ?? throw new InvalidOperationException("The host is not ready.");
 
-        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
+        IConnectionContextSupervisor IAmazonSqsHost.ConnectionContextSupervisor =>
+            _host?.ConnectionContextSupervisor ?? throw new InvalidOperationException("The host is not ready.");
 
-            return _host.ConnectConsumeObserver(observer);
-        }
+        IRetryPolicy IAmazonSqsHost.ConnectionRetryPolicy => _host?.ConnectionRetryPolicy ?? throw new InvalidOperationException("The host is not ready.");
 
-        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
-
-            return _host.ConnectReceiveObserver(observer);
-        }
-
-        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
-
-            return _host.ConnectReceiveEndpointObserver(observer);
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-        }
-
-        Uri IHost.Address
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Address;
-            }
-        }
-
-        IAmazonSqsHostTopology IAmazonSqsHost.Topology
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Topology;
-            }
-        }
+        AmazonSqsHostSettings IAmazonSqsHost.Settings => _configuration.Settings;
 
         HostReceiveEndpointHandle IReceiveConnector<IAmazonSqsReceiveEndpointConfigurator>.ConnectReceiveEndpoint(IEndpointDefinition definition,
             IEndpointNameFormatter endpointNameFormatter, Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint)
@@ -106,71 +55,5 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
             return _host.ConnectReceiveEndpoint(queueName, configure);
         }
-
-        IConnectionContextSupervisor IAmazonSqsHost.ConnectionContextSupervisor
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.ConnectionContextSupervisor;
-            }
-        }
-
-        IRetryPolicy IAmazonSqsHost.ConnectionRetryPolicy
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.ConnectionRetryPolicy;
-            }
-        }
-
-        AmazonSqsHostSettings IAmazonSqsHost.Settings
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Settings;
-            }
-        }
-
-        IHostTopology IHost.Topology
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Topology;
-            }
-        }
-
-        HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            return _host.ConnectReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            return _host.ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
-        }
-
-        ConnectHandle IEndpointConfigurationObserverConnector.ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
-        {
-            return _host.ConnectEndpointConfigurationObserver(observer);
-        }
-
-        public void SetComplete(IAmazonSqsHost host)
-        {
-            _host = host;
-        }
-
     }
 }
