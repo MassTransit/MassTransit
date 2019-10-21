@@ -1,0 +1,2027 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Produce messages · MassTransit</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+        <link rel="stylesheet" href="../build/gitbook.css">
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="message-initializers.html" />
+    
+    
+    <link rel="prev" href="message-consumers.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Overview</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../quickstart.html">
+            
+                <a href="../quickstart.html">
+            
+                    
+                    Quick Start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../upgrade-v6.html">
+            
+                <a href="../upgrade-v6.html">
+            
+                    
+                    Upgrading to Version 6
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="../introduction/getting-help.html">
+            
+                <a href="../introduction/getting-help.html">
+            
+                    
+                    Getting Help
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="../understand/">
+            
+                <a href="../understand/">
+            
+                    
+                    Understanding MassTransit
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.5.1" data-path="../understand/key-ideas.html">
+            
+                <a href="../understand/key-ideas.html">
+            
+                    
+                    Key concepts
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.2" data-path="../understand/under-the-hood.html">
+            
+                <a href="../understand/under-the-hood.html">
+            
+                    
+                    Under the hood
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.5.2.1" data-path="../understand/default-topology.html">
+            
+                <a href="../understand/default-topology.html">
+            
+                    
+                    Topology
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.3" data-path="../understand/additions-to-transport.html">
+            
+                <a href="../understand/additions-to-transport.html">
+            
+                    
+                    What we add to the transport
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.4" data-path="../understand/publishing.html">
+            
+                <a href="../understand/publishing.html">
+            
+                    
+                    Publishing messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.5" data-path="../understand/sending.md">
+            
+                <span>
+            
+                    
+                    Sending messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.6" data-path="../understand/perfcounters.html">
+            
+                <a href="../understand/perfcounters.html">
+            
+                    
+                    Performance counters
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="../learn/">
+            
+                <a href="../learn/">
+            
+                    
+                    Learning Resources
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.6.1" data-path="../learn/samples/">
+            
+                <a href="../learn/samples/">
+            
+                    
+                    Samples
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.6.1.1" data-path="../learn/samples/request-response.html">
+            
+                <a href="../learn/samples/request-response.html">
+            
+                    
+                    Request/Response
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.2" data-path="../learn/samples/saga.html">
+            
+                <a href="../learn/samples/saga.html">
+            
+                    
+                    Saga
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.3" data-path="../learn/samples/courier.html">
+            
+                <a href="../learn/samples/courier.html">
+            
+                    
+                    Courier
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.4" data-path="../learn/samples/containers.html">
+            
+                <a href="../learn/samples/containers.html">
+            
+                    
+                    Containers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.5" data-path="../learn/samples/quartz.html">
+            
+                <a href="../learn/samples/quartz.html">
+            
+                    
+                    Quartz
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.2" data-path="../learn/videos.html">
+            
+                <a href="../learn/videos.html">
+            
+                    
+                    Videos
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.3" data-path="../learn/courses.html">
+            
+                <a href="../learn/courses.html">
+            
+                    
+                    Courses
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.4" data-path="../learn/loving-the-community.html">
+            
+                <a href="../learn/loving-the-community.html">
+            
+                    
+                    Loving the community
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../contributing/">
+            
+                <a href="../contributing/">
+            
+                    
+                    Contributing
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Usage</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../introduction/">
+            
+                <a href="../introduction/">
+            
+                    
+                    Installation
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="../introduction/prerequisites.html">
+            
+                <a href="../introduction/prerequisites.html">
+            
+                    
+                    Prerequisites
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="../introduction/packages.html">
+            
+                <a href="../introduction/packages.html">
+            
+                    
+                    Supported Packages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="../introduction/how-to-install.html">
+            
+                <a href="../introduction/how-to-install.html">
+            
+                    
+                    How to install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="../introduction/getting-help.html">
+            
+                <a href="../introduction/getting-help.html">
+            
+                    
+                    Getting help
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="../introduction/how-to-report-bugs.html">
+            
+                <a href="../introduction/how-to-report-bugs.html">
+            
+                    
+                    How to report bugs
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Using MassTransit
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.1" data-path="configuration.html">
+            
+                <a href="configuration.html">
+            
+                    
+                    Configure MassTransit
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.2" data-path="transports.html">
+            
+                <a href="transports.html">
+            
+                    
+                    Choose a transport
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.2.1" data-path="azure-functions.html">
+            
+                <a href="azure-functions.html">
+            
+                    
+                    Azure Functions
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.3" data-path="message-contracts.html">
+            
+                <a href="message-contracts.html">
+            
+                    
+                    Create message contracts
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.4" data-path="message-consumers.html">
+            
+                <a href="message-consumers.html">
+            
+                    
+                    Create message consumers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="2.2.5" data-path="producing-messages.html">
+            
+                <a href="producing-messages.html">
+            
+                    
+                    Produce messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.6" data-path="message-initializers.html">
+            
+                <a href="message-initializers.html">
+            
+                    
+                    Initialize messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.7" data-path="correlation.html">
+            
+                <a href="correlation.html">
+            
+                    
+                    Correlate messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8" data-path="containers/">
+            
+                <a href="containers/">
+            
+                    
+                    Use IoC container
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.8.1" data-path="containers/autofac.html">
+            
+                <a href="containers/autofac.html">
+            
+                    
+                    Autofac
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.2" data-path="containers/ninject.html">
+            
+                <a href="containers/ninject.html">
+            
+                    
+                    Ninject
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.3" data-path="containers/structuremap.html">
+            
+                <a href="containers/structuremap.html">
+            
+                    
+                    StructureMap
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.4" data-path="containers/lamar.html">
+            
+                <a href="containers/lamar.html">
+            
+                    
+                    Lamar
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.5" data-path="containers/unity.html">
+            
+                <a href="containers/unity.html">
+            
+                    
+                    Unity
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.6" data-path="containers/castlewindsor.html">
+            
+                <a href="containers/castlewindsor.html">
+            
+                    
+                    Castle Windsor
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.7" data-path="containers/msdi.html">
+            
+                <a href="containers/msdi.html">
+            
+                    
+                    Microsoft Dependency Injection
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.9" data-path="request-response.html">
+            
+                <a href="request-response.html">
+            
+                    
+                    Request/Response
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.10" data-path="exceptions.html">
+            
+                <a href="exceptions.html">
+            
+                    
+                    Handle exceptions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.11" data-path="retries.html">
+            
+                <a href="retries.html">
+            
+                    
+                    Configure retries
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.12" data-path="message-data.html">
+            
+                <a href="message-data.html">
+            
+                    
+                    Large payloads
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13" data-path="scheduling/">
+            
+                <a href="scheduling/">
+            
+                    
+                    Schedule messages
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.13.1" data-path="scheduling/scheduling-api.html">
+            
+                <a href="scheduling/scheduling-api.html">
+            
+                    
+                    Scheduling API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.2" data-path="scheduling/in-memory.html">
+            
+                <a href="scheduling/in-memory.html">
+            
+                    
+                    In-memory scheduling
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.3" data-path="scheduling/activemq-delayed.html">
+            
+                <a href="scheduling/activemq-delayed.html">
+            
+                    
+                    ActiveMQ Delay and Schedule Message Delivery
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.4" data-path="scheduling/azure-sb-scheduler.html">
+            
+                <a href="scheduling/azure-sb-scheduler.html">
+            
+                    
+                    Azure Service Bus
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.5" data-path="scheduling/rabbitmq-delayed.html">
+            
+                <a href="scheduling/rabbitmq-delayed.html">
+            
+                    
+                    RabbitMQ Delayed Exchange
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.6" data-path="scheduling/redeliver.html">
+            
+                <a href="scheduling/redeliver.html">
+            
+                    
+                    Redelivering messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.14" data-path="observers.html">
+            
+                <a href="observers.html">
+            
+                    
+                    Observe messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.15" data-path="lifecycle-observers.html">
+            
+                <a href="lifecycle-observers.html">
+            
+                    
+                    Observe lifecycle
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.16" >
+            
+                <span>
+            
+                    
+                    Monitoring
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.16.1" data-path="monitoring/applications-insights.html">
+            
+                <a href="monitoring/applications-insights.html">
+            
+                    
+                    AppInsights
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.16.2" data-path="monitoring/diagnostic-source.html">
+            
+                <a href="monitoring/diagnostic-source.html">
+            
+                    
+                    Diagnostic Source
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.17" data-path="connect-endpoint.html">
+            
+                <a href="connect-endpoint.html">
+            
+                    
+                    Connect endpoints
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.18" data-path="logging.html">
+            
+                <a href="logging.html">
+            
+                    
+                    Logging
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.19" data-path="testing/">
+            
+                <a href="testing/">
+            
+                    
+                    Testing
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.19.1" data-path="testing/bus-harness.html">
+            
+                <a href="testing/bus-harness.html">
+            
+                    
+                    Bus harness
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.19.2" data-path="testing/testing-consumers.html">
+            
+                <a href="testing/testing-consumers.html">
+            
+                    
+                    Testing consumers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.19.3" data-path="testing/testing-sagas.html">
+            
+                <a href="testing/testing-sagas.html">
+            
+                    
+                    Testing sagas
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Advanced</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../advanced/sagas/">
+            
+                <a href="../advanced/sagas/">
+            
+                    
+                    Sagas
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../advanced/sagas/automatonymous.html">
+            
+                <a href="../advanced/sagas/automatonymous.html">
+            
+                    
+                    Automatonymous
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../advanced/sagas/persistence.html">
+            
+                <a href="../advanced/sagas/persistence.html">
+            
+                    
+                    Persistence
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="../advanced/courier/">
+            
+                <a href="../advanced/courier/">
+            
+                    
+                    Courier
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.2.1" data-path="../advanced/courier/activities.html">
+            
+                <a href="../advanced/courier/activities.html">
+            
+                    
+                    Activities
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.2" data-path="../advanced/courier/builder.html">
+            
+                <a href="../advanced/courier/builder.html">
+            
+                    
+                    Builder
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.3" data-path="../advanced/courier/execute.html">
+            
+                <a href="../advanced/courier/execute.html">
+            
+                    
+                    Execution
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.4" data-path="../advanced/courier/events.html">
+            
+                <a href="../advanced/courier/events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.5" data-path="../advanced/courier/subscriptions.html">
+            
+                <a href="../advanced/courier/subscriptions.html">
+            
+                    
+                    Subscriptions
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" data-path="../advanced/middleware/">
+            
+                <a href="../advanced/middleware/">
+            
+                    
+                    Middleware
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.3.1" data-path="../advanced/middleware/receive.html">
+            
+                <a href="../advanced/middleware/receive.html">
+            
+                    
+                    Receive Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.2" data-path="../advanced/middleware/concurrency-limit.html">
+            
+                <a href="../advanced/middleware/concurrency-limit.html">
+            
+                    
+                    Concurrent Message Limit
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.3" data-path="../advanced/middleware/circuit-breaker.html">
+            
+                <a href="../advanced/middleware/circuit-breaker.html">
+            
+                    
+                    Circuit breaker
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.4" data-path="../advanced/middleware/rate-limiter.html">
+            
+                <a href="../advanced/middleware/rate-limiter.html">
+            
+                    
+                    Rate limiter
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.5" data-path="../advanced/middleware/latest.html">
+            
+                <a href="../advanced/middleware/latest.html">
+            
+                    
+                    Latest
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.6" data-path="../advanced/middleware/custom.html">
+            
+                <a href="../advanced/middleware/custom.html">
+            
+                    
+                    Custom
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.4" data-path="../advanced/audit/">
+            
+                <a href="../advanced/audit/">
+            
+                    
+                    Audit
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.5" data-path="../advanced/turnout/">
+            
+                <a href="../advanced/turnout/">
+            
+                    
+                    Turnout
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6" data-path="../advanced/versioning.html">
+            
+                <a href="../advanced/versioning.html">
+            
+                    
+                    Versioning
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7" data-path="../advanced/topology/">
+            
+                <a href="../advanced/topology/">
+            
+                    
+                    Topology
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.7.1" data-path="../advanced/topology/message.html">
+            
+                <a href="../advanced/topology/message.html">
+            
+                    
+                    Message
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.2" data-path="../advanced/topology/publish.html">
+            
+                <a href="../advanced/topology/publish.html">
+            
+                    
+                    Publish
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.3" data-path="../advanced/topology/send.html">
+            
+                <a href="../advanced/topology/send.html">
+            
+                    
+                    Send
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.4" data-path="../advanced/topology/consume.html">
+            
+                <a href="../advanced/topology/consume.html">
+            
+                    
+                    Consume
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.5" data-path="../advanced/topology/conventions.html">
+            
+                <a href="../advanced/topology/conventions.html">
+            
+                    
+                    Conventions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.6" data-path="../advanced/topology/rabbitmq/">
+            
+                <a href="../advanced/topology/rabbitmq/">
+            
+                    
+                    RabbitMQ
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.7.6.1" data-path="../advanced/topology/rabbitmq/binding.html">
+            
+                <a href="../advanced/topology/rabbitmq/binding.html">
+            
+                    
+                    Exchange Binding
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.6.2" data-path="../advanced/topology/rabbitmq/routingkey.html">
+            
+                <a href="../advanced/topology/rabbitmq/routingkey.html">
+            
+                    
+                    RoutingKey
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.7" data-path="../advanced/topology/servicebus/">
+            
+                <a href="../advanced/topology/servicebus/">
+            
+                    
+                    Azure Service Bus
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.7.7.1" data-path="../advanced/topology/servicebus/sessionid.html">
+            
+                <a href="../advanced/topology/servicebus/sessionid.html">
+            
+                    
+                    SessionId
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.7.2" data-path="../advanced/topology/servicebus/partitionkey.html">
+            
+                <a href="../advanced/topology/servicebus/partitionkey.html">
+            
+                    
+                    PartitionKey
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.7.3" data-path="../advanced/topology/servicebus/topicsub.html">
+            
+                <a href="../advanced/topology/servicebus/topicsub.html">
+            
+                    
+                    Topic Subscription
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.8" data-path="../advanced/transactions.html">
+            
+                <a href="../advanced/transactions.html">
+            
+                    
+                    Transactions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.9" data-path="../advanced/interoperability.html">
+            
+                <a href="../advanced/interoperability.html">
+            
+                    
+                    Interoperability
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.9.1" data-path="../advanced/interoperability/encrypted-messages.html">
+            
+                <a href="../advanced/interoperability/encrypted-messages.html">
+            
+                    
+                    Encrypted Messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10" data-path="../advanced/signalr/">
+            
+                <a href="../advanced/signalr/">
+            
+                    
+                    SignalR
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.10.1" data-path="../advanced/signalr/quickstart.html">
+            
+                <a href="../advanced/signalr/quickstart.html">
+            
+                    
+                    Quick Start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.2" data-path="../advanced/signalr/hub_endpoints.html">
+            
+                <a href="../advanced/signalr/hub_endpoints.html">
+            
+                    
+                    Hub Endpoints
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.3" data-path="../advanced/signalr/interop.html">
+            
+                <a href="../advanced/signalr/interop.html">
+            
+                    
+                    Interop
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.4" data-path="../advanced/signalr/sample.html">
+            
+                <a href="../advanced/signalr/sample.html">
+            
+                    
+                    Sample
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.5" data-path="../advanced/signalr/considerations.html">
+            
+                <a href="../advanced/signalr/considerations.html">
+            
+                    
+                    Considerations
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Troubleshooting</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../troubleshooting/">
+            
+                <a href="../troubleshooting/">
+            
+                    
+                    Troubleshooting
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="4.1.1" data-path="../troubleshooting/common-gotchas.html">
+            
+                <a href="../troubleshooting/common-gotchas.html">
+            
+                    
+                    Common gotchas
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.2" data-path="../troubleshooting/show-config.html">
+            
+                <a href="../troubleshooting/show-config.html">
+            
+                    
+                    Diagnostics
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Architecture</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../architecture/">
+            
+                <a href="../architecture/">
+            
+                    
+                    Articles
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="5.1.1" data-path="../architecture/green-cache.html">
+            
+                <a href="../architecture/green-cache.html">
+            
+                    
+                    Green Cache
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Produce messages</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="producing-messages">Producing messages</h1>
+<!-- TOC -->
+<ul>
+<li><a href="#sending-commands">Sending commands</a><ul>
+<li><a href="#using-endpoint-conventions">Using endpoint conventions</a></li>
+<li><a href="#sending-via-interfaces">Sending via interfaces</a></li>
+<li><a href="#setting-message-headers">Setting message headers</a></li>
+</ul>
+</li>
+<li><a href="#publishing-events">Publishing events</a></li>
+</ul>
+<!-- /TOC -->
+<p>An application or service can produce messages using two different methods. A message can be sent using <code>Send</code> or a message can be published using <code>Publish</code>. The behavior of each method is very different, but it easy to understand by looking at the type of messages involved with each particular method.</p>
+<p>When a message is sent, it is delivered to a specific endpoint using a <code>DestinationAddress</code>. When a message is published, it is not sent to a specific endpoint, but is instead broadcasted to any consumers which have <em>subscribed</em> to the message type. For these two separate behavior, we describe messages sent as commands, and messages published as events.</p>
+<blockquote>
+<p>These are discussed in depth in the <em>Creating a message contract</em> section of the documentation.</p>
+</blockquote>
+<h2 id="sending-commands">Sending commands</h2>
+<p>Sending a command to an endpoint requires an <code>ISendEndpoint</code> reference, which can be obtained from any send endpoint provider (an object that supports <code>ISendEndpointProvider</code>). The application should always use the object closest to it to obtain the send endpoint, and it should do it every time it needs it -- the application should not cache the send endpoint reference.</p>
+<p>For instance, an <code>IBus</code> instance is a send endpoint provider, but it should <em>never</em> be used by a consumer to obtain an <code>ISendEndpoint</code>. <code>ConsumeContext</code> can also provide send endpoints, and should be used since it is <em>closer</em> to the consumer.</p>
+<div class="alert alert-info">
+<b>Note:</b>
+    This cannot be stressed enough -- always get send endpoints from the closest interface to the application code. There is extensive logic to tie message flows together using conversation, correlation, and initiator identifiers. By skipping a level and going outside the closest scope, that information can be lost which prevents the useful trace identifiers from being properly handled.
+</div>
+
+<p>To obtain a send endpoint from a send endpoint provider, use the GetSendEndpoint() method as shown below. Once the send endpoint is returned, it can be used to a send a message.</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">async</span> <span class="token class-name">Task</span> <span class="token function">SendOrder</span><span class="token punctuation">(</span><span class="token class-name">ISendEndpointProvider</span> sendEndpointProvider<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">var</span> endpoint <span class="token operator">=</span> <span class="token keyword">await</span> sendEndpointProvider<span class="token punctuation">.</span><span class="token function">GetSendEndpoint</span><span class="token punctuation">(</span>_serviceAddress<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">await</span> endpoint<span class="token punctuation">.</span><span class="token function">Send</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">SubmitOrder</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>There are many overloads for the <code>Send</code> method. Because MassTransit is built around filters and pipes, pipes are used to customize the message delivery behavior of Send. There are also some useful overloads (via extension methods) to make sending easier and less noisy due to the pipe construction, etc.</p>
+<h3 id="using-endpoint-conventions">Using endpoint conventions</h3>
+<p>Using send endpoints might seem too verbose, because before sending any message, you need to get the send endpoint and to do that you need to have an endpoint address. Usually, addresses are kept in the configuration and accessing the configuration from all over the application is not a good practice.</p>
+<p>Endpoint conventions solve this issue by allowing you to configure the mapping between message types and endpoint addresses. A potential downside here that you will not be able to send messages of the same type to different endpoints by using conventions. If you need to do this, keep using the <code>GetSendEndpoint</code> method.</p>
+<p>Conventions are configured like this:</p>
+<pre class="language-"><code class="lang-csharp">EndpointConvention<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Map</span><span class="token punctuation">&lt;</span><span class="token class-name">SubmitOrder</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span>
+    <span class="token keyword">new</span> <span class="token class-name">Uri</span><span class="token punctuation">(</span><span class="token string">&quot;rabbitmq://mq.acme.com/order/order_processing&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Now, you don&apos;t need to get the send endpoint anymore for this type of message and can send it like this:</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">async</span> <span class="token class-name">Task</span> <span class="token function">Post</span><span class="token punctuation">(</span><span class="token class-name">SubmitOrderRequest</span> request<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">AllGoodWith</span><span class="token punctuation">(</span>request<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token keyword">await</span> _bus<span class="token punctuation">.</span><span class="token function">Send</span><span class="token punctuation">(</span><span class="token function">ConvertToCommand</span><span class="token punctuation">(</span>request<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Also, from inside the consumer, you can do the same using the <code>ConsumeContext.Send</code> overload:</p>
+<pre class="language-"><code class="lang-csharp">EndpointConvention<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Map</span><span class="token punctuation">&lt;</span><span class="token class-name">StartDelivery</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span>
+    <span class="token keyword">new</span> <span class="token class-name">Uri</span><span class="token punctuation">(</span>ConfigurationManager<span class="token punctuation">.</span>AppSettings<span class="token punctuation">[</span><span class="token string">&quot;deliveryServiceQueue&quot;</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">SubmitOrderConsumer</span> <span class="token punctuation">:</span> <span class="token class-name">IConsumer</span><span class="token operator">&lt;</span>SubmitOrder<span class="token operator">&gt;</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">readonly</span> <span class="token class-name">IOrderSubmitter</span> _orderSubmitter<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token function">SubmitOrderConsumer</span><span class="token punctuation">(</span><span class="token class-name">IOrderSubmitter</span> submitter<span class="token punctuation">)</span>
+        <span class="token operator">=&gt;</span> _orderSubmitter <span class="token operator">=</span> submitter<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">async</span> <span class="token class-name">Task</span> <span class="token function">Consume</span><span class="token punctuation">(</span>IConsumeContext<span class="token operator">&lt;</span>SubmitOrder<span class="token operator">&gt;</span> context<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">await</span> _orderSubmitter<span class="token punctuation">.</span><span class="token function">Process</span><span class="token punctuation">(</span>context<span class="token punctuation">.</span>Message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">await</span> context<span class="token punctuation">.</span><span class="token function">Send</span><span class="token punctuation">(</span>
+            <span class="token keyword">new</span> <span class="token class-name">StartDelivery</span><span class="token punctuation">(</span>context<span class="token punctuation">.</span>Message<span class="token punctuation">.</span>OrderId<span class="token punctuation">,</span> DateTime<span class="token punctuation">.</span>UtcNow<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The <code>EndpointConvention.Map<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>T</span><span class="token punctuation">&gt;</span></span></code> method is static, so it can be called from everywhere. It is important to remember that you cannot configure conventions for the same message twice. If you try to do this - the <code>Map</code> method will throw an exception. This is also important when writing tests, so you need to configure the conventions at the same time as you confgigure your test bus (harness).</p>
+<p>It is better to configure send conventions before you start the bus.</p>
+<h3 id="sending-via-interfaces">Sending via interfaces</h3>
+<p>Since the general recommendation is to use interfaces, there are convenience methods to initialize the interface without requiring the creation of a message class underneath. While versioning of messages still requires a class which supports multiple interfaces, a simple approach to send an interface message is shown below.</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">SubmitOrder</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">string</span> OrderId <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token class-name">DateTime</span> OrderDate <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">decimal</span> OrderAmount <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">public</span> <span class="token keyword">async</span> <span class="token class-name">Task</span> <span class="token function">SendOrder</span><span class="token punctuation">(</span><span class="token class-name">ISendEndpoint</span> endpoint<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">await</span> endpoint<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Send</span><span class="token punctuation">&lt;</span><span class="token class-name">SubmitOrder</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token keyword">new</span>
+    <span class="token punctuation">{</span>
+        OrderId <span class="token operator">=</span> <span class="token string">&quot;27&quot;</span><span class="token punctuation">,</span>
+        OrderDate <span class="token operator">=</span> DateTime<span class="token punctuation">.</span>UtcNow<span class="token punctuation">,</span>
+        OrderAmount <span class="token operator">=</span> <span class="token number">123.45</span>m
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3 id="setting-message-headers">Setting message headers</h3>
+<p>There are a variety of message headers available which are used for correlation and tracking of messages. It is also possible to override some of the default behaviors of MassTransit when a fault occurs. For instance, a fault is normally <em>published</em> when a consumer throws an exception. If instead the application wants faults delivered to a specific address, the <code>FaultAddress</code> can be specified via a header. How this is done is shown below.</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">SubmitOrder</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">string</span> OrderId <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token class-name">DateTime</span> OrderDate <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">decimal</span> OrderAmount <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">public</span> <span class="token keyword">async</span> <span class="token class-name">Task</span> <span class="token function">SendOrder</span><span class="token punctuation">(</span><span class="token class-name">ISendEndpoint</span> endpoint<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">await</span> endpoint<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Send</span><span class="token punctuation">&lt;</span><span class="token class-name">SubmitOrder</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token keyword">new</span>
+    <span class="token punctuation">{</span>
+        OrderId <span class="token operator">=</span> <span class="token string">&quot;27&quot;</span><span class="token punctuation">,</span>
+        OrderDate <span class="token operator">=</span> DateTime<span class="token punctuation">.</span>UtcNow<span class="token punctuation">,</span>
+        OrderAmount <span class="token operator">=</span> <span class="token number">123.45</span>m
+    <span class="token punctuation">}</span><span class="token punctuation">,</span> context <span class="token operator">=&gt;</span> 
+        context<span class="token punctuation">.</span>FaultAddress <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Uri</span><span class="token punctuation">(</span><span class="token string">&quot;rabbitmq://localhost/order_faults&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2 id="publishing-events">Publishing events</h2>
+<p>Messages are published similarly to how messages are sent, but in this case, a single <code>IPublishEndpoint</code> is used. The same rules for endpoints apply, the closest instance of the publish endpoint should be used. So the <code>ConsumeContext</code> for consumers, and <code>IBus</code> for applications that are published outside of a consumer context.</p>
+<p>To publish a message, see the code below:</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">OrderSubmitted</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">string</span> OrderId <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token class-name">DateTime</span> OrderDate <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">public</span> <span class="token keyword">async</span> <span class="token class-name">Task</span> <span class="token function">NotifyOrderSubmitted</span><span class="token punctuation">(</span><span class="token class-name">IPublishEndpoint</span> publishEndpoint<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">await</span> publishEndpoint<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Publish</span><span class="token punctuation">&lt;</span><span class="token class-name">OrderSubmitted</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token keyword">new</span>
+    <span class="token punctuation">{</span>
+        OrderId <span class="token operator">=</span> <span class="token string">&quot;27&quot;</span><span class="token punctuation">,</span>
+        OrderDate <span class="token operator">=</span> DateTime<span class="token punctuation">.</span>UtcNow<span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>If you are planning to publish messages from within your consumers, this example would suit better:</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">SubmitOrderConsumer</span> <span class="token punctuation">:</span> <span class="token class-name">IConsumer</span><span class="token operator">&lt;</span>SubmitOrder<span class="token operator">&gt;</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">readonly</span> <span class="token class-name">IOrderSubmitter</span> _orderSubmitter<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token function">SubmitOrderConsumer</span><span class="token punctuation">(</span><span class="token class-name">IOrderSubmitter</span> submitter<span class="token punctuation">)</span>
+        <span class="token operator">=&gt;</span> _orderSubmitter <span class="token operator">=</span> submitter<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">async</span> <span class="token class-name">Task</span> <span class="token function">Consume</span><span class="token punctuation">(</span>IConsumeContext<span class="token operator">&lt;</span>SubmitOrder<span class="token operator">&gt;</span> context<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">await</span> _orderSubmitter<span class="token punctuation">.</span><span class="token function">Process</span><span class="token punctuation">(</span>context<span class="token punctuation">.</span>Message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">await</span> context<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Publish</span><span class="token punctuation">&lt;</span><span class="token class-name">OrderSubmitted</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token keyword">new</span>
+        <span class="token punctuation">{</span>
+            OrderId <span class="token operator">=</span> context<span class="token punctuation">.</span>Message<span class="token punctuation">.</span>OrderId<span class="token punctuation">,</span>
+            OrderDate <span class="token operator">=</span> DateTime<span class="token punctuation">.</span>UtcNow
+        <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="message-consumers.html" class="navigation navigation-prev " aria-label="Previous page: Create message consumers">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="message-initializers.html" class="navigation navigation-next " aria-label="Next page: Initialize messages">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Produce messages","level":"2.2.5","depth":2,"next":{"title":"Initialize messages","level":"2.2.6","depth":2,"path":"usage/message-initializers.md","ref":"usage/message-initializers.md","articles":[]},"previous":{"title":"Create message consumers","level":"2.2.4","depth":2,"path":"usage/message-consumers.md","ref":"usage/message-consumers.md","articles":[]},"dir":"ltr"},"config":{"plugins":["edit-link","prism","-highlight","github","anchorjs","expandable-chapters"],"root":"docs","styles":{"website":"build/gitbook.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"prism":{},"github":{"url":"https://github.com/MassTransit/MassTransit/"},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"edit-link":{"label":"Edit This Page","base":"https://github.com/masstransit/masstransit/tree/master/docs"},"theme-default":{"styles":{"website":"build/gitbook.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{},"expandable-chapters":{}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"MassTransit","gitbook":"3.2.2"},"file":{"path":"usage/producing-messages.md","mtime":"2019-10-21T01:47:18.262Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2019-10-21T01:50:06.212Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-edit-link/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-anchorjs/anchor.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-anchorjs/anchor-style.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

@@ -1,0 +1,2085 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Automatonymous · MassTransit</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-prism/prism.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+        <link rel="stylesheet" href="../../build/gitbook.css">
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="persistence.html" />
+    
+    
+    <link rel="prev" href="./" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Overview</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../../">
+            
+                <a href="../../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../../quickstart.html">
+            
+                <a href="../../quickstart.html">
+            
+                    
+                    Quick Start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../../upgrade-v6.html">
+            
+                <a href="../../upgrade-v6.html">
+            
+                    
+                    Upgrading to Version 6
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="../../introduction/getting-help.html">
+            
+                <a href="../../introduction/getting-help.html">
+            
+                    
+                    Getting Help
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="../../understand/">
+            
+                <a href="../../understand/">
+            
+                    
+                    Understanding MassTransit
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.5.1" data-path="../../understand/key-ideas.html">
+            
+                <a href="../../understand/key-ideas.html">
+            
+                    
+                    Key concepts
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.2" data-path="../../understand/under-the-hood.html">
+            
+                <a href="../../understand/under-the-hood.html">
+            
+                    
+                    Under the hood
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.5.2.1" data-path="../../understand/default-topology.html">
+            
+                <a href="../../understand/default-topology.html">
+            
+                    
+                    Topology
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.3" data-path="../../understand/additions-to-transport.html">
+            
+                <a href="../../understand/additions-to-transport.html">
+            
+                    
+                    What we add to the transport
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.4" data-path="../../understand/publishing.html">
+            
+                <a href="../../understand/publishing.html">
+            
+                    
+                    Publishing messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.5" data-path="../../understand/sending.md">
+            
+                <span>
+            
+                    
+                    Sending messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.6" data-path="../../understand/perfcounters.html">
+            
+                <a href="../../understand/perfcounters.html">
+            
+                    
+                    Performance counters
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="../../learn/">
+            
+                <a href="../../learn/">
+            
+                    
+                    Learning Resources
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.6.1" data-path="../../learn/samples/">
+            
+                <a href="../../learn/samples/">
+            
+                    
+                    Samples
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.6.1.1" data-path="../../learn/samples/request-response.html">
+            
+                <a href="../../learn/samples/request-response.html">
+            
+                    
+                    Request/Response
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.2" data-path="../../learn/samples/saga.html">
+            
+                <a href="../../learn/samples/saga.html">
+            
+                    
+                    Saga
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.3" data-path="../../learn/samples/courier.html">
+            
+                <a href="../../learn/samples/courier.html">
+            
+                    
+                    Courier
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.4" data-path="../../learn/samples/containers.html">
+            
+                <a href="../../learn/samples/containers.html">
+            
+                    
+                    Containers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.5" data-path="../../learn/samples/quartz.html">
+            
+                <a href="../../learn/samples/quartz.html">
+            
+                    
+                    Quartz
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.2" data-path="../../learn/videos.html">
+            
+                <a href="../../learn/videos.html">
+            
+                    
+                    Videos
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.3" data-path="../../learn/courses.html">
+            
+                <a href="../../learn/courses.html">
+            
+                    
+                    Courses
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.4" data-path="../../learn/loving-the-community.html">
+            
+                <a href="../../learn/loving-the-community.html">
+            
+                    
+                    Loving the community
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../../contributing/">
+            
+                <a href="../../contributing/">
+            
+                    
+                    Contributing
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Usage</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../../introduction/">
+            
+                <a href="../../introduction/">
+            
+                    
+                    Installation
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="../../introduction/prerequisites.html">
+            
+                <a href="../../introduction/prerequisites.html">
+            
+                    
+                    Prerequisites
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="../../introduction/packages.html">
+            
+                <a href="../../introduction/packages.html">
+            
+                    
+                    Supported Packages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="../../introduction/how-to-install.html">
+            
+                <a href="../../introduction/how-to-install.html">
+            
+                    
+                    How to install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="../../introduction/getting-help.html">
+            
+                <a href="../../introduction/getting-help.html">
+            
+                    
+                    Getting help
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="../../introduction/how-to-report-bugs.html">
+            
+                <a href="../../introduction/how-to-report-bugs.html">
+            
+                    
+                    How to report bugs
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="../../usage/">
+            
+                <a href="../../usage/">
+            
+                    
+                    Using MassTransit
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.1" data-path="../../usage/configuration.html">
+            
+                <a href="../../usage/configuration.html">
+            
+                    
+                    Configure MassTransit
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.2" data-path="../../usage/transports.html">
+            
+                <a href="../../usage/transports.html">
+            
+                    
+                    Choose a transport
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.2.1" data-path="../../usage/azure-functions.html">
+            
+                <a href="../../usage/azure-functions.html">
+            
+                    
+                    Azure Functions
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.3" data-path="../../usage/message-contracts.html">
+            
+                <a href="../../usage/message-contracts.html">
+            
+                    
+                    Create message contracts
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.4" data-path="../../usage/message-consumers.html">
+            
+                <a href="../../usage/message-consumers.html">
+            
+                    
+                    Create message consumers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.5" data-path="../../usage/producing-messages.html">
+            
+                <a href="../../usage/producing-messages.html">
+            
+                    
+                    Produce messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.6" data-path="../../usage/message-initializers.html">
+            
+                <a href="../../usage/message-initializers.html">
+            
+                    
+                    Initialize messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.7" data-path="../../usage/correlation.html">
+            
+                <a href="../../usage/correlation.html">
+            
+                    
+                    Correlate messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8" data-path="../../usage/containers/">
+            
+                <a href="../../usage/containers/">
+            
+                    
+                    Use IoC container
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.8.1" data-path="../../usage/containers/autofac.html">
+            
+                <a href="../../usage/containers/autofac.html">
+            
+                    
+                    Autofac
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.2" data-path="../../usage/containers/ninject.html">
+            
+                <a href="../../usage/containers/ninject.html">
+            
+                    
+                    Ninject
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.3" data-path="../../usage/containers/structuremap.html">
+            
+                <a href="../../usage/containers/structuremap.html">
+            
+                    
+                    StructureMap
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.4" data-path="../../usage/containers/lamar.html">
+            
+                <a href="../../usage/containers/lamar.html">
+            
+                    
+                    Lamar
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.5" data-path="../../usage/containers/unity.html">
+            
+                <a href="../../usage/containers/unity.html">
+            
+                    
+                    Unity
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.6" data-path="../../usage/containers/castlewindsor.html">
+            
+                <a href="../../usage/containers/castlewindsor.html">
+            
+                    
+                    Castle Windsor
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.7" data-path="../../usage/containers/msdi.html">
+            
+                <a href="../../usage/containers/msdi.html">
+            
+                    
+                    Microsoft Dependency Injection
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.9" data-path="../../usage/request-response.html">
+            
+                <a href="../../usage/request-response.html">
+            
+                    
+                    Request/Response
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.10" data-path="../../usage/exceptions.html">
+            
+                <a href="../../usage/exceptions.html">
+            
+                    
+                    Handle exceptions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.11" data-path="../../usage/retries.html">
+            
+                <a href="../../usage/retries.html">
+            
+                    
+                    Configure retries
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.12" data-path="../../usage/message-data.html">
+            
+                <a href="../../usage/message-data.html">
+            
+                    
+                    Large payloads
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13" data-path="../../usage/scheduling/">
+            
+                <a href="../../usage/scheduling/">
+            
+                    
+                    Schedule messages
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.13.1" data-path="../../usage/scheduling/scheduling-api.html">
+            
+                <a href="../../usage/scheduling/scheduling-api.html">
+            
+                    
+                    Scheduling API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.2" data-path="../../usage/scheduling/in-memory.html">
+            
+                <a href="../../usage/scheduling/in-memory.html">
+            
+                    
+                    In-memory scheduling
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.3" data-path="../../usage/scheduling/activemq-delayed.html">
+            
+                <a href="../../usage/scheduling/activemq-delayed.html">
+            
+                    
+                    ActiveMQ Delay and Schedule Message Delivery
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.4" data-path="../../usage/scheduling/azure-sb-scheduler.html">
+            
+                <a href="../../usage/scheduling/azure-sb-scheduler.html">
+            
+                    
+                    Azure Service Bus
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.5" data-path="../../usage/scheduling/rabbitmq-delayed.html">
+            
+                <a href="../../usage/scheduling/rabbitmq-delayed.html">
+            
+                    
+                    RabbitMQ Delayed Exchange
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.6" data-path="../../usage/scheduling/redeliver.html">
+            
+                <a href="../../usage/scheduling/redeliver.html">
+            
+                    
+                    Redelivering messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.14" data-path="../../usage/observers.html">
+            
+                <a href="../../usage/observers.html">
+            
+                    
+                    Observe messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.15" data-path="../../usage/lifecycle-observers.html">
+            
+                <a href="../../usage/lifecycle-observers.html">
+            
+                    
+                    Observe lifecycle
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.16" >
+            
+                <span>
+            
+                    
+                    Monitoring
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.16.1" data-path="../../usage/monitoring/applications-insights.html">
+            
+                <a href="../../usage/monitoring/applications-insights.html">
+            
+                    
+                    AppInsights
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.16.2" data-path="../../usage/monitoring/diagnostic-source.html">
+            
+                <a href="../../usage/monitoring/diagnostic-source.html">
+            
+                    
+                    Diagnostic Source
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.17" data-path="../../usage/connect-endpoint.html">
+            
+                <a href="../../usage/connect-endpoint.html">
+            
+                    
+                    Connect endpoints
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.18" data-path="../../usage/logging.html">
+            
+                <a href="../../usage/logging.html">
+            
+                    
+                    Logging
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.19" data-path="../../usage/testing/">
+            
+                <a href="../../usage/testing/">
+            
+                    
+                    Testing
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.19.1" data-path="../../usage/testing/bus-harness.html">
+            
+                <a href="../../usage/testing/bus-harness.html">
+            
+                    
+                    Bus harness
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.19.2" data-path="../../usage/testing/testing-consumers.html">
+            
+                <a href="../../usage/testing/testing-consumers.html">
+            
+                    
+                    Testing consumers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.19.3" data-path="../../usage/testing/testing-sagas.html">
+            
+                <a href="../../usage/testing/testing-sagas.html">
+            
+                    
+                    Testing sagas
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Advanced</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Sagas
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="3.1.1" data-path="automatonymous.html">
+            
+                <a href="automatonymous.html">
+            
+                    
+                    Automatonymous
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="persistence.html">
+            
+                <a href="persistence.html">
+            
+                    
+                    Persistence
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="../courier/">
+            
+                <a href="../courier/">
+            
+                    
+                    Courier
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.2.1" data-path="../courier/activities.html">
+            
+                <a href="../courier/activities.html">
+            
+                    
+                    Activities
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.2" data-path="../courier/builder.html">
+            
+                <a href="../courier/builder.html">
+            
+                    
+                    Builder
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.3" data-path="../courier/execute.html">
+            
+                <a href="../courier/execute.html">
+            
+                    
+                    Execution
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.4" data-path="../courier/events.html">
+            
+                <a href="../courier/events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.5" data-path="../courier/subscriptions.html">
+            
+                <a href="../courier/subscriptions.html">
+            
+                    
+                    Subscriptions
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" data-path="../middleware/">
+            
+                <a href="../middleware/">
+            
+                    
+                    Middleware
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.3.1" data-path="../middleware/receive.html">
+            
+                <a href="../middleware/receive.html">
+            
+                    
+                    Receive Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.2" data-path="../middleware/concurrency-limit.html">
+            
+                <a href="../middleware/concurrency-limit.html">
+            
+                    
+                    Concurrent Message Limit
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.3" data-path="../middleware/circuit-breaker.html">
+            
+                <a href="../middleware/circuit-breaker.html">
+            
+                    
+                    Circuit breaker
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.4" data-path="../middleware/rate-limiter.html">
+            
+                <a href="../middleware/rate-limiter.html">
+            
+                    
+                    Rate limiter
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.5" data-path="../middleware/latest.html">
+            
+                <a href="../middleware/latest.html">
+            
+                    
+                    Latest
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.6" data-path="../middleware/custom.html">
+            
+                <a href="../middleware/custom.html">
+            
+                    
+                    Custom
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.4" data-path="../audit/">
+            
+                <a href="../audit/">
+            
+                    
+                    Audit
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.5" data-path="../turnout/">
+            
+                <a href="../turnout/">
+            
+                    
+                    Turnout
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6" data-path="../versioning.html">
+            
+                <a href="../versioning.html">
+            
+                    
+                    Versioning
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7" data-path="../topology/">
+            
+                <a href="../topology/">
+            
+                    
+                    Topology
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.7.1" data-path="../topology/message.html">
+            
+                <a href="../topology/message.html">
+            
+                    
+                    Message
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.2" data-path="../topology/publish.html">
+            
+                <a href="../topology/publish.html">
+            
+                    
+                    Publish
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.3" data-path="../topology/send.html">
+            
+                <a href="../topology/send.html">
+            
+                    
+                    Send
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.4" data-path="../topology/consume.html">
+            
+                <a href="../topology/consume.html">
+            
+                    
+                    Consume
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.5" data-path="../topology/conventions.html">
+            
+                <a href="../topology/conventions.html">
+            
+                    
+                    Conventions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.6" data-path="../topology/rabbitmq/">
+            
+                <a href="../topology/rabbitmq/">
+            
+                    
+                    RabbitMQ
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.7.6.1" data-path="../topology/rabbitmq/binding.html">
+            
+                <a href="../topology/rabbitmq/binding.html">
+            
+                    
+                    Exchange Binding
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.6.2" data-path="../topology/rabbitmq/routingkey.html">
+            
+                <a href="../topology/rabbitmq/routingkey.html">
+            
+                    
+                    RoutingKey
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.7" data-path="../topology/servicebus/">
+            
+                <a href="../topology/servicebus/">
+            
+                    
+                    Azure Service Bus
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.7.7.1" data-path="../topology/servicebus/sessionid.html">
+            
+                <a href="../topology/servicebus/sessionid.html">
+            
+                    
+                    SessionId
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.7.2" data-path="../topology/servicebus/partitionkey.html">
+            
+                <a href="../topology/servicebus/partitionkey.html">
+            
+                    
+                    PartitionKey
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.7.3" data-path="../topology/servicebus/topicsub.html">
+            
+                <a href="../topology/servicebus/topicsub.html">
+            
+                    
+                    Topic Subscription
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.8" data-path="../transactions.html">
+            
+                <a href="../transactions.html">
+            
+                    
+                    Transactions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.9" data-path="../interoperability.html">
+            
+                <a href="../interoperability.html">
+            
+                    
+                    Interoperability
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.9.1" data-path="../interoperability/encrypted-messages.html">
+            
+                <a href="../interoperability/encrypted-messages.html">
+            
+                    
+                    Encrypted Messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10" data-path="../signalr/">
+            
+                <a href="../signalr/">
+            
+                    
+                    SignalR
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.10.1" data-path="../signalr/quickstart.html">
+            
+                <a href="../signalr/quickstart.html">
+            
+                    
+                    Quick Start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.2" data-path="../signalr/hub_endpoints.html">
+            
+                <a href="../signalr/hub_endpoints.html">
+            
+                    
+                    Hub Endpoints
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.3" data-path="../signalr/interop.html">
+            
+                <a href="../signalr/interop.html">
+            
+                    
+                    Interop
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.4" data-path="../signalr/sample.html">
+            
+                <a href="../signalr/sample.html">
+            
+                    
+                    Sample
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.5" data-path="../signalr/considerations.html">
+            
+                <a href="../signalr/considerations.html">
+            
+                    
+                    Considerations
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Troubleshooting</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../../troubleshooting/">
+            
+                <a href="../../troubleshooting/">
+            
+                    
+                    Troubleshooting
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="4.1.1" data-path="../../troubleshooting/common-gotchas.html">
+            
+                <a href="../../troubleshooting/common-gotchas.html">
+            
+                    
+                    Common gotchas
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.2" data-path="../../troubleshooting/show-config.html">
+            
+                <a href="../../troubleshooting/show-config.html">
+            
+                    
+                    Diagnostics
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Architecture</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../../architecture/">
+            
+                <a href="../../architecture/">
+            
+                    
+                    Articles
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="5.1.1" data-path="../../architecture/green-cache.html">
+            
+                <a href="../../architecture/green-cache.html">
+            
+                    
+                    Green Cache
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="../.." >Automatonymous</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="creating-automatonymous-state-machines">Creating Automatonymous State Machines</h1>
+<p><a href="https://github.com/MassTransit/Automatonymous" target="_blank">Automatonymous</a> is a state machine library built by the same team that created MassTransit. Automatonymous provides a friendly syntax for declaring a state machine, including the states, events (both trigger event and data events are supported), and behaviors. The simple syntax makes it easy to get started with your own state machines, while including many advanced features that make it extremely flexible in a variety of business contexts.</p>
+<p>Like MassTransit, Automatonymous is free, open source, and licensed under the very permissive Apache 2.0 license, making usable at no cost to anyone for both commercial and non-commercial use.</p>
+<h2 id="sample-state-machine">Sample State Machine</h2>
+<p>The code in this section will require installing a few NuGet dependencies:</p>
+<ul>
+<li><code>MassTransit</code></li>
+<li><code>Automatonymous</code></li>
+<li><code>MassTransit.Automatonymous</code></li>
+</ul>
+<h3 id="defining-a-state-machine-saga">Defining a state machine saga</h3>
+<p>To define a state machine saga, create a class that inherits from <code>MassTransitStateMachine</code>. The <code>MassTransit.Automatonymous</code> NuGet package must be referenced.</p>
+<blockquote>
+<p>This section is written using the shopping cart sample, which is <a href="https://github.com/MassTransit/Sample-ShoppingWeb" target="_blank">hosted on GitHub</a>.</p>
+</blockquote>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ShoppingCartStateMachine</span> <span class="token punctuation">:</span>
+    <span class="token class-name">MassTransitStateMachine</span><span class="token operator">&lt;</span>ShoppingCart<span class="token operator">&gt;</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token function">ShoppingCartStateMachine</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">InstanceState</span><span class="token punctuation">(</span>x <span class="token operator">=&gt;</span> x<span class="token punctuation">.</span>CurrentState<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>The state machine class, and the specification of the property for the current state of the machine are defined first.</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token function">Event</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> ItemAdded<span class="token punctuation">,</span> x <span class="token operator">=&gt;</span> x<span class="token punctuation">.</span><span class="token function">CorrelateBy</span><span class="token punctuation">(</span>cart <span class="token operator">=&gt;</span> cart<span class="token punctuation">.</span>UserName<span class="token punctuation">,</span> context <span class="token operator">=&gt;</span> context<span class="token punctuation">.</span>Message<span class="token punctuation">.</span>UserName<span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token function">SelectId</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> Guid<span class="token punctuation">.</span><span class="token function">NewGuid</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>The event that is observed when an item is added to the cart, along with the correlation between the state machine instance and the message are defined. The id generator for the saga instance is also defined.</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token function">Event</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> Submitted<span class="token punctuation">,</span> x <span class="token operator">=&gt;</span> x<span class="token punctuation">.</span><span class="token function">CorrelateById</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> context<span class="token punctuation">.</span>Message<span class="token punctuation">.</span>CartId<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>The order submitted event, and the correlation for that order.</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token function">Schedule</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> CartExpired<span class="token punctuation">,</span> x <span class="token operator">=&gt;</span> x<span class="token punctuation">.</span>ExpirationId<span class="token punctuation">,</span> x <span class="token operator">=&gt;</span>
+    <span class="token punctuation">{</span>
+        x<span class="token punctuation">.</span>Delay <span class="token operator">=</span> TimeSpan<span class="token punctuation">.</span><span class="token function">FromSeconds</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        x<span class="token punctuation">.</span>Received <span class="token operator">=</span> e <span class="token operator">=&gt;</span> e<span class="token punctuation">.</span><span class="token function">CorrelateById</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> context<span class="token punctuation">.</span>Message<span class="token punctuation">.</span>CartId<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>In order to schedule the timeout, a schedule is defined, including the time delay for the scheduled event, and the correlation of the event back to the state machine.</p>
+<p>Now, it is time for the actual behavior of the events and how they interact with the state of the <em>ShoppingCart</em>.</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token function">Initially</span><span class="token punctuation">(</span>
+        <span class="token function">When</span><span class="token punctuation">(</span>ItemAdded<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">Then</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span>
+            <span class="token punctuation">{</span>
+                context<span class="token punctuation">.</span>Instance<span class="token punctuation">.</span>Created <span class="token operator">=</span> context<span class="token punctuation">.</span>Data<span class="token punctuation">.</span>Timestamp<span class="token punctuation">;</span>
+                context<span class="token punctuation">.</span>Instance<span class="token punctuation">.</span>Updated <span class="token operator">=</span> context<span class="token punctuation">.</span>Data<span class="token punctuation">.</span>Timestamp<span class="token punctuation">;</span>
+                context<span class="token punctuation">.</span>Instance<span class="token punctuation">.</span>UserName <span class="token operator">=</span> context<span class="token punctuation">.</span>Data<span class="token punctuation">.</span>UserName<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">ThenAsync</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> 
+                Console<span class="token punctuation">.</span>Out<span class="token punctuation">.</span><span class="token function">WriteLineAsync</span><span class="token punctuation">(</span>
+                    $<span class="token string">&quot;Item Added: {context.Data.UserName} to {context.Instance.CorrelationId}&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">Schedule</span><span class="token punctuation">(</span>CartExpired<span class="token punctuation">,</span> context <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">CartExpiredEvent</span><span class="token punctuation">(</span>context<span class="token punctuation">.</span>Instance<span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">TransitionTo</span><span class="token punctuation">(</span>Active<span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Initially defined events that can create a state machine instance. In the above, the properties of the instance are initialized, and then the <em>CartExpired</em> event is scheduled, after which the state is set to <em>Active</em>.</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token function">During</span><span class="token punctuation">(</span>Active<span class="token punctuation">,</span>
+        <span class="token function">When</span><span class="token punctuation">(</span>Submitted<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">Then</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span>
+            <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>context<span class="token punctuation">.</span>Data<span class="token punctuation">.</span>Timestamp <span class="token operator">&gt;</span> context<span class="token punctuation">.</span>Instance<span class="token punctuation">.</span>Updated<span class="token punctuation">)</span>
+                    context<span class="token punctuation">.</span>Instance<span class="token punctuation">.</span>Updated <span class="token operator">=</span> context<span class="token punctuation">.</span>Data<span class="token punctuation">.</span>Timestamp<span class="token punctuation">;</span>
+                context<span class="token punctuation">.</span>Instance<span class="token punctuation">.</span>OrderId <span class="token operator">=</span> context<span class="token punctuation">.</span>Data<span class="token punctuation">.</span>OrderId<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">ThenAsync</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> 
+                Console<span class="token punctuation">.</span>Out<span class="token punctuation">.</span><span class="token function">WriteLineAsync</span><span class="token punctuation">(</span>
+                    $<span class="token string">&quot;Cart Submitted: {context.Data.UserName} to {context.Instance.CorrelationId}&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">Unschedule</span><span class="token punctuation">(</span>CartExpired<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">TransitionTo</span><span class="token punctuation">(</span>Ordered<span class="token punctuation">)</span><span class="token punctuation">,</span>
+</code></pre>
+<p>While the shopping cart is active, if the order is submitted, the expiration is canceled (via <em>Unschedule</em>) and the state is set to Ordered.</p>
+<pre class="language-"><code class="lang-csharp">            <span class="token function">When</span><span class="token punctuation">(</span>ItemAdded<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">Then</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span>
+                <span class="token punctuation">{</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>context<span class="token punctuation">.</span>Data<span class="token punctuation">.</span>Timestamp <span class="token operator">&gt;</span> context<span class="token punctuation">.</span>Instance<span class="token punctuation">.</span>Updated<span class="token punctuation">)</span>
+                        context<span class="token punctuation">.</span>Instance<span class="token punctuation">.</span>Updated <span class="token operator">=</span> context<span class="token punctuation">.</span>Data<span class="token punctuation">.</span>Timestamp<span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">ThenAsync</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> 
+                    Console<span class="token punctuation">.</span>Out<span class="token punctuation">.</span><span class="token function">WriteLineAsync</span><span class="token punctuation">(</span>
+                        $<span class="token string">&quot;Item Added: {context.Data.UserName} to {context.Instance.CorrelationId}&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">Schedule</span><span class="token punctuation">(</span>CartExpired<span class="token punctuation">,</span> context <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">CartExpiredEvent</span><span class="token punctuation">(</span>context<span class="token punctuation">.</span>Instance<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+</code></pre>
+<p>If another item is added to the cart, the <em>CartExpired</em> event is scheduled, and the existence of a previously scheduled event (via the <em>ExpirationId</em> property) is used to cancel the previously scheduled event.</p>
+<pre class="language-"><code class="lang-csharp">        <span class="token function">When</span><span class="token punctuation">(</span>CartExpired<span class="token punctuation">.</span>Received<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">ThenAsync</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> Console<span class="token punctuation">.</span>Out<span class="token punctuation">.</span><span class="token function">WriteLineAsync</span><span class="token punctuation">(</span>
+                $<span class="token string">&quot;Item Expired: {context.Instance.CorrelationId}&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">Publish</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">CartRemovedEvent</span><span class="token punctuation">(</span>context<span class="token punctuation">.</span>Instance<span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">Finalize</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>If the <em>CartExpired</em> event is received, the cart removed event is published and the shopping cart is finalized.</p>
+<pre class="language-"><code class="lang-csharp">        <span class="token function">SetCompletedWhenFinalized</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+</code></pre>
+<p>Signals that the state machine instance should be deleted if it is finalized. This is used to tell Entity Framework to delete the row from the database.</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token keyword">public</span> <span class="token class-name">State</span> Active <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">private</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token class-name">State</span> Ordered <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">private</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>The states of the shopping cart (<em>Initial</em> and <em>Final</em> are built-in states).</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token keyword">public</span> Schedule<span class="token operator">&lt;</span>ShoppingCart<span class="token punctuation">,</span> CartExpired<span class="token operator">&gt;</span> CartExpired <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">private</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>The schedule definition for the CartExpired event.</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token keyword">public</span> Event<span class="token operator">&lt;</span>CartItemAdded<span class="token operator">&gt;</span> ItemAdded <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">private</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> Event<span class="token operator">&lt;</span>OrderSubmitted<span class="token operator">&gt;</span> Submitted <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">private</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The events that are observed by the state machine (the correlations are defined earlier in the state machine).</p>
+<p>The state machine is generic, and requires a state class (because sagas are stateful), so that is defined below. The state class has the values that are persisted between events.</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">class</span> <span class="token class-name">ShoppingCart</span> <span class="token punctuation">:</span>
+    <span class="token class-name">SagaStateMachineInstance</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token class-name">Guid</span> CorrelationId <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>The CorrelationId is the primary key of the saga state instance. It is assigned either from a property on the initial message that creates the saga instance, or can be generated using <code>NewId.NextGuid()</code>, which ensures a nice ordered sequential identifier.</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token keyword">public</span> <span class="token keyword">string</span> CurrentState <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>The current state of the saga, which can be saved as a <em>string</em> or an <em>int</em>, depending upon your database requirements. An <em>int</em> is smaller, but requires that all valid states be mapped to integers during the definition of the state machine.</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token keyword">public</span> Guid<span class="token punctuation">?</span> ExpirationId <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>This is an identifier that is used by the state machine&apos;s scheduling feature, to capture the scheduled message identifier. Message scheduling within sagas is a powerful feature, which is described later.</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token keyword">public</span> <span class="token keyword">string</span> UserName <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">DateTime</span> Created <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token class-name">DateTime</span> Updated <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> Guid<span class="token punctuation">?</span> OrderId <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The remainder of the properties are relevant to the application, and are saved when properly mapped using the saga repository (which can be any supported storage engine, Entity Framework and NHibernate are supported out of the box).</p>
+<h3 id="connecting-the-saga-to-a-receive-endpoint">Connecting the saga to a receive endpoint</h3>
+<p>To connect the state machine saga to a receive endpoint, a saga repository is used, along with the state machine instance.</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">var</span> repository <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token generic-method"><span class="token function">InMemorySagaRepository</span><span class="token punctuation">&lt;</span><span class="token class-name">ShoppingCart</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+_busControl <span class="token operator">=</span> Bus<span class="token punctuation">.</span>Factory<span class="token punctuation">.</span><span class="token function">CreateUsingRabbitMq</span><span class="token punctuation">(</span>x <span class="token operator">=&gt;</span>
+<span class="token punctuation">{</span>
+    <span class="token class-name">IRabbitMqHost</span> host <span class="token operator">=</span> x<span class="token punctuation">.</span><span class="token function">Host</span><span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    x<span class="token punctuation">.</span><span class="token function">ReceiveEndpoint</span><span class="token punctuation">(</span>host<span class="token punctuation">,</span> <span class="token string">&quot;shopping_cart_state&quot;</span><span class="token punctuation">,</span> e <span class="token operator">=&gt;</span>
+    <span class="token punctuation">{</span>
+        e<span class="token punctuation">.</span>PrefetchCount <span class="token operator">=</span> <span class="token number">8</span><span class="token punctuation">;</span>
+        e<span class="token punctuation">.</span><span class="token function">StateMachineSaga</span><span class="token punctuation">(</span>_machine<span class="token punctuation">,</span> repository<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    x<span class="token punctuation">.</span><span class="token function">UseInMemoryMessageScheduler</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// for testing, to make it easy</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<h3 id="combining-events-think-forkjoin">Combining events (think Fork/Join)</h3>
+<p>Multiple events can be combined into a single event, for the purposes of joining together multiple operations. To define a combined event, the <code>Event</code> syntax has an overload.</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token keyword">public</span> Event<span class="token operator">&lt;</span>OrderReady<span class="token operator">&gt;</span> Ready <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">private</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> Event<span class="token operator">&lt;</span>PaymentApproved<span class="token operator">&gt;</span> Approved <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">private</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> Event<span class="token operator">&lt;</span>StockVerified<span class="token operator">&gt;</span> Verified <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">private</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+
+    <span class="token function">CompositeEvent</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> OrderReady<span class="token punctuation">,</span> x <span class="token operator">=&gt;</span> x<span class="token punctuation">.</span>OrderReadyStatus<span class="token punctuation">,</span> PaymentApproved<span class="token punctuation">,</span> StockVerified<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Once both events have been delivered to the state machine, the third event, <em>OrderReady</em>, will be triggered.</p>
+<div class="alert alert-info">
+<b>Note:</b>
+    The order of events being declared can impact the order in which they execute. Therefore, it is best to declare composite events at the end of the state machine declaration, after all other events and behaviors are declared. That way, the composite events will be raised <i>after</i> the dependent event behaviors.
+</div>
+
+
+<h3 id="ignoring-events">Ignoring events</h3>
+<p>In some cases you may want to ignore events, which can not be handled by the saga, because of inapropriate state. Without additional configuration handling of such events end with exception and messages being moved to the error queue. State machine can be configured to ignore events if they can not be handled. This can be done with the use of <i>Ignore()</i> method:</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token keyword">public</span> <span class="token class-name">State</span> Intermediate <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token class-name">Event</span> Start <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">private</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token function">MyMachine</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">Initially</span><span class="token punctuation">(</span>
+            <span class="token function">When</span><span class="token punctuation">(</span>Start<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">ThenAsync</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> Console<span class="token punctuation">.</span>Out<span class="token punctuation">.</span><span class="token function">WriteAsync</span><span class="token punctuation">(</span><span class="token string">&quot;Initially&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">TransitionTo</span><span class="token punctuation">(</span>Intermediate<span class="token punctuation">)</span>
+            <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token function">During</span><span class="token punctuation">(</span>Intermediate<span class="token punctuation">,</span>
+            <span class="token function">When</span><span class="token punctuation">(</span>AllowedEvent<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">Then</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> Console<span class="token punctuation">.</span>Out<span class="token punctuation">.</span><span class="token function">WriteAsync</span><span class="token punctuation">(</span><span class="token string">&quot;AllowedEvent&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">TransitionTo</span><span class="token punctuation">(</span>SomeState<span class="token punctuation">)</span><span class="token punctuation">,</span>
+            <span class="token function">Ignore</span><span class="token punctuation">(</span>Start<span class="token punctuation">)</span>
+            <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+</code></pre>
+<p>In the example above MyMachine will only handle Start event in <i>Initial</i> state. If Start event is correlated with the saga, which is in the state <i>Intermediate</i>, such event will be ignored without moving message to the error queue.</p>
+<p>Another approach to configure ignorance is to use <i>Ignore()</i> method inside <i>DuringAny()</i>. This approach is more suitable when a sufficiently large number of states is defined:</p>
+<pre class="language-"><code class="lang-csharp">    <span class="token keyword">public</span> <span class="token class-name">State</span> Intermediate <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token class-name">State</span> AnotherState <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token class-name">State</span> SomeAnotherState <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token class-name">Event</span> Start <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token keyword">private</span> <span class="token keyword">set</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token function">MyMachine</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token function">DuringAny</span><span class="token punctuation">(</span><span class="token function">Ignore</span><span class="token punctuation">(</span>Start<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token function">Initially</span><span class="token punctuation">(</span>
+            <span class="token function">When</span><span class="token punctuation">(</span>Start<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">ThenAsync</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> Console<span class="token punctuation">.</span>Out<span class="token punctuation">.</span><span class="token function">WriteAsync</span><span class="token punctuation">(</span><span class="token string">&quot;Initially&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">TransitionTo</span><span class="token punctuation">(</span>Intermediate<span class="token punctuation">)</span>
+            <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token function">During</span><span class="token punctuation">(</span>Intermediate<span class="token punctuation">,</span>
+            <span class="token function">When</span><span class="token punctuation">(</span>AllowedEvent<span class="token punctuation">)</span>
+                <span class="token punctuation">.</span><span class="token function">Then</span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span> Console<span class="token punctuation">.</span>Out<span class="token punctuation">.</span><span class="token function">WriteAsync</span><span class="token punctuation">(</span><span class="token string">&quot;AllowedEvent&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token function">Ignore</span><span class="token punctuation">(</span>Start<span class="token punctuation">)</span>
+            <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+</code></pre>
+<p>In the example above MyMachine is configured to ignore <i>Start</i> event during any state, except <i>Initial</i> state.</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="./" class="navigation navigation-prev " aria-label="Previous page: Sagas">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="persistence.html" class="navigation navigation-next " aria-label="Next page: Persistence">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Automatonymous","level":"3.1.1","depth":2,"next":{"title":"Persistence","level":"3.1.2","depth":2,"path":"advanced/sagas/persistence.md","ref":"advanced/sagas/persistence.md","articles":[]},"previous":{"title":"Sagas","level":"3.1","depth":1,"path":"advanced/sagas/README.md","ref":"advanced/sagas/README.md","articles":[{"title":"Automatonymous","level":"3.1.1","depth":2,"path":"advanced/sagas/automatonymous.md","ref":"advanced/sagas/automatonymous.md","articles":[]},{"title":"Persistence","level":"3.1.2","depth":2,"path":"advanced/sagas/persistence.md","ref":"advanced/sagas/persistence.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["edit-link","prism","-highlight","github","anchorjs","expandable-chapters"],"root":"docs","styles":{"website":"build/gitbook.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"prism":{},"github":{"url":"https://github.com/MassTransit/MassTransit/"},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"edit-link":{"label":"Edit This Page","base":"https://github.com/masstransit/masstransit/tree/master/docs"},"theme-default":{"styles":{"website":"build/gitbook.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{},"expandable-chapters":{}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"MassTransit","gitbook":"3.2.2"},"file":{"path":"advanced/sagas/automatonymous.md","mtime":"2019-10-21T01:47:18.215Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2019-10-21T01:50:06.212Z"},"basePath":"../..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../../gitbook/gitbook.js"></script>
+    <script src="../../gitbook/theme.js"></script>
+    
+        
+        <script src="../../gitbook/gitbook-plugin-edit-link/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-anchorjs/anchor.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-anchorjs/anchor-style.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

@@ -1,0 +1,2290 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Configure MassTransit · MassTransit</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.2">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-prism/prism.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+        <link rel="stylesheet" href="../build/gitbook.css">
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="transports.html" />
+    
+    
+    <link rel="prev" href="./" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Overview</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../quickstart.html">
+            
+                <a href="../quickstart.html">
+            
+                    
+                    Quick Start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../upgrade-v6.html">
+            
+                <a href="../upgrade-v6.html">
+            
+                    
+                    Upgrading to Version 6
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="../introduction/getting-help.html">
+            
+                <a href="../introduction/getting-help.html">
+            
+                    
+                    Getting Help
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="../understand/">
+            
+                <a href="../understand/">
+            
+                    
+                    Understanding MassTransit
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.5.1" data-path="../understand/key-ideas.html">
+            
+                <a href="../understand/key-ideas.html">
+            
+                    
+                    Key concepts
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.2" data-path="../understand/under-the-hood.html">
+            
+                <a href="../understand/under-the-hood.html">
+            
+                    
+                    Under the hood
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.5.2.1" data-path="../understand/default-topology.html">
+            
+                <a href="../understand/default-topology.html">
+            
+                    
+                    Topology
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.3" data-path="../understand/additions-to-transport.html">
+            
+                <a href="../understand/additions-to-transport.html">
+            
+                    
+                    What we add to the transport
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.4" data-path="../understand/publishing.html">
+            
+                <a href="../understand/publishing.html">
+            
+                    
+                    Publishing messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.5" data-path="../understand/sending.md">
+            
+                <span>
+            
+                    
+                    Sending messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.6" data-path="../understand/perfcounters.html">
+            
+                <a href="../understand/perfcounters.html">
+            
+                    
+                    Performance counters
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="../learn/">
+            
+                <a href="../learn/">
+            
+                    
+                    Learning Resources
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.6.1" data-path="../learn/samples/">
+            
+                <a href="../learn/samples/">
+            
+                    
+                    Samples
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.6.1.1" data-path="../learn/samples/request-response.html">
+            
+                <a href="../learn/samples/request-response.html">
+            
+                    
+                    Request/Response
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.2" data-path="../learn/samples/saga.html">
+            
+                <a href="../learn/samples/saga.html">
+            
+                    
+                    Saga
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.3" data-path="../learn/samples/courier.html">
+            
+                <a href="../learn/samples/courier.html">
+            
+                    
+                    Courier
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.4" data-path="../learn/samples/containers.html">
+            
+                <a href="../learn/samples/containers.html">
+            
+                    
+                    Containers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.1.5" data-path="../learn/samples/quartz.html">
+            
+                <a href="../learn/samples/quartz.html">
+            
+                    
+                    Quartz
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.2" data-path="../learn/videos.html">
+            
+                <a href="../learn/videos.html">
+            
+                    
+                    Videos
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.3" data-path="../learn/courses.html">
+            
+                <a href="../learn/courses.html">
+            
+                    
+                    Courses
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6.4" data-path="../learn/loving-the-community.html">
+            
+                <a href="../learn/loving-the-community.html">
+            
+                    
+                    Loving the community
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../contributing/">
+            
+                <a href="../contributing/">
+            
+                    
+                    Contributing
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Usage</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="../introduction/">
+            
+                <a href="../introduction/">
+            
+                    
+                    Installation
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.1.1" data-path="../introduction/prerequisites.html">
+            
+                <a href="../introduction/prerequisites.html">
+            
+                    
+                    Prerequisites
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.2" data-path="../introduction/packages.html">
+            
+                <a href="../introduction/packages.html">
+            
+                    
+                    Supported Packages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.3" data-path="../introduction/how-to-install.html">
+            
+                <a href="../introduction/how-to-install.html">
+            
+                    
+                    How to install
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.4" data-path="../introduction/getting-help.html">
+            
+                <a href="../introduction/getting-help.html">
+            
+                    
+                    Getting help
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.1.5" data-path="../introduction/how-to-report-bugs.html">
+            
+                <a href="../introduction/how-to-report-bugs.html">
+            
+                    
+                    How to report bugs
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Using MassTransit
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter active" data-level="2.2.1" data-path="configuration.html">
+            
+                <a href="configuration.html">
+            
+                    
+                    Configure MassTransit
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.2" data-path="transports.html">
+            
+                <a href="transports.html">
+            
+                    
+                    Choose a transport
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.2.1" data-path="azure-functions.html">
+            
+                <a href="azure-functions.html">
+            
+                    
+                    Azure Functions
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.3" data-path="message-contracts.html">
+            
+                <a href="message-contracts.html">
+            
+                    
+                    Create message contracts
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.4" data-path="message-consumers.html">
+            
+                <a href="message-consumers.html">
+            
+                    
+                    Create message consumers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.5" data-path="producing-messages.html">
+            
+                <a href="producing-messages.html">
+            
+                    
+                    Produce messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.6" data-path="message-initializers.html">
+            
+                <a href="message-initializers.html">
+            
+                    
+                    Initialize messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.7" data-path="correlation.html">
+            
+                <a href="correlation.html">
+            
+                    
+                    Correlate messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8" data-path="containers/">
+            
+                <a href="containers/">
+            
+                    
+                    Use IoC container
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.8.1" data-path="containers/autofac.html">
+            
+                <a href="containers/autofac.html">
+            
+                    
+                    Autofac
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.2" data-path="containers/ninject.html">
+            
+                <a href="containers/ninject.html">
+            
+                    
+                    Ninject
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.3" data-path="containers/structuremap.html">
+            
+                <a href="containers/structuremap.html">
+            
+                    
+                    StructureMap
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.4" data-path="containers/lamar.html">
+            
+                <a href="containers/lamar.html">
+            
+                    
+                    Lamar
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.5" data-path="containers/unity.html">
+            
+                <a href="containers/unity.html">
+            
+                    
+                    Unity
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.6" data-path="containers/castlewindsor.html">
+            
+                <a href="containers/castlewindsor.html">
+            
+                    
+                    Castle Windsor
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.8.7" data-path="containers/msdi.html">
+            
+                <a href="containers/msdi.html">
+            
+                    
+                    Microsoft Dependency Injection
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.9" data-path="request-response.html">
+            
+                <a href="request-response.html">
+            
+                    
+                    Request/Response
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.10" data-path="exceptions.html">
+            
+                <a href="exceptions.html">
+            
+                    
+                    Handle exceptions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.11" data-path="retries.html">
+            
+                <a href="retries.html">
+            
+                    
+                    Configure retries
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.12" data-path="message-data.html">
+            
+                <a href="message-data.html">
+            
+                    
+                    Large payloads
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13" data-path="scheduling/">
+            
+                <a href="scheduling/">
+            
+                    
+                    Schedule messages
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.13.1" data-path="scheduling/scheduling-api.html">
+            
+                <a href="scheduling/scheduling-api.html">
+            
+                    
+                    Scheduling API
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.2" data-path="scheduling/in-memory.html">
+            
+                <a href="scheduling/in-memory.html">
+            
+                    
+                    In-memory scheduling
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.3" data-path="scheduling/activemq-delayed.html">
+            
+                <a href="scheduling/activemq-delayed.html">
+            
+                    
+                    ActiveMQ Delay and Schedule Message Delivery
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.4" data-path="scheduling/azure-sb-scheduler.html">
+            
+                <a href="scheduling/azure-sb-scheduler.html">
+            
+                    
+                    Azure Service Bus
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.5" data-path="scheduling/rabbitmq-delayed.html">
+            
+                <a href="scheduling/rabbitmq-delayed.html">
+            
+                    
+                    RabbitMQ Delayed Exchange
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.13.6" data-path="scheduling/redeliver.html">
+            
+                <a href="scheduling/redeliver.html">
+            
+                    
+                    Redelivering messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.14" data-path="observers.html">
+            
+                <a href="observers.html">
+            
+                    
+                    Observe messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.15" data-path="lifecycle-observers.html">
+            
+                <a href="lifecycle-observers.html">
+            
+                    
+                    Observe lifecycle
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.16" >
+            
+                <span>
+            
+                    
+                    Monitoring
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.16.1" data-path="monitoring/applications-insights.html">
+            
+                <a href="monitoring/applications-insights.html">
+            
+                    
+                    AppInsights
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.16.2" data-path="monitoring/diagnostic-source.html">
+            
+                <a href="monitoring/diagnostic-source.html">
+            
+                    
+                    Diagnostic Source
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.17" data-path="connect-endpoint.html">
+            
+                <a href="connect-endpoint.html">
+            
+                    
+                    Connect endpoints
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.18" data-path="logging.html">
+            
+                <a href="logging.html">
+            
+                    
+                    Logging
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.19" data-path="testing/">
+            
+                <a href="testing/">
+            
+                    
+                    Testing
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="2.2.19.1" data-path="testing/bus-harness.html">
+            
+                <a href="testing/bus-harness.html">
+            
+                    
+                    Bus harness
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.19.2" data-path="testing/testing-consumers.html">
+            
+                <a href="testing/testing-consumers.html">
+            
+                    
+                    Testing consumers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2.19.3" data-path="testing/testing-sagas.html">
+            
+                <a href="testing/testing-sagas.html">
+            
+                    
+                    Testing sagas
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Advanced</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="../advanced/sagas/">
+            
+                <a href="../advanced/sagas/">
+            
+                    
+                    Sagas
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.1.1" data-path="../advanced/sagas/automatonymous.html">
+            
+                <a href="../advanced/sagas/automatonymous.html">
+            
+                    
+                    Automatonymous
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.1.2" data-path="../advanced/sagas/persistence.html">
+            
+                <a href="../advanced/sagas/persistence.html">
+            
+                    
+                    Persistence
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="../advanced/courier/">
+            
+                <a href="../advanced/courier/">
+            
+                    
+                    Courier
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.2.1" data-path="../advanced/courier/activities.html">
+            
+                <a href="../advanced/courier/activities.html">
+            
+                    
+                    Activities
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.2" data-path="../advanced/courier/builder.html">
+            
+                <a href="../advanced/courier/builder.html">
+            
+                    
+                    Builder
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.3" data-path="../advanced/courier/execute.html">
+            
+                <a href="../advanced/courier/execute.html">
+            
+                    
+                    Execution
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.4" data-path="../advanced/courier/events.html">
+            
+                <a href="../advanced/courier/events.html">
+            
+                    
+                    Events
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2.5" data-path="../advanced/courier/subscriptions.html">
+            
+                <a href="../advanced/courier/subscriptions.html">
+            
+                    
+                    Subscriptions
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" data-path="../advanced/middleware/">
+            
+                <a href="../advanced/middleware/">
+            
+                    
+                    Middleware
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.3.1" data-path="../advanced/middleware/receive.html">
+            
+                <a href="../advanced/middleware/receive.html">
+            
+                    
+                    Receive Pipeline
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.2" data-path="../advanced/middleware/concurrency-limit.html">
+            
+                <a href="../advanced/middleware/concurrency-limit.html">
+            
+                    
+                    Concurrent Message Limit
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.3" data-path="../advanced/middleware/circuit-breaker.html">
+            
+                <a href="../advanced/middleware/circuit-breaker.html">
+            
+                    
+                    Circuit breaker
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.4" data-path="../advanced/middleware/rate-limiter.html">
+            
+                <a href="../advanced/middleware/rate-limiter.html">
+            
+                    
+                    Rate limiter
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.5" data-path="../advanced/middleware/latest.html">
+            
+                <a href="../advanced/middleware/latest.html">
+            
+                    
+                    Latest
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3.6" data-path="../advanced/middleware/custom.html">
+            
+                <a href="../advanced/middleware/custom.html">
+            
+                    
+                    Custom
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.4" data-path="../advanced/audit/">
+            
+                <a href="../advanced/audit/">
+            
+                    
+                    Audit
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.5" data-path="../advanced/turnout/">
+            
+                <a href="../advanced/turnout/">
+            
+                    
+                    Turnout
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.6" data-path="../advanced/versioning.html">
+            
+                <a href="../advanced/versioning.html">
+            
+                    
+                    Versioning
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7" data-path="../advanced/topology/">
+            
+                <a href="../advanced/topology/">
+            
+                    
+                    Topology
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.7.1" data-path="../advanced/topology/message.html">
+            
+                <a href="../advanced/topology/message.html">
+            
+                    
+                    Message
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.2" data-path="../advanced/topology/publish.html">
+            
+                <a href="../advanced/topology/publish.html">
+            
+                    
+                    Publish
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.3" data-path="../advanced/topology/send.html">
+            
+                <a href="../advanced/topology/send.html">
+            
+                    
+                    Send
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.4" data-path="../advanced/topology/consume.html">
+            
+                <a href="../advanced/topology/consume.html">
+            
+                    
+                    Consume
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.5" data-path="../advanced/topology/conventions.html">
+            
+                <a href="../advanced/topology/conventions.html">
+            
+                    
+                    Conventions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.6" data-path="../advanced/topology/rabbitmq/">
+            
+                <a href="../advanced/topology/rabbitmq/">
+            
+                    
+                    RabbitMQ
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.7.6.1" data-path="../advanced/topology/rabbitmq/binding.html">
+            
+                <a href="../advanced/topology/rabbitmq/binding.html">
+            
+                    
+                    Exchange Binding
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.6.2" data-path="../advanced/topology/rabbitmq/routingkey.html">
+            
+                <a href="../advanced/topology/rabbitmq/routingkey.html">
+            
+                    
+                    RoutingKey
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.7" data-path="../advanced/topology/servicebus/">
+            
+                <a href="../advanced/topology/servicebus/">
+            
+                    
+                    Azure Service Bus
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.7.7.1" data-path="../advanced/topology/servicebus/sessionid.html">
+            
+                <a href="../advanced/topology/servicebus/sessionid.html">
+            
+                    
+                    SessionId
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.7.2" data-path="../advanced/topology/servicebus/partitionkey.html">
+            
+                <a href="../advanced/topology/servicebus/partitionkey.html">
+            
+                    
+                    PartitionKey
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.7.7.3" data-path="../advanced/topology/servicebus/topicsub.html">
+            
+                <a href="../advanced/topology/servicebus/topicsub.html">
+            
+                    
+                    Topic Subscription
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.8" data-path="../advanced/transactions.html">
+            
+                <a href="../advanced/transactions.html">
+            
+                    
+                    Transactions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.9" data-path="../advanced/interoperability.html">
+            
+                <a href="../advanced/interoperability.html">
+            
+                    
+                    Interoperability
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.9.1" data-path="../advanced/interoperability/encrypted-messages.html">
+            
+                <a href="../advanced/interoperability/encrypted-messages.html">
+            
+                    
+                    Encrypted Messages
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10" data-path="../advanced/signalr/">
+            
+                <a href="../advanced/signalr/">
+            
+                    
+                    SignalR
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="3.10.1" data-path="../advanced/signalr/quickstart.html">
+            
+                <a href="../advanced/signalr/quickstart.html">
+            
+                    
+                    Quick Start
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.2" data-path="../advanced/signalr/hub_endpoints.html">
+            
+                <a href="../advanced/signalr/hub_endpoints.html">
+            
+                    
+                    Hub Endpoints
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.3" data-path="../advanced/signalr/interop.html">
+            
+                <a href="../advanced/signalr/interop.html">
+            
+                    
+                    Interop
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.4" data-path="../advanced/signalr/sample.html">
+            
+                <a href="../advanced/signalr/sample.html">
+            
+                    
+                    Sample
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.10.5" data-path="../advanced/signalr/considerations.html">
+            
+                <a href="../advanced/signalr/considerations.html">
+            
+                    
+                    Considerations
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Troubleshooting</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="../troubleshooting/">
+            
+                <a href="../troubleshooting/">
+            
+                    
+                    Troubleshooting
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="4.1.1" data-path="../troubleshooting/common-gotchas.html">
+            
+                <a href="../troubleshooting/common-gotchas.html">
+            
+                    
+                    Common gotchas
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.1.2" data-path="../troubleshooting/show-config.html">
+            
+                <a href="../troubleshooting/show-config.html">
+            
+                    
+                    Diagnostics
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Architecture</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="../architecture/">
+            
+                <a href="../architecture/">
+            
+                    
+                    Articles
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="5.1.1" data-path="../architecture/green-cache.html">
+            
+                <a href="../architecture/green-cache.html">
+            
+                    
+                    Green Cache
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Configure MassTransit</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="configuring-masstransit">Configuring MassTransit</h1>
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+<!-- code_chunk_output -->
+<ul>
+<li><a href="#configuring-masstransit">Configuring MassTransit</a><ul>
+<li><a href="#masstransit-in-a-console-application">In a console application</a></li>
+<li><a href="#masstransit-and-aspnet-core">In ASP.NET Core</a></li>
+<li><a href="#masstransit-in-a-windows-service">In a Windows service</a></li>
+<li><a href="#masstransit-in-a-web-application">In a web application</a><ul>
+<li><a href="#aspnet-mvcwebapi2">ASP.NET (MVC/WebApi2)</a></li>
+<li><a href="#owin-pipeline-webapi2">OWIN Pipeline (WebApi2)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- /code_chunk_output -->
+<p>To configure MassTransit in your application, it depends upon the application type. There are several application types, which are covered below. In these examples, the use of a dependency injection framework is not included. Using a container (such as Autofac, StructureMap, etc.) with MassTransit is covered separately.</p>
+<h2 id="masstransit-in-a-console-application">MassTransit in a console application</h2>
+<p>A console application has a <code>Main</code> entry point, which is part of the <code>Program.cs</code> class by default. The example below configures a simple bus instance that publishes an event with a value entered.</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">namespace</span> EventPublisher
+<span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">interface</span> <span class="token class-name">ValueEntered</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">string</span> Value <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Program</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">Main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token keyword">var</span> busControl <span class="token operator">=</span> <span class="token function">ConfigureBus</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token comment">// Important! The bus must be started before using it!</span>
+            busControl<span class="token punctuation">.</span><span class="token function">Start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">do</span>
+            <span class="token punctuation">{</span>
+                Console<span class="token punctuation">.</span><span class="token function">WriteLine</span><span class="token punctuation">(</span><span class="token string">&quot;Enter message (or quit to exit)&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                Console<span class="token punctuation">.</span><span class="token function">Write</span><span class="token punctuation">(</span><span class="token string">&quot;&gt; &quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">string</span> <span class="token keyword">value</span> <span class="token operator">=</span> Console<span class="token punctuation">.</span><span class="token function">ReadLine</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token string">&quot;quit&quot;</span><span class="token punctuation">.</span><span class="token function">Equals</span><span class="token punctuation">(</span><span class="token keyword">value</span><span class="token punctuation">,</span> StringComparison<span class="token punctuation">.</span>OrdinalIgnoreCase<span class="token punctuation">)</span><span class="token punctuation">)</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>
+
+                busControl<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Publish</span><span class="token punctuation">&lt;</span><span class="token class-name">ValueEntered</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token keyword">new</span>
+                <span class="token punctuation">{</span>
+                    Value <span class="token operator">=</span> <span class="token keyword">value</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token keyword">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            busControl<span class="token punctuation">.</span><span class="token function">Stop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token keyword">static</span> <span class="token class-name">IBusControl</span> <span class="token function">ConfigureBus</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> Bus<span class="token punctuation">.</span>Factory<span class="token punctuation">.</span><span class="token function">CreateUsingRabbitMq</span><span class="token punctuation">(</span>cfg <span class="token operator">=&gt;</span>
+            <span class="token punctuation">{</span>
+                cfg<span class="token punctuation">.</span><span class="token function">Host</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Uri</span><span class="token punctuation">(</span><span class="token string">&quot;rabbitmq://localhost&quot;</span><span class="token punctuation">)</span><span class="token punctuation">,</span> h <span class="token operator">=&gt;</span>
+                <span class="token punctuation">{</span>
+                    h<span class="token punctuation">.</span><span class="token function">Username</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    h<span class="token punctuation">.</span><span class="token function">Password</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>In the example, the bus is configured and started, after which a publishing loop allows values to be entered and published. When the loop exits, the <code>busControl</code> variable is disposed, which stops the bus.</p>
+<p><em>Always start the bus</em> before starting to use it. Of course, you can only start a configured bus.</p>
+<h2 id="masstransit-and-aspnet-core">MassTransit and ASP.NET Core</h2>
+<p>MassTransit integrates natively with ASP.NET Core using the <code>MassTransit.AspNetCore</code> package.</p>
+<p>The package includes the following features:</p>
+<ul>
+<li>Hosted service to start and stop the bus following the application lifecycle</li>
+<li>Registers the bus instance as a singleton for the required interfaces</li>
+<li>Adds health checks for the bus instance and receive endpoints</li>
+<li>Tells the bus to use the ASP.NET Core logger</li>
+</ul>
+<p>If you want to register your consumers in the ASP.NET Core service collection, use the following code as an example:</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Startup</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">ConfigureServices</span><span class="token punctuation">(</span><span class="token class-name">IServiceCollection</span> services<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token comment">// Add framework services</span>
+        services<span class="token punctuation">.</span><span class="token function">AddHealthChecks</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        services<span class="token punctuation">.</span><span class="token function">AddMvc</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// Register your consumers if the need dependencies</span>
+        services<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">AddScoped</span><span class="token punctuation">&lt;</span><span class="token class-name">SomeDependency</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+        <span class="token comment">// Register MassTransit</span>
+        services<span class="token punctuation">.</span><span class="token function">AddMassTransit</span><span class="token punctuation">(</span>x <span class="token operator">=&gt;</span>
+        <span class="token punctuation">{</span>
+            x<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">AddConsumer</span><span class="token punctuation">&lt;</span><span class="token class-name">OrderConsumer</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            x<span class="token punctuation">.</span><span class="token function">AddBus</span><span class="token punctuation">(</span>provider <span class="token operator">=&gt;</span> Bus<span class="token punctuation">.</span>Factory<span class="token punctuation">.</span><span class="token function">CreateUsingRabbitMq</span><span class="token punctuation">(</span>cfg <span class="token operator">=&gt;</span>
+            <span class="token punctuation">{</span>
+                <span class="token keyword">var</span> host <span class="token operator">=</span> cfg<span class="token punctuation">.</span><span class="token function">Host</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Uri</span><span class="token punctuation">(</span><span class="token string">&quot;rabbitmq://localhost&quot;</span><span class="token punctuation">)</span><span class="token punctuation">,</span> hostConfigurator <span class="token operator">=&gt;</span> 
+                <span class="token punctuation">{</span> 
+                    hostConfigurator<span class="token punctuation">.</span><span class="token function">Username</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    hostConfigurator<span class="token punctuation">.</span><span class="token function">Password</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                cfg<span class="token punctuation">.</span><span class="token function">ReceiveEndpoint</span><span class="token punctuation">(</span>host<span class="token punctuation">,</span> <span class="token string">&quot;submit-order&quot;</span><span class="token punctuation">,</span> ep <span class="token operator">=&gt;</span>
+                <span class="token punctuation">{</span>
+                    ep<span class="token punctuation">.</span>PrefetchCount <span class="token operator">=</span> <span class="token number">16</span><span class="token punctuation">;</span>
+                    ep<span class="token punctuation">.</span><span class="token function">UseMessageRetry</span><span class="token punctuation">(</span>r <span class="token operator">=&gt;</span> r<span class="token punctuation">.</span><span class="token function">Interval</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                    ep<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">ConfigureConsumer</span><span class="token punctuation">&lt;</span><span class="token class-name">OrderConsumer</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span>provider<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// everything else</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Remember, however, that it is perfectly fine to set up all the required dependencies in the <code>Startup</code>, which serves as the bootstrap code for your application. By doing that you can avoid weird cases when you have two dependencies that implement the same interface and then you cannot properly register them both, since only the last one will count.</p>
+<p>Here is how you can avoid using the container:</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Startup</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token class-name">IConfiguration</span> Configuration <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token keyword">private</span> <span class="token class-name">ILoggerFactory</span> LoggerFactory <span class="token punctuation">{</span> <span class="token keyword">get</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token function">Startup</span><span class="token punctuation">(</span><span class="token class-name">IConfiguration</span> configuration<span class="token punctuation">,</span> <span class="token class-name">ILoggerFactory</span> loggerFactory<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        Configuration <span class="token operator">=</span> configuration<span class="token punctuation">;</span>
+        LoggerFactory <span class="token operator">=</span> loggerFactory<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">ConfigureServices</span><span class="token punctuation">(</span><span class="token class-name">IServiceCollection</span> services<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token comment">// Add framework services</span>
+        services<span class="token punctuation">.</span><span class="token function">AddHealthChecks</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        services<span class="token punctuation">.</span><span class="token function">AddMvc</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// Using factory delegates for transient dependencies</span>
+        <span class="token keyword">var</span> someDependencyFactory <span class="token operator">=</span> 
+            <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">SomeDependency</span><span class="token punctuation">(</span>Configuration<span class="token punctuation">[</span><span class="token string">&quot;connectionStrings:mySqlDatabase&quot;</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// Using instances for singletons</span>
+        <span class="token keyword">var</span> anotherDependency <span class="token operator">=</span> 
+            <span class="token keyword">new</span> <span class="token class-name">SomeDocumentStore</span><span class="token punctuation">(</span>Configuration<span class="token punctuation">[</span><span class="token string">&quot;connectionString:documentStore&quot;</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// Register MassTransit. Here we need to send the logger factory.</span>
+        services<span class="token punctuation">.</span><span class="token function">AddMassTransit</span><span class="token punctuation">(</span><span class="token function">ConfigureBus</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> LoggerFactory<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">private</span> <span class="token class-name">IBusControl</span> <span class="token function">ConfigureBus</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span>
+        Bus<span class="token punctuation">.</span>Factory<span class="token punctuation">.</span><span class="token function">CreateUsingRabbitMq</span><span class="token punctuation">(</span>cfg <span class="token operator">=&gt;</span>
+        <span class="token punctuation">{</span>
+            <span class="token keyword">var</span> host <span class="token operator">=</span> cfg<span class="token punctuation">.</span><span class="token function">Host</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Uri</span><span class="token punctuation">(</span><span class="token string">&quot;rabbitmq://localhost&quot;</span><span class="token punctuation">)</span><span class="token punctuation">,</span> hc <span class="token operator">=&gt;</span> 
+            <span class="token punctuation">{</span> 
+                hc<span class="token punctuation">.</span><span class="token function">Username</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                hc<span class="token punctuation">.</span><span class="token function">Password</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            cfg<span class="token punctuation">.</span><span class="token function">ReceiveEndpoint</span><span class="token punctuation">(</span>host<span class="token punctuation">,</span> <span class="token string">&quot;submit-order&quot;</span><span class="token punctuation">,</span> ep <span class="token operator">=&gt;</span>
+            <span class="token punctuation">{</span>
+                ep<span class="token punctuation">.</span>PrefetchCount <span class="token operator">=</span> <span class="token number">16</span><span class="token punctuation">;</span>
+                ep<span class="token punctuation">.</span><span class="token function">UseMessageRetry</span><span class="token punctuation">(</span>x <span class="token operator">=&gt;</span> x<span class="token punctuation">.</span><span class="token function">Interval</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                ep<span class="token punctuation">.</span><span class="token function">Consumer</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> 
+                    <span class="token keyword">new</span> <span class="token class-name">OrderConsumer</span><span class="token punctuation">(</span><span class="token function">someDependency</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> anotherDependency<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// everything else</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>To make the health checks work, remember to add this line to the <code>Configure</code> method in the <code>Startup.cs</code> file:</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">Configure</span><span class="token punctuation">(</span><span class="token class-name">IApplicationBuilder</span> app<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    app<span class="token punctuation">.</span><span class="token function">UseHealthChecks</span><span class="token punctuation">(</span><span class="token string">&quot;/health&quot;</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">HealthCheckOptions</span> <span class="token punctuation">{</span>Predicate <span class="token operator">=</span> check <span class="token operator">=&gt;</span> check<span class="token punctuation">.</span>Tags<span class="token punctuation">.</span><span class="token function">Contains</span><span class="token punctuation">(</span><span class="token string">&quot;ready&quot;</span><span class="token punctuation">)</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// everything else</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Also, as an obvious requirement, you need to use .NET Core 2.2 (or higher) and have those two package references in your project file:</p>
+<pre class="language-"><code class="lang-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>PackageReference</span> <span class="token attr-name">Include</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>Microsoft.AspNetCore.Diagnostics<span class="token punctuation">&quot;</span></span> <span class="token attr-name">Version</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>2.2.0<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>PackageReference</span> <span class="token attr-name">Include</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>Microsoft.AspNetCore.Diagnostics.HealthChecks<span class="token punctuation">&quot;</span></span> <span class="token attr-name">Version</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>2.2.0<span class="token punctuation">&quot;</span></span> <span class="token punctuation">/&gt;</span></span>
+</code></pre>
+<p>Of course, health checks only work when you provide an endpoint that is accessible via http or https. That implies that you cannot do that using the <code>Microsoft.NET.Sdk</code>, so you need to ensure that your <code>csproj</code> file starts with this line:</p>
+<pre class="language-"><code class="lang-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Project</span> <span class="token attr-name">Sdk</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">&quot;</span>Microsoft.NET.Sdk.Web<span class="token punctuation">&quot;</span></span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+<p>The Web SDK is used by default if you are using the ASP.NET Core Web Application template, but you can also change it, if you used the Console Application template. In such a case you&apos;d also need to add some more packages to be able to host the http endpoint using Kestrel. The easiest way to migrate a console application to the web application (that still runs as a console application) by creating a new web application with the type <code>Empty</code> and checking the differences.</p>
+<h2 id="masstransit-in-a-windows-service">MassTransit in a Windows service</h2>
+<p>A Windows service is recommended for consuming commands and events as it provides an autonomous execution environment for message consumers. The service can be started and stopped using the service control manager, as well as monitored by operations tools.</p>
+<div class="alert alert-info">
+<b>Note:</b>
+    To create a Windows service, we strongly recommend using Topshelf, as it was built specifically for this purpose. Topshelf is easy to use, has zero dependencies, and creates a service that can be self-installed without additional tools.
+</div>
+
+<p>The important aspect of configuring a bus in a Windows service is to ensure that the bus is only configured and started when the service is <em>started</em>.</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">namespace</span> EventService
+<span class="token punctuation">{</span>
+    <span class="token keyword">using</span> Topshelf<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Program</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">Main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span>HostFactory<span class="token punctuation">.</span><span class="token function">Run</span><span class="token punctuation">(</span>cfg <span class="token operator">=&gt;</span> cfg<span class="token punctuation">.</span><span class="token function">Service</span><span class="token punctuation">(</span>x <span class="token operator">=&gt;</span> <span class="token keyword">new</span> <span class="token class-name">EventConsumerService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">class</span> <span class="token class-name">EventConsumerService</span> <span class="token punctuation">:</span>
+        <span class="token class-name">ServiceControl</span>
+    <span class="token punctuation">{</span>
+        <span class="token class-name">IBusControl</span> _bus<span class="token punctuation">;</span>
+
+        <span class="token keyword">public</span> <span class="token keyword">bool</span> <span class="token function">Start</span><span class="token punctuation">(</span><span class="token class-name">HostControl</span> hostControl<span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            _bus <span class="token operator">=</span> <span class="token function">ConfigureBus</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            _bus<span class="token punctuation">.</span><span class="token function">Start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token keyword">return</span> <span class="token keyword">true</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token keyword">public</span> <span class="token keyword">bool</span> <span class="token function">Stop</span><span class="token punctuation">(</span><span class="token class-name">HostControl</span> hostControl<span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            _bus<span class="token punctuation">?.</span><span class="token function">Stop</span><span class="token punctuation">(</span>TimeSpan<span class="token punctuation">.</span><span class="token function">FromSeconds</span><span class="token punctuation">(</span><span class="token number">30</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token keyword">return</span> <span class="token keyword">true</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token class-name">IBusControl</span> <span class="token function">ConfigureBus</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> Bus<span class="token punctuation">.</span>Factory<span class="token punctuation">.</span><span class="token function">CreateUsingRabbitMq</span><span class="token punctuation">(</span>cfg <span class="token operator">=&gt;</span>
+            <span class="token punctuation">{</span>
+                <span class="token keyword">var</span> host <span class="token operator">=</span> cfg<span class="token punctuation">.</span><span class="token function">Host</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Uri</span><span class="token punctuation">(</span><span class="token string">&quot;rabbitmq://localhost&quot;</span><span class="token punctuation">)</span><span class="token punctuation">,</span> h <span class="token operator">=&gt;</span>
+                <span class="token punctuation">{</span>
+                    h<span class="token punctuation">.</span><span class="token function">Username</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    h<span class="token punctuation">.</span><span class="token function">Password</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                cfg<span class="token punctuation">.</span><span class="token function">ReceiveEndpoint</span><span class="token punctuation">(</span>host<span class="token punctuation">,</span> <span class="token string">&quot;event_queue&quot;</span><span class="token punctuation">,</span> e <span class="token operator">=&gt;</span>
+                <span class="token punctuation">{</span>
+                    e<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Handler</span><span class="token punctuation">&lt;</span><span class="token class-name">ValueEntered</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span>context <span class="token operator">=&gt;</span>
+                        Console<span class="token punctuation">.</span>Out<span class="token punctuation">.</span><span class="token function">WriteLineAsync</span><span class="token punctuation">(</span>$<span class="token string">&quot;Value was entered: {context.Message.Value}&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2 id="masstransit-in-a-web-application">MassTransit in a web application</h2>
+<p>Configuring a bus in a web site is typically done to publish events, send commands, as well as engage in request/response conversations. Hosting receive endpoints and persistent consumers is not recommended (use a service as shown above).</p>
+<h3 id="aspnet-mvcwebapi2">ASP.NET (MVC/WebApi2)</h3>
+<p>In a web application, the <code>HttpApplication</code> class methods of <code>Application_Start</code> and <code>Application_End</code> are used to configure/start the bus and stop the bus respectively.</p>
+<div class="alert alert-info">
+<b>Note:</b>
+    While many MassTransit samples use Topshelf, web applications are an exception where the standard web application conventions are followed.
+</div>
+
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">MvcApplication</span> <span class="token punctuation">:</span> <span class="token class-name">HttpApplication</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">static</span> <span class="token class-name">IBusControl</span> _busControl<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">IBus</span> Bus
+    <span class="token punctuation">{</span>
+        <span class="token keyword">get</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> _busControl<span class="token punctuation">;</span> <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">Application_Start</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        _busControl <span class="token operator">=</span> <span class="token function">ConfigureBus</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        _busControl<span class="token punctuation">.</span><span class="token function">Start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">protected</span> <span class="token keyword">void</span> <span class="token function">Application_End</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        _busControl<span class="token punctuation">.</span><span class="token function">Stop</span><span class="token punctuation">(</span>TimeSpan<span class="token punctuation">.</span><span class="token function">FromSeconds</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token class-name">IBusControl</span> <span class="token function">ConfigureBus</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> Bus<span class="token punctuation">.</span>Factory<span class="token punctuation">.</span><span class="token function">CreateUsingRabbitMq</span><span class="token punctuation">(</span>cfg <span class="token operator">=&gt;</span>
+        <span class="token punctuation">{</span>
+            <span class="token keyword">var</span> host <span class="token operator">=</span> cfg<span class="token punctuation">.</span><span class="token function">Host</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Uri</span><span class="token punctuation">(</span><span class="token string">&quot;rabbitmq://localhost&quot;</span><span class="token punctuation">)</span><span class="token punctuation">,</span> h <span class="token operator">=&gt;</span>
+            <span class="token punctuation">{</span>
+                h<span class="token punctuation">.</span><span class="token function">Username</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                h<span class="token punctuation">.</span><span class="token function">Password</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">NotifyController</span> <span class="token punctuation">:</span> <span class="token class-name">Controller</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">async</span> Task<span class="token operator">&lt;</span>ActionResult<span class="token operator">&gt;</span> <span class="token function">Put</span><span class="token punctuation">(</span><span class="token keyword">string</span> <span class="token keyword">value</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">await</span> MvcApplication<span class="token punctuation">.</span>Bus<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Publish</span><span class="token punctuation">&lt;</span><span class="token class-name">ValueNotified</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token keyword">new</span>
+        <span class="token punctuation">{</span>
+            Value <span class="token operator">=</span> <span class="token keyword">value</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">return</span> <span class="token function">View</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">CommandController</span> <span class="token punctuation">:</span> <span class="token class-name">Controller</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">async</span> Task<span class="token operator">&lt;</span>ActionResult<span class="token operator">&gt;</span> <span class="token function">Send</span><span class="token punctuation">(</span><span class="token keyword">string</span> <span class="token keyword">value</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> endpoint <span class="token operator">=</span> <span class="token keyword">await</span> MvcApplication<span class="token punctuation">.</span>Bus<span class="token punctuation">.</span><span class="token function">GetSendEndpoint</span><span class="token punctuation">(</span>_serviceAddress<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">await</span> endpoint<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Send</span><span class="token punctuation">&lt;</span><span class="token class-name">SubmitValue</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token keyword">new</span>
+        <span class="token punctuation">{</span>
+            Timestamp <span class="token operator">=</span> DateTime<span class="token punctuation">.</span>UtcNow<span class="token punctuation">,</span>
+            Value <span class="token operator">=</span> <span class="token keyword">value</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">return</span> <span class="token function">View</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The above example is kept simple, providing a static <code>MvcApplication.Bus</code> property to access the bus instance (for publishing events, and sending commands to endpoints). Newer version of ASP.NET have built-in dependency resolution, in which case the <code>IBus</code> should be registered so that controllers can specify the dependency in the constructor. In fact, the inherited <code>IPublishEndpoint</code> and <code>ISendEndpointProvider</code> should also be registered.</p>
+<p>The example controllers show how to publish and send messages as well.</p>
+<h3 id="owin-pipeline-webapi2">OWIN Pipeline (WebApi2)</h3>
+<p>WebApi2 can alternatively use the OWIN pipeline. But OWIN doesn&apos;t have <code>Application_End</code> and so it requires a different approach to ensure the bus is disposed properly.</p>
+<p>This example shows an OWIN WebApi2 project using the Autofac Container. The concept should be similar if you aren&apos;t using WebApi2 or a different Container, but still OWIN.</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Startup</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">Configuration</span><span class="token punctuation">(</span><span class="token class-name">IAppBuilder</span> app<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token comment">// STANDARD WEB API SETUP:</span>
+
+        <span class="token comment">// Get your HttpConfiguration. In OWIN, you&apos;ll create one</span>
+        <span class="token comment">// rather than using GlobalConfiguration.</span>
+        <span class="token keyword">var</span> config <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">HttpConfiguration</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        WebApiConfig<span class="token punctuation">.</span><span class="token function">Register</span><span class="token punctuation">(</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Register your routes</span>
+
+        <span class="token comment">// Make the autofac container</span>
+        <span class="token keyword">var</span> builder <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ContainerBuilder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// Register your Bus</span>
+        builder<span class="token punctuation">.</span><span class="token function">Register</span><span class="token punctuation">(</span>c <span class="token operator">=&gt;</span>
+            <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> Bus<span class="token punctuation">.</span>Factory<span class="token punctuation">.</span><span class="token function">CreateUsingRabbitMq</span><span class="token punctuation">(</span>sbc <span class="token operator">=&gt;</span>
+                    sbc<span class="token punctuation">.</span><span class="token function">Host</span><span class="token punctuation">(</span><span class="token string">&quot;localhost&quot;</span><span class="token punctuation">,</span><span class="token string">&quot;dev&quot;</span><span class="token punctuation">,</span> h <span class="token operator">=&gt;</span>
+                    <span class="token punctuation">{</span>
+                        h<span class="token punctuation">.</span><span class="token function">Username</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        h<span class="token punctuation">.</span><span class="token function">Password</span><span class="token punctuation">(</span><span class="token string">&quot;guest&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+                <span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token generic-method"><span class="token function">As</span><span class="token punctuation">&lt;</span><span class="token class-name">IBusControl</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token generic-method"><span class="token function">As</span><span class="token punctuation">&lt;</span><span class="token class-name">IPublishEndpoint</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">SingleInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// Register anything else you might need...</span>
+
+        <span class="token comment">// Build the container</span>
+        <span class="token keyword">var</span> container <span class="token operator">=</span> builder<span class="token punctuation">.</span><span class="token function">Build</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// OWIN WEB API SETUP:</span>
+
+        <span class="token comment">// set the DependencyResolver</span>
+        config<span class="token punctuation">.</span>DependencyResolver <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AutofacWebApiDependencyResolver</span><span class="token punctuation">(</span>container<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// Register the Autofac middleware FIRST, then the Autofac Web API middleware,</span>
+        <span class="token comment">// and finally the standard Web API middleware.</span>
+
+        app<span class="token punctuation">.</span><span class="token function">UseAutofacMiddleware</span><span class="token punctuation">(</span>container<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        app<span class="token punctuation">.</span><span class="token function">UseAutofacWebApi</span><span class="token punctuation">(</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        app<span class="token punctuation">.</span><span class="token function">UseWebApi</span><span class="token punctuation">(</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// Starts Mass Transit Service bus, and registers stopping of bus on app dispose</span>
+        <span class="token keyword">var</span> bus <span class="token operator">=</span> container<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Resolve</span><span class="token punctuation">&lt;</span><span class="token class-name">IBusControl</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">var</span> busHandle <span class="token operator">=</span> TaskUtil<span class="token punctuation">.</span><span class="token function">Await</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> bus<span class="token punctuation">.</span><span class="token function">StartAsync</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">var</span> properties <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AppProperties</span><span class="token punctuation">(</span>app<span class="token punctuation">.</span>Properties<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">if</span><span class="token punctuation">(</span>properties<span class="token punctuation">.</span>OnAppDisposing <span class="token operator">!=</span> CancellationToken<span class="token punctuation">.</span>None<span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            properties<span class="token punctuation">.</span>OnAppDisposing<span class="token punctuation">.</span><span class="token function">Register</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> busHandle<span class="token punctuation">.</span><span class="token function">Stop</span><span class="token punctuation">(</span>TimeSpan<span class="token punctuation">.</span><span class="token function">FromSeconds</span><span class="token punctuation">(</span><span class="token number">30</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The important bit is the last several lines where we resolve the <code>IBusControl</code> and register an action to stop when the app disposes.</p>
+<p>You&apos;ll also notice we registered the bus <code>.As<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>IPublishEndpoint</span><span class="token punctuation">&gt;</span></span>()</code>. That&apos;s because we are following the guidance above, where our websites should really only be Publishing to the service bus.</p>
+<p>Now your controller might look like:</p>
+<pre class="language-"><code class="lang-csharp"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">MyController</span> <span class="token punctuation">:</span> <span class="token class-name">ApiController</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">readonly</span> <span class="token class-name">IPublishEndpoint</span> _publishEndpoint<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token function">MyController</span><span class="token punctuation">(</span><span class="token class-name">IPublishEndpoint</span> publishEndpoint<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        _publishEndpoint <span class="token operator">=</span> publishEndpoint<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token punctuation">[</span><span class="token class-name">HttpPost</span><span class="token punctuation">]</span>
+    <span class="token keyword">public</span> <span class="token keyword">async</span> Task<span class="token operator">&lt;</span>IHttpActionResult<span class="token operator">&gt;</span> <span class="token function">OrderShipped</span><span class="token punctuation">(</span><span class="token keyword">int</span> orderId<span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">await</span> _publishEndpoint<span class="token punctuation">.</span><span class="token generic-method"><span class="token function">Publish</span><span class="token punctuation">&lt;</span><span class="token class-name">OrderShipped</span><span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span>
+        <span class="token keyword">new</span>
+        <span class="token punctuation">{</span>
+            OrderId <span class="token operator">=</span> orderId
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">return</span> <span class="token function">Ok</span><span class="token punctuation">(</span><span class="token string">&quot;Success!&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="./" class="navigation navigation-prev " aria-label="Previous page: Using MassTransit">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="transports.html" class="navigation navigation-next " aria-label="Next page: Choose a transport">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Configure MassTransit","level":"2.2.1","depth":2,"next":{"title":"Choose a transport","level":"2.2.2","depth":2,"path":"usage/transports.md","ref":"usage/transports.md","articles":[{"title":"Azure Functions","level":"2.2.2.1","depth":3,"path":"usage/azure-functions.md","ref":"usage/azure-functions.md","articles":[]}]},"previous":{"title":"Using MassTransit","level":"2.2","depth":1,"path":"usage/README.md","ref":"usage/README.md","articles":[{"title":"Configure MassTransit","level":"2.2.1","depth":2,"path":"usage/configuration.md","ref":"usage/configuration.md","articles":[]},{"title":"Choose a transport","level":"2.2.2","depth":2,"path":"usage/transports.md","ref":"usage/transports.md","articles":[{"title":"Azure Functions","level":"2.2.2.1","depth":3,"path":"usage/azure-functions.md","ref":"usage/azure-functions.md","articles":[]}]},{"title":"Create message contracts","level":"2.2.3","depth":2,"path":"usage/message-contracts.md","ref":"usage/message-contracts.md","articles":[]},{"title":"Create message consumers","level":"2.2.4","depth":2,"path":"usage/message-consumers.md","ref":"usage/message-consumers.md","articles":[]},{"title":"Produce messages","level":"2.2.5","depth":2,"path":"usage/producing-messages.md","ref":"usage/producing-messages.md","articles":[]},{"title":"Initialize messages","level":"2.2.6","depth":2,"path":"usage/message-initializers.md","ref":"usage/message-initializers.md","articles":[]},{"title":"Correlate messages","level":"2.2.7","depth":2,"path":"usage/correlation.md","ref":"usage/correlation.md","articles":[]},{"title":"Use IoC container","level":"2.2.8","depth":2,"path":"usage/containers/README.md","ref":"usage/containers/README.md","articles":[{"title":"Autofac","level":"2.2.8.1","depth":3,"path":"usage/containers/autofac.md","ref":"usage/containers/autofac.md","articles":[]},{"title":"Ninject","level":"2.2.8.2","depth":3,"path":"usage/containers/ninject.md","ref":"usage/containers/ninject.md","articles":[]},{"title":"StructureMap","level":"2.2.8.3","depth":3,"path":"usage/containers/structuremap.md","ref":"usage/containers/structuremap.md","articles":[]},{"title":"Lamar","level":"2.2.8.4","depth":3,"path":"usage/containers/lamar.md","ref":"usage/containers/lamar.md","articles":[]},{"title":"Unity","level":"2.2.8.5","depth":3,"path":"usage/containers/unity.md","ref":"usage/containers/unity.md","articles":[]},{"title":"Castle Windsor","level":"2.2.8.6","depth":3,"path":"usage/containers/castlewindsor.md","ref":"usage/containers/castlewindsor.md","articles":[]},{"title":"Microsoft Dependency Injection","level":"2.2.8.7","depth":3,"path":"usage/containers/msdi.md","ref":"usage/containers/msdi.md","articles":[]}]},{"title":"Request/Response","level":"2.2.9","depth":2,"path":"usage/request-response.md","ref":"usage/request-response.md","articles":[]},{"title":"Handle exceptions","level":"2.2.10","depth":2,"path":"usage/exceptions.md","ref":"usage/exceptions.md","articles":[]},{"title":"Configure retries","level":"2.2.11","depth":2,"path":"usage/retries.md","ref":"usage/retries.md","articles":[]},{"title":"Large payloads","level":"2.2.12","depth":2,"path":"usage/message-data.md","ref":"usage/message-data.md","articles":[]},{"title":"Schedule messages","level":"2.2.13","depth":2,"path":"usage/scheduling/README.md","ref":"usage/scheduling/README.md","articles":[{"title":"Scheduling API","level":"2.2.13.1","depth":3,"path":"usage/scheduling/scheduling-api.md","ref":"usage/scheduling/scheduling-api.md","articles":[]},{"title":"In-memory scheduling","level":"2.2.13.2","depth":3,"path":"usage/scheduling/in-memory.md","ref":"usage/scheduling/in-memory.md","articles":[]},{"title":"ActiveMQ Delay and Schedule Message Delivery","level":"2.2.13.3","depth":3,"path":"usage/scheduling/activemq-delayed.md","ref":"usage/scheduling/activemq-delayed.md","articles":[]},{"title":"Azure Service Bus","level":"2.2.13.4","depth":3,"path":"usage/scheduling/azure-sb-scheduler.md","ref":"usage/scheduling/azure-sb-scheduler.md","articles":[]},{"title":"RabbitMQ Delayed Exchange","level":"2.2.13.5","depth":3,"path":"usage/scheduling/rabbitmq-delayed.md","ref":"usage/scheduling/rabbitmq-delayed.md","articles":[]},{"title":"Redelivering messages","level":"2.2.13.6","depth":3,"path":"usage/scheduling/redeliver.md","ref":"usage/scheduling/redeliver.md","articles":[]}]},{"title":"Observe messages","level":"2.2.14","depth":2,"path":"usage/observers.md","ref":"usage/observers.md","articles":[]},{"title":"Observe lifecycle","level":"2.2.15","depth":2,"path":"usage/lifecycle-observers.md","ref":"usage/lifecycle-observers.md","articles":[]},{"title":"Monitoring","level":"2.2.16","depth":2,"ref":"","articles":[{"title":"AppInsights","level":"2.2.16.1","depth":3,"path":"usage/monitoring/applications-insights.md","ref":"usage/monitoring/applications-insights.md","articles":[]},{"title":"Diagnostic Source","level":"2.2.16.2","depth":3,"path":"usage/monitoring/diagnostic-source.md","ref":"usage/monitoring/diagnostic-source.md","articles":[]}]},{"title":"Connect endpoints","level":"2.2.17","depth":2,"path":"usage/connect-endpoint.md","ref":"usage/connect-endpoint.md","articles":[]},{"title":"Logging","level":"2.2.18","depth":2,"path":"usage/logging.md","ref":"usage/logging.md","articles":[]},{"title":"Testing","level":"2.2.19","depth":2,"path":"usage/testing/README.md","ref":"usage/testing/README.md","articles":[{"title":"Bus harness","level":"2.2.19.1","depth":3,"path":"usage/testing/bus-harness.md","ref":"usage/testing/bus-harness.md","articles":[]},{"title":"Testing consumers","level":"2.2.19.2","depth":3,"path":"usage/testing/testing-consumers.md","ref":"usage/testing/testing-consumers.md","articles":[]},{"title":"Testing sagas","level":"2.2.19.3","depth":3,"path":"usage/testing/testing-sagas.md","ref":"usage/testing/testing-sagas.md","articles":[]}]}]},"dir":"ltr"},"config":{"plugins":["edit-link","prism","-highlight","github","anchorjs","expandable-chapters"],"root":"docs","styles":{"website":"build/gitbook.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"prism":{},"github":{"url":"https://github.com/MassTransit/MassTransit/"},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"edit-link":{"label":"Edit This Page","base":"https://github.com/masstransit/masstransit/tree/master/docs"},"theme-default":{"styles":{"website":"build/gitbook.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"anchorjs":{},"expandable-chapters":{}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"MassTransit","gitbook":"3.2.2"},"file":{"path":"usage/configuration.md","mtime":"2019-10-21T01:47:18.246Z","type":"markdown"},"gitbook":{"version":"3.2.2","time":"2019-10-21T01:50:06.212Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-edit-link/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-anchorjs/anchor.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-anchorjs/anchor-style.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
