@@ -146,7 +146,7 @@
 
         public override IBusHostControl Build()
         {
-            var hostTopology = new ServiceBusHostTopology(_topologyConfiguration);
+            var hostTopology = new ServiceBusHostTopology(_topologyConfiguration, _hostSettings.ServiceUri);
 
             var host = new ServiceBusHost(this, hostTopology);
 

@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,23 +15,29 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Runtime.Serialization;
 
+
     /// <summary>
-    /// Thrown when a message is nack'd by the broker
+    /// Published when a RabbitMQ channel is closed and the message was not confirmed by the broker.
     /// </summary>
     [Serializable]
-    public class PublishNackException :
+    public class MessageReturnedException :
         TransportException
     {
-        public PublishNackException()
+        public MessageReturnedException()
         {
         }
 
-        public PublishNackException(Uri uri, string message)
+        public MessageReturnedException(Uri uri, string message)
             : base(uri, message)
         {
         }
 
-        protected PublishNackException(SerializationInfo info, StreamingContext context)
+        public MessageReturnedException(Uri uri, string message, Exception innerException)
+            : base(uri, message, innerException)
+        {
+        }
+
+        protected MessageReturnedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

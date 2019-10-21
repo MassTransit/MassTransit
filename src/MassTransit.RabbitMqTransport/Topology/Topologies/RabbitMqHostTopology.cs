@@ -41,11 +41,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             return _configuration.Send.GetMessageTopology<T>();
         }
 
-        public SendSettings GetSendSettings(Uri address)
-        {
-            return _configuration.Send.GetSendSettings(address);
-        }
-
         public Uri GetDestinationAddress(string exchangeName, Action<IExchangeConfigurator> configure = null)
         {
             var sendSettings = new RabbitMqSendSettings(exchangeName, _exchangeTypeSelector.DefaultExchangeType, true, false);
@@ -69,6 +64,19 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             configure?.Invoke(settings);
 
             return settings.GetSendAddress(_hostAddress);
+        }
+
+        public Uri GetDelayedExchangeDestinationAddress(Uri address)
+        {
+            var settings = _configuration.Send.GetSendSettings(address);
+
+            var sendSettings = new RabbitMqSendSettings(settings.ExchangeName + "_delay", "x-delayed-message", settings.Durable, settings.AutoDelete);
+
+            sendSettings.SetExchangeArgument("x-delayed-type", settings.ExchangeType);
+
+            sendSettings.BindToExchange(settings.ExchangeName);
+
+            return sendSettings.GetSendAddress(_hostAddress);
         }
 
         public override string CreateTemporaryQueueName(string prefix)

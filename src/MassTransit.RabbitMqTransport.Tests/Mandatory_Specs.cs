@@ -23,7 +23,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_throw_an_exception()
         {
-            Assert.That(async () => await Bus.Publish(new NoBindingPlease(), context => context.Mandatory = true), Throws.TypeOf<PublishReturnedException>());
+            Assert.That(async () => await Bus.Publish(new NoBindingPlease(), context => context.Mandatory = true), Throws.TypeOf<MessageReturnedException>());
         }
 
 

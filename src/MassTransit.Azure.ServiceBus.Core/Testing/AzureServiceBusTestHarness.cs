@@ -94,7 +94,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Testing
 
                 ConfigureServiceBusBusHost(x, Host);
 
-                x.ReceiveEndpoint(Host, InputQueueName, e =>
+                x.ReceiveEndpoint(InputQueueName, e =>
                 {
                     ConfigureReceiveEndpoint(e);
 

@@ -101,7 +101,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         public Task<ISendTransport> CreateSendTransport(Uri address)
         {
-            var settings = _hostTopology.GetSendSettings(address);
+            var settings = _hostTopology.SendTopology.GetSendSettings(address);
 
             var brokerTopology = settings.GetBrokerTopology();
 

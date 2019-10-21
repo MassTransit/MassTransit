@@ -105,14 +105,14 @@
         {
             var settings = new SubscriptionEndpointSettings(_busConfiguration.Topology.Publish.GetMessageTopology<T>().TopicDescription, subscriptionName);
 
-            CreateSubscriptionEndpointConfiguration(settings,  configure);
+            CreateSubscriptionEndpointConfiguration(settings, configure);
         }
 
         public void SubscriptionEndpoint(string subscriptionName, string topicPath, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
             var settings = new SubscriptionEndpointSettings(topicPath, subscriptionName);
 
-            CreateSubscriptionEndpointConfiguration(settings,  configure);
+            CreateSubscriptionEndpointConfiguration(settings, configure);
         }
 
         public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,
@@ -146,7 +146,7 @@
 
         public override IBusHostControl Build()
         {
-            var hostTopology = new ServiceBusHostTopology(_topologyConfiguration);
+            var hostTopology = new ServiceBusHostTopology(_topologyConfiguration, _hostSettings.ServiceUri);
 
             var host = new ServiceBusHost(this, hostTopology);
 

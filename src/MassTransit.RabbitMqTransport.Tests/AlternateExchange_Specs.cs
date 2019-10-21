@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Threading.Tasks;
     using NUnit.Framework;
@@ -21,27 +9,41 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class AlternateExchange_Specs :
         RabbitMqTestFixture
     {
+        Task<ConsumeContext<TheWorldImploded>> _handled;
+
         [Test]
         public async Task Should_create_and_bind_the_exchange_and_properties()
         {
-            await Bus.Publish<TheWorldImploded>(new
-            {
-                Value = "Whoa!"
-            });
+            await Bus.Publish<TheWorldImploded>(new {Value = "Whoa!"});
+
+            await _handled;
         }
 
         const string AlternateExchangeName = "publish-not-delivered";
+        const string AlternateQueueName = "world-examiner";
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
             configurator.PublishTopology.GetMessageTopology<TheWorldImploded>()
-                .BindAlterateExchangeQueue(AlternateExchangeName);
+                .BindAlternateExchangeQueue(AlternateExchangeName);
+
+            configurator.ReceiveEndpoint(AlternateQueueName, x =>
+            {
+                x.BindMessageExchanges = false;
+
+                x.Bind(AlternateExchangeName);
+
+                _handled = Handled<TheWorldImploded>(x);
+            });
         }
 
         protected override void OnCleanupVirtualHost(IModel model)
         {
             model.ExchangeDelete(AlternateExchangeName);
             model.QueueDelete(AlternateExchangeName);
+
+            model.ExchangeDelete(AlternateQueueName);
+            model.QueueDelete(AlternateQueueName);
         }
 
 
