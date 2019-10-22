@@ -33,6 +33,8 @@
                     h.Password("Ohcrud");
                     h.RequestedConnectionTimeout(2000);
                 });
+
+                x.AutoStart = false;
             });
 
             Assert.That(async () =>
@@ -97,13 +99,13 @@
 
                 await handle.Ready;
 
-                for (var i = 0; i < 10; i++)
+                for (var i = 0; i < 30; i++)
                 {
                     try
                     {
                         await Task.Delay(1000);
 
-                        await busControl.Publish(new TestMessage());
+//                        await busControl.Publish(new TestMessage());
 
                         Console.WriteLine("Published: {0}", i);
                     }
@@ -168,7 +170,7 @@
 
                 await handle.Ready;
 
-                await Task.Delay(5000);
+                await Task.Delay(60000);
             }
             finally
             {

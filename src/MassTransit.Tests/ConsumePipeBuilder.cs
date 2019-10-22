@@ -30,7 +30,7 @@ namespace MassTransit.Tests
         {
             _pipeBuilder.AddFilter(_filter);
 
-            return new ConsumePipe(_filter, _pipeBuilder.Build());
+            return new ConsumePipe(_filter, _pipeBuilder.Build(), true);
         }
 
         static Guid GetRequestId(ConsumeContext context)

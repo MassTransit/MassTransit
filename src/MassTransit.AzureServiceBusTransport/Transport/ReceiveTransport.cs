@@ -85,7 +85,9 @@
                     {
                         try
                         {
-                            await _context.Dependencies.OrCanceled(Stopping).ConfigureAwait(false);
+                            await _context.OnTransportStartup(_clientContextSupervisor, Stopping).ConfigureAwait(false);
+                            if (IsStopping)
+                                return;
 
                             await _clientContextSupervisor.Send(_clientPipe, Stopped).ConfigureAwait(false);
                         }

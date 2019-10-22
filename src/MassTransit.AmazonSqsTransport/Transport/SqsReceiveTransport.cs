@@ -102,7 +102,9 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
                         try
                         {
-                            await _context.Dependencies.OrCanceled(Stopping).ConfigureAwait(false);
+                            await _context.OnTransportStartup(_host.ConnectionContextSupervisor, Stopping).ConfigureAwait(false);
+                            if (IsStopping)
+                                return;
 
                             await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
                         }

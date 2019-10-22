@@ -53,6 +53,11 @@
 
         public ISerializationConfiguration Serialization => _endpointConfiguration.Serialization;
 
+        public bool AutoStart
+        {
+            set => _endpointConfiguration.Consume.Configurator.AutoStart = value;
+        }
+
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
             _endpointConfiguration.AddPipeSpecification(specification);

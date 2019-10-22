@@ -39,6 +39,11 @@
 
         public IJobService Service => _jobService.Value;
 
+        public bool AutoStart
+        {
+            set => _configurator.AutoStart = value;
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             if (JobFactory == null)

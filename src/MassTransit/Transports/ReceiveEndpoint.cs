@@ -6,6 +6,7 @@ namespace MassTransit.Transports
     using Context;
     using Events;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using Pipeline;
 
 
@@ -17,19 +18,21 @@ namespace MassTransit.Transports
     public class ReceiveEndpoint :
         IReceiveEndpointControl
     {
-        readonly IReceiveTransport _receiveTransport;
-        ConnectHandle _handle;
         readonly ReceiveEndpointContext _context;
+        readonly IReceiveTransport _receiveTransport;
+        readonly TaskCompletionSource<ReceiveEndpointReady> _started;
+        ConnectHandle _handle;
 
         public ReceiveEndpoint(IReceiveTransport receiveTransport, ReceiveEndpointContext context)
         {
             _context = context;
             _receiveTransport = receiveTransport;
 
+            _started = new TaskCompletionSource<ReceiveEndpointReady>();
             _handle = receiveTransport.ConnectReceiveTransportObserver(new Observer(this, context.EndpointObservers));
         }
 
-        ReceiveEndpointContext IReceiveEndpoint.Context => _context;
+        public Task<ReceiveEndpointReady> Started => _started.Task;
 
         ReceiveEndpointHandle IReceiveEndpointControl.Start()
         {
@@ -120,7 +123,13 @@ namespace MassTransit.Transports
 
             public Task Ready(ReceiveTransportReady ready)
             {
-                return _observer.Ready(new ReceiveEndpointReadyEvent(ready.InputAddress, _endpoint));
+                var endpointReadyEvent = new ReceiveEndpointReadyEvent(ready.InputAddress, _endpoint, ready.IsStarted);
+                if (ready.IsStarted)
+                {
+                    _endpoint._started.TrySetResultOnThreadPool(endpointReadyEvent);
+                }
+
+                return _observer.Ready(endpointReadyEvent);
             }
 
             public Task Completed(ReceiveTransportCompleted completed)

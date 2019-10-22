@@ -33,5 +33,10 @@ namespace MassTransit
         /// <param name="specification"></param>
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification);
+
+        /// <summary>
+        /// If set to false, the transport will only be started when a connection is made to the consume pipe.
+        /// </summary>
+        bool AutoStart { set; }
     }
 }

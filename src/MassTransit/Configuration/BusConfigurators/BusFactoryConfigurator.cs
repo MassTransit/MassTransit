@@ -31,6 +31,8 @@
         {
             _busConfiguration = busConfiguration;
 
+            busConfiguration.BusEndpointConfiguration.Consume.Configurator.AutoStart = false;
+
             _specifications = new List<IBusFactorySpecification>();
 
             if (LogContext.Current == null)
@@ -40,6 +42,11 @@
         public IMessageTopologyConfigurator MessageTopology => _busConfiguration.Topology.Message;
         public ISendTopologyConfigurator SendTopology => _busConfiguration.Topology.Send;
         public IPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
+
+        public virtual bool AutoStart
+        {
+            set => _busConfiguration.BusEndpointConfiguration.Consume.Configurator.AutoStart = value;
+        }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {

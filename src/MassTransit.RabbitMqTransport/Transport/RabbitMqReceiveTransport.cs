@@ -8,7 +8,6 @@
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
-    using GreenPipes.Internals.Extensions;
     using Policies;
     using RabbitMQ.Client.Exceptions;
     using Topology;
@@ -90,7 +89,9 @@
 
                         try
                         {
-                            await _context.Dependencies.OrCanceled(Stopping).ConfigureAwait(false);
+                            await _context.OnTransportStartup(_host.ConnectionContextSupervisor, Stopping).ConfigureAwait(false);
+                            if (IsStopping)
+                                return;
 
                             await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
                         }

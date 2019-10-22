@@ -9,6 +9,7 @@ namespace MassTransit
     using EndpointConfigurators;
     using Events;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using Pipeline;
     using Topology;
     using Transports;
@@ -22,6 +23,7 @@ namespace MassTransit
         readonly IConsumePipe _consumePipe;
         readonly IConsumePipeSpecification _consumePipeSpecification;
         readonly IBusHostControl _host;
+        readonly ILogContext _logContext;
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
         readonly IReceiveEndpoint _receiveEndpoint;
         Handle _busHandle;
@@ -37,6 +39,8 @@ namespace MassTransit
 
             Topology = host.Topology;
 
+            _logContext = LogContext.Current;
+
             _publishEndpoint = new Lazy<IPublishEndpoint>(() => _receiveEndpoint.CreatePublishEndpoint(Address));
         }
 
@@ -44,14 +48,24 @@ namespace MassTransit
         {
             IPipe<ConsumeContext<T>> messagePipe = _consumePipeSpecification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
 
-            return _consumePipe.ConnectConsumePipe(messagePipe);
+            var handle = _consumePipe.ConnectConsumePipe(messagePipe);
+
+            if (_busHandle != null && !_receiveEndpoint.Started.IsCompletedSuccessfully())
+                TaskUtil.Await(_receiveEndpoint.Started);
+
+            return handle;
         }
 
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
             IPipe<ConsumeContext<T>> messagePipe = _consumePipeSpecification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
 
-            return _consumePipe.ConnectRequestPipe(requestId, messagePipe);
+            var handle = _consumePipe.ConnectRequestPipe(requestId, messagePipe);
+
+            if (_busHandle != null && !_receiveEndpoint.Started.IsCompletedSuccessfully())
+                TaskUtil.Await(_receiveEndpoint.Started);
+
+            return handle;
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
@@ -110,11 +124,15 @@ namespace MassTransit
 
         Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _receiveEndpoint.GetSendEndpoint(address);
         }
 
         public async Task<BusHandle> StartAsync(CancellationToken cancellationToken)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             if (_busHandle != null)
             {
                 LogContext.Warning?.Log("StartAsync called, but the bus was already started: {Address} ({Reason})", Address, "Already Started");
@@ -136,7 +154,7 @@ namespace MassTransit
 
                 var hostHandle = await _host.Start(cancellationToken).ConfigureAwait(false);
 
-                busHandle = new Handle(hostHandle, this, _busObservable);
+                busHandle = new Handle(hostHandle, this, _busObservable, _logContext);
 
                 await busHandle.Ready.ConfigureAwait(false);
 
@@ -177,6 +195,8 @@ namespace MassTransit
 
         public Task StopAsync(CancellationToken cancellationToken = new CancellationToken())
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             if (_busHandle == null)
             {
                 LogContext.Warning?.Log("Failed to stop bus: {Address} ({Reason})", Address, "Not Started");
@@ -246,13 +266,15 @@ namespace MassTransit
         {
             readonly IBus _bus;
             readonly IBusObserver _busObserver;
+            readonly ILogContext _logContext;
             readonly HostHandle _hostHandle;
             bool _stopped;
 
-            public Handle(HostHandle hostHandle, IBus bus, IBusObserver busObserver)
+            public Handle(HostHandle hostHandle, IBus bus, IBusObserver busObserver, ILogContext logContext)
             {
                 _bus = bus;
                 _busObserver = busObserver;
+                _logContext = logContext;
                 _hostHandle = hostHandle;
             }
 
@@ -260,6 +282,8 @@ namespace MassTransit
 
             public async Task StopAsync(CancellationToken cancellationToken)
             {
+                LogContext.SetCurrentIfNull(_logContext);
+
                 if (_stopped)
                     return;
 
