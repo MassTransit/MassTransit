@@ -4,8 +4,13 @@ namespace MassTransit.Initializers
     using System.Threading;
     using Contexts;
     using Factories;
-    using GreenPipes.Internals.Extensions;
-    using Util;
+    using Metadata;
+
+
+    public static class MessageFactoryCache
+    {
+
+    }
 
 
     public static class MessageFactoryCache<TMessage>
@@ -30,7 +35,11 @@ namespace MassTransit.Initializers
 
                 var implementationType = typeof(TMessage);
                 if (typeof(TMessage).IsInterface)
-                    implementationType = TypeCache.GetImplementationType(typeof(TMessage));
+                    implementationType = TypeMetadataCache<TMessage>.ImplementationType;
+
+                Type[] parameterTypes = new Type[0];
+                if (implementationType.GetConstructor(parameterTypes) == null)
+                    throw new ArgumentException("No default constructor available for message type", nameof(TMessage));
 
                 return (IMessageFactory<TMessage>)Activator.CreateInstance(typeof(DynamicMessageFactory<,>).MakeGenericType(typeof(TMessage),
                     implementationType));

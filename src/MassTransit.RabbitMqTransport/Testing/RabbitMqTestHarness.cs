@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Testing
+﻿namespace MassTransit.RabbitMqTransport.Testing
 {
     using System;
     using System.Linq;
@@ -58,7 +46,7 @@ namespace MassTransit.RabbitMqTransport.Testing
 
         public event Action<IRabbitMqBusFactoryConfigurator> OnConfigureRabbitMqBus;
         public event Action<IRabbitMqBusFactoryConfigurator, IRabbitMqHost> OnConfigureRabbitMqBusHost;
-        public event Action<IRabbitMqReceiveEndpointConfigurator> OnConfigureRabbitMqReceiveEndoint;
+        public event Action<IRabbitMqReceiveEndpointConfigurator> OnConfigureRabbitMqReceiveEndpoint;
         public event Action<IRabbitMqHostConfigurator> OnConfigureRabbitMqHost;
         public event Action<IModel> OnCleanupVirtualHost;
 
@@ -74,7 +62,7 @@ namespace MassTransit.RabbitMqTransport.Testing
 
         protected virtual void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            OnConfigureRabbitMqReceiveEndoint?.Invoke(configurator);
+            OnConfigureRabbitMqReceiveEndpoint?.Invoke(configurator);
         }
 
         protected virtual void ConfigureRabbitMqHost(IRabbitMqHostConfigurator configurator)
@@ -103,11 +91,9 @@ namespace MassTransit.RabbitMqTransport.Testing
 
         protected override IBusControl CreateBus()
         {
-            return MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
+            var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 Host = ConfigureHost(x);
-
-                CleanUpVirtualHost(Host);
 
                 ConfigureBus(x);
 
@@ -127,6 +113,10 @@ namespace MassTransit.RabbitMqTransport.Testing
                     _inputQueueAddress = e.InputAddress;
                 });
             });
+
+            CleanUpVirtualHost(Host);
+
+            return busControl;
         }
 
         void CleanUpVirtualHost(IRabbitMqHost host)

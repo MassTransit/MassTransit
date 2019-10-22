@@ -13,6 +13,7 @@
 namespace MassTransit
 {
     using GreenPipes;
+    using Metadata;
     using Util;
 
 

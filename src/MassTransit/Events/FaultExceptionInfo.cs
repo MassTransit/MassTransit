@@ -13,6 +13,7 @@
 namespace MassTransit.Events
 {
     using System;
+    using Metadata;
     using Util;
 
 

@@ -25,7 +25,9 @@
 
             var setMethod = implementationPropertyInfo.GetSetMethod(true);
             if (setMethod == null)
-                throw new ArgumentException("The property does not have an accessible set method");
+                throw new ArgumentException($"The property does not have an accessible set method: {implementationPropertyInfo.Name}");
+
+            // look for <Address>k__BackingField and use a field setter if available
 
             Name = propertyInfo.Name;
 

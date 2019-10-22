@@ -35,6 +35,33 @@
             configurator.AddPipeSpecification(specification);
         }
 
+        public override void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
+        {
+            var specification = new ExecuteContextRetryPipeSpecification<TArguments>(_cancellationToken);
+
+            _configure?.Invoke(specification);
+
+            configurator.Arguments(x => x.AddPipeSpecification(specification));
+        }
+
+        public override void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
+        {
+            var specification = new ExecuteContextRetryPipeSpecification<TArguments>(_cancellationToken);
+
+            _configure?.Invoke(specification);
+
+            configurator.Arguments(x => x.AddPipeSpecification(specification));
+        }
+
+        public override void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
+        {
+            var specification = new CompensateContextRetryPipeSpecification<TLog>(_cancellationToken);
+
+            _configure?.Invoke(specification);
+
+            configurator.Log(x => x.AddPipeSpecification(specification));
+        }
+
         static RetryConsumeContext<TMessage> Factory<TMessage>(ConsumeContext<TMessage> context, IRetryPolicy retryPolicy, RetryContext retryContext)
             where TMessage : class
         {

@@ -1,24 +1,14 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
     using System;
     using Autofac;
     using AutofacIntegration;
+    using AutofacIntegration.Registration;
     using AutofacIntegration.ScopeProviders;
     using ConsumeConfigurators;
     using Courier;
     using PipeConfigurators;
+    using Registration;
     using Saga;
     using Scoping;
 
@@ -75,7 +65,7 @@ namespace MassTransit
             Action<ContainerBuilder, ConsumeContext> configureScope = null)
             where T : class, IConsumer
         {
-            ILifetimeScopeRegistry<TId> registry = context.Resolve<ILifetimeScopeRegistry<TId>>();
+            var registry = context.Resolve<ILifetimeScopeRegistry<TId>>();
 
             IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new RegistryLifetimeScopeProvider<TId>(registry), name, configureScope);
 
@@ -153,11 +143,9 @@ namespace MassTransit
             Action<ContainerBuilder, ConsumeContext> configureScope = null)
             where T : class, ISaga
         {
-            var repository = scope.Resolve<ISagaRepository<T>>();
+            ISagaRepositoryFactory factory = new AutofacSagaRepositoryFactory(new SingleLifetimeScopeProvider(scope), name, configureScope);
 
-            ISagaScopeProvider<T> scopeProvider = new AutofacSagaScopeProvider<T>(new SingleLifetimeScopeProvider(scope), name, configureScope);
-
-            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+            ISagaRepository<T> sagaRepository = factory.CreateSagaRepository<T>();
 
             configurator.Saga(sagaRepository);
         }
@@ -208,7 +196,7 @@ namespace MassTransit
             IComponentContext context,
             string name = "message",
             Action<ContainerBuilder, ExecuteContext<TArguments>> configureScope = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             ExecuteActivityHost<TActivity, TArguments>(configurator, compensateAddress, context.Resolve<ILifetimeScope>(), name, configureScope);
@@ -219,7 +207,7 @@ namespace MassTransit
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure,
             string name = "message",
             Action<ContainerBuilder, ExecuteContext<TArguments>> configureScope = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             ExecuteActivityHost(configurator, compensateAddress, context.Resolve<ILifetimeScope>(), configure, name, configureScope);
@@ -229,7 +217,7 @@ namespace MassTransit
             ILifetimeScope lifetimeScope,
             string name = "message",
             Action<ContainerBuilder, ExecuteContext<TArguments>> configureScope = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
@@ -238,7 +226,7 @@ namespace MassTransit
 
             var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress, configurator);
 
             configurator.AddEndpointSpecification(specification);
         }
@@ -248,7 +236,7 @@ namespace MassTransit
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure,
             string name = "message",
             Action<ContainerBuilder, ExecuteContext<TArguments>> configureScope = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
@@ -257,7 +245,7 @@ namespace MassTransit
 
             var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress, configurator);
 
             configure(specification);
 
@@ -268,7 +256,7 @@ namespace MassTransit
             IComponentContext context,
             string name = "message",
             Action<ContainerBuilder, ExecuteContext<TArguments>> configureScope = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             ExecuteActivityHost<TActivity, TArguments>(configurator, context.Resolve<ILifetimeScope>(), name, configureScope);
@@ -279,7 +267,7 @@ namespace MassTransit
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure,
             string name = "message",
             Action<ContainerBuilder, ExecuteContext<TArguments>> configureScope = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             ExecuteActivityHost(configurator, context.Resolve<ILifetimeScope>(), configure, name, configureScope);
@@ -288,7 +276,7 @@ namespace MassTransit
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope,
             string name = "message",
             Action<ContainerBuilder, ExecuteContext<TArguments>> configureScope = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
@@ -297,7 +285,7 @@ namespace MassTransit
 
             var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, configurator);
 
             configurator.AddEndpointSpecification(specification);
         }
@@ -306,7 +294,7 @@ namespace MassTransit
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure,
             string name = "message",
             Action<ContainerBuilder, ExecuteContext<TArguments>> configureScope = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
@@ -315,7 +303,7 @@ namespace MassTransit
 
             var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, configurator);
 
             configure(specification);
 
@@ -325,7 +313,7 @@ namespace MassTransit
         public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IComponentContext context,
             string name = "message",
             Action<ContainerBuilder, CompensateContext<TLog>> configureScope = null)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             CompensateActivityHost<TActivity, TLog>(configurator, context.Resolve<ILifetimeScope>(), name, configureScope);
@@ -335,7 +323,7 @@ namespace MassTransit
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configure,
             string name = "message",
             Action<ContainerBuilder, CompensateContext<TLog>> configureScope = null)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             CompensateActivityHost(configurator, context.Resolve<ILifetimeScope>(), configure, name, configureScope);
@@ -344,7 +332,7 @@ namespace MassTransit
         public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, ILifetimeScope lifetimeScope,
             string name = "message",
             Action<ContainerBuilder, CompensateContext<TLog>> configureScope = null)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
@@ -353,7 +341,7 @@ namespace MassTransit
 
             var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
 
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory, configurator);
 
             configurator.AddEndpointSpecification(specification);
         }
@@ -362,7 +350,7 @@ namespace MassTransit
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configure,
             string name = "message",
             Action<ContainerBuilder, CompensateContext<TLog>> configureScope = null)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
@@ -371,7 +359,7 @@ namespace MassTransit
 
             var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
 
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory, configurator);
 
             configure(specification);
 

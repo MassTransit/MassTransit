@@ -1,66 +1,63 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.PipeConfigurators
+﻿namespace MassTransit.PipeConfigurators
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using Builders;
     using ConsumeConfigurators;
     using Courier;
-    using Courier.Contracts;
     using Courier.Hosts;
     using Courier.Pipeline;
     using GreenPipes;
+    using GreenPipes.Builders;
+    using GreenPipes.Configurators;
 
 
     public class ExecuteActivityHostSpecification<TActivity, TArguments> :
         IExecuteActivityConfigurator<TActivity, TArguments>,
         IReceiveEndpointSpecification
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
-        readonly ExecuteActivityFactory<TActivity, TArguments> _activityFactory;
-        readonly Func<IPipe<RequestContext>, IFilter<ConsumeContext<RoutingSlip>>> _filterFactory;
-        readonly List<IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>>> _pipeSpecifications;
+        readonly IExecuteActivityFactory<TActivity, TArguments> _activityFactory;
+        readonly Uri _compensateAddress;
+        readonly IBuildPipeConfigurator<ExecuteActivityContext<TActivity, TArguments>> _activityPipeConfigurator;
+        readonly IBuildPipeConfigurator<ExecuteContext<TArguments>> _executePipeConfigurator;
         readonly RoutingSlipConfigurator _routingSlipConfigurator;
+        readonly ActivityConfigurationObservable _observers;
 
-        public ExecuteActivityHostSpecification(ExecuteActivityFactory<TActivity, TArguments> activityFactory)
+        public ExecuteActivityHostSpecification(IExecuteActivityFactory<TActivity, TArguments> activityFactory, IActivityConfigurationObserver observer)
         {
             _activityFactory = activityFactory;
 
-            _pipeSpecifications = new List<IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>>>();
+            _activityPipeConfigurator = new PipeConfigurator<ExecuteActivityContext<TActivity, TArguments>>();
+            _executePipeConfigurator = new PipeConfigurator<ExecuteContext<TArguments>>();
             _routingSlipConfigurator = new RoutingSlipConfigurator();
-            _filterFactory = executePipe => new ExecuteActivityHost<TActivity, TArguments>(_activityFactory, executePipe);
+            _observers = new ActivityConfigurationObservable();
+
+            _observers.Connect(observer);
         }
 
-        public ExecuteActivityHostSpecification(ExecuteActivityFactory<TActivity, TArguments> activityFactory, Uri compensateAddress)
+        public ExecuteActivityHostSpecification(IExecuteActivityFactory<TActivity, TArguments> activityFactory, Uri compensateAddress,
+            IActivityConfigurationObserver observer)
+            : this(activityFactory, observer)
         {
-            _activityFactory = activityFactory;
-
-            _pipeSpecifications = new List<IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>>>();
-            _routingSlipConfigurator = new RoutingSlipConfigurator();
-            _filterFactory = executePipe => new ExecuteActivityHost<TActivity, TArguments>(_activityFactory, executePipe, compensateAddress);
+            _compensateAddress = compensateAddress;
         }
 
         public void AddPipeSpecification(IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>> specification)
         {
-            _pipeSpecifications.Add(specification);
+            _activityPipeConfigurator.AddPipeSpecification(specification);
         }
 
-        public void Arguments(Action<IExecuteActivityArgumentsConfigurator<TArguments>> configure)
+        public void Arguments(Action<IExecuteArgumentsConfigurator<TArguments>> configure)
         {
-            var configurator = new ExecuteActivityArgumentsConfigurator<TActivity, TArguments>(this);
+            var configurator = new ExecuteArgumentsConfigurator<TArguments>(_executePipeConfigurator);
+
+            configure?.Invoke(configurator);
+        }
+
+        public void ActivityArguments(Action<IExecuteActivityArgumentsConfigurator<TArguments>> configure)
+        {
+            var configurator = new ExecuteActivityArgumentsConfigurator<TActivity, TArguments>(_activityPipeConfigurator);
 
             configure?.Invoke(configurator);
         }
@@ -72,23 +69,41 @@ namespace MassTransit.PipeConfigurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_filterFactory == null)
-                yield return this.Failure("FilterFactory", "must not be null");
-
-            foreach (var result in _pipeSpecifications.SelectMany(x => x.Validate()))
-                yield return result;
-
             foreach (var result in _routingSlipConfigurator.Validate())
                 yield return result;
+            foreach (var result in _activityPipeConfigurator.Validate())
+                yield return result;
+
+            _observers.All(observer =>
+            {
+                if (_compensateAddress == null)
+                    observer.ExecuteActivityConfigured(this);
+                else
+                    observer.ActivityConfigured(this, _compensateAddress);
+
+                return true;
+            });
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            IPipe<RequestContext> executeActivityPipe = _pipeSpecifications.Build(new ExecuteActivityFilter<TActivity, TArguments>());
+            _activityPipeConfigurator.UseFilter(new ExecuteActivityFilter<TActivity, TArguments>());
 
-            _routingSlipConfigurator.UseFilter(_filterFactory(executeActivityPipe));
+            IPipe<ExecuteActivityContext<TActivity, TArguments>> executeActivityPipe = _activityPipeConfigurator.Build();
+
+            _executePipeConfigurator.UseFilter(new ExecuteActivityFactoryFilter<TActivity, TArguments>(_activityFactory, executeActivityPipe));
+
+            var executePipe = _executePipeConfigurator.Build();
+
+            var host = new ExecuteActivityHost<TActivity, TArguments>(executePipe, _compensateAddress);
+            _routingSlipConfigurator.UseFilter(host);
 
             builder.ConnectConsumePipe(_routingSlipConfigurator.Build());
+        }
+
+        public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return _observers.Connect(observer);
         }
     }
 }

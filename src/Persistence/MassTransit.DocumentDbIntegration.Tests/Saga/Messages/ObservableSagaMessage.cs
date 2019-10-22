@@ -1,4 +1,4 @@
-﻿namespace MassTransit.DocumentDbIntegration.Tests.Saga
+﻿namespace MassTransit.DocumentDbIntegration.Tests.Saga.Messages
 {
     public class ObservableSagaMessage
     {

@@ -1,25 +1,17 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Transport
+﻿namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System;
+    using System.Threading.Tasks;
     using Configuration;
     using Configuration.Configuration;
     using Configurators;
+    using Context;
+    using Contexts;
     using Definition;
     using Exceptions;
     using GreenPipes;
     using GreenPipes.Agents;
+    using Pipeline;
     using Topology;
     using Transports;
 
@@ -29,11 +21,13 @@ namespace MassTransit.AmazonSqsTransport.Transport
         IAmazonSqsHostControl
     {
         readonly IAmazonSqsHostConfiguration _hostConfiguration;
+        readonly IAmazonSqsHostTopology _hostTopology;
 
-        public AmazonSqsHost(IAmazonSqsHostConfiguration hostConfiguration)
-            : base(hostConfiguration)
+        public AmazonSqsHost(IAmazonSqsHostConfiguration hostConfiguration, IAmazonSqsHostTopology hostTopology)
+            : base(hostConfiguration, hostTopology)
         {
             _hostConfiguration = hostConfiguration;
+            _hostTopology = hostTopology;
 
             ConnectionRetryPolicy = Retry.CreatePolicy(x =>
             {
@@ -42,13 +36,13 @@ namespace MassTransit.AmazonSqsTransport.Transport
                 x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
             });
 
-            ConnectionContextSupervisor = new AmazonSqsConnectionContextSupervisor(hostConfiguration);
+            ConnectionContextSupervisor = new AmazonSqsConnectionContextSupervisor(hostConfiguration, hostTopology);
         }
 
         public IConnectionContextSupervisor ConnectionContextSupervisor { get; }
         public IRetryPolicy ConnectionRetryPolicy { get; }
         public AmazonSqsHostSettings Settings => _hostConfiguration.Settings;
-        public IAmazonSqsHostTopology Topology => _hostConfiguration.Topology;
+        public IAmazonSqsHostTopology Topology => _hostTopology;
 
         protected override void Probe(ProbeContext context)
         {
@@ -84,15 +78,52 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IAmazonSqsReceiveEndpointConfigurator> configure = null)
         {
-            var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
+            LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            configure?.Invoke(configuration.Configurator);
+            LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
+
+            var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, configure);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
 
-            configuration.Build();
+            configuration.Build(this);
 
             return ReceiveEndpoints.Start(queueName);
+        }
+
+        public Task<ISendTransport> CreateSendTransport(Uri address)
+        {
+            var settings = _hostTopology.SendTopology.GetSendSettings(address);
+
+            var clientContextSupervisor = new AmazonSqsClientContextSupervisor(ConnectionContextSupervisor);
+
+            var configureTopologyPipe = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
+
+            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, SendLogContext);
+
+            var transport = new QueueSendTransport(transportContext);
+            Add(transport);
+
+            return Task.FromResult<ISendTransport>(transport);
+        }
+
+        public Task<ISendTransport> CreatePublishTransport<T>()
+            where T : class
+        {
+            IAmazonSqsMessagePublishTopology<T> publishTopology = _hostTopology.Publish<T>();
+
+            var settings = publishTopology.GetPublishSettings();
+
+            var clientContextSupervisor = new AmazonSqsClientContextSupervisor(ConnectionContextSupervisor);
+
+            var configureTopologyPipe = new ConfigureTopologyFilter<PublishSettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
+
+            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, SendLogContext);
+
+            var transport = new TopicSendTransport(transportContext);
+            Add(transport);
+
+            return Task.FromResult<ISendTransport>(transport);
         }
 
         protected override IAgent[] GetAgentHandles()

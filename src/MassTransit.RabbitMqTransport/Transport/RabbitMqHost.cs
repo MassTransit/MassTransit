@@ -1,25 +1,16 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
     using Configuration;
+    using Context;
+    using Contexts;
     using Definition;
     using GreenPipes;
     using GreenPipes.Agents;
     using Integration;
     using MassTransit.Configurators;
+    using Pipeline;
     using Topology;
     using Transports;
 
@@ -29,11 +20,13 @@ namespace MassTransit.RabbitMqTransport.Transport
         IRabbitMqHostControl
     {
         readonly IRabbitMqHostConfiguration _hostConfiguration;
+        readonly IRabbitMqHostTopology _hostTopology;
 
-        public RabbitMqHost(IRabbitMqHostConfiguration hostConfiguration)
-            : base(hostConfiguration)
+        public RabbitMqHost(IRabbitMqHostConfiguration hostConfiguration, IRabbitMqHostTopology hostTopology)
+            : base(hostConfiguration, hostTopology)
         {
             _hostConfiguration = hostConfiguration;
+            _hostTopology = hostTopology;
 
             ConnectionRetryPolicy = Retry.CreatePolicy(x =>
             {
@@ -42,7 +35,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                 x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
             });
 
-            ConnectionContextSupervisor = new RabbitMqConnectionContextSupervisor(hostConfiguration);
+            ConnectionContextSupervisor = new RabbitMqConnectionContextSupervisor(hostConfiguration, hostTopology);
         }
 
         protected override void Probe(ProbeContext context)
@@ -61,10 +54,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             if (Settings.Ssl)
             {
-                context.Set(new
-                {
-                    Settings.SslServerName
-                });
+                context.Set(new {Settings.SslServerName});
             }
 
             ConnectionContextSupervisor.Probe(context);
@@ -73,7 +63,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         public IConnectionContextSupervisor ConnectionContextSupervisor { get; }
         public IRetryPolicy ConnectionRetryPolicy { get; }
         public RabbitMqHostSettings Settings => _hostConfiguration.Settings;
-        IRabbitMqHostTopology IRabbitMqHost.Topology => _hostConfiguration.Topology;
+        IRabbitMqHostTopology IRabbitMqHost.Topology => _hostTopology;
 
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IReceiveEndpointConfigurator> configureEndpoint = null)
@@ -96,22 +86,70 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
         {
-            var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
+            LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            configure?.Invoke(configuration.Configurator);
+            LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
+
+            var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, configure);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
 
-            configuration.Build();
+            configuration.Build(this);
 
             return ReceiveEndpoints.Start(queueName);
         }
 
-        protected override async Task StopSupervisor(StopSupervisorContext context)
+        public Task<ISendTransport> CreateSendTransport(Uri address)
         {
-            await base.StopSupervisor(context).ConfigureAwait(false);
+            var settings = _hostTopology.GetSendSettings(address);
 
-            await ConnectionContextSupervisor.Stop(context).ConfigureAwait(false);
+            var brokerTopology = settings.GetBrokerTopology();
+
+            var supervisor = CreateModelContextSupervisor();
+
+            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
+
+            var transport = CreateSendTransport(supervisor, pipe, settings.ExchangeName);
+
+            return Task.FromResult(transport);
+        }
+
+        public Task<ISendTransport> CreatePublishTransport<T>()
+            where T : class
+        {
+            IRabbitMqMessagePublishTopology<T> publishTopology = _hostTopology.Publish<T>();
+
+            var sendSettings = publishTopology.GetSendSettings();
+
+            var brokerTopology = publishTopology.GetBrokerTopology();
+
+            var supervisor = CreateModelContextSupervisor();
+
+            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology).ToPipe();
+
+            var transport = CreateSendTransport(supervisor, pipe, publishTopology.Exchange.ExchangeName);
+
+            return Task.FromResult(transport);
+        }
+
+        ISendTransport CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> pipe, string exchangeName)
+        {
+            var sendTransportContext = new HostRabbitMqSendTransportContext(modelContextSupervisor, pipe, exchangeName, SendLogContext);
+
+            var transport = new RabbitMqSendTransport(sendTransportContext);
+            Add(transport);
+
+            return transport;
+        }
+
+        IModelContextSupervisor CreateModelContextSupervisor()
+        {
+            return new ModelContextSupervisor(ConnectionContextSupervisor);
+        }
+
+        protected override IAgent[] GetAgentHandles()
+        {
+            return new IAgent[] {ConnectionContextSupervisor};
         }
     }
 }

@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
@@ -17,7 +5,8 @@ namespace MassTransit.RabbitMqTransport.Tests
     using TestFramework.Messages;
     using NUnit.Framework;
     using GreenPipes;
-    using GreenPipes.Introspection;
+    using MassTransit.Testing;
+    using MassTransit.Testing.Indicators;
     using TestFramework;
 
 
@@ -27,6 +16,8 @@ namespace MassTransit.RabbitMqTransport.Tests
     {
         readonly int _limit;
         int _attempts;
+        IBusActivityMonitor _activityMonitor;
+        Task<ConsumeContext<Fault<PingMessage>>> _handled;
 
         public When_specifying_retry_limit()
         {
@@ -37,13 +28,23 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_stop_after_limit_exceeded()
         {
-            ProbeResult result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-
             await Bus.Publish(new PingMessage());
-            await Task.Delay(TimeSpan.FromSeconds(20));
+
+            var handled = await _handled;
+
+            Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
+
+            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
+
             Assert.LessOrEqual(_attempts, _limit + 1);
+        }
+
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.ReceiveEndpoint(e =>
+            {
+                _handled = Handled<Fault<PingMessage>>(e);
+            });
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -54,8 +55,16 @@ namespace MassTransit.RabbitMqTransport.Tests
             configurator.Consumer(() => new Consumer(ref _attempts));
         }
 
+        protected override void ConnectObservers(IBus bus)
+        {
+            base.ConnectObservers(bus);
 
-        class Consumer : IConsumer<PingMessage>
+            _activityMonitor = bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(500));
+        }
+
+
+        class Consumer :
+            IConsumer<PingMessage>
         {
             public Consumer(ref int attempts)
             {

@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Common_Tests
 {
@@ -19,6 +19,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using Scenarios;
     using Shouldly;
     using TestFramework;
+    using TestFramework.Messages;
 
 
     public abstract class Common_Consumer :
@@ -67,10 +68,42 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             await sendEndpoint.Send(new SimpleMessageClass(name));
 
-            SimplerConsumer lastConsumer = await SimplerConsumer.LastConsumer.UntilCompletedOrCanceled(TestCancellationToken);
+            SimplerConsumer lastConsumer = await SimplerConsumer.LastConsumer.OrCanceled(TestCancellationToken);
             lastConsumer.ShouldNotBe(null);
 
-            SimpleMessageInterface last = await lastConsumer.Last.UntilCompletedOrCanceled(TestCancellationToken);
+            SimpleMessageInterface last = await lastConsumer.Last.OrCanceled(TestCancellationToken);
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            ConfigureEndpoints(configurator);
+        }
+
+        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
+    }
+
+
+    public abstract class Common_Consumer_ServiceEndpoint :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_handle_the_request()
+        {
+            var serviceClient = Bus.CreateServiceClient();
+
+            var requestClient = serviceClient.CreateRequestClient<PingMessage>();
+
+            var pingId = NewId.NextGuid();
+
+            var response = await requestClient.GetResponse<PongMessage>(new PingMessage(pingId));
+
+            Assert.That(response.Message.CorrelationId, Is.EqualTo(pingId));
+        }
+
+        [Test]
+        public void Should_just_startup()
+        {
+
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

@@ -1,26 +1,12 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.MartenIntegration
+﻿namespace MassTransit.MartenIntegration
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Logging;
     using Marten;
     using Saga;
-    using Util;
 
 
     public class MartenSagaRepository<TSaga> : ISagaRepository<TSaga>,
@@ -28,7 +14,6 @@ namespace MassTransit.MartenIntegration
         IRetrieveSagaFromRepository<TSaga>
         where TSaga : class, ISaga
     {
-        static readonly ILog _log = Logger.Get<MartenSagaRepository<TSaga>>();
         readonly IDocumentStore _store;
 
         public MartenSagaRepository(IDocumentStore store)
@@ -62,10 +47,7 @@ namespace MassTransit.MartenIntegration
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("sagaRepository");
-            scope.Set(new
-            {
-                Persistence = "marten"
-            });
+            scope.Set(new {Persistence = "marten"});
         }
 
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy,
@@ -78,9 +60,8 @@ namespace MassTransit.MartenIntegration
 
             using (var session = _store.DirtyTrackedSession())
             {
-                TSaga instance;
-                if (policy.PreInsertInstance(context, out instance))
-                    await PreInsertSagaInstance<T>(session, instance).ConfigureAwait(false);
+                if (policy.PreInsertInstance(context, out var instance))
+                    await PreInsertSagaInstance(session, context, instance).ConfigureAwait(false);
 
                 if (instance == null)
                     instance = session.Load<TSaga>(sagaId);
@@ -122,70 +103,61 @@ namespace MassTransit.MartenIntegration
                 }
                 catch (SagaException sex)
                 {
-                    if (_log.IsErrorEnabled)
-                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+                    context.LogFault(sex);
 
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    if (_log.IsErrorEnabled)
-                        _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+                    context.LogFault(ex);
 
                     throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                 }
             }
         }
 
-        static async Task<bool> PreInsertSagaInstance<T>(IDocumentSession session, TSaga instance)
-        {
-            var inserted = false;
-            try
-            {
-                session.Store(instance);
-                await session.SaveChangesAsync().ConfigureAwait(false);
-                inserted = true;
-
-                _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                    TypeMetadataCache<T>.ShortName);
-            }
-            catch (Exception ex)
-            {
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName,
-                        instance.CorrelationId,
-                        TypeMetadataCache<T>.ShortName, ex.Message);
-                }
-            }
-
-            return inserted;
-        }
-
-        static async Task SendToInstance<T>(ConsumeContext<T> context,
-            ISagaPolicy<TSaga, T> policy, TSaga instance,
-            IPipe<SagaConsumeContext<TSaga, T>> next, IDocumentSession session)
+        async Task PreInsertSagaInstance<T>(IDocumentSession session, ConsumeContext<T> context, TSaga instance)
             where T : class
         {
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId,
-                        TypeMetadataCache<T>.ShortName);
+                session.Store(instance);
+                await session.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
 
-                var sagaConsumeContext = new MartenSagaConsumeContext<TSaga, T>(session, context, instance);
+                context.LogInsert(this, instance.CorrelationId);
+            }
+            catch (Exception ex)
+            {
+                context.LogInsertFault(this, ex, instance.CorrelationId);
+            }
+        }
+
+        async Task SendToInstance<T>(ConsumeContext<T> context,
+            ISagaPolicy<TSaga, T> policy, TSaga instance,
+            IPipe<SagaConsumeContext<TSaga, T>> next, IDocumentSession session)
+            where T : class
+        {
+            var sagaConsumeContext = new MartenSagaConsumeContext<TSaga, T>(session, context, instance);
+
+            try
+            {
+                sagaConsumeContext.LogUsed();
 
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
                 if (!sagaConsumeContext.IsCompleted)
                     await session.SaveChangesAsync().ConfigureAwait(false);
             }
-            catch (SagaException)
+            catch (SagaException sex)
             {
+                sagaConsumeContext.LogFault(sex);
+
                 throw;
             }
             catch (Exception ex)
             {
+                sagaConsumeContext.LogFault(ex);
+
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), instance.CorrelationId, ex);
             }
         }
@@ -215,15 +187,9 @@ namespace MassTransit.MartenIntegration
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName,
-                        context.Saga.CorrelationId,
-                        TypeMetadataCache<TMessage>.ShortName);
-                }
+                SagaConsumeContext<TSaga, TMessage> proxy = new MartenSagaConsumeContext<TSaga, TMessage>(_session,context, context.Saga);
 
-                SagaConsumeContext<TSaga, TMessage> proxy = new MartenSagaConsumeContext<TSaga, TMessage>(_session,
-                    context, context.Saga);
+                proxy.LogAdded();
 
                 await _next.Send(proxy).ConfigureAwait(false);
 

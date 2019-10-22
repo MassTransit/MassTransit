@@ -1,20 +1,10 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit
+﻿namespace MassTransit
 {
     using System;
+    using Context;
     using Courier;
     using Courier.Factories;
+    using Metadata;
     using PipeConfigurators;
 
 
@@ -22,7 +12,7 @@ namespace MassTransit
     {
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>, new()
+            where TActivity : class, IExecuteActivity<TArguments>, new()
             where TArguments : class
         {
             ExecuteActivityHost(configurator, DefaultConstructorExecuteActivityFactory<TActivity, TArguments>.ExecuteFactory, configure);
@@ -30,7 +20,7 @@ namespace MassTransit
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>, new()
+            where TActivity : class, IExecuteActivity<TArguments>, new()
             where TArguments : class
         {
             ExecuteActivityHost(configurator, compensateAddress, DefaultConstructorExecuteActivityFactory<TActivity, TArguments>.ExecuteFactory, configure);
@@ -38,7 +28,7 @@ namespace MassTransit
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress, Func<TActivity> activityFactory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             ExecuteActivityHost(configurator, compensateAddress, _ => activityFactory(), configure);
@@ -46,7 +36,7 @@ namespace MassTransit
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
             Func<TActivity> activityFactory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             ExecuteActivityHost(configurator, _ => activityFactory(), configure);
@@ -55,37 +45,49 @@ namespace MassTransit
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
             Uri compensateAddress, Func<TArguments, TActivity> activityFactory,
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
+            if (activityFactory == null)
+                throw new ArgumentNullException(nameof(activityFactory));
+
             var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(activityFactory);
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
 
-            configure?.Invoke(specification);
-
-            configurator.AddEndpointSpecification(specification);
+            ExecuteActivityHost(configurator, compensateAddress, factory, configure);
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
             Func<TArguments, TActivity> activityFactory,
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
+            if (activityFactory == null)
+                throw new ArgumentNullException(nameof(activityFactory));
+
             var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(activityFactory);
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
 
-            configure?.Invoke(specification);
-
-            configurator.AddEndpointSpecification(specification);
+            ExecuteActivityHost(configurator, factory, configure);
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
-            ExecuteActivityFactory<TActivity, TArguments> factory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            IExecuteActivityFactory<TActivity, TArguments> factory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress);
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            if (compensateAddress == null)
+                throw new ArgumentNullException(nameof(compensateAddress));
+
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
+
+            LogContext.Debug?.Log("Configuring Execute Activity: {ActivityType}, {ArgumentType}", TypeMetadataCache<TActivity>.ShortName,
+                TypeMetadataCache<TArguments>.ShortName);
+
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress, configurator);
 
             configure?.Invoke(specification);
 
@@ -93,11 +95,20 @@ namespace MassTransit
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator,
-            ExecuteActivityFactory<TActivity, TArguments> factory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            IExecuteActivityFactory<TActivity, TArguments> factory, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory);
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
+
+            LogContext.Debug?.Log("Configuring Execute Activity: {ActivityType}, {ArgumentType}", TypeMetadataCache<TActivity>.ShortName,
+                TypeMetadataCache<TArguments>.ShortName);
+
+            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, configurator);
 
             configure?.Invoke(specification);
 
@@ -106,39 +117,51 @@ namespace MassTransit
 
         public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configure = null)
-            where TActivity : class, CompensateActivity<TLog>, new()
+            where TActivity : class, ICompensateActivity<TLog>, new()
             where TLog : class
         {
             CompensateActivityHost(configurator, DefaultConstructorCompensateActivityFactory<TActivity, TLog>.CompensateFactory, configure);
         }
 
-        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, Func<TActivity> controllerFactory,
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, Func<TActivity> activityFactory,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configure = null)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
-            CompensateActivityHost(configurator, _ => controllerFactory(), configure);
+            if (activityFactory == null)
+                throw new ArgumentNullException(nameof(activityFactory));
+
+            CompensateActivityHost(configurator, _ => activityFactory(), configure);
         }
 
-        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, Func<TLog, TActivity> controllerFactory,
+        public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, Func<TLog, TActivity> activityFactory,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configure = null)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
-            var factory = new FactoryMethodCompensateActivityFactory<TActivity, TLog>(controllerFactory);
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+            if (activityFactory == null)
+                throw new ArgumentNullException(nameof(activityFactory));
 
-            configure?.Invoke(specification);
+            var factory = new FactoryMethodCompensateActivityFactory<TActivity, TLog>(activityFactory);
 
-            configurator.AddEndpointSpecification(specification);
+            CompensateActivityHost(configurator, factory, configure);
         }
 
         public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator,
-            CompensateActivityFactory<TActivity, TLog> factory, Action<ICompensateActivityConfigurator<TActivity, TLog>> configure = null)
-            where TActivity : class, CompensateActivity<TLog>
+            ICompensateActivityFactory<TActivity, TLog> factory, Action<ICompensateActivityConfigurator<TActivity, TLog>> configure = null)
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory);
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
+
+            LogContext.Debug?.Log("Configuring Compensate Activity: {ActivityType}, {LogType}", TypeMetadataCache<TActivity>.ShortName,
+                TypeMetadataCache<TLog>.ShortName);
+
+            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory, configurator);
 
             configure?.Invoke(specification);
 

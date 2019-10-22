@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.MongoDbIntegration.Saga
+﻿namespace MassTransit.MongoDbIntegration.Saga
 {
     using System;
     using System.Collections.Generic;
@@ -20,18 +8,16 @@ namespace MassTransit.MongoDbIntegration.Saga
     using Context;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
-    using Logging;
     using MassTransit.Saga;
+    using Metadata;
     using MongoDB.Driver;
     using Pipeline;
-    using Util;
 
 
     public class MongoDbSagaRepository<TSaga> :
         ISagaRepository<TSaga>
         where TSaga : class, IVersionedSaga
     {
-        static readonly ILog _log = Logger.Get<MongoDbSagaRepository<TSaga>>();
         readonly IMongoCollection<TSaga> _collection;
         readonly IMongoDbSagaConsumeContextFactory _mongoDbSagaConsumeContextFactory;
 
@@ -45,19 +31,16 @@ namespace MassTransit.MongoDbIntegration.Saga
         {
         }
 
-        public MongoDbSagaRepository(
-            IMongoDatabase mongoDatabase,
+        public MongoDbSagaRepository(IMongoDatabase mongoDatabase,
             IMongoDbSagaConsumeContextFactory mongoDbSagaConsumeContextFactory,
             string collectionName = null)
             : this(mongoDatabase, mongoDbSagaConsumeContextFactory, new DefaultCollectionNameFormatter(collectionName))
         {
         }
 
-        public MongoDbSagaRepository(
-            IMongoDatabase database,
+        public MongoDbSagaRepository(IMongoDatabase database,
             IMongoDbSagaConsumeContextFactory mongoDbSagaConsumeContextFactory,
-            ICollectionNameFormatter collectionNameFormatter
-        )
+            ICollectionNameFormatter collectionNameFormatter)
         {
             _mongoDbSagaConsumeContextFactory = mongoDbSagaConsumeContextFactory;
             _collection = database.GetCollection<TSaga>(collectionNameFormatter);
@@ -88,8 +71,8 @@ namespace MassTransit.MongoDbIntegration.Saga
 
             if (instance == null)
             {
-                instance =
-                    await _collection.Find(x => x.CorrelationId == context.CorrelationId).SingleOrDefaultAsync(context.CancellationToken).ConfigureAwait(false);
+                instance = await _collection.Find(x => x.CorrelationId == context.CorrelationId).SingleOrDefaultAsync(context.CancellationToken)
+                    .ConfigureAwait(false);
             }
 
             if (instance == null)
@@ -127,15 +110,13 @@ namespace MassTransit.MongoDbIntegration.Saga
             }
             catch (SagaException sex)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", sex);
+                context.LogFault(sex);
 
                 throw;
             }
             catch (Exception ex)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"SAGA:{TypeMetadataCache<TSaga>.ShortName} Exception {TypeMetadataCache<T>.ShortName}", ex);
+                context.LogFault(ex);
 
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
             }
@@ -148,13 +129,11 @@ namespace MassTransit.MongoDbIntegration.Saga
             {
                 await _collection.InsertOneAsync(instance, cancellationToken: context.CancellationToken).ConfigureAwait(false);
 
-                _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
+                context.LogInsert(this, instance.CorrelationId);
             }
             catch (Exception ex)
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName,
-                        ex.Message);
+                context.LogInsertFault(this, ex, instance.CorrelationId);
             }
         }
 
@@ -163,18 +142,19 @@ namespace MassTransit.MongoDbIntegration.Saga
         {
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-
                 SagaConsumeContext<TSaga, T> sagaConsumeContext = _mongoDbSagaConsumeContextFactory.Create(_collection, context, instance);
+
+                sagaConsumeContext.LogUsed();
 
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
                 if (!sagaConsumeContext.IsCompleted)
                     await UpdateMongoDbSaga(context, instance).ConfigureAwait(false);
             }
-            catch (SagaException)
+            catch (SagaException sex)
             {
+                context.LogFault(this, sex, instance?.CorrelationId);
+
                 throw;
             }
             catch (Exception ex)
@@ -187,15 +167,11 @@ namespace MassTransit.MongoDbIntegration.Saga
         {
             instance.Version++;
 
-            var old =
-                await
-                    _collection.FindOneAndReplaceAsync(x => x.CorrelationId == instance.CorrelationId && x.Version < instance.Version, instance,
-                        cancellationToken: context.CancellationToken).ConfigureAwait(false);
+            var old = await _collection.FindOneAndReplaceAsync(x => x.CorrelationId == instance.CorrelationId && x.Version < instance.Version, instance,
+                cancellationToken: context.CancellationToken).ConfigureAwait(false);
 
             if (old == null)
-            {
                 throw new MongoDbConcurrencyException("Unable to update saga. It may not have been found or may have been updated by another process.");
-            }
         }
     }
 }

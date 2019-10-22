@@ -18,6 +18,7 @@ namespace MassTransit.Tests.Audit
     using System.Threading.Tasks;
     using GreenPipes.Caching;
     using MassTransit.Audit;
+    using Metadata;
     using Util;
 
 

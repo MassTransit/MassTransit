@@ -1,20 +1,9 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.StructureMapIntegration.ScopeProviders
 {
     using System;
     using Context;
     using GreenPipes;
+    using Metadata;
     using Scoping;
     using Scoping.ConsumerContexts;
     using StructureMap;
@@ -60,8 +49,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
             try
             {
-                var proxy = new ConsumeContextProxyScope(context);
-                proxy.UpdatePayload(nestedContainer);
+                var proxy = new ConsumeContextScope(context, nestedContainer);
 
                 return new CreatedConsumerScopeContext<IContainer>(nestedContainer, proxy);
             }
@@ -97,7 +85,6 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
                 ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, nestedContainer);
-                consumerContext.UpdatePayload(nestedContainer);
 
                 return new CreatedConsumerScopeContext<IContainer, TConsumer, T>(nestedContainer, consumerContext);
             }

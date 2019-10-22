@@ -1,20 +1,7 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.UnityIntegration
 {
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Saga;
     using Scoping;
     using Scoping.SagaContexts;
@@ -45,12 +32,9 @@ namespace MassTransit.UnityIntegration
             var scope = _container.CreateChildContainer();
             try
             {
-                var proxy = new ConsumeContextProxy<T>(context, new PayloadCacheScope(context));
+                var proxy = new ConsumeContextScope<T>(context, scope);
 
-                var consumerScope = scope;
-                proxy.GetOrAddPayload(() => consumerScope);
-
-                return new CreatedSagaScopeContext<IUnityContainer, T>(consumerScope, proxy);
+                return new CreatedSagaScopeContext<IUnityContainer, T>(scope, proxy);
             }
             catch
             {
@@ -68,12 +52,9 @@ namespace MassTransit.UnityIntegration
             var scope = _container.CreateChildContainer();
             try
             {
-                var proxy = new SagaQueryConsumeContextProxy<TSaga, T>(context, new PayloadCacheScope(context), context.Query);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, scope);
 
-                var sagaScope = scope;
-                proxy.GetOrAddPayload(() => sagaScope);
-
-                return new CreatedSagaQueryScopeContext<IUnityContainer, TSaga, T>(sagaScope, proxy);
+                return new CreatedSagaQueryScopeContext<IUnityContainer, TSaga, T>(scope, proxy);
             }
             catch
             {

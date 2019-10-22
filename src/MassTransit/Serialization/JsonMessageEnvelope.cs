@@ -14,6 +14,7 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
+    using Metadata;
     using Util;
 
 

@@ -20,6 +20,7 @@ namespace MassTransit.Clients
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
+    using Metadata;
     using Util;
 
 
@@ -76,7 +77,9 @@ namespace MassTransit.Clients
 
             _send = SendRequest();
 
+        #pragma warning disable 4014
             HandleFault();
+        #pragma warning restore 4014
         }
 
         async Task IPipe<SendContext<TRequest>>.Send(SendContext<TRequest> context)
@@ -234,7 +237,10 @@ namespace MassTransit.Clients
                 DisposeTimer();
 
                 _readyToSend.TrySetException(exception);
-                _sendContext.TrySetException(exception);
+
+                bool cancel = _sendContext.TrySetException(exception);
+                if (cancel)
+                    _cancellationTokenSource.Cancel();
 
                 lock (_responseHandlers)
                 {
@@ -244,8 +250,6 @@ namespace MassTransit.Clients
                         handle.Disconnect();
                     }
                 }
-
-                _cancellationTokenSource.Cancel();
             }
 
             Task.Factory.StartNew(HandleFail, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
@@ -258,7 +262,10 @@ namespace MassTransit.Clients
             DisposeTimer();
 
             _readyToSend.TrySetCanceled();
-            _sendContext.TrySetCanceled();
+
+            bool cancel = _sendContext.TrySetCanceled();
+            if (cancel)
+                _cancellationTokenSource.Cancel();
 
             lock (_responseHandlers)
             {
@@ -268,8 +275,6 @@ namespace MassTransit.Clients
                     handle.Disconnect();
                 }
             }
-
-            _cancellationTokenSource.Cancel();
         }
 
         void TimeoutExpired(object state)

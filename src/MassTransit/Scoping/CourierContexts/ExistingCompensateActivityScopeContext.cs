@@ -6,7 +6,7 @@
 
     public class ExistingCompensateActivityScopeContext<TActivity, TLog> :
         ICompensateActivityScopeContext<TActivity, TLog>
-        where TActivity : class, CompensateActivity<TLog>
+        where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
         readonly Action<TActivity> _disposeCallback;

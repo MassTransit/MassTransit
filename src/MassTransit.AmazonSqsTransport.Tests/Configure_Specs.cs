@@ -13,6 +13,7 @@
 namespace MassTransit.AmazonSqsTransport.Tests
 {
     using System;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -20,9 +21,11 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Configuration;
+    using Context;
     using GreenPipes.Internals.Extensions;
     using MassTransit.Testing;
     using NUnit.Framework;
+    using TestFramework.Logging;
     using TestFramework.Messages;
     using Testing;
 
@@ -130,6 +133,18 @@ namespace MassTransit.AmazonSqsTransport.Tests
     {
         const string AwsAccessKey = "{YOUR AWS ACCESS KEY}";
         const string AwsSecretKey = "{YOUR AWS SECRET KEY}";
+        static int _subscribedObserver;
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            var loggerFactory = new TestOutputLoggerFactory(true);
+
+            LogContext.ConfigureCurrentLogContext(loggerFactory);
+
+            if (Interlocked.CompareExchange(ref _subscribedObserver, 1, 0) == 0)
+                DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
+        }
 
         [Test]
         public async Task Should_succeed_and_connect_when_properly_configured()
@@ -140,7 +155,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
-                host = cfg.Host("ap-southeast-2", h =>
+                host = cfg.Host("us-east-2", h =>
                 {
                     h.AccessKey(AwsAccessKey);
                     h.SecretKey(AwsSecretKey);
@@ -166,16 +181,16 @@ namespace MassTransit.AmazonSqsTransport.Tests
             });
 
             await busControl.StartAsync();
+            try
+            {
+                await busControl.Publish(new PingMessage());
 
-            var sendAddress = host.Topology.GetDestinationAddress(typeof(PingMessage));
-
-            var sendEndpoint = await busControl.GetSendEndpoint(sendAddress);
-
-            await sendEndpoint.Send(new PingMessage());
-
-            await received.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(120));
-
-            await busControl.StopAsync();
+                await received.Task.OrTimeout(TimeSpan.FromSeconds(30));
+            }
+            finally
+            {
+                await busControl.StopAsync();
+            }
         }
 
         [Test]
@@ -183,7 +198,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
         {
             var bus = Bus.Factory.CreateUsingAmazonSqs(sbc =>
             {
-                var host = sbc.Host("ap-southeast-2", h =>
+                var host = sbc.Host("us-east-2", h =>
                 {
                     h.AccessKey(AwsAccessKey);
                     h.SecretKey(AwsSecretKey);
@@ -275,7 +290,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             Assert.That(handler2.Consumed.Select().Any(), Is.True);
 
-            await harness.Stop().UntilCompletedOrTimeout(5000);
+            await harness.Stop().OrTimeout(s:5);
 
             await harness.Stop();
         }
@@ -398,7 +413,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
             var publishTasks = messageTypes.Select(m => busControl.Publish(Activator.CreateInstance(m)));
             await Task.WhenAll(publishTasks);
 
-            var awaitTasks = tasksCompleted.Values.Select(async t => await t.Task.UntilCompletedOrTimeout(TimeSpan.FromSeconds(20)));
+            var awaitTasks = tasksCompleted.Values.Select(async t => await t.Task.OrTimeout(TimeSpan.FromSeconds(20)));
             await Task.WhenAll(awaitTasks);
 
             await busControl.StopAsync();

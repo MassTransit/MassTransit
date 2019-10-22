@@ -21,7 +21,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using Serialization;
     using TestFramework;
     using TestFramework.Messages;
-    using Testing;
 
 
     [TestFixture]

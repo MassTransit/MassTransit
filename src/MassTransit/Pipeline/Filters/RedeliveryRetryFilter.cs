@@ -1,32 +1,22 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Pipeline.Filters
+﻿namespace MassTransit.Pipeline.Filters
 {
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Observers;
-    using Util;
+    using Metadata;
 
 
     /// <summary>
     /// Uses the message redelivery mechanism, if available, to delay a retry without blocking message delivery
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class RedeliveryRetryFilter<T> :
-        IFilter<ConsumeContext<T>>
-        where T : class
+    /// <typeparam name="TContext">The context type</typeparam>
+    /// <typeparam name="TMessage">The message type</typeparam>
+    public class RedeliveryRetryFilter<TContext, TMessage> :
+        IFilter<TContext>
+        where TContext : class, ConsumeContext<TMessage>
+        where TMessage : class
     {
         readonly RetryObservable _observers;
         readonly IRetryPolicy _retryPolicy;
@@ -46,30 +36,33 @@ namespace MassTransit.Pipeline.Filters
         }
 
         [DebuggerNonUserCode]
-        public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
+        public async Task Send(TContext context, IPipe<TContext> next)
         {
-            using (RetryPolicyContext<ConsumeContext<T>> policyContext = _retryPolicy.CreatePolicyContext(context))
+            using (RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context))
             {
-                await _observers.PostCreate(policyContext).ConfigureAwait(false);
+                if (_observers.Count > 0)
+                    await _observers.PostCreate(policyContext).ConfigureAwait(false);
 
                 try
                 {
                     await next.Send(policyContext.Context).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException exception) when (exception.CancellationToken == context.CancellationToken)
+                catch (OperationCanceledException exception)
+                    when (exception.CancellationToken == context.CancellationToken || exception.CancellationToken == policyContext.Context.CancellationToken)
                 {
                     throw;
                 }
                 catch (Exception exception)
                 {
-                    if (context.CancellationToken.IsCancellationRequested)
-                        context.CancellationToken.ThrowIfCancellationRequested();
+                    if (policyContext.Context.CancellationToken.IsCancellationRequested)
+                        policyContext.Context.CancellationToken.ThrowIfCancellationRequested();
 
-                    if (!policyContext.CanRetry(exception, out RetryContext<ConsumeContext<T>> retryContext))
+                    if (!policyContext.CanRetry(exception, out RetryContext<TContext> retryContext))
                     {
                         await retryContext.RetryFaulted(exception).ConfigureAwait(false);
 
-                        await _observers.RetryFault(retryContext).ConfigureAwait(false);
+                        if (_observers.Count > 0)
+                            await _observers.RetryFault(retryContext).ConfigureAwait(false);
 
                         if (_retryPolicy.IsHandled(exception))
                             context.GetOrAddPayload(() => retryContext);
@@ -84,7 +77,8 @@ namespace MassTransit.Pipeline.Filters
                         {
                             await retryContext.RetryFaulted(exception).ConfigureAwait(false);
 
-                            await _observers.RetryFault(retryContext).ConfigureAwait(false);
+                            if (_observers.Count > 0)
+                                await _observers.RetryFault(retryContext).ConfigureAwait(false);
 
                             if (_retryPolicy.IsHandled(exception))
                                 context.GetOrAddPayload(() => retryContext);
@@ -93,26 +87,24 @@ namespace MassTransit.Pipeline.Filters
                         }
                     }
 
-                    await _observers.PostFault(retryContext).ConfigureAwait(false);
+                    if (_observers.Count > 0)
+                        await _observers.PostFault(retryContext).ConfigureAwait(false);
 
                     try
                     {
                         if (!context.TryGetPayload(out MessageRedeliveryContext redeliveryContext))
-                            throw new ContextException(
-                                "The message redelivery context was not available to delay the message", exception);
+                            throw new ContextException("The message redelivery context was not available to delay the message", exception);
 
                         var delay = retryContext.Delay ?? TimeSpan.Zero;
 
                         await redeliveryContext.ScheduleRedelivery(delay).ConfigureAwait(false);
 
                         await context.NotifyConsumed(context, context.ReceiveContext.ElapsedTime,
-                                TypeMetadataCache<RedeliveryRetryFilter<T>>.ShortName)
-                            .ConfigureAwait(false);
+                            TypeMetadataCache<RedeliveryRetryFilter<TContext, TMessage>>.ShortName).ConfigureAwait(false);
                     }
                     catch (Exception redeliveryException)
                     {
-                        throw new ContextException("The message delivery could not be rescheduled",
-                            new AggregateException(redeliveryException, exception));
+                        throw new ContextException("The message delivery could not be rescheduled", new AggregateException(redeliveryException, exception));
                     }
                 }
             }

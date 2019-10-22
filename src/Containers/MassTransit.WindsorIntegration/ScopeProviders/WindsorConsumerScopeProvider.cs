@@ -5,6 +5,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
     using Castle.MicroKernel;
     using Context;
     using GreenPipes;
+    using Metadata;
     using Scoping;
     using Scoping.ConsumerContexts;
     using Util;
@@ -20,11 +21,6 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
         {
             _kernel = kernel;
             _scopeActions = new List<Action<ConsumeContext>>();
-        }
-
-        public void AddScopeAction(Action<ConsumeContext> action)
-        {
-            _scopeActions.Add(action);
         }
 
         public void Probe(ProbeContext context)
@@ -44,8 +40,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
             try
             {
-                var proxy = new ConsumeContextProxyScope(context);
-                proxy.UpdatePayload(_kernel);
+                var proxy = new ConsumeContextScope(context, _kernel);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);
@@ -71,7 +66,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                var consumerContext = context.PushConsumer(consumer);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumer(consumer);
 
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext, ReleaseComponent);
             }
@@ -83,8 +78,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                var consumerContext = context.PushConsumerScope(consumer, scope);
-                consumerContext.UpdatePayload(_kernel);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, _kernel);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(consumerContext);
@@ -96,6 +90,11 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 scope?.Dispose();
                 throw;
             }
+        }
+
+        public void AddScopeAction(Action<ConsumeContext> action)
+        {
+            _scopeActions.Add(action);
         }
 
         void ReleaseComponent<T>(T component)

@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Conventional
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Pipeline;
+    using Metadata;
     using Util;
 
 

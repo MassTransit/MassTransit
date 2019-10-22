@@ -1,14 +1,14 @@
 // Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host
 {
@@ -27,7 +27,6 @@ namespace MassTransit.Host
         ServiceControl
     {
         readonly ILifetimeScope _hostScope;
-        readonly ILog _log = Logger.Get<MassTransitHostService>();
         ILifetimeScope _bootstrapperScope;
         readonly List<ServiceControl> _services;
 
@@ -39,7 +38,7 @@ namespace MassTransit.Host
 
         public bool Start(HostControl hostControl)
         {
-            _log.InfoFormat($"Starting {GetType().GetDisplayName()}");
+//            _log.InfoFormat($"Starting {GetType().GetDisplayName()}");
 
             var started = new List<ServiceControl>();
 
@@ -49,12 +48,12 @@ namespace MassTransit.Host
 
                 List<AssemblyRegistration> registrations = scanner.GetAssemblyRegistrations().ToList();
 
-                _log.Info($"Found {registrations.Count} assembly registrations");
+  //              _log.Info($"Found {registrations.Count} assembly registrations");
                 foreach (var registration in registrations)
                 {
-                    _log.Info($"Assembly: {registration.Assembly.GetName().Name}");
-                    foreach (var type in registration.Types)
-                        _log.Info($"  Type: {type.GetTypeName()}");
+    //                _log.Info($"Assembly: {registration.Assembly.GetName().Name}");
+        //            foreach (var type in registration.Types)
+      //                  _log.Info($"  Type: {type.GetTypeName()}");
                 }
 
                 var busFactoryType = scanner.GetHostBusFactoryType();
@@ -85,7 +84,7 @@ namespace MassTransit.Host
             }
             catch (Exception ex)
             {
-                _log.Error("Service failed to start", ex);
+                //_log.Error("Service failed to start", ex);
 
                 Parallel.ForEach(started, service =>
                 {
@@ -99,7 +98,7 @@ namespace MassTransit.Host
 
         public bool Stop(HostControl hostControl)
         {
-            _log.InfoFormat("Stopping {0} services", _services.Count);
+            //_log.InfoFormat("Stopping {0} services", _services.Count);
 
             if (_services != null)
             {
@@ -109,8 +108,6 @@ namespace MassTransit.Host
                     StopService(hostControl, service);
                 });
             }
-
-            Logger.Shutdown();
 
             return true;
         }
@@ -141,7 +138,7 @@ namespace MassTransit.Host
             if (service == null)
                 return;
 
-            _log.InfoFormat("Starting Service {0}", service);
+            //_log.InfoFormat("Starting Service {0}", service);
 
             if (!service.Start(hostControl))
                 throw new TopshelfException($"Failed to start service: {service}");
@@ -157,14 +154,14 @@ namespace MassTransit.Host
 
             try
             {
-                _log.InfoFormat("Stopping Service {0}", service);
+              //  _log.InfoFormat("Stopping Service {0}", service);
 
                 if (!service.Stop(hostControl))
                     throw new TopshelfException($"Failed to stop service: {service}");
             }
             catch (Exception ex)
             {
-                _log.Error("Stop Service Failed", ex);
+                //_log.Error("Stop Service Failed", ex);
             }
         }
     }

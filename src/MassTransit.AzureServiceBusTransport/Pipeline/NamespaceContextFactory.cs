@@ -1,14 +1,14 @@
 // Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Pipeline
 {
@@ -16,17 +16,16 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
+    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
     using Microsoft.ServiceBus;
 
 
     public class NamespaceContextFactory :
         IPipeContextFactory<NamespaceContext>
     {
-        static readonly ILog _log = Logger.Get<NamespaceContextFactory>();
         readonly Uri _serviceUri;
         readonly NamespaceManagerSettings _settings;
 
@@ -86,13 +85,9 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 if (supervisor.Stopping.IsCancellationRequested)
                     throw new OperationCanceledException($"The namespace is stopping and cannot be used: {_serviceUri}");
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Creating namespace manager: {0}", _serviceUri);
+                LogContext.Debug?.Log("Created NamespaceManager: {ServiceUri}", _serviceUri);
 
                 var namespaceManager = new NamespaceManager(_serviceUri, _settings);
-
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Created namespace manager: {0}", _serviceUri);
 
                 var context = new ServiceBusNamespaceContext(namespaceManager, supervisor.Stopped);
 
@@ -100,8 +95,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             }
             catch (Exception ex)
             {
-                if (_log.IsDebugEnabled)
-                    _log.Debug($"Namespace Create Failed: {_serviceUri}", ex);
+                LogContext.Error?.Log(ex, "Create NamespaceManager faulted: {ServiceUri}", _serviceUri);
 
                 throw;
             }

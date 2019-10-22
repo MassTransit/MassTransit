@@ -4,13 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
-    using Contexts;
     using GreenPipes;
-    using GreenPipes.Agents;
     using Pipeline;
     using Settings;
     using Topology.Configuration;
-    using Topology.Configuration.Configurators;
     using Transport;
     using Transports;
 
@@ -23,41 +20,32 @@
         readonly IServiceBusEndpointConfiguration _endpointConfiguration;
         readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly ReceiveEndpointSettings _settings;
+        readonly Lazy<Uri> _inputAddress;
 
-        public ServiceBusReceiveEndpointConfiguration(IServiceBusHostConfiguration hostConfiguration, IServiceBusEndpointConfiguration endpointConfiguration,
-            string queueName)
-            : this(hostConfiguration, endpointConfiguration, new ReceiveEndpointSettings(queueName, new QueueConfigurator(queueName)))
-        {
-        }
-
-        public ServiceBusReceiveEndpointConfiguration(IServiceBusHostConfiguration hostConfiguration, IServiceBusEndpointConfiguration endpointConfiguration,
-            ReceiveEndpointSettings settings)
-            : base(hostConfiguration, endpointConfiguration, settings)
+        public ServiceBusReceiveEndpointConfiguration(IServiceBusHostConfiguration hostConfiguration, ReceiveEndpointSettings settings,
+            IServiceBusEndpointConfiguration endpointConfiguration)
+            : base(hostConfiguration, settings, endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
             _settings = settings;
 
-            _settings.QueueConfigurator.BasePath = hostConfiguration.Host.BasePath;
-
-            HostAddress = hostConfiguration.HostAddress;
-            InputAddress = settings.GetInputAddress(hostConfiguration.HostAddress, settings.Path);
+            _settings.QueueConfigurator.BasePath = hostConfiguration.BasePath;
 
             SubscribeMessageTopics = true;
+
+            _inputAddress = new Lazy<Uri>(FormatInputAddress);
         }
 
-        IServiceBusReceiveEndpointConfigurator IServiceBusReceiveEndpointConfiguration.Configurator => this;
+        public bool SubscribeMessageTopics { get; set; }
+
+        public ReceiveSettings Settings => _settings;
+
+        public override Uri HostAddress => _hostConfiguration.HostAddress;
+
+        public override Uri InputAddress => _inputAddress.Value;
 
         IServiceBusTopologyConfiguration IServiceBusEndpointConfiguration.Topology => _endpointConfiguration.Topology;
-
-        public IServiceBusEndpointConfiguration CreateEndpointConfiguration()
-        {
-            return _endpointConfiguration.CreateEndpointConfiguration();
-        }
-
-        public override Uri HostAddress { get; }
-
-        public override Uri InputAddress { get; }
 
         public TimeSpan DuplicateDetectionHistoryTimeWindow
         {
@@ -108,11 +96,15 @@
             SubscribeMessageTopics = false;
         }
 
-        public IServiceBusHost Host => _hostConfiguration.Host;
+        Uri FormatInputAddress()
+        {
+            return _settings.GetInputAddress(_hostConfiguration.HostAddress, _settings.Path);
+        }
 
-        public bool SubscribeMessageTopics { get; set; }
-
-        public ReceiveSettings Settings => _settings;
+        protected override bool IsAlreadyConfigured()
+        {
+            return _inputAddress.IsValueCreated || base.IsAlreadyConfigured();
+        }
 
         public override IEnumerable<ValidationResult> Validate()
         {
@@ -120,48 +112,39 @@
                 .Concat(base.Validate());
         }
 
-        public override IReceiveEndpoint Build()
+        public void Build(IServiceBusHostControl host)
         {
-            var builder = new ServiceBusReceiveEndpointBuilder(this);
+            var builder = new ServiceBusReceiveEndpointBuilder(host, this);
 
             ApplySpecifications(builder);
 
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
             NamespacePipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology,
-                _settings.RemoveSubscriptions, _hostConfiguration.Host.Stopping));
+                _settings.RemoveSubscriptions, host.Stopping));
 
-            return CreateReceiveEndpoint(receiveEndpointContext);
+            CreateReceiveEndpoint(host, receiveEndpointContext);
         }
 
         protected override IErrorTransport CreateErrorTransport(IServiceBusHostControl host)
         {
             var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.QueueConfigurator);
 
-            return new BrokeredMessageErrorTransport(CreateSendEndpointContextCache(host, settings));
+            return new BrokeredMessageErrorTransport(CreateSendEndpointContextSupervisor(host, settings));
         }
 
         protected override IDeadLetterTransport CreateDeadLetterTransport(IServiceBusHostControl host)
         {
             var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.QueueConfigurator);
 
-            return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextCache(host, settings));
-        }
-
-        protected override IPipeContextFactory<SendEndpointContext> CreateSendEndpointContextFactory(IServiceBusHost host, SendSettings settings,
-            IPipe<NamespaceContext> namespacePipe)
-        {
-            return new QueueSendEndpointContextFactory(host.MessagingFactoryContextSupervisor, host.NamespaceContextSupervisor,
-                Pipe.Empty<MessagingFactoryContext>(), namespacePipe,
-                settings);
+            return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextSupervisor(host, settings));
         }
 
         protected override IClientContextSupervisor CreateClientCache(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor,
             INamespaceContextSupervisor namespaceContextSupervisor)
         {
             return new ClientContextSupervisor(new QueueClientContextFactory(messagingFactoryContextSupervisor, namespaceContextSupervisor,
-                MessagingFactoryPipeConfigurator.Build(),
-                NamespacePipeConfigurator.Build(), _settings));
+                MessagingFactoryPipeConfigurator.Build(), NamespacePipeConfigurator.Build(), _settings));
         }
     }
 }

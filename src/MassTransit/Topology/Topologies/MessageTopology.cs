@@ -19,6 +19,7 @@ namespace MassTransit.Topology.Topologies
     using EntityNameFormatters;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
+    using Metadata;
     using Observers;
     using Util;
 

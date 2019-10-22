@@ -13,6 +13,8 @@
     using Topology;
     using Topology.Settings;
     using Transport;
+    using Transports;
+    using Util;
 
 
     public class ActiveMqReceiveEndpointConfiguration :
@@ -25,57 +27,34 @@
         readonly Lazy<Uri> _inputAddress;
         readonly IBuildPipeConfigurator<SessionContext> _sessionConfigurator;
         readonly QueueReceiveSettings _settings;
-
-        public ActiveMqReceiveEndpointConfiguration(IActiveMqHostConfiguration hostConfiguration, string queueName,
-            IActiveMqEndpointConfiguration endpointConfiguration)
-            : this(hostConfiguration, endpointConfiguration)
-        {
-            BindMessageTopics = true;
-
-            _settings = new QueueReceiveSettings(queueName, true, false);
-        }
+        readonly IActiveMqHostConfiguration _hostConfiguration;
 
         public ActiveMqReceiveEndpointConfiguration(IActiveMqHostConfiguration hostConfiguration, QueueReceiveSettings settings,
             IActiveMqEndpointConfiguration endpointConfiguration)
-            : this(hostConfiguration, endpointConfiguration)
+            : base(endpointConfiguration)
         {
             _settings = settings;
-        }
 
-        ActiveMqReceiveEndpointConfiguration(IActiveMqHostConfiguration hostConfiguration, IActiveMqEndpointConfiguration endpointConfiguration)
-            : base(hostConfiguration, endpointConfiguration)
-        {
-            HostConfiguration = hostConfiguration;
+            BindMessageTopics = true;
+
+            _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
 
             _connectionConfigurator = new PipeConfigurator<ConnectionContext>();
             _sessionConfigurator = new PipeConfigurator<SessionContext>();
 
-            HostAddress = hostConfiguration.Host.Address;
-
             _inputAddress = new Lazy<Uri>(FormatInputAddress);
         }
 
-        public IActiveMqReceiveEndpointConfigurator Configurator => this;
-
-        public IActiveMqBusConfiguration BusConfiguration => HostConfiguration.BusConfiguration;
-        public IActiveMqHostConfiguration HostConfiguration { get; }
-
-        public IActiveMqHostControl Host => HostConfiguration.Host;
-
         public bool BindMessageTopics { get; set; }
-
         public ReceiveSettings Settings => _settings;
-
-        public override Uri HostAddress { get; }
-
+        public override Uri HostAddress => _hostConfiguration.HostAddress;
         public override Uri InputAddress => _inputAddress.Value;
-
         IActiveMqTopologyConfiguration IActiveMqEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
-        public override IReceiveEndpoint Build()
+        public void Build(IActiveMqHostControl host)
         {
-            var builder = new ActiveMqReceiveEndpointBuilder(this);
+            var builder = new ActiveMqReceiveEndpointBuilder(host, this);
 
             ApplySpecifications(builder);
 
@@ -84,7 +63,7 @@
             _sessionConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
 
             IAgent consumerAgent;
-            if (HostConfiguration.BusConfiguration.DeployTopologyOnly)
+            if (_hostConfiguration.DeployTopologyOnly)
             {
                 var transportReadyFilter = new TransportReadyFilter<SessionContext>(receiveEndpointContext);
                 _sessionConfigurator.UseFilter(transportReadyFilter);
@@ -100,15 +79,20 @@
                 consumerAgent = consumerFilter;
             }
 
-            IFilter<ConnectionContext> sessionFilter = new ReceiveSessionFilter(_sessionConfigurator.Build(), HostConfiguration.Host);
+            IFilter<ConnectionContext> sessionFilter = new ReceiveSessionFilter(_sessionConfigurator.Build(), host);
 
             _connectionConfigurator.UseFilter(sessionFilter);
 
-            var transport = new ActiveMqReceiveTransport(HostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
-
+            var transport = new ActiveMqReceiveTransport(host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
             transport.Add(consumerAgent);
 
-            return CreateReceiveEndpoint(_settings.EntityName ?? NewId.Next().ToString(), transport, receiveEndpointContext);
+            var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
+
+            var queueName = _settings.EntityName ?? NewId.Next().ToString(FormatUtil.Formatter);
+
+            host.AddReceiveEndpoint(queueName, receiveEndpoint);
+
+            ReceiveEndpoint = receiveEndpoint;
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -124,8 +108,6 @@
             foreach (var result in base.Validate())
                 yield return result.WithParentKey(queueName);
         }
-
-        IActiveMqHost IActiveMqReceiveEndpointConfigurator.Host => Host;
 
         public bool Durable
         {
@@ -178,7 +160,7 @@
 
         Uri FormatInputAddress()
         {
-            return _settings.GetInputAddress(HostConfiguration.Host.Settings.HostAddress);
+            return _settings.GetInputAddress(_hostConfiguration.HostAddress);
         }
 
         protected override bool IsAlreadyConfigured()

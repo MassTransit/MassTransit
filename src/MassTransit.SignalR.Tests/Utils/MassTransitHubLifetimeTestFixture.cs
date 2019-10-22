@@ -9,6 +9,8 @@
     using Microsoft.Extensions.Logging.Abstractions;
     using Microsoft.Extensions.Options;
     using System;
+    using Utils;
+
 
     public abstract class MassTransitHubLifetimeTestFixture<THub>
         where THub : Hub

@@ -1,15 +1,3 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Configuration
 {
     using System;
@@ -17,7 +5,9 @@ namespace MassTransit.Tests.Configuration
     using System.Threading.Tasks;
     using ConsumeConfigurators;
     using GreenPipes;
+    using MassTransit.Courier;
     using NUnit.Framework;
+    using TestFramework.Courier;
     using TestFramework.Messages;
     using Util;
 
@@ -39,8 +29,8 @@ namespace MassTransit.Tests.Configuration
 
                     e.Consumer<MyConsumer>(x =>
                     {
-                        x.Message<PingMessage>(m => m.UseConsoleLog(context => Task.FromResult("Hello")));
-                        x.Message<PongMessage>(m => m.UseConsoleLog(context => Task.FromResult("Hello")));
+                        x.Message<PingMessage>(m => m.UseExecute(context => Console.WriteLine("Hello")));
+                        x.Message<PongMessage>(m => m.UseExecute(context => Console.WriteLine("Hello")));
                         x.ConsumerMessage<PingMessage>(m => m.UseExecute(context =>
                         {
                         }));
@@ -121,6 +111,53 @@ namespace MassTransit.Tests.Configuration
             Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(MyConsumer), typeof(PongMessage))));
         }
 
+        [Test]
+        public void Should_invoke_the_observers_for_execute_activity_type()
+        {
+            var observer = new ActivityConfigurationObserver();
+
+            var bus = Bus.Factory.CreateUsingInMemory(cfg =>
+            {
+                cfg.ConnectActivityConfigurationObserver(observer);
+
+                cfg.ReceiveEndpoint("hello", e =>
+                {
+                    e.ExecuteActivityHost<SetVariableActivity, SetVariableArguments>();
+                });
+            });
+
+            Assert.That(observer.ExecuteActivityTypes.Contains((typeof(SetVariableActivity), typeof(SetVariableArguments))));
+        }
+
+        [Test]
+        public void Should_invoke_the_observers_for_activity_type()
+        {
+            var observer = new ActivityConfigurationObserver();
+
+            Uri compensateAddress = null;
+
+            var bus = Bus.Factory.CreateUsingInMemory(cfg =>
+            {
+                cfg.ConnectActivityConfigurationObserver(observer);
+
+                cfg.ReceiveEndpoint("hello", e =>
+                {
+                    cfg.ReceiveEndpoint("goodbye", ce =>
+                    {
+                        ce.CompensateActivityHost<TestActivity, TestLog>();
+
+                        e.ExecuteActivityHost<TestActivity, TestArguments>(ce.InputAddress);
+
+                        compensateAddress = ce.InputAddress;
+                    });
+
+                });
+            });
+
+            Assert.That(observer.ActivityTypes.Contains((typeof(TestActivity), typeof(TestArguments), compensateAddress)));
+            Assert.That(observer.CompensateActivityTypes.Contains((typeof(TestActivity), typeof(TestLog))));
+        }
+
 
         class MyConsumer :
             IConsumer<PingMessage>,
@@ -154,6 +191,47 @@ namespace MassTransit.Tests.Configuration
                 where TMessage : class
             {
                 _messageTypes.Add(typeof(TMessage));
+            }
+        }
+
+
+        class ActivityConfigurationObserver :
+            IActivityConfigurationObserver
+        {
+            readonly HashSet<(Type activityType, Type argumentType)> _executeActivityTypes;
+            readonly HashSet<(Type activityType, Type argumentType, Uri compensateAddress)> _activityTypes;
+            readonly HashSet<(Type activityType, Type logType)> _compensateActivityTypes;
+
+            public HashSet<(Type activityType, Type argumentType)> ExecuteActivityTypes => _executeActivityTypes;
+            public HashSet<(Type activityType, Type argumentType, Uri compensateAddress)> ActivityTypes => _activityTypes;
+            public HashSet<(Type activityType, Type logType)> CompensateActivityTypes => _compensateActivityTypes;
+
+            public ActivityConfigurationObserver()
+            {
+                _executeActivityTypes = new HashSet<(Type activityType, Type argumentdType)>();
+                _activityTypes = new HashSet<(Type activityType, Type argumentType, Uri compensateAddress)>();
+                _compensateActivityTypes = new HashSet<(Type activityType, Type logType)>();
+            }
+
+            public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
+                where TActivity : class, IExecuteActivity<TArguments>
+                where TArguments : class
+            {
+                _activityTypes.Add((typeof(TActivity), typeof(TArguments), compensateAddress));
+            }
+
+            public void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
+                where TActivity : class, IExecuteActivity<TArguments>
+                where TArguments : class
+            {
+                _executeActivityTypes.Add((typeof(TActivity), typeof(TArguments)));
+            }
+
+            public void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
+                where TActivity : class, ICompensateActivity<TLog>
+                where TLog : class
+            {
+                _compensateActivityTypes.Add((typeof(TActivity), typeof(TLog)));
             }
         }
 

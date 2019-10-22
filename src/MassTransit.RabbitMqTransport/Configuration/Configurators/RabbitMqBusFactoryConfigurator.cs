@@ -1,22 +1,9 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Configurators
+﻿namespace MassTransit.RabbitMqTransport.Configurators
 {
     using System;
     using System.Collections.Generic;
     using BusConfigurators;
     using Configuration;
-    using Definition;
     using GreenPipes;
     using MassTransit.Builders;
     using Topology;
@@ -28,29 +15,34 @@ namespace MassTransit.RabbitMqTransport.Configurators
         IRabbitMqBusFactoryConfigurator,
         IBusFactory
     {
-        readonly IRabbitMqEndpointConfiguration _busEndpointConfiguration;
-        readonly IRabbitMqBusConfiguration _configuration;
+        readonly IRabbitMqBusConfiguration _busConfiguration;
+        readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly RabbitMqReceiveSettings _settings;
 
-        public RabbitMqBusFactoryConfigurator(IRabbitMqBusConfiguration configuration, IRabbitMqEndpointConfiguration busEndpointConfiguration)
-            : base(configuration, busEndpointConfiguration)
+        public RabbitMqBusFactoryConfigurator(IRabbitMqBusConfiguration busConfiguration)
+            : base(busConfiguration)
         {
-            _configuration = configuration;
-            _busEndpointConfiguration = busEndpointConfiguration;
+            _busConfiguration = busConfiguration;
+            _hostConfiguration = busConfiguration.HostConfiguration;
 
-            var busQueueName = _configuration.Topology.Consume.CreateTemporaryQueueName("bus");
-
-            _settings = new RabbitMqReceiveSettings(busQueueName, busEndpointConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, false,
-                true);
+            var queueName = busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
+            var exchangeType = busConfiguration.BusEndpointConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType;
+            _settings = new RabbitMqReceiveSettings(queueName, exchangeType, false, true);
 
             _settings.AutoDeleteAfter(TimeSpan.FromMinutes(1));
         }
 
         public IBusControl CreateBus()
         {
-            var busReceiveEndpointConfiguration = _configuration.CreateReceiveEndpointConfiguration(_settings, _busEndpointConfiguration);
+            void ConfigureBusEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                configurator.BindMessageExchanges = false;
+            }
 
-            var builder = new ConfigurationBusBuilder(_configuration, busReceiveEndpointConfiguration, BusObservable);
+            var busReceiveEndpointConfiguration = _busConfiguration.HostConfiguration
+                .CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, ConfigureBusEndpoint);
+
+            var builder = new ConfigurationBusBuilder(_busConfiguration, busReceiveEndpointConfiguration);
 
             ApplySpecifications(builder);
 
@@ -143,87 +135,70 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public IRabbitMqHost Host(RabbitMqHostSettings settings)
         {
-            var hostConfiguration = _configuration.CreateHostConfiguration(settings);
+            _busConfiguration.HostConfiguration.Settings = settings;
 
-            return hostConfiguration.Host;
+            return _busConfiguration.HostConfiguration.Proxy;
         }
 
         void IRabbitMqBusFactoryConfigurator.Send<T>(Action<IRabbitMqMessageSendTopologyConfigurator<T>> configureTopology)
         {
-            IRabbitMqMessageSendTopologyConfigurator<T> configurator = _configuration.Topology.Send.GetMessageTopology<T>();
+            IRabbitMqMessageSendTopologyConfigurator<T> configurator = _busConfiguration.Topology.Send.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
 
         void IRabbitMqBusFactoryConfigurator.Publish<T>(Action<IRabbitMqMessagePublishTopologyConfigurator<T>> configureTopology)
         {
-            IRabbitMqMessagePublishTopologyConfigurator<T> configurator = _configuration.Topology.Publish.GetMessageTopology<T>();
+            IRabbitMqMessagePublishTopologyConfigurator<T> configurator = _busConfiguration.Topology.Publish.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
         }
 
-        public new IRabbitMqSendTopologyConfigurator SendTopology => _configuration.Topology.Send;
-        public new IRabbitMqPublishTopologyConfigurator PublishTopology => _configuration.Topology.Publish;
+        public new IRabbitMqSendTopologyConfigurator SendTopology => _busConfiguration.Topology.Send;
+        public new IRabbitMqPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 
         public bool DeployTopologyOnly
         {
-            set => _configuration.DeployTopologyOnly = value;
+            set => _hostConfiguration.DeployTopologyOnly = value;
         }
 
-        public void OverrideDefaultBusEndpointQueueName(string value)
+        public void OverrideDefaultBusEndpointQueueName(string queueName)
         {
-            _settings.ExchangeName = value;
-            _settings.QueueName = value;
+            _settings.ExchangeName = queueName;
+            _settings.QueueName = queueName;
         }
 
-        public override void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
-        {
-            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
-
-            var configuration = CreateConfiguration(queueName);
-
-            ConfigureReceiveEndpoint(configuration, configuration.Configurator, x => x.Apply(definition, configureEndpoint));
-        }
-
-        public override void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            var configuration = CreateConfiguration(queueName);
-
-            ConfigureReceiveEndpoint(configuration, configuration.Configurator, configureEndpoint);
-        }
-
-        public void ReceiveEndpoint(IRabbitMqHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
-
-            var configuration = CreateConfiguration(host, queueName);
-
-            ConfigureReceiveEndpoint(configuration, configuration.Configurator, x => x.Apply(definition, configureEndpoint));
+            _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IRabbitMqHost host, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            var configuration = CreateConfiguration(host, queueName);
-
-            ConfigureReceiveEndpoint(configuration, configuration.Configurator, configure);
+            _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        IRabbitMqReceiveEndpointConfiguration CreateConfiguration(string queueName)
+        public void ReceiveEndpoint(IRabbitMqHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            var settings = new RabbitMqReceiveSettings(queueName, _configuration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType,
-                true, false);
-
-            return _configuration.CreateReceiveEndpointConfiguration(settings, _configuration.CreateEndpointConfiguration());
+            _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        IRabbitMqReceiveEndpointConfiguration CreateConfiguration(IRabbitMqHost host, string queueName)
+        public void ReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint)
         {
-            if (!_configuration.Hosts.TryGetHost(host, out var hostConfiguration))
-                throw new ArgumentException("The host was not configured on this bus", nameof(host));
+            _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
+        }
 
-            return hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
+        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        public void ReceiveEndpoint(IRabbitMqHost host, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint)
+        {
+            _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }
     }
 }

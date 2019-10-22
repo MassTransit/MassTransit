@@ -10,18 +10,11 @@ namespace MassTransit.Util
 
     public class PendingTaskCollection
     {
-        readonly CancellationToken _cancellationToken;
         readonly IDictionary<long, Task> _tasks;
         long _nextId;
 
-        public PendingTaskCollection(CancellationToken cancellationToken = default)
-            : this(4, cancellationToken)
+        public PendingTaskCollection(int capacity)
         {
-        }
-
-        public PendingTaskCollection(int capacity, CancellationToken cancellationToken = default)
-        {
-            _cancellationToken = cancellationToken;
             _tasks = new Dictionary<long, Task>(capacity);
         }
 
@@ -41,23 +34,23 @@ namespace MassTransit.Util
             task.ContinueWith(x => Remove(id), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
         }
 
-        public Task Completed => ReceiveTasksCompleted();
+        public Task Completed(CancellationToken cancellationToken = default) => ReceiveTasksCompleted(cancellationToken);
 
-        async Task ReceiveTasksCompleted()
+        async Task ReceiveTasksCompleted(CancellationToken cancellationToken)
         {
             Task[] tasks = null;
             do
             {
                 lock (_tasks)
-                    tasks = _tasks.Values.Where(x => x.Status != TaskStatus.RanToCompletion).ToArray();
+                    tasks = _tasks.Values.Where(x => !x.IsCompletedSuccessfully()).ToArray();
 
                 if (tasks.Length == 0)
                     break;
 
                 var whenAll = Task.WhenAll(tasks);
 
-                if (_cancellationToken.CanBeCanceled)
-                    whenAll = whenAll.UntilCompletedOrCanceled(_cancellationToken);
+                if (cancellationToken.CanBeCanceled)
+                    whenAll = whenAll.OrCanceled(cancellationToken);
 
                 await whenAll.ConfigureAwait(false);
             }

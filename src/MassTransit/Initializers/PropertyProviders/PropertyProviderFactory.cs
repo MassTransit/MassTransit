@@ -5,6 +5,7 @@ namespace MassTransit.Initializers.PropertyProviders
     using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Extensions;
+    using Metadata;
     using PropertyConverters;
     using TypeConverters;
     using Util;
@@ -155,9 +156,11 @@ namespace MassTransit.Initializers.PropertyProviders
                         return true;
                     }
 
-                    if (typeof(T).IsInterface && TypeMetadataCache<T>.IsValidMessageType && !typeof(TProperty).IsValueTypeOrObject())
+                    if (typeof(T).IsInterfaceOrConcreteClass() && TypeMetadataCache<T>.IsValidMessageType && !typeof(TProperty).IsValueTypeOrObject())
                     {
-                        var converterType = typeof(InitializePropertyConverter<,>).MakeGenericType(typeof(T), typeof(TProperty));
+                        var converterType = typeof(TProperty) == typeof(object)
+                            ? typeof(InitializePropertyConverter<>).MakeGenericType(typeof(T))
+                            : typeof(InitializePropertyConverter<,>).MakeGenericType(typeof(T), typeof(TProperty));
 
                         converter = (IPropertyConverter<T, TProperty>)Activator.CreateInstance(converterType);
                         return true;
@@ -615,7 +618,7 @@ namespace MassTransit.Initializers.PropertyProviders
                     return true;
                 }
 
-                if (type.IsInterface && TypeMetadataCache.IsValidMessageType(type) && !type.IsValueTypeOrObject())
+                if (type.IsInterfaceOrConcreteClass() && TypeMetadataCache.IsValidMessageType(type) && !type.IsValueTypeOrObject())
                 {
                     var factoryType = typeof(InitializerResult<>).MakeGenericType(typeof(TInput), typeof(TInputProperty), typeof(TInputKey),
                         typeof(TInputValue), type);

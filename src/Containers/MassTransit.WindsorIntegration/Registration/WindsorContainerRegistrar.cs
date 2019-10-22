@@ -1,18 +1,7 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.WindsorIntegration.Registration
 {
     using System;
+    using Automatonymous;
     using Castle.MicroKernel.Lifestyle.Scoped;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
@@ -56,6 +45,22 @@ namespace MassTransit.WindsorIntegration.Registration
         {
         }
 
+        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+            where TStateMachine : class, SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            if (!_container.Kernel.HasComponent(typeof(IStateMachineActivityFactory)))
+                _container.Register(Component.For<IStateMachineActivityFactory>().ImplementedBy<WindsorStateMachineActivityFactory>().LifestyleSingleton());
+
+            if (!_container.Kernel.HasComponent(typeof(ISagaStateMachineFactory)))
+                _container.Register(Component.For<ISagaStateMachineFactory>().ImplementedBy<WindsorSagaStateMachineFactory>().LifestyleSingleton());
+
+            _container.Register(
+                Component.For<TStateMachine>().LifestyleSingleton(),
+                Component.For<SagaStateMachine<TInstance>>().UsingFactoryMethod(provider => provider.Resolve<TStateMachine>()).LifestyleSingleton()
+            );
+        }
+
         public void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga
@@ -66,7 +71,7 @@ namespace MassTransit.WindsorIntegration.Registration
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             RegisterActivityIfNotPresent<TActivity>();
@@ -78,7 +83,7 @@ namespace MassTransit.WindsorIntegration.Registration
 
         public void RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>()
             where TDefinition : class, IActivityDefinition<TActivity, TArguments, TLog>
-            where TActivity : class, Activity<TArguments, TLog>
+            where TActivity : class, IActivity<TArguments, TLog>
             where TArguments : class
             where TLog : class
         {
@@ -89,7 +94,7 @@ namespace MassTransit.WindsorIntegration.Registration
 
         public void RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>()
             where TDefinition : class, IExecuteActivityDefinition<TActivity, TArguments>
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             _container.Register(
@@ -115,7 +120,7 @@ namespace MassTransit.WindsorIntegration.Registration
                 var clientFactory = kernel.Resolve<IClientFactory>();
 
                 var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
-                return (currentScope != null)
+                return currentScope != null
                     ? clientFactory.CreateRequestClient<T>(kernel.Resolve<ConsumeContext>(), timeout)
                     : clientFactory.CreateRequestClient<T>(timeout);
             }));
@@ -129,14 +134,14 @@ namespace MassTransit.WindsorIntegration.Registration
                 var clientFactory = kernel.Resolve<IClientFactory>();
 
                 var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
-                return (currentScope != null)
+                return currentScope != null
                     ? clientFactory.CreateRequestClient<T>(kernel.Resolve<ConsumeContext>(), destinationAddress, timeout)
                     : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
             }));
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             RegisterActivityIfNotPresent<TActivity>();

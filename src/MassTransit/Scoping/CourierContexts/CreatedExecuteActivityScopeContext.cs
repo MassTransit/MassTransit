@@ -7,7 +7,7 @@
     public class CreatedExecuteActivityScopeContext<TScope, TActivity, TArguments> :
         IExecuteActivityScopeContext<TActivity, TArguments>
         where TScope : IDisposable
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         readonly TScope _scope;

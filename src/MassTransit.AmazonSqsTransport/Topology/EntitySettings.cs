@@ -12,6 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Topology
 {
+    using System.Collections.Generic;
+
+
     public interface EntitySettings
     {
         /// <summary>
@@ -28,5 +31,10 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// True if the queue/exchange should automatically be deleted
         /// </summary>
         bool AutoDelete { get; }
+
+        /// <summary>
+        /// Collection of tags to assign to queue when created.
+        /// </summary>
+        IDictionary<string, string> Tags { get; }
     }
 }

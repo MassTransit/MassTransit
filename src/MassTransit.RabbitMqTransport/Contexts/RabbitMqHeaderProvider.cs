@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Contexts
 {
@@ -30,17 +30,36 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
-            yield return new KeyValuePair<string, object>(RabbitMqHeaders.Exchange, _context.Exchange);
-            yield return new KeyValuePair<string, object>(RabbitMqHeaders.RoutingKey, _context.RoutingKey);
+            if (!string.IsNullOrWhiteSpace(_context.Exchange))
+                yield return new KeyValuePair<string, object>(RabbitMqHeaders.Exchange, _context.Exchange);
+            if (!string.IsNullOrWhiteSpace(_context.RoutingKey))
+                yield return new KeyValuePair<string, object>(RabbitMqHeaders.RoutingKey, _context.RoutingKey);
             yield return new KeyValuePair<string, object>(RabbitMqHeaders.DeliveryTag, _context.DeliveryTag);
-            yield return new KeyValuePair<string, object>(RabbitMqHeaders.ConsumerTag, _context.ConsumerTag);
-            yield return new KeyValuePair<string, object>(nameof(_context.Properties.MessageId), _context.Properties.MessageId);
-            yield return new KeyValuePair<string, object>(nameof(_context.Properties.CorrelationId), _context.Properties.CorrelationId);
+            if (!string.IsNullOrWhiteSpace(_context.ConsumerTag))
+                yield return new KeyValuePair<string, object>(RabbitMqHeaders.ConsumerTag, _context.ConsumerTag);
+            if (!string.IsNullOrWhiteSpace(_context.Properties.MessageId))
+                yield return new KeyValuePair<string, object>(nameof(_context.Properties.MessageId), _context.Properties.MessageId);
+            if (!string.IsNullOrWhiteSpace(_context.Properties.CorrelationId))
+                yield return new KeyValuePair<string, object>(nameof(_context.Properties.CorrelationId), _context.Properties.CorrelationId);
 
             if (_context.Properties.IsHeadersPresent())
             {
                 foreach (var header in _context.Properties.Headers)
-                    yield return header;
+                {
+                    var value = header.Value;
+
+                    if (value is byte[] bytes)
+                    {
+                        string text = Encoding.UTF8.GetString(bytes);
+
+                        if (!string.IsNullOrWhiteSpace(text))
+                            yield return new KeyValuePair<string, object>(header.Key, text);
+                    }
+                    else if (value is string s && !string.IsNullOrWhiteSpace(s))
+                        yield return new KeyValuePair<string, object>(header.Key, s);
+                    else if (value != default)
+                        yield return header;
+                }
             }
         }
 
@@ -48,49 +67,54 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             if (_context.Properties.IsHeadersPresent() && _context.Properties.Headers.TryGetValue(key, out value))
             {
-                if (value is byte[])
+                if (value is byte[] bytes)
                 {
-                    value = Encoding.UTF8.GetString((byte[])value);
-                    return !string.IsNullOrWhiteSpace((string)value);
+                    string text = Encoding.UTF8.GetString(bytes);
+
+                    value = text;
+                    return !string.IsNullOrWhiteSpace(text);
                 }
 
-                return true;
+                if (value is string s)
+                    return !string.IsNullOrWhiteSpace(s);
+
+                return value != default;
             }
 
             if (RabbitMqHeaders.Exchange.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.Exchange;
-                return true;
+                return value != default;
             }
 
             if (RabbitMqHeaders.RoutingKey.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.RoutingKey;
-                return true;
+                return value != default;
             }
 
             if (RabbitMqHeaders.DeliveryTag.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.DeliveryTag;
-                return true;
+                return value != default;
             }
 
             if (RabbitMqHeaders.ConsumerTag.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.ConsumerTag;
-                return true;
+                return value != default;
             }
 
             if (nameof(_context.Properties.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.Properties.MessageId;
-                return true;
+                return value != default;
             }
 
             if (nameof(_context.Properties.CorrelationId).Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.Properties.CorrelationId;
-                return true;
+                return value != default;
             }
 
             value = default;

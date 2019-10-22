@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AutofacIntegration
+﻿namespace MassTransit.AutofacIntegration
 {
     using System;
     using System.Collections.Concurrent;
@@ -24,8 +12,8 @@ namespace MassTransit.AutofacIntegration
     public class LifetimeScopeRegistry<TId> :
         ILifetimeScopeRegistry<TId>
     {
-        readonly Lazy<ILifetimeScope> _defaultScope;
         readonly ILifetimeScopeIdProvider<TId> _currentScopeIdProvider;
+        readonly Lazy<ILifetimeScope> _defaultScope;
         readonly ILifetimeScope _parentScope;
         readonly ConcurrentDictionary<TId, RegisteredLifetimeScope> _scopes;
         readonly object _tag;
@@ -81,9 +69,9 @@ namespace MassTransit.AutofacIntegration
         /// </summary>
         public event EventHandler<LifetimeScopeBeginningEventArgs> ChildLifetimeScopeBeginning
         {
-            add { GetCurrentScope().ChildLifetimeScopeBeginning += value; }
+            add => GetCurrentScope().ChildLifetimeScopeBeginning += value;
 
-            remove { GetCurrentScope().ChildLifetimeScopeBeginning -= value; }
+            remove => GetCurrentScope().ChildLifetimeScopeBeginning -= value;
         }
 
         /// <summary>
@@ -91,9 +79,9 @@ namespace MassTransit.AutofacIntegration
         /// </summary>
         public event EventHandler<LifetimeScopeEndingEventArgs> CurrentScopeEnding
         {
-            add { GetCurrentScope().CurrentScopeEnding += value; }
+            add => GetCurrentScope().CurrentScopeEnding += value;
 
-            remove { GetCurrentScope().CurrentScopeEnding -= value; }
+            remove => GetCurrentScope().CurrentScopeEnding -= value;
         }
 
         /// <summary>
@@ -101,9 +89,9 @@ namespace MassTransit.AutofacIntegration
         /// </summary>
         public event EventHandler<ResolveOperationBeginningEventArgs> ResolveOperationBeginning
         {
-            add { GetCurrentScope().ResolveOperationBeginning += value; }
+            add => GetCurrentScope().ResolveOperationBeginning += value;
 
-            remove { GetCurrentScope().ResolveOperationBeginning -= value; }
+            remove => GetCurrentScope().ResolveOperationBeginning -= value;
         }
 
         public ILifetimeScope GetLifetimeScope(TId scopeId)
@@ -122,9 +110,7 @@ namespace MassTransit.AutofacIntegration
         public void Dispose()
         {
             foreach (var scope in _scopes.Values)
-            {
                 scope.Dispose();
-            }
 
             if (_defaultScope.IsValueCreated)
                 _defaultScope.Value.Dispose();
@@ -154,7 +140,7 @@ namespace MassTransit.AutofacIntegration
         {
             public bool TryGetScopeId(out TId id)
             {
-                id = default(TId);
+                id = default;
                 return false;
             }
         }

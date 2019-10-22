@@ -87,4 +87,36 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             configurator.ConfigureEndpoints(_container);
         }
     }
+
+
+    [TestFixture]
+    public class Autofac_Consumer_ServiceEndpoint :
+        Common_Consumer_ServiceEndpoint
+    {
+        readonly IContainer _container;
+
+        public Autofac_Consumer_ServiceEndpoint()
+        {
+            var builder = new ContainerBuilder();
+            builder.AddMassTransit(x =>
+            {
+                x.AddConsumer<PingRequestConsumer>();
+
+                x.AddBus(provider => BusControl);
+            });
+
+            _container = builder.Build();
+        }
+
+        [OneTimeTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ServiceInstance(x => x.ConfigureEndpoints(_container));
+        }
+    }
 }

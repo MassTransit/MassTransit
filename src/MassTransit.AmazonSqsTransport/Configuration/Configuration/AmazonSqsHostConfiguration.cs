@@ -1,102 +1,116 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
+﻿namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 {
     using System;
-    using System.Threading.Tasks;
     using Configurators;
-    using MassTransit.Configuration;
-    using MassTransit.Topology;
-    using Pipeline;
-    using Topology;
+    using Definition;
+    using MassTransit.Configurators;
+    using Topology.Settings;
+    using Topology.Topologies;
     using Transport;
     using Transports;
 
 
     public class AmazonSqsHostConfiguration :
+        BaseHostConfiguration<IAmazonSqsReceiveEndpointConfiguration>,
         IAmazonSqsHostConfiguration
     {
         readonly IAmazonSqsBusConfiguration _busConfiguration;
-        readonly IAmazonSqsHostControl _host;
-        readonly IAmazonSqsHostTopology _topology;
+        readonly IAmazonSqsTopologyConfiguration _topologyConfiguration;
+        readonly AmazonSqsHostProxy _proxy;
+        AmazonSqsHostSettings _hostSettings;
 
-        public AmazonSqsHostConfiguration(IAmazonSqsBusConfiguration busConfiguration, AmazonSqsHostSettings settings, IAmazonSqsHostTopology topology)
+        public AmazonSqsHostConfiguration(IAmazonSqsBusConfiguration busConfiguration, IAmazonSqsTopologyConfiguration
+            topologyConfiguration)
         {
-            Settings = settings;
-            _topology = topology;
             _busConfiguration = busConfiguration;
+            _topologyConfiguration = topologyConfiguration;
+            _hostSettings = new ConfigurationHostSettings();
 
-            _host = new AmazonSqsHost(this);
+            _proxy = new AmazonSqsHostProxy();
         }
 
-        IBusHostControl IHostConfiguration.Host => _host;
-        Uri IHostConfiguration.HostAddress => Settings.HostAddress;
-        IHostTopology IHostConfiguration.Topology => _topology;
+        public override Uri HostAddress => _hostSettings.HostAddress;
+        public IAmazonSqsHost Proxy => _proxy;
+        public bool DeployTopologyOnly { get; set; }
 
-        public AmazonSqsHostSettings Settings { get; }
-
-        IAmazonSqsBusConfiguration IAmazonSqsHostConfiguration.BusConfiguration => _busConfiguration;
-        IAmazonSqsHostControl IAmazonSqsHostConfiguration.Host => _host;
-        IAmazonSqsHostTopology IAmazonSqsHostConfiguration.Topology => _topology;
-
-        public bool Matches(Uri address)
+        public AmazonSqsHostSettings Settings
         {
-            if (!address.Scheme.Equals("amazonsqs", StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            var settings = new AmazonSqsHostConfigurator(address).Settings;
-
-            return AmazonSqsHostEqualityComparer.Default.Equals(Settings, settings);
+            get => _hostSettings;
+            set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public Task<ISendTransport> CreateSendTransport(Uri address)
+        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IAmazonSqsReceiveEndpointConfigurator> configure)
         {
-            var settings = _topology.SendTopology.GetSendSettings(address);
+            var settings = new QueueReceiveSettings(queueName, true, false);
+            var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
 
-            var clientContextSupervisor = new AmazonSqsClientContextSupervisor(_host.ConnectionContextSupervisor);
-
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology());
-
-            var transport = new QueueSendTransport(clientContextSupervisor, configureTopologyFilter, settings.EntityName);
-            transport.Add(clientContextSupervisor);
-
-            _host.Add(transport);
-
-            return Task.FromResult<ISendTransport>(transport);
+            return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
         }
 
-        public Task<ISendTransport> CreatePublishTransport<T>()
-            where T : class
+        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
+            IAmazonSqsEndpointConfiguration endpointConfiguration, Action<IAmazonSqsReceiveEndpointConfigurator> configure)
         {
-            IAmazonSqsMessagePublishTopology<T> publishTopology = _topology.Publish<T>();
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+            if (endpointConfiguration == null)
+                throw new ArgumentNullException(nameof(endpointConfiguration));
 
-            var sendSettings = publishTopology.GetPublishSettings();
+            var configuration = new AmazonSqsReceiveEndpointConfiguration(this, settings, endpointConfiguration);
 
-            var clientContextSupervisor = new AmazonSqsClientContextSupervisor(_host.ConnectionContextSupervisor);
+            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
+            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
+            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
 
-            var configureTopologyFilter = new ConfigureTopologyFilter<PublishSettings>(sendSettings, publishTopology.GetBrokerTopology());
+            configure?.Invoke(configuration);
 
-            var sendTransport = new TopicSendTransport(clientContextSupervisor, configureTopologyFilter, sendSettings.EntityName);
-            sendTransport.Add(clientContextSupervisor);
+            Observers.EndpointConfigured(configuration);
 
-            _host.Add(sendTransport);
+            Add(configuration);
 
-            return Task.FromResult<ISendTransport>(sendTransport);
+            return configuration;
         }
 
-        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
+        void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            return new AmazonSqsReceiveEndpointConfiguration(this, queueName, _busConfiguration.CreateEndpointConfiguration());
+            ReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
+
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            ReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+        }
+
+        public void ReceiveEndpoint(string queueName, Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint)
+        {
+            CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
+        }
+
+        public override IBusHostControl Build()
+        {
+            var messageNameFormatter = new AmazonSqsMessageNameFormatter();
+
+            var hostTopology = new AmazonSqsHostTopology(messageNameFormatter, _hostSettings.HostAddress, _topologyConfiguration);
+
+            var host = new AmazonSqsHost(this, hostTopology);
+
+            foreach (var endpointConfiguration in Endpoints)
+            {
+                endpointConfiguration.Build(host);
+            }
+
+            _proxy.SetComplete(host);
+
+            return host;
         }
     }
 }

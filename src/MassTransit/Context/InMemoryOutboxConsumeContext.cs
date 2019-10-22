@@ -2,29 +2,30 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using Util;
 
 
     public class InMemoryOutboxConsumeContext :
         ConsumeContextProxy,
         OutboxContext
     {
-        readonly ConsumeContext _context;
         readonly TaskCompletionSource<InMemoryOutboxConsumeContext> _clearToSend;
         readonly List<Func<Task>> _pendingActions;
+        readonly InMemoryOutboxMessageSchedulerContext _outboxSchedulerContext;
 
         public InMemoryOutboxConsumeContext(ConsumeContext context)
             : base(context)
         {
-            _context = context;
-
             ReceiveContext = new InMemoryOutboxReceiveContext(this, context.ReceiveContext);
 
             _pendingActions = new List<Func<Task>>();
             _clearToSend = new TaskCompletionSource<InMemoryOutboxConsumeContext>();
+
+            if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
+            {
+                _outboxSchedulerContext = new InMemoryOutboxMessageSchedulerContext(schedulerContext);
+                context.AddOrUpdatePayload(() => _outboxSchedulerContext, _ => _outboxSchedulerContext);
+            }
         }
 
         public Task ClearToSend => _clearToSend.Task;
@@ -53,12 +54,22 @@ namespace MassTransit.Context
             }
         }
 
-        public Task DiscardPendingActions()
+        public async Task DiscardPendingActions()
         {
             lock (_pendingActions)
                 _pendingActions.Clear();
 
-            return TaskUtil.Completed;
+            if (_outboxSchedulerContext != null)
+            {
+                try
+                {
+                    await _outboxSchedulerContext.CancelAllScheduledMessages().ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    LogContext.Warning?.Log(e, "One or more messages could not be unscheduled.", e);
+                }
+            }
         }
     }
 

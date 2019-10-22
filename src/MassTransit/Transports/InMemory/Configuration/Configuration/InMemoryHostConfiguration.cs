@@ -1,58 +1,121 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.InMemory.Configuration
+﻿namespace MassTransit.Transports.InMemory.Configuration
 {
     using System;
-    using System.Threading.Tasks;
-    using MassTransit.Configuration;
-    using MassTransit.Topology;
+    using Definition;
+    using GreenPipes.Caching;
+    using MassTransit.Configurators;
+    using Topology.Topologies;
 
 
     public class InMemoryHostConfiguration :
-        IInMemoryHostConfiguration
+        BaseHostConfiguration<IInMemoryReceiveEndpointConfiguration>,
+        IInMemoryHostConfiguration,
+        IInMemoryHostConfigurator
     {
         readonly IInMemoryBusConfiguration _busConfiguration;
-        readonly InMemoryHost _host;
+        readonly IInMemoryTopologyConfiguration _topologyConfiguration;
+        readonly ICacheConfigurator _sendTransportCacheConfigurator;
+        readonly InMemoryHostProxy _proxy;
+        Uri _hostAddress;
 
-        public InMemoryHostConfiguration(IInMemoryBusConfiguration busConfiguration, Uri baseAddress, int transportConcurrencyLimit, IHostTopology hostTopology)
+        public InMemoryHostConfiguration(IInMemoryBusConfiguration busConfiguration, Uri baseAddress, IInMemoryTopologyConfiguration topologyConfiguration)
         {
             _busConfiguration = busConfiguration;
+            _topologyConfiguration = topologyConfiguration;
 
-            Topology = hostTopology;
-            HostAddress = baseAddress ?? new Uri("loopback://localhost/");
+            _hostAddress = baseAddress ?? new Uri("loopback://localhost/");
 
-            _host = new InMemoryHost(this, transportConcurrencyLimit);
+            TransportConcurrencyLimit = Environment.ProcessorCount;
+
+            _sendTransportCacheConfigurator = new CacheConfigurator();
+
+            _proxy = new InMemoryHostProxy();
         }
 
-        public Uri HostAddress { get; }
-        IBusHostControl IHostConfiguration.Host => _host;
-        public IHostTopology Topology { get; }
+        public IInMemoryHostConfigurator Configurator => this;
 
-        public bool Matches(Uri address)
+        public CacheSettings SendTransportCacheSettings => _sendTransportCacheConfigurator.Settings;
+        public IInMemoryHost Proxy => _proxy;
+
+        public override Uri HostAddress => _hostAddress;
+
+        public Uri BaseAddress
         {
-            return address.ToString().StartsWith(HostAddress.ToString(), StringComparison.OrdinalIgnoreCase);
+            set => _hostAddress = value ?? new Uri("loopback://localhost/");
         }
 
-        public Task<ISendTransport> CreateSendTransport(Uri address)
+        public int TransportConcurrencyLimit { get; set; }
+
+        public IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IInMemoryReceiveEndpointConfigurator> configure)
         {
-            return _host.GetSendTransport(address);
+            var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+
+            return CreateReceiveEndpointConfiguration(queueName, endpointConfiguration, configure);
         }
 
-        public IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
+        public IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            IInMemoryEndpointConfiguration endpointConfiguration, Action<IInMemoryReceiveEndpointConfigurator> configure)
         {
-            return new InMemoryReceiveEndpointConfiguration(this, queueName, _busConfiguration.CreateEndpointConfiguration());
+            if (endpointConfiguration == null)
+                throw new ArgumentNullException(nameof(endpointConfiguration));
+            if (string.IsNullOrWhiteSpace(queueName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(queueName));
+
+            var configuration = new InMemoryReceiveEndpointConfiguration(this, queueName, endpointConfiguration);
+
+            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
+            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
+            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
+            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
+
+            configure?.Invoke(configuration);
+
+            Observers.EndpointConfigured(configuration);
+            Add(configuration);
+
+            return configuration;
         }
 
-        public IInMemoryHostControl Host => _host;
+        ICacheConfigurator IInMemoryHostConfigurator.SendTransportCache => _sendTransportCacheConfigurator;
+
+        void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            ReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
+
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            ReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+        }
+
+        public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
+        {
+            CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
+        }
+
+        public override IBusHostControl Build()
+        {
+            var hostTopology = new InMemoryHostTopology(_topologyConfiguration);
+            var host = new InMemoryHost(this, hostTopology);
+
+            foreach (var endpointConfiguration in Endpoints)
+            {
+                endpointConfiguration.Build(host);
+            }
+
+            _proxy.SetComplete(host);
+
+            return host;
+        }
     }
 }

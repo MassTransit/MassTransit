@@ -3,8 +3,6 @@
     using System.Threading.Tasks;
     using Courier;
     using GreenPipes;
-    using Logging;
-    using Util;
 
 
     /// <summary>
@@ -13,12 +11,10 @@
     /// <typeparam name="TActivity"></typeparam>
     /// <typeparam name="TArguments"></typeparam>
     public class ScopeCompensateActivityFactory<TActivity, TArguments> :
-        CompensateActivityFactory<TActivity, TArguments>
-        where TActivity : class, CompensateActivity<TArguments>
+        ICompensateActivityFactory<TActivity, TArguments>
+        where TActivity : class, ICompensateActivity<TArguments>
         where TArguments : class
     {
-        static readonly ILog _log = Logger.Get<ScopeCompensateActivityFactory<TActivity, TArguments>>();
-
         readonly ICompensateActivityScopeProvider<TActivity, TArguments> _scopeProvider;
 
         public ScopeCompensateActivityFactory(ICompensateActivityScopeProvider<TActivity, TArguments> scopeProvider)
@@ -26,15 +22,11 @@
             _scopeProvider = scopeProvider;
         }
 
-        public async Task<ResultContext<CompensationResult>> Compensate(CompensateContext<TArguments> context,
-            IRequestPipe<CompensateActivityContext<TActivity, TArguments>, CompensationResult> next)
+        public async Task Compensate(CompensateContext<TArguments> context, IPipe<CompensateActivityContext<TActivity, TArguments>> next)
         {
             using (ICompensateActivityScopeContext<TActivity, TArguments> scope = _scopeProvider.GetScope(context))
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("CompensateActivityFactory: Compensating: {0}", TypeMetadataCache<TActivity>.ShortName);
-
-                return await next.Send(scope.Context).ConfigureAwait(false);
+                await next.Send(scope.Context).ConfigureAwait(false);
             }
         }
 

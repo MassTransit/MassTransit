@@ -22,6 +22,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
+    using Metadata;
     using Util;
 
 

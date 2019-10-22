@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
@@ -18,6 +18,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Text;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Metadata;
     using NUnit.Framework;
     using RabbitMQ.Client;
     using Shouldly;
@@ -232,15 +233,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             using (var connection = connectionFactory.CreateConnection())
             using (var model = connection.CreateModel())
             {
-                var log = Logging.Logger.Get("UnitTest");
-
-                log.Debug("Sending empty message");
-
                 model.BasicPublish("input_queue", "", model.CreateBasicProperties(), null);
 
                 await Task.Delay(5000).ConfigureAwait(false);
-
-                log.Debug("Reading error message");
 
                 _basicGetResult = model.BasicGet("input_queue_error", true);
 

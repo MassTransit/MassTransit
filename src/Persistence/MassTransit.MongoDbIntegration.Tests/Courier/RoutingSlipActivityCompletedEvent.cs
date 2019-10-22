@@ -15,6 +15,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Courier
     using System;
     using System.Collections.Generic;
     using MassTransit.Courier.Contracts;
+    using Metadata;
     using Util;
 
 

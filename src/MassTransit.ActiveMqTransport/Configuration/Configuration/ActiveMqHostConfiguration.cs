@@ -1,114 +1,117 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.ActiveMqTransport.Configuration
+﻿namespace MassTransit.ActiveMqTransport.Configuration
 {
     using System;
-    using System.Threading.Tasks;
-    using Apache.NMS;
     using Configurators;
-    using GreenPipes;
-    using MassTransit.Configuration;
-    using MassTransit.Topology;
-    using Pipeline;
-    using Topology;
+    using Definition;
+    using MassTransit.Configurators;
+    using Topology.Settings;
+    using Topology.Topologies;
     using Transport;
     using Transports;
 
 
     public class ActiveMqHostConfiguration :
+        BaseHostConfiguration<IActiveMqReceiveEndpointConfiguration>,
         IActiveMqHostConfiguration
     {
         readonly IActiveMqBusConfiguration _busConfiguration;
-        readonly ActiveMqHostSettings _hostSettings;
-        readonly IActiveMqHostTopology _hostTopology;
-        readonly IActiveMqHostControl _host;
+        readonly ActiveMqHostProxy _proxy;
+        readonly IActiveMqTopologyConfiguration _topologyConfiguration;
+        ActiveMqHostSettings _hostSettings;
 
-        public ActiveMqHostConfiguration(IActiveMqBusConfiguration busConfiguration, ActiveMqHostSettings hostSettings, IActiveMqHostTopology hostTopology)
+        public ActiveMqHostConfiguration(IActiveMqBusConfiguration busConfiguration,
+            IActiveMqTopologyConfiguration topologyConfiguration)
         {
             _busConfiguration = busConfiguration;
-            _hostSettings = hostSettings;
-            _hostTopology = hostTopology;
+            _topologyConfiguration = topologyConfiguration;
+            _hostSettings = new ConfigurationHostSettings {Host = "localhost"};
 
-            _host = new ActiveMqHost(this);
-
-            Description = hostSettings.ToDescription();
+            _proxy = new ActiveMqHostProxy();
         }
 
-        Uri IHostConfiguration.HostAddress => _hostSettings.HostAddress;
-        IBusHostControl IHostConfiguration.Host => _host;
-        IHostTopology IHostConfiguration.Topology => _hostTopology;
+        public string Description => _hostSettings.ToDescription();
+        public override Uri HostAddress => _hostSettings.HostAddress;
+        public IActiveMqHost Proxy => _proxy;
+        public bool DeployTopologyOnly { get; set; }
 
-        IActiveMqBusConfiguration IActiveMqHostConfiguration.BusConfiguration => _busConfiguration;
-        IActiveMqHostControl IActiveMqHostConfiguration.Host => _host;
-        IActiveMqHostTopology IActiveMqHostConfiguration.Topology => _hostTopology;
-
-        public string Description { get; }
-        ActiveMqHostSettings IActiveMqHostConfiguration.Settings => _hostSettings;
-
-        public bool Matches(Uri address)
+        public ActiveMqHostSettings Settings
         {
-            if (!address.Scheme.Equals("activemq", StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            var settings = new ActiveMqHostConfigurator(address).Settings;
-
-            return ActiveMqHostEqualityComparer.Default.Equals(_hostSettings, settings);
+            get => _hostSettings;
+            set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public Task<ISendTransport> CreateSendTransport(Uri address)
+        public IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IActiveMqReceiveEndpointConfigurator> configure)
         {
-            var settings = _host.Topology.SendTopology.GetSendSettings(address);
+            var settings = new QueueReceiveSettings(queueName, true, false);
+            var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
 
-            var sessionContextSupervisor = CreateSessionContextSupervisor();
-
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology());
-
-            return CreateSendTransport(sessionContextSupervisor, configureTopologyFilter, settings.EntityName, DestinationType.Queue);
+            return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
         }
 
-        public Task<ISendTransport> CreatePublishTransport<T>()
-            where T : class
+        public IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
+            IActiveMqEndpointConfiguration endpointConfiguration, Action<IActiveMqReceiveEndpointConfigurator> configure)
         {
-            IActiveMqMessagePublishTopology<T> publishTopology = _hostTopology.Publish<T>();
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+            if (endpointConfiguration == null)
+                throw new ArgumentNullException(nameof(endpointConfiguration));
 
-            var settings = publishTopology.GetSendSettings();
+            var configuration = new ActiveMqReceiveEndpointConfiguration(this, settings, endpointConfiguration);
 
-            var sessionContextSupervisor = CreateSessionContextSupervisor();
+            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
+            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
+            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
 
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, publishTopology.GetBrokerTopology());
+            configure?.Invoke(configuration);
 
-            return CreateSendTransport(sessionContextSupervisor, configureTopologyFilter, settings.EntityName, DestinationType.Topic);
+            Observers.EndpointConfigured(configuration);
+
+            Add(configuration);
+
+            return configuration;
         }
 
-        ISessionContextSupervisor CreateSessionContextSupervisor()
+        void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            return new ActiveMqSessionContextSupervisor(_host.ConnectionContextSupervisor);
+            ReceiveEndpoint(queueName, configureEndpoint);
         }
 
-        Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor sessionContextSupervisor, IFilter<SessionContext> configureTopologyFilter,
-            string entityName, DestinationType destinationType)
+        void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            var transport = new ActiveMqSendTransport(sessionContextSupervisor, configureTopologyFilter, entityName, destinationType);
-            transport.Add(sessionContextSupervisor);
-
-            _host.Add(transport);
-
-            return Task.FromResult<ISendTransport>(transport);
+            ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint = null)
         {
-            return new ActiveMqReceiveEndpointConfiguration(this, queueName, _busConfiguration.CreateEndpointConfiguration());
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            ReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+        }
+
+        public void ReceiveEndpoint(string queueName, Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint)
+        {
+            CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
+        }
+
+        public override IBusHostControl Build()
+        {
+            var messageNameFormatter = new ActiveMqMessageNameFormatter();
+
+            var hostTopology = new ActiveMqHostTopology(messageNameFormatter, _hostSettings.HostAddress, _topologyConfiguration);
+
+            var host = new ActiveMqHost(this, hostTopology);
+
+            foreach (var endpointConfiguration in Endpoints)
+            {
+                endpointConfiguration.Build(host);
+            }
+
+            _proxy.SetComplete(host);
+
+            return host;
         }
     }
 }

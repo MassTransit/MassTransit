@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Contexts
 {
     using System;
@@ -17,9 +5,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
     using System.Threading.Tasks;
     using Apache.NMS;
     using Configuration;
+    using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
-    using Logging;
     using Topology;
     using Util;
 
@@ -29,36 +16,42 @@ namespace MassTransit.ActiveMqTransport.Contexts
         ConnectionContext,
         IAsyncDisposable
     {
-        static readonly ILog _log = Logger.Get<ActiveMqConnectionContext>();
-
         readonly IConnection _connection;
-        readonly IActiveMqHostConfiguration _configuration;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
-        public ActiveMqConnectionContext(IConnection connection, IActiveMqHostConfiguration configuration, CancellationToken cancellationToken)
-            : base(new PayloadCache(), cancellationToken)
+        public ActiveMqConnectionContext(IConnection connection, IActiveMqHostConfiguration configuration, IActiveMqHostTopology hostTopology,
+            CancellationToken cancellationToken)
+            : base(cancellationToken)
         {
             _connection = connection;
-            _configuration = configuration;
+
+            Description = configuration.Description;
+            HostAddress = configuration.HostAddress;
+
+            Topology = hostTopology;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
         }
 
-        public string Description => _configuration.Description;
-        public Uri HostAddress => _configuration.HostAddress;
-        public IActiveMqHostTopology Topology => _configuration.Topology;
-
-        public Task<ISession> CreateSession()
-        {
-            return Task.Factory.StartNew(() => _connection.CreateSession(), CancellationToken, TaskCreationOptions.None, _taskScheduler);
-        }
-
         IConnection ConnectionContext.Connection => _connection;
+        public string Description { get; }
+        public Uri HostAddress { get; }
+        public IActiveMqHostTopology Topology { get; }
+
+        public async Task<ISession> CreateSession(CancellationToken cancellationToken)
+        {
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken))
+            {
+                var model = await Task.Factory.StartNew(() => _connection.CreateSession(), tokenSource.Token, TaskCreationOptions.None, _taskScheduler)
+                    .ConfigureAwait(false);
+
+                return model;
+            }
+        }
 
         Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Disconnecting: {0}", Description);
+            LogContext.Debug?.Log("Disconnecting: {Host}", Description);
 
             try
             {
@@ -68,12 +61,10 @@ namespace MassTransit.ActiveMqTransport.Contexts
             }
             catch (Exception exception)
             {
-                if (_log.IsErrorEnabled)
-                    _log.Error($"Close Connection Faulted: {Description}", exception);
+                LogContext.Warning?.Log(exception, "Close Connection Faulted: {Host}", Description);
             }
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Disconnected: {0}", Description);
+            LogContext.Debug?.Log("Disconnected: {Host}", Description);
 
             return TaskUtil.Completed;
         }

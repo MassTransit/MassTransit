@@ -2,12 +2,12 @@ namespace MassTransit.Tests.Initializers
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using InitializerTestMessages;
     using MassTransit.Initializers;
+    using Metadata;
     using NUnit.Framework;
     using TestFramework;
     using Util;
@@ -34,6 +34,27 @@ namespace MassTransit.Tests.Initializers
             {
                 await context.RespondAsync<SimpleResponse>(new {Value = "World"});
             });
+        }
+    }
+
+
+    [TestFixture]
+    public class Creating_a_message_with_the_same_type_included :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_initialize_the_properties()
+        {
+            var context = await MessageInitializerCache<ExceptionInfo>.Initialize(new
+            {
+                Message = "Hello",
+                ExceptionType = TypeMetadataCache<ArgumentException>.ShortName,
+            });
+
+            var message = context.Message;
+
+            Assert.That(message.Message, Is.EqualTo("Hello"));
+            Assert.That(message.ExceptionType, Is.EqualTo(TypeMetadataCache<ArgumentException>.ShortName));
         }
     }
 
@@ -101,56 +122,6 @@ namespace MassTransit.Tests.Initializers
     {
         DateTime _now;
         Response<SuperComplexResponse> _response;
-
-        [Test, Explicit, Category("SlowAF")]
-        public async Task Should_be_faster_than_json()
-        {
-            var now = DateTime.UtcNow;
-
-            var inputObject = new
-            {
-                StringValue = "Hello",
-                IntValue = 27,
-                DateTimeValue = now,
-                NullableValue = 42,
-                NotNullableValue = (int?)69,
-                NullableDecimalValue = 123.45m,
-                Numbers = new[] {12, 24, 36},
-                Names = new[] {"Curly", "Larry", "Moe"},
-                Exception = new IntentionalTestException("It Happens"),
-                SubValue = new {Text = "Mary"},
-                SubValues = new object[] {new {Text = "Frank"}, new {Text = "Lola"},},
-                Amount = 867.53m,
-                //                AsyncValue = GetIntResult().Select(x => x.Number),
-                EngineStatus = Status.Started,
-                NumberStatus = 12,
-                StringStatus = "Started",
-                //       Strings = new Dictionary<string, string> {{"Hello", "World"}, {"Thank You", "Next"}}
-            };
-
-            var context = await MessageInitializerCache<SuperComplexRequest>.Initialize(inputObject);
-
-            var timer = Stopwatch.StartNew();
-            for (int i = 0; i < 100000; i++)
-            {
-                context = await MessageInitializerCache<SuperComplexRequest>.Initialize(inputObject);
-            }
-
-            timer.Stop();
-
-            var message = TypeMetadataCache<SuperComplexRequest>.InitializeFromObject(inputObject);
-
-            var jsonTimer = Stopwatch.StartNew();
-            for (int i = 0; i < 100000; i++)
-            {
-                message = TypeMetadataCache<SuperComplexRequest>.InitializeFromObject(inputObject);
-            }
-
-            jsonTimer.Stop();
-
-            Console.WriteLine("Initializer: {0}", timer.ElapsedMilliseconds);
-            Console.WriteLine("JsonMessage: {0}", jsonTimer.ElapsedMilliseconds);
-        }
 
         [OneTimeSetUp]
         public async Task Setup()

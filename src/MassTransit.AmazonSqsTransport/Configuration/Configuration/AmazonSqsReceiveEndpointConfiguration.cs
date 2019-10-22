@@ -13,6 +13,8 @@
     using Topology;
     using Topology.Settings;
     using Transport;
+    using Transports;
+    using Util;
 
 
     public class AmazonSqsReceiveEndpointConfiguration :
@@ -27,56 +29,32 @@
         readonly IBuildPipeConfigurator<ClientContext> _clientConfigurator;
         readonly QueueReceiveSettings _settings;
 
-        public AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, string queueName,
-            IAmazonSqsEndpointConfiguration endpointConfiguration)
-            : this(hostConfiguration, endpointConfiguration)
-        {
-            SubscribeMessageTopics = true;
-
-            _settings = new QueueReceiveSettings(queueName, true, false);
-        }
-
         public AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, QueueReceiveSettings settings,
             IAmazonSqsEndpointConfiguration endpointConfiguration)
-            : this(hostConfiguration, endpointConfiguration)
+            : base(endpointConfiguration)
         {
             _settings = settings;
-        }
 
-        AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, IAmazonSqsEndpointConfiguration endpointConfiguration)
-            : base(hostConfiguration, endpointConfiguration)
-        {
+            SubscribeMessageTopics = true;
+
             _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
 
             _connectionConfigurator = new PipeConfigurator<ConnectionContext>();
             _clientConfigurator = new PipeConfigurator<ClientContext>();
 
-            HostAddress = hostConfiguration.Host.Address;
-
             _inputAddress = new Lazy<Uri>(FormatInputAddress);
         }
 
-        public IAmazonSqsReceiveEndpointConfigurator Configurator => this;
-
-        public IAmazonSqsBusConfiguration BusConfiguration => _hostConfiguration.BusConfiguration;
-        public IAmazonSqsHostConfiguration HostConfiguration => _hostConfiguration;
-
-        public IAmazonSqsHostControl Host => _hostConfiguration.Host;
-
         public bool SubscribeMessageTopics { get; set; }
-
         public ReceiveSettings Settings => _settings;
-
-        public override Uri HostAddress { get; }
-
+        public override Uri HostAddress => _hostConfiguration.HostAddress;
         public override Uri InputAddress => _inputAddress.Value;
-
         IAmazonSqsTopologyConfiguration IAmazonSqsEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
-        public override IReceiveEndpoint Build()
+        public void  Build(IAmazonSqsHostControl host)
         {
-            var builder = new AmazonSqsReceiveEndpointBuilder(this);
+            var builder = new AmazonSqsReceiveEndpointBuilder(host, this);
 
             ApplySpecifications(builder);
 
@@ -85,7 +63,7 @@
             _clientConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
 
             IAgent consumerAgent;
-            if (_hostConfiguration.BusConfiguration.DeployTopologyOnly)
+            if (_hostConfiguration.DeployTopologyOnly)
             {
                 var transportReadyFilter = new TransportReadyFilter<ClientContext>(receiveEndpointContext);
                 _clientConfigurator.UseFilter(transportReadyFilter);
@@ -108,14 +86,31 @@
 
             _connectionConfigurator.UseFilter(clientFilter);
 
-            var transport = new SqsReceiveTransport(_hostConfiguration.Host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
-
+            var transport = new SqsReceiveTransport(host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
             transport.Add(consumerAgent);
 
-            return CreateReceiveEndpoint(_settings.EntityName ?? NewId.Next().ToString(), transport, receiveEndpointContext);
+            var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
+
+            var queueName = _settings.EntityName ?? NewId.Next().ToString(FormatUtil.Formatter);
+
+            host.AddReceiveEndpoint(queueName, receiveEndpoint);
+
+            ReceiveEndpoint = receiveEndpoint;
         }
 
-        IAmazonSqsHost IAmazonSqsReceiveEndpointConfigurator.Host => Host;
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            var queueName = $"{_settings.EntityName}";
+
+            if (!AmazonSqsEntityNameValidator.Validator.IsValidEntityName(_settings.EntityName))
+                yield return this.Failure(queueName, "must be a valid queue name");
+
+            if (_settings.PurgeOnStartup)
+                yield return this.Warning(queueName, "Existing messages in the queue will be purged on service start");
+
+            foreach (var result in base.Validate())
+                yield return result.WithParentKey(queueName);
+        }
 
         public bool Durable
         {
@@ -153,7 +148,9 @@
         }
 
         public IDictionary<string, object> QueueAttributes => _settings.QueueAttributes;
+
         public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
+        public IDictionary<string, string> QueueTags => _settings.QueueTags;
 
         public void Subscribe(string topicName, Action<ITopicSubscriptionConfigurator> configure = null)
         {
@@ -181,26 +178,12 @@
 
         Uri FormatInputAddress()
         {
-            return _settings.GetInputAddress(_hostConfiguration.Host.Settings.HostAddress);
+            return _settings.GetInputAddress(_hostConfiguration.HostAddress);
         }
 
         protected override bool IsAlreadyConfigured()
         {
             return _inputAddress.IsValueCreated || base.IsAlreadyConfigured();
-        }
-
-        public override IEnumerable<ValidationResult> Validate()
-        {
-            var queueName = $"{_settings.EntityName}";
-
-            if (!AmazonSqsEntityNameValidator.Validator.IsValidEntityName(_settings.EntityName))
-                yield return this.Failure(queueName, "must be a valid queue name");
-
-            if (_settings.PurgeOnStartup)
-                yield return this.Warning(queueName, "Existing messages in the queue will be purged on service start");
-
-            foreach (var result in base.Validate())
-                yield return result.WithParentKey(queueName);
         }
     }
 }

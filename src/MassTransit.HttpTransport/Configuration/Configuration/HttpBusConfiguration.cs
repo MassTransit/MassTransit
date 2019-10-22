@@ -1,58 +1,43 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Configuration
+﻿namespace MassTransit.HttpTransport.Configuration
 {
-    using Hosting;
+    using EndpointConfigurators;
+    using GreenPipes;
     using MassTransit.Configuration;
-    using Topology;
+    using MassTransit.Pipeline.Observables;
 
 
     public class HttpBusConfiguration :
         HttpEndpointConfiguration,
         IHttpBusConfiguration
     {
-        readonly IHttpTopologyConfiguration _topologyConfiguration;
-        readonly IHostCollection<IHttpHostConfiguration> _hosts;
+        readonly IHttpEndpointConfiguration _busEndpointConfiguration;
+        readonly BusObservable _busObservers;
+        readonly IHttpHostConfiguration _hostConfiguration;
 
         public HttpBusConfiguration(IHttpTopologyConfiguration topologyConfiguration)
             : base(topologyConfiguration)
         {
-            _topologyConfiguration = topologyConfiguration;
+            _hostConfiguration = new HttpHostConfiguration(this, topologyConfiguration);
+            _busEndpointConfiguration = CreateEndpointConfiguration();
 
-            _hosts = new HostCollection<IHttpHostConfiguration>();
+            _busObservers = new BusObservable();
         }
 
-        public IReadOnlyHostCollection<IHttpHostConfiguration> Hosts => _hosts;
+        IHostConfiguration IBusConfiguration.HostConfiguration => _hostConfiguration;
+        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
+        IBusObserver IBusConfiguration.BusObservers => _busObservers;
 
-        public IHttpHostConfiguration CreateHostConfiguration(HttpHostSettings settings)
+        IHttpEndpointConfiguration IHttpBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
+        IHttpHostConfiguration IHttpBusConfiguration.HostConfiguration => _hostConfiguration;
+
+        public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
-            var hostTopology = new HttpHostTopology(_topologyConfiguration);
-
-            var hostConfiguration = new HttpHostConfiguration(this, settings, hostTopology);
-
-            _hosts.Add(hostConfiguration);
-
-            return hostConfiguration;
+            return _busObservers.Connect(observer);
         }
 
-        public IHttpReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, IHttpEndpointConfiguration endpointConfiguration)
+        public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
-            if (_hosts.Count == 0)
-                throw new ConfigurationException("At least one host must be configured");
-
-            return new HttpReceiveEndpointConfiguration(_hosts[0], queueName, endpointConfiguration);
+            return _hostConfiguration.ConnectEndpointConfigurationObserver(observer);
         }
-
-        IReadOnlyHostCollection IBusConfiguration.Hosts => _hosts;
     }
 }

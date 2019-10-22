@@ -1,15 +1,3 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
     using System;
@@ -17,15 +5,15 @@ namespace MassTransit.Testing
 
 
     public class ActivityTestHarness<TActivity, TArguments, TLog>
-        where TActivity : class, Activity<TArguments, TLog>
+        where TActivity : class, IActivity<TArguments, TLog>
         where TArguments : class
         where TLog : class
     {
-        readonly ActivityFactory<TActivity, TArguments, TLog> _activityFactory;
+        readonly IActivityFactory<TActivity, TArguments, TLog> _activityFactory;
         readonly Action<ICompensateActivityConfigurator<TActivity, TLog>> _configureCompensate;
         readonly Action<IExecuteActivityConfigurator<TActivity, TArguments>> _configureExecute;
 
-        public ActivityTestHarness(BusTestHarness testHarness, ActivityFactory<TActivity, TArguments, TLog> activityFactory,
+        public ActivityTestHarness(BusTestHarness testHarness, IActivityFactory<TActivity, TArguments, TLog> activityFactory,
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate)
         {
@@ -47,10 +35,15 @@ namespace MassTransit.Testing
         public string Name { get; private set; }
         public Uri ExecuteAddress { get; private set; }
 
+        public event Action<IReceiveEndpointConfigurator> OnConfigureExecuteReceiveEndpoint;
+        public event Action<IReceiveEndpointConfigurator> OnConfigureCompensateReceiveEndpoint;
+
         void ConfigureBus(IBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint(CompensateQueueName, x =>
             {
+                OnConfigureCompensateReceiveEndpoint?.Invoke(x);
+
                 x.CompensateActivityHost(_activityFactory, _configureCompensate);
 
                 CompensateAddress = x.InputAddress;
@@ -58,6 +51,8 @@ namespace MassTransit.Testing
 
             configurator.ReceiveEndpoint(ExecuteQueueName, x =>
             {
+                OnConfigureExecuteReceiveEndpoint?.Invoke(x);
+
                 x.ExecuteActivityHost(CompensateAddress, _activityFactory, _configureExecute);
 
                 ExecuteAddress = x.InputAddress;

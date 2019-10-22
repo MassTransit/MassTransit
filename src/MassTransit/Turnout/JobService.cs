@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Turnout
 {
@@ -16,16 +16,16 @@ namespace MassTransit.Turnout
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Commands;
+    using Context;
     using Contracts;
     using GreenPipes;
-    using Logging;
+    using Metadata;
+    using Util;
 
 
     public class JobService :
         IJobService
     {
-        static readonly ILog _log = Logger.Get<JobService>();
-
         readonly Uri _managementAddress;
         readonly IJobRegistry _registry;
         readonly TimeSpan _superviseInterval;
@@ -67,8 +67,7 @@ namespace MassTransit.Turnout
 
             var check = new SuperviseJobCommand<T>(jobHandle.JobId, job, utcNow, jobHandle.Status);
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Scheduled Job Supervision: {0}-{1}", jobHandle.JobId.ToString("N"), typeof(T).Name);
+            LogContext.Debug?.Log("Scheduled job supervision: {JobId} ({MessageType})", jobHandle.JobId, TypeMetadataCache<T>.ShortName);
 
             return context.ScheduleSend(_managementAddress, scheduledTime, check);
         }
@@ -85,20 +84,17 @@ namespace MassTransit.Turnout
                 {
                     try
                     {
-                        if (_log.IsDebugEnabled)
-                            _log.DebugFormat("Cancelling job: {0}", jobHandle.JobId);
+                        LogContext.Debug?.Log("Cancelling job: {JobId}", jobHandle.JobId);
 
                         await jobHandle.Cancel().ConfigureAwait(false);
 
-                        JobHandle removed;
-                        _registry.TryRemoveJob(jobHandle.JobId, out removed);
+                        _registry.TryRemoveJob(jobHandle.JobId, out _);
 
                         await jobHandle.NotifyCanceled("Job Service Stopped").ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
-                        if (_log.IsErrorEnabled)
-                            _log.Error($"Failed to cancel job: {jobHandle.JobId:N}", ex);
+                        LogContext.Error?.Log(ex, "Cancel job faulted: {JobId}", jobHandle.JobId);
                     }
                 }
             }

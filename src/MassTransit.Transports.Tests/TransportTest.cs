@@ -56,7 +56,7 @@ namespace MassTransit.Transports.Tests
 
                 Harness = harness;
 
-                harness.OnConfigureRabbitMqReceiveEndoint += x => x.BindMessageExchanges = Subscribe;
+                harness.OnConfigureRabbitMqReceiveEndpoint += x => x.BindMessageExchanges = Subscribe;
             }
             else if (HarnessType == typeof(ActiveMqTestHarness))
             {
@@ -64,7 +64,7 @@ namespace MassTransit.Transports.Tests
 
                 Harness = harness;
 
-                harness.OnConfigureActiveMqReceiveEndoint += x => x.BindMessageTopics = Subscribe;
+                harness.OnConfigureActiveMqReceiveEndpoint += x => x.BindMessageTopics = Subscribe;
             }
             else if (HarnessType == typeof(AzureServiceBusTestHarness))
             {

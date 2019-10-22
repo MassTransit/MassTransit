@@ -3,6 +3,7 @@ namespace MassTransit.Initializers.PropertyConverters
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Util;
 
 
     public class DictionaryPropertyConverter<TKey, TElement> :
@@ -15,26 +16,56 @@ namespace MassTransit.Initializers.PropertyConverters
             IEnumerable<KeyValuePair<TKey, TElement>> input)
             where TMessage : class
         {
-            return Task.FromResult(input?.ToDictionary(x => x.Key, x => x.Value));
+            switch (input)
+            {
+                case null:
+                    return TaskUtil.Default<Dictionary<TKey, TElement>>();
+                case Dictionary<TKey, TElement> dictionary:
+                    return Task.FromResult(dictionary);
+                default:
+                    return Task.FromResult(input.ToDictionary(x => x.Key, x => x.Value));
+            }
         }
 
         Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TElement>>>
             .Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TElement>> input)
         {
-            return Task.FromResult<IDictionary<TKey, TElement>>(input?.ToDictionary(x => x.Key, x => x.Value));
+            switch (input)
+            {
+                case null:
+                    return TaskUtil.Default<IDictionary<TKey, TElement>>();
+                case IDictionary<TKey, TElement> dictionary:
+                    return Task.FromResult(dictionary);
+                default:
+                    return Task.FromResult<IDictionary<TKey, TElement>>(input.ToDictionary(x => x.Key, x => x.Value));
+            }
         }
 
         Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TElement>>>
             .Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TElement>> input)
         {
-            return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(input?.ToDictionary(x => x.Key, x => x.Value));
+            switch (input)
+            {
+                case null:
+                    return TaskUtil.Default<IReadOnlyDictionary<TKey, TElement>>();
+                case IReadOnlyDictionary<TKey, TElement> dictionary:
+                    return Task.FromResult(dictionary);
+                default:
+                    return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(input.ToDictionary(x => x.Key, x => x.Value));
+            }
         }
 
         Task<IEnumerable<KeyValuePair<TKey, TElement>>>
             IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TKey, TElement>>>.Convert<TMessage>(
                 InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TElement>> input)
         {
-            return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(input?.ToDictionary(x => x.Key, x => x.Value));
+            switch (input)
+            {
+                case null:
+                    return TaskUtil.Default<IEnumerable<KeyValuePair<TKey, TElement>>>();
+                default:
+                    return Task.FromResult(input);
+            }
         }
     }
 
@@ -52,37 +83,131 @@ namespace MassTransit.Initializers.PropertyConverters
             _converter = converter;
         }
 
-        public async Task<Dictionary<TKey, TElement>> Convert<TMessage>(InitializeContext<TMessage> context,
+        public Task<Dictionary<TKey, TElement>> Convert<TMessage>(InitializeContext<TMessage> context,
+            IEnumerable<KeyValuePair<TKey, TInputElement>> input)
+            where TMessage : class
+        {
+            return ConvertSync(context, input);
+        }
+
+        Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.
+            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
+        {
+            var resultTask = ConvertSync(context, input);
+            if (resultTask.IsCompleted)
+                return Task.FromResult<IDictionary<TKey, TElement>>(resultTask.Result);
+
+            async Task<IDictionary<TKey, TElement>> ConvertAsync()
+            {
+                return await resultTask.ConfigureAwait(false);
+            }
+
+            return ConvertAsync();
+        }
+
+        Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.
+            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
+        {
+            var resultTask = ConvertSync(context, input);
+            if (resultTask.IsCompleted)
+                return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
+
+            async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
+            {
+                return await resultTask.ConfigureAwait(false);
+            }
+
+            return ConvertAsync();
+        }
+
+        Task<IEnumerable<KeyValuePair<TKey, TElement>>>
+            IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.Convert<TMessage>(
+                InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
+        {
+            var resultTask = ConvertSync(context, input);
+            if (resultTask.IsCompleted)
+                return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
+
+            async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
+            {
+                return await resultTask.ConfigureAwait(false);
+            }
+
+            return ConvertAsync();
+        }
+
+        Task<Dictionary<TKey, TElement>> ConvertSync<TMessage>(InitializeContext<TMessage> context,
             IEnumerable<KeyValuePair<TKey, TInputElement>> input)
             where TMessage : class
         {
             if (input == null)
-                return default;
+                return TaskUtil.Default<Dictionary<TKey, TElement>>();
 
-            (TKey Key, TElement Value)[] elements = await Task
-                .WhenAll(input.Select(async x => (x.Key, await _converter.Convert(context, x.Value).ConfigureAwait(false))))
-                .ConfigureAwait(false);
+            int capacity = 0;
+            if (input is ICollection<TElement> collection)
+            {
+                capacity = collection.Count;
+                if (capacity == 0)
+                    return Task.FromResult(new Dictionary<TKey, TElement>());
+            }
 
-            return elements.ToDictionary(x => x.Key, x => x.Value);
-        }
+            Dictionary<TKey, TElement> results = new Dictionary<TKey, TElement>(capacity);
+            IEnumerator<KeyValuePair<TKey, TInputElement>> enumerator = input.GetEnumerator();
+            bool disposeEnumerator = true;
+            try
+            {
+                async Task<Dictionary<TKey, TElement>> ConvertAsync(IEnumerator<KeyValuePair<TKey, TInputElement>> asyncEnumerator, Task<TElement> elementTask)
+                {
+                    try
+                    {
+                        var element = await elementTask.ConfigureAwait(false);
 
-        async Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.
-            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
-        {
-            return await Convert(context, input).ConfigureAwait(false);
-        }
+                        results.Add(asyncEnumerator.Current.Key, element);
 
-        async Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.
-            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
-        {
-            return await Convert(context, input).ConfigureAwait(false);
-        }
+                        while (asyncEnumerator.MoveNext())
+                        {
+                            var current = asyncEnumerator.Current;
 
-        async Task<IEnumerable<KeyValuePair<TKey, TElement>>>
-            IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.Convert<TMessage>(
-                InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
-        {
-            return await Convert(context, input).ConfigureAwait(false);
+                            elementTask = _converter.Convert(context, current.Value);
+                            if (elementTask.IsCompleted)
+                                results.Add(current.Key, elementTask.Result);
+                            else
+                            {
+                                element = await elementTask.ConfigureAwait(false);
+
+                                results.Add(asyncEnumerator.Current.Key, element);
+                            }
+                        }
+
+                        return results;
+                    }
+                    finally
+                    {
+                        asyncEnumerator.Dispose();
+                    }
+                }
+
+                while (enumerator.MoveNext())
+                {
+                    var current = enumerator.Current;
+
+                    var elementTask = _converter.Convert(context, current.Value);
+                    if (elementTask.IsCompleted)
+                        results.Add(current.Key, elementTask.Result);
+                    else
+                    {
+                        disposeEnumerator = false;
+                        return ConvertAsync(enumerator, elementTask);
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeEnumerator)
+                    enumerator.Dispose();
+            }
+
+            return Task.FromResult(results);
         }
     }
 
@@ -100,37 +225,131 @@ namespace MassTransit.Initializers.PropertyConverters
             _converter = converter;
         }
 
-        public async Task<Dictionary<TKey, TElement>> Convert<TMessage>(InitializeContext<TMessage> context,
+        public Task<Dictionary<TKey, TElement>> Convert<TMessage>(InitializeContext<TMessage> context,
+            IEnumerable<KeyValuePair<TInputKey, TElement>> input)
+            where TMessage : class
+        {
+            return ConvertSync(context, input);
+        }
+
+        Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.
+            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
+        {
+            var resultTask = ConvertSync(context, input);
+            if (resultTask.IsCompleted)
+                return Task.FromResult<IDictionary<TKey, TElement>>(resultTask.Result);
+
+            async Task<IDictionary<TKey, TElement>> ConvertAsync()
+            {
+                return await resultTask.ConfigureAwait(false);
+            }
+
+            return ConvertAsync();
+        }
+
+        Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.
+            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
+        {
+            var resultTask = ConvertSync(context, input);
+            if (resultTask.IsCompleted)
+                return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
+
+            async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
+            {
+                return await resultTask.ConfigureAwait(false);
+            }
+
+            return ConvertAsync();
+        }
+
+        Task<IEnumerable<KeyValuePair<TKey, TElement>>>
+            IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.Convert<TMessage>(
+                InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
+        {
+            var resultTask = ConvertSync(context, input);
+            if (resultTask.IsCompleted)
+                return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
+
+            async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
+            {
+                return await resultTask.ConfigureAwait(false);
+            }
+
+            return ConvertAsync();
+        }
+
+        Task<Dictionary<TKey, TElement>> ConvertSync<TMessage>(InitializeContext<TMessage> context,
             IEnumerable<KeyValuePair<TInputKey, TElement>> input)
             where TMessage : class
         {
             if (input == null)
-                return default;
+                return TaskUtil.Default<Dictionary<TKey, TElement>>();
 
-            (TKey Key, TElement Value)[] elements = await Task
-                .WhenAll(input.Select(async x => (await _converter.Convert(context, x.Key).ConfigureAwait(false), x.Value)))
-                .ConfigureAwait(false);
+            int capacity = 0;
+            if (input is ICollection<TElement> collection)
+            {
+                capacity = collection.Count;
+                if (capacity == 0)
+                    return Task.FromResult(new Dictionary<TKey, TElement>());
+            }
 
-            return elements.ToDictionary(x => x.Key, x => x.Value);
-        }
+            Dictionary<TKey, TElement> results = new Dictionary<TKey, TElement>(capacity);
+            IEnumerator<KeyValuePair<TInputKey, TElement>> enumerator = input.GetEnumerator();
+            bool disposeEnumerator = true;
+            try
+            {
+                async Task<Dictionary<TKey, TElement>> ConvertAsync(IEnumerator<KeyValuePair<TInputKey, TElement>> asyncEnumerator, Task<TKey> keyTask)
+                {
+                    try
+                    {
+                        var key = await keyTask.ConfigureAwait(false);
 
-        async Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.
-            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
-        {
-            return await Convert(context, input).ConfigureAwait(false);
-        }
+                        results.Add(key, asyncEnumerator.Current.Value);
 
-        async Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.
-            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
-        {
-            return await Convert(context, input).ConfigureAwait(false);
-        }
+                        while (asyncEnumerator.MoveNext())
+                        {
+                            var current = asyncEnumerator.Current;
 
-        async Task<IEnumerable<KeyValuePair<TKey, TElement>>>
-            IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.Convert<TMessage>(
-                InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
-        {
-            return await Convert(context, input).ConfigureAwait(false);
+                            keyTask = _converter.Convert(context, current.Key);
+                            if (keyTask.IsCompleted)
+                                results.Add(keyTask.Result, current.Value);
+                            else
+                            {
+                                key = await keyTask.ConfigureAwait(false);
+
+                                results.Add(key, asyncEnumerator.Current.Value);
+                            }
+                        }
+
+                        return results;
+                    }
+                    finally
+                    {
+                        asyncEnumerator.Dispose();
+                    }
+                }
+
+                while (enumerator.MoveNext())
+                {
+                    var current = enumerator.Current;
+
+                    var keyTask = _converter.Convert(context, current.Key);
+                    if (keyTask.IsCompleted)
+                        results.Add(keyTask.Result, current.Value);
+                    else
+                    {
+                        disposeEnumerator = false;
+                        return ConvertAsync(enumerator, keyTask);
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeEnumerator)
+                    enumerator.Dispose();
+            }
+
+            return Task.FromResult(results);
         }
     }
 
@@ -151,39 +370,133 @@ namespace MassTransit.Initializers.PropertyConverters
             _keyConverter = keyConverter;
         }
 
-        public async Task<Dictionary<TKey, TElement>> Convert<TMessage>(InitializeContext<TMessage> context,
+        public Task<Dictionary<TKey, TElement>> Convert<TMessage>(InitializeContext<TMessage> context,
+            IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
+            where TMessage : class
+        {
+            return ConvertSync(context, input);
+        }
+
+        Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>
+            .Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
+        {
+            var resultTask = ConvertSync(context, input);
+            if (resultTask.IsCompleted)
+                return Task.FromResult<IDictionary<TKey, TElement>>(resultTask.Result);
+
+            async Task<IDictionary<TKey, TElement>> ConvertAsync()
+            {
+                return await resultTask.ConfigureAwait(false);
+            }
+
+            return ConvertAsync();
+        }
+
+        Task<IReadOnlyDictionary<TKey, TElement>>
+            IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>.
+            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
+        {
+            var resultTask = ConvertSync(context, input);
+            if (resultTask.IsCompleted)
+                return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
+
+            async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
+            {
+                return await resultTask.ConfigureAwait(false);
+            }
+
+            return ConvertAsync();
+        }
+
+        Task<IEnumerable<KeyValuePair<TKey, TElement>>> IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>,
+            IEnumerable<KeyValuePair<TInputKey, TInputElement>>>.Convert<TMessage>(InitializeContext<TMessage> context,
+            IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
+        {
+            var resultTask = ConvertSync(context, input);
+            if (resultTask.IsCompleted)
+                return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
+
+            async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
+            {
+                return await resultTask.ConfigureAwait(false);
+            }
+
+            return ConvertAsync();
+        }
+
+        Task<Dictionary<TKey, TElement>> ConvertSync<TMessage>(InitializeContext<TMessage> context,
             IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
             where TMessage : class
         {
             if (input == null)
-                return default;
+                return TaskUtil.Default<Dictionary<TKey, TElement>>();
 
-            (TKey Key, TElement Value)[] elements = await Task
-                .WhenAll(input.Select(async x => (await _keyConverter.Convert(context, x.Key).ConfigureAwait(false),
-                    await _elementConverter.Convert(context, x.Value).ConfigureAwait(false))))
-                .ConfigureAwait(false);
+            int capacity = 0;
+            if (input is ICollection<TElement> collection)
+            {
+                capacity = collection.Count;
+                if (capacity == 0)
+                    return Task.FromResult(new Dictionary<TKey, TElement>());
+            }
 
-            return elements.ToDictionary(x => x.Key, x => x.Value);
-        }
+            Dictionary<TKey, TElement> results = new Dictionary<TKey, TElement>(capacity);
+            IEnumerator<KeyValuePair<TInputKey, TInputElement>> enumerator = input.GetEnumerator();
+            bool disposeEnumerator = true;
+            try
+            {
+                async Task<Dictionary<TKey, TElement>> ConvertAsync(IEnumerator<KeyValuePair<TInputKey, TInputElement>> asyncEnumerator, Task<TKey> keyTask,
+                    Task<TElement> elementTask)
+                {
+                    try
+                    {
+                        var key = keyTask.IsCompleted ? keyTask.Result : await keyTask.ConfigureAwait(false);
+                        var element = elementTask.IsCompleted ? elementTask.Result : await elementTask.ConfigureAwait(false);
 
-        async Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>
-            .Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
-        {
-            return await Convert(context, input).ConfigureAwait(false);
-        }
+                        results.Add(key, element);
 
-        async Task<IReadOnlyDictionary<TKey, TElement>>
-            IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>.
-            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
-        {
-            return await Convert(context, input).ConfigureAwait(false);
-        }
+                        while (asyncEnumerator.MoveNext())
+                        {
+                            var current = asyncEnumerator.Current;
 
-        async Task<IEnumerable<KeyValuePair<TKey, TElement>>> IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>,
-            IEnumerable<KeyValuePair<TInputKey, TInputElement>>>.Convert<TMessage>(InitializeContext<TMessage> context,
-            IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
-        {
-            return await Convert(context, input).ConfigureAwait(false);
+                            keyTask = _keyConverter.Convert(context, current.Key);
+                            elementTask = _elementConverter.Convert(context, current.Value);
+
+                            key = keyTask.IsCompleted ? keyTask.Result : await keyTask.ConfigureAwait(false);
+                            element = elementTask.IsCompleted ? elementTask.Result : await elementTask.ConfigureAwait(false);
+
+                            results.Add(key, element);
+                        }
+
+                        return results;
+                    }
+                    finally
+                    {
+                        asyncEnumerator.Dispose();
+                    }
+                }
+
+                while (enumerator.MoveNext())
+                {
+                    var current = enumerator.Current;
+
+                    var keyTask = _keyConverter.Convert(context, current.Key);
+                    var elementTask = _elementConverter.Convert(context, current.Value);
+                    if (keyTask.IsCompleted && elementTask.IsCompleted)
+                        results.Add(keyTask.Result, elementTask.Result);
+                    else
+                    {
+                        disposeEnumerator = false;
+                        return ConvertAsync(enumerator, keyTask, elementTask);
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeEnumerator)
+                    enumerator.Dispose();
+            }
+
+            return Task.FromResult(results);
         }
     }
 }

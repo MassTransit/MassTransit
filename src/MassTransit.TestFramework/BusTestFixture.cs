@@ -1,19 +1,11 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.TestFramework
 {
     using System;
+    using System.Diagnostics;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Context;
+    using Logging;
     using Testing;
 
 
@@ -23,10 +15,25 @@ namespace MassTransit.TestFramework
     public abstract class BusTestFixture :
         AsyncTestFixture
     {
+        static int _subscribedObserver;
+
         protected BusTestFixture(BusTestHarness harness)
             : base(harness)
         {
             BusTestHarness = harness;
+
+            harness.OnConnectObservers += ConnectObservers;
+            harness.OnConfigureBus += ConfigureBus;
+        }
+
+        void ConfigureBus(IBusFactoryConfigurator configurator)
+        {
+            var loggerFactory = new TestOutputLoggerFactory(true);
+
+            LogContext.ConfigureCurrentLogContext(loggerFactory);
+
+            if (Interlocked.CompareExchange(ref _subscribedObserver, 1, 0) == 0)
+                DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
         }
 
         protected BusTestHarness BusTestHarness { get; }
@@ -114,7 +121,7 @@ namespace MassTransit.TestFramework
         }
 
         /// <summary>
-        /// Registers a handler on the receive endpoint that is completed after the specified handler is 
+        /// Registers a handler on the receive endpoint that is completed after the specified handler is
         /// executed and canceled if the test is canceled.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -129,11 +136,6 @@ namespace MassTransit.TestFramework
 
         protected virtual void ConnectObservers(IBus bus)
         {
-        }
-
-        protected void LogEndpoint(IReceiveEndpointConfigurator configurator)
-        {
-            BusTestHarness.LogEndpoint(configurator);
         }
     }
 }

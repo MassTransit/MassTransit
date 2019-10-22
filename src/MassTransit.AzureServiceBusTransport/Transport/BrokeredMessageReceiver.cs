@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Transport
+﻿namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
@@ -30,14 +18,12 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         IBrokeredMessageReceiver
     {
         readonly Uri _inputAddress;
-        readonly ILog _log;
-        readonly ReceiveEndpointContext _receiveEndpointContext;
+        readonly ReceiveEndpointContext _context;
 
-        public BrokeredMessageReceiver(Uri inputAddress, ILog log, ReceiveEndpointContext receiveEndpointContext)
+        public BrokeredMessageReceiver(Uri inputAddress, ReceiveEndpointContext context)
         {
             _inputAddress = inputAddress;
-            _log = log;
-            _receiveEndpointContext = receiveEndpointContext;
+            _context = context;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -48,27 +34,33 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveObserver(observer);
+            return _context.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveEndpointContext.ConnectPublishObserver(observer);
+            return _context.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            return _receiveEndpointContext.ConnectSendObserver(observer);
+            return _context.ConnectSendObserver(observer);
         }
 
         async Task IBrokeredMessageReceiver.Handle(BrokeredMessage message, Action<ReceiveContext> contextCallback)
         {
-            var context = new ServiceBusReceiveContext(_inputAddress, message, _receiveEndpointContext);
+            LogContext.Current = _context.LogContext;
+
+            var context = new ServiceBusReceiveContext(_inputAddress, message, _context);
             contextCallback?.Invoke(context);
+
+            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
+            activity.AddReceiveContextHeaders(context);
 
             try
             {
-                await _receiveEndpointContext.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
 
                 if (message.LockedUntilUtc <= DateTime.UtcNow)
                     throw new MessageLockExpiredException(_inputAddress, $"The message lock expired: {message.MessageId}");
@@ -76,13 +68,14 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 if (message.ExpiresAtUtc < DateTime.UtcNow)
                     throw new MessageTimeToLiveExpiredException(_inputAddress, $"The message TTL expired: {message.MessageId}");
 
-                await _receiveEndpointContext.ReceivePipe.Send(context).ConfigureAwait(false);
+                await _context.ReceivePipe.Send(context).ConfigureAwait(false);
 
                 await context.ReceiveCompleted.ConfigureAwait(false);
 
                 await message.CompleteAsync().ConfigureAwait(false);
 
-                await _receiveEndpointContext.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -92,26 +85,28 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 }
                 catch (Exception exception)
                 {
-                    if (_log.IsWarnEnabled)
-                        _log.Warn($"Abandon message faulted: {message.MessageId}", exception);
+                    LogContext.Warning?.Log(exception, "Abandon message faulted: {MessageId", message.MessageId);
                 }
 
-                await _receiveEndpointContext.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+                if (_context.ReceiveObservers.Count > 0)
+                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             finally
             {
+                activity?.Stop();
+
                 context.Dispose();
             }
         }
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
-            return _receiveEndpointContext.ReceivePipe.ConnectConsumeMessageObserver(observer);
+            return _context.ReceivePipe.ConnectConsumeMessageObserver(observer);
         }
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
-            return _receiveEndpointContext.ReceivePipe.ConnectConsumeObserver(observer);
+            return _context.ReceivePipe.ConnectConsumeObserver(observer);
         }
     }
 }

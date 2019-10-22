@@ -17,6 +17,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using System.Threading.Tasks;
     using Configuration;
     using GreenPipes;
+    using Metadata;
     using NUnit.Framework;
     using TestFramework.Messages;
     using Util;

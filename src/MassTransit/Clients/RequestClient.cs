@@ -3,6 +3,7 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Initializers;
 
 
     public class RequestClient<TRequest> :
@@ -30,9 +31,16 @@
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            Task<TRequest> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
+            Task<InitializeContext<TRequest>> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
 
-            return new ClientRequestHandle<TRequest>(_context, _requestSendEndpoint, request, cancellationToken, timeout.Or(_timeout));
+            async Task<TRequest> Message()
+            {
+                var message = await request.ConfigureAwait(false);
+
+                return message.Message;
+            }
+
+            return new ClientRequestHandle<TRequest>(_context, _requestSendEndpoint, Message(), cancellationToken, timeout.Or(_timeout));
         }
 
         public Task<Response<T>> GetResponse<T>(TRequest message, CancellationToken cancellationToken, RequestTimeout timeout)
@@ -47,9 +55,16 @@
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            Task<TRequest> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
+            Task<InitializeContext<TRequest>> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
 
-            return GetResponse<T>(request, cancellationToken, timeout);
+            async Task<TRequest> Message()
+            {
+                var message = await request.ConfigureAwait(false);
+
+                return message.Message;
+            }
+
+            return GetResponse<T>(Message(), cancellationToken, timeout);
         }
 
         async Task<Response<T>> GetResponse<T>(Task<TRequest> message, CancellationToken cancellationToken, RequestTimeout timeout)
@@ -78,9 +93,17 @@
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            Task<TRequest> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
+            Task<InitializeContext<TRequest>> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
 
-            return GetResponse<T1, T2>(request, cancellationToken, timeout);
+            async Task<TRequest> Message()
+            {
+                var message = await request.ConfigureAwait(false);
+
+                return message.Message;
+            }
+
+
+            return GetResponse<T1, T2>(Message(), cancellationToken, timeout);
         }
 
         async Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponse<T1, T2>(Task<TRequest> message, CancellationToken cancellationToken,

@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Host
 {
@@ -16,9 +16,10 @@ namespace MassTransit.Host
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Context;
     using Hosting;
     using Internals.Extensions;
-    using Logging;
+    using Metadata;
     using Util;
     using Util.Scanning;
 
@@ -27,7 +28,6 @@ namespace MassTransit.Host
     {
         readonly string _endpointSpecificationTypeName;
         readonly string _hostBusFactoryTypeName;
-        readonly ILog _log = Logger.Get<ServiceAssemblyScanner>();
         readonly string _serviceSpecificationTypeName;
 
         public ServiceAssemblyScanner()
@@ -98,7 +98,7 @@ namespace MassTransit.Host
             }
             catch (BadImageFormatException e)
             {
-                _log.Debug("Could not scan contents of assembly " + assemblyFile, e);
+                LogContext.Warning?.Log(e, "Assembly Scan failed: {File}", assemblyFile);
                 return null;
             }
         }
@@ -107,7 +107,7 @@ namespace MassTransit.Host
         {
             foreach (var interfaceType in type.GetInterfaces())
             {
-                var name = interfaceType.GetTypeName();
+                var name = TypeMetadataCache.GetShortName(interfaceType);
 
                 if (name.Equals(_endpointSpecificationTypeName, StringComparison.InvariantCultureIgnoreCase))
                     return true;
@@ -123,7 +123,7 @@ namespace MassTransit.Host
         {
             foreach (var interfaceType in type.GetInterfaces())
             {
-                var name = interfaceType.GetTypeName();
+                var name = TypeMetadataCache.GetShortName(interfaceType);
 
                 if (name.Equals(_hostBusFactoryTypeName, StringComparison.InvariantCultureIgnoreCase))
                     return true;

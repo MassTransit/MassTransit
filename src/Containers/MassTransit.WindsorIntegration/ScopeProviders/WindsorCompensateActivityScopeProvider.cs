@@ -3,7 +3,6 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
     using System;
     using Castle.MicroKernel;
     using Courier;
-    using Courier.Hosts;
     using GreenPipes;
     using Scoping;
     using Scoping.CourierContexts;
@@ -11,7 +10,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
 
     public class WindsorCompensateActivityScopeProvider<TActivity, TLog> :
         ICompensateActivityScopeProvider<TActivity, TLog>
-        where TActivity : class, CompensateActivity<TLog>
+        where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
         readonly IKernel _kernel;
@@ -25,21 +24,21 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
         {
             if (context.TryGetPayload<IKernel>(out var kernel))
             {
-                kernel.UpdateScope(context.ConsumeContext);
+                kernel.UpdateScope(context);
 
                 var activity = kernel.Resolve<TActivity>(new Arguments().AddTyped(context.Log));
 
-                CompensateActivityContext<TActivity, TLog> activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+                CompensateActivityContext<TActivity, TLog> activityContext = context.CreateActivityContext(activity);
 
                 return new ExistingCompensateActivityScopeContext<TActivity, TLog>(activityContext, ReleaseComponent);
             }
 
-            var scope = _kernel.CreateNewOrUseExistingMessageScope(context.ConsumeContext);
+            var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
             try
             {
                 var activity = _kernel.Resolve<TActivity>(new Arguments().AddTyped(context.Log));
 
-                CompensateActivityContext<TActivity, TLog> activityContext = new HostCompensateActivityContext<TActivity, TLog>(activity, context);
+                CompensateActivityContext<TActivity, TLog> activityContext = context.CreateActivityContext(activity);
                 activityContext.UpdatePayload(_kernel);
 
                 return new CreatedCompensateActivityScopeContext<IDisposable, TActivity, TLog>(scope, activityContext, ReleaseComponent);

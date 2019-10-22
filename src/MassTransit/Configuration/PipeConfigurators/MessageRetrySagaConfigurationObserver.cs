@@ -2,6 +2,7 @@ namespace MassTransit.PipeConfigurators
 {
     using System;
     using System.Threading;
+    using Automatonymous;
     using Context;
     using GreenPipes;
     using GreenPipes.Configurators;
@@ -31,6 +32,11 @@ namespace MassTransit.PipeConfigurators
         }
 
         void ISagaConfigurationObserver.SagaConfigured<T>(ISagaConfigurator<T> configurator)
+        {
+        }
+
+        public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+            where TInstance : class, ISaga, SagaStateMachineInstance
         {
         }
 

@@ -15,7 +15,6 @@ namespace MassTransit.QuartzService
     using System;
     using Configuration;
     using GreenPipes;
-    using Logging;
     using Quartz;
     using Quartz.Impl;
     using QuartzIntegration;
@@ -29,7 +28,6 @@ namespace MassTransit.QuartzService
     {
         readonly IConfigurationProvider _configurationProvider;
         readonly int _consumerLimit;
-        readonly ILog _log = Logger.Get<ScheduleMessageService>();
         readonly string _queueName;
         readonly IScheduler _scheduler;
         IBusControl _bus;

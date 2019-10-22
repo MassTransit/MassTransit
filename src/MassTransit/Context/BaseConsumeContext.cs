@@ -2,46 +2,42 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Converters;
     using Events;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Initializers;
+    using Metadata;
     using Pipeline.Pipes;
     using Util;
 
 
     public abstract class BaseConsumeContext :
-        BasePipeContext,
         ConsumeContext
     {
         readonly Lazy<IPublishEndpoint> _publishEndpoint;
 
         protected BaseConsumeContext(ReceiveContext receiveContext)
-            : base(receiveContext)
         {
             ReceiveContext = receiveContext;
 
             _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
         }
 
-        protected BaseConsumeContext(ConsumeContext consumeContext)
-            : base(consumeContext)
-        {
-            ReceiveContext = consumeContext.ReceiveContext;
+        public virtual CancellationToken CancellationToken => ReceiveContext.CancellationToken;
 
-            _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
-        }
+        public abstract bool HasPayloadType(Type payloadType);
 
-        protected BaseConsumeContext(ConsumeContext consumeContext, IPayloadCache payloadCache)
-            : base(payloadCache, consumeContext.CancellationToken)
-        {
-            ReceiveContext = consumeContext.ReceiveContext;
+        public abstract bool TryGetPayload<T>(out T payload)
+            where T : class;
 
-            _publishEndpoint = new Lazy<IPublishEndpoint>(CreatePublishEndpoint);
-        }
+        public abstract T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
+            where T : class;
+
+        public abstract T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
+            where T : class;
 
         public virtual ReceiveContext ReceiveContext { get; }
 
@@ -247,12 +243,12 @@ namespace MassTransit.Context
             return ReceiveContext.NotifyConsumed(context, duration, consumerType);
         }
 
-        public virtual Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        public virtual async Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            AddConsumeTask(GenerateFault(context, exception));
+            await GenerateFault(context, exception).ConfigureAwait(false);
 
-            return ReceiveContext.NotifyFaulted(context, duration, consumerType, exception);
+            await ReceiveContext.NotifyFaulted(context, duration, consumerType, exception).ConfigureAwait(false);
         }
 
         public virtual Task Publish<T>(T message, CancellationToken cancellationToken)
@@ -338,7 +334,7 @@ namespace MassTransit.Context
         async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
             where T : class
         {
-            Fault<T> fault = new FaultEvent<T>(context.Message, context.MessageId, HostMetadataCache.Host, exception);
+            Fault<T> fault = new FaultEvent<T>(context.Message, context.MessageId, HostMetadataCache.Host, exception, context.SupportedMessageTypes.ToArray());
 
             var faultPipe = new FaultPipe<T>(context);
 
@@ -354,7 +350,7 @@ namespace MassTransit.Context
         }
 
 
-        struct FaultPipe<T> :
+        readonly struct FaultPipe<T> :
             IPipe<SendContext<Fault<T>>>
             where T : class
         {
@@ -371,6 +367,11 @@ namespace MassTransit.Context
 
                 context.CorrelationId = _context.CorrelationId;
                 context.RequestId = _context.RequestId;
+
+                if (_context.TryGetPayload(out ConsumeRetryContext retryContext) && retryContext.RetryCount > 0)
+                {
+                    context.Headers.Set(MessageHeaders.FaultRetryCount, retryContext.RetryCount);
+                }
 
                 return TaskUtil.Completed;
             }

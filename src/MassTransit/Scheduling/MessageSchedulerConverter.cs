@@ -1,22 +1,10 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Scheduling
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Internals.Extensions;
+    using Metadata;
 
 
     /// <summary>
@@ -29,24 +17,21 @@ namespace MassTransit.Scheduling
         where T : class
     {
         public async Task<ScheduledMessage> ScheduleSend(IMessageScheduler scheduler, Uri destinationAddress, DateTime scheduledTime, object message,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             if (scheduler == null)
                 throw new ArgumentNullException(nameof(scheduler));
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            var msg = message as T;
-            if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
+            if (message is T msg)
+                return await scheduler.ScheduleSend(destinationAddress, scheduledTime, msg, cancellationToken).ConfigureAwait(false);
 
-            ScheduledMessage scheduleSend = await scheduler.ScheduleSend(destinationAddress, scheduledTime, msg, cancellationToken).ConfigureAwait(false);
-
-            return scheduleSend;
+            throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
         }
 
         public async Task<ScheduledMessage> ScheduleSend(IMessageScheduler scheduler, Uri destinationAddress, DateTime scheduledTime, object message,
-            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
         {
             if (scheduler == null)
                 throw new ArgumentNullException(nameof(scheduler));
@@ -55,14 +40,11 @@ namespace MassTransit.Scheduling
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var msg = message as T;
-            if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
+            if (message is T msg)
+                return await scheduler.ScheduleSend(destinationAddress, scheduledTime, msg, pipe, cancellationToken).ConfigureAwait(false);
 
-            ScheduledMessage<T> scheduleSend =
-                await scheduler.ScheduleSend(destinationAddress, scheduledTime, msg, pipe, cancellationToken).ConfigureAwait(false);
+            throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
 
-            return scheduleSend;
         }
 
         public async Task<ScheduledRecurringMessage> ScheduleRecurringSend(IRecurringMessageScheduler scheduler, Uri destinationAddress,
@@ -75,14 +57,10 @@ namespace MassTransit.Scheduling
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            var msg = message as T;
-            if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
+            if (message is T msg)
+                return await scheduler.ScheduleRecurringSend(destinationAddress, schedule, msg, cancellationToken).ConfigureAwait(false);
 
-            ScheduledRecurringMessage<T> scheduleSend = await scheduler.ScheduleRecurringSend(destinationAddress, schedule, msg, cancellationToken)
-                .ConfigureAwait(false);
-
-            return scheduleSend;
+            throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
         }
 
         public async Task<ScheduledRecurringMessage> ScheduleRecurringSend(IRecurringMessageScheduler scheduler, Uri destinationAddress,
@@ -97,14 +75,10 @@ namespace MassTransit.Scheduling
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var msg = message as T;
-            if (msg == null)
-                throw new ArgumentException("Unexpected message type: " + message.GetType().GetTypeName());
+            if (message is T msg)
+                return await scheduler.ScheduleRecurringSend(destinationAddress, schedule, msg, pipe, cancellationToken).ConfigureAwait(false);
 
-            ScheduledRecurringMessage<T> scheduleSend = await scheduler.ScheduleRecurringSend(destinationAddress, schedule, msg, pipe, cancellationToken)
-                .ConfigureAwait(false);
-
-            return scheduleSend;
+            throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
         }
     }
 }

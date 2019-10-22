@@ -16,10 +16,10 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
+    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
 
@@ -27,7 +27,6 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     public class MessagingFactoryContextFactory :
         IPipeContextFactory<MessagingFactoryContext>
     {
-        static readonly ILog _log = Logger.Get<MessagingFactoryContextFactory>();
         readonly MessagingFactorySettings _messagingFactorySettings;
         readonly RetryPolicy _retryPolicy;
         readonly Uri _serviceUri;
@@ -89,15 +88,11 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 if (supervisor.Stopping.IsCancellationRequested)
                     throw new OperationCanceledException($"The connection is stopping and cannot be used: {_serviceUri}");
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connecting: {0}", _serviceUri);
-
                 var messagingFactory = await MessagingFactory.CreateAsync(_serviceUri, _messagingFactorySettings).ConfigureAwait(false);
 
                 messagingFactory.RetryPolicy = _retryPolicy;
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connected: {0}", _serviceUri);
+                LogContext.Debug?.Log("Connected: {Host}", _serviceUri);
 
                 var messagingFactoryContext = new ServiceBusMessagingFactoryContext(messagingFactory, supervisor.Stopped);
 
@@ -105,8 +100,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
             }
             catch (Exception ex)
             {
-                if (_log.IsDebugEnabled)
-                    _log.Debug($"MessagingFactory Create Failed: {_serviceUri}", ex);
+                LogContext.Error?.Log(ex, "Connect failed: {Host}", _serviceUri);
 
                 throw;
             }

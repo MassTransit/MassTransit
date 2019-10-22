@@ -6,7 +6,6 @@ namespace MassTransit.Context
     using System.Runtime.Serialization;
     using System.Threading;
     using GreenPipes;
-    using GreenPipes.Payloads;
 
 
     public abstract class BaseSendContext<TMessage> :
@@ -19,7 +18,7 @@ namespace MassTransit.Context
         IMessageSerializer _serializer;
 
         protected BaseSendContext(TMessage message, CancellationToken cancellationToken)
-            : base(new PayloadCache(), cancellationToken)
+            : base(cancellationToken)
         {
             Message = message;
 

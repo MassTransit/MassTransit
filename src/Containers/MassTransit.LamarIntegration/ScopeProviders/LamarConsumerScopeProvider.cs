@@ -3,6 +3,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
     using Context;
     using GreenPipes;
     using Lamar;
+    using Metadata;
     using Scoping;
     using Scoping.ConsumerContexts;
     using Util;
@@ -35,8 +36,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
             var nestedContainer = _container.GetNestedContainer(context);
             try
             {
-                var proxy = new ConsumeContextProxyScope(context);
-                proxy.UpdatePayload(nestedContainer);
+                var proxy = new ConsumeContextScope(context, nestedContainer);
 
                 return new CreatedConsumerScopeContext<INestedContainer>(nestedContainer, proxy);
             }
@@ -59,7 +59,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                var consumerContext = context.PushConsumer(consumer);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumer(consumer);
 
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext);
             }
@@ -71,8 +71,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                var consumerContext = context.PushConsumerScope(consumer, nestedContainer);
-                consumerContext.UpdatePayload(nestedContainer);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, nestedContainer);
 
                 return new CreatedConsumerScopeContext<INestedContainer, TConsumer, T>(nestedContainer, consumerContext);
             }

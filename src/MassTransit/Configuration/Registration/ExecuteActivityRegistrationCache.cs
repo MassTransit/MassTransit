@@ -1,15 +1,3 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Registration
 {
     using System;
@@ -17,6 +5,7 @@ namespace MassTransit.Registration
     using System.Linq;
     using Courier;
     using Internals.Extensions;
+    using Metadata;
     using Util;
 
 
@@ -24,14 +13,14 @@ namespace MassTransit.Registration
     {
         static CachedRegistration GetOrAdd(Type activityType)
         {
-            if (!activityType.HasInterface(typeof(ExecuteActivity<>)))
+            if (!activityType.HasInterface(typeof(IExecuteActivity<>)))
                 throw new ArgumentException($"The type is not an execute activity: {TypeMetadataCache.GetShortName(activityType)}", nameof(activityType));
 
-            if (activityType.HasInterface(typeof(CompensateActivity<>)))
+            if (activityType.HasInterface(typeof(ICompensateActivity<>)))
                 throw new ArgumentException($"The type is an activity, which supports compensation: {TypeMetadataCache.GetShortName(activityType)}",
                     nameof(activityType));
 
-            var argumentType = activityType.GetClosingArguments(typeof(ExecuteActivity<>)).Single();
+            var argumentType = activityType.GetClosingArguments(typeof(IExecuteActivity<>)).Single();
 
             return Cached.Instance.GetOrAdd(activityType,
                 _ => (CachedRegistration)Activator.CreateInstance(typeof(CachedRegistration<,>).MakeGenericType(activityType, argumentType)));
@@ -63,7 +52,7 @@ namespace MassTransit.Registration
 
         class CachedRegistration<TActivity, TArguments> :
             CachedRegistration
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             public void Register(IContainerRegistrar registrar)

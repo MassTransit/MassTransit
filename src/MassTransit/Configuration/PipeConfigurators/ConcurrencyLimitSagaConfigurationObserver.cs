@@ -1,5 +1,6 @@
 namespace MassTransit.PipeConfigurators
 {
+    using Automatonymous;
     using Pipeline.Filters.ConcurrencyLimit;
     using Saga;
     using SagaConfigurators;
@@ -26,6 +27,11 @@ namespace MassTransit.PipeConfigurators
         public IConcurrencyLimiter Limiter => _limiter;
 
         void ISagaConfigurationObserver.SagaConfigured<T>(ISagaConfigurator<T> configurator)
+        {
+        }
+
+        public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+            where TInstance : class, ISaga, SagaStateMachineInstance
         {
         }
 

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Contexts
+﻿namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
     using System.Collections.Concurrent;
@@ -19,34 +7,32 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Integration;
-    using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
-    using Topology;
     using Util;
 
 
     public class RabbitMqModelContext :
-        BasePipeContext,
+        ScopePipeContext,
         ModelContext,
         IAsyncDisposable
     {
-        static readonly ILog _log = Logger.Get<RabbitMqModelContext>();
-
         readonly ConnectionContext _connectionContext;
         readonly IModel _model;
+        readonly CancellationToken _cancellationToken;
         readonly ConcurrentDictionary<ulong, PendingPublish> _published;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         ulong _publishTagMax;
 
         public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
-            : base(new PayloadCacheScope(connectionContext), cancellationToken)
+            : base(connectionContext)
         {
             _connectionContext = connectionContext;
             _model = model;
+            _cancellationToken = cancellationToken;
 
             _published = new ConcurrentDictionary<ulong, PendingPublish>();
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
@@ -62,8 +48,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public Task DisposeAsync(CancellationToken cancellationToken)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Closing model: {0} / {1}", _model.ChannelNumber, _connectionContext.Description);
+            LogContext.Debug?.Log("Closing model: {ChannelNumber} {Host}", _model.ChannelNumber, _connectionContext.Description);
 
             try
             {
@@ -77,22 +62,27 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
                         _model.WaitForConfirms(_connectionContext.StopTimeout, out timedOut);
                         if (timedOut)
-                            _log.WarnFormat("Timeout waiting for pending confirms: {0}", _connectionContext.Description);
+                            LogContext.Warning?.Log("Timeout waiting for pending confirms:  {ChannelNumber} {Host}", _model.ChannelNumber,
+                                _connectionContext.Description);
                         else
-                            _log.DebugFormat("Pending confirms complete: {0}", _connectionContext.Description);
+                            LogContext.Debug?.Log("Pending confirms complete:  {ChannelNumber} {Host}", _model.ChannelNumber,
+                                _connectionContext.Description);
                     }
                     while (timedOut);
                 }
             }
             catch (Exception ex)
             {
-                _log.Error("Fault waiting for confirms", ex);
+                LogContext.Error?.Log(ex, "Fault waiting for pending confirms:  {ChannelNumber} {Host}", _model.ChannelNumber,
+                    _connectionContext.Description);
             }
 
             _model.Cleanup(200, "ModelContext Disposed");
 
             return TaskUtil.Completed;
         }
+
+        CancellationToken PipeContext.CancellationToken => _cancellationToken;
 
         IModel ModelContext.Model => _model;
 
@@ -191,8 +181,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         void OnBasicReturn(object model, BasicReturnEventArgs args)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("BasicReturn: {0}-{1} {2}", args.ReplyCode, args.ReplyText, args.BasicProperties.MessageId);
+            LogContext.Debug?.Log("BasicReturn: {ReplyCode}-{ReplyText} {MessageId}", args.ReplyCode, args.ReplyText, args.BasicProperties.MessageId);
 
             if (args.BasicProperties.Headers.TryGetValue("publishId", out var value))
             {

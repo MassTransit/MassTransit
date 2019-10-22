@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier.Results
 {
     using System;
@@ -54,7 +42,7 @@ namespace MassTransit.Courier.Results
             {
                 ISendEndpoint endpoint = await _compensateContext.GetSendEndpoint(routingSlip.GetNextCompensateAddress()).ConfigureAwait(false);
 
-                 await _compensateContext.ConsumeContext.Forward(endpoint, routingSlip).ConfigureAwait(false);
+                 await _compensateContext.Forward(endpoint, routingSlip).ConfigureAwait(false);
             }
             else
             {
@@ -64,6 +52,12 @@ namespace MassTransit.Courier.Results
                 await _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, _routingSlip.Variables,
                     _routingSlip.ActivityExceptions.ToArray()).ConfigureAwait(false);
             }
+        }
+
+        public bool IsFailed(out Exception exception)
+        {
+            exception = default;
+            return false;
         }
 
         bool HasMoreCompensations(RoutingSlip routingSlip)

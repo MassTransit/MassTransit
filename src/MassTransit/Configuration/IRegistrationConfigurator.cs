@@ -1,18 +1,7 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
     using System;
+    using Automatonymous;
     using ConsumeConfigurators;
     using Courier;
     using Definition;
@@ -46,21 +35,29 @@ namespace MassTransit
             where T : class, ISaga;
 
         /// <summary>
-        /// Adds the saga, using the specified factory, allowing configuration when it is configured on the endpoint. This is used
-        /// to add advanced sagas, such as state machines, to the standard saga registration.
-        /// </summary>
-        /// <param name="factory">The saga registration factory</param>
-        /// <param name="configure"></param>
-        /// <typeparam name="T">The saga type (or instance type, if it's a state machine)</typeparam>
-        ISagaRegistrationConfigurator<T> AddSaga<T>(SagaRegistrationFactory<T> factory, Action<ISagaConfigurator<T>> configure = null)
-            where T : class, ISaga;
-
-        /// <summary>
         /// Adds the saga, along with an optional saga definition
         /// </summary>
         /// <param name="sagaType">The saga type</param>
         /// <param name="sagaDefinitionType">The saga definition type</param>
         void AddSaga(Type sagaType, Type sagaDefinitionType = null);
+
+        /// <summary>
+        /// Adds a SagaStateMachine to the registry, using the factory method, and updates the registrar prior to registering so that the default
+        /// saga registrar isn't notified.
+        /// </summary>
+        /// <param name="sagaDefinitionType"></param>
+        /// <typeparam name="TStateMachine"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Type sagaDefinitionType = null)
+            where TStateMachine : class, SagaStateMachine<T>
+            where T : class, SagaStateMachineInstance;
+
+        /// <summary>
+        /// Adds the state machine saga, along with an optional saga definition
+        /// </summary>
+        /// <param name="sagaType">The saga type</param>
+        /// <param name="sagaDefinitionType">The saga definition type</param>
+        void AddSagaStateMachine(Type sagaType, Type sagaDefinitionType = null);
 
         /// <summary>
         /// Adds an execute activity (Courier), allowing configuration when it is configured on the endpoint.
@@ -70,7 +67,7 @@ namespace MassTransit
         /// <typeparam name="TArguments">The argument type</typeparam>
         IExecuteActivityRegistrationConfigurator<TActivity, TArguments> AddExecuteActivity<TActivity, TArguments>(
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class;
 
         /// <summary>
@@ -91,7 +88,7 @@ namespace MassTransit
         IActivityRegistrationConfigurator<TActivity, TArguments, TLog> AddActivity<TActivity, TArguments, TLog>(
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute = null,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate = null)
-            where TActivity : class, Activity<TArguments, TLog>
+            where TActivity : class, IActivity<TArguments, TLog>
             where TLog : class
             where TArguments : class;
 

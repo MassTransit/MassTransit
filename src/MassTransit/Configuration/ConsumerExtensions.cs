@@ -1,24 +1,13 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit
+﻿namespace MassTransit
 {
     using System;
     using ConsumeConfigurators;
     using ConsumeConnectors;
     using ConsumerSpecifications;
+    using Context;
     using GreenPipes;
     using Internals.Extensions;
-    using Logging;
+    using Metadata;
     using Pipeline;
     using Pipeline.ConsumerFactories;
     using Util;
@@ -26,8 +15,6 @@ namespace MassTransit
 
     public static class ConsumerExtensions
     {
-        static readonly ILog _log = Logger.Get(typeof(ConsumerExtensions));
-
         /// <summary>
         /// Connect a consumer to the receiving endpoint
         /// </summary>
@@ -40,8 +27,12 @@ namespace MassTransit
             Action<IConsumerConfigurator<TConsumer>> configure = null)
             where TConsumer : class, IConsumer
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Consumer: {0} (using supplied consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (consumerFactory == null)
+                throw new ArgumentNullException(nameof(consumerFactory));
+
+            LogContext.Debug?.Log("Subscribing Consumer: {ConsumerType} (using supplied consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
 
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, configurator);
 
@@ -53,26 +44,29 @@ namespace MassTransit
         /// <summary>
         /// Connect a consumer to the bus instance's default endpoint
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TConsumer"></typeparam>
         /// <param name="connector"></param>
         /// <param name="consumerFactory"></param>
         /// <param name="pipeSpecifications"></param>
         /// <returns></returns>
-        public static ConnectHandle ConnectConsumer<T>(this IConsumePipeConnector connector, IConsumerFactory<T> consumerFactory,
-            params IPipeSpecification<ConsumerConsumeContext<T>>[] pipeSpecifications)
-            where T : class, IConsumer
+        public static ConnectHandle ConnectConsumer<TConsumer>(this IConsumePipeConnector connector, IConsumerFactory<TConsumer> consumerFactory,
+            params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
+            where TConsumer : class, IConsumer
         {
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
             if (consumerFactory == null)
                 throw new ArgumentNullException(nameof(consumerFactory));
 
-            IConsumerSpecification<T> specification = ConsumerConnectorCache<T>.Connector.CreateConsumerSpecification<T>();
-            foreach (IPipeSpecification<ConsumerConsumeContext<T>> pipeSpecification in pipeSpecifications)
+            LogContext.Debug?.Log("Connecting Consumer: {ConsumerType} (using supplied consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
+
+            IConsumerSpecification<TConsumer> specification = ConsumerConnectorCache<TConsumer>.Connector.CreateConsumerSpecification<TConsumer>();
+            foreach (IPipeSpecification<ConsumerConsumeContext<TConsumer>> pipeSpecification in pipeSpecifications)
             {
                 specification.AddPipeSpecification(pipeSpecification);
             }
-            return ConsumerConnectorCache<T>.Connector.ConnectConsumer(connector, consumerFactory, specification);
+
+            return ConsumerConnectorCache<TConsumer>.Connector.ConnectConsumer(connector, consumerFactory, specification);
         }
 
         /// <summary>
@@ -85,8 +79,10 @@ namespace MassTransit
         public static void Consumer<TConsumer>(this IReceiveEndpointConfigurator configurator, Action<IConsumerConfigurator<TConsumer>> configure = null)
             where TConsumer : class, IConsumer, new()
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Consumer: {0} (using default constructor)", TypeMetadataCache<TConsumer>.ShortName);
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            LogContext.Debug?.Log("Subscribing Consumer: {ConsumerType} (using default constructor)", TypeMetadataCache<TConsumer>.ShortName);
 
             var consumerFactory = new DefaultConstructorConsumerFactory<TConsumer>();
 
@@ -111,6 +107,8 @@ namespace MassTransit
             if (connector == null)
                 throw new ArgumentNullException(nameof(connector));
 
+            LogContext.Debug?.Log("Connecting Consumer: {ConsumerType} (using default constructor)", TypeMetadataCache<TConsumer>.ShortName);
+
             return ConnectConsumer(connector, new DefaultConstructorConsumerFactory<TConsumer>(), pipeSpecifications);
         }
 
@@ -126,8 +124,12 @@ namespace MassTransit
             Action<IConsumerConfigurator<TConsumer>> configure = null)
             where TConsumer : class, IConsumer
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Consumer: {0} (using delegate consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (consumerFactoryMethod == null)
+                throw new ArgumentNullException(nameof(consumerFactoryMethod));
+
+            LogContext.Debug?.Log("Subscribing Consumer: {ConsumerType} (using delegate consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
 
             var delegateConsumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactoryMethod);
 
@@ -150,8 +152,12 @@ namespace MassTransit
             params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
             where TConsumer : class, IConsumer
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Consumer: {0} (using delegate consumer factory)", typeof(TConsumer));
+            if (connector == null)
+                throw new ArgumentNullException(nameof(connector));
+            if (consumerFactoryMethod == null)
+                throw new ArgumentNullException(nameof(consumerFactoryMethod));
+
+            LogContext.Debug?.Log("Connecting Consumer: {ConsumerType} (using delegate consumer factory)", TypeMetadataCache<TConsumer>.ShortName);
 
             var consumerFactory = new DelegateConsumerFactory<TConsumer>(consumerFactoryMethod);
 
@@ -167,11 +173,18 @@ namespace MassTransit
         /// <returns></returns>
         public static void Consumer(this IReceiveEndpointConfigurator configurator, Type consumerType, Func<Type, object> consumerFactory)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType.GetTypeName());
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (consumerType == null)
+                throw new ArgumentNullException(nameof(consumerType));
+            if (consumerFactory == null)
+                throw new ArgumentNullException(nameof(consumerFactory));
 
-            var consumerConfigurator = (IReceiveEndpointSpecification)Activator.CreateInstance(
-                typeof(UntypedConsumerConfigurator<>).MakeGenericType(consumerType), consumerFactory, configurator);
+            LogContext.Debug?.Log("Subscribing Consumer: {ConsumerType} (by type, using object consumer factory)",
+                TypeMetadataCache.GetShortName(consumerType));
+
+            var configuratorType = typeof(UntypedConsumerConfigurator<>).MakeGenericType(consumerType);
+            var consumerConfigurator = (IReceiveEndpointSpecification)Activator.CreateInstance(configuratorType, consumerFactory, configurator);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
         }
@@ -194,8 +207,7 @@ namespace MassTransit
             if (!consumerType.HasInterface<IConsumer>())
                 throw new ArgumentException("The consumer type must implement an IConsumer interface");
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Subscribing Consumer: {0} (by type, using object consumer factory)", consumerType);
+            LogContext.Debug?.Log("Connecting Consumer: {ConsumerType} (by type, using object consumer factory)", TypeMetadataCache.GetShortName(consumerType));
 
             return ConsumerConnectorCache.Connect(connector, consumerType, objectFactory);
         }

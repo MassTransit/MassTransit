@@ -20,9 +20,7 @@ namespace MassTransit.SimpleInjectorIntegration
             {
                 var consumeContext = container.TryGetInstance<ConsumeContext>();
                 if (consumeContext != null)
-                {
                     return consumeContext;
-                }
             }
 
             return null;

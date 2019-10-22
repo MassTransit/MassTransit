@@ -22,8 +22,7 @@ public class BuildParameters
     {
         get
         {
-            return !IsLocalBuild && IsRunningOnWindows && !IsPullRequest && IsMainMassTransitRepo && (IsMasterBranch
-                || IsDevelopBranch);
+            return !IsLocalBuild && IsRunningOnWindows && !IsPullRequest && IsMainMassTransitRepo && (IsMasterBranch || IsDevelopBranch);
         }
     }
 
@@ -52,7 +51,8 @@ public class BuildParameters
             IsPullRequest = buildSystem.AppVeyor.Environment.PullRequest.IsPullRequest,
             IsMainMassTransitRepo = StringComparer.OrdinalIgnoreCase.Equals("masstransit/masstransit", buildSystem.AppVeyor.Environment.Repository.Name),
             IsMasterBranch = StringComparer.OrdinalIgnoreCase.Equals("master", buildSystem.AppVeyor.Environment.Repository.Branch),
-            IsDevelopBranch = StringComparer.OrdinalIgnoreCase.Equals("develop", buildSystem.AppVeyor.Environment.Repository.Branch),
+            IsDevelopBranch = StringComparer.OrdinalIgnoreCase.Equals("develop", buildSystem.AppVeyor.Environment.Repository.Branch)
+              || StringComparer.OrdinalIgnoreCase.Equals("v6", buildSystem.AppVeyor.Environment.Repository.Branch),
             IsTagged = IsBuildTagged(buildSystem),
             Paths = BuildPaths.GetPaths(context)
         };

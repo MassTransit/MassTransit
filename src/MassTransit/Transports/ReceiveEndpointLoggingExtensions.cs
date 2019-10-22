@@ -1,39 +1,21 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
     using System;
-    using Logging;
+    using Context;
+    using Internals.Extensions;
+    using Metadata;
     using Util;
 
 
     public static class ReceiveEndpointLoggingExtensions
     {
-        static ILog _messages = Logger.Get("MassTransit.Messages");
-
-        public static void SetLog(ILog log)
-        {
-            _messages = log;
-        }
-
         /// <summary>
         /// Log that a message was skipped, and moved to the dead letter queue
         /// </summary>
         /// <param name="context"></param>
         public static void LogSkipped(this ReceiveContext context)
         {
-            if (_messages.IsDebugEnabled)
-                _messages.Debug($"SKIP {context.InputAddress} {GetMessageId(context)}");
+            LogContext.Current?.Messages.Debug?.Log("SKIP {InputAddress} {MessageId}", context.InputAddress, GetMessageId(context));
         }
 
         /// <summary>
@@ -44,80 +26,68 @@ namespace MassTransit.Transports
         /// <param name="reason"> </param>
         public static void LogMoved(this ReceiveContext context, string destination, string reason)
         {
-            if (_messages.IsInfoEnabled)
-                _messages.Info($"MOVE {context.InputAddress} {GetMessageId(context)} {destination} {reason}");
-        }
-
-        static string GetMessageId(ReceiveContext context)
-        {
-            return context.TransportHeaders.Get("MessageId", "N/A");
+            LogContext.Current?.Messages.Info?.Log("MOVE {InputAddress} {MessageId} {DestinationAddress} {Reason}", context.InputAddress,
+                GetMessageId(context), destination, reason);
         }
 
         public static void LogConsumed<T>(this ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class
         {
-            if (_messages.IsDebugEnabled)
-                _messages.Debug(
-                    $"RECEIVE {context.ReceiveContext.InputAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName} {consumerType}({duration})");
+            LogContext.Current?.Messages.Debug?.Log("RECEIVE {InputAddress} {MessageId} {MessageType} {ConsumerType}({Duration})",
+                context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache<T>.ShortName, consumerType, duration.ToFriendlyString());
         }
 
         public static void LogFaulted<T>(this ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            if (_messages.IsErrorEnabled)
-            {
-                var faultMessage = GetFaultMessage(exception);
-
-                _messages.Error(
-                    $"R-FAULT {context.ReceiveContext.InputAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName} {consumerType}({duration}) {faultMessage}",
-                    exception);
-            }
+            LogContext.Current?.Messages.Error?.Log("R-FAULT {InputAddress} {MessageId} {MessageType} {ConsumerType}({Duration}) {Exception}",
+                context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache<T>.ShortName, consumerType, duration.ToFriendlyString(),
+                GetFaultMessage(exception));
         }
 
         public static void LogFaulted(this ReceiveContext context, Exception exception)
         {
-            if (_messages.IsErrorEnabled)
-            {
-                var faultMessage = GetFaultMessage(exception);
-
-                _messages.Error($"R-FAULT {context.InputAddress} {GetMessageId(context)} {faultMessage}", exception);
-            }
+            LogContext.Current?.Messages.Error?.Log("R-FAULT {InputAddress} {MessageId} {Exception}", context.InputAddress, GetMessageId(context),
+                GetFaultMessage(exception));
         }
 
         public static void LogRetry(this ConsumeContext context, Exception exception)
         {
-            if (_messages.IsWarnEnabled)
-            {
-                var faultMessage = GetFaultMessage(exception);
+            LogContext.Current?.Messages.Warning?.Log("R-RETRY {InputAddress} {MessageId} {Exception}", context.ReceiveContext.InputAddress,
+                context.MessageId, GetFaultMessage(exception));
+        }
 
-                _messages.Warn($"R-RETRY {context.ReceiveContext.InputAddress} {context.MessageId} {faultMessage}", exception);
-            }
+        public static void LogRetry<T>(this ConsumeContext<T> context, Exception exception)
+            where T : class
+        {
+            LogContext.Current?.Messages.Warning?.Log("R-RETRY {InputAddress} {MessageId} {MessageType} {Exception}", context.ReceiveContext.InputAddress,
+                context.MessageId, TypeMetadataCache<T>.ShortName, GetFaultMessage(exception));
         }
 
         public static void LogFaulted<T>(this SendContext<T> context, Exception exception)
             where T : class
         {
-            if (_messages.IsWarnEnabled)
-            {
-                var faultMessage = GetFaultMessage(exception);
-
-                _messages.Warn($"S-FAULT {context.DestinationAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName} {faultMessage}", exception);
-            }
+            LogContext.Current?.Messages.Error?.Log("S-FAULT {DestinationAddress} {MessageId} {MessageType} {Exception}", context.DestinationAddress,
+                context.MessageId, TypeMetadataCache<T>.ShortName, GetFaultMessage(exception));
         }
 
         public static void LogSent<T>(this SendContext<T> context)
             where T : class
         {
-            if (_messages.IsDebugEnabled)
-                _messages.Debug($"SEND {context.DestinationAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName}");
+            LogContext.Current?.Messages.Debug?.Log("SEND {DestinationAddress} {MessageId} {MessageType}", context.DestinationAddress, context.MessageId,
+                TypeMetadataCache<T>.ShortName);
         }
 
         public static void LogScheduled<T>(this SendContext<T> context, DateTime deliveryTime)
             where T : class
         {
-            if (_messages.IsDebugEnabled)
-                _messages.Debug(
-                    $"SCHED {context.DestinationAddress} {context.MessageId} {TypeMetadataCache<T>.ShortName} {deliveryTime:G} {context.ScheduledMessageId?.ToString("N") ?? ""}");
+            LogContext.Current?.Messages.Debug?.Log("SCHED {DestinationAddress} {MessageId} {MessageType} {DeliveryTime:G} {Token}", context.DestinationAddress,
+                context.MessageId, TypeMetadataCache<T>.ShortName, deliveryTime, context.ScheduledMessageId?.ToString("D"));
+        }
+
+        static string GetMessageId(ReceiveContext context)
+        {
+            return context.TransportHeaders.Get("MessageId", "N/A");
         }
 
         static string GetFaultMessage(Exception exception)

@@ -1,23 +1,11 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configurators
 {
     using System;
     using System.Net.Security;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
+    using Metadata;
     using RabbitMQ.Client;
-    using Util;
 
 
     class ConfigurationHostSettings :
@@ -33,8 +21,10 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             PublisherConfirmation = true;
 
+            RequestedConnectionTimeout = 10000;
+
             ClientProvidedName = HostMetadataCache.Host.ProcessName;
-            
+
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
         }
 
@@ -60,6 +50,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public bool PublisherConfirmation { get; set; }
         public Uri HostAddress => _hostAddress.Value;
         public ushort RequestedChannelMax { get; set; }
+        public int RequestedConnectionTimeout { get; set; }
 
         Uri FormatHostAddress()
         {
@@ -75,6 +66,5 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             return builder.Uri;
         }
-
     }
 }

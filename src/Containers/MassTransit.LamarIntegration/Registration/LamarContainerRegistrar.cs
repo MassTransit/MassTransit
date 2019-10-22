@@ -1,23 +1,13 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.LamarIntegration.Registration
 {
     using System;
+    using Automatonymous;
     using Courier;
     using Definition;
     using Lamar;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Saga;
     using ScopeProviders;
     using Scoping;
@@ -52,6 +42,17 @@ namespace MassTransit.LamarIntegration.Registration
         {
         }
 
+        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+            where TStateMachine : class, SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            _registry.TryAddSingleton<IStateMachineActivityFactory, LamarStateMachineActivityFactory>();
+            _registry.TryAddSingleton<ISagaStateMachineFactory, LamarSagaStateMachineFactory>();
+
+            _registry.AddSingleton<TStateMachine>();
+            _registry.AddSingleton<SagaStateMachine<TInstance>>(provider => provider.GetRequiredService<TStateMachine>());
+        }
+
         public void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga
@@ -61,7 +62,7 @@ namespace MassTransit.LamarIntegration.Registration
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             _registry.ForConcreteType<TActivity>();
@@ -72,7 +73,7 @@ namespace MassTransit.LamarIntegration.Registration
 
         public void RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>()
             where TDefinition : class, IActivityDefinition<TActivity, TArguments, TLog>
-            where TActivity : class, Activity<TArguments, TLog>
+            where TActivity : class, IActivity<TArguments, TLog>
             where TArguments : class
             where TLog : class
         {
@@ -82,7 +83,7 @@ namespace MassTransit.LamarIntegration.Registration
 
         public void RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>()
             where TDefinition : class, IExecuteActivityDefinition<TActivity, TArguments>
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             _registry.For<IExecuteActivityDefinition<TActivity, TArguments>>()
@@ -106,8 +107,8 @@ namespace MassTransit.LamarIntegration.Registration
             {
                 var clientFactory = context.GetInstance<IClientFactory>();
 
-                ConsumeContext consumeContext = context.TryGetInstance<ConsumeContext>();
-                return (consumeContext != null)
+                var consumeContext = context.TryGetInstance<ConsumeContext>();
+                return consumeContext != null
                     ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
                     : clientFactory.CreateRequestClient<T>(timeout);
             }).Scoped();
@@ -120,15 +121,15 @@ namespace MassTransit.LamarIntegration.Registration
             {
                 var clientFactory = context.GetInstance<IClientFactory>();
 
-                ConsumeContext consumeContext = context.TryGetInstance<ConsumeContext>();
-                return (consumeContext != null)
+                var consumeContext = context.TryGetInstance<ConsumeContext>();
+                return consumeContext != null
                     ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
                     : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
             }).Scoped();
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             _registry.ForConcreteType<TActivity>();
@@ -138,14 +139,14 @@ namespace MassTransit.LamarIntegration.Registration
         }
 
         IExecuteActivityScopeProvider<TActivity, TArguments> CreateExecuteActivityScopeProvider<TActivity, TArguments>(IServiceContext context)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             return new LamarExecuteActivityScopeProvider<TActivity, TArguments>(context.GetRequiredService<IContainer>());
         }
 
         ICompensateActivityScopeProvider<TActivity, TLog> CreateCompensateActivityScopeProvider<TActivity, TLog>(IServiceContext context)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             return new LamarCompensateActivityScopeProvider<TActivity, TLog>(context.GetRequiredService<IContainer>());

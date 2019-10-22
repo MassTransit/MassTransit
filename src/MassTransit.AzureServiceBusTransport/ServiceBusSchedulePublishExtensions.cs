@@ -19,6 +19,7 @@ namespace MassTransit
     using AzureServiceBusTransport.Scheduling;
     using GreenPipes;
     using Initializers;
+    using Metadata;
     using Scheduling;
     using Util;
 

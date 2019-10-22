@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Courier
+﻿namespace MassTransit.Tests.Courier
 {
     using System;
     using GreenPipes;
@@ -43,11 +31,11 @@ namespace MassTransit.Tests.Courier
             {
                 x.ExecuteActivityHost<TestActivity, TestArguments>(_compensateUri, h =>
                 {
-                    h.UseConsoleLog(async log => log.Context.ActivityName);
+                    h.UseExecute(context => Console.WriteLine(context.ActivityName));
 
-                    h.Arguments(a => a.UseConsoleLog(async log => log.Context.Arguments.Value));
+                    h.ActivityArguments(a => a.UseExecute(context => Console.WriteLine(context.Arguments.Value)));
 
-                    h.RoutingSlip(rs => rs.UseConsoleLog(async log => log.Context.Message.TrackingNumber.ToString("N")));
+                    h.RoutingSlip(rs => rs.UseExecute(context => Console.WriteLine(context.Message.TrackingNumber.ToString("N"))));
                 });
             });
 
@@ -55,11 +43,11 @@ namespace MassTransit.Tests.Courier
             {
                 x.CompensateActivityHost<TestActivity, TestLog>(h =>
                 {
-                    h.UseConsoleLog(async log => log.Context.Log.OriginalValue);
+                    h.UseExecute(context => Console.WriteLine(context.Log.OriginalValue));
 
-                    h.Log(l => l.UseConsoleLog(async log => log.Context.Log.OriginalValue));
+                    h.ActivityLog(l => l.UseExecute(context => Console.WriteLine(context.Log.OriginalValue)));
 
-                    h.RoutingSlip(rs => rs.UseConsoleLog(async log => log.Context.Message.TrackingNumber.ToString("N")));
+                    h.RoutingSlip(rs => rs.UseExecute(context => Console.WriteLine(context.Message.TrackingNumber.ToString("N"))));
                 });
             });
         }

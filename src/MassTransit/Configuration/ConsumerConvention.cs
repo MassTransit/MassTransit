@@ -14,6 +14,7 @@ namespace MassTransit
 {
     using System;
     using ConsumeConnectors;
+    using Metadata;
     using Util;
 
 

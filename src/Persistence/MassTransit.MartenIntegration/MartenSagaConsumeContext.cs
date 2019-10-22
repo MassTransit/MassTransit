@@ -1,37 +1,21 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-
-namespace MassTransit.MartenIntegration
+﻿namespace MassTransit.MartenIntegration
 {
     using System;
     using System.Threading.Tasks;
     using Context;
-    using Logging;
     using Marten;
     using Saga;
-    using Util;
 
 
     public class MartenSagaConsumeContext<TSaga, TMessage> :
-        ConsumeContextProxyScope<TMessage>,
+        ConsumeContextScope<TMessage>,
         SagaConsumeContext<TSaga, TMessage>
         where TMessage : class
         where TSaga : class, ISaga
     {
-        static readonly ILog Log = Logger.Get<MartenSagaRepository<TSaga>>();
         readonly IDocumentSession _session;
 
-        public MartenSagaConsumeContext(IDocumentSession session, 
+        public MartenSagaConsumeContext(IDocumentSession session,
             ConsumeContext<TMessage> context, TSaga instance)
             : base(context)
         {
@@ -41,16 +25,14 @@ namespace MassTransit.MartenIntegration
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;
 
-        Task SagaConsumeContext<TSaga>.SetCompleted()
+        async Task SagaConsumeContext<TSaga>.SetCompleted()
         {
             _session.Delete(Saga);
-            _session.SaveChanges();
-            IsCompleted = true;
-            if (Log.IsDebugEnabled)
-                Log.DebugFormat("SAGA:{0}:{1} Removed {2}", TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName,
-                    Saga.CorrelationId);
+            await _session.SaveChangesAsync().ConfigureAwait(false);
 
-            return TaskUtil.Completed;
+            IsCompleted = true;
+
+            this.LogRemoved();
         }
 
         public TSaga Saga { get; }

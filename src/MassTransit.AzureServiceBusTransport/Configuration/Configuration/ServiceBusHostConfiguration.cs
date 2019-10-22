@@ -1,133 +1,163 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Configuration
+﻿namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
-    using System.Threading.Tasks;
-    using GreenPipes;
-    using MassTransit.Configuration;
-    using MassTransit.Topology;
-    using Pipeline;
+    using Configurators;
+    using Definition;
+    using MassTransit.Configurators;
     using Settings;
-    using Topology;
+    using Topology.Configuration.Configurators;
+    using Topology.Topologies;
     using Transport;
     using Transports;
-    using Util;
 
 
     public class ServiceBusHostConfiguration :
+        BaseHostConfiguration<IServiceBusEntityEndpointConfiguration>,
         IServiceBusHostConfiguration
     {
         readonly IServiceBusBusConfiguration _busConfiguration;
-        readonly ServiceBusHost _host;
-        readonly ServiceBusHostSettings _hostSettings;
-        readonly IServiceBusHostTopology _hostTopology;
+        readonly ServiceBusHostProxy _proxy;
+        readonly IServiceBusTopologyConfiguration _topologyConfiguration;
+        ServiceBusHostSettings _hostSettings;
 
-        public ServiceBusHostConfiguration(IServiceBusBusConfiguration busConfiguration, ServiceBusHostSettings hostSettings,
-            IServiceBusHostTopology hostTopology)
+        public ServiceBusHostConfiguration(IServiceBusBusConfiguration busConfiguration, IServiceBusTopologyConfiguration topologyConfiguration)
         {
             _busConfiguration = busConfiguration;
-            _hostSettings = hostSettings;
-            _hostTopology = hostTopology;
+            _hostSettings = new HostSettings();
+            _topologyConfiguration = topologyConfiguration;
 
-            _host = new ServiceBusHost(this);
+            _proxy = new ServiceBusHostProxy();
         }
 
-        IBusHostControl IHostConfiguration.Host => _host;
-        Uri IHostConfiguration.HostAddress => _hostSettings.ServiceUri;
-        IHostTopology IHostConfiguration.Topology => _hostTopology;
+        public override Uri HostAddress => _hostSettings.ServiceUri;
 
-        IServiceBusBusConfiguration IServiceBusHostConfiguration.BusConfiguration => _busConfiguration;
-        IServiceBusHostControl IServiceBusHostConfiguration.Host => _host;
-        ServiceBusHostSettings IServiceBusHostConfiguration.Settings => _hostSettings;
-        IServiceBusHostTopology IServiceBusHostConfiguration.Topology => _hostTopology;
+        string IServiceBusHostConfiguration.BasePath => _hostSettings.ServiceUri.AbsolutePath.Trim('/');
 
-        public bool Matches(Uri address)
+        public bool DeployTopologyOnly { get; set; }
+
+        public IServiceBusHost Proxy => _proxy;
+
+        public ServiceBusHostSettings Settings
         {
-            return _hostSettings.ServiceUri.GetLeftPart(UriPartial.Authority)
-                .Equals(address.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase);
+            get => _hostSettings;
+            set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public Task<ISendTransport> CreateSendTransport(Uri address)
+        void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            var settings = _hostTopology.SendTopology.GetSendSettings(address);
-
-            var endpointContextSupervisor = CreateQueueSendEndpointContextSupervisor(settings);
-
-            var transport = new ServiceBusSendTransport(endpointContextSupervisor, address);
-
-            _host.Add(transport);
-
-            return Task.FromResult<ISendTransport>(transport);
+            ReceiveEndpoint(queueName, configureEndpoint);
         }
 
-        public Task<ISendTransport> CreatePublishTransport<T>()
+        void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
+
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            ReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+        }
+
+        public void ReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint)
+        {
+            CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
+        }
+
+        public IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IServiceBusReceiveEndpointConfigurator> configure)
+        {
+            var settings = new ReceiveEndpointSettings(queueName, new QueueConfigurator(queueName));
+
+            var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+
+            return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
+        }
+
+        public IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(ReceiveEndpointSettings settings,
+            IServiceBusEndpointConfiguration endpointConfiguration, Action<IServiceBusReceiveEndpointConfigurator> configure)
+        {
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+            if (endpointConfiguration == null)
+                throw new ArgumentNullException(nameof(endpointConfiguration));
+
+            var configuration = new ServiceBusReceiveEndpointConfiguration(this, settings, endpointConfiguration);
+
+            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
+            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
+            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
+
+            configure?.Invoke(configuration);
+
+            Observers.EndpointConfigured(configuration);
+
+            Add(configuration);
+
+            return configuration;
+        }
+
+        public void SubscriptionEndpoint<T>(string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
             where T : class
         {
-            var publishTopology = _hostTopology.Publish<T>();
+            var settings = new SubscriptionEndpointSettings(_busConfiguration.Topology.Publish.GetMessageTopology<T>().TopicDescription, subscriptionName);
 
-            if (!publishTopology.TryGetPublishAddress(_hostSettings.ServiceUri, out Uri publishAddress))
-                throw new ArgumentException($"The type did not return a valid publish address: {TypeMetadataCache<T>.ShortName}");
-
-            var settings = publishTopology.GetSendSettings();
-
-            var endpointContextSupervisor = CreateTopicSendEndpointContextSupervisor(settings);
-
-            var transport = new ServiceBusSendTransport(endpointContextSupervisor, publishAddress);
-
-            _host.Add(transport);
-
-            return Task.FromResult<ISendTransport>(transport);
+            CreateSubscriptionEndpointConfiguration(settings,  configure);
         }
 
-        public IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
+        public void SubscriptionEndpoint(string subscriptionName, string topicPath, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
-            return new ServiceBusReceiveEndpointConfiguration(this, _busConfiguration.CreateEndpointConfiguration(), queueName);
+            var settings = new SubscriptionEndpointSettings(topicPath, subscriptionName);
+
+            CreateSubscriptionEndpointConfiguration(settings,  configure);
         }
 
-        public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings)
+        public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
         {
-            return new ServiceBusSubscriptionEndpointConfiguration(this, _busConfiguration.CreateEndpointConfiguration(), settings);
+            return CreateSubscriptionEndpointConfiguration(settings, _busConfiguration.CreateEndpointConfiguration(), configure);
         }
 
-        ISendEndpointContextSupervisor CreateQueueSendEndpointContextSupervisor(SendSettings settings)
+        public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,
+            IServiceBusEndpointConfiguration endpointConfiguration, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
-            IPipe<NamespaceContext> namespacePipe = CreateConfigureTopologyPipe(settings);
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+            if (endpointConfiguration == null)
+                throw new ArgumentNullException(nameof(endpointConfiguration));
 
-            var contextFactory = new QueueSendEndpointContextFactory(_host.MessagingFactoryContextSupervisor, _host.NamespaceContextSupervisor,
-                Pipe.Empty<MessagingFactoryContext>(),
-                namespacePipe, settings);
+            var configuration = new ServiceBusSubscriptionEndpointConfiguration(this, settings, endpointConfiguration);
 
-            return new SendEndpointContextSupervisor(contextFactory);
+            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
+            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
+            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
+
+            configure?.Invoke(configuration);
+
+            Observers.EndpointConfigured(configuration);
+
+            Add(configuration);
+
+            return configuration;
         }
 
-        ISendEndpointContextSupervisor CreateTopicSendEndpointContextSupervisor(SendSettings settings)
+        public override IBusHostControl Build()
         {
-            IPipe<NamespaceContext> namespacePipe = CreateConfigureTopologyPipe(settings);
+            var hostTopology = new ServiceBusHostTopology(_topologyConfiguration);
 
-            var contextFactory = new TopicSendEndpointContextFactory(_host.MessagingFactoryContextSupervisor, _host.NamespaceContextSupervisor,
-                Pipe.Empty<MessagingFactoryContext>(),
-                namespacePipe, settings);
+            var host = new ServiceBusHost(this, hostTopology);
 
-            return new SendEndpointContextSupervisor(contextFactory);
-        }
+            foreach (var endpointConfiguration in Endpoints)
+            {
+                endpointConfiguration.Build(host);
+            }
 
-        IPipe<NamespaceContext> CreateConfigureTopologyPipe(SendSettings settings)
-        {
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false, _host.Stopping);
+            _proxy.SetComplete(host);
 
-            IPipe<NamespaceContext> namespacePipe = configureTopologyFilter.ToPipe();
-            return namespacePipe;
+            return host;
         }
     }
 }

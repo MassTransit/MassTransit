@@ -5,7 +5,6 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
     using Castle.MicroKernel;
     using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using Saga;
     using Scoping;
     using Scoping.SagaContexts;
@@ -37,8 +36,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
             try
             {
-                var proxy = new ConsumeContextProxy<T>(context, new PayloadCacheScope(context));
-                proxy.UpdatePayload(_kernel);
+                var proxy = new ConsumeContextScope<T>(context, _kernel);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);
@@ -65,8 +63,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
             try
             {
-                var proxy = new SagaQueryConsumeContextProxy<TSaga, T>(context, new PayloadCacheScope(context), context.Query);
-                proxy.UpdatePayload(_kernel);
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, _kernel);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);

@@ -18,6 +18,7 @@ namespace MassTransit.Tests
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
+    using Metadata;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -79,6 +80,7 @@ namespace MassTransit.Tests
             {
                 Assert.That(exception.Fault.Exceptions.First().ExceptionType, Is.EqualTo(TypeMetadataCache<IntentionalTestException>.ShortName));
                 Assert.That(exception.RequestType, Is.EqualTo(TypeMetadataCache<GetValue>.ShortName));
+                Assert.That(exception.Fault.FaultMessageTypes, Is.EqualTo(TypeMetadataCache<GetValue>.MessageTypeNames));
             }
             catch
             {
@@ -243,7 +245,7 @@ namespace MassTransit.Tests
                         var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
 
                         await client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token)
-                            .UntilCompletedOrTimeout(TimeSpan.FromSeconds(5))
+                            .OrTimeout(TimeSpan.FromSeconds(5))
                             .ConfigureAwait(false);
                     }
                 }
@@ -272,7 +274,7 @@ namespace MassTransit.Tests
                         var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
 
                         await client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token)
-                            .UntilCompletedOrTimeout(TimeSpan.FromSeconds(5))
+                            .OrTimeout(TimeSpan.FromSeconds(5))
                             .ConfigureAwait(false);
                     }
                 }

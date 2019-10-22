@@ -1,22 +1,11 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
     using System;
     using ConsumeConfigurators;
     using Courier;
+    using ExtensionsDependencyInjectionIntegration.Registration;
     using ExtensionsDependencyInjectionIntegration.ScopeProviders;
-    using Microsoft.Extensions.DependencyInjection;
+    using Registration;
     using Saga;
     using Scoping;
 
@@ -53,18 +42,16 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var repository = provider.GetRequiredService<ISagaRepository<T>>();
+            ISagaRepositoryFactory factory = new DependencyInjectionSagaRepositoryFactory(provider);
 
-            ISagaScopeProvider<T> scopeProvider = new DependencyInjectionSagaScopeProvider<T>(provider);
-
-            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
+            ISagaRepository<T> sagaRepository = factory.CreateSagaRepository<T>();
 
             configurator.Saga(sagaRepository, configure);
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
             IServiceProvider provider, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             var executeActivityScopeProvider = new DependencyInjectionExecuteActivityScopeProvider<TActivity, TArguments>(provider);
@@ -76,7 +63,7 @@ namespace MassTransit
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
-            where TActivity : class, ExecuteActivity<TArguments>
+            where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
             var executeActivityScopeProvider = new DependencyInjectionExecuteActivityScopeProvider<TActivity, TArguments>(provider);
@@ -88,7 +75,7 @@ namespace MassTransit
 
         public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configure = null)
-            where TActivity : class, CompensateActivity<TLog>
+            where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
             var compensateActivityScopeProvider = new DependencyInjectionCompensateActivityScopeProvider<TActivity, TLog>(provider);

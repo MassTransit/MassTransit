@@ -12,9 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory.Fabric
 {
+    using GreenPipes;
+
+
     public interface IInMemoryQueue :
         IMessageSink<InMemoryTransportMessage>
     {
-        void ConnectConsumer(IInMemoryQueueConsumer consumer);
+        ConnectHandle ConnectConsumer(IInMemoryQueueConsumer consumer);
     }
 }

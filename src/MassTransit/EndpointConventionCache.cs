@@ -16,6 +16,7 @@ namespace MassTransit
     using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading;
+    using Metadata;
     using Util;
 
 

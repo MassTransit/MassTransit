@@ -13,6 +13,7 @@
 namespace MassTransit.Monitoring.Performance
 {
     using System;
+    using Metadata;
     using Util;
 
 

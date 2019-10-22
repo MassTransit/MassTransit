@@ -1,25 +1,13 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Transport
+﻿namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
-    using MassTransit.Pipeline.Observables;
     using MassTransit.Scheduling;
     using Microsoft.ServiceBus.Messaging;
     using Transports;
@@ -35,66 +23,68 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         Supervisor,
         ISendTransport
     {
-        static readonly ILog _log = Logger.Get<ServiceBusSendTransport>();
-        readonly Uri _address;
-        readonly SendObservable _observers;
+        readonly ServiceBusSendTransportContext _context;
 
-        readonly IPipeContextSource<SendEndpointContext> _source;
-
-        public ServiceBusSendTransport(IPipeContextSource<SendEndpointContext> source, Uri address)
+        public ServiceBusSendTransport(ServiceBusSendTransportContext context)
         {
-            _source = source;
-            _address = address;
-            _observers = new SendObservable();
+            _context = context;
+
+            Add(context.Source);
         }
 
         Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
-            var clientPipe = new SendClientPipe<T>(message, pipe, cancellationToken, _observers);
+            var clientPipe = new SendPipe<T>(_context, message, pipe, cancellationToken);
 
-            return _source.Send(clientPipe, cancellationToken);
+            return _context.Source.Send(clientPipe, cancellationToken);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _observers.Connect(observer);
+            return _context.ConnectSendObserver(observer);
         }
 
         protected override Task StopSupervisor(StopSupervisorContext context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping transport: {0}", _address);
+            LogContext.Debug?.Log("Stopping send transport: {Address}", _context.Address);
 
             return base.StopSupervisor(context);
         }
 
 
-        struct SendClientPipe<T> :
+        struct SendPipe<T> :
             IPipe<SendEndpointContext>
             where T : class
         {
+            readonly ServiceBusSendTransportContext _context;
             readonly T _message;
             readonly CancellationToken _cancellationToken;
             readonly IPipe<SendContext<T>> _pipe;
-            readonly ISendObserver _observer;
 
-            public SendClientPipe(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken, ISendObserver observer)
+            public SendPipe(ServiceBusSendTransportContext context, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             {
+                _context = context;
                 _message = message;
-                _cancellationToken = cancellationToken;
                 _pipe = pipe;
-                _observer = observer;
+                _cancellationToken = cancellationToken;
             }
 
             public async Task Send(SendEndpointContext clientContext)
             {
+                LogContext.SetCurrentIfNull(_context.LogContext);
+
                 var context = new AzureServiceBusSendContext<T>(_message, _cancellationToken);
 
+                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartActivity(new {_context.Address});
                 try
                 {
                     await _pipe.Send(context).ConfigureAwait(false);
 
+                    activity.AddSendContextHeaders(context);
+
                     CopyIncomingIdentifiersIfPresent(context);
+
+                    AddTransportHeaders(activity, context);
 
                     if (IsCancelScheduledSend(context, out var sequenceNumber))
                     {
@@ -110,7 +100,8 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                             return;
                     }
 
-                    await _observer.PreSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
                     var brokeredMessage = CreateBrokeredMessage(context);
 
@@ -118,13 +109,19 @@ namespace MassTransit.AzureServiceBusTransport.Transport
 
                     context.LogSent();
 
-                    await _observer.PostSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PostSend(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await _observer.SendFault(context, ex).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
 
                     throw;
+                }
+                finally
+                {
+                    activity?.Stop();
                 }
             }
 
@@ -139,8 +136,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 var enqueueTimeUtc = context.ScheduledEnqueueTimeUtc.Value;
                 if (enqueueTimeUtc < now)
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("The scheduled time was in the past, sending: {0}", context.ScheduledEnqueueTimeUtc);
+                    LogContext.Debug?.Log("The scheduled time was in the past, sending: {ScheduledTime}", context.ScheduledEnqueueTimeUtc);
 
                     return false;
                 }
@@ -159,8 +155,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 }
                 catch (ArgumentOutOfRangeException)
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("The scheduled time was rejected by the server, sending: {0}", context.MessageId);
+                    LogContext.Debug?.Log("The scheduled time was rejected by the server, sending: {MessageId}", context.MessageId);
 
                     return false;
                 }
@@ -172,13 +167,12 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                 {
                     await clientContext.CancelScheduledSend(sequenceNumber).ConfigureAwait(false);
 
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("Canceled Scheduled: {0} {1}", sequenceNumber, clientContext.EntityPath);
+                    LogContext.Debug?.Log("Canceled scheduled message {SequenceNumber} {EntityPath}", sequenceNumber, clientContext.EntityPath);
                 }
                 catch (MessageNotFoundException exception)
                 {
-                    if (_log.IsDebugEnabled)
-                        _log.DebugFormat("The scheduled message was not found: {0}", exception.Message);
+                    LogContext.Warning?.Log(exception, "The scheduled message was not found: {SequenceNumber} {EntityPath}", sequenceNumber,
+                        clientContext.EntityPath);
                 }
             }
 
@@ -247,6 +241,17 @@ namespace MassTransit.AzureServiceBusTransport.Transport
                     if (sendContext.PartitionKey == null && brokeredMessageContext.PartitionKey != null)
                         sendContext.PartitionKey = brokeredMessageContext.PartitionKey;
                 }
+            }
+
+            static void AddTransportHeaders(StartedActivity? startedActivity, AzureServiceBusSendContext<T> context)
+            {
+                if (!startedActivity.HasValue)
+                    return;
+
+                var activity = startedActivity.Value;
+
+                activity.AddTag(nameof(context.PartitionKey), context.PartitionKey);
+                activity.AddTag(nameof(context.SessionId), context.SessionId);
             }
         }
     }

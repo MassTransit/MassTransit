@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier
+﻿namespace MassTransit.Courier
 {
     using System;
     using System.Linq.Expressions;
@@ -25,7 +13,7 @@ namespace MassTransit.Courier
         bool HasValue { get; }
 
         /// <summary>
-        /// True if the argument was present in the intinerary
+        /// True if the argument was present in the itinerary
         /// </summary>
         bool IsPresent { get; }
     }
@@ -53,7 +41,7 @@ namespace MassTransit.Courier
     }
 
 
-    class ArgumentConfiguratorImpl<T, TArguments> : 
+    class ArgumentConfiguratorImpl<T, TArguments> :
         ArgumentConfigurator<T, TArguments>
         where TArguments : class
     {

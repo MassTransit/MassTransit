@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using Util;
+    using Metadata;
 
 
     public class ReadPropertyCache<T> :

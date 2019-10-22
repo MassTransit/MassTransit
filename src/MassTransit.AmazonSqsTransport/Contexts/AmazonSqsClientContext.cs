@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Contexts
 {
     using System;
@@ -25,9 +13,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using Amazon.SimpleNotificationService.Model;
     using Amazon.SQS;
     using Amazon.SQS.Model;
+    using Context;
     using GreenPipes;
-    using GreenPipes.Payloads;
-    using Logging;
     using Pipeline;
     using Topology;
     using Topology.Entities;
@@ -36,15 +23,14 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
 
     public class AmazonSqsClientContext :
-        BasePipeContext,
+        ScopePipeContext,
         ClientContext,
         IAsyncDisposable
     {
-        static readonly ILog _log = Logger.Get<AmazonSqsClientContext>();
-
         readonly ConnectionContext _connectionContext;
         readonly IAmazonSQS _amazonSqs;
         readonly IAmazonSimpleNotificationService _amazonSns;
+        readonly CancellationToken _cancellationToken;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
         readonly object _lock = new object();
         readonly IDictionary<string, string> _queueUrls;
@@ -52,11 +38,12 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         public AmazonSqsClientContext(ConnectionContext connectionContext, IAmazonSQS amazonSqs, IAmazonSimpleNotificationService amazonSns,
             CancellationToken cancellationToken)
-            : base(new PayloadCacheScope(connectionContext), cancellationToken)
+            : base(connectionContext)
         {
             _connectionContext = connectionContext;
             _amazonSqs = amazonSqs;
             _amazonSns = amazonSns;
+            _cancellationToken = cancellationToken;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
 
@@ -66,14 +53,13 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         public Task DisposeAsync(CancellationToken cancellationToken)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Closing client context: {0}", _connectionContext.HostAddress);
-
             _amazonSqs?.Dispose();
             _amazonSns?.Dispose();
 
             return GreenPipes.Util.TaskUtil.Completed;
         }
+
+        CancellationToken PipeContext.CancellationToken => _cancellationToken;
 
         ConnectionContext ClientContext.ConnectionContext => _connectionContext;
 
@@ -85,7 +71,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             var request = new CreateTopicRequest(topic.EntityName)
             {
-                Attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString())
+                Attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString()),
+                Tags = topic.TopicTags.Select(x => new Tag { Key = x.Key, Value =  x.Value }).ToList()
             };
 
             var response = await _amazonSns.CreateTopicAsync(request).ConfigureAwait(false);
@@ -109,14 +96,15 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             // required to preserve backwards compability
             if (queue.EntityName.EndsWith(".fifo", true, CultureInfo.InvariantCulture) && !queue.QueueAttributes.ContainsKey(QueueAttributeName.FifoQueue))
             {
-                _log.Warn("Using '.fifo' suffix without 'FifoQueue' attribute might cause unexpected behavior.");
+                LogContext.Warning?.Log("Using '.fifo' suffix without 'FifoQueue' attribute might cause unexpected behavior.");
 
                 queue.QueueAttributes[QueueAttributeName.FifoQueue] = true;
             }
 
             var request = new CreateQueueRequest(queue.EntityName)
             {
-                Attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString())
+                Attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString()),
+                Tags = queue.QueueTags.ToDictionary(x => x.Key, x => x.Value)
             };
 
             var response = await _amazonSqs.CreateQueueAsync(request).ConfigureAwait(false);
@@ -151,7 +139,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 TopicArn = topicArn,
                 Endpoint = queueArn,
                 Protocol = "sqs",
-                Attributes = subscriptionAttributes
+                Attributes = subscriptionAttributes,
             };
 
             await _amazonSns.SubscribeAsync(subscribeRequest).ConfigureAwait(false);
@@ -171,7 +159,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 statement.Principals.Add(new Principal("*"));
                 policy.Statements.Add(statement);
 
-                var setAttributes = new Dictionary<string, string> { { QueueAttributeName.Policy, policy.ToJson() } };
+                var setAttributes = new Dictionary<string, string> {{QueueAttributeName.Policy, policy.ToJson()}};
                 await _amazonSqs.SetAttributesAsync(queueUrl, setAttributes).ConfigureAwait(false);
             }
         }
@@ -183,9 +171,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 .SelectMany(s => s.Conditions);
 
             return conditions.Any(c =>
-                    string.Equals(c.Type, ConditionFactory.ArnComparisonType.ArnLike.ToString(), StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(c.ConditionKey, ConditionFactory.SOURCE_ARN_CONDITION_KEY, StringComparison.OrdinalIgnoreCase) &&
-                    c.Values.Contains<string>(topicArnPattern));
+                string.Equals(c.Type, ConditionFactory.ArnComparisonType.ArnLike.ToString(), StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(c.ConditionKey, ConditionFactory.SOURCE_ARN_CONDITION_KEY, StringComparison.OrdinalIgnoreCase) &&
+                c.Values.Contains(topicArnPattern));
         }
 
         async Task ClientContext.DeleteTopic(Topic topic)
@@ -231,7 +219,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         {
             var messages = new List<Message>();
             var remainingNumMessagesToPoll = receiveSettings.PrefetchCount;
-            while(remainingNumMessagesToPoll > 0)
+            while (remainingNumMessagesToPoll > 0)
             {
                 var numMessagesToPoll = Math.Min(remainingNumMessagesToPoll, 10);
                 var response = await ReceiveMessages(receiveSettings, queueUrl, numMessagesToPoll).ConfigureAwait(false);

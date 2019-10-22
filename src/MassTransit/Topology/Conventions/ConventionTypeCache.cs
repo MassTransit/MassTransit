@@ -15,6 +15,7 @@ namespace MassTransit.Topology.Conventions
     using System;
     using System.Collections.Concurrent;
     using System.Reflection;
+    using Metadata;
     using Util;
 
 

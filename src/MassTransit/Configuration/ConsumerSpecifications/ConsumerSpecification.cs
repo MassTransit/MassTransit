@@ -17,6 +17,7 @@ namespace MassTransit.ConsumerSpecifications
     using System.Linq;
     using ConsumeConfigurators;
     using GreenPipes;
+    using Metadata;
     using Util;
 
 

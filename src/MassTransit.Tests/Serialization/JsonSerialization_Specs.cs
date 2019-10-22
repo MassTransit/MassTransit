@@ -1,14 +1,14 @@
 // Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
@@ -20,9 +20,9 @@ namespace MassTransit.Tests.Serialization
     using System.Reflection;
     using System.Text;
     using System.Xml.Linq;
-    using GreenPipes.Internals.Extensions;
     using MassTransit.Serialization;
     using MassTransit.Serialization.JsonConverters;
+    using Metadata;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Newtonsoft.Json.Serialization;
@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Serialization
 
     public class When_serializing_messages_with_json_dot_net
     {
-        static Type _proxyType = TypeCache.GetImplementationType(typeof(MessageA));
+        static readonly Type _proxyType = TypeMetadataCache<MessageA>.ImplementationType;
         string _body;
         JsonSerializer _deserializer;
         Envelope _envelope;
@@ -122,8 +122,7 @@ namespace MassTransit.Tests.Serialization
 
             using (var jsonReader = new JTokenReader(result.Message as JToken))
             {
-                Type proxyType = TypeCache.GetImplementationType(typeof(MessageA));
-                var message = (MessageA)Activator.CreateInstance(proxyType);
+                var message = (MessageA)Activator.CreateInstance(_proxyType);
 
                 _serializer.Populate(jsonReader, message);
 
@@ -178,7 +177,7 @@ namespace MassTransit.Tests.Serialization
             result.Headers.Count.ShouldBe(0);
         }
 
-        [Test]
+        [Test, Explicit, Category("SlowAF")]
         public void Serialization_speed()
         {
             //warm it up

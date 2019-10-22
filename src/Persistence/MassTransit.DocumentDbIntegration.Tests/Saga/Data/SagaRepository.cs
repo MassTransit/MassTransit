@@ -1,4 +1,4 @@
-﻿namespace MassTransit.DocumentDbIntegration.Tests.Saga
+﻿namespace MassTransit.DocumentDbIntegration.Tests.Saga.Data
 {
     using System;
     using System.Threading.Tasks;

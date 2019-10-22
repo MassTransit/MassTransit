@@ -19,6 +19,8 @@ namespace MassTransit.DocumentDbIntegration.Tests.Saga
     using NUnit.Framework;
     using System;
     using System.Threading.Tasks;
+    using Data;
+    using Messages;
 
 
     [TestFixture]

@@ -14,6 +14,7 @@ namespace MassTransit.Topology.Topologies
 {
     using System.Text;
     using Configuration;
+    using Metadata;
     using Util;
 
 

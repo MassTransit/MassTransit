@@ -15,6 +15,7 @@ namespace MassTransit.EntityFrameworkIntegration.Audit
     using System.Data.Entity;
     using System.Threading.Tasks;
     using MassTransit.Audit;
+    using Metadata;
     using Util;
 
 

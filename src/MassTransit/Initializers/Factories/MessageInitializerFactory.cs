@@ -6,6 +6,7 @@ namespace MassTransit.Initializers.Factories
     using System.Linq.Expressions;
     using Conventions;
     using GreenPipes.Internals.Extensions;
+    using Metadata;
 
 
     public class MessageInitializerFactory<TMessage, TInput> :
@@ -14,15 +15,22 @@ namespace MassTransit.Initializers.Factories
         where TInput : class
     {
         readonly IInitializerConvention[] _conventions;
+        readonly IMessageFactory<TMessage> _messageFactory;
 
         public MessageInitializerFactory(IInitializerConvention[] conventions)
         {
             _conventions = conventions;
         }
 
+        public MessageInitializerFactory(IMessageFactory<TMessage> messageFactory, IInitializerConvention[] conventions)
+        {
+            _messageFactory = messageFactory;
+            _conventions = conventions;
+        }
+
         public IMessageInitializer<TMessage> CreateMessageInitializer()
         {
-            var builder = new MessageInitializerBuilder<TMessage, TInput>();
+            var builder = new MessageInitializerBuilder<TMessage, TInput>(_messageFactory);
 
             foreach (IPropertyInitializerInspector<TMessage, TInput> inspector in CreatePropertyInspectors())
             {
@@ -56,16 +64,14 @@ namespace MassTransit.Initializers.Factories
 
         static IEnumerable<IPropertyInitializerInspector<TMessage, TInput>> CreatePropertyInspectors()
         {
-            return typeof(TMessage).GetAllProperties().Where(x => x.CanRead)
-                .GroupBy(x => x.Name, (key,values) => values.Last())
+            return TypeMetadataCache<TMessage>.Properties.Where(x => x.CanRead)
                 .Select(x => (IPropertyInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
                     typeof(PropertyInitializerInspector<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), x.PropertyType), x));
         }
 
         static IEnumerable<IHeaderInitializerInspector<TMessage, TInput>> CreateInputHeaderInspectors()
         {
-            return typeof(TInput).GetAllProperties().Where(x => x.CanRead)
-                .GroupBy(x => x.Name, (key, values) => values.Last())
+            return TypeMetadataCache<TInput>.Properties.Where(x => x.CanRead)
                 .Select(x => (IHeaderInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
                     typeof(InputHeaderInitializerInspector<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), x.PropertyType), x));
         }

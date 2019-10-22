@@ -1,20 +1,9 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Configuration
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Automatonymous;
     using GreenPipes;
     using MassTransit.Saga;
     using NUnit.Framework;
@@ -40,8 +29,8 @@ namespace MassTransit.Tests.Configuration
 
                     e.Saga(new InMemorySagaRepository<MySaga>(), x =>
                     {
-                        x.Message<PingMessage>(m => m.UseConsoleLog(context => Task.FromResult("Hello")));
-                        x.Message<PongMessage>(m => m.UseConsoleLog(context => Task.FromResult("Hello")));
+                        x.Message<PingMessage>(m => m.UseExecute(context => Console.WriteLine("Hello")));
+                        x.Message<PongMessage>(m => m.UseExecute(context => Console.WriteLine("Hello")));
                         x.SagaMessage<PingMessage>(m => m.UseExecute(context =>
                         {
                         }));
@@ -83,20 +72,30 @@ namespace MassTransit.Tests.Configuration
         {
             readonly HashSet<Tuple<Type, Type>> _messageTypes;
             readonly HashSet<Type> _sagaTypes;
+            readonly HashSet<Type> _stateMachineTypes;
 
             public SagaConfigurationObserver()
             {
                 _sagaTypes = new HashSet<Type>();
+                _stateMachineTypes = new HashSet<Type>();
                 _messageTypes = new HashSet<Tuple<Type, Type>>();
             }
 
             public HashSet<Type> SagaTypes => _sagaTypes;
+
+            public HashSet<Type> StateMachineTypes => _stateMachineTypes;
 
             public HashSet<Tuple<Type, Type>> MessageTypes => _messageTypes;
 
             void ISagaConfigurationObserver.SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
             {
                 _sagaTypes.Add(typeof(TSaga));
+            }
+
+            public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+                where TInstance : class, ISaga, SagaStateMachineInstance
+            {
+                _stateMachineTypes.Add(stateMachine.GetType());
             }
 
             void ISagaConfigurationObserver.SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)

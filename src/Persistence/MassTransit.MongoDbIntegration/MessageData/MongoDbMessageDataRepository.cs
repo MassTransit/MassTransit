@@ -1,22 +1,10 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.MongoDbIntegration.MessageData
+﻿namespace MassTransit.MongoDbIntegration.MessageData
 {
     using System;
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
-    using Logging;
+    using Context;
     using MassTransit.MessageData;
     using MongoDB.Bson;
     using MongoDB.Driver;
@@ -28,7 +16,6 @@ namespace MassTransit.MongoDbIntegration.MessageData
     {
         readonly IGridFSBucket _bucket;
         readonly IFileNameGenerator _fileNameGenerator;
-        readonly ILog _log = Logger.Get<MongoDbMessageDataRepository>();
         readonly IMessageDataResolver _resolver;
 
         public MongoDbMessageDataRepository(string connectionString, string database)
@@ -64,8 +51,7 @@ namespace MassTransit.MongoDbIntegration.MessageData
             var id = await _bucket.UploadFromStreamAsync(filename, stream, options, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("MessageData:Put {0} - {1}", id, filename);
+            LogContext.Debug?.Log("MessageData:Put {Id} {FileName}", id, filename);
 
             return _resolver.GetAddress(id);
         }

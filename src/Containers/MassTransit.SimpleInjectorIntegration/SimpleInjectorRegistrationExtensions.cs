@@ -1,11 +1,9 @@
-
 namespace MassTransit
 {
+    using System;
     using ConsumeConfigurators;
     using Definition;
     using Saga;
-
-    using System;
     using SimpleInjector;
     using SimpleInjectorIntegration;
     using SimpleInjectorIntegration.Registration;
@@ -40,7 +38,7 @@ namespace MassTransit
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
         public static void ConfigureEndpoints<T>(this T configurator, Container container, IEndpointNameFormatter endpointNameFormatter = null)
-            where T : IBusFactoryConfigurator
+            where T : IReceiveConfigurator
         {
             var registration = container.GetInstance<IRegistration>();
 
@@ -58,9 +56,7 @@ namespace MassTransit
             var registration = container.GetInstance<IRegistration>();
 
             foreach (var consumerType in consumerTypes)
-            {
                 registration.ConfigureConsumer(consumerType, configurator);
-            }
         }
 
         /// <summary>
@@ -101,9 +97,7 @@ namespace MassTransit
             var registration = container.GetInstance<IRegistration>();
 
             foreach (var sagaType in sagaTypes)
-            {
                 registration.ConfigureSaga(sagaType, configurator);
-            }
         }
 
         /// <summary>

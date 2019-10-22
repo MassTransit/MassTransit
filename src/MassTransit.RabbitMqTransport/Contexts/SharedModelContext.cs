@@ -1,78 +1,26 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Contexts
+﻿namespace MassTransit.RabbitMqTransport.Contexts
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using GreenPipes.Payloads;
     using RabbitMQ.Client;
-    using Topology;
 
 
     public class SharedModelContext :
+        ProxyPipeContext,
         ModelContext
     {
-        readonly CancellationToken _cancellationToken;
         readonly ModelContext _context;
-        readonly IPayloadCache _payloadCache;
 
         public SharedModelContext(ModelContext context, CancellationToken cancellationToken)
+            : base(context)
         {
             _context = context;
-            _cancellationToken = cancellationToken;
+            CancellationToken = cancellationToken;
         }
 
-        public SharedModelContext(ModelContext context, IPayloadCache payloadCache, CancellationToken cancellationToken)
-        {
-            _context = context;
-            _payloadCache = payloadCache;
-            _cancellationToken = cancellationToken;
-        }
-
-        bool PipeContext.HasPayloadType(Type contextType)
-        {
-            if (_payloadCache != null)
-                return _payloadCache.HasPayloadType(contextType);
-
-            return _context.HasPayloadType(contextType);
-        }
-
-        bool PipeContext.TryGetPayload<TPayload>(out TPayload payload)
-        {
-            if (_payloadCache != null)
-                return _payloadCache.TryGetPayload(out payload);
-
-            return _context.TryGetPayload(out payload);
-        }
-
-        TPayload PipeContext.GetOrAddPayload<TPayload>(PayloadFactory<TPayload> payloadFactory)
-        {
-            if (_payloadCache != null)
-                return _payloadCache.GetOrAddPayload(payloadFactory);
-
-            return _context.GetOrAddPayload(payloadFactory);
-        }
-
-        T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
-        {
-            if (_payloadCache != null)
-                return _payloadCache.AddOrUpdatePayload(addFactory, updateFactory);
-
-            return _context.AddOrUpdatePayload(addFactory, updateFactory);
-        }
+        public override CancellationToken CancellationToken { get; }
 
         ConnectionContext ModelContext.ConnectionContext => _context.ConnectionContext;
 
@@ -142,7 +90,5 @@ namespace MassTransit.RabbitMqTransport.Contexts
         }
 
         IModel ModelContext.Model => _context.Model;
-
-        CancellationToken PipeContext.CancellationToken => _cancellationToken;
     }
 }

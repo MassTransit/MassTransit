@@ -20,6 +20,7 @@ namespace MassTransit.ConsumePipeSpecifications
     using GreenPipes.Pipes;
     using GreenPipes.Specifications;
     using GreenPipes.Util;
+    using Metadata;
     using PipeBuilders;
     using Util;
 

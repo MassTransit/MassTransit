@@ -1,16 +1,14 @@
 ﻿namespace MassTransit.Host
 {
     using System;
-    using Logging;
     using Serilog;
-    using SerilogIntegration;
     using Topshelf;
     using Topshelf.Logging;
 
 
     class Program
     {
-        static Serilog.ILogger _baseLogger;
+        static ILogger _baseLogger;
 
         static int Main()
         {
@@ -39,7 +37,6 @@
                 .CreateLogger();
 
             SerilogLogWriterFactory.Use(_baseLogger);
-            Logger.UseLogger(new SerilogLogger(_baseLogger));
         }
     }
 }

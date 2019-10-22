@@ -1,52 +1,44 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Transformation.Contexts
 {
     using System;
     using GreenPipes;
-    using GreenPipes.Payloads;
 
 
     /// <summary>
-    /// Sits in front of the consume context and allows the inbound message to be 
+    /// Sits in front of the consume context and allows the inbound message to be
     /// transformed.
     /// </summary>
-    /// <typeparam name="TMessage"></typeparam>
-    public class ConsumeTransformContext<TMessage> :
-        BasePipeContext,
-        TransformContext<TMessage>
-        where TMessage : class
+    /// <typeparam name="TInput"></typeparam>
+    public class ConsumeTransformContext<TInput> :
+        ProxyPipeContext,
+        TransformContext<TInput>
+        where TInput : class
     {
-        readonly ConsumeContext<TMessage> _context;
+        readonly ConsumeContext _context;
 
-        public ConsumeTransformContext(ConsumeContext<TMessage> context)
-            : base(new PayloadCacheScope(context), context.CancellationToken)
+        public ConsumeTransformContext(ConsumeContext context, TInput input)
+            : base(context)
         {
             _context = context;
+            Input = input;
         }
 
-        Guid? TransformContext.MessageId => _context.MessageId;
-        Guid? TransformContext.RequestId => _context.RequestId;
-        Guid? TransformContext.CorrelationId => _context.CorrelationId;
-        Guid? TransformContext.ConversationId => _context.ConversationId;
-        Guid? TransformContext.InitiatorId => _context.InitiatorId;
-        Uri TransformContext.SourceAddress => _context.SourceAddress;
-        Uri TransformContext.DestinationAddress => _context.DestinationAddress;
-        Headers TransformContext.Headers => _context.Headers;
-        HostInfo TransformContext.Host => _context.Host;
+        Guid? MessageContext.MessageId => _context.MessageId;
+        Guid? MessageContext.RequestId => _context.RequestId;
+        Guid? MessageContext.CorrelationId => _context.CorrelationId;
+        Guid? MessageContext.ConversationId => _context.ConversationId;
+        Guid? MessageContext.InitiatorId => _context.InitiatorId;
+        DateTime? MessageContext.ExpirationTime => _context.ExpirationTime;
+        Uri MessageContext.SourceAddress => _context.SourceAddress;
+        Uri MessageContext.DestinationAddress => _context.DestinationAddress;
+        Uri MessageContext.ResponseAddress => _context.ResponseAddress;
+        Uri MessageContext.FaultAddress => _context.FaultAddress;
+        DateTime? MessageContext.SentTime => _context.SentTime;
+        Headers MessageContext.Headers => _context.Headers;
+        HostInfo MessageContext.Host => _context.Host;
 
-        TMessage TransformContext<TMessage>.Input => _context.Message;
+        public bool HasInput => true;
 
-        bool TransformContext<TMessage>.HasInput => true;
+        public TInput Input { get; }
     }
 }

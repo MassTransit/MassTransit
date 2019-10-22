@@ -1,28 +1,15 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace Sample.AzureFunctions.ServiceBus
+﻿namespace Sample.AzureFunctions.ServiceBus
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Logging;
+    using MassTransit.Context;
     using MassTransit.WebJobs.ServiceBusIntegration;
     using Microsoft.Azure.EventHubs;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.WebJobs;
-    using Microsoft.Extensions.Logging;
 
 
     public static class Functions
@@ -31,16 +18,17 @@ namespace Sample.AzureFunctions.ServiceBus
         public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue")] Message message, IBinder binder, Microsoft.Extensions.Logging.ILogger logger,
             CancellationToken cancellationToken)
         {
-            logger.LogInformation("Creating brokered message receiver");
+            LogContext.ConfigureCurrentLogContext(logger);
+
+            LogContext.Info?.Log("Creating brokered message receiver");
 
             var handler = Bus.Factory.CreateBrokeredMessageReceiver(binder, cfg =>
             {
                 cfg.CancellationToken = cancellationToken;
-                cfg.SetLog(logger);
                 cfg.InputAddress = new Uri("sb://masstransit-build.servicebus.windows.net/input-queue");
 
                 cfg.UseRetry(x => x.Intervals(10, 100, 500, 1000));
-                cfg.Consumer(() => new SubmitOrderConsumer(cfg.Log));
+                cfg.Consumer(() => new SubmitOrderConsumer());
             });
 
             return handler.Handle(message);
@@ -50,16 +38,17 @@ namespace Sample.AzureFunctions.ServiceBus
         public static Task AuditOrderAsync([EventHubTrigger("input-hub")] EventData message, IBinder binder, Microsoft.Extensions.Logging.ILogger logger,
             CancellationToken cancellationToken)
         {
-            logger.LogInformation("Creating EventHub receiver");
+            LogContext.ConfigureCurrentLogContext(logger);
+
+            LogContext.Info?.Log("Creating event hub receiver");
 
             var handler = Bus.Factory.CreateEventDataReceiver(binder, cfg =>
             {
                 cfg.CancellationToken = cancellationToken;
-                cfg.SetLog(logger);
                 cfg.InputAddress = new Uri("sb://masstransit-eventhub.servicebus.windows.net/input-hub");
 
                 cfg.UseRetry(x => x.Intervals(10, 100, 500, 1000));
-                cfg.Consumer(() => new AuditOrderConsumer(cfg.Log));
+                cfg.Consumer(() => new AuditOrderConsumer());
             });
 
             return handler.Handle(message);
@@ -70,17 +59,9 @@ namespace Sample.AzureFunctions.ServiceBus
     public class SubmitOrderConsumer :
         IConsumer<SubmitOrder>
     {
-        readonly ILog _log;
-
-        public SubmitOrderConsumer(ILog log)
-        {
-            _log = log;
-        }
-
         public Task Consume(ConsumeContext<SubmitOrder> context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Processing Order: {0}", context.Message.OrderNumber);
+            LogContext.Debug?.Log("Processing Order: {OrderNumber}", context.Message.OrderNumber);
 
             context.Publish<OrderReceived>(new
             {
@@ -96,17 +77,9 @@ namespace Sample.AzureFunctions.ServiceBus
     public class AuditOrderConsumer :
         IConsumer<OrderReceived>
     {
-        readonly ILog _log;
-
-        public AuditOrderConsumer(ILog log)
-        {
-            _log = log;
-        }
-
         public async Task Consume(ConsumeContext<OrderReceived> context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Received Order: {0}", context.Message.OrderNumber);
+            LogContext.Debug?.Log("Received Order: {OrderNumber}", context.Message.OrderNumber);
         }
     }
 

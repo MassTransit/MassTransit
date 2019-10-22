@@ -1,20 +1,9 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.MessageData
+﻿namespace MassTransit.Tests.MessageData
 {
     namespace DataBus_Specs
     {
         using System;
+        using System.Collections.Generic;
         using System.IO;
         using System.Text;
         using System.Threading.Tasks;
@@ -34,10 +23,7 @@ namespace MassTransit.Tests.MessageData
             {
                 string data = NewId.NextGuid().ToString();
 
-                var message = new SendMessageWithBigData
-                {
-                    Body = await _repository.PutString(data)
-                };
+                var message = new SendMessageWithBigData {Body = await _repository.PutString(data)};
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -51,10 +37,7 @@ namespace MassTransit.Tests.MessageData
             {
                 byte[] data = NewId.NextGuid().ToByteArray();
 
-                var message = new MessageWithByteArrayImpl
-                {
-                    Bytes = await _repository.PutBytes(data)
-                };
+                var message = new MessageWithByteArrayImpl {Bytes = await _repository.PutBytes(data)};
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -79,14 +62,14 @@ namespace MassTransit.Tests.MessageData
 
                 _repository = new FileSystemMessageDataRepository(dataDirectory);
 
-                configurator.UseMessageData<MessageWithBigData>(_repository);
+                configurator.UseMessageData(_repository);
 
                 _received = Handler<MessageWithBigData>(configurator, async context =>
                 {
                     _receivedBody = await context.Message.Body.Value;
                 });
 
-                configurator.UseMessageData<MessageWithByteArray>(_repository);
+                configurator.UseMessageData(_repository);
 
                 _receivedBytes = Handler<MessageWithByteArray>(configurator, async context =>
                 {
@@ -105,10 +88,7 @@ namespace MassTransit.Tests.MessageData
             {
                 string data = NewId.NextGuid().ToString();
 
-                var message = new SendMessageWithBigData
-                {
-                    Body = await _repository.PutString(data)
-                };
+                var message = new SendMessageWithBigData {Body = await _repository.PutString(data)};
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -122,10 +102,7 @@ namespace MassTransit.Tests.MessageData
             {
                 byte[] data = NewId.NextGuid().ToByteArray();
 
-                var message = new MessageWithByteArrayImpl
-                {
-                    Bytes = await _repository.PutBytes(data)
-                };
+                var message = new MessageWithByteArrayImpl {Bytes = await _repository.PutBytes(data)};
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -154,14 +131,14 @@ namespace MassTransit.Tests.MessageData
                 var cryptoStreamProvider = new AesCryptoStreamProvider(keyProvider, "default");
                 _repository = new EncryptedMessageDataRepository(fileRepository, cryptoStreamProvider);
 
-                configurator.UseMessageData<MessageWithBigData>(_repository);
+                configurator.UseMessageData(_repository);
 
                 _received = Handler<MessageWithBigData>(configurator, async context =>
                 {
                     _receivedBody = await context.Message.Body.Value;
                 });
 
-                configurator.UseMessageData<MessageWithByteArray>(_repository);
+                configurator.UseMessageData(_repository);
 
                 _receivedBytes = Handler<MessageWithByteArray>(configurator, async context =>
                 {
@@ -203,11 +180,90 @@ namespace MassTransit.Tests.MessageData
             {
                 _messageDataRepository = new InMemoryMessageDataRepository();
 
-                configurator.UseMessageData<MessageWithBigData>(_messageDataRepository);
+                configurator.UseMessageData(_messageDataRepository);
 
                 _received = Handler<MessageWithBigData>(configurator, async context =>
                 {
                     _receivedBody = await context.Message.Body.Value;
+                });
+            }
+        }
+
+
+        [TestFixture]
+        public class Receiving_nested_message_with_data :
+            InMemoryTestFixture
+        {
+            [Test]
+            public async Task Should_load_the_data_from_the_repository()
+            {
+                string data = NewId.NextGuid().ToString();
+                Uri dataAddress;
+                byte[] buffer = Encoding.UTF8.GetBytes(data);
+                using (var stream = new MemoryStream(buffer, false))
+                {
+                    dataAddress = await _messageDataRepository.Put(stream);
+                }
+
+                var message = new Message
+                {
+                    Document = new Document() {Body = new ConstantMessageData<byte[]>(dataAddress, buffer)},
+                    Documents = new IDocument[]
+                    {
+                        new Document()
+                        {
+                            Title = "Hello, World",
+                            PageCount = 27,
+                            Body = new ConstantMessageData<byte[]>(dataAddress, buffer)
+                        }
+                    },
+                    DocumentIndex = new Dictionary<string, IDocument>()
+                    {
+                        {"First", new Document {Body = new ConstantMessageData<byte[]>(dataAddress, buffer)}},
+                        {"Second", new Document {Body = new ConstantMessageData<byte[]>(dataAddress, buffer)}},
+                    }
+                };
+
+                await InputQueueSendEndpoint.Send(message);
+
+                await _received;
+
+                Assert.That(_body, Is.Not.Null);
+                Assert.That(_body0, Is.Not.Null);
+
+                var result = await _body.Value;
+                Assert.That(result, Is.EqualTo(buffer));
+
+                result = await _body0.Value;
+                Assert.That(result, Is.EqualTo(buffer));
+
+                result = await _bodyFirst.Value;
+                Assert.That(result, Is.EqualTo(buffer));
+
+                result = await _bodySecond.Value;
+                Assert.That(result, Is.EqualTo(buffer));
+            }
+
+            IMessageDataRepository _messageDataRepository;
+
+            Task<ConsumeContext<IMessage>> _received;
+            MessageData<byte[]> _body;
+            MessageData<byte[]> _body0;
+            MessageData<byte[]> _bodyFirst;
+            MessageData<byte[]> _bodySecond;
+
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
+                _messageDataRepository = new InMemoryMessageDataRepository();
+
+                configurator.UseMessageData(_messageDataRepository);
+
+                _received = Handler<IMessage>(configurator, async context =>
+                {
+                    _body = context.Message.Document.Body;
+                    _body0 = context.Message.Documents[0].Body;
+                    _bodyFirst = context.Message.DocumentIndex["First"].Body;
+                    _bodySecond = context.Message.DocumentIndex["Second"].Body;
                 });
             }
         }
@@ -247,13 +303,84 @@ namespace MassTransit.Tests.MessageData
             {
                 _messageDataRepository = new InMemoryMessageDataRepository();
 
-                configurator.UseMessageData<MessageWithByteArray>(_messageDataRepository);
+                configurator.UseMessageData(_messageDataRepository);
 
                 _received = Handler<MessageWithByteArray>(configurator, async context =>
                 {
                     _receivedBytesArray = await context.Message.Bytes.Value;
                 });
             }
+        }
+
+        [TestFixture]
+        public class A_message_with_no_message_data :
+            InMemoryTestFixture
+        {
+            [Test]
+            public async Task Should_not_add_a_filter()
+            {
+            }
+
+            IMessageDataRepository _messageDataRepository;
+
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
+                _messageDataRepository = new InMemoryMessageDataRepository();
+
+                configurator.UseMessageData(_messageDataRepository);
+
+                Handled<IHaveNoMessageData>(configurator);
+            }
+        }
+
+
+        public interface IDocument
+        {
+            string Title { get; }
+            int PageCount { get; }
+            MessageData<byte[]> Body { get; }
+        }
+
+
+        class Document :
+            IDocument
+        {
+            public string Title { get; set; }
+
+            public int PageCount { get; set; }
+
+            public MessageData<byte[]> Body { get; set; }
+        }
+
+
+        public interface IMessage
+        {
+            IDocument Document { get; }
+            IDocument[] Documents { get; }
+            IDictionary<string, IDocument> DocumentIndex { get; }
+        }
+
+
+        public class Message : IMessage
+        {
+            public IDocument Document { get; set; }
+            public IDocument[] Documents { get; set; }
+            public IDictionary<string, IDocument> DocumentIndex { get; set; }
+        }
+
+
+        public interface IHaveNoMessageDataEither
+        {
+            string Value { get; }
+            int Name { get; }
+        }
+
+
+        public interface IHaveNoMessageData
+        {
+            IHaveNoMessageDataEither Child { get; }
+            IHaveNoMessageDataEither[] Children { get; }
+            IDictionary<string, IHaveNoMessageDataEither> ChildIndex { get; }
         }
 
 

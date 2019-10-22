@@ -17,6 +17,7 @@ namespace MassTransit.Registration
     using System.Linq;
     using Definition;
     using Internals.Extensions;
+    using Metadata;
     using Util;
 
 

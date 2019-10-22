@@ -1,31 +1,32 @@
 ﻿namespace MassTransit.SignalR.Consumers
 {
-    using MassTransit.Logging;
-    using MassTransit.SignalR.Utils;
+    using Utils;
     using Microsoft.AspNetCore.SignalR;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Context;
+
 
     public class UserBaseConsumer<THub>
         where THub : Hub
     {
-        static readonly ILog _logger = Logger.Get<UserBaseConsumer<THub>>();
-
-        private readonly BaseMassTransitHubLifetimeManager<THub> _hubLifetimeManager;
+        readonly BaseMassTransitHubLifetimeManager<THub> _hubLifetimeManager;
 
         protected UserBaseConsumer(HubLifetimeManager<THub> hubLifetimeManager)
         {
-            _hubLifetimeManager = hubLifetimeManager as BaseMassTransitHubLifetimeManager<THub> ?? throw new ArgumentNullException(nameof(hubLifetimeManager), "HubLifetimeManager<> must be of type BaseMassTransitHubLifetimeManager<>");
+            _hubLifetimeManager = hubLifetimeManager as BaseMassTransitHubLifetimeManager<THub> ?? throw new ArgumentNullException(nameof(hubLifetimeManager),
+                "HubLifetimeManager<> must be of type BaseMassTransitHubLifetimeManager<>");
         }
 
         public async Task Handle(string userId, IDictionary<string, byte[]> messages)
         {
-            var message = new Lazy<SerializedHubMessage>(() => messages.ToSerializedHubMessage());
+            var message = new Lazy<SerializedHubMessage>(messages.ToSerializedHubMessage);
 
             var userStore = _hubLifetimeManager.Users[userId];
 
-            if (userStore == null || userStore.Count <= 0) return;
+            if (userStore == null || userStore.Count <= 0)
+                return;
 
             var tasks = new List<Task>();
             foreach (var connection in userStore)
@@ -39,7 +40,7 @@
             }
             catch (Exception e)
             {
-                _logger.Warn("Failed writing message.", e);
+                LogContext.Warning?.Log(e, "Failed to write message");
             }
         }
     }

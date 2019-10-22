@@ -1,20 +1,10 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Context
+﻿namespace MassTransit.Context
 {
     using System;
+    using ConsumePipeSpecifications;
     using GreenPipes;
     using Pipeline;
+    using Pipeline.Observables;
     using Topology;
     using Transports;
 
@@ -30,26 +20,28 @@ namespace MassTransit.Context
         IReceiveObserverConnector,
         IReceiveEndpointObserverConnector
     {
-        /// <summary>
-        /// The input address of the receive endpoint
-        /// </summary>
         Uri InputAddress { get; }
 
-        IReceiveObserver ReceiveObservers { get; }
+        IReceiveEndpointObserver EndpointObservers { get; }
+
+        ReceiveObservable ReceiveObservers { get; }
 
         IReceiveTransportObserver TransportObservers { get; }
 
-        IReceiveEndpointObserver EndpointObservers { get; }
+        IConsumePipeSpecification ConsumePipeSpecification { get; }
+
+        ILogContext LogContext { get; }
 
         IPublishTopology Publish { get; }
 
         IReceivePipe ReceivePipe { get; }
 
-        ISendEndpointProvider SendEndpointProvider { get; }
+        ISendPipe SendPipe { get; }
+
+        IMessageSerializer Serializer { get; }
 
         IPublishEndpointProvider PublishEndpointProvider { get; }
-        
-        IMessageSerializer Serializer { get; }
-        ISendPipe SendPipe { get; }
+
+        ISendEndpointProvider SendEndpointProvider { get; }
     }
 }

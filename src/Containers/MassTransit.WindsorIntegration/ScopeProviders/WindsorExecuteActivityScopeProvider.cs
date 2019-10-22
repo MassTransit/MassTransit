@@ -3,7 +3,6 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
     using System;
     using Castle.MicroKernel;
     using Courier;
-    using Courier.Hosts;
     using GreenPipes;
     using Scoping;
     using Scoping.CourierContexts;
@@ -11,7 +10,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
 
     public class WindsorExecuteActivityScopeProvider<TActivity, TArguments> :
         IExecuteActivityScopeProvider<TActivity, TArguments>
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         readonly IKernel _kernel;
@@ -25,21 +24,21 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
         {
             if (context.TryGetPayload<IKernel>(out var kernel))
             {
-                kernel.UpdateScope(context.ConsumeContext);
+                kernel.UpdateScope(context);
 
                 var activity = kernel.Resolve<TActivity>(new Arguments().AddTyped(context.Arguments));
 
-                ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
 
                 return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext, ReleaseComponent);
             }
 
-            var scope = _kernel.CreateNewOrUseExistingMessageScope(context.ConsumeContext);
+            var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
             try
             {
                 var activity = _kernel.Resolve<TActivity>(new Arguments().AddTyped(context.Arguments));
 
-                ExecuteActivityContext<TActivity, TArguments> activityContext = new HostExecuteActivityContext<TActivity, TArguments>(activity, context);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
                 activityContext.UpdatePayload(_kernel);
 
                 return new CreatedExecuteActivityScopeContext<IDisposable, TActivity, TArguments>(scope, activityContext, ReleaseComponent);

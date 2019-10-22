@@ -13,6 +13,7 @@
 namespace MassTransit.Scheduling
 {
     using System;
+    using Metadata;
     using Util;
 
 

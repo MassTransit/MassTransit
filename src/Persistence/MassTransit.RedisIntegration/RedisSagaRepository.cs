@@ -1,24 +1,10 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RedisIntegration
+﻿namespace MassTransit.RedisIntegration
 {
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Logging;
     using Saga;
     using StackExchange.Redis;
-    using Util;
 
 
     public class RedisSagaRepository<TSaga> :
@@ -26,7 +12,6 @@ namespace MassTransit.RedisIntegration
         IRetrieveSagaFromRepository<TSaga>
         where TSaga : class, IVersionedSaga
     {
-        static readonly ILog _log = Logger.Get<RedisSagaRepository<TSaga>>();
         readonly Func<IDatabase> _redisDbFactory;
         readonly bool _optimistic;
         readonly TimeSpan _lockTimeout;
@@ -66,7 +51,7 @@ namespace MassTransit.RedisIntegration
             try
             {
                 if (policy.PreInsertInstance(context, out var instance))
-                    await PreInsertSagaInstance<T>(sagas, instance).ConfigureAwait(false);
+                    await PreInsertSagaInstance(sagas, context, instance).ConfigureAwait(false);
 
                 if (instance == null)
                     instance = await sagas.Get(sagaId).ConfigureAwait(false);
@@ -96,10 +81,7 @@ namespace MassTransit.RedisIntegration
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("sagaRepository");
-            scope.Set(new
-            {
-                Persistence = "redis"
-            });
+            scope.Set(new {Persistence = "redis"});
         }
 
         async Task SendToInstance<T>(ITypedDatabase<TSaga> sagas, ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy,
@@ -108,10 +90,9 @@ namespace MassTransit.RedisIntegration
         {
             try
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Used {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-
                 var sagaConsumeContext = new RedisSagaConsumeContext<TSaga, T>(sagas, context, instance);
+
+                sagaConsumeContext.LogUsed();
 
                 await policy.Existing(sagaConsumeContext, next).ConfigureAwait(false);
 
@@ -128,26 +109,18 @@ namespace MassTransit.RedisIntegration
             }
         }
 
-        static async Task<bool> PreInsertSagaInstance<T>(ITypedDatabase<TSaga> sagas, TSaga instance)
+        async Task PreInsertSagaInstance<T>(ITypedDatabase<TSaga> sagas, ConsumeContext<T> context, TSaga instance)
+            where T : class
         {
             try
             {
                 await sagas.Put(instance.CorrelationId, instance).ConfigureAwait(false);
 
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("SAGA:{0}:{1} Insert {2}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName);
-
-                return true;
+                context.LogInsert(this, instance.CorrelationId);
             }
             catch (Exception ex)
             {
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("SAGA:{0}:{1} Dupe {2} - {3}", TypeMetadataCache<TSaga>.ShortName, instance.CorrelationId, TypeMetadataCache<T>.ShortName,
-                        ex.Message);
-                }
-
-                return false;
+                context.LogInsertFault(this, ex, instance.CorrelationId);
             }
         }
 
@@ -204,13 +177,9 @@ namespace MassTransit.RedisIntegration
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                if (_log.IsDebugEnabled)
-                {
-                    _log.DebugFormat("SAGA:{0}:{1} Added {2}", TypeMetadataCache<TSaga>.ShortName, context.Saga.CorrelationId,
-                        TypeMetadataCache<TMessage>.ShortName);
-                }
-
                 SagaConsumeContext<TSaga, TMessage> proxy = new RedisSagaConsumeContext<TSaga, TMessage>(_sagas, context, context.Saga);
+
+                proxy.LogAdded();
 
                 await _next.Send(proxy).ConfigureAwait(false);
 

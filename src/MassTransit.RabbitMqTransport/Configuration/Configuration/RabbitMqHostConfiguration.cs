@@ -1,160 +1,128 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
-    using System.Text;
-    using System.Threading.Tasks;
-    using GreenPipes;
-    using Integration;
-    using MassTransit.Configuration;
-    using MassTransit.Topology;
-    using Pipeline;
+    using Configurators;
+    using Definition;
+    using MassTransit.Configurators;
     using Topology;
     using Topology.Settings;
+    using Topology.Topologies;
     using Transport;
     using Transports;
 
 
     public class RabbitMqHostConfiguration :
+        BaseHostConfiguration<IRabbitMqReceiveEndpointConfiguration>,
         IRabbitMqHostConfiguration
     {
         readonly IRabbitMqBusConfiguration _busConfiguration;
-        readonly RabbitMqHostSettings _hostSettings;
-        readonly IRabbitMqHostTopology _hostTopology;
-        readonly IRabbitMqHostControl _host;
+        readonly RabbitMqHostProxy _proxy;
+        readonly IRabbitMqTopologyConfiguration _topologyConfiguration;
+        RabbitMqHostSettings _hostSettings;
 
-        public RabbitMqHostConfiguration(IRabbitMqBusConfiguration busConfiguration, RabbitMqHostSettings hostSettings, IRabbitMqHostTopology hostTopology)
+        public RabbitMqHostConfiguration(IRabbitMqBusConfiguration busConfiguration, IRabbitMqTopologyConfiguration topologyConfiguration)
         {
             _busConfiguration = busConfiguration;
-            _hostSettings = hostSettings;
-            _hostTopology = hostTopology;
+            _topologyConfiguration = topologyConfiguration;
+            _hostSettings = new ConfigurationHostSettings()
+            {
+                Host = "localhost",
+                Username = "guest",
+                Password = "guest"
+            };
 
-            _host = new RabbitMqHost(this);
-
-            Description = FormatDescription(hostSettings);
+            _proxy = new RabbitMqHostProxy();
         }
 
-        public string Description { get; }
+        public string Description => _hostSettings.ToDescription();
 
-        Uri IHostConfiguration.HostAddress => _hostSettings.HostAddress;
-        IBusHostControl IHostConfiguration.Host => _host;
-        IHostTopology IHostConfiguration.Topology => _hostTopology;
+        public override Uri HostAddress => _hostSettings.HostAddress;
 
-        IRabbitMqBusConfiguration IRabbitMqHostConfiguration.BusConfiguration => _busConfiguration;
-        IRabbitMqHostControl IRabbitMqHostConfiguration.Host => _host;
+        public IRabbitMqHost Proxy => _proxy;
 
-        public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName)
+        public bool PublisherConfirmation => _hostSettings.PublisherConfirmation;
+        public bool DeployTopologyOnly { get; set; }
+
+        public RabbitMqHostSettings Settings
+        {
+            get => _hostSettings;
+            set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+
+        public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
             var settings = new RabbitMqReceiveSettings(queueName, _busConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false);
+            var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
 
-            return new RabbitMqReceiveEndpointConfiguration(this, settings, _busConfiguration.CreateEndpointConfiguration());
+            return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
         }
 
-        public bool Matches(Uri address)
+        public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(RabbitMqReceiveSettings settings,
+            IRabbitMqEndpointConfiguration endpointConfiguration, Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            switch (address.Scheme.ToLowerInvariant())
-            {
-                case "rabbitmq":
-                case "amqp":
-                case "rabbitmqs":
-                case "amqps":
-                    break;
+            if (settings == null)
+                throw new ArgumentNullException(nameof(settings));
+            if (endpointConfiguration == null)
+                throw new ArgumentNullException(nameof(endpointConfiguration));
 
-                default:
-                    return false;
+            var configuration = new RabbitMqReceiveEndpointConfiguration(this, settings, endpointConfiguration);
+
+            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
+            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
+            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
+
+            configure?.Invoke(configuration);
+
+            Observers.EndpointConfigured(configuration);
+
+            Add(configuration);
+
+            return configuration;
+        }
+
+        void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            ReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
+        }
+
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            ReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+        }
+
+        public void ReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint)
+        {
+            CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
+        }
+
+        public override IBusHostControl Build()
+        {
+            var exchangeTypeSelector = new FanoutExchangeTypeSelector();
+            var messageNameFormatter = new RabbitMqMessageNameFormatter();
+
+            var hostTopology = new RabbitMqHostTopology(exchangeTypeSelector, messageNameFormatter, _hostSettings.HostAddress, _topologyConfiguration);
+
+            var host = new RabbitMqHost(this, hostTopology);
+
+            foreach (var endpointConfiguration in Endpoints)
+            {
+                endpointConfiguration.Build(host);
             }
 
-            var settings = address.GetHostSettings();
+            _proxy.SetComplete(host);
 
-            return RabbitMqHostEqualityComparer.Default.Equals(_hostSettings, settings);
-        }
-
-        IRabbitMqHostTopology IRabbitMqHostConfiguration.Topology => _hostTopology;
-        public bool PublisherConfirmation => _hostSettings.PublisherConfirmation;
-        public RabbitMqHostSettings Settings => _hostSettings;
-
-        public IModelContextSupervisor CreateModelContextSupervisor()
-        {
-            return new ModelContextSupervisor(_host.ConnectionContextSupervisor);
-        }
-
-        public ISendTransport CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IFilter<ModelContext> modelFilter, string exchangeName)
-        {
-            var transport = new RabbitMqSendTransport(modelContextSupervisor, modelFilter, exchangeName);
-
-            _host.Add(transport);
-
-            return transport;
-        }
-
-        public Task<ISendTransport> CreateSendTransport(Uri address)
-        {
-            var settings = _hostTopology.GetSendSettings(address);
-
-            var brokerTopology = settings.GetBrokerTopology();
-
-            IModelContextSupervisor supervisor = CreateModelContextSupervisor();
-
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology);
-
-            var transport = CreateSendTransport(supervisor, configureTopologyFilter, settings.ExchangeName);
-
-            return Task.FromResult(transport);
-        }
-
-        public Task<ISendTransport> CreatePublishTransport<T>()
-            where T : class
-        {
-            IRabbitMqMessagePublishTopology<T> publishTopology = _hostTopology.Publish<T>();
-
-            var sendSettings = publishTopology.GetSendSettings();
-
-            var brokerTopology = publishTopology.GetBrokerTopology();
-
-            IModelContextSupervisor supervisor = CreateModelContextSupervisor();
-
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology);
-
-            var transport = CreateSendTransport(supervisor, configureTopologyFilter, publishTopology.Exchange.ExchangeName);
-
-            return Task.FromResult(transport);
-        }
-
-        static string FormatDescription(RabbitMqHostSettings settings)
-        {
-            var sb = new StringBuilder();
-
-            if (!string.IsNullOrWhiteSpace(settings.Username))
-                sb.Append(settings.Username).Append('@');
-
-            sb.Append(settings.Host);
-
-            var actualHost = settings.HostNameSelector?.LastHost;
-            if (!string.IsNullOrWhiteSpace(actualHost))
-                sb.Append('(').Append(actualHost).Append(')');
-
-            if (settings.Port != -1)
-                sb.Append(':').Append(settings.Port);
-
-            if (string.IsNullOrWhiteSpace(settings.VirtualHost))
-                sb.Append('/');
-            else if (settings.VirtualHost.StartsWith("/"))
-                sb.Append(settings.VirtualHost);
-            else
-                sb.Append("/").Append(settings.VirtualHost);
-
-            return sb.ToString();
+            return host;
         }
     }
 }

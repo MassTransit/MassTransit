@@ -1,86 +1,44 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
+﻿namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 {
-    using System;
+    using EndpointConfigurators;
+    using GreenPipes;
     using MassTransit.Configuration;
-    using Topology;
-    using Topology.Settings;
-    using Topology.Topologies;
+    using MassTransit.Pipeline.Observables;
 
 
     public class AmazonSqsBusConfiguration :
         AmazonSqsEndpointConfiguration,
         IAmazonSqsBusConfiguration
     {
-        readonly IHostCollection<IAmazonSqsHostConfiguration> _hosts;
+        readonly IAmazonSqsEndpointConfiguration _busEndpointConfiguration;
+        readonly BusObservable _busObservers;
+        readonly IAmazonSqsHostConfiguration _hostConfiguration;
 
-        public AmazonSqsBusConfiguration(IAmazonSqsTopologyConfiguration topology)
-            : base(topology)
+        public AmazonSqsBusConfiguration(IAmazonSqsTopologyConfiguration topologyConfiguration)
+            : base(topologyConfiguration)
         {
-            _hosts = new HostCollection<IAmazonSqsHostConfiguration>();
+            _hostConfiguration = new AmazonSqsHostConfiguration(this, topologyConfiguration);
+            _busEndpointConfiguration = CreateEndpointConfiguration();
+
+            _busObservers = new BusObservable();
         }
 
-        public bool DeployTopologyOnly { get; set; }
+        IHostConfiguration IBusConfiguration.HostConfiguration => _hostConfiguration;
+        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
+        IBusObserver IBusConfiguration.BusObservers => _busObservers;
 
-        public bool TryGetHost(Uri address, out IAmazonSqsHostConfiguration hostConfiguration)
+        IAmazonSqsEndpointConfiguration IAmazonSqsBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
+        IAmazonSqsHostConfiguration IAmazonSqsBusConfiguration.HostConfiguration => _hostConfiguration;
+
+        public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
-            return _hosts.TryGetHost(address, out hostConfiguration);
+            return _busObservers.Connect(observer);
         }
 
-        public bool TryGetHost(IAmazonSqsHost host, out IAmazonSqsHostConfiguration hostConfiguration)
+        public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
-            return _hosts.TryGetHost(host, out hostConfiguration);
+            return _hostConfiguration.ConnectEndpointConfigurationObserver(observer);
         }
 
-        public IAmazonSqsHostConfiguration CreateHostConfiguration(AmazonSqsHostSettings settings)
-        {
-            var hostTopology = CreateHostTopology(settings.HostAddress);
-
-            var hostConfiguration = new AmazonSqsHostConfiguration(this, settings, hostTopology);
-
-            _hosts.Add(hostConfiguration);
-
-            return hostConfiguration;
-        }
-
-        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
-            IAmazonSqsEndpointConfiguration endpointConfiguration)
-        {
-            if (_hosts.Count == 0)
-                throw new ConfigurationException("At least one host must be configured");
-
-            var configuration = new AmazonSqsReceiveEndpointConfiguration(_hosts[0], queueName, endpointConfiguration);
-
-            return configuration;
-        }
-
-        public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
-            IAmazonSqsEndpointConfiguration endpointConfiguration)
-        {
-            if (_hosts.Count == 0)
-                throw new ConfigurationException("At least one host must be configured");
-
-            var configuration = new AmazonSqsReceiveEndpointConfiguration(_hosts[0], settings, endpointConfiguration);
-
-            return configuration;
-        }
-
-        public IReadOnlyHostCollection Hosts => _hosts;
-
-        IAmazonSqsHostTopology CreateHostTopology(Uri hostAddress)
-        {
-            return new AmazonSqsHostTopology(new AmazonSqsMessageNameFormatter(), hostAddress, Topology);
-        }
     }
 }

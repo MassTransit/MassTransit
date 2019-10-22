@@ -3,6 +3,7 @@
 ## Overview
 
 * [Quick Start](quickstart.md)
+* [Upgrading to Version 6](upgrade-v6.md)
 * [Getting Help](introduction/getting-help.md)
 * [Understanding MassTransit](understand/README.md)
   * [Key concepts](understand/key-ideas.md)

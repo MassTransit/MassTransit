@@ -71,7 +71,7 @@
 
                         await observer.PreSent;
 
-                        Assert.That(async () => await sendObserver.PreSent.UntilCompletedOrTimeout(5000), Throws.TypeOf<TimeoutException>());
+                        Assert.That(async () => await sendObserver.PreSent.OrTimeout(s:5), Throws.TypeOf<TimeoutException>());
                     }
                 }
             }

@@ -15,6 +15,7 @@ namespace MassTransit.Util
     using System;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
+    using Metadata;
 
 
     public static class ExceptionUtil

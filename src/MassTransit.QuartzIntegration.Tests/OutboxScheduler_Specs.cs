@@ -24,7 +24,7 @@
 
             Console.WriteLine("Pong was scheduled");
 
-            Assert.That(async () => await _pongReceived.Task.UntilCompletedOrTimeout(5000), Throws.TypeOf<TimeoutException>());
+            Assert.That(async () => await _pongReceived.Task.OrTimeout(s:5), Throws.TypeOf<TimeoutException>());
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _pingReceived;

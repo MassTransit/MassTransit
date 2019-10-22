@@ -4,11 +4,11 @@ namespace MassTransit.Definition
 
 
     public class CompensateActivityEndpointDefinition<TActivity, TLog> :
-        SettingsEndpointDefinition<CompensateActivity<TLog>>
-        where TActivity : class, CompensateActivity<TLog>
+        SettingsEndpointDefinition<ICompensateActivity<TLog>>
+        where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
-        public CompensateActivityEndpointDefinition(IEndpointSettings<IEndpointDefinition<CompensateActivity<TLog>>> settings)
+        public CompensateActivityEndpointDefinition(IEndpointSettings<IEndpointDefinition<ICompensateActivity<TLog>>> settings)
             : base(settings)
         {
         }

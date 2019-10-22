@@ -33,7 +33,7 @@ namespace MassTransit.ActiveMqTransport
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var redeliverySpecification = new DelayedExchangeRedeliveryPipeSpecification<T>();
+            var redeliverySpecification = new ActiveMqRedeliveryPipeSpecification<T>();
 
             configurator.AddPipeSpecification(redeliverySpecification);
 
@@ -58,7 +58,7 @@ namespace MassTransit.ActiveMqTransport
             if (configureRetry == null)
                 throw new ArgumentNullException(nameof(configureRetry));
 
-            var observer = new DelayedExchangeRedeliveryConfigurationObserver(configurator, configureRetry);
+            var observer = new ActiveMqRedeliveryConfigurationObserver(configurator, configureRetry);
         }
     }
 }

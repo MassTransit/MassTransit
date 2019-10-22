@@ -1,15 +1,3 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
     using System;
@@ -25,7 +13,7 @@ namespace MassTransit.Serialization
     /// A static consume context from the Binary serializer
     /// </summary>
     public class StaticConsumeContext :
-        BaseConsumeContext
+        DeserializerConsumeContext
     {
         readonly Header[] _binaryHeaders;
         readonly object _message;
@@ -52,10 +40,10 @@ namespace MassTransit.Serialization
             _binaryHeaders = headers;
             _supportedTypes = GetSupportedMessageTypes().ToArray();
             _messageTypes = new Dictionary<Type, ConsumeContext>();
-            _consumeTasks = new PendingTaskCollection(receiveContext.CancellationToken);
+            _consumeTasks = new PendingTaskCollection(4);
         }
 
-        public override Task ConsumeCompleted => _consumeTasks.Completed;
+        public override Task ConsumeCompleted => _consumeTasks.Completed(CancellationToken);
 
         public override Guid? MessageId => _messageId ?? (_messageId = GetHeaderGuid(BinaryMessageSerializer.MessageIdKey));
         public override Guid? RequestId => _requestId ?? (_requestId = GetHeaderGuid(BinaryMessageSerializer.RequestIdKey));
@@ -94,7 +82,7 @@ namespace MassTransit.Serialization
                     return existing != null;
             }
 
-            var typeUrn = MessageUrn.ForType(messageType).ToString();
+            var typeUrn = MessageUrn.ForTypeString(messageType);
 
             return _supportedTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
         }
@@ -109,7 +97,7 @@ namespace MassTransit.Serialization
                     return message != null;
                 }
 
-                var typeUrn = MessageUrn.ForType(typeof(T)).ToString();
+                var typeUrn = MessageUrn.ForTypeString<T>();
 
                 if (_supportedTypes.Any(typeUrn.Equals))
                 {

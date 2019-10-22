@@ -6,7 +6,7 @@
 
     public interface IExecuteActivityScopeProvider<out TActivity, TArguments> :
         IProbeSite
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
         IExecuteActivityScopeContext<TActivity, TArguments> GetScope(ExecuteContext<TArguments> context);

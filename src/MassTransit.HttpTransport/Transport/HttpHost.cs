@@ -1,28 +1,16 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Transport
+﻿namespace MassTransit.HttpTransport.Transport
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Clients;
     using Configuration;
-    using Events;
+    using Context;
     using GreenPipes;
     using GreenPipes.Agents;
     using Hosting;
     using Logging;
+    using MassTransit.Topology;
     using Transports;
 
 
@@ -30,20 +18,32 @@ namespace MassTransit.HttpTransport.Transport
         BaseHost,
         IHttpHostControl
     {
-        static readonly ILog _log = Logger.Get<HttpHost>();
-
         readonly IHttpHostConfiguration _hostConfiguration;
+        readonly IHostTopology _hostTopology;
         readonly HttpHostContextSupervisor _httpHostContextSupervisor;
 
-        public HttpHost(IHttpHostConfiguration hostConfiguration)
-            : base(hostConfiguration)
+        public HttpHost(IHttpHostConfiguration hostConfiguration, IHostTopology hostTopology)
+            : base(hostConfiguration, hostTopology)
         {
             _hostConfiguration = hostConfiguration;
+            _hostTopology = hostTopology;
 
             _httpHostContextSupervisor = new HttpHostContextSupervisor(hostConfiguration);
         }
 
-        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        protected override void Probe(ProbeContext context)
+        {
+            context.Set(new
+            {
+                Type = "HTTP",
+                Settings.Host,
+                Settings.Port,
+                Settings.Method.Method
+            });
+        }
+
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
         {
             throw new NotImplementedException();
         }
@@ -55,14 +55,17 @@ namespace MassTransit.HttpTransport.Transport
 
         public override async Task<HostHandle> Start(CancellationToken cancellationToken)
         {
+            LogContext.Debug?.Log("Starting host: {HostAddress}", _hostConfiguration.HostAddress);
+
+            DefaultLogContext = LogContext.Current;
+            SendLogContext = LogContext.Current.CreateLogContext(LogCategoryName.Transport.Send);
+            ReceiveLogContext = LogContext.Current.CreateLogContext(LogCategoryName.Transport.Receive);
+
             var handlesReady = new TaskCompletionSource<HostReceiveEndpointHandle[]>();
             var hostStarted = new TaskCompletionSource<bool>();
 
             IPipe<HttpHostContext> connectionPipe = Pipe.ExecuteAsync<HttpHostContext>(async context =>
             {
-                if (_log.IsDebugEnabled)
-                    _log.DebugFormat("Connection established to {0}", Settings.Host);
-
                 try
                 {
                     await handlesReady.Task.ConfigureAwait(false);
@@ -84,14 +87,11 @@ namespace MassTransit.HttpTransport.Transport
                 }
             });
 
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Starting connection to {0}", Settings.Host);
-
             var connectionTask = HttpHostContextSupervisor.Send(connectionPipe, Stopping);
 
             HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints(cancellationToken);
 
-            var hostHandle = new Handle(handles, this, _httpHostContextSupervisor, connectionTask);
+            HostHandle hostHandle = new StartHostHandle(this, handles, GetAgentHandles());
 
             await hostHandle.Ready.ConfigureAwait(false);
 
@@ -102,65 +102,24 @@ namespace MassTransit.HttpTransport.Transport
             return hostHandle;
         }
 
-        protected override void Probe(ProbeContext context)
+        protected override IAgent[] GetAgentHandles()
         {
-            context.Set(new
-            {
-                Type = "HTTP",
-                Settings.Host,
-                Settings.Port,
-                Settings.Method.Method
-            });
+            return new IAgent[] {_httpHostContextSupervisor};
         }
 
         public IHttpHostContextSupervisor HttpHostContextSupervisor => _httpHostContextSupervisor;
         public HttpHostSettings Settings => _hostConfiguration.Settings;
 
-        class Handle :
-            HostHandle
+        public Task<ISendTransport> CreateSendTransport(Uri address, ReceiveEndpointContext receiveEndpointContext)
         {
-            readonly IAgent _hostAgent;
-            readonly Task _connectionTask;
-            readonly HostReceiveEndpointHandle[] _handles;
-            readonly IBusHostControl _host;
+            var clientContextSupervisor = new HttpClientContextSupervisor(receiveEndpointContext.ReceivePipe);
 
-            public Handle(HostReceiveEndpointHandle[] handles, IBusHostControl host, IAgent hostAgent, Task connectionTask)
-            {
-                _host = host;
-                _handles = handles;
-                _hostAgent = hostAgent;
-                _connectionTask = connectionTask;
-            }
+            var sendSettings = address.GetSendSettings();
 
-            public Task<HostReady> Ready
-            {
-                get { return ReadyOrNot(_handles.Select(x => x.Ready)); }
-            }
+            var transport = new HttpSendTransport(clientContextSupervisor, sendSettings, receiveEndpointContext);
+            Add(transport);
 
-            async Task HostHandle.Stop(CancellationToken cancellationToken)
-            {
-                await Task.WhenAll(_handles.Select(x => x.StopAsync(cancellationToken))).ConfigureAwait(false);
-
-                await _host.Stop("Host Stopped", cancellationToken).ConfigureAwait(false);
-
-                await _hostAgent.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
-
-                await _connectionTask.ConfigureAwait(false);
-            }
-
-            async Task<HostReady> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> endpoints)
-            {
-                Task<ReceiveEndpointReady>[] readyTasks = endpoints as Task<ReceiveEndpointReady>[] ?? endpoints.ToArray();
-
-                foreach (Task<ReceiveEndpointReady> ready in readyTasks)
-                    await ready.ConfigureAwait(false);
-
-                await _hostAgent.Ready.ConfigureAwait(false);
-
-                ReceiveEndpointReady[] endpointsReady = await Task.WhenAll(readyTasks).ConfigureAwait(false);
-
-                return new HostReadyEvent(_host.Address, endpointsReady);
-            }
+            return Task.FromResult<ISendTransport>(transport);
         }
     }
 }

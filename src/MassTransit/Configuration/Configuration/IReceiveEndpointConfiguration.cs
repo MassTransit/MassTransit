@@ -31,17 +31,12 @@ namespace MassTransit.Configuration
         ReceiveEndpointObservable EndpointObservers { get; }
         ReceiveObservable ReceiveObservers { get; }
         ReceiveTransportObservable TransportObservers { get; }
+        IReceiveEndpoint ReceiveEndpoint { get; }
 
         /// <summary>
         /// Create the receive pipe, using the endpoint configuration
         /// </summary>
         /// <returns></returns>
         IReceivePipe CreateReceivePipe();
-
-        /// <summary>
-        /// Builds the receive endpoint
-        /// </summary>
-        /// <returns></returns>
-        IReceiveEndpoint Build();
     }
 }

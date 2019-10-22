@@ -1,64 +1,43 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configuration
 {
+    using EndpointConfigurators;
+    using GreenPipes;
     using MassTransit.Configuration;
-    using Topology;
-    using Topology.Settings;
-    using Topology.Topologies;
+    using MassTransit.Pipeline.Observables;
 
 
     public class RabbitMqBusConfiguration :
         RabbitMqEndpointConfiguration,
         IRabbitMqBusConfiguration
     {
-        readonly IHostCollection<IRabbitMqHostConfiguration> _hosts;
-        readonly FanoutExchangeTypeSelector _exchangeTypeSelector;
-        readonly RabbitMqMessageNameFormatter _messageNameFormatter;
+        readonly IRabbitMqEndpointConfiguration _busEndpointConfiguration;
+        readonly BusObservable _busObservers;
+        readonly IRabbitMqHostConfiguration _hostConfiguration;
 
-        public RabbitMqBusConfiguration(IRabbitMqTopologyConfiguration topology)
-            : base(topology)
+        public RabbitMqBusConfiguration(IRabbitMqTopologyConfiguration topologyConfiguration)
+            : base(topologyConfiguration)
         {
-            _hosts = new HostCollection<IRabbitMqHostConfiguration>();
+            _hostConfiguration = new RabbitMqHostConfiguration(this, topologyConfiguration);
+            _busEndpointConfiguration = CreateEndpointConfiguration();
 
-            _exchangeTypeSelector = new FanoutExchangeTypeSelector();
-            _messageNameFormatter = new RabbitMqMessageNameFormatter();
+            _busObservers = new BusObservable();
         }
 
-        IReadOnlyHostCollection<IRabbitMqHostConfiguration> IRabbitMqBusConfiguration.Hosts => _hosts;
+        IHostConfiguration IBusConfiguration.HostConfiguration => _hostConfiguration;
+        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
+        IBusObserver IBusConfiguration.BusObservers => _busObservers;
 
-        public bool DeployTopologyOnly { get; set; }
+        IRabbitMqEndpointConfiguration IRabbitMqBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
+        IRabbitMqHostConfiguration IRabbitMqBusConfiguration.HostConfiguration => _hostConfiguration;
 
-        public IRabbitMqHostConfiguration CreateHostConfiguration(RabbitMqHostSettings hostSettings)
+        public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
-            var hostTopology = new RabbitMqHostTopology(_exchangeTypeSelector, _messageNameFormatter, hostSettings.HostAddress, Topology);
-
-            var hostConfiguration = new RabbitMqHostConfiguration(this, hostSettings, hostTopology);
-
-            _hosts.Add(hostConfiguration);
-
-            return hostConfiguration;
+            return _busObservers.Connect(observer);
         }
 
-        public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(RabbitMqReceiveSettings settings,
-            IRabbitMqEndpointConfiguration endpointConfiguration)
+        public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
-            if (_hosts.Count == 0)
-                throw new ConfigurationException("At least one host must be configured");
-
-            return new RabbitMqReceiveEndpointConfiguration(_hosts[0], settings, endpointConfiguration);
+            return _hostConfiguration.ConnectEndpointConfigurationObserver(observer);
         }
-
-        public IReadOnlyHostCollection Hosts => _hosts;
     }
 }

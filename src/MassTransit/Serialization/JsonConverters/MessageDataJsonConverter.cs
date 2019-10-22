@@ -3,6 +3,7 @@
     using System;
     using Internals.Extensions;
     using MessageData;
+    using Metadata;
     using Newtonsoft.Json;
     using Util;
 

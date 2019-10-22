@@ -5,14 +5,13 @@
     using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
     using Initializers.TypeConverters;
-    using Integration;
     using Internals.Extensions;
     using Logging;
-    using MassTransit.Pipeline.Observables;
     using RabbitMQ.Client;
     using Transports;
 
@@ -22,22 +21,13 @@
         ISendTransport,
         IAsyncDisposable
     {
-        static readonly ILog _log = Logger.Get<RabbitMqSendTransport>();
+        readonly RabbitMqSendTransportContext _context;
 
-        readonly string _exchange;
-        readonly IFilter<ModelContext> _filter;
-        readonly IModelContextSupervisor _modelContextSupervisor;
-        readonly SendObservable _observers;
-
-        public RabbitMqSendTransport(IModelContextSupervisor modelContextSupervisor, IFilter<ModelContext> preSendFilter, string exchange)
+        public RabbitMqSendTransport(RabbitMqSendTransportContext context)
         {
-            _modelContextSupervisor = modelContextSupervisor;
-            _filter = preSendFilter;
-            _exchange = exchange;
+            _context = context;
 
-            _observers = new SendObservable();
-
-            Add(modelContextSupervisor);
+            Add(context.ModelContextSupervisor);
         }
 
         Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
@@ -48,22 +38,21 @@
         Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             if (IsStopped)
-                throw new TransportUnavailableException($"The RabbitMQ send transport is stopped: {_exchange}");
+                throw new TransportUnavailableException($"The RabbitMQ send transport is stopped: {_context.Exchange}");
 
-            var sendPipe = new SendPipe<T>(_filter, _observers, _exchange, message, pipe, cancellationToken);
+            var sendPipe = new SendPipe<T>(_context, message, pipe, cancellationToken);
 
-            return _modelContextSupervisor.Send(sendPipe, cancellationToken);
+            return _context.ModelContextSupervisor.Send(sendPipe, cancellationToken);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _observers.Connect(observer);
+            return _context.ConnectSendObserver(observer);
         }
 
         protected override Task StopSupervisor(StopSupervisorContext context)
         {
-            if (_log.IsDebugEnabled)
-                _log.DebugFormat("Stopping transport: {0}", _exchange);
+            LogContext.Debug?.Log("Stopping send transport: {Exchange}", _context.Exchange);
 
             return base.StopSupervisor(context);
         }
@@ -73,19 +62,15 @@
             IPipe<ModelContext>
             where T : class
         {
-            readonly IFilter<ModelContext> _filter;
-            readonly SendObservable _observers;
-            readonly string _exchange;
+            readonly RabbitMqSendTransportContext _context;
             readonly T _message;
             readonly IPipe<SendContext<T>> _pipe;
             readonly CancellationToken _cancellationToken;
 
-            public SendPipe(IFilter<ModelContext> filter, SendObservable observers, string exchange, T message, IPipe<SendContext<T>> pipe,
-                CancellationToken cancellationToken)
+            public SendPipe(RabbitMqSendTransportContext context, T message, IPipe<SendContext<T>> pipe, CancellationToken
+                cancellationToken)
             {
-                _filter = filter;
-                _observers = observers;
-                _exchange = exchange;
+                _context = context;
                 _message = message;
                 _pipe = pipe;
                 _cancellationToken = cancellationToken;
@@ -93,14 +78,20 @@
 
             public async Task Send(ModelContext modelContext)
             {
-                await _filter.Send(modelContext, Pipe.Empty<ModelContext>()).ConfigureAwait(false);
+                LogContext.SetCurrentIfNull(_context.LogContext);
+
+                await _context.ConfigureTopologyPipe.Send(modelContext).ConfigureAwait(false);
 
                 var properties = modelContext.Model.CreateBasicProperties();
 
-                var context = new BasicPublishRabbitMqSendContext<T>(properties, _exchange, _message, _cancellationToken);
+                var context = new BasicPublishRabbitMqSendContext<T>(properties, _context.Exchange, _message, _cancellationToken);
+
+                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartActivity(new {_context.Exchange});
                 try
                 {
                     await _pipe.Send(context).ConfigureAwait(false);
+
+                    activity.AddSendContextHeaders(context);
 
                     byte[] body = context.Body;
 
@@ -127,7 +118,8 @@
                     if (context.TimeToLive.HasValue)
                         properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
 
-                    await _observers.PreSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
                     var publishTask = modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey ?? "", context.Mandatory,
                         context.BasicProperties, body, context.AwaitAck);
@@ -136,15 +128,21 @@
 
                     context.LogSent();
 
-                    await _observers.PostSend(context).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PostSend(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     context.LogFaulted(ex);
 
-                    await _observers.SendFault(context, ex).ConfigureAwait(false);
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
 
                     throw;
+                }
+                finally
+                {
+                    activity?.Stop();
                 }
             }
 

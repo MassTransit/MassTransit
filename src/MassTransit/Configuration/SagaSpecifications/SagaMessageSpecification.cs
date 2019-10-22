@@ -17,6 +17,7 @@ namespace MassTransit.SagaSpecifications
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
+    using Metadata;
     using Saga;
     using SagaConfigurators;
     using Util;

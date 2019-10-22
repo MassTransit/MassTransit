@@ -7,14 +7,14 @@ namespace MassTransit.Definition
     public class EndpointActivityDefinition<TActivity, TArguments, TLog> :
         EndpointExecuteActivityDefinition<TActivity, TArguments>,
         IActivityDefinition<TActivity, TArguments, TLog>
-        where TActivity : class, Activity<TArguments, TLog>
+        where TActivity : class, IActivity<TArguments, TLog>
         where TArguments : class
         where TLog : class
     {
-        readonly IEndpointDefinition<CompensateActivity<TLog>> _compensateEndpointDefinition;
+        readonly IEndpointDefinition<ICompensateActivity<TLog>> _compensateEndpointDefinition;
 
-        public EndpointActivityDefinition(IEndpointDefinition<ExecuteActivity<TArguments>> endpointDefinition,
-            IEndpointDefinition<CompensateActivity<TLog>> compensateEndpointDefinition)
+        public EndpointActivityDefinition(IEndpointDefinition<IExecuteActivity<TArguments>> endpointDefinition,
+            IEndpointDefinition<ICompensateActivity<TLog>> compensateEndpointDefinition)
             : base(endpointDefinition)
         {
             _compensateEndpointDefinition = compensateEndpointDefinition;

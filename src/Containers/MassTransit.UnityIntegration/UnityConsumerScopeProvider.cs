@@ -1,19 +1,8 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.UnityIntegration
+﻿namespace MassTransit.UnityIntegration
 {
     using Context;
     using GreenPipes;
+    using Metadata;
     using Scoping;
     using Scoping.ConsumerContexts;
     using Unity;
@@ -43,12 +32,9 @@ namespace MassTransit.UnityIntegration
             var scope = _container.CreateChildContainer();
             try
             {
-                var proxy = new ConsumeContextProxyScope(context);
+                var proxy = new ConsumeContextScope(context, scope);
 
-                var consumerScope = scope;
-                proxy.GetOrAddPayload(() => consumerScope);
-
-                return new CreatedConsumerScopeContext<IUnityContainer>(consumerScope, proxy);
+                return new CreatedConsumerScopeContext<IUnityContainer>(scope, proxy);
             }
             catch
             {
@@ -58,7 +44,9 @@ namespace MassTransit.UnityIntegration
             }
         }
 
-        public IConsumerScopeContext<TConsumer, T> GetScope<TConsumer, T>(ConsumeContext<T> context) where TConsumer : class where T : class
+        public IConsumerScopeContext<TConsumer, T> GetScope<TConsumer, T>(ConsumeContext<T> context)
+            where TConsumer : class
+            where T : class
         {
             if (context.TryGetPayload<IUnityContainer>(out var existingScope))
             {

@@ -1,21 +1,11 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Topology
+﻿namespace MassTransit.HttpTransport.Topology
 {
     using System;
+    using ConsumePipeSpecifications;
     using Context;
     using GreenPipes;
     using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using MassTransit.Topology;
     using Microsoft.AspNetCore.Http;
     using Transport;
@@ -23,62 +13,67 @@ namespace MassTransit.HttpTransport.Topology
 
 
     public class HttpResponseReceiveEndpointContext :
-        BasePipeContext,
+        ProxyPipeContext,
         ReceiveEndpointContext
     {
         readonly HttpContext _httpContext;
-        readonly ReceiveEndpointContext _receiveEndpointContext;
+        readonly ReceiveEndpointContext _context;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
 
-        public HttpResponseReceiveEndpointContext(ReceiveEndpointContext receiveEndpointContext, HttpContext httpContext)
+        public HttpResponseReceiveEndpointContext(ReceiveEndpointContext context, HttpContext httpContext)
+            : base(context)
         {
-            _receiveEndpointContext = receiveEndpointContext;
+            _context = context;
             _httpContext = httpContext;
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
         }
 
-        Uri ReceiveEndpointContext.InputAddress => _receiveEndpointContext.InputAddress;
-        IReceiveObserver ReceiveEndpointContext.ReceiveObservers => _receiveEndpointContext.ReceiveObservers;
-        IReceiveTransportObserver ReceiveEndpointContext.TransportObservers => _receiveEndpointContext.TransportObservers;
-        public IReceiveEndpointObserver EndpointObservers => _receiveEndpointContext.EndpointObservers;
+        Uri ReceiveEndpointContext.InputAddress => _context.InputAddress;
+        ReceiveObservable ReceiveEndpointContext.ReceiveObservers => _context.ReceiveObservers;
+        IReceiveTransportObserver ReceiveEndpointContext.TransportObservers => _context.TransportObservers;
+        public IConsumePipeSpecification ConsumePipeSpecification => _context.ConsumePipeSpecification;
 
-        IPublishTopology ReceiveEndpointContext.Publish => _receiveEndpointContext.Publish;
-        IReceivePipe ReceiveEndpointContext.ReceivePipe => _receiveEndpointContext.ReceivePipe;
+        public ILogContext LogContext => _context.LogContext;
+        public IReceiveEndpointObserver EndpointObservers => _context.EndpointObservers;
+
+        IPublishTopology ReceiveEndpointContext.Publish => _context.Publish;
+        IReceivePipe ReceiveEndpointContext.ReceivePipe => _context.ReceivePipe;
+        public ISendPipe SendPipe => _context.SendPipe;
+
+        public IMessageSerializer Serializer => _context.Serializer;
 
         ISendEndpointProvider ReceiveEndpointContext.SendEndpointProvider => _sendEndpointProvider.Value;
-        IPublishEndpointProvider ReceiveEndpointContext.PublishEndpointProvider => _receiveEndpointContext.PublishEndpointProvider;
-        ISendPipe ReceiveEndpointContext.SendPipe => _receiveEndpointContext.SendPipe;
-        IMessageSerializer ReceiveEndpointContext.Serializer => _receiveEndpointContext.Serializer;
+        IPublishEndpointProvider ReceiveEndpointContext.PublishEndpointProvider => _context.PublishEndpointProvider;
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _receiveEndpointContext.ConnectSendObserver(observer);
+            return _context.ConnectSendObserver(observer);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveEndpointContext.ConnectPublishObserver(observer);
+            return _context.ConnectPublishObserver(observer);
         }
 
         ISendEndpointProvider CreateSendEndpointProvider()
         {
-            return new HttpResponseSendEndpointProvider(_httpContext, _receiveEndpointContext);
+            return new HttpResponseSendEndpointProvider(_httpContext, _context);
         }
 
         ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveTransportObserver(observer);
+            return _context.ConnectReceiveTransportObserver(observer);
         }
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveObserver(observer);
+            return _context.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveEndpointObserver(observer);
+            return _context.ConnectReceiveEndpointObserver(observer);
         }
     }
 }

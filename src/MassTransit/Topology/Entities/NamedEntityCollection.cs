@@ -14,6 +14,7 @@ namespace MassTransit.Topology.Entities
 {
     using System;
     using System.Collections.Generic;
+    using Metadata;
     using Util;
 
 

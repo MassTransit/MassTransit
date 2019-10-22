@@ -1,30 +1,36 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Transports.InMemory.Configuration
+﻿namespace MassTransit.Transports.InMemory.Configuration
 {
+    using System;
+    using GreenPipes.Caching;
     using MassTransit.Configuration;
 
 
     public interface IInMemoryHostConfiguration :
-        IHostConfiguration
+        IHostConfiguration,
+        IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator>
     {
-        new IInMemoryHostControl Host { get; }
+        /// <summary>
+        /// Set the host's base address
+        /// </summary>
+        Uri BaseAddress { set; }
 
         /// <summary>
-        /// Create a receive endpoint configuration using the specified host
+        /// Sets the maximum number of threads used by an in-memory transport, for partitioning
+        /// the input queue. This setting also specifies how many threads will be used for dispatching
+        /// messages to consumers.
         /// </summary>
-        /// <param name="queueName">The queue name for the receive endpoint</param>
-        /// <returns></returns>
-        IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName);
+        int TransportConcurrencyLimit { get; set; }
+
+        IInMemoryHostConfigurator Configurator { get; }
+
+        CacheSettings SendTransportCacheSettings { get; }
+
+        IInMemoryHost Proxy { get; }
+
+        IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IInMemoryReceiveEndpointConfigurator> configure = null);
+
+        IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, IInMemoryEndpointConfiguration endpointConfiguration,
+            Action<IInMemoryReceiveEndpointConfigurator> configure = null);
     }
 }

@@ -1,18 +1,17 @@
 ﻿namespace MassTransit.SignalR.Consumers
 {
-    using MassTransit.Logging;
-    using MassTransit.SignalR.Utils;
+    using Utils;
     using Microsoft.AspNetCore.SignalR;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Context;
+
 
     public class ConnectionBaseConsumer<THub>
         where THub : Hub
     {
-        static readonly ILog _logger = Logger.Get<ConnectionBaseConsumer<THub>>();
-
-        private readonly BaseMassTransitHubLifetimeManager<THub> _hubLifetimeManager;
+        readonly BaseMassTransitHubLifetimeManager<THub> _hubLifetimeManager;
 
         protected ConnectionBaseConsumer(HubLifetimeManager<THub> hubLifetimeManager)
         {
@@ -21,7 +20,7 @@
 
         protected async Task Handle(string connectionId, IDictionary<string, byte[]> messages)
         {
-            var message = new Lazy<SerializedHubMessage>(() => messages.ToSerializedHubMessage());
+            var message = new Lazy<SerializedHubMessage>(messages.ToSerializedHubMessage);
 
             var connection = _hubLifetimeManager.Connections[connectionId];
             if (connection == null) return; // Connection doesn't exist on server, skipping
@@ -32,7 +31,7 @@
             }
             catch (Exception e)
             {
-                _logger.Warn("Failed writing message.", e);
+                LogContext.Warning?.Log(e, "Failed to write message");
             }
         }
     }

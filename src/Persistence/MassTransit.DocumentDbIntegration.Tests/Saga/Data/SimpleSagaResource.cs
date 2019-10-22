@@ -1,12 +1,14 @@
-﻿namespace MassTransit.DocumentDbIntegration.Tests.Saga
+﻿namespace MassTransit.DocumentDbIntegration.Tests.Saga.Data
 {
     using System;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using MassTransit;
     using MassTransit.Saga;
+    using Messages;
     using Microsoft.Azure.Documents;
     using Newtonsoft.Json;
+
 
     public class SimpleSagaResource : Resource,
         InitiatedBy<InitiateSimpleSaga>,

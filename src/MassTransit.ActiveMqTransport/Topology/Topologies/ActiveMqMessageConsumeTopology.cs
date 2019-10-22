@@ -19,6 +19,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
+    using Metadata;
     using Specifications;
     using Util;
 

@@ -2,7 +2,7 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
 {
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
-    using Newtonsoft.Json;
+
 
     public interface IDocumentDbSagaConsumeContextFactory
     {

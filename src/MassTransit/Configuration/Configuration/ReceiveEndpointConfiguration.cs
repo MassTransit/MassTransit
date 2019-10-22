@@ -1,46 +1,33 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Configuration
+﻿namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Mime;
+    using Automatonymous;
     using ConsumeConfigurators;
-    using Context;
+    using Courier;
     using GreenPipes;
     using Pipeline;
     using Pipeline.Observables;
     using Saga;
     using SagaConfigurators;
-    using Transports;
 
 
     public abstract class ReceiveEndpointConfiguration :
         IReceiveEndpointConfiguration
     {
-        readonly IEndpointConfiguration _configuration;
+        readonly IEndpointConfiguration _endpointConfiguration;
         readonly Lazy<IConsumePipe> _consumePipe;
-        readonly IHostConfiguration _hostConfiguration;
         readonly IList<string> _lateConfigurationKeys;
         readonly IList<IReceiveEndpointSpecification> _specifications;
+        IReceiveEndpoint _receiveEndpoint;
 
-        protected ReceiveEndpointConfiguration(IHostConfiguration hostConfiguration, IEndpointConfiguration configuration)
+        protected ReceiveEndpointConfiguration(IEndpointConfiguration endpointConfiguration)
         {
-            _hostConfiguration = hostConfiguration;
-            _configuration = configuration;
+            _endpointConfiguration = endpointConfiguration;
 
-            _consumePipe = new Lazy<IConsumePipe>(() => _configuration.Consume.CreatePipe());
+            _consumePipe = new Lazy<IConsumePipe>(() => _endpointConfiguration.Consume.CreatePipe());
             _specifications = new List<IReceiveEndpointSpecification>();
             _lateConfigurationKeys = new List<string>();
 
@@ -53,65 +40,97 @@ namespace MassTransit.Configuration
         public ReceiveObservable ReceiveObservers { get; }
         public ReceiveTransportObservable TransportObservers { get; }
 
-        public IConsumePipeConfiguration Consume => _configuration.Consume;
-        public ISendPipeConfiguration Send => _configuration.Send;
-        public IPublishPipeConfiguration Publish => _configuration.Publish;
-        public IReceivePipeConfiguration Receive => _configuration.Receive;
+        public IConsumePipeConfiguration Consume => _endpointConfiguration.Consume;
+        public ISendPipeConfiguration Send => _endpointConfiguration.Send;
+        public IPublishPipeConfiguration Publish => _endpointConfiguration.Publish;
+        public IReceivePipeConfiguration Receive => _endpointConfiguration.Receive;
 
-        public ITopologyConfiguration Topology => _configuration.Topology;
+        public ITopologyConfiguration Topology => _endpointConfiguration.Topology;
 
-        public ISerializationConfiguration Serialization => _configuration.Serialization;
+        public ISerializationConfiguration Serialization => _endpointConfiguration.Serialization;
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _configuration.AddPipeSpecification(specification);
+            _endpointConfiguration.AddPipeSpecification(specification);
         }
 
         public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
-            return _configuration.ConnectConsumerConfigurationObserver(observer);
+            return _endpointConfiguration.ConnectConsumerConfigurationObserver(observer);
         }
 
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
         {
-            return _configuration.ConnectSagaConfigurationObserver(observer);
+            return _endpointConfiguration.ConnectSagaConfigurationObserver(observer);
         }
 
         public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
             where TConsumer : class
         {
-            _configuration.ConsumerConfigured(configurator);
+            _endpointConfiguration.ConsumerConfigured(configurator);
         }
 
         public void ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
             where TConsumer : class
             where TMessage : class
         {
-            _configuration.ConsumerMessageConfigured(configurator);
+            _endpointConfiguration.ConsumerMessageConfigured(configurator);
         }
 
         public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
             where TSaga : class, ISaga
         {
-            _configuration.SagaConfigured(configurator);
+            _endpointConfiguration.SagaConfigured(configurator);
+        }
+
+        public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+            where TInstance : class, ISaga, SagaStateMachineInstance
+        {
+            _endpointConfiguration.StateMachineSagaConfigured(configurator, stateMachine);
         }
 
         public void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
             where TSaga : class, ISaga
             where TMessage : class
         {
-            _configuration.SagaMessageConfigured(configurator);
+            _endpointConfiguration.SagaMessageConfigured(configurator);
         }
 
         public ConnectHandle ConnectHandlerConfigurationObserver(IHandlerConfigurationObserver observer)
         {
-            return _configuration.ConnectHandlerConfigurationObserver(observer);
+            return _endpointConfiguration.ConnectHandlerConfigurationObserver(observer);
         }
 
         public void HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
             where TMessage : class
         {
-            _configuration.HandlerConfigured(configurator);
+            _endpointConfiguration.HandlerConfigured(configurator);
+        }
+
+        public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return _endpointConfiguration.ConnectActivityConfigurationObserver(observer);
+        }
+
+        public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            _endpointConfiguration.ActivityConfigured(configurator, compensateAddress);
+        }
+
+        public void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            _endpointConfiguration.ExecuteActivityConfigured(configurator);
+        }
+
+        public void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            _endpointConfiguration.CompensateActivityConfigured(configurator);
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
@@ -122,42 +141,42 @@ namespace MassTransit.Configuration
         public void AddPipeSpecification<T>(IPipeSpecification<ConsumeContext<T>> specification)
             where T : class
         {
-            _configuration.AddPipeSpecification(specification);
+            _endpointConfiguration.AddPipeSpecification(specification);
         }
 
         public void AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _configuration.AddPrePipeSpecification(specification);
+            _endpointConfiguration.AddPrePipeSpecification(specification);
         }
 
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
-            _configuration.ConfigureSend(callback);
+            _endpointConfiguration.ConfigureSend(callback);
         }
 
         public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
         {
-            _configuration.ConfigurePublish(callback);
+            _endpointConfiguration.ConfigurePublish(callback);
         }
 
         public void ConfigureReceive(Action<IReceivePipeConfigurator> callback)
         {
-            _configuration.ConfigureReceive(callback);
+            _endpointConfiguration.ConfigureReceive(callback);
         }
 
         public void ConfigureDeadLetter(Action<IPipeConfigurator<ReceiveContext>> callback)
         {
-            _configuration.ConfigureDeadLetter(callback);
+            _endpointConfiguration.ConfigureDeadLetter(callback);
         }
 
         public void ConfigureError(Action<IPipeConfigurator<ExceptionReceiveContext>> callback)
         {
-            _configuration.ConfigureError(callback);
+            _endpointConfiguration.ConfigureError(callback);
         }
 
         public virtual IEnumerable<ValidationResult> Validate()
         {
-            return _configuration.Validate()
+            return _endpointConfiguration.Validate()
                 .Concat(_specifications.SelectMany(x => x.Validate()))
                 .Concat(_lateConfigurationKeys.Select(x => this.Failure(x, "was modified after being used")));
         }
@@ -167,36 +186,37 @@ namespace MassTransit.Configuration
         public abstract Uri HostAddress { get; }
         public abstract Uri InputAddress { get; }
 
-        public virtual IReceivePipe CreateReceivePipe()
+        public virtual IReceiveEndpoint ReceiveEndpoint
         {
-            return _configuration.Receive.CreatePipe(ConsumePipe, _configuration.Serialization.Deserializer);
+            get
+            {
+                if (_receiveEndpoint == null)
+                    throw new InvalidOperationException("The receive endpoint has not been built.");
+
+                return _receiveEndpoint;
+            }
+
+            protected set => _receiveEndpoint = value;
         }
 
-        public abstract IReceiveEndpoint Build();
-
-        protected virtual IReceiveEndpoint CreateReceiveEndpoint(string endpointName, IReceiveTransport receiveTransport,
-            ReceiveEndpointContext receiveEndpointContext)
+        public virtual IReceivePipe CreateReceivePipe()
         {
-            var receiveEndpoint = new ReceiveEndpoint(receiveTransport, receiveEndpointContext);
-
-            _hostConfiguration.Host.AddReceiveEndpoint(endpointName, receiveEndpoint);
-
-            return receiveEndpoint;
+            return _endpointConfiguration.Receive.CreatePipe(ConsumePipe, _endpointConfiguration.Serialization.Deserializer);
         }
 
         public void SetMessageSerializer(SerializerFactory serializerFactory)
         {
-            _configuration.Serialization.SetSerializer(serializerFactory);
+            _endpointConfiguration.Serialization.SetSerializer(serializerFactory);
         }
 
         public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
         {
-            _configuration.Serialization.AddDeserializer(contentType, deserializerFactory);
+            _endpointConfiguration.Serialization.AddDeserializer(contentType, deserializerFactory);
         }
 
         public void ClearMessageDeserializers()
         {
-            _configuration.Serialization.ClearDeserializers();
+            _endpointConfiguration.Serialization.ClearDeserializers();
         }
 
         protected void ApplySpecifications(IReceiveEndpointBuilder builder)
@@ -220,5 +240,6 @@ namespace MassTransit.Configuration
         {
             return false;
         }
+
     }
 }

@@ -6,7 +6,7 @@
 
     public interface ICompensateActivityScopeContext<out TActivity, out TLog> :
         IDisposable
-        where TActivity : class, CompensateActivity<TLog>
+        where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
         CompensateActivityContext<TActivity, TLog> Context { get; }

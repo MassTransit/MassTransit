@@ -5,8 +5,6 @@
 
     public interface ISendPipe :
         ISendContextPipe,
-        ISendObserverConnector,
-        ISendMessageObserverConnector,
         IProbeSite
     {
     }

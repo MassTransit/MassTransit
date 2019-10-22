@@ -6,12 +6,12 @@ namespace MassTransit.Definition
 
     public class EndpointExecuteActivityDefinition<TActivity, TArguments> :
         IExecuteActivityDefinition<TActivity, TArguments>
-        where TActivity : class, ExecuteActivity<TArguments>
+        where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
-        readonly IEndpointDefinition<ExecuteActivity<TArguments>> _endpointDefinition;
+        readonly IEndpointDefinition<IExecuteActivity<TArguments>> _endpointDefinition;
 
-        public EndpointExecuteActivityDefinition(IEndpointDefinition<ExecuteActivity<TArguments>> endpointDefinition)
+        public EndpointExecuteActivityDefinition(IEndpointDefinition<IExecuteActivity<TArguments>> endpointDefinition)
         {
             _endpointDefinition = endpointDefinition;
         }
