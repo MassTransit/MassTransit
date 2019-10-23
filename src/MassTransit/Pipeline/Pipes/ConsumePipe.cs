@@ -3,6 +3,7 @@ namespace MassTransit.Pipeline.Pipes
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using GreenPipes.Filters;
 
 
@@ -47,7 +48,7 @@ namespace MassTransit.Pipeline.Pipes
         {
             var handle = _dynamicFilter.ConnectPipe(pipe);
 
-            _connected.TrySetResult(true);
+            _connected.TrySetResultOnThreadPool(true);
 
             return handle;
         }
@@ -56,7 +57,7 @@ namespace MassTransit.Pipeline.Pipes
         {
             var handle = _dynamicFilter.ConnectPipe(requestId, pipe);
 
-            _connected.TrySetResult(true);
+            _connected.TrySetResultOnThreadPool(true);
 
             return handle;
         }

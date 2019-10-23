@@ -56,6 +56,8 @@
         [Test]
         public async Task Should_receive_the_response()
         {
+            _response = _requestClient.Request(new PingMessage());
+
             var message = await _response;
 
             message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
@@ -84,8 +86,6 @@
                     context.SetAwaitAck(false);
                     context.ResponseAddress = new UriBuilder(Bus.Address) {Host = "totally-bogus-host"}.Uri;
                 });
-
-            _response = _requestClient.Request(new PingMessage());
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
