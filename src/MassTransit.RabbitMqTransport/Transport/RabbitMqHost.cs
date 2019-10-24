@@ -1,6 +1,7 @@
 namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
     using Context;
@@ -8,6 +9,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     using Definition;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Caching;
     using Integration;
     using MassTransit.Configurators;
     using Pipeline;
@@ -21,6 +23,7 @@ namespace MassTransit.RabbitMqTransport.Transport
     {
         readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly IRabbitMqHostTopology _hostTopology;
+        IIndex<Uri, CachedSendTransport> _index;
 
         public RabbitMqHost(IRabbitMqHostConfiguration hostConfiguration, IRabbitMqHostTopology hostTopology)
             : base(hostConfiguration, hostTopology)
@@ -36,7 +39,43 @@ namespace MassTransit.RabbitMqTransport.Transport
             });
 
             ConnectionContextSupervisor = new RabbitMqConnectionContextSupervisor(hostConfiguration, hostTopology);
+
+            var cacheSettings = new CacheSettings(SendEndpointCacheDefaults.Capacity, SendEndpointCacheDefaults.MinAge, SendEndpointCacheDefaults.MaxAge);
+
+            var cache = new GreenCache<CachedSendTransport>(cacheSettings);
+            _index = cache.AddIndex("key", x => x.Address);
         }
+
+
+        class CachedSendTransport :
+            ISendTransport,
+            INotifyValueUsed
+        {
+            readonly ISendTransport _sendTransport;
+            public Uri Address { get; }
+
+            public CachedSendTransport(Uri address, ISendTransport sendTransport)
+            {
+                Address = address;
+
+                _sendTransport = sendTransport;
+            }
+
+            public ConnectHandle ConnectSendObserver(ISendObserver observer)
+            {
+                return _sendTransport.ConnectSendObserver(observer);
+            }
+
+            public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+                where T : class
+            {
+                Used?.Invoke();
+                return _sendTransport.Send(message, pipe, cancellationToken);
+            }
+
+            public event Action Used;
+        }
+
 
         protected override void Probe(ProbeContext context)
         {
@@ -99,19 +138,24 @@ namespace MassTransit.RabbitMqTransport.Transport
             return ReceiveEndpoints.Start(queueName);
         }
 
-        public Task<ISendTransport> CreateSendTransport(Uri address)
+        public async Task<ISendTransport> CreateSendTransport(RabbitMqEndpointAddress address)
         {
-            var settings = _hostTopology.SendTopology.GetSendSettings(address);
+            Task<CachedSendTransport> Create(Uri transportAddress)
+            {
+                var settings = _hostTopology.SendTopology.GetSendSettings(address);
 
-            var brokerTopology = settings.GetBrokerTopology();
+                var brokerTopology = settings.GetBrokerTopology();
 
-            var supervisor = CreateModelContextSupervisor();
+                var supervisor = CreateModelContextSupervisor();
 
-            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
+                IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
 
-            var transport = CreateSendTransport(supervisor, pipe, settings.ExchangeName);
+                var transport = CreateSendTransport(supervisor, pipe, settings.ExchangeName);
 
-            return Task.FromResult(transport);
+                return Task.FromResult(new CachedSendTransport(transportAddress, transport));
+            }
+
+            return await _index.Get(address, Create).ConfigureAwait(false);
         }
 
         public Task<ISendTransport> CreatePublishTransport<T>()
@@ -119,7 +163,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         {
             IRabbitMqMessagePublishTopology<T> publishTopology = _hostTopology.Publish<T>();
 
-            var sendSettings = publishTopology.GetSendSettings();
+            var sendSettings = publishTopology.GetSendSettings(_hostConfiguration.HostAddress);
 
             var brokerTopology = publishTopology.GetBrokerTopology();
 

@@ -71,14 +71,5 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
         public TimeSpan? QueueExpiration { get; set; }
 
         public IDictionary<string, object> QueueArguments { get; }
-
-        protected override IEnumerable<string> GetQueryStringOptions()
-        {
-            foreach (var option in base.GetQueryStringOptions())
-                yield return option;
-
-            if (Exclusive)
-                yield return "exclusive=true";
-        }
     }
 }

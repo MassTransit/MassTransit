@@ -15,9 +15,16 @@ namespace MassTransit.RabbitMqTransport.Transport
             _host = host;
         }
 
+        public Uri NormalizeAddress(Uri address)
+        {
+            return new RabbitMqEndpointAddress(_host.Address, address);
+        }
+
         Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
         {
-            return _host.CreateSendTransport(address);
+            var endpointAddress = new RabbitMqEndpointAddress(_host.Address, address);
+
+            return _host.CreateSendTransport(endpointAddress);
         }
     }
 }

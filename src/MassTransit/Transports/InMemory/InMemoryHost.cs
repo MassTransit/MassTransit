@@ -108,6 +108,11 @@ namespace MassTransit.Transports.InMemory
             }).ConfigureAwait(false);
         }
 
+        public Uri NormalizeAddress(Uri address)
+        {
+            return address;
+        }
+
         IInMemoryPublishTopologyBuilder IInMemoryHostControl.CreatePublishTopologyBuilder(PublishEndpointTopologyBuilder.Options options)
         {
             return new PublishEndpointTopologyBuilder(_messageFabric, options);

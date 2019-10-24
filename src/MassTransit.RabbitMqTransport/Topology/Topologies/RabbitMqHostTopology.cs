@@ -43,7 +43,9 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         public Uri GetDestinationAddress(string exchangeName, Action<IExchangeConfigurator> configure = null)
         {
-            var sendSettings = new RabbitMqSendSettings(exchangeName, _exchangeTypeSelector.DefaultExchangeType, true, false);
+            var address = new RabbitMqEndpointAddress(_hostAddress, new Uri($"exchange:{exchangeName}"));
+
+            var sendSettings = new RabbitMqSendSettings(address);
 
             configure?.Invoke(sendSettings);
 
@@ -52,14 +54,11 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         public Uri GetDestinationAddress(Type messageType, Action<IExchangeConfigurator> configure = null)
         {
+            var exchangeName = _messageNameFormatter.GetMessageName(messageType).ToString();
             var isTemporary = TypeMetadataCache.IsTemporaryMessageType(messageType);
+            var address = new RabbitMqEndpointAddress(_hostAddress, new Uri($"exchange:{exchangeName}?temporary={isTemporary}"));
 
-            var durable = !isTemporary;
-            var autoDelete = isTemporary;
-
-            var name = _messageNameFormatter.GetMessageName(messageType).ToString();
-
-            var settings = new RabbitMqSendSettings(name, _exchangeTypeSelector.DefaultExchangeType, durable, autoDelete);
+            var settings = new RabbitMqSendSettings(address);
 
             configure?.Invoke(settings);
 
@@ -68,15 +67,15 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         public Uri GetDelayedExchangeDestinationAddress(Uri address)
         {
-            var settings = _configuration.Send.GetSendSettings(address);
+            var endpointAddress = new RabbitMqEndpointAddress(_hostAddress, address);
 
-            var sendSettings = new RabbitMqSendSettings(settings.ExchangeName + "_delay", "x-delayed-message", settings.Durable, settings.AutoDelete);
+            var delayedExchangeAddress = endpointAddress.GetDelayAddress();
 
-            sendSettings.SetExchangeArgument("x-delayed-type", settings.ExchangeType);
+            var settings = new RabbitMqSendSettings(delayedExchangeAddress);
 
-            sendSettings.BindToExchange(settings.ExchangeName);
+            settings.BindToExchange(endpointAddress.Name);
 
-            return sendSettings.GetSendAddress(_hostAddress);
+            return settings.GetSendAddress(_hostAddress);
         }
 
         public override string CreateTemporaryQueueName(string prefix)

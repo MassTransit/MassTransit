@@ -44,5 +44,10 @@
 
             return new ServiceBusSendTransport(transportContext);
         }
+
+        public Uri NormalizeAddress(Uri address)
+        {
+            return address;
+        }
     }
 }

@@ -65,13 +65,13 @@
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
         {
-            publishAddress = GetSendSettings().GetSendAddress(baseAddress);
+            publishAddress = _exchange.GetEndpointAddress(baseAddress);
             return true;
         }
 
-        public SendSettings GetSendSettings()
+        public SendSettings GetSendSettings(Uri hostAddress)
         {
-            return new RabbitMqSendSettings(_exchange.ExchangeName, _exchange.ExchangeType, _exchange.Durable, _exchange.AutoDelete);
+            return new RabbitMqSendSettings(GetEndpointAddress(hostAddress));
         }
 
         public BrokerTopology GetBrokerTopology()
@@ -108,6 +108,11 @@
         void IExchangeConfigurator.SetExchangeArgument(string key, TimeSpan value)
         {
             _exchange.SetExchangeArgument(key, value);
+        }
+
+        public RabbitMqEndpointAddress GetEndpointAddress(Uri hostAddress)
+        {
+            return _exchange.GetEndpointAddress(hostAddress);
         }
 
         public string AlternateExchange

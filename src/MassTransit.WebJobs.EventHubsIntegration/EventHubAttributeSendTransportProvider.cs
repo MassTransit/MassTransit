@@ -37,5 +37,10 @@
 
             return transport;
         }
+
+        public Uri NormalizeAddress(Uri address)
+        {
+            return address;
+        }
     }
 }
