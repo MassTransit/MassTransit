@@ -22,5 +22,11 @@
         {
             return _host.CreateSendTransport(address, _receiveEndpointContext);
         }
+
+        public Uri NormalizeAddress(Uri address)
+        {
+            return address;
+        }
+
     }
 }

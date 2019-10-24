@@ -167,6 +167,37 @@
 
 
     [TestFixture]
+    public class Sending_a_request_using_the_new_request_client_via_new_endpoint_name :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_receive_the_response()
+        {
+            var message = await _response;
+
+            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+        }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        Task<Response<PongMessage>> _response;
+        IRequestClient<PingMessage> _requestClient;
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            _requestClient = Bus.CreateRequestClient<PingMessage>(new Uri("exchange:input_queue"), RequestTimeout.After(s: 8));
+
+            _response = _requestClient.GetResponse<PongMessage>(new PingMessage());
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
+        }
+    }
+
+
+    [TestFixture]
     public class Sending_a_request_using_the_request_client_in_a_consumer :
         RabbitMqTestFixture
     {
@@ -396,7 +427,6 @@
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8),
                 TimeSpan.FromSeconds(8));
-
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

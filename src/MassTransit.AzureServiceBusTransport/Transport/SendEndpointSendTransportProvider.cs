@@ -19,5 +19,11 @@ namespace MassTransit.AzureServiceBusTransport.Transport
         {
             return _host.CreateSendTransport(address);
         }
+
+        public Uri NormalizeAddress(Uri address)
+        {
+            return address;
+        }
+
     }
 }
