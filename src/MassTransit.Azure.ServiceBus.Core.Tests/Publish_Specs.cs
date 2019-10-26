@@ -167,7 +167,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
             base.ConfigureServiceBusBusHost(configurator, host);
-            configurator.ReceiveEndpoint(host, e =>
+            configurator.ReceiveEndpoint(e =>
             {
                 e.RemoveSubscriptions = true;
                 _consumer = HandledByConsumer<PingMessage>(e);

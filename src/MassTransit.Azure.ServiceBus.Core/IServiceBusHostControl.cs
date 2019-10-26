@@ -1,6 +1,5 @@
 namespace MassTransit.Azure.ServiceBus.Core
 {
-    using System;
     using System.Threading.Tasks;
     using Transports;
 
@@ -9,7 +8,7 @@ namespace MassTransit.Azure.ServiceBus.Core
         IServiceBusHost,
         IBusHostControl
     {
-        Task<ISendTransport> CreateSendTransport(Uri address);
+        Task<ISendTransport> CreateSendTransport(ServiceBusEndpointAddress address);
 
         Task<ISendTransport> CreatePublishTransport<T>()
             where T : class;

@@ -12,7 +12,9 @@
 
         public ServiceBusHostConfigurator(Uri serviceAddress)
         {
-            _settings = new HostSettings {ServiceUri = serviceAddress};
+            var hostAddress = new ServiceBusHostAddress(serviceAddress);
+
+            _settings = new HostSettings {ServiceUri = hostAddress};
         }
 
         public ServiceBusHostSettings Settings => _settings;
