@@ -7,5 +7,5 @@ Hopefully, you will find it useful as you explore the MassTransit framework.
 * [Prerequisites](prerequisites.md)
 * [Supported Packages](packages.md)
 * [How to Install](how-to-install.md)
-* [Getting Html](getting-help.md)
+* [Getting Help](getting-help.md)
 * [How to Report Bugs](how-to-report-bugs.md)
