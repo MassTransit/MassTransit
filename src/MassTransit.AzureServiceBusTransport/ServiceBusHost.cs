@@ -8,6 +8,7 @@ namespace MassTransit.AzureServiceBusTransport
     using Definition;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Caching;
     using MassTransit.Configurators;
     using Metadata;
     using Microsoft.ServiceBus.Messaging;
@@ -24,6 +25,7 @@ namespace MassTransit.AzureServiceBusTransport
     {
         readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly IServiceBusHostTopology _hostTopology;
+        readonly IIndex<Uri, CachedSendTransport> _index;
 
         public ServiceBusHost(IServiceBusHostConfiguration hostConfiguration, IServiceBusHostTopology hostTopology)
             : base(hostConfiguration, hostTopology)
@@ -47,6 +49,11 @@ namespace MassTransit.AzureServiceBusTransport
             MessagingFactoryContextSupervisor = new MessagingFactoryContextSupervisor(hostConfiguration);
 
             NamespaceContextSupervisor = new NamespaceContextSupervisor(hostConfiguration);
+
+            var cacheSettings = new CacheSettings(SendEndpointCacheDefaults.Capacity, SendEndpointCacheDefaults.MinAge, SendEndpointCacheDefaults.MaxAge);
+
+            var cache = new GreenCache<CachedSendTransport>(cacheSettings);
+            _index = cache.AddIndex("key", x => x.Address);
         }
 
         public IMessagingFactoryContextSupervisor MessagingFactoryContextSupervisor { get; }
@@ -136,18 +143,23 @@ namespace MassTransit.AzureServiceBusTransport
             return ReceiveEndpoints.Start(configuration.Settings.Path);
         }
 
-        public Task<ISendTransport> CreateSendTransport(Uri address)
+        public async Task<ISendTransport> CreateSendTransport(ServiceBusEndpointAddress address)
         {
-            var settings = _hostTopology.SendTopology.GetSendSettings(address);
+            Task<CachedSendTransport> Create(Uri transportAddress)
+            {
+                var settings = _hostTopology.SendTopology.GetSendSettings(address);
 
-            var endpointContextSupervisor = CreateQueueSendEndpointContextSupervisor(settings);
+                var endpointContextSupervisor = CreateQueueSendEndpointContextSupervisor(settings);
 
-            var transportContext = new HostServiceBusSendTransportContext(address, endpointContextSupervisor, SendLogContext);
+                var transportContext = new HostServiceBusSendTransportContext(address, endpointContextSupervisor, SendLogContext);
 
-            var transport = new ServiceBusSendTransport(transportContext);
-            Add(transport);
+                var transport = new ServiceBusSendTransport(transportContext);
+                Add(transport);
 
-            return Task.FromResult<ISendTransport>(transport);
+                return Task.FromResult(new CachedSendTransport(transportAddress, transport));
+            }
+
+            return await _index.Get(address, Create).ConfigureAwait(false);
         }
 
         public Task<ISendTransport> CreatePublishTransport<T>()
@@ -155,7 +167,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             var publishTopology = _hostTopology.Publish<T>();
 
-            if (!publishTopology.TryGetPublishAddress(_hostConfiguration.Settings.ServiceUri, out Uri publishAddress))
+            if (!publishTopology.TryGetPublishAddress(_hostConfiguration.HostAddress, out Uri publishAddress))
                 throw new ArgumentException($"The type did not return a valid publish address: {TypeMetadataCache<T>.ShortName}");
 
             var settings = publishTopology.GetSendSettings();
