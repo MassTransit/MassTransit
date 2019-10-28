@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 {
     using System;
@@ -22,7 +10,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
     using Microsoft.ServiceBus.Messaging;
     using Settings;
     using Transport;
-    using Util;
 
 
     public class ServiceBusMessagePublishTopology<TMessage> :
@@ -45,14 +32,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
         {
-            var entityName = _messageTopology.EntityName;
-
-            var builder = new UriBuilder(baseAddress)
-            {
-                Path = entityName
-            };
-
-            publishAddress = builder.Uri;
+            publishAddress = new ServiceBusEndpointAddress(baseAddress, _messageTopology.EntityName);
             return true;
         }
 
@@ -153,7 +133,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             /*
 
             builder.CreateTopicSubscription(builder.Topic, topicHandle, new SubscriptionConfigurator(builder.Topic.Topic.TopicDescription.Path, topicHandle));
-            
+
                 builder.ExchangeBind(builder.Exchange, exchangeHandle, "", new Dictionary<string, object>());
             else
                 builder.Exchange = exchangeHandle;

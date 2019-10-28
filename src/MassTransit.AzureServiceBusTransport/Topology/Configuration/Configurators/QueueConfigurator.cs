@@ -101,19 +101,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Configuration.Configurat
 
         public Uri GetQueueAddress(Uri hostAddress)
         {
-            var basePath = hostAddress.AbsolutePath.Trim('/');
-            var fullPath = string.IsNullOrEmpty(basePath) ? Path : $"{basePath}/{Path.Trim('/')}";
-            var builder = new UriBuilder(hostAddress) {Path = fullPath};
-
-            IEnumerable<string> GetQueryStringOptions()
-            {
-                if (AutoDeleteOnIdle.HasValue && AutoDeleteOnIdle.Value > TimeSpan.Zero && AutoDeleteOnIdle.Value != Defaults.AutoDeleteOnIdle)
-                    yield return $"autodelete={AutoDeleteOnIdle.Value.TotalSeconds}";
-            }
-
-            builder.Query += string.Join("&", GetQueryStringOptions());
-
-            return builder.Uri;
+            return new ServiceBusEndpointAddress(hostAddress, Path, AutoDeleteOnIdle);
         }
     }
 }
