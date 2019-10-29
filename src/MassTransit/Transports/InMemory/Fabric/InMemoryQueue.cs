@@ -17,6 +17,7 @@ namespace MassTransit.Transports.InMemory.Fabric
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Util;
+    using Internals.Extensions;
     using Util;
 
 
@@ -37,7 +38,7 @@ namespace MassTransit.Transports.InMemory.Fabric
             _cancellationToken = new CancellationTokenSource();
 
             _consumers = new Connectable<IInMemoryQueueConsumer>();
-            _consumer = new TaskCompletionSource<IInMemoryQueueConsumer>();
+            _consumer = TaskCompletionSourceFactory.New<IInMemoryQueueConsumer>();
             _cancellationToken.Token.Register(() => _consumer.TrySetCanceled());
         }
 

@@ -5,6 +5,7 @@
         using System;
         using System.Threading.Tasks;
         using GreenPipes;
+        using Internals.Extensions;
         using MassTransit.Testing;
         using Microsoft.ServiceBus;
         using Microsoft.ServiceBus.Messaging;
@@ -24,7 +25,7 @@
                 Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", Configuration.ServiceNamespace,
                     "MassTransit.AzureServiceBusTransport.Tests");
 
-                var completed = new TaskCompletionSource<A>();
+                var completed = TaskCompletionSourceFactory.New<A>();
 
                 IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
@@ -75,7 +76,7 @@
                 Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", Configuration.ServiceNamespace,
                     "MassTransit.AzureServiceBusTransport.Tests");
 
-                var completed = new TaskCompletionSource<A>();
+                var completed = TaskCompletionSourceFactory.New<A>();
 
                 IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {

@@ -9,6 +9,7 @@
     using GreenPipes;
     using GreenPipes.Agents;
     using Hosting;
+    using Internals.Extensions;
     using Logging;
     using MassTransit.Topology;
     using Transports;
@@ -61,8 +62,8 @@
             SendLogContext = LogContext.Current.CreateLogContext(LogCategoryName.Transport.Send);
             ReceiveLogContext = LogContext.Current.CreateLogContext(LogCategoryName.Transport.Receive);
 
-            var handlesReady = new TaskCompletionSource<HostReceiveEndpointHandle[]>();
-            var hostStarted = new TaskCompletionSource<bool>();
+            var handlesReady = TaskCompletionSourceFactory.New<HostReceiveEndpointHandle[]>();
+            var hostStarted = TaskCompletionSourceFactory.New<bool>();
 
             IPipe<HttpHostContext> connectionPipe = Pipe.ExecuteAsync<HttpHostContext>(async context =>
             {

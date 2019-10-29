@@ -94,13 +94,13 @@
 
             static Dependency()
             {
-                _completed = new TaskCompletionSource<string>();
+                _completed = TaskCompletionSourceFactory.New<string>();
             }
 
             public Dependency()
             {
-                _first = new TaskCompletionSource<string>();
-                _second = new TaskCompletionSource<string>();
+                _first = TaskCompletionSourceFactory.New<string>();
+                _second = TaskCompletionSourceFactory.New<string>();
             }
 
             public static Task<string> Completed => _completed.Task;

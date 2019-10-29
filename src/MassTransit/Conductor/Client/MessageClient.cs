@@ -10,6 +10,7 @@ namespace MassTransit.Conductor.Client
     using Distribution;
     using GreenPipes;
     using GreenPipes.Caching;
+    using Internals.Extensions;
     using Metadata;
     using Util;
 
@@ -32,7 +33,7 @@ namespace MassTransit.Conductor.Client
 
             ClientId = clientId;
 
-            _serviceAddress = new TaskCompletionSource<Uri>();
+            _serviceAddress = TaskCompletionSourceFactory.New<Uri>();
 
             var cacheSettings = new CacheSettings(1000, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(30));
             _cache = new GreenCache<EndpointInfo>(cacheSettings);

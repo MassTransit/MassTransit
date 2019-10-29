@@ -14,14 +14,15 @@ namespace MassTransit.Transports.Tests.Observers
 {
     using System;
     using System.Threading.Tasks;
+    using Internals.Extensions;
 
 
     public class SendObserver :
         ISendObserver
     {
-        readonly TaskCompletionSource<SendContext> _postSend = new TaskCompletionSource<SendContext>();
-        readonly TaskCompletionSource<SendContext> _preSend = new TaskCompletionSource<SendContext>();
-        readonly TaskCompletionSource<SendContext> _sendFaulted = new TaskCompletionSource<SendContext>();
+        readonly TaskCompletionSource<SendContext> _postSend = TaskCompletionSourceFactory.New<SendContext>();
+        readonly TaskCompletionSource<SendContext> _preSend = TaskCompletionSourceFactory.New<SendContext>();
+        readonly TaskCompletionSource<SendContext> _sendFaulted = TaskCompletionSourceFactory.New<SendContext>();
 
         public Task<SendContext> PreSent => _preSend.Task;
 

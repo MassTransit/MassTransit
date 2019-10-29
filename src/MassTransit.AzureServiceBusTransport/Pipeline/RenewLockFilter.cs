@@ -17,6 +17,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using Internals.Extensions;
     using Microsoft.ServiceBus.Messaging;
 
 
@@ -63,7 +64,7 @@ namespace MassTransit.AzureServiceBusTransport.Pipeline
                 _context = context;
                 _delay = delay;
                 _source = new CancellationTokenSource();
-                _completed = new TaskCompletionSource<bool>();
+                _completed = TaskCompletionSourceFactory.New<bool>();
 
                 if (context != null)
                 {

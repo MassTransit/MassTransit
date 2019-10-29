@@ -10,6 +10,8 @@
     using System.Security.Claims;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals.Extensions;
+
 
     internal class TestClient : ITransferFormatFeature, IConnectionHeartbeatFeature, IDisposable
     {
@@ -47,7 +49,7 @@
             }
 
             Connection.User = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            Connection.Items["ConnectedTask"] = new TaskCompletionSource<bool>();
+            Connection.Items["ConnectedTask"] = TaskCompletionSourceFactory.New<bool>();
 
             _protocol = protocol ?? new JsonHubProtocol();
             _invocationBinder = invocationBinder ?? new DefaultInvocationBinder();
@@ -233,7 +235,7 @@
                 }
                 else
                 {
-                    // read first message out of the incoming data 
+                    // read first message out of the incoming data
                     if (HandshakeProtocol.TryParseResponseMessage(ref buffer, out var responseMessage))
                     {
                         return responseMessage;

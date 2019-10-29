@@ -19,6 +19,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
     using Microsoft.ServiceBus.Messaging;
     using Transports.Metrics;
     using Util;
@@ -39,7 +40,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             _messageReceiver = messageReceiver;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
-            _deliveryComplete = new TaskCompletionSource<bool>();
+            _deliveryComplete = TaskCompletionSourceFactory.New<bool>();
         }
 
         public Task DeliveryCompleted => _deliveryComplete.Task;

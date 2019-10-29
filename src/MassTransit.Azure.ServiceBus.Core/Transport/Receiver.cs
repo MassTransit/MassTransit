@@ -9,6 +9,7 @@
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
     using Transports.Metrics;
@@ -30,7 +31,7 @@
             _messageReceiver = messageReceiver;
 
             Tracker = new DeliveryTracker(HandleDeliveryComplete);
-            _deliveryComplete = new TaskCompletionSource<bool>();
+            _deliveryComplete = TaskCompletionSourceFactory.New<bool>();
         }
 
         public DeliveryMetrics GetDeliveryMetrics()

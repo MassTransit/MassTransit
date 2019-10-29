@@ -19,6 +19,7 @@ namespace MassTransit.HttpTransport.Transport
     using Contexts;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
     using Microsoft.AspNetCore.Http;
     using Pipeline;
     using Transports.Metrics;
@@ -38,7 +39,7 @@ namespace MassTransit.HttpTransport.Transport
             _context = context;
 
             _tracker = new DeliveryTracker(OnDeliveryComplete);
-            _deliveryComplete = new TaskCompletionSource<bool>();
+            _deliveryComplete = TaskCompletionSourceFactory.New<bool>();
 
             SetReady();
         }

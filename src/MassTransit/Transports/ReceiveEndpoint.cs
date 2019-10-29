@@ -7,6 +7,7 @@ namespace MassTransit.Transports
     using Events;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
     using Pipeline;
 
 
@@ -28,7 +29,7 @@ namespace MassTransit.Transports
             _context = context;
             _receiveTransport = receiveTransport;
 
-            _started = new TaskCompletionSource<ReceiveEndpointReady>();
+            _started = TaskCompletionSourceFactory.New<ReceiveEndpointReady>();
             _handle = receiveTransport.ConnectReceiveTransportObserver(new Observer(this, context.EndpointObservers));
         }
 

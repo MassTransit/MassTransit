@@ -7,6 +7,7 @@ namespace MassTransit.ActiveMqTransport.Tests
     using System.Threading.Tasks;
     using Configurators;
     using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework.Messages;
@@ -119,7 +120,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         [Test]
         public async Task Should_succeed_and_connect_when_properly_configured()
         {
-            TaskCompletionSource<bool> received = new TaskCompletionSource<bool>();
+            TaskCompletionSource<bool> received = TaskCompletionSourceFactory.New<bool>();
 
             Uri sendAddress = null;
 

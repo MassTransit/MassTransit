@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using Internals.Extensions;
     using Observers;
     using Util;
 
@@ -185,7 +186,7 @@
         public Task<ConsumeContext<T>> SubscribeHandler<T>()
             where T : class
         {
-            var source = new TaskCompletionSource<ConsumeContext<T>>();
+            var source = TaskCompletionSourceFactory.New<ConsumeContext<T>>();
 
             ConnectHandle handler = null;
             handler = Bus.ConnectHandler<T>(async context =>
@@ -215,7 +216,7 @@
         public Task<ConsumeContext<T>> SubscribeHandler<T>(Func<ConsumeContext<T>, bool> filter)
             where T : class
         {
-            var source = new TaskCompletionSource<ConsumeContext<T>>();
+            var source = TaskCompletionSourceFactory.New<ConsumeContext<T>>();
 
             ConnectHandle handler = null;
             handler = Bus.ConnectHandler<T>(async context =>

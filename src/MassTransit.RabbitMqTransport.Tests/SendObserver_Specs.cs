@@ -12,6 +12,7 @@
     namespace ObserverTests
     {
         using GreenPipes.Internals.Extensions;
+        using Internals.Extensions;
 
 
         [TestFixture]
@@ -101,9 +102,9 @@
 
             public PublishObserver()
             {
-                _sendFaulted = new TaskCompletionSource<PublishContext>();
-                _preSend = new TaskCompletionSource<PublishContext>();
-                _postSend = new TaskCompletionSource<PublishContext>();
+                _sendFaulted = TaskCompletionSourceFactory.New<PublishContext>();
+                _preSend = TaskCompletionSourceFactory.New<PublishContext>();
+                _postSend = TaskCompletionSourceFactory.New<PublishContext>();
             }
 
             public Task<PublishContext> PreSent
@@ -144,9 +145,9 @@
         class SendObserver :
             ISendObserver
         {
-            readonly TaskCompletionSource<SendContext> _postSend = new TaskCompletionSource<SendContext>();
-            readonly TaskCompletionSource<SendContext> _preSend = new TaskCompletionSource<SendContext>();
-            readonly TaskCompletionSource<SendContext> _sendFaulted = new TaskCompletionSource<SendContext>();
+            readonly TaskCompletionSource<SendContext> _postSend = TaskCompletionSourceFactory.New<SendContext>();
+            readonly TaskCompletionSource<SendContext> _preSend = TaskCompletionSourceFactory.New<SendContext>();
+            readonly TaskCompletionSource<SendContext> _sendFaulted = TaskCompletionSourceFactory.New<SendContext>();
 
             public Task<SendContext> PreSent
             {

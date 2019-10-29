@@ -20,6 +20,7 @@ namespace MassTransit.Clients
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
+    using Internals.Extensions;
     using Metadata;
     using Util;
 
@@ -65,8 +66,8 @@ namespace MassTransit.Clients
                     : TaskScheduler.FromCurrentSynchronizationContext());
 
             _pipeConfigurator = new PipeConfigurator<SendContext<TRequest>>();
-            _sendContext = new TaskCompletionSource<SendContext<TRequest>>();
-            _readyToSend = new TaskCompletionSource<bool>();
+            _sendContext = TaskCompletionSourceFactory.New<SendContext<TRequest>>();
+            _readyToSend = TaskCompletionSourceFactory.New<bool>();
             _cancellationTokenSource = new CancellationTokenSource();
             _responseHandlers = new Dictionary<Type, HandlerConnectHandle>();
 

@@ -23,6 +23,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using Configuration;
     using Context;
     using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework.Logging;
@@ -149,7 +150,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
         [Test]
         public async Task Should_succeed_and_connect_when_properly_configured()
         {
-            TaskCompletionSource<bool> received = new TaskCompletionSource<bool>();
+            TaskCompletionSource<bool> received = TaskCompletionSourceFactory.New<bool>();
 
             IAmazonSqsHost host = null;
 
@@ -362,7 +363,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                 typeof(Message21), typeof(Message22)
             };
 
-            var tasksCompleted = messageTypes.ToDictionary(k => k, v => new TaskCompletionSource<bool>());
+            var tasksCompleted = messageTypes.ToDictionary(k => k, v => TaskCompletionSourceFactory.New<bool>());
 
             IAmazonSqsHost host = null;
 

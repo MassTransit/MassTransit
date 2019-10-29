@@ -5,6 +5,7 @@ namespace MassTransit.Pipeline.Pipes
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
     using GreenPipes.Filters;
+    using Internals.Extensions;
 
 
     public class ConsumePipe :
@@ -19,7 +20,7 @@ namespace MassTransit.Pipeline.Pipes
             _dynamicFilter = dynamicFilter ?? throw new ArgumentNullException(nameof(dynamicFilter));
             _pipe = pipe ?? throw new ArgumentNullException(nameof(pipe));
 
-            _connected = new TaskCompletionSource<bool>();
+            _connected = TaskCompletionSourceFactory.New<bool>();
 
             if (autoStart)
                 _connected.TrySetResult(true);

@@ -14,6 +14,7 @@ namespace MassTransit.Transports.Tests.Observers
 {
     using System;
     using System.Threading.Tasks;
+    using Internals.Extensions;
 
 
     public class PublishObserver :
@@ -25,9 +26,9 @@ namespace MassTransit.Transports.Tests.Observers
 
         public PublishObserver()
         {
-            _sendFaulted = new TaskCompletionSource<PublishContext>();
-            _preSend = new TaskCompletionSource<PublishContext>();
-            _postSend = new TaskCompletionSource<PublishContext>();
+            _sendFaulted = TaskCompletionSourceFactory.New<PublishContext>();
+            _preSend = TaskCompletionSourceFactory.New<PublishContext>();
+            _postSend = TaskCompletionSourceFactory.New<PublishContext>();
         }
 
         public Task<PublishContext> PrePublished

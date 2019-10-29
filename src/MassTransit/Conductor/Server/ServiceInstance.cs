@@ -6,6 +6,7 @@ namespace MassTransit.Conductor.Server
     using Consumers;
     using Contracts;
     using Initializers;
+    using Internals.Extensions;
     using Metadata;
     using Util;
 
@@ -27,7 +28,7 @@ namespace MassTransit.Conductor.Server
             _instanceAddress = new Lazy<Uri>(() => configurator.InputAddress);
 
             _messageTypes = new Dictionary<Type, IMessageEndpoint>();
-            _receiveEndpoint = new TaskCompletionSource<IReceiveEndpoint>();
+            _receiveEndpoint = TaskCompletionSourceFactory.New<IReceiveEndpoint>();
 
             configurator.ConnectReceiveEndpointObserver(new InstanceReadyObserver(_receiveEndpoint));
         }

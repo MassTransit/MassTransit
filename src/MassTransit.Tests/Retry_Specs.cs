@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Introspection;
+    using Internals.Extensions;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -584,7 +585,7 @@
 
             public RetryObserver()
             {
-                _completionSource = new TaskCompletionSource<RetryContext>();
+                _completionSource = TaskCompletionSourceFactory.New<RetryContext>();
             }
 
             public Task<RetryContext> Completed => _completionSource.Task;

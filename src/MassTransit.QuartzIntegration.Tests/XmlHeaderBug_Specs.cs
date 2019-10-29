@@ -14,6 +14,7 @@ namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Internals.Extensions;
     using NUnit.Framework;
     using TestFramework;
 
@@ -57,7 +58,7 @@ namespace MassTransit.QuartzIntegration.Tests
         {
             public Task Completed => _source.Task;
 
-            readonly TaskCompletionSource<ConsumeContext<IMyMessage>> _source = new TaskCompletionSource<ConsumeContext<IMyMessage>>();
+            readonly TaskCompletionSource<ConsumeContext<IMyMessage>> _source = TaskCompletionSourceFactory.New<ConsumeContext<IMyMessage>>();
 
             public async Task Consume(ConsumeContext<IMyMessage> context)
             {

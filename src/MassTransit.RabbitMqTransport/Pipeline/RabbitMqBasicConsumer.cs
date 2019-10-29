@@ -9,6 +9,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
     using Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
@@ -53,7 +54,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             _pending = new ConcurrentDictionary<ulong, RabbitMqReceiveContext>();
 
-            _deliveryComplete = new TaskCompletionSource<bool>();
+            _deliveryComplete = TaskCompletionSourceFactory.New<bool>();
         }
 
         /// <summary>

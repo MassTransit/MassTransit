@@ -10,6 +10,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
     using Logging;
     using Topology;
     using Transports.Metrics;
@@ -49,7 +50,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             _pending = new ConcurrentDictionary<string, AmazonSqsReceiveContext>();
 
-            _deliveryComplete = new TaskCompletionSource<bool>();
+            _deliveryComplete = TaskCompletionSourceFactory.New<bool>();
 
             SetReady();
         }

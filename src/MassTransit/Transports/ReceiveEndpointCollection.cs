@@ -7,6 +7,7 @@
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Agents;
+    using Internals.Extensions;
     using Pipeline.Observables;
     using Util;
 
@@ -238,7 +239,7 @@
                 public Observer(IReceiveEndpoint endpoint, CancellationToken cancellationToken)
                 {
                     _cancellationToken = cancellationToken;
-                    _ready = new TaskCompletionSource<ReceiveEndpointReady>();
+                    _ready = TaskCompletionSourceFactory.New<ReceiveEndpointReady>();
 
                     _handle = endpoint.ConnectReceiveEndpointObserver(this);
                 }

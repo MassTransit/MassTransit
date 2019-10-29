@@ -20,6 +20,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using Internals.Extensions;
 
 
     public class BatchConsumer<TConsumer, TMessage> :
@@ -46,7 +47,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
             _consumerFactory = consumerFactory;
             _consumerPipe = consumerPipe;
             _messages = new SortedDictionary<Guid, ConsumeContext<TMessage>>();
-            _completed = new TaskCompletionSource<DateTime>();
+            _completed = TaskCompletionSourceFactory.New<DateTime>();
             _firstMessage = DateTime.UtcNow;
 
             _timer = new Timer(TimeLimitExpired, null, timeLimit, TimeSpan.Zero);

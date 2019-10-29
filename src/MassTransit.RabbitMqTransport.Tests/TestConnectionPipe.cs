@@ -3,6 +3,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using Internals.Extensions;
     using MassTransit.Pipeline;
     using RabbitMqTransport;
 
@@ -14,7 +15,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         public TestConnectionPipe(CancellationToken testCancellationToken)
         {
-            _called = new TaskCompletionSource<ConnectionContext>();
+            _called = TaskCompletionSourceFactory.New<ConnectionContext>();
             testCancellationToken.Register(() => _called.TrySetCanceled());
         }
 

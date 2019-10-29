@@ -10,6 +10,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
     using Logging;
     using Topology;
     using Transports.Metrics;
@@ -51,7 +52,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             _pending = new ConcurrentDictionary<string, ActiveMqReceiveContext>();
 
-            _deliveryComplete = new TaskCompletionSource<bool>();
+            _deliveryComplete = TaskCompletionSourceFactory.New<bool>();
 
             messageConsumer.Listener += HandleMessage;
 

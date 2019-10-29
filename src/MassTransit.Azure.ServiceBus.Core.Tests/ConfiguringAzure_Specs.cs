@@ -6,6 +6,7 @@
         using System.Threading.Tasks;
         using GreenPipes;
         using Hosting;
+        using Internals.Extensions;
         using MassTransit.Testing;
         using NUnit.Framework;
         using TestFramework;
@@ -26,7 +27,7 @@
                     "MassTransit.Azure.ServiceBus.Core.Tests"
                 );
 
-                var completed = new TaskCompletionSource<A>();
+                var completed = TaskCompletionSourceFactory.New<A>();
 
                 IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {

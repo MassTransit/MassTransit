@@ -3,6 +3,7 @@ namespace MassTransit.Transports
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
     using Util;
 
 
@@ -15,7 +16,7 @@ namespace MassTransit.Transports
 
         public ReceiveEndpointDependency(IReceiveEndpointObserverConnector connector)
         {
-            _ready = new TaskCompletionSource<ReceiveEndpointReady>();
+            _ready = TaskCompletionSourceFactory.New<ReceiveEndpointReady>();
 
             _handle = connector.ConnectReceiveEndpointObserver(this);
         }
