@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 {
     using System;
@@ -24,21 +12,33 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         AmazonSqsHostSettings
     {
         readonly Lazy<Uri> _hostAddress;
-        
+        ImmutableCredentials _immutableCredentials;
+        AWSCredentials _credentials;
+
         public ConfigurationHostSettings()
         {
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
         }
 
         public RegionEndpoint Region { get; set; }
-        public string AccessKey { get => GetImmutableCredentials().AccessKey; }
-        public string SecretKey { get => GetImmutableCredentials().SecretKey; }
+        public string AccessKey => (_immutableCredentials ?? (_immutableCredentials = GetImmutableCredentials())).AccessKey;
+        public string SecretKey => (_immutableCredentials ?? (_immutableCredentials = GetImmutableCredentials())).SecretKey;
 
-        public AWSCredentials Credentials { get; set; }
+        public AWSCredentials Credentials
+        {
+            get => _credentials;
+            set
+            {
+                _credentials = value;
+                _immutableCredentials = null;
+            }
+        }
 
         public AmazonSQSConfig AmazonSqsConfig { get; set; }
 
         public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; set; }
+
+        public string Scope { get; set; }
 
         public Uri HostAddress => _hostAddress.Value;
 
@@ -49,14 +49,9 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 
         Uri FormatHostAddress()
         {
-            var builder = new UriBuilder
-            {
-                Scheme = "amazonsqs",
-                Host = Region.SystemName,
-                Path = "/"
-            };
+            var hostAddress = new AmazonSqsHostAddress(Region.SystemName, Scope);
 
-            return builder.Uri;
+            return hostAddress;
         }
 
         public override string ToString()
@@ -68,10 +63,9 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             }.Uri.ToString();
         }
 
-        private ImmutableCredentials GetImmutableCredentials()
+        ImmutableCredentials GetImmutableCredentials()
         {
-            if (Credentials == null) throw new ArgumentNullException(nameof(Credentials));
-            return Credentials.GetCredentials();
+            return Credentials?.GetCredentials() ?? throw new ArgumentNullException(nameof(Credentials));
         }
     }
 }

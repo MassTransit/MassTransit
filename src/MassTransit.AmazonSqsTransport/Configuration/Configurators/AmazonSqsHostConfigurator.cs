@@ -1,15 +1,3 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 {
     using System;
@@ -17,7 +5,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
     using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using Exceptions;
 
 
     public class AmazonSqsHostConfigurator :
@@ -25,19 +12,21 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
     {
         readonly ConfigurationHostSettings _settings;
 
+        string _accessKey;
+        string _secretKey;
+
         public AmazonSqsHostConfigurator(Uri address)
         {
-            if (string.Compare("amazonsqs", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
-                throw new AmazonSqsTransportConfigurationException($"The address scheme was invalid: {address.Scheme}");
+            var hostAddress = new AmazonSqsHostAddress(address);
 
-            var regionEndpoint = RegionEndpoint.GetBySystemName(address.Host);
+            var regionEndpoint = RegionEndpoint.GetBySystemName(hostAddress.Host);
 
-            _settings = new ConfigurationHostSettings
+            _settings = new ConfigurationHostSettings()
             {
+                Scope = hostAddress.Scope,
                 Region = regionEndpoint,
-                Credentials = null,
-                AmazonSqsConfig = new AmazonSQSConfig { RegionEndpoint = regionEndpoint },
-                AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig { RegionEndpoint = regionEndpoint },
+                AmazonSqsConfig = new AmazonSQSConfig {RegionEndpoint = regionEndpoint},
+                AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig {RegionEndpoint = regionEndpoint}
             };
 
             if (!string.IsNullOrEmpty(address.UserInfo))
@@ -54,9 +43,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         }
 
         public AmazonSqsHostSettings Settings => _settings;
-
-        private string _accessKey { get; set; }
-        private string _secretKey { get; set; }
 
         public void AccessKey(string accessKey)
         {
@@ -85,12 +71,12 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             _settings.AmazonSnsConfig = config;
         }
 
-        private void SetBasicCredentials()
+        void SetBasicCredentials()
         {
-            if (!string.IsNullOrEmpty(_accessKey) && !string.IsNullOrEmpty(_secretKey))
-            {
-                _settings.Credentials = new BasicAWSCredentials(_accessKey, _secretKey);
-            }
+            if (string.IsNullOrEmpty(_accessKey) || string.IsNullOrEmpty(_secretKey))
+                return;
+
+            _settings.Credentials = new BasicAWSCredentials(_accessKey, _secretKey);
         }
     }
 }

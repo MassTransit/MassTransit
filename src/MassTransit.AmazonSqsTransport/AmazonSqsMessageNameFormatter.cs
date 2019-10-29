@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport
 {
     using System;
@@ -22,39 +10,19 @@ namespace MassTransit.AmazonSqsTransport
     public class AmazonSqsMessageNameFormatter :
         IMessageNameFormatter
     {
-        readonly IMessageNameFormatter _formatter;
-
-        public AmazonSqsMessageNameFormatter()
-        {
-            _formatter = new AmazonArnMessageNameFormatter(
-                genericArgumentSeparator: "__",
-                genericTypeSeparator: "--",
-                namespaceSeparator: "-",
-                nestedTypeSeparator: "_");
-        }
-
-        public MessageName GetMessageName(Type type)
-        {
-            return _formatter.GetMessageName(type);
-        }
-    }
-
-    public class AmazonArnMessageNameFormatter :
-        IMessageNameFormatter
-    {
         readonly ConcurrentDictionary<Type, string> _cache;
         readonly string _genericArgumentSeparator;
         readonly string _genericTypeSeparator;
         readonly string _namespaceSeparator;
         readonly string _nestedTypeSeparator;
 
-        public AmazonArnMessageNameFormatter(string genericArgumentSeparator, string genericTypeSeparator,
-            string namespaceSeparator, string nestedTypeSeparator)
+        public AmazonSqsMessageNameFormatter(string genericArgumentSeparator = null, string genericTypeSeparator = null,
+            string namespaceSeparator = null, string nestedTypeSeparator = null)
         {
-            _genericArgumentSeparator = genericArgumentSeparator;
-            _genericTypeSeparator = genericTypeSeparator;
-            _namespaceSeparator = namespaceSeparator;
-            _nestedTypeSeparator = nestedTypeSeparator;
+            _genericArgumentSeparator = genericArgumentSeparator ?? "__";
+            _genericTypeSeparator = genericTypeSeparator ?? "--";
+            _namespaceSeparator = namespaceSeparator ?? "-";
+            _nestedTypeSeparator = nestedTypeSeparator ?? "_";
 
             _cache = new ConcurrentDictionary<Type, string>();
         }

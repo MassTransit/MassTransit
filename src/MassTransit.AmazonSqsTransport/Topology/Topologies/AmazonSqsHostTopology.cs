@@ -20,7 +20,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
     using Metadata;
     using Settings;
     using Transports;
-    using Util;
 
 
     public class AmazonSqsHostTopology :
@@ -54,7 +53,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public SendSettings GetSendSettings(Uri address)
         {
-            return _configuration.Send.GetSendSettings(address);
+            var endpointAddress = new AmazonSqsEndpointAddress(_hostAddress, address);
+
+            return _configuration.Send.GetSendSettings(endpointAddress);
         }
 
         public Uri GetDestinationAddress(string topicName, Action<ITopicConfigurator> configure = null)
