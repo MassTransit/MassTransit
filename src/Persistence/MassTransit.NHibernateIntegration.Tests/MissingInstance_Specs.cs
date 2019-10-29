@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.NHibernateIntegration.Tests
 {
@@ -17,6 +17,7 @@ namespace MassTransit.NHibernateIntegration.Tests
         using System;
         using System.Threading.Tasks;
         using Automatonymous;
+        using GreenPipes.Internals.Extensions;
         using MassTransit.Saga;
         using NHibernate;
         using NUnit.Framework;
@@ -65,10 +66,13 @@ namespace MassTransit.NHibernateIntegration.Tests
 
                 var (status, notFound) = await requestClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("A"), TestCancellationToken);
 
-                Assert.AreEqual(TaskStatus.Canceled, status.Status);
-                Assert.AreEqual(TaskStatus.RanToCompletion, notFound.Status);
+                Assert.That(notFound.IsCompletedSuccessfully(), Is.True);
 
-                Assert.AreEqual("A", notFound.Result.Message.ServiceName);
+                Response<InstanceNotFound> result = await notFound;
+
+                Assert.AreEqual("A", result.Message.ServiceName);
+
+                Assert.That(async () => await status, Throws.TypeOf<TaskCanceledException>());
             }
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

@@ -179,7 +179,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             await _first;
 
-            Assert.That(async () => await _second.OrTimeout(5000), Throws.TypeOf<OperationCanceledException>());
+            Assert.That(async () => await _second.OrTimeout(5000), Throws.TypeOf<TimeoutException>());
         }
 
         Task<ConsumeContext<SecondMessage>> _second;

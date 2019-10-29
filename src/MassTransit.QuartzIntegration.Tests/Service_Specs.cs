@@ -107,7 +107,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
             await Bus.CancelScheduledSend(scheduledMessage);
 
-            Assert.That(async () => await handlerA.OrTimeout(5000), Throws.TypeOf<OperationCanceledException>());
+            Assert.That(async () => await handlerA.OrTimeout(5000), Throws.TypeOf<TimeoutException>());
         }
 
 
