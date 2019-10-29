@@ -30,7 +30,9 @@ namespace MassTransit.Transformation.TransformConfigurators
             {
                 var inputPropertyProvider = new InputPropertyProvider<TInput, TProperty>(_property);
 
-                var arrayConverter = new ArrayPropertyConverter<TElement, TElement>(converter) as IPropertyConverter<TProperty, TProperty>;
+                IPropertyConverter<TProperty, TProperty> arrayConverter = typeof(TProperty).IsArray
+                    ? new ArrayPropertyConverter<TElement, TElement>(converter) as IPropertyConverter<TProperty, TProperty>
+                    : new ListPropertyConverter<TElement, TElement>(converter) as IPropertyConverter<TProperty, TProperty>;
 
                 var provider = new PropertyConverterPropertyProvider<TInput, TProperty, TProperty>(arrayConverter, inputPropertyProvider);
 
