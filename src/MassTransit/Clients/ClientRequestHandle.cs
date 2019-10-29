@@ -65,8 +65,8 @@ namespace MassTransit.Clients
                     : TaskScheduler.FromCurrentSynchronizationContext());
 
             _pipeConfigurator = new PipeConfigurator<SendContext<TRequest>>();
-            _sendContext = new TaskCompletionSource<SendContext<TRequest>>();
-            _readyToSend = new TaskCompletionSource<bool>();
+            _sendContext = TaskUtil.GetTask<SendContext<TRequest>>();
+            _readyToSend = TaskUtil.GetTask<bool>();
             _cancellationTokenSource = new CancellationTokenSource();
             _responseHandlers = new Dictionary<Type, HandlerConnectHandle>();
 

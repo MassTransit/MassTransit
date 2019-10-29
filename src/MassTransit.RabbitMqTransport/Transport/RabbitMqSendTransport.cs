@@ -9,6 +9,7 @@
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Initializers.TypeConverters;
     using Internals.Extensions;
     using Logging;
@@ -124,7 +125,7 @@
                     var publishTask = modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey ?? "", context.Mandatory,
                         context.BasicProperties, body, context.AwaitAck);
 
-                    await publishTask.WithCancellation(context.CancellationToken).ConfigureAwait(false);
+                    await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
                     context.LogSent();
 

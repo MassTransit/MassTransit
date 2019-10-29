@@ -27,7 +27,7 @@ namespace MassTransit.Conductor.Server
             _instanceAddress = new Lazy<Uri>(() => configurator.InputAddress);
 
             _messageTypes = new Dictionary<Type, IMessageEndpoint>();
-            _receiveEndpoint = new TaskCompletionSource<IReceiveEndpoint>();
+            _receiveEndpoint = TaskUtil.GetTask<IReceiveEndpoint>();
 
             configurator.ConnectReceiveEndpointObserver(new InstanceReadyObserver(_receiveEndpoint));
         }

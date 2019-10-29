@@ -9,6 +9,7 @@
         using MassTransit.Testing;
         using NUnit.Framework;
         using TestFramework;
+        using Util;
 
 
         [TestFixture]
@@ -26,7 +27,7 @@
                     "MassTransit.Azure.ServiceBus.Core.Tests"
                 );
 
-                var completed = new TaskCompletionSource<A>();
+                var completed = TaskUtil.GetTask<A>();
 
                 IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {

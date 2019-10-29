@@ -2,6 +2,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
     using System.Threading.Tasks;
+    using Util;
 
 
     /// <summary>
@@ -19,7 +20,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             _connectionContext = connectionContext;
             _exchange = exchange;
             _publishTag = publishTag;
-            _source = new TaskCompletionSource<ulong>();
+            _source = TaskUtil.GetTask<ulong>();
         }
 
         public Task Task => _source.Task;

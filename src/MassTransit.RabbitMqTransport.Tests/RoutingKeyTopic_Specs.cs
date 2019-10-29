@@ -2,10 +2,10 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes.Util;
     using NUnit.Framework;
     using RabbitMQ.Client;
     using RoutingKeyTopic;
+    using Util;
 
 
     namespace RoutingKeyTopic
@@ -96,8 +96,8 @@
         class Consumer :
             IConsumer<Message>
         {
-            static readonly TaskCompletionSource<Message> _microsoft = new TaskCompletionSource<Message>();
-            static readonly TaskCompletionSource<Message> _uber = new TaskCompletionSource<Message>();
+            static readonly TaskCompletionSource<Message> _microsoft = TaskUtil.GetTask<Message>();
+            static readonly TaskCompletionSource<Message> _uber = TaskUtil.GetTask<Message>();
             public static Task<Message> Microsoft => _microsoft.Task;
             public static Task<Message> Uber => _uber.Task;
 

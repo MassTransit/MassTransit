@@ -15,7 +15,7 @@ namespace MassTransit.Transports
 
         public ReceiveEndpointDependency(IReceiveEndpointObserverConnector connector)
         {
-            _ready = new TaskCompletionSource<ReceiveEndpointReady>();
+            _ready = TaskUtil.GetTask<ReceiveEndpointReady>();
 
             _handle = connector.ConnectReceiveEndpointObserver(this);
         }

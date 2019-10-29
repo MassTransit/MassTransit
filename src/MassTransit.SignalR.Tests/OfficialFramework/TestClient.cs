@@ -10,6 +10,8 @@
     using System.Security.Claims;
     using System.Threading;
     using System.Threading.Tasks;
+    using Util;
+
 
     internal class TestClient : ITransferFormatFeature, IConnectionHeartbeatFeature, IDisposable
     {
@@ -47,7 +49,7 @@
             }
 
             Connection.User = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            Connection.Items["ConnectedTask"] = new TaskCompletionSource<bool>();
+            Connection.Items["ConnectedTask"] = TaskUtil.GetTask<bool>();
 
             _protocol = protocol ?? new JsonHubProtocol();
             _invocationBinder = invocationBinder ?? new DefaultInvocationBinder();
@@ -55,8 +57,7 @@
             _cts = new CancellationTokenSource();
         }
 
-        public async Task<Task> ConnectAsync(
-            Microsoft.AspNetCore.Connections.ConnectionHandler handler,
+        public async Task<Task> ConnectAsync(Microsoft.AspNetCore.Connections.ConnectionHandler handler,
             bool sendHandshakeRequestMessage = true,
             bool expectedHandshakeResponseMessage = true)
         {
@@ -233,7 +234,7 @@
                 }
                 else
                 {
-                    // read first message out of the incoming data 
+                    // read first message out of the incoming data
                     if (HandshakeProtocol.TryParseResponseMessage(ref buffer, out var responseMessage))
                     {
                         return responseMessage;
