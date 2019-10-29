@@ -22,15 +22,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Settings
 
         public Uri GetInputAddress(Uri hostAddress)
         {
-            var builder = new UriBuilder(hostAddress);
-
-            builder.Path = builder.Path == "/"
-                ? $"/{EntityName}"
-                : $"/{string.Join("/", builder.Path.Trim('/'), EntityName)}";
-
-            builder.Query += string.Join("&", GetQueryStringOptions());
-
-            return builder.Uri;
+            return GetEndpointAddress(hostAddress);
         }
     }
 }

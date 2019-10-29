@@ -19,7 +19,6 @@ namespace MassTransit.ActiveMqTransport.Tests
     using Context;
     using GreenPipes;
     using GreenPipes.Introspection;
-    using Logging;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
