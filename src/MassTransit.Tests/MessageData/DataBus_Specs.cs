@@ -217,6 +217,15 @@
                             Body = new ConstantMessageData<byte[]>(dataAddress, buffer)
                         }
                     },
+                    DocumentList = new List<IDocument>()
+                    {
+                        new Document()
+                        {
+                            Title = "Hello, World",
+                            PageCount = 44,
+                            Body = new ConstantMessageData<byte[]>(dataAddress, buffer)
+                        }
+                    },
                     DocumentIndex = new Dictionary<string, IDocument>()
                     {
                         {"First", new Document {Body = new ConstantMessageData<byte[]>(dataAddress, buffer)}},
@@ -237,6 +246,9 @@
                 result = await _body0.Value;
                 Assert.That(result, Is.EqualTo(buffer));
 
+                result = await _bodyList0.Value;
+                Assert.That(result, Is.EqualTo(buffer));
+
                 result = await _bodyFirst.Value;
                 Assert.That(result, Is.EqualTo(buffer));
 
@@ -249,6 +261,7 @@
             Task<ConsumeContext<IMessage>> _received;
             MessageData<byte[]> _body;
             MessageData<byte[]> _body0;
+            MessageData<byte[]> _bodyList0;
             MessageData<byte[]> _bodyFirst;
             MessageData<byte[]> _bodySecond;
 
@@ -262,6 +275,7 @@
                 {
                     _body = context.Message.Document.Body;
                     _body0 = context.Message.Documents[0].Body;
+                    _bodyList0 = context.Message.DocumentList[0].Body;
                     _bodyFirst = context.Message.DocumentIndex["First"].Body;
                     _bodySecond = context.Message.DocumentIndex["Second"].Body;
                 });
@@ -312,6 +326,7 @@
             }
         }
 
+
         [TestFixture]
         public class A_message_with_no_message_data :
             InMemoryTestFixture
@@ -357,6 +372,7 @@
         {
             IDocument Document { get; }
             IDocument[] Documents { get; }
+            IList<IDocument> DocumentList { get; }
             IDictionary<string, IDocument> DocumentIndex { get; }
         }
 
@@ -365,6 +381,7 @@
         {
             public IDocument Document { get; set; }
             public IDocument[] Documents { get; set; }
+            public IList<IDocument> DocumentList { get; set; }
             public IDictionary<string, IDocument> DocumentIndex { get; set; }
         }
 
