@@ -13,6 +13,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using Logging;
     using Topology;
     using Transports.Metrics;
+    using Util;
 
 
     /// <summary>
@@ -49,7 +50,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             _pending = new ConcurrentDictionary<string, AmazonSqsReceiveContext>();
 
-            _deliveryComplete = new TaskCompletionSource<bool>();
+            _deliveryComplete = TaskUtil.GetTask<bool>();
 
             SetReady();
         }

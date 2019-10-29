@@ -4,7 +4,6 @@
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Pipeline;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -14,6 +13,7 @@
     namespace ObserverTests
     {
         using GreenPipes.Internals.Extensions;
+        using Util;
 
 
         [TestFixture]
@@ -102,9 +102,9 @@
 
                 public Observer()
                 {
-                    _sendFaulted = new TaskCompletionSource<PublishContext>();
-                    _preSend = new TaskCompletionSource<PublishContext>();
-                    _postSend = new TaskCompletionSource<PublishContext>();
+                    _sendFaulted = TaskUtil.GetTask<PublishContext>();
+                    _preSend = TaskUtil.GetTask<PublishContext>();
+                    _postSend = TaskUtil.GetTask<PublishContext>();
                 }
 
                 public Task<PublishContext> PreSent

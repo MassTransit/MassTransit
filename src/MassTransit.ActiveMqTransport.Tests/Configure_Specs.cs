@@ -12,6 +12,7 @@ namespace MassTransit.ActiveMqTransport.Tests
     using TestFramework.Messages;
     using Testing;
     using Topology.Topologies;
+    using Util;
 
 
     [TestFixture]
@@ -119,7 +120,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         [Test]
         public async Task Should_succeed_and_connect_when_properly_configured()
         {
-            TaskCompletionSource<bool> received = new TaskCompletionSource<bool>();
+            TaskCompletionSource<bool> received = TaskUtil.GetTask<bool>();
 
             Uri sendAddress = null;
 

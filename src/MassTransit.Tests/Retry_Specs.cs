@@ -584,7 +584,7 @@
 
             public RetryObserver()
             {
-                _completionSource = new TaskCompletionSource<RetryContext>();
+                _completionSource = TaskUtil.GetTask<RetryContext>();
             }
 
             public Task<RetryContext> Completed => _completionSource.Task;

@@ -3,10 +3,11 @@
     using System.Threading.Tasks;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
-    using Internals.Extensions;
+    using GreenPipes.Internals.Extensions;
     using NUnit.Framework;
     using Scenarios;
     using TestFramework;
+    using Util;
     using WindsorIntegration;
 
 
@@ -20,7 +21,7 @@
 
             await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
 
-            var result = await Dependency.Completed.WithCancellation(TestCancellationToken);
+            var result = await Dependency.Completed.OrCanceled(TestCancellationToken);
         }
 
         [OneTimeTearDown]
@@ -94,13 +95,13 @@
 
             static Dependency()
             {
-                _completed = new TaskCompletionSource<string>();
+                _completed = TaskUtil.GetTask<string>();
             }
 
             public Dependency()
             {
-                _first = new TaskCompletionSource<string>();
-                _second = new TaskCompletionSource<string>();
+                _first = TaskUtil.GetTask<string>();
+                _second = TaskUtil.GetTask<string>();
             }
 
             public static Task<string> Completed => _completed.Task;

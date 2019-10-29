@@ -39,7 +39,7 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             _messageReceiver = messageReceiver;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
-            _deliveryComplete = new TaskCompletionSource<bool>();
+            _deliveryComplete = TaskUtil.GetTask<bool>();
         }
 
         public Task DeliveryCompleted => _deliveryComplete.Task;

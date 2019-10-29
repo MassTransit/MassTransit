@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Tests
+﻿namespace MassTransit.AzureServiceBusTransport.Tests
 {
     namespace Verify_account_settings
     {
@@ -19,12 +7,11 @@ namespace MassTransit.AzureServiceBusTransport.Tests
         using System.IO;
         using System.Threading;
         using System.Threading.Tasks;
-        using Contexts;
-        using MassTransit.Pipeline;
         using Microsoft.ServiceBus;
         using Microsoft.ServiceBus.Messaging;
         using Microsoft.ServiceBus.Messaging.Amqp;
         using NUnit.Framework;
+        using Util;
 
 
         [TestFixture]
@@ -64,7 +51,7 @@ namespace MassTransit.AzureServiceBusTransport.Tests
                 MessageReceiver receiver = await factory.CreateMessageReceiverAsync("Control");
                 receiver.PrefetchCount = 100;
 
-                var done = new TaskCompletionSource<bool>();
+                var done = TaskUtil.GetTask<bool>();
                 int count = 0;
                 const int limit = 1000;
                 receiver.OnMessageAsync(async message =>

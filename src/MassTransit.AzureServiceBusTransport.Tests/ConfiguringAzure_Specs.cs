@@ -10,6 +10,7 @@
         using Microsoft.ServiceBus.Messaging;
         using NUnit.Framework;
         using TestFramework;
+        using Util;
 
 
         [TestFixture]
@@ -24,7 +25,7 @@
                 Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", Configuration.ServiceNamespace,
                     "MassTransit.AzureServiceBusTransport.Tests");
 
-                var completed = new TaskCompletionSource<A>();
+                var completed = TaskUtil.GetTask<A>();
 
                 IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
@@ -75,7 +76,7 @@
                 Uri serviceUri = ServiceBusEnvironment.CreateServiceUri("sb", Configuration.ServiceNamespace,
                     "MassTransit.AzureServiceBusTransport.Tests");
 
-                var completed = new TaskCompletionSource<A>();
+                var completed = TaskUtil.GetTask<A>();
 
                 IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {

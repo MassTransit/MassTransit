@@ -13,6 +13,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using Logging;
     using Topology;
     using Transports.Metrics;
+    using Util;
 
 
     /// <summary>
@@ -51,7 +52,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             _pending = new ConcurrentDictionary<string, ActiveMqReceiveContext>();
 
-            _deliveryComplete = new TaskCompletionSource<bool>();
+            _deliveryComplete = TaskUtil.GetTask<bool>();
 
             messageConsumer.Listener += HandleMessage;
 

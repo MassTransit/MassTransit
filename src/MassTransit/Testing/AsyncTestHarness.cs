@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
@@ -56,7 +56,7 @@ namespace MassTransit.Testing
                     _cancellationTokenSource = new CancellationTokenSource((int)TestTimeout.TotalMilliseconds);
                     _cancellationToken = _cancellationTokenSource.Token;
 
-                    var source = new TaskCompletionSource<bool>();
+                    var source = TaskUtil.GetTask<bool>();
                     _cancelledTask = source.Task;
 
                     _cancellationToken.Register(() => source.TrySetCanceled());
@@ -91,7 +91,7 @@ namespace MassTransit.Testing
         /// <returns></returns>
         public TaskCompletionSource<T> GetTask<T>()
         {
-            var source = new TaskCompletionSource<T>();
+            var source = TaskUtil.GetTask<T>();
 
             TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
 
