@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.AmazonSqsTransport
 {
-    using System;
     using System.Threading.Tasks;
     using Transports;
 
@@ -9,7 +8,7 @@
         IBusHostControl,
         IAmazonSqsHost
     {
-        Task<ISendTransport> CreateSendTransport(Uri address);
+        Task<ISendTransport> CreateSendTransport(AmazonSqsEndpointAddress address);
 
         Task<ISendTransport> CreatePublishTransport<T>()
             where T : class;

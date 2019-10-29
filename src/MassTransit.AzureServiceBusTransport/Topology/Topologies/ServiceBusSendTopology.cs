@@ -2,7 +2,6 @@
 {
     using System;
     using Configuration;
-    using Internals.Extensions;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Microsoft.ServiceBus.Messaging;
@@ -63,16 +62,13 @@
             return new QueueSendSettings(description);
         }
 
-        public SendSettings GetDeadLetterSettings(ISubscriptionConfigurator configurator, string basePath)
+        public SendSettings GetDeadLetterSettings(ISubscriptionConfigurator configurator, Uri hostAddress)
         {
             var description = configurator.GetSubscriptionDescription();
 
-            basePath = basePath.Trim('/');
+            var deadLetterEndpointAddress = new ServiceBusEndpointAddress(hostAddress, description.Name + DeadLetterQueueSuffix);
 
-            var path = description.Name + DeadLetterQueueSuffix;
-            var queuePath = string.IsNullOrEmpty(basePath) ? path : $"{basePath}/{path.Trim('/')}";
-
-            var queueDescription = Defaults.CreateQueueDescription(queuePath);
+            var queueDescription = Defaults.CreateQueueDescription(deadLetterEndpointAddress.Path);
             queueDescription.DefaultMessageTimeToLive = description.DefaultMessageTimeToLive;
             queueDescription.AutoDeleteOnIdle = description.AutoDeleteOnIdle;
 

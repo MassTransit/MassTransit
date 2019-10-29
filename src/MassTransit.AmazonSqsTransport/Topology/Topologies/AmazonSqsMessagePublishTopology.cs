@@ -69,7 +69,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
         {
-            publishAddress = GetPublishSettings().GetSendAddress(baseAddress);
+            publishAddress = new AmazonSqsEndpointAddress(baseAddress, _topic.EntityName, _topic.AutoDelete);
             return true;
         }
 

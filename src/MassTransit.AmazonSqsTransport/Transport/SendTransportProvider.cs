@@ -17,12 +17,14 @@
 
         Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
         {
-            return _host.CreateSendTransport(address);
+            var endpointAddress = new AmazonSqsEndpointAddress(_host.Address, address);
+
+            return _host.CreateSendTransport(endpointAddress);
         }
 
         public Uri NormalizeAddress(Uri address)
         {
-            return address;
+            return new AmazonSqsEndpointAddress(_host.Address, address);
         }
     }
 }
