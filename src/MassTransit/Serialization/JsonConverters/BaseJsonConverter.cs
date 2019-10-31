@@ -33,7 +33,7 @@ namespace MassTransit.Serialization.JsonConverters
         {
             public object Deserialize(JsonReader reader, Type objectType, JsonSerializer serializer)
             {
-                throw new NotImplementedException();
+                throw new NotImplementedException($"Failed to find deserializer for type {objectType.FullName}");
             }
 
             public bool IsSupported => false;
