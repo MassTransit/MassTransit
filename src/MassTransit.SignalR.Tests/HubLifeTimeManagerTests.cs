@@ -115,7 +115,6 @@
 
         #region From Scaleout
         [Test]
-        [Category("Flakey")]
         public async Task DisconnectConnectionRemovesConnectionFromGroup()
         {
             using (var client = new TestClient())
@@ -135,6 +134,8 @@
                 await Task.Delay(2000);
 
                 await manager.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout();
+
+                await Task.Delay(2000);
 
                 Assert.Null(client.TryRead());
             }
