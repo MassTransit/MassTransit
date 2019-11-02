@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
 
     // From here: https://stackoverflow.com/a/11034999/6558597
@@ -85,6 +86,19 @@
                 {
                     if (_lock.IsReadLockHeld) _lock.ExitReadLock();
                 }
+            }
+        }
+
+        public T[] ToArray()
+        {
+            try
+            {
+                _lock.EnterReadLock();
+                return _hashSet.ToArray(); // Internally Linq .ToArray uses CopyTo
+            }
+            finally
+            {
+                if (_lock.IsReadLockHeld) _lock.ExitReadLock();
             }
         }
 
