@@ -111,15 +111,6 @@ namespace MassTransit.RabbitMqTransport
             if (hostInfo.AssemblyVersion != null)
                 factory.ClientProperties["assembly_version"] = hostInfo.AssemblyVersion;
 
-            if (string.IsNullOrEmpty(settings.ClientProvidedName))
-            {
-                factory.ClientProperties["connection_name"] = $"{hostInfo.MachineName}.{hostInfo.Assembly}_{hostInfo.ProcessName}";
-            }
-            else
-            {
-                factory.ClientProperties["connection_name"] = settings.ClientProvidedName;
-            }
-
             return factory;
         }
 

@@ -22,8 +22,10 @@ namespace MassTransit.RabbitMqTransport.Configurators
                 });
             }
 
-            _settings.ClientProvidedName = connectionName;
             _settings.VirtualHost = GetVirtualHost(hostAddress);
+
+            if (!string.IsNullOrEmpty(connectionName))
+                _settings.ClientProvidedName = connectionName;
         }
 
         public RabbitMqHostConfigurator(string host, string virtualHost, ushort port = 5672, string connectionName = null)
@@ -33,8 +35,10 @@ namespace MassTransit.RabbitMqTransport.Configurators
                 Host = host,
                 Port = port,
                 VirtualHost = virtualHost,
-                ClientProvidedName = connectionName
             };
+
+            if (!string.IsNullOrEmpty(connectionName))
+                _settings.ClientProvidedName = connectionName;
         }
 
         public RabbitMqHostSettings Settings => _settings;
