@@ -301,9 +301,8 @@ namespace MassTransit.ActiveMqTransport.Tests
         [Test]
         public void Failover_should_take_precendence_in_uri_construction()
         {
-            var settings = new ConfigurationHostSettings()
+            var settings = new ConfigurationHostSettings(new Uri("activemq://fake-host"))
             {
-                Host = "fake-host",
                 Port = 61616,
                 FailoverHosts = new []
                 {

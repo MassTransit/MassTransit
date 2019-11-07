@@ -101,7 +101,6 @@ namespace MassTransit.ActiveMqTransport
         /// of this type (created automatically upon the first receiver binding).
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="host"></param>
         /// <param name="configure"></param>
         public static void ReceiveEndpoint(this IActiveMqBusFactoryConfigurator configurator,
             Action<IActiveMqReceiveEndpointConfigurator> configure = null)
@@ -115,7 +114,6 @@ namespace MassTransit.ActiveMqTransport
         /// of this type (created automatically upon the first receiver binding).
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="host"></param>
         /// <param name="definition"></param>
         /// <param name="configure"></param>
         public static void ReceiveEndpoint(this IActiveMqBusFactoryConfigurator configurator, IEndpointDefinition definition,

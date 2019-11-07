@@ -1,15 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../netfx.props" />
+  <Import Project="../netfx.props"/>
 
   <PropertyGroup>
-    <TargetFrameworks>net452</TargetFrameworks>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <RootNamespace>MassTransit</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj"/>
   </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+    <Reference Include="System"/>
+    <Reference Include="System.Core"/>
+    <Reference Include="System.Runtime"/>
+  </ItemGroup>
+
 </Project>

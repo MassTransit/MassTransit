@@ -24,7 +24,7 @@
         {
             _busConfiguration = busConfiguration;
             _topologyConfiguration = topologyConfiguration;
-            _hostSettings = new ConfigurationHostSettings {Host = "localhost"};
+            _hostSettings = new ConfigurationHostSettings(new Uri("activemq://localhost"));
 
             _proxy = new ActiveMqHostProxy(this);
         }

@@ -101,7 +101,7 @@
 
                 ConfigureRabbitMqBusHost(x, Host);
 
-                x.ReceiveEndpoint(Host, InputQueueName, e =>
+                x.ReceiveEndpoint(InputQueueName, e =>
                 {
                     e.PrefetchCount = 16;
                     e.PurgeOnStartup = true;

@@ -3,7 +3,7 @@
   <Import Project="../../signing.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>

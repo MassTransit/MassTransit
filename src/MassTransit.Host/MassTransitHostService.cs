@@ -82,7 +82,7 @@ namespace MassTransit.Host
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //_log.Error("Service failed to start", ex);
 
@@ -159,7 +159,7 @@ namespace MassTransit.Host
                 if (!service.Stop(hostControl))
                     throw new TopshelfException($"Failed to stop service: {service}");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //_log.Error("Stop Service Failed", ex);
             }

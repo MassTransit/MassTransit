@@ -87,14 +87,13 @@
             {
                 Host = ConfigureHost(x);
 
-
                 ConfigureBus(x);
 
                 ConfigureActiveMqBus(x);
 
                 ConfigureActiveMqBusHost(x, Host);
 
-                x.ReceiveEndpoint(Host, InputQueueName, e =>
+                x.ReceiveEndpoint(InputQueueName, e =>
                 {
                     ConfigureReceiveEndpoint(e);
 
