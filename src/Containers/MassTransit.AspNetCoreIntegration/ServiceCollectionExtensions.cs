@@ -99,10 +99,8 @@
         {
             if (loggerFactory == null)
                 loggerFactory = provider.GetService<ILoggerFactory>();
-            var diagnosticSource = provider.GetService<DiagnosticSource>();
-
             if (loggerFactory != null)
-                LogContext.ConfigureCurrentLogContext(loggerFactory, diagnosticSource);
+                LogContext.ConfigureCurrentLogContext(loggerFactory);
         }
 
         static void AddSimplifiedHostedService(this IServiceCollection services, Action<HealthCheckOptions> configureHealthChecks)
