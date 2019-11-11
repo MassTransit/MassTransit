@@ -10,16 +10,14 @@
     using System.Data.Entity.Core.Objects;
     using System.Data.Entity.Infrastructure;
 
+
     public class MsSqlLockStatements : IRawSqlLockStatements
     {
         const string DefaultRowLockStatement = "select 1 from {0}.{1} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0";
 
         protected static readonly ConcurrentDictionary<Type, SchemaTablePair> TableNames = new ConcurrentDictionary<Type, SchemaTablePair>();
 
-        public MsSqlLockStatements(
-            string defaultSchema = "dbo",
-            string rowLockStatement = DefaultRowLockStatement
-            )
+        public MsSqlLockStatements(string defaultSchema = "dbo", string rowLockStatement = DefaultRowLockStatement)
         {
             DefaultSchema = defaultSchema;
             RowLockStatement = rowLockStatement ?? throw new ArgumentNullException(nameof(rowLockStatement));
@@ -45,10 +43,10 @@
 
             if (!TableNames.TryGetValue(t, out var result))
             {
-
                 string entityName = t.Name;
 
-                ReadOnlyCollection<EntityContainerMapping> storageMetadata = objectContext.MetadataWorkspace.GetItems<EntityContainerMapping>(DataSpace.CSSpace);
+                ReadOnlyCollection<EntityContainerMapping> storageMetadata =
+                    objectContext.MetadataWorkspace.GetItems<EntityContainerMapping>(DataSpace.CSSpace);
 
                 foreach (EntityContainerMapping ecm in storageMetadata)
                 {
@@ -63,7 +61,7 @@
                     }
                 }
 
-                if(result != null)
+                if (result != null)
                 {
                     TableNames.TryAdd(t, result);
                 }
@@ -75,6 +73,7 @@
 
             return result;
         }
+
 
         public class SchemaTablePair
         {

@@ -5,12 +5,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     using Microsoft.EntityFrameworkCore.Design;
 
 
-    public class SagaWithDependencyContextFactory : 
+    public class SagaWithDependencyContextFactory :
         IDesignTimeDbContextFactory<SagaWithDependencyContext>
     {
         public SagaWithDependencyContext CreateDbContext(string[] args)
         {
-            var dbContextOptionsBuilder = 
+            var dbContextOptionsBuilder =
                 new DbContextOptionsBuilder<SagaWithDependencyContext>();
 
             dbContextOptionsBuilder.UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString(),

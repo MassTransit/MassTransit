@@ -16,7 +16,6 @@ namespace MassTransit.EntityFrameworkIntegration.Audit
     using System.Threading.Tasks;
     using MassTransit.Audit;
     using Metadata;
-    using Util;
 
 
     public class EntityFrameworkAuditStore : IMessageAuditStore

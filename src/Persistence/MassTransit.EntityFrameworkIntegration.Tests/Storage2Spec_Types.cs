@@ -21,11 +21,13 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         public Guid CorrelationId { get; set; }
     }
 
+
     public class Bass
     {
         public Guid CorrelationId { get; set; }
         public string Name { get; set; }
     }
+
 
     public class Baritone
     {
@@ -33,17 +35,20 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         public string Name { get; set; }
     }
 
+
     public class Tenor
     {
         public Guid CorrelationId { get; set; }
         public string Name { get; set; }
     }
 
+
     public class Countertenor
     {
         public Guid CorrelationId { get; set; }
         public string Name { get; set; }
     }
+
 
     public class ChoirStateOptimistic :
         SagaStateMachineInstance
@@ -79,7 +84,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             Event(() => RehersalStarts, x =>
             {
                 x.CorrelateById(context => context.Message.CorrelationId);
-                });
+            });
             Event(() => BassStarts, x => x.CorrelateById(context => context.Message.CorrelationId));
             Event(() => BaritoneStarts, x => x.CorrelateById(context => context.Message.CorrelationId));
             Event(() => TenorStarts, x => x.CorrelateById(context => context.Message.CorrelationId));
@@ -118,6 +123,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         public State Warmup { get; private set; }
         public State Harmony { get; private set; }
     }
+
 
     public class ChoirStatePessimistic :
         SagaStateMachineInstance

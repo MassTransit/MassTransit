@@ -31,7 +31,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         InMemoryTestFixture
     {
         ChoirStateMachine _machine;
-        readonly ISagaDbContextFactory<ChoirStateOptimistic> _sagaDbContextFactory;
+        readonly ISagaDbContextFactory _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<ChoirStateOptimistic>> _repository;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -43,10 +43,11 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
         public When_using_EntityFrameworkConcurrencyFail()
         {
-            _sagaDbContextFactory = new DelegateSagaDbContextFactory<ChoirStateOptimistic>(
-                () => new SagaDbContext<ChoirStateOptimistic, EntityFrameworkChoirStateMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+            _sagaDbContextFactory =
+                new DelegateSagaDbContextFactory(() => new ChoirStateOptimisticSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
 
-            _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() => EntityFrameworkSagaRepository<ChoirStateOptimistic>.CreateOptimistic(_sagaDbContextFactory));
+            _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() =>
+                EntityFrameworkSagaRepository<ChoirStateOptimistic>.CreateOptimistic(_sagaDbContextFactory));
         }
 
         async Task<ChoirStateOptimistic> GetSaga(Guid id)
@@ -67,7 +68,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             {
                 Guid correlationId = NewId.NextGuid();
 
-                await InputQueueSendEndpoint.Send(new RehersalBegins { CorrelationId = correlationId });
+                await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
 
                 sagaIds[i] = correlationId;
             }
@@ -80,10 +81,26 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
             for (int i = 0; i < 20; i++)
             {
-                tasks.Add(InputQueueSendEndpoint.Send(new Bass { CorrelationId = sagaIds[i], Name = "John" }));
-                tasks.Add(InputQueueSendEndpoint.Send(new Baritone { CorrelationId = sagaIds[i], Name = "Mark" }));
-                tasks.Add(InputQueueSendEndpoint.Send(new Tenor { CorrelationId = sagaIds[i], Name = "Anthony" }));
-                tasks.Add(InputQueueSendEndpoint.Send(new Countertenor { CorrelationId = sagaIds[i], Name = "Tom" }));
+                tasks.Add(InputQueueSendEndpoint.Send(new Bass
+                {
+                    CorrelationId = sagaIds[i],
+                    Name = "John"
+                }));
+                tasks.Add(InputQueueSendEndpoint.Send(new Baritone
+                {
+                    CorrelationId = sagaIds[i],
+                    Name = "Mark"
+                }));
+                tasks.Add(InputQueueSendEndpoint.Send(new Tenor
+                {
+                    CorrelationId = sagaIds[i],
+                    Name = "Anthony"
+                }));
+                tasks.Add(InputQueueSendEndpoint.Send(new Countertenor
+                {
+                    CorrelationId = sagaIds[i],
+                    Name = "Tom"
+                }));
             }
 
             await Task.WhenAll(tasks);
@@ -91,8 +108,8 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
             foreach (var sid in sagaIds)
             {
-                var sagaId = await ExtensionMethodsForSagas.ShouldContainSaga<ChoirStateOptimistic>(_repository.Value, x => x.CorrelationId == sid
-                && x.CurrentState == _machine.Warmup.Name, TestTimeout);
+                var sagaId = await _repository.Value.ShouldContainSaga(x => x.CorrelationId == sid
+                    && x.CurrentState == _machine.Warmup.Name, TestTimeout);
 
                 Assert.IsTrue(sagaId.HasValue);
             }
@@ -103,20 +120,36 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         {
             Guid correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new RehersalBegins { CorrelationId = correlationId });
+            await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
 
             Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
 
             Assert.IsTrue(sagaId.HasValue);
 
             await Task.WhenAll(
-                InputQueueSendEndpoint.Send(new Bass { CorrelationId = correlationId, Name = "John" }),
-                InputQueueSendEndpoint.Send(new Baritone { CorrelationId = correlationId, Name = "Mark" }),
-                InputQueueSendEndpoint.Send(new Tenor { CorrelationId = correlationId, Name = "Anthony" }),
-                InputQueueSendEndpoint.Send(new Countertenor { CorrelationId = correlationId, Name = "Tom" })
-                );
+                InputQueueSendEndpoint.Send(new Bass
+                {
+                    CorrelationId = correlationId,
+                    Name = "John"
+                }),
+                InputQueueSendEndpoint.Send(new Baritone
+                {
+                    CorrelationId = correlationId,
+                    Name = "Mark"
+                }),
+                InputQueueSendEndpoint.Send(new Tenor
+                {
+                    CorrelationId = correlationId,
+                    Name = "Anthony"
+                }),
+                InputQueueSendEndpoint.Send(new Countertenor
+                {
+                    CorrelationId = correlationId,
+                    Name = "Tom"
+                })
+            );
 
-            sagaId = await ExtensionMethodsForSagas.ShouldContainSaga<ChoirStateOptimistic>(_repository.Value, x => x.CorrelationId == correlationId
+            sagaId = await _repository.Value.ShouldContainSaga(x => x.CorrelationId == correlationId
                 && x.CurrentState == _machine.Warmup.Name, TestTimeout);
 
             Assert.IsTrue(sagaId.HasValue);

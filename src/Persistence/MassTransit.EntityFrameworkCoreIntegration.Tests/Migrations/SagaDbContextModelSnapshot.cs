@@ -9,7 +9,7 @@ using MassTransit.Tests.Saga;
 
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations
 {
-    [DbContext(typeof(SagaDbContext<SimpleSaga, SimpleSagaMap>))]
+    [DbContext(typeof(SimpleSagaDbContext))]
     partial class SagaDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

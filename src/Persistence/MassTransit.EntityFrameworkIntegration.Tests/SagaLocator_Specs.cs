@@ -50,13 +50,13 @@
             foundId.HasValue.ShouldBe(true);
         }
 
-        readonly ISagaDbContextFactory<SimpleSaga> _sagaDbContextFactory;
+        readonly ISagaDbContextFactory _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;
 
         public Locating_an_existing_ef_saga()
         {
-            _sagaDbContextFactory = new DelegateSagaDbContextFactory<SimpleSaga>(() =>
-                new SagaDbContext<SimpleSaga, SimpleSagaMap>(LocalDbConnectionStringProvider.GetLocalDbConnectionString()));
+            _sagaDbContextFactory =
+                new DelegateSagaDbContextFactory(() => new SimpleSagaDbContext(LocalDbConnectionStringProvider.GetLocalDbConnectionString()));
 
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => EntityFrameworkSagaRepository<SimpleSaga>.CreatePessimistic(_sagaDbContextFactory));
         }

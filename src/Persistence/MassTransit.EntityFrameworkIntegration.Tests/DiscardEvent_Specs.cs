@@ -13,10 +13,14 @@
 namespace MassTransit.EntityFrameworkIntegration.Tests
 {
     using System;
+    using System.Collections.Generic;
+    using System.Data.Entity;
+    using System.Data.Entity.ModelConfiguration;
     using System.Linq;
     using System.Threading.Tasks;
     using Automatonymous;
     using EntityFrameworkIntegration;
+    using Mappings;
     using MassTransit.Saga;
     using NUnit.Framework;
     using Saga;
@@ -27,7 +31,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
     public class StateMachineTest :
         InMemoryTestFixture
     {
-        ISagaDbContextFactory<SimpleState> _sagaDbContextFactory;
+        ISagaDbContextFactory _sagaDbContextFactory;
 
         [Test]
         public async Task Test_Discarded_Missing_Saga_Instance_Is_Not_Persisted()
@@ -91,8 +95,8 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                 _discarded.TrySetResult(true);
             });
 
-            _sagaDbContextFactory = new DelegateSagaDbContextFactory<SimpleState>(() =>
-                new SagaDbContext<SimpleState, SimpleStateMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+            _sagaDbContextFactory = new DelegateSagaDbContextFactory(() =>
+                new SimpleStateSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
 
             _simpleStateRepository = new Lazy<ISagaRepository<SimpleState>>(() =>
                 new EntityFrameworkSagaRepository<SimpleState>(_sagaDbContextFactory, System.Data.IsolationLevel.Serializable, new MsSqlLockStatements()));
@@ -128,17 +132,30 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
     }
 
 
-    public class SimpleStateMap :
-        SagaClassMapping<SimpleState>
+    public class SimpleStateSagaDbContext : SagaDbContext
     {
-        public SimpleStateMap()
+        class SimpleStateMap :
+            SagaClassMap<SimpleState>
         {
-            Property(x => x.CurrentState)
-                .HasMaxLength(64);
+            protected override void Configure(EntityTypeConfiguration<SimpleState> cfg, DbModelBuilder modelBuilder)
+            {
+                cfg.Property(x => x.CurrentState)
+                    .HasMaxLength(64);
 
-            Property(x => x.CorrelationId);
-            Property(x => x.TestName);
-            Property(x => x.PublishDate);
+                cfg.Property(x => x.CorrelationId);
+                cfg.Property(x => x.TestName);
+                cfg.Property(x => x.PublishDate);
+            }
+        }
+
+        public SimpleStateSagaDbContext(string getLocalDbConnectionString)
+            : base(getLocalDbConnectionString)
+        {
+        }
+
+        protected override IEnumerable<ISagaClassMap> Configurations
+        {
+            get { yield return new SimpleStateMap(); }
         }
     }
 

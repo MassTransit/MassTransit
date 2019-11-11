@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 {
@@ -70,11 +70,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 
         public Locating_an_existing_ef_saga()
         {
-            // add new migration by calling 
+            // add new migration by calling
             // dotnet ef migrations add --context "SagaDbContext``2" Init  -v
             var contextFactory = new ContextFactory();
 
-            using (SagaDbContext<SimpleSaga, SimpleSagaMap> context = contextFactory.CreateDbContext(Array.Empty<string>()))
+            using (var context = contextFactory.CreateDbContext(Array.Empty<string>()))
             {
                 context.Database.Migrate();
             }

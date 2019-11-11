@@ -14,11 +14,14 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
+    using System.Data.Entity.ModelConfiguration;
     using System.Linq;
     using System.Threading.Tasks;
     using EntityFrameworkIntegration;
     using GreenPipes;
+    using Mappings;
     using MassTransit.Saga;
     using NUnit.Framework;
     using Saga;
@@ -32,7 +35,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         InMemoryTestFixture
     {
         SuperShopper _machine;
-        readonly ISagaDbContextFactory<ShoppingChore> _sagaDbContextFactory;
+        readonly ISagaDbContextFactory _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<ShoppingChore>> _repository;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -50,8 +53,8 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
         public When_using_EntityFramework()
         {
-            _sagaDbContextFactory = new DelegateSagaDbContextFactory<ShoppingChore>(
-                () => new SagaDbContext<ShoppingChore, EntityFrameworkShoppingChoreMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+            _sagaDbContextFactory = new DelegateSagaDbContextFactory(
+                () => new ShoppingChoreSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
 
             _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => EntityFrameworkSagaRepository<ShoppingChore>.CreatePessimistic(_sagaDbContextFactory));
         }
@@ -75,20 +78,14 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         {
             Guid correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
 
             Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
             Assert.IsTrue(sagaId.HasValue);
 
-            await InputQueueSendEndpoint.Send(new SodOff
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
 
-            sagaId = await ExtensionMethodsForSagas.ShouldNotContainSaga<ShoppingChore>(_repository.Value, correlationId, TestTimeout);
+            sagaId = await _repository.Value.ShouldNotContainSaga(correlationId, TestTimeout);
             Assert.IsFalse(sagaId.HasValue);
         }
 
@@ -102,10 +99,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             {
                 Guid correlationId = Guid.NewGuid();
 
-                tasks.Add(InputQueueSendEndpoint.Send(new GirlfriendYelling
-                {
-                    CorrelationId = correlationId
-                }));
+                tasks.Add(InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId}));
 
                 sagaIds[i] = correlationId;
             }
@@ -124,21 +118,15 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         {
             Guid correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
 
             Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
 
             Assert.IsTrue(sagaId.HasValue);
 
-            await InputQueueSendEndpoint.Send(new GotHitByACar
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
 
-            sagaId = await ExtensionMethodsForSagas.ShouldContainSaga<ShoppingChore>(_repository.Value, x => x.CorrelationId == correlationId
+            sagaId = await _repository.Value.ShouldContainSaga(x => x.CorrelationId == correlationId
                 && x.CurrentState == _machine.Dead.Name, TestTimeout);
 
             Assert.IsTrue(sagaId.HasValue);
@@ -157,15 +145,28 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
     }
 
 
-    class EntityFrameworkShoppingChoreMap :
-        SagaClassMapping<ShoppingChore>
+    class ShoppingChoreSagaDbContext : SagaDbContext
     {
-        public EntityFrameworkShoppingChoreMap()
+        class EntityFrameworkShoppingChoreMap :
+            SagaClassMap<ShoppingChore>
         {
-            Property(x => x.CurrentState);
-            Property(x => x.Everything);
+            protected override void Configure(EntityTypeConfiguration<ShoppingChore> cfg, DbModelBuilder modelBuilder)
+            {
+                cfg.Property(x => x.CurrentState);
+                cfg.Property(x => x.Everything);
 
-            Property(x => x.Screwed);
+                cfg.Property(x => x.Screwed);
+            }
+        }
+
+        public ShoppingChoreSagaDbContext(string nameOrConnectionString)
+            : base(nameOrConnectionString)
+        {
+        }
+
+        protected override IEnumerable<ISagaClassMap> Configurations
+        {
+            get { yield return new EntityFrameworkShoppingChoreMap(); }
         }
     }
 }
