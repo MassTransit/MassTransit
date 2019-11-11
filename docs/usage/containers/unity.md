@@ -3,12 +3,11 @@
 The following example shows how to configure a simple Unity container, and include the bus in the
 container. The two bus interfaces, `IBus` and `IBusControl`, are included.
 
-<div class="alert alert-info">
-<b>Note:</b>
-    Consumers should not typically depend upon <i>IBus</i> or <i>IBusControl</i>. A consumer should use the <i>ConsumeContext</i>
-    instead, which has all of the same methods as <i>IBus</i>, but is scoped to the receive endpoint. This ensures that
-    messages can be tracked between consumers, and are sent from the proper address.
-</div>
+::: tip
+Consumers should not typically depend upon <i>IBus</i> or <i>IBusControl</i>. A consumer should use the <i>ConsumeContext</i>
+instead, which has all of the same methods as <i>IBus</i>, but is scoped to the receive endpoint. This ensures that
+messages can be tracked between consumers, and are sent from the proper address.
+:::
 
 ```csharp
 public static void Main(string[] args) 

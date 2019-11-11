@@ -70,13 +70,9 @@ var busObserver = new BusObserver();
 
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-    {
-        h.Username("guest");
-        h.Password("guest");
-    });
+    cfg.Host("localhost");
 
-    cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
+    cfg.ReceiveEndpoint("customer_update_queue", e =>
     {
         e.Consumer<UpdateCustomerConsumer>();
     });

@@ -147,6 +147,25 @@
 
         [Test]
         [Explicit]
+        public async Task Should_start_without_any_configuration()
+        {
+            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+            });
+
+            BusHandle handle = await busControl.StartAsync(new CancellationTokenSource(5000).Token);
+            try
+            {
+                await handle.Ready;
+            }
+            finally
+            {
+                await handle.StopAsync();
+            }
+        }
+
+        [Test]
+        [Explicit]
         public async Task Should_startup_and_shut_down_cleanly_with_an_endpoint()
         {
             IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>

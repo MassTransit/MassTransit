@@ -64,13 +64,9 @@ are bound to the consumer message type exchanges, closing the loop.
 ```csharp
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-    {
-        h.Username("guest");
-        h.Password("guest");
-    });
+    cfg.Host("localhost");
 
-    cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
+    cfg.ReceiveEndpoint("customer_update_queue", e =>
     {
         e.Consumer<UpdateCustomerConsumer>();
     });

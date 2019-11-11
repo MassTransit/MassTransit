@@ -1,19 +1,18 @@
-# Observing messages
+# Observers
 
-MassTransit supports a number of message observes, making it possible to monitoring when messages are received, consumed, sent, and published. Each type of observer is configured separately, keeping the interfaces lean and
-focused.
+MassTransit supports a number of message observes, making it possible to monitor when messages are received, consumed, sent, and published. Each type of observer is configured separately, keeping the interfaces lean and focused.
 
-<div class="alert alert-warning">
-<b>Warning:</b>
-    Observers should not be used to modify or intercept messages. To intercept messages (either to add headers,or modify the message contents), create a new or use an existing middleware component.
-</div>
+::: warning
+Observers should not be used to modify or intercept messages. To intercept messages (to either add headers or modify message content), create a new or use an existing middleware component.
+:::
 
-## Observing received messages
+## Received Messages
 
-To observe received messages immediately after they are delivered by the transport, create a class that implements the `IReceiveObserver` interface, and connect it to the bus as shown below.
+To observe messages as they are received by the transport, create a class that implements the `IReceiveObserver` interface, and connect it to the bus as shown below.
 
 ```csharp
-public class ReceiveObserver : IReceiveObserver
+public class ReceiveObserver : 
+    IReceiveObserver
 {    
     public Task PreReceive(ReceiveContext context)
     {
@@ -48,13 +47,9 @@ Then connect the observer to the bus before starting it, as shown.
 ```csharp
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-    {
-        h.Username("guest");
-        h.Password("guest");
-    });
+    cfg.Host("rabbitmq://localhost/");
 
-    cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
+    cfg.ReceiveEndpoint("customer_update_queue", e =>
     {
         e.Consumer<UpdateCustomerConsumer>();
     });
@@ -62,9 +57,11 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 
 var observer = new ReceiveObserver();
 var handle = busControl.ConnectReceiveObserver(observer);
+
+await busControl.StartAsync();
 ```
 
-## Observing consumed messages
+## Consumed Messages
 
 If the receive context isn't super interesting, perhaps the actual consumption of messages might float your boat. A consume observer implements the `IConsumeObserver` interface, as shown below.
 
@@ -91,7 +88,7 @@ public class ConsumeObserver : IConsumeObserver
 
 To connect the observer, use the `ConnectConsumeObserver` method before starting the bus.
 
-## Observing specific consumed messages
+### Types Consumed Messages
 
 Okay, so it's obvious that if you've read this far you want a more specific observer, one that only is called when a specific message type is consumed. We have you covered there too, as shown below.
 
@@ -118,7 +115,7 @@ public class ConsumeObserver<T> : IConsumeMessageObserver<T> where T : class
 
 To connect the observer, use the `ConnectConsumeMessageObserver` method before starting the bus.
 
-## Observing sent messages
+## Sent Messages
 
 Okay, so, incoming messages are not your thing. We get it, you're all about what goes out. It's cool. It's better to send than to receive. Or is that give? Anyway, a send observer is also available.
 
@@ -147,7 +144,7 @@ public class SendObserver : ISendObserver
 
 To connect the observer, you already guessed it, use the `ConnectSendObserver` method before starting the bus.
 
-## Observing published messages
+## Published Messages
 
 In addition to send, publish is also observable. Because the semantics matter, absolutely. Using the MessageId to link them up as it's unique for each message. Remember that Publish and Send are two distinct operations so if you want to observe all messages that are leaving your service, you have to connect both Publish and Send observers.
 

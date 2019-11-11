@@ -23,6 +23,11 @@
             return GreenPipes.Internals.Extensions.TypeCache.GetShortName(type);
         }
 
+        public static IEnumerable<PropertyInfo> GetProperties(Type type)
+        {
+            return GetOrAdd(type).Properties;
+        }
+
         public static bool IsValidMessageType(Type type)
         {
             return GetOrAdd(type).IsValidMessageType;
@@ -98,18 +103,22 @@
             bool IsValidMessageType { get; }
             Type[] MessageTypes { get; }
             string[] MessageTypeNames { get; }
+            IEnumerable<PropertyInfo> Properties { get; }
         }
 
 
         class CachedType<T> :
             CachedType
         {
+            PropertyInfo[] _properites;
             public bool HasConsumerInterfaces => TypeMetadataCache<T>.HasConsumerInterfaces;
             public bool HasSagaInterfaces => TypeMetadataCache<T>.HasSagaInterfaces;
             public bool IsTemporaryMessageType => TypeMetadataCache<T>.IsTemporaryMessageType;
             public bool IsValidMessageType => TypeMetadataCache<T>.IsValidMessageType;
             public Type[] MessageTypes => TypeMetadataCache<T>.MessageTypes;
             public string[] MessageTypeNames => TypeMetadataCache<T>.MessageTypeNames;
+
+            public IEnumerable<PropertyInfo> Properties => TypeMetadataCache<T>.Properties;
         }
     }
 

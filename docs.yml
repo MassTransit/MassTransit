@@ -9,10 +9,10 @@ only_commits:
     - '**/*.html'
     - docs.yml
     - package.json
+skip_branch_with_pr: true
 install:
   - npm install -g npm
   - ps: $env:path = $env:appdata + "\npm;" + $env:path
-  - npm install -g gitbook-cli
   - npm install --no-optional
 build_script:
   - node --version && npm --version

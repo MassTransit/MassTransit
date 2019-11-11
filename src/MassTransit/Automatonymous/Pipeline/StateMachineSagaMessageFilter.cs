@@ -76,7 +76,7 @@ namespace Automatonymous.Pipeline
             {
                 await _machine.RaiseEvent(eventContext).ConfigureAwait(false);
 
-                if (_machine.IsCompleted(context.Saga))
+                if (await _machine.IsCompleted(context.Saga).ConfigureAwait(false))
                     await context.SetCompleted().ConfigureAwait(false);
             }
             catch (UnhandledEventException ex)

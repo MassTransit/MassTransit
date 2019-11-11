@@ -1,3 +1,0 @@
-# Testing Consumers
-
-WIP

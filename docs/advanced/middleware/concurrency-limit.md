@@ -1,18 +1,17 @@
-# Using the concurrent message limit
+# Concurrency Limit
 
 By specifying a concurrent message limit, MassTransit limits the number of messages delivered to a consumer at the same time. At the same time, since a consumer factory is used to create consumers, it also limits the number of concurrent consumers that exist at the same time.
 
-<div class="alert alert-info">
-<b>Note:</b>
-    The concurrent message limit applies to the total of all message types consumed by the consumer.
-</div>
+::: tip
+The concurrent message limit applies to the total of all message types consumed by the consumer.
+:::
 
 ### Consumer
 
 To add a concurrent message limit to a consumer:
 
 ```csharp
-cfg.ReceiveEndpoint(host, "submit-order", e =>
+cfg.ReceiveEndpoint("submit-order", e =>
 {
     e.Consumer<SubmitOrderConsumer>(cc =>
     {
@@ -26,7 +25,7 @@ cfg.ReceiveEndpoint(host, "submit-order", e =>
 To add a concurrent message limit to a saga:
 
 ```csharp
-cfg.ReceiveEndpoint(host, "order-status", e =>
+cfg.ReceiveEndpoint("order-status", e =>
 {
     e.Saga<OrderStatusSaga>(cc =>
     {
@@ -44,7 +43,7 @@ To add a concurrent message limit to a consumer, and support dynamic adjustment:
 ```csharp
 var management = cfg.ManagementEndpoint();
 
-cfg.ReceiveEndpoint(host, "order-status", e =>
+cfg.ReceiveEndpoint("order-status", e =>
 {
     e.Saga<OrderStatusSaga>(cc =>
     {
@@ -72,7 +71,7 @@ The concurrency limit support built into GreenPipes supports any `PipeContext`, 
 To use the Green Pipes concurrency limit:
 
 ```csharp
-cfg.ReceiveEndpoint(host, "submit-order", e =>
+cfg.ReceiveEndpoint("submit-order", e =>
 {
     e.UseConcurrencyLimit(4);
 

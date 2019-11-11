@@ -1,27 +1,26 @@
-# Long-running tasks using Turnout
+# Turnout
 
 Message consumers are similar to web controllers in that they are intended to live for a short time -- the time it takes to process a single message. However, there are times when the processing *initiated* by a message takes long time (for instance, longer than a minute). Rather than block the message consumer and preventing it from consuming additional messages, a way to start an asynchronous task is required.
 
 Turnout enables the execution of long-running tasks initiated by a message consumer. Turnout manages the lifetime 
 of the task, and appropriately handles failure and handing off to other nodes in the event of a server failure.
 
-<div class="alert alert-info">
-<b>Warning</b>
-    Turnout is an early-access feature, and it's only been tested with some basic scenarios. It works, but there are rough edges, so consider it like running with scissors.
-</div>
+::: danger
+Turnout is an early-access feature, and it's only been tested with some basic scenarios. It works, but there are rough edges, so consider it like running with scissors.
+:::
 
-## Configuring a Turnout
+### Configuration
 
 To configure a turnout, a turnout endpoint is created for the command message type.
 
 ```csharp
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(new Uri("rabbitmq://localhost/"));
+    cfg.Host("localhost");
 
     cfg.UseInMemoryScheduler();
 
-    cfg.TurnoutEndpoint<AuditCustomerHistory>(host, "audit_consumer_history", e =>
+    cfg.TurnoutEndpoint<AuditCustomerHistory>("audit_consumer_history", e =>
     {
         e.SuperviseInterval = TimeSpan.FromSeconds(30);
         e.SetJobFactory(async context =>
@@ -32,7 +31,7 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 });
 ```
 
-## Turnout - Under the hood
+### Under the hood
 
 When a turnout endpoint is created, the queue name specified is used to create several queues. First, the *audit_consumer_history* queue is created, as it is the queue specified by the developer. This is where the commands are sent, just like a normal consumer.
 
@@ -42,7 +41,7 @@ A second queue, *audit_consumer_history-expired* is also created, and is used as
 
 A third queue, *turnout-???*, is created to allow the node to send commands to itself to supervise the state of the Task. Messages are sent to this endpoint by the node (each node gets a unique queue) using the message scheduler (this is a great place to use the built-in scheduling of Azure Service Bus, or the delayed exchange with RabbitMQ).
 
-### Job supervision
+#### Job supervision
 
 Rather than rely on in-process timers, Turnout uses the queuing and scheduling features to supervise jobs. Messages are scheduled every interval to check on the status of the job. If the job completed, it is removed from the job registry. If it is still running, a new supervision command is scheduled. Each command is scheduled for a specific time, and the time-to-live is set to the supervision interval (plus a delta to ensure it has time to be received).
 
@@ -50,6 +49,6 @@ If the node crashes (does not cleanly shut down), the messages will not be recei
 
 > Faulted job handling has yet to be decided, but will be configurable to either follow a retry policy, or just report that the job faulted.
 
-### Stopping a node
+#### Stopping a node
 
 When a node is stopped, any running jobs are aborted (different than being cancelled). This way, the job is reported as aborted and another node can pickup the job to continue processing.

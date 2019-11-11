@@ -24,9 +24,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             _busConfiguration = busConfiguration;
             _topologyConfiguration = topologyConfiguration;
-            _hostSettings = new ConfigurationHostSettings()
+            _hostSettings = new ConfigurationHostSettings
             {
                 Host = "localhost",
+                VirtualHost = "/",
+                Port = 5672,
                 Username = "guest",
                 Password = "guest"
             };

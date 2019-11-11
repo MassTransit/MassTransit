@@ -1,4 +1,4 @@
-# Configuring Autofac
+# Autofac
 
 Autofac is a powerful and fast container, and is well supported by MassTransit. Nested lifetime scopes are used extensively to encapsulate dependencies and ensure clean object lifetime management. The following examples show the various ways that MassTransit can be configured, including the appropriate interfaces necessary.
 
@@ -6,10 +6,9 @@ A sample project for the container registration code is available on [GitHub](ht
 
 > Requires NuGets `MassTransit`, `MassTransit.AutoFac`, and `MassTransit.RabbitMQ`
 
-<div class="alert alert-info">
-<b>Note:</b>
-    Consumers should not depend upon <i>IBus</i> or <i>IBusControl</i>. A consumer should use the <i>ConsumeContext</i> instead, which has all of the same methods as <i>IBus</i>, but is scoped to the receive endpoint. This ensures that messages can be tracked between consumers and are sent from the proper address.
-</div>
+::: tip
+Consumers should not depend upon <i>IBus</i> or <i>IBusControl</i>. A consumer should use the <i>ConsumeContext</i> instead, which has all of the same methods as <i>IBus</i>, but is scoped to the receive endpoint. This ensures that messages can be tracked between consumers and are sent from the proper address.
+:::
 
 ```csharp
 using System;
@@ -48,7 +47,7 @@ namespace Example
                 // add the bus to the container
                 x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
                 {
-                    var host = cfg.Host("localhost/");
+                    cfg.Host("localhost");
 
                     cfg.ReceiveEndpoint("customer_update", ec =>
                     {
@@ -103,7 +102,8 @@ builder.Register(context =>
 Autofac modules are great for encapsulating configuration, and that is equally true when using MassTransit. An example of using modules with Autofac is shown below.
 
 ```csharp
-class ConsumerModule : Module
+class ConsumerModule : 
+Module
 {
     protected override void Load(ContainerBuilder builder)
     {
@@ -117,7 +117,8 @@ class ConsumerModule : Module
     }
 }
 
-class BusModule : Module
+class BusModule : 
+    Module
 {
     protected override void Load(ContainerBuilder builder)
     {
@@ -127,15 +128,17 @@ class BusModule : Module
 
             var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
-                var host = cfg.Host(busSettings.HostAddress, h =>
+                cfg.Host(busSettings.HostAddress, h =>
                 {
                     h.Username(busSettings.Username);
                     h.Password(busSettings.Password);
                 });
 
+                cfg.AddConsumersFromContainer(context);
+
                 cfg.ReceiveEndpoint(busSettings.QueueName, ec =>
                 {
-                    ec.LoadFrom(context);
+                    ec.ConfigureConsumers(context);
                 })
             });
         })
@@ -167,7 +170,7 @@ public void CreateContainer()
 
 ## Registering State Machine Sagas
 
-By using an additional package `MassTransit.Automatonymous.Autofac` you can also register state machine sagas:
+You can also register state machine sagas:
 
 ```csharp
 var builder = new ContainerBuilder();
@@ -188,7 +191,7 @@ and load them from a contained when configuring the bus.
 ```csharp
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(busSettings.HostAddress, h =>
+    cfg.Host(busSettings.HostAddress, h =>
     {
         h.Username(busSettings.Username);
         h.Password(busSettings.Password);

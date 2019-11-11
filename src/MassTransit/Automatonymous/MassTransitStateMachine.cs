@@ -17,11 +17,14 @@ namespace Automatonymous
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using System.Threading.Tasks;
     using CorrelationConfigurators;
     using MassTransit;
     using MassTransit.Context;
     using MassTransit.Internals.Extensions;
+    using MassTransit.Metadata;
     using MassTransit.Scheduling;
+    using MassTransit.Util;
     using Requests;
     using SagaConfigurators;
     using Schedules;
@@ -40,7 +43,7 @@ namespace Automatonymous
     {
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
         readonly Lazy<StateMachineRegistration[]> _registrations;
-        Func<TInstance, bool> _isCompleted;
+        Func<TInstance, Task<bool>> _isCompleted;
 
         protected MassTransitStateMachine()
         {
@@ -65,33 +68,32 @@ namespace Automatonymous
             }
         }
 
-        bool SagaStateMachine<TInstance>.IsCompleted(TInstance instance)
+        Task<bool> SagaStateMachine<TInstance>.IsCompleted(TInstance instance)
         {
             return _isCompleted(instance);
         }
 
         /// <summary>
-        /// Sets the method used to determine if a state machine instance is completed. A completed
-        /// state machine instance is removed from the saga repository.
+        /// Sets the method used to determine if a state machine instance has completed. The saga repository removes completed state machine instances.
         /// </summary>
         /// <param name="completed"></param>
-        protected void SetCompleted(Func<TInstance, bool> completed)
+        protected void SetCompleted(Func<TInstance, Task<bool>> completed)
         {
             _isCompleted = completed ?? NotCompletedByDefault;
         }
 
         /// <summary>
-        /// Sets the state machine instance to Completed when in the final state. A completed
-        /// state machine instance is removed from the saga repository.
+        /// Sets the state machine instance to Completed when in the final state. The saga repository removes completed state machine instances.
         /// </summary>
         protected void SetCompletedWhenFinalized()
         {
             _isCompleted = IsFinalized;
         }
 
-        bool IsFinalized(TInstance instance)
+        async Task<bool> IsFinalized(TInstance instance)
         {
-            State<TInstance> currentState = this.GetState(instance).Result;
+            State<TInstance> currentState = await this.GetState(instance).ConfigureAwait(false);
+
             return Final.Equals(currentState);
         }
 
@@ -175,12 +177,6 @@ namespace Automatonymous
 
                 _eventCorrelations[@event] = builder.Build();
             }
-        }
-
-        void DefaultCorrelatedByConfigurator<T>(IEventCorrelationConfigurator<TInstance, T> configurator)
-            where T : class, CorrelatedBy<Guid>
-        {
-            configurator.CorrelateById(context => context.Message.CorrelationId);
         }
 
         /// <summary>
@@ -328,9 +324,9 @@ namespace Automatonymous
                     }));
         }
 
-        static bool NotCompletedByDefault(TInstance instance)
+        static Task<bool> NotCompletedByDefault(TInstance instance)
         {
-            return false;
+            return TaskUtil.False;
         }
 
         /// <summary>
@@ -342,24 +338,10 @@ namespace Automatonymous
                 declaration.Declare(this);
         }
 
-        static IEnumerable<PropertyInfo> GetStateMachineProperties(TypeInfo typeInfo)
+        static IEnumerable<PropertyInfo> GetStateMachineProperties(Type typeInfo)
         {
-            if (typeInfo.IsInterface)
-                yield break;
-
-            if (typeInfo.BaseType != null)
-            {
-                foreach (var propertyInfo in GetStateMachineProperties(typeInfo.BaseType.GetTypeInfo()))
-                    yield return propertyInfo;
-            }
-
-            IEnumerable<PropertyInfo> properties = typeInfo.DeclaredMethods
-                .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && !x.IsStatic)
-                .Select(x => typeInfo.GetDeclaredProperty(x.Name.Substring("get_".Length)))
+            return TypeMetadataCache.GetProperties(typeInfo)
                 .Where(x => x.CanRead && x.CanWrite);
-
-            foreach (var propertyInfo in properties)
-                yield return propertyInfo;
         }
 
         StateMachineRegistration[] GetRegistrations()
@@ -368,29 +350,27 @@ namespace Automatonymous
 
             var machineType = GetType();
 
-            IEnumerable<PropertyInfo> properties = GetStateMachineProperties(machineType.GetTypeInfo());
+            IEnumerable<PropertyInfo> properties = GetStateMachineProperties(machineType);
 
             foreach (var propertyInfo in properties)
             {
-                var propertyTypeInfo = propertyInfo.PropertyType.GetTypeInfo();
-                if (!propertyTypeInfo.IsGenericType)
+                var propertyType = propertyInfo.PropertyType.GetTypeInfo();
+                if (!propertyType.IsGenericType)
                     continue;
 
-                if (propertyTypeInfo.GetGenericTypeDefinition() != typeof(Event<>))
+                if (!propertyType.ClosesType(typeof(Event<>), out Type[] arguments))
                     continue;
 
-                var messageTypeInfo = propertyTypeInfo.GetGenericArguments().First().GetTypeInfo();
-                if (messageTypeInfo.AsType().HasInterface<CorrelatedBy<Guid>>())
+                var messageType = arguments[0];
+                if (messageType.HasInterface<CorrelatedBy<Guid>>())
                 {
-                    var declarationType = typeof(CorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType,
-                        messageTypeInfo.AsType());
+                    var declarationType = typeof(CorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType, messageType);
                     var declaration = Activator.CreateInstance(declarationType, propertyInfo);
                     events.Add((StateMachineRegistration)declaration);
                 }
                 else
                 {
-                    var declarationType = typeof(UncorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType,
-                        messageTypeInfo.AsType());
+                    var declarationType = typeof(UncorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType, messageType);
                     var declaration = Activator.CreateInstance(declarationType, propertyInfo);
                     events.Add((StateMachineRegistration)declaration);
                 }
