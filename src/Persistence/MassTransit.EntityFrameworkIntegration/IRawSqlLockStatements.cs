@@ -1,7 +1,8 @@
 ﻿namespace MassTransit.EntityFrameworkIntegration
 {
-    using MassTransit.Saga;
     using System.Data.Entity;
+    using MassTransit.Saga;
+
 
     public interface IRawSqlLockStatements
     {

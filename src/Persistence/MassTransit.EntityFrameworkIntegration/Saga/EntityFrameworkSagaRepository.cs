@@ -20,11 +20,11 @@
         where TSaga : class, ISaga
     {
         readonly IsolationLevel _isolationLevel;
-        readonly ISagaDbContextFactory<TSaga> _sagaDbContextFactory;
+        readonly ISagaDbContextFactory _sagaDbContextFactory;
         readonly Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
         readonly IRawSqlLockStatements _rawSqlLockStatements;
 
-        public EntityFrameworkSagaRepository(ISagaDbContextFactory<TSaga> sagaDbContextFactory,
+        public EntityFrameworkSagaRepository(ISagaDbContextFactory sagaDbContextFactory,
             IsolationLevel isolationLevel,
             IRawSqlLockStatements rawSqlLockStatements = null,
             Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
@@ -35,7 +35,7 @@
             _queryCustomization = queryCustomization;
         }
 
-        public static EntityFrameworkSagaRepository<TSaga> CreateOptimistic(ISagaDbContextFactory<TSaga> sagaDbContextFactory,
+        public static EntityFrameworkSagaRepository<TSaga> CreateOptimistic(ISagaDbContextFactory sagaDbContextFactory,
             Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
             return new EntityFrameworkSagaRepository<TSaga>(sagaDbContextFactory, IsolationLevel.ReadCommitted, null, queryCustomization);
@@ -44,10 +44,10 @@
         public static EntityFrameworkSagaRepository<TSaga> CreateOptimistic(Func<DbContext> sagaDbContextFactory,
             Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
-            return CreateOptimistic(new DelegateSagaDbContextFactory<TSaga>(sagaDbContextFactory), queryCustomization);
+            return CreateOptimistic(new DelegateSagaDbContextFactory(sagaDbContextFactory), queryCustomization);
         }
 
-        public static EntityFrameworkSagaRepository<TSaga> CreatePessimistic(ISagaDbContextFactory<TSaga> sagaDbContextFactory,
+        public static EntityFrameworkSagaRepository<TSaga> CreatePessimistic(ISagaDbContextFactory sagaDbContextFactory,
             IRawSqlLockStatements rawSqlLockStatements = null,
             Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
@@ -59,7 +59,7 @@
             IRawSqlLockStatements rawSqlLockStatements = null,
             Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
-            return CreatePessimistic(new DelegateSagaDbContextFactory<TSaga>(sagaDbContextFactory), rawSqlLockStatements, queryCustomization);
+            return CreatePessimistic(new DelegateSagaDbContextFactory(sagaDbContextFactory), rawSqlLockStatements, queryCustomization);
         }
 
         async Task<IEnumerable<Guid>> IQuerySagaRepository<TSaga>.Find(ISagaQuery<TSaga> query)
@@ -369,9 +369,7 @@
 
         static bool IsDeadlockException(DataException exception)
         {
-            var baseException = exception.GetBaseException() as SqlException;
-
-            return baseException != null && baseException.Number == 1205;
+            return exception.GetBaseException() is SqlException baseException && baseException.Number == 1205;
         }
 
         async Task<bool> PreInsertSagaInstance<T>(DbContext dbContext, ConsumeContext<T> context, TSaga instance)

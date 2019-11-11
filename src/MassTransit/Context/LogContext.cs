@@ -15,9 +15,9 @@ namespace MassTransit.Context
         public static EnabledLogger? Trace => Current?.Trace;
         public static EnabledLogger? Warning => Current?.Warning;
 
-        public static void ConfigureCurrentLogContext(ILoggerFactory loggerFactory = null, DiagnosticSource source = null)
+        public static void ConfigureCurrentLogContext(ILoggerFactory loggerFactory = null)
         {
-            Current = new BusLogContext(loggerFactory ?? NullLoggerFactory.Instance, source ?? Cached.Default.Value);
+            Current = new BusLogContext(loggerFactory ?? NullLoggerFactory.Instance, Cached.Default.Value);
         }
 
         /// <summary>
@@ -25,10 +25,9 @@ namespace MassTransit.Context
         /// used for all log output.
         /// </summary>
         /// <param name="logger">An existing logger</param>
-        /// <param name="source">An optional custom <see cref="DiagnosticSource"/></param>
-        public static void ConfigureCurrentLogContext(ILogger logger, DiagnosticSource source = null)
+        public static void ConfigureCurrentLogContext(ILogger logger)
         {
-            Current = new BusLogContext(new SingleLoggerFactory(logger), source ?? Cached.Default.Value);
+            Current = new BusLogContext(new SingleLoggerFactory(logger), Cached.Default.Value);
         }
 
         public static EnabledScope? BeginScope()

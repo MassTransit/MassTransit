@@ -24,6 +24,10 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
     namespace PreInsert
     {
+        using System.Collections.Generic;
+        using System.Data.Entity;
+        using System.Data.Entity.ModelConfiguration;
+        using Mappings;
         using MassTransit.Saga;
 
 
@@ -90,16 +94,31 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         }
 
 
-        #region EntityFramework
-        class EntityFrameworkInstanceMap : SagaClassMapping<Instance>
+    #region EntityFramework
+
+        public class InstanceSagaDbContext : SagaDbContext
         {
-            public EntityFrameworkInstanceMap()
+            class EntityFrameworkInstanceMap : SagaClassMap<Instance>
             {
-                Property(x => x.CurrentState);
-                Property(x => x.Name);
-                Property(x => x.CreateTimestamp);
+                protected override void Configure(EntityTypeConfiguration<Instance> cfg, DbModelBuilder modelBuilder)
+                {
+                    cfg.Property(x => x.CurrentState);
+                    cfg.Property(x => x.Name);
+                    cfg.Property(x => x.CreateTimestamp);
+                }
+            }
+
+            public InstanceSagaDbContext(string dbConnectionString)
+                : base(dbConnectionString)
+            {
+            }
+
+            protected override IEnumerable<ISagaClassMap> Configurations
+            {
+                get { yield return new EntityFrameworkInstanceMap(); }
             }
         }
+
 
         [TestFixture]
         public class When_pre_inserting_the_state_machine_instance_using_ef :
@@ -107,8 +126,8 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         {
             public When_pre_inserting_the_state_machine_instance_using_ef()
             {
-                ISagaDbContextFactory<Instance> sagaDbContextFactory = new DelegateSagaDbContextFactory<Instance>(
-                    () => new SagaDbContext<Instance, EntityFrameworkInstanceMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+                ISagaDbContextFactory sagaDbContextFactory = new DelegateSagaDbContextFactory(
+                    () => new InstanceSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
 
                 _repository = EntityFrameworkSagaRepository<Instance>.CreatePessimistic(sagaDbContextFactory);
             }
@@ -145,10 +164,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
                     Initially(
                         When(Started)
-                            .Publish(context => new StartupComplete
-                            {
-                                TransactionId = context.Data.CorrelationId
-                            })
+                            .Publish(context => new StartupComplete {TransactionId = context.Data.CorrelationId})
                             .TransitionTo(Running));
                 }
 
@@ -177,11 +193,12 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                 Assert.AreEqual(received.SourceAddress, InputQueueAddress, "The published message should have the input queue source address");
 
                 Guid? saga =
-                    await ExtensionMethodsForSagas.ShouldContainSaga<Instance>(_repository, x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.Running.Name, TestTimeout);
+                    await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.Running.Name, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
             }
         }
+
 
         [TestFixture]
         public class When_pre_inserting_in_an_invalid_state_using_ef :
@@ -189,8 +206,8 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         {
             public When_pre_inserting_in_an_invalid_state_using_ef()
             {
-                ISagaDbContextFactory<Instance> sagaDbContextFactory = new DelegateSagaDbContextFactory<Instance>(
-                    () => new SagaDbContext<Instance, EntityFrameworkInstanceMap>(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+                ISagaDbContextFactory sagaDbContextFactory =
+                    new DelegateSagaDbContextFactory(() => new InstanceSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
 
                 _repository = EntityFrameworkSagaRepository<Instance>.CreatePessimistic(sagaDbContextFactory);
             }
@@ -231,10 +248,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                             {
                             }),
                         When(Started)
-                            .Publish(context => new StartupComplete
-                            {
-                                TransactionId = context.Data.CorrelationId
-                            })
+                            .Publish(context => new StartupComplete {TransactionId = context.Data.CorrelationId})
                             .TransitionTo(Running));
                 }
 
@@ -272,12 +286,12 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                 Assert.AreEqual(received.SourceAddress, InputQueueAddress, "The published message should have the input queue source address");
 
                 Guid? saga =
-                    await ExtensionMethodsForSagas.ShouldContainSaga<Instance>(_repository, x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.Running.Name, TestTimeout);
+                    await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.Running.Name, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
             }
         }
-        #endregion EntityFramework
 
+    #endregion EntityFramework
     }
 }

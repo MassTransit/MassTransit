@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit.Saga;
-    using MassTransit.Tests.Saga;
     using MassTransit.Tests.Saga.Messages;
     using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
@@ -60,7 +59,7 @@
 
         public Using_custom_include_in_repository()
         {
-            // add new migration by calling 
+            // add new migration by calling
             // dotnet ef migrations add --context "SagaWithDependencyContext" Init  -v
             var contextFactory = new SagaWithDependencyContextFactory();
 
