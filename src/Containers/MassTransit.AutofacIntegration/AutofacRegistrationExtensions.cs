@@ -1,11 +1,15 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Autofac;
+    using Autofac.Core;
     using AutofacIntegration;
     using AutofacIntegration.Registration;
     using ConsumeConfigurators;
     using Definition;
+    using Metadata;
     using Saga;
 
 
@@ -25,6 +29,33 @@ namespace MassTransit
             var configurator = new ContainerBuilderRegistrationConfigurator(builder);
 
             configure?.Invoke(configurator);
+        }
+
+        /// <summary>
+        /// Add consumers that were already added to the container to the registration
+        /// </summary>
+        public static void AddConsumersFromContainer(this IRegistrationConfigurator configurator, IComponentContext context)
+        {
+            var consumerTypes = context.FindTypes(TypeMetadataCache.IsConsumerOrDefinition);
+            configurator.AddConsumers(consumerTypes);
+        }
+
+        /// <summary>
+        /// Add sagas that were already added to the container to the registration
+        /// </summary>
+        public static void AddSagasFromContainer(this IRegistrationConfigurator configurator, IComponentContext context)
+        {
+            var sagaTypes = context.FindTypes(TypeMetadataCache.IsSagaOrDefinition);
+            configurator.AddSagas(sagaTypes);
+        }
+
+        static Type[] FindTypes(this IComponentContext context, Func<Type, bool> filter)
+        {
+            return context.ComponentRegistry.Registrations
+                .SelectMany(r => r.Services.OfType<IServiceWithType>(), (r, s) => (r, s))
+                .Where(rs => filter(rs.s.ServiceType))
+                .Select(rs => rs.s.ServiceType)
+                .ToArray();
         }
 
         /// <summary>

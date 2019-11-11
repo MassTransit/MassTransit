@@ -1,9 +1,11 @@
 namespace MassTransit
 {
     using System;
+    using System.Linq;
     using Castle.Windsor;
     using ConsumeConfigurators;
     using Definition;
+    using Metadata;
     using Saga;
     using WindsorIntegration;
     using WindsorIntegration.Registration;
@@ -25,6 +27,32 @@ namespace MassTransit
             var configurator = new WindsorContainerRegistrationConfigurator(container);
 
             configure?.Invoke(configurator);
+        }
+
+        /// <summary>
+        /// Add consumers that were already added to the container to the registration
+        /// </summary>
+        public static void AddConsumersFromContainer(this IRegistrationConfigurator configurator, IWindsorContainer container)
+        {
+            var consumerTypes = container.FindTypes(TypeMetadataCache.IsConsumerOrDefinition);
+            configurator.AddConsumers(consumerTypes);
+        }
+
+        /// <summary>
+        /// Add sagas that were already added to the container to the registration
+        /// </summary>
+        public static void AddSagasFromContainer(this IRegistrationConfigurator configurator, IWindsorContainer container)
+        {
+            var sagaTypes = container.FindTypes(TypeMetadataCache.IsSagaOrDefinition);
+            configurator.AddSagas(sagaTypes);
+        }
+
+        static Type[] FindTypes(this IWindsorContainer container, Func<Type, bool> filter)
+        {
+            return container.Kernel.GetHandlers()
+                .Where(rs => rs.ComponentModel.Services.Any(filter))
+                .Select(rs => rs.ComponentModel.Implementation)
+                .ToArray();
         }
 
         /// <summary>
