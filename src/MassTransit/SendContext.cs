@@ -45,6 +45,8 @@
 
         TimeSpan? TimeToLive { get; set; }
 
+        DateTime? SentTime { get; }
+
         ContentType ContentType { get; set; }
 
         /// <summary>

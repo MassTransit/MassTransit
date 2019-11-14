@@ -33,6 +33,7 @@ namespace MassTransit.EntityFrameworkIntegration
             Property(x => x.ConversationId);
             Property(x => x.CorrelationId);
             Property(x => x.RequestId);
+            Property(x => x.SentTime);
             Property(x => x.SourceAddress);
             Property(x => x.DestinationAddress);
             Property(x => x.ResponseAddress);
