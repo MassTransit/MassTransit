@@ -12,6 +12,8 @@ Before you just post your question, however, spend a few moments to compose your
 
 ## Mailing List
 
+[![alt Google Group](https://img.shields.io/badge/groups-join%20convo-lightgrey.svg "Google Group")][2] 
+
 A long history of support is available on the mailing list, which is hosted on [Google Groups][2]. There are a wide variety of developers using MassTransit on the list, and often times they can help. If you are going to use MassTransit, joining the mailing list is a great way to participate in the community.
 
 When posting on the mailing list, pick a good subject line, and if the subject of the thread changes, please change the subject to match. Some of us deal with hundreds of emails per day and we need all the help we can get to pick the interesting or important ones.
@@ -20,7 +22,9 @@ Also, if you are seeing some unexpected behavior, generate a [diagnostic result]
 
 ## Gitter
 
-Our chat room at [Gitter](https://gitter.im/MassTransit/home) is becoming more and more popular. There you can find people who use MassTransit in their systems and can provide you with quick advise. Get engaged, get help and help others too!
+[![alt Gitter](https://badges.gitter.im/Join%20Chat.svg "Gitter")][5]
+
+Our chat room at [Gitter][5] is becoming more and more popular. There you can find people who use MassTransit in their systems and can provide you with quick advise. Get engaged, get help and help others too!
 
 ## Twitter
 
@@ -35,6 +39,7 @@ Please **do not open an issue on GitHub**, unless you have spotted an actual bug
 This policy is in place to avoid bugs being drowned out in a pile of sensible suggestions for future enhancements and calls for help from people who forget to check back if they get it and so on.
 
 [1]: http://stackoverflow.com/questions/tagged/masstransit
-[2]: http://groups.google.com/group/masstransit-discuss/
+[2]: https://groups.google.com/forum/#!forum/masstransit-discuss
 [3]: https://github.com/masstransit/masstransit/issues
 [4]: https://gist.github.com/
+[5]: https://gitter.im/MassTransit/MassTransit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
