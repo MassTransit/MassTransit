@@ -79,11 +79,11 @@
         {
             LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
-
             var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, configure);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
+
+            TransportLogMessages.ConnectReceiveEndpoint(configuration.InputAddress);
 
             configuration.Build(this);
 
@@ -92,6 +92,8 @@
 
         public Task<ISendTransport> CreateSendTransport(AmazonSqsEndpointAddress address)
         {
+            TransportLogMessages.CreateSendTransport(address);
+
             var settings = _hostTopology.SendTopology.GetSendSettings(address);
 
             var clientContextSupervisor = new AmazonSqsClientContextSupervisor(ConnectionContextSupervisor);

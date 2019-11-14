@@ -8,6 +8,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using GreenPipes;
     using RabbitMQ.Client;
     using Topology;
+    using Transports;
     using Util;
 
 
@@ -46,13 +47,12 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public async Task<IModel> CreateModel(CancellationToken cancellationToken)
         {
-            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken))
-            {
-                var model = await Task.Factory.StartNew(() => _connection.CreateModel(), tokenSource.Token, TaskCreationOptions.None, _taskScheduler)
-                    .ConfigureAwait(false);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
 
-                return model;
-            }
+            var model = await Task.Factory.StartNew(() => _connection.CreateModel(), tokenSource.Token, TaskCreationOptions.None, _taskScheduler)
+                .ConfigureAwait(false);
+
+            return model;
         }
 
         async Task<ModelContext> ConnectionContext.CreateModelContext(CancellationToken cancellationToken)
@@ -66,11 +66,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
         {
             _connection.ConnectionShutdown -= OnConnectionShutdown;
 
-            LogContext.Debug?.Log("Disconnecting: {Host}", Description);
+            TransportLogMessages.DisconnectHost(Description);
 
             _connection.Cleanup(200, "Connection Disposed");
 
-            LogContext.Debug?.Log("Disconnected: {Host}", Description);
+            TransportLogMessages.DisconnectedHost(Description);
 
             return TaskUtil.Completed;
         }

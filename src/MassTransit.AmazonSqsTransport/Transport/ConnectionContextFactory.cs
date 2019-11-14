@@ -11,6 +11,7 @@
     using GreenPipes.Agents;
     using Policies;
     using Topology;
+    using Transports;
 
 
     public class ConnectionContextFactory :
@@ -68,7 +69,7 @@
                 IConnection connection = null;
                 try
                 {
-                    LogContext.Debug?.Log("Connecting: {Host}", _configuration.Settings.ToString());
+                    TransportLogMessages.ConnectHost(_configuration.Settings.ToString());
 
                     connection = _configuration.Settings.CreateConnection();
 

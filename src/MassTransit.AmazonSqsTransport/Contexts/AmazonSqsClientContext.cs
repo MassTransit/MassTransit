@@ -21,6 +21,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using Pipeline;
     using Topology;
     using Topology.Entities;
+    using Transports;
     using Util;
 
 
@@ -82,16 +83,18 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 }).ToList()
             };
 
+            TransportLogMessages.CreateTopic(topic.EntityName);
+
             var response = await _amazonSns.CreateTopicAsync(request, _cancellationToken).ConfigureAwait(false);
 
             EnsureSuccessfulResponse(response);
-
-            await Task.Delay(500, _cancellationToken).ConfigureAwait(false);
 
             var topicArn = response.TopicArn;
 
             lock (_lock)
                 _topicArns[topic.EntityName] = topicArn;
+
+            await Task.Delay(500, _cancellationToken).ConfigureAwait(false);
 
             return topicArn;
         }
@@ -118,16 +121,18 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 Tags = queue.QueueTags.ToDictionary(x => x.Key, x => x.Value)
             };
 
+            TransportLogMessages.CreateQueue(queue.EntityName);
+
             var response = await _amazonSqs.CreateQueueAsync(request, _cancellationToken).ConfigureAwait(false);
 
             EnsureSuccessfulResponse(response);
-
-            await Task.Delay(500, _cancellationToken).ConfigureAwait(false);
 
             var queueUrl = response.QueueUrl;
 
             lock (_lock)
                 _queueUrls[queue.EntityName] = queueUrl;
+
+            await Task.Delay(500, _cancellationToken).ConfigureAwait(false);
 
             return queueUrl;
         }
@@ -182,6 +187,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         async Task ClientContext.DeleteTopic(Topology.Entities.Topic topic)
         {
             var topicArn = await CreateTopic(topic).ConfigureAwait(false);
+
+            TransportLogMessages.DeleteTopic(topicArn);
+
             var response = await _amazonSns.DeleteTopicAsync(topicArn, _cancellationToken).ConfigureAwait(false);
 
             EnsureSuccessfulResponse(response);
@@ -190,6 +198,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         async Task ClientContext.DeleteQueue(Queue queue)
         {
             var queueUrl = await CreateQueue(queue).ConfigureAwait(false);
+
+            TransportLogMessages.DeleteQueue(queueUrl);
+
             var response = await _amazonSqs.DeleteQueueAsync(queueUrl, _cancellationToken).ConfigureAwait(false);
 
             EnsureSuccessfulResponse(response);

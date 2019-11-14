@@ -8,6 +8,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
     using Context;
     using GreenPipes;
     using Topology;
+    using Transports;
     using Util;
 
 
@@ -40,18 +41,17 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
         public async Task<ISession> CreateSession(CancellationToken cancellationToken)
         {
-            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken))
-            {
-                var model = await Task.Factory.StartNew(() => _connection.CreateSession(), tokenSource.Token, TaskCreationOptions.None, _taskScheduler)
-                    .ConfigureAwait(false);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
 
-                return model;
-            }
+            var model = await Task.Factory.StartNew(() => _connection.CreateSession(), tokenSource.Token, TaskCreationOptions.None, _taskScheduler)
+                .ConfigureAwait(false);
+
+            return model;
         }
 
         Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
         {
-            LogContext.Debug?.Log("Disconnecting: {Host}", Description);
+            TransportLogMessages.DisconnectHost(Description);
 
             try
             {
@@ -64,7 +64,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
                 LogContext.Warning?.Log(exception, "Close Connection Faulted: {Host}", Description);
             }
 
-            LogContext.Debug?.Log("Disconnected: {Host}", Description);
+            TransportLogMessages.DisconnectedHost(Description);
 
             return TaskUtil.Completed;
         }

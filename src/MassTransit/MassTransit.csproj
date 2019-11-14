@@ -14,14 +14,13 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <DefineConstants>$(DefineConstants);NETCORE;NETSTD</DefineConstants>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <DefineConstants>$(DefineConstants);NETSTD</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
     <Compile Remove="Configuration/BusConfigurators/PerformanceCounterBusFactorySpecification.cs" />
-    <Compile Remove="Context/LogContext.net45.cs" />
     <Compile Remove="Serialization/StaticHeaders.cs" />
     <Compile Remove="Serialization/StaticConsumeContext.cs" />
     <Compile Remove="Serialization/ExtensionsForBinaryMessageSerializer.cs" />
@@ -31,7 +30,6 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <Compile Remove="Context/LogContext.net45.cs" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Transactions" />
   </ItemGroup>

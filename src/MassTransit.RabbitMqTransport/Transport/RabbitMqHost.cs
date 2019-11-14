@@ -95,11 +95,11 @@ namespace MassTransit.RabbitMqTransport.Transport
         {
             LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
-
             var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, configure);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
+
+            TransportLogMessages.ConnectReceiveEndpoint(configuration.InputAddress);
 
             configuration.Build(this);
 
@@ -110,6 +110,8 @@ namespace MassTransit.RabbitMqTransport.Transport
         {
             Task<CachedSendTransport> Create(Uri transportAddress)
             {
+                TransportLogMessages.CreateSendTransport(address);
+
                 var settings = _hostTopology.SendTopology.GetSendSettings(address);
 
                 var brokerTopology = settings.GetBrokerTopology();
