@@ -13,7 +13,7 @@
   },
   "scripts": {
     "docs:build": "bash -c \"rm -rf docs/.vuepress/dist\" && vuepress build docs",
-    "docs:publish": "npm run docs:build && cd docs/.vuepress/dist && git init && git commit --allow-empty -m \"Update docs\" && git checkout -b gh-pages && git add . && git commit -am \"Update docs\" && git push https://github.com/MassTransit/MassTransit.git gh-pages --force",
+    "docs:publish": "npm run docs:build && cd docs/.vuepress/dist && git init && git commit --allow-empty -m \"Update docs\" && git checkout -b gh-pages && git add . && git commit -am \"Update docs\" && git push https://github.com/alexeyzimarev/MassTransit.git gh-pages --force",
     "docs:dev": "vuepress dev docs"
   },
   "repository": {
