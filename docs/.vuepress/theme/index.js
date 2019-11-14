@@ -18,7 +18,7 @@ module.exports = (themeConfig, ctx) => {
                 layout: "BlogLayout",
                 itemLayout: 'BlogLayout',
                 pagination: {
-                    lengthPerPage: 3,
+                    lengthPerPage: 10,
                     layout: "BlogLayout",
                 }
             },
@@ -32,7 +32,7 @@ module.exports = (themeConfig, ctx) => {
                 scopeLayout: "BlogLayout",
                 frontmatter: { title: 'Tag' },
                 pagination: {
-                    lengthPerPage: 3,
+                    lengthPerPage: 10,
                     layout: "BlogLayout",
                 }
             },

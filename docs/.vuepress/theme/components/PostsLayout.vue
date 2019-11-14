@@ -2,7 +2,7 @@
     <div class="content__default">
         <h1>Recent updates{{scope}}</h1>
 
-        <Pagination />
+        <Pagination v-if="showPagination" />
 
         <ul class="blog-list">
             <li v-for="post in pages" class="blog-list__item">
@@ -25,6 +25,9 @@
             },
             scope() {
                 return this.$currentTag ? ": " + this.$currentTag.key : ""
+            },
+            showPagination() {
+                return this.$pagination._paginationPages.length > 1;
             }
         }
     }
