@@ -3,9 +3,13 @@
   "version": "0.1.0",
   "description": "MassTransit Documentation",
   "main": "index.js",
-  "dependencies": {
+  "devDependencies": {
     "@vuepress/plugin-active-header-links": "^1.0.0-rc.1",
-    "vuepress": "^1.2.0"
+    "vuepress": "^1.2.0",
+    "@vuepress/plugin-blog": "^1.5.1"
+  },
+  "dependencies": {
+    "remove-markdown": "^0.3.0"
   },
   "scripts": {
     "docs:build": "bash -c \"rm -rf docs/.vuepress/dist\" && vuepress build docs",
