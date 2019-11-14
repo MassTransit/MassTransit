@@ -67,6 +67,7 @@ namespace MassTransit.Context
         public Uri FaultAddress { get; set; }
 
         public TimeSpan? TimeToLive { get; set; }
+        public DateTime? SentTime { get; set; }
 
         public ContentType ContentType { get; set; }
 

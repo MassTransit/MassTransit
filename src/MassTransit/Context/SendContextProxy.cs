@@ -100,6 +100,12 @@ namespace MassTransit.Context
             set => _context.TimeToLive = value;
         }
 
+        public DateTime? SentTime
+        {
+            get => _context.SentTime;
+            set => _context.SentTime = value;
+        }
+
         public ContentType ContentType
         {
             get => _context.ContentType;

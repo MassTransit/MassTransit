@@ -32,7 +32,11 @@ namespace MassTransit.Audit.Observers
             _filter = filter;
         }
 
-        Task ISendObserver.PreSend<T>(SendContext<T> context) => TaskUtil.Completed;
+        Task ISendObserver.PreSend<T>(SendContext<T> context)
+        {
+            context.SentTime = DateTime.UtcNow;
+            return TaskUtil.Completed;
+        }
 
         Task ISendObserver.PostSend<T>(SendContext<T> context)
         {

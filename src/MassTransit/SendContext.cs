@@ -44,6 +44,7 @@
         SendHeaders Headers { get; }
 
         TimeSpan? TimeToLive { get; set; }
+        DateTime? SentTime { get; set; }
 
         ContentType ContentType { get; set; }
 

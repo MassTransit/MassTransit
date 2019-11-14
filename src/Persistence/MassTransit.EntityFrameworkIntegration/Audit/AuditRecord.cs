@@ -26,6 +26,7 @@ namespace MassTransit.EntityFrameworkIntegration.Audit
         public Guid? CorrelationId { get; set; }
         public Guid? InitiatorId { get; set; }
         public Guid? RequestId { get; set; }
+        public DateTime? SentTime { get; set; }
         public string SourceAddress { get; set; }
         public string DestinationAddress { get; set; }
         public string ResponseAddress { get; set; }

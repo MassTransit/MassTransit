@@ -47,7 +47,7 @@ namespace MassTransit.Context
 
         Uri MessageContext.FaultAddress => _context.FaultAddress;
 
-        DateTime? MessageContext.SentTime => default(DateTime?);
+        DateTime? MessageContext.SentTime => _context.SentTime;
 
         Headers MessageContext.Headers => _context.Headers;
 
