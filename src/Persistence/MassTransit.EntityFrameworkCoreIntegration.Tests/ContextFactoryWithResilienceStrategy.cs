@@ -5,11 +5,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     using Microsoft.EntityFrameworkCore.Design;
 
 
-    public class ContextFactoryWithResilienceStrategy : IDesignTimeDbContextFactory<SimpleSagaDbContext>
+    public class ContextFactoryWithResilienceStrategy : IDesignTimeDbContextFactory<SimpleSagaDbContextWithResilienceStrategy>
     {
-        public SimpleSagaDbContext CreateDbContext(string[] args)
+        public SimpleSagaDbContextWithResilienceStrategy CreateDbContext(string[] args)
         {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<SimpleSagaDbContext>();
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<SimpleSagaDbContextWithResilienceStrategy>();
 
             dbContextOptionsBuilder.UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString(),
                 m =>
@@ -19,7 +19,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                         m.EnableRetryOnFailure();
                     });
 
-            return new SimpleSagaDbContext(dbContextOptionsBuilder.Options);
+            return new SimpleSagaDbContextWithResilienceStrategy(dbContextOptionsBuilder.Options);
         }
     }
 }

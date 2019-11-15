@@ -8,7 +8,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 
     public class SimpleSagaDbContext : SagaDbContext
     {
-        public SimpleSagaDbContext(DbContextOptions<SimpleSagaDbContext> options)
+        public SimpleSagaDbContext(DbContextOptions options)
             : base(options)
         {
         }
