@@ -13,7 +13,7 @@
 </template>
 
 <script>
-    import PostPreview from "./PostPreview";
+    import PostPreview from "@theme/components/PostPreview";
     import {Pagination, SimplePagination} from '@vuepress/plugin-blog/lib/client/components'
 
     export default {

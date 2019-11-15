@@ -12,11 +12,11 @@
 </template>
 
 <script>
-    import PageEdit from '@parent-theme/components/PageEdit.vue';
-    import PageNav from '@parent-theme/components/PageNav.vue';
-    import TagsLayout from "./TagsLayout";
-    import PostsLayout from './PostsLayout.vue';
-    import PostLayout from './PostLayout.vue';
+    import PageEdit from '@parent-theme/components/PageEdit';
+    import PageNav from '@parent-theme/components/PageNav';
+    import TagsLayout from "@theme/components/TagsLayout";
+    import PostsLayout from '@theme/components/PostsLayout';
+    import PostLayout from '@theme/components/PostLayout';
 
     export default {
         components: {PageEdit, PageNav, TagsLayout, PostsLayout, PostLayout},

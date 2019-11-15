@@ -14,7 +14,7 @@
 </template>
 
 <script>
-    import BlogTag from "./BlogTag";
+    import BlogTag from "@theme/components/BlogTag";
 
     export default {
         components: {BlogTag}

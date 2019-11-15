@@ -6,6 +6,7 @@ module.exports = {
    themeConfig: {
     logo: '/mt-logo-small.png',
     nav: [
+      { text: "Blog", link: "/updates/" },
       { text: 'Gitter', link: 'https://gitter.im/MassTransit/MassTransit' },
       { text: 'NuGet', link: 'https://nuget.org/packages/MassTransit' }
     ],

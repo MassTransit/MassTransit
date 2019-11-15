@@ -14,7 +14,7 @@
 </template>
 
 <script>
-    import PostTags from "./PostTags";
+    import PostTags from "@theme/components/PostTags";
 
     export default {
         components: {PostTags},

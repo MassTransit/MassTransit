@@ -1,10 +1,10 @@
 <template>
     <div>
-        <ul v-for="tag in tags" class="tag-list">
-            <li class="tag-list__item">
+        <div class="tag-list">
+            <span v-for="tag in tags" class="tag-list__item">
                 <router-link class="tag-list__btn" :to="tagPath(tag)">{{ tag }}</router-link>
-            </li>
-        </ul>
+            </span>
+        </div>
     </div>
 </template>
 
@@ -26,7 +26,6 @@
 
 <style scoped lang="stylus">
     .tag-list
-        list-style: none
         padding-left: 0
         display: flex
         margin-bottom: 25px

@@ -4,6 +4,7 @@
         Written <span v-if="$frontmatter.author"> by {{ $frontmatter.author }} </span>
         <time v-if="$frontmatter.date">on {{ resolvePostDate }}</time>
 
+        <p></p>
         <PostTags :tags="$frontmatter.tag" />
 
         <Content/>
@@ -11,7 +12,7 @@
 </template>
 
 <script>
-    import PostTags from "./PostTags";
+    import PostTags from "@theme/components/PostTags";
 
     export default {
         components: {PostTags},
