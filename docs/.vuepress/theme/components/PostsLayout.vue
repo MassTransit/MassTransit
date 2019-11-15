@@ -1,6 +1,6 @@
 <template>
     <div class="content__default">
-        <h1>Recent updates{{scope}}</h1>
+        <h1>{{ $title }}</h1>
 
         <Pagination v-if="showPagination" />
 
@@ -22,9 +22,6 @@
         computed: {
             pages() {
                 return this.$pagination.pages
-            },
-            scope() {
-                return this.$currentTag ? ": " + this.$currentTag.key : ""
             },
             showPagination() {
                 return this.$pagination._paginationPages.length > 1;
