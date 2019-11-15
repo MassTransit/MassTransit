@@ -7,18 +7,18 @@
 
         <span v-html="getSummary"></span>
 
-        <ul v-for="tag in item.frontmatter.tag" class="tag-list">
-            <li class="tag-list__item">
-                <router-link class="tag-list__btn" :to="tagPath(tag)">{{ tag }}</router-link>
-            </li>
-        </ul>
+        <PostTags v-if="item.frontmatter.tag" :tags="item.frontmatter.tag" />
 
         <router-link class="button blog-post__button" :to="item.path">Read More ></router-link>
     </section>
 </template>
 
 <script>
+    import PostTags from "./PostTags";
+
     export default {
+        components: {PostTags},
+
         props: {
             item: {
                 type: Object,
@@ -69,29 +69,6 @@
         text-transform: uppercase
         font-weight: 700
         box-shadow: 0 0
-        transition: box-shadow 0.2s ease-in
-
-        &:hover
-            box-shadow 0 0 5px $accentColor
-
-    .tag-list
-        list-style: none
-        padding-left: 0
-        display: flex
-        margin-bottom: 25px
-
-    .tag-list__item
-        margin-left: 10px
-
-        &:first-child
-            margin-left: 0
-
-    .tag-list__btn
-        border-radius: 4px
-        color $textColor
-        border 1px solid $borderColor
-        padding: 5px
-        font-size: 0.9rem
         transition: box-shadow 0.2s ease-in
 
         &:hover

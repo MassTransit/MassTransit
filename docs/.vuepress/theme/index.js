@@ -17,9 +17,7 @@ module.exports = (themeConfig, ctx) => {
         path: '/updates/',
         layout: "BlogLayout",
         itemLayout: 'BlogLayout',
-        frontmatter: {
-          title: "MassTransit Blog",
-        },
+        frontmatter: {title: "Blog"},
         pagination: {
           lengthPerPage: 10,
           layout: "BlogLayout",
