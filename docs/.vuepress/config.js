@@ -3,7 +3,7 @@ module.exports = {
   base: '/MassTransit/',
   description: 'A free, open-source distributed application framework for .NET.',
   plugins: ['@vuepress/active-header-links'],
-   themeConfig: {
+  themeConfig: {
     logo: '/mt-logo-small.png',
     nav: [
       { text: 'Gitter', link: 'https://gitter.im/MassTransit/MassTransit' },
@@ -120,7 +120,7 @@ module.exports = {
                 ]
               },
               '/advanced/connect-endpoint',
-              ['/usage/observers', 'Observing'],
+              '/advanced/observers',
               {
                 title: 'Topology',
                 path: '/advanced/topology/',
