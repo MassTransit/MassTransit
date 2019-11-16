@@ -1,6 +1,6 @@
 # Scheduled Redelivery
 
-> This page may be removed in the future, for more detail on handling exceptions is available at the [Handling exceptions](usage/exception.md) page.
+> This page may be removed in the future, for more detail on handling exceptions is available at the [Handling exceptions](/usage/exceptions) page.
 
 There are situations where a message cannot be processed, either due to an unavailable resource or a situation in which message ordering is important (you should try not to depend upon message order, but sometimes it is an easy workaround). In these situations, scheduling a message for redelivery is a powerful tool.
 
@@ -48,7 +48,7 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 
 ### Redelivery with RabbitMQ
 
-It is also possible to use RabbitMQ Delayed Exchange to redeliver messages. You can even use it if the delayed exchange is not [configured](rabbitmq-delayed.md) as a default message scheduler.
+It is also possible to use RabbitMQ Delayed Exchange to redeliver messages. You can even use it if the delayed exchange is not [configured](rabbitmq-delayed) as a default message scheduler.
 
 You can schedule a message to be redelivered via RabbitMQ delayed exchange from a consumer by using the `Defer` extension method like this:
 

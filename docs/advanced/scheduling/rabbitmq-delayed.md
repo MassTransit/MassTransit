@@ -2,9 +2,9 @@
 
 RabbitMQ has no native support for deferred dispatch. However, the community has developed a plugin that makes such functionality possible, enabling native support for message scheduling for RabbitMQ.
 
-This plugin is still considered as experimental. It is supported by MassTransit, but we cannot guarantee anything more than the plugin guarantees itself. Please read the message on the plugin [project home page](1) to get full understanding of the current status and limitations.
+This plugin is still considered as experimental. It is supported by MassTransit, but we cannot guarantee anything more than the plugin guarantees itself. Please read the message on the plugin [project home page][1] to get full understanding of the current status and limitations.
 
-The plugin is not included in the RabbitMQ distribution. Please follow the instructions on the [project wiki](1) to install it.
+The plugin is not included in the RabbitMQ distribution. Please follow the instructions on the [project wiki][1] to install it.
 
 ### Scheduling messages
 
@@ -44,6 +44,6 @@ public async Task Consume(ConsumeContext<MyMessage> context)
 }
 ```
 
-Read more about message redelivery in [Redelivering messages](redeliver.md)
+Read more about message redelivery in [Redelivering messages](redeliver)
 
 [1]: https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/
