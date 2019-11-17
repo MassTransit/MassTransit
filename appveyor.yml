@@ -12,6 +12,7 @@ skip_commits:
   files:
     - docs/**/*
     - package.json
+    - docs.yml
 
 image:
   - Visual Studio 2017
