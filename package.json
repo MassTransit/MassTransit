@@ -13,7 +13,7 @@
   },
   "scripts": {
     "docs:build": "bash -c \"rm -rf docs/.vuepress/dist\" && vuepress build docs",
-    "docs:publish": "cd docs/.vuepress/dist && git init && git fetch https://github.com/MassTransit/masstransit.github.io.git && git checkout 220443cd2ab45d486fcee10a65669aff0bda31ab && git checkout -b master && git add . && git commit -am \"Deploy Documentation\" && git push https://github.com/MassTransit/masstransit.github.io.git --force",
+    "docs:publish": "cd docs/.vuepress/dist && git init && git fetch https://github.com/MassTransit/masstransit.github.io.git && git checkout 220443cd2ab45d486fcee10a65669aff0bda31ab && git checkout -b master && git add . && git commit -am \"Deploy Documentation\" && git push --force --set-upstream https://github.com/MassTransit/masstransit.github.io.git master",
     "docs:dev": "vuepress dev docs"
   },
   "repository": {
