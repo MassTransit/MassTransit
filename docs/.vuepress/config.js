@@ -1,10 +1,13 @@
 module.exports = {
   title: 'MassTransit',
-  base: '/MassTransit/',
   description: 'A free, open-source distributed application framework for .NET.',
   plugins: ['@vuepress/active-header-links'],
   themeConfig: {
     logo: '/mt-logo-small.png',
+    algolia: {
+      apiKey: 'e458b7be70837c0e85b6b229c4e26664',
+      indexName: 'masstransit'
+    },
     nav: [
       { text: "Blog", link: "/updates/" },
       { text: 'Gitter', link: 'https://gitter.im/MassTransit/MassTransit' },
