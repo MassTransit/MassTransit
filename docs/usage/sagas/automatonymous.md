@@ -951,6 +951,145 @@ The _Request_ includes three events: _Completed, _Faulted_, and _TimeoutExpired_
 The request timeout is scheduled using the message scheduler, and the scheduled message is canceled when a response or fault is received. Not all message schedulers support cancellation, so it may be necessary to _Ignore_ the `TimeoutExpired` event in subsequent states.
 :::
 
+### Custom
+
+There are scenarios when an event behavior may have dependencies that need to be managed at a scope level, such as a database connection, or the complexity is best encapsulated in a separate class rather than being part of the state machine itself. Developers can create their own activities for state machine use, and optionally create their own extension methods to add them to a behavior.
+
+To create an activity, create a class that implements `IActivity<TInstance, TData>` as shown.
+
+```cs
+public class PublishOrderSubmittedActivity :
+    Activity<OrderState, SubmitOrder>
+{
+    readonly ConsumeContext _context;
+
+    public PublishOrderSubmittedActivity(ConsumeContext context)
+    {
+        _context = context;
+    }
+
+    public void Probe(ProbeContext context)
+    {
+        context.CreateScope("publish-order-submitted");
+    }
+
+    public void Accept(StateMachineVisitor visitor)
+    {
+        visitor.Visit(this);
+    }
+
+    public async Task Execute(BehaviorContext<OrderState, SubmitOrder> context, Behavior<OrderState, SubmitOrder> next)
+    {
+        // do the activity thing
+        await _context.Publish<OrderSubmitted>(new { OrderId = context.Instance.CorrelationId }).ConfigureAwait(false);
+
+        // call the next activity in the behavior
+        await next.Execute(context).ConfigureAwait(false);
+    }
+
+    public Task Faulted<TException>(BehaviorExceptionContext<OrderState, SubmitOrder, TException> context, Behavior<OrderState, SubmitOrder> next)
+        where TException : Exception
+    {
+        return next.Faulted(context);
+    }
+}
+```
+
+Once created, configure the activity in a state machine as shown.
+
+```cs
+public interface OrderSubmitted
+{
+    Guid OrderId { get; }    
+}
+
+public class OrderStateMachine :
+    MassTransitStateMachine<OrderState>
+{
+    public OrderStateMachine()
+    {
+        Initially(
+            When(SubmitOrder)
+                .Activity(x => x.OfType<PublishOrderSubmittedActivity>())
+                .TransitionTo(Submitted));
+    }
+}
+```
+
+When the `SubmitOrder` event is consumed, the state machine will resolve the activity from the container, and call the `Execute` method. The activity will be scoped, so any dependencies will be resolved within the message `ConsumeContext`.
+
+In the above example, the event type was known in advance. If an activity for any event type is needed, it can be created without specifying the event type. 
+
+```cs
+public class PublishOrderSubmittedActivity :
+    Activity<OrderState>
+{
+    readonly ConsumeContext _context;
+
+    public PublishOrderSubmittedActivity(ConsumeContext context)
+    {
+        _context = context;
+    }
+
+    public void Probe(ProbeContext context)
+    {
+        context.CreateScope("publish-order-submitted");
+    }
+
+    public void Accept(StateMachineVisitor visitor)
+    {
+        visitor.Visit(this);
+    }
+
+    public async Task Execute(BehaviorContext<OrderState> context, Behavior<OrderState> next)
+    {
+        await _context.Publish<OrderSubmitted>(new { OrderId = context.Instance.CorrelationId }).ConfigureAwait(false);
+
+        await next.Execute(context).ConfigureAwait(false);
+    }
+
+    public async Task Execute<T>(BehaviorContext<OrderState, T> context, Behavior<OrderState, T> next)
+    {
+        await _context.Publish<OrderSubmitted>(new { OrderId = context.Instance.CorrelationId }).ConfigureAwait(false);
+
+        await next.Execute(context).ConfigureAwait(false);
+    }
+
+    public Task Faulted<TException>(BehaviorExceptionContext<OrderState, TException> context, Behavior<OrderState> next) 
+        where TException : Exception
+    {
+        return next.Faulted(context);
+    }
+
+    public Task Faulted<T, TException>(BehaviorExceptionContext<OrderState, T, TException> context, Behavior<OrderState, T> next)
+        where TException : Exception
+    {
+        return next.Faulted(context);
+    }
+}
+```
+
+To register an instance activity, use the following syntax.
+
+```cs
+public interface OrderSubmitted
+{
+    Guid OrderId { get; }    
+}
+
+public class OrderStateMachine :
+    MassTransitStateMachine<OrderState>
+{
+    public OrderStateMachine()
+    {
+        Initially(
+            When(SubmitOrder)
+                .Activity(x => x.OfInstanceType<PublishOrderSubmittedActivity>())
+                .TransitionTo(Submitted));
+    }
+}
+```
+
 
 
 [1]: https://github.com/MassTransit/Automatonymous

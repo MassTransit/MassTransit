@@ -1,10 +1,10 @@
 # Producers
 
-An application or service can produce messages using two different methods. A message can be sent or a message can be published. The behavior of each method is very different, but it easy to understand by looking at the type of messages involved with each particular method.
+An application or service can produce messages using two different methods. A message can be sent or a message can be published. The behavior of each method is very different, but it's easy to understand by looking at the type of messages involved with each particular method.
 
 When a message is sent, it is delivered to a specific endpoint using a _DestinationAddress_. When a message is published, it is not sent to a specific endpoint, but is instead broadcasted to any consumers which have *subscribed* to the message type. For these two separate behavior, we describe messages sent as commands, and messages published as events.
 
-> These are discussed in depth in the [Message Contracts](/usage/messages) section of the documentation.
+> These are discussed in depth in the [Messages](messages) section of the documentation.
 
 ## Send
 
