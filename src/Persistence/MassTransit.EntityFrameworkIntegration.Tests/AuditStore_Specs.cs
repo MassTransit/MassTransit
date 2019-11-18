@@ -13,6 +13,8 @@
 namespace MassTransit.EntityFrameworkIntegration.Tests
 {
     using System.Data.Entity;
+    using System.Data.Entity.Infrastructure;
+    using System.Data.Entity.Migrations;
     using System.Linq;
     using System.Threading.Tasks;
     using Audit;
@@ -53,10 +55,15 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         [OneTimeSetUp]
         public async Task Send_message_to_test_consumer()
         {
+            Database.SetInitializer(new DropCreateDatabaseAlways<AuditDbContext>());
+
             _store = new EntityFrameworkAuditStore(
                 LocalDbConnectionStringProvider.GetLocalDbConnectionString(), "audit");
             using (var dbContext = _store.AuditContext)
+            {
+                dbContext.Database.Initialize(true);
                 await dbContext.Database.ExecuteSqlCommandAsync("TRUNCATE TABLE audit");
+            }
 
             _harness = new InMemoryTestHarness();
             _harness.OnConnectObservers += bus =>
