@@ -82,6 +82,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Audit
                 CorrelationId = metadata.CorrelationId,
                 InitiatorId = metadata.InitiatorId,
                 RequestId = metadata.RequestId,
+                SentTime = metadata.SentTime,
                 SourceAddress = metadata.SourceAddress,
                 DestinationAddress = metadata.DestinationAddress,
                 ResponseAddress = metadata.ResponseAddress,
