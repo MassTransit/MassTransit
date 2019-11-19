@@ -47,10 +47,10 @@
                     var connection1 = HubConnectionContextUtils.Create(client1.Connection);
                     var connection2 = HubConnectionContextUtils.Create(client2.Connection);
 
-                    await manager1.OnConnectedAsync(connection1).OrTimeout();
-                    await manager2.OnConnectedAsync(connection2).OrTimeout();
+                    await manager1.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
+                    await manager2.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-                    await manager1.SendAllAsync("Hello", new object[] { new TestObject { TestProperty = "Foo" } });
+                    await manager1.SendAllAsync("Hello", new object[] { new TestObject { TestProperty = "Foo" } }).OrTimeout(Harness.TestTimeout);
 
                     Assert.IsTrue(backplane2Harness.All.Consumed.Select<All<MyHub>>().Any());
 
