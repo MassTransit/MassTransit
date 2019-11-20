@@ -14,7 +14,7 @@ The other addition we added is in the Properties/launchSettings.json, which lets
 
 You can simulate scaleout by running the two profiles.
 
-```cmd
+```
 > cd (your path to MassTransit clone)\src\MassTransit.SignalR.Sample
 > dotnet run --launch-profile sample1
 > dotnet run --launch-profile sample2
@@ -30,7 +30,7 @@ Then you can type a message in each, and see them show up in the other. The back
 
 If you have some backend services (console apps, or Mt Topshelf consumers), you might want to notify users/groups of things that have happened in realtime. You can do this by running this console app.
 
-```cmd
+```
 > cd (your path to MassTransit clone)\src\MassTransit.SignalR.SampleConsole
 > dotnet run
 ```

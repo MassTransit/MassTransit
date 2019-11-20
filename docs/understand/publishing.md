@@ -49,7 +49,7 @@ namespace Company.Messages
 
 Once the messages have been published, exchanges are created in RabbitMQ for each of the message types:
 
-```text
+```
 Exchanges
 
 Company.Messages.CustomerAddressUpdated
@@ -75,7 +75,7 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 
 This results in the creation of a queue, as well as a binding to the queue from the `UpdateCustomerAddress` exchange.
 
-```text
+```
 Exchanges
 
 customer_update_queue
