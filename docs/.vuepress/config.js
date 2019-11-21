@@ -84,6 +84,7 @@ module.exports = {
                   '/advanced/scheduling/scheduling-api',
                   '/advanced/scheduling/in-memory',
                   '/advanced/scheduling/azure-sb-scheduler',
+                  '/advanced/scheduling/amazonsqs-scheduler',
                   '/advanced/scheduling/rabbitmq-delayed',
                   '/advanced/scheduling/redeliver'
                 ]

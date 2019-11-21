@@ -17,6 +17,7 @@ Message scheduling is described in details in the following articles:
 * [Scheduling API](scheduling-api)
 * [In-memory scheduling](in-memory)
 * [Azure Service Bus](azure-sb-scheduler)
+* [Amazon SQS](amazonsqs-scheduler)
 * [RabbitMQ Delayed Exchange](rabbitmq-delayed)
 * [Redelivering messages](redeliver)
 
