@@ -141,7 +141,7 @@ Some errors take a while to resolve, say a remote service is down or a SQL serve
 In some frameworks, message redelivery is also referred to as second-level retry.
 :::
 
-To add message redelivery, first, the bus must be configured with a message scheduler (see the [scheduling](scheduling/scheduling-api) section for more details). With a scheduler configured, the above example that only used retry can be modified to add scheduled redelivery as shown below. Note, that due to the piped execution the order of the two calls is important.
+To add message redelivery, first, the bus must be configured with a message scheduler (see the [scheduling](/advanced/scheduling/scheduling-api) section for more details). With a scheduler configured, the above example that only used retry can be modified to add scheduled redelivery as shown below. Note, that due to the piped execution the order of the two calls is important.
 
 ```cs
 var sessionFactory = CreateSessionFactory();
