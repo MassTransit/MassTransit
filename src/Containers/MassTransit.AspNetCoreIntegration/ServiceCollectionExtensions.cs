@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.AspNetCoreIntegration
 {
     using System;
-    using System.Diagnostics;
     using Context;
     using ExtensionsDependencyInjectionIntegration;
     using HealthChecks;
@@ -24,12 +23,7 @@
         {
             services.AddMassTransit(x =>
             {
-                x.AddBus(provider =>
-                {
-                    ConfigureLogging(provider);
-
-                    return createBus(provider);
-                });
+                x.AddBus(createBus);
             });
 
             services.AddSimplifiedHostedService(configureHealthChecks);
@@ -56,12 +50,7 @@
             {
                 configure(x);
 
-                x.AddBus(provider =>
-                {
-                    ConfigureLogging(provider);
-
-                    return createBus(provider);
-                });
+                x.AddBus(createBus);
             });
 
             services.AddSimplifiedHostedService(configureHealthChecks);
@@ -84,7 +73,8 @@
             {
                 x.AddBus(provider =>
                 {
-                    ConfigureLogging(provider, loggerFactory);
+                    if (loggerFactory != null)
+                        LogContext.ConfigureCurrentLogContext(loggerFactory);
 
                     return bus;
                 });
@@ -93,14 +83,6 @@
             services.AddSimplifiedHostedService(configureHealthChecks);
 
             return services;
-        }
-
-        static void ConfigureLogging(IServiceProvider provider, ILoggerFactory loggerFactory = null)
-        {
-            if (loggerFactory == null)
-                loggerFactory = provider.GetService<ILoggerFactory>();
-            if (loggerFactory != null)
-                LogContext.ConfigureCurrentLogContext(loggerFactory);
         }
 
         static void AddSimplifiedHostedService(this IServiceCollection services, Action<HealthCheckOptions> configureHealthChecks)

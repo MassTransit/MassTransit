@@ -31,7 +31,16 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         public void AddBus(Func<IBusControl> busFactory)
         {
-            Container.RegisterSingleton(busFactory);
+            IBusControl BusFactory()
+            {
+                var provider = Container.GetInstance<IConfigurationServiceProvider>();
+
+                ConfigureLogContext(provider);
+
+                return busFactory();
+            }
+
+            Container.RegisterSingleton(BusFactory);
 
             Container.RegisterSingleton<IBus>(() => Container.GetInstance<IBusControl>());
 

@@ -44,8 +44,17 @@ namespace MassTransit.LamarIntegration.Registration
 
         public void AddBus(Func<IServiceContext, IBusControl> busFactory)
         {
+            IBusControl BusFactory(IServiceContext context)
+            {
+                var provider = context.GetInstance<IConfigurationServiceProvider>();
+
+                ConfigureLogContext(provider);
+
+                return busFactory(context);
+            }
+
             _registry.For<IBusControl>()
-                .Use(busFactory)
+                .Use(BusFactory)
                 .Singleton();
 
             _registry.For<IBus>()
