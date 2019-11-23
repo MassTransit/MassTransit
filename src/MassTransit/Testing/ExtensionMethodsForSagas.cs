@@ -28,6 +28,12 @@ namespace MassTransit.Testing
             return await (repository as IQuerySagaRepository<TSaga>).ShouldContainSaga(sagaId, timeout).ConfigureAwait(false);
         }
 
+        public static async Task<Guid?> ShouldContainSaga<TSaga>(this InMemorySagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
+            where TSaga : class, ISaga
+        {
+            return await (repository as IQuerySagaRepository<TSaga>).ShouldContainSaga(sagaId, timeout).ConfigureAwait(false);
+        }
+
         public static async Task<Guid?> ShouldContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
@@ -43,6 +49,11 @@ namespace MassTransit.Testing
             }
 
             return default;
+        }
+        public static async Task<Guid?> ShouldNotContainSaga<TSaga>(this InMemorySagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
+            where TSaga : class, ISaga
+        {
+            return await (repository as IQuerySagaRepository<TSaga>).ShouldNotContainSaga(sagaId, timeout).ConfigureAwait(false);
         }
 
         public static async Task<Guid?> ShouldNotContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
@@ -67,6 +78,12 @@ namespace MassTransit.Testing
             }
 
             return saga;
+        }
+        public static async Task<Guid?> ShouldContainSaga<TSaga>(this InMemorySagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter,
+            TimeSpan timeout)
+            where TSaga : class, ISaga
+        {
+            return await (repository as IQuerySagaRepository<TSaga>).ShouldContainSaga(filter, timeout).ConfigureAwait(false);
         }
 
         public static async Task<Guid?> ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter,
