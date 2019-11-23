@@ -171,8 +171,9 @@ namespace MassTransit.Tests
 
             var (registered, existing) = await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember());
 
-            Assert.That(registered.Status, Is.EqualTo(TaskStatus.RanToCompletion));
-            Assert.That(existing.Status, Is.EqualTo(TaskStatus.Canceled));
+            await registered;
+
+            Assert.That(async () => await existing, Throws.TypeOf<TaskCanceledException>());
         }
 
         [Test]
@@ -182,8 +183,9 @@ namespace MassTransit.Tests
 
             var (registered, existing) = await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember() {MemberId = "Johnny5"});
 
-            Assert.That(registered.Status, Is.EqualTo(TaskStatus.Canceled));
-            Assert.That(existing.Status, Is.EqualTo(TaskStatus.RanToCompletion));
+            await existing;
+
+            Assert.That(async () => await registered, Throws.TypeOf<TaskCanceledException>());
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -292,7 +294,6 @@ namespace MassTransit.Tests
                 await Task.Delay(500);
                 await context.RespondAsync(new PongMessage(), responseContext =>
                 {
-
                 });
             });
         }

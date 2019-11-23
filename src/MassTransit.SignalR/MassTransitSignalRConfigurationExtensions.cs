@@ -6,7 +6,6 @@
     using System;
     using Definition;
     using MassTransit.SignalR.Consumers;
-    using MassTransit.SignalR.Contracts;
     using MassTransit.MessageData;
 
     public static class MassTransitSignalRConfigurationExtensions
@@ -49,7 +48,6 @@
 
                 configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
                 {
-                    e.UseMessageData(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
                     configureEndpoint?.Invoke(e);
 
                     e.ConfigureConsumer<ConnectionConsumer<THub>>(serviceProvider);
@@ -57,7 +55,6 @@
 
                 configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
                 {
-                    e.UseMessageData(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
                     configureEndpoint?.Invoke(e);
 
                     e.ConfigureConsumer<GroupConsumer<THub>>(serviceProvider);
@@ -65,7 +62,6 @@
 
                 configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
                 {
-                    e.UseMessageData(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
                     configureEndpoint?.Invoke(e);
 
                     e.ConfigureConsumer<UserConsumer<THub>>(serviceProvider);

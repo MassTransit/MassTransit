@@ -1,29 +1,22 @@
-# Configuring MassTransit
+# Configuration
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+MassTransit can be used in any .NET application, however, the application type can influence the bus configuration. Several different application type examples are shwon below, each of which lists any additional dependencies are required. Each example focuses on simplicity, and therefore may omit certain extra features to avoid confusion. 
 
-<!-- code_chunk_output -->
+::: tip NOTE
+Except where required by the application type, no dependency injection container is used. For container configuration examples, refer to the [containers](/usage/containers) section.
+:::
 
-* [Configuring MassTransit](#configuring-masstransit)
-	* [In a console application](#masstransit-in-a-console-application)
-	* [In ASP.NET Core](#masstransit-and-aspnet-core)
-	* [In a Windows service](#masstransit-in-a-windows-service)
-	* [In a web application](#masstransit-in-a-web-application)
-		* [ASP.NET (MVC/WebApi2)](#aspnet-mvcwebapi2)
-		* [OWIN Pipeline (WebApi2)](#owin-pipeline-webapi2)
-
-<!-- /code_chunk_output -->
-
-
-To configure MassTransit in your application, it depends upon the application type. There are several application types, which are covered below. In these examples, the use of a dependency injection framework is not included. Using a container (such as Autofac, StructureMap, etc.) with MassTransit is covered separately.
-
-## MassTransit in a console application
+## Console application
 
 A console application has a `Main` entry point, which is part of the `Program.cs` class by default. The example below configures a simple bus instance that publishes an event with a value entered.
 
-```csharp
+> References: [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/)
+
+```cs
 namespace EventPublisher
 {
+    using MassTransit;
+
     public interface ValueEntered
     {
         string Value { get; }
@@ -31,100 +24,100 @@ namespace EventPublisher
 
     public class Program
     {
-        public static void Main()
+        // be sure to set the C# language version to 7.3 or later
+        public static async Task Main()
         {
-            var busControl = ConfigureBus();
+            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg => cfg.Host("localhost"));
 
             // Important! The bus must be started before using it!
-            busControl.Start();
-            do
+            await busControl.StartAsync();
+            try
             {
-                Console.WriteLine("Enter message (or quit to exit)");
-                Console.Write("> ");
-                string value = Console.ReadLine();
-
-                if("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
-                    break;
-
-                busControl.Publish<ValueEntered>(new
+                do
                 {
-                    Value = value
-                });
+                    string value = await Task.Run(() =>
+                    {
+                        Console.WriteLine("Enter message (or quit to exit)");
+                        Console.Write("> ");
+                        return Console.ReadLine();
+                    });
+
+                    if("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
+                        break;
+
+                    await busControl.Publish<ValueEntered>(new
+                    {
+                        Value = value
+                    });
+                }
+                while (true);
             }
-            while (true);
-            
-            busControl.Stop();
-        }
-
-        static IBusControl ConfigureBus()
-        {
-            return Bus.Factory.CreateUsingRabbitMq(cfg =>
+            finally
             {
-                cfg.Host(new Uri("rabbitmq://localhost"), h =>
-                {
-                    h.Username("guest");
-                    h.Password("guest");
-                });
-            });
+                await busControl.StopAsync();
+            }
         }
     }
 }
 ```
 
-In the example, the bus is configured and started, after which a publishing loop allows values to be entered and published. When the loop exits, the ``busControl`` variable is disposed, which stops the bus.
+In the example, the bus is configured and started after which a publishing loop allows values to be entered and published. When the loop exits, the bus is stopped.
 
-*Always start the bus* before starting to use it. Of course, you can only start a configured bus.
+::: warning REMEMBER
+Always start the bus before using it.
+:::
 
-## MassTransit and ASP.NET Core
+## ASP.NET Core
 
-MassTransit integrates natively with ASP.NET Core using the `MassTransit.AspNetCore` package.
+MassTransit integrates natively with ASP.NET Core, and supports:
 
-The package includes the following features:
  * Hosted service to start and stop the bus following the application lifecycle
  * Registers the bus instance as a singleton for the required interfaces
  * Adds health checks for the bus instance and receive endpoints
- * Tells the bus to use the ASP.NET Core logger
+ * Configures the bus to use the host process `ILoggerFactory` instance
 
 If you want to register your consumers in the ASP.NET Core service collection, use the following code as an example:
 
-```csharp
+> References: [MassTransit.AspNetCore](https://nuget.org/packages/MassTransit.AspNetCore/), [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/) 
+
+```cs
 public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
         // Add framework services
         services.AddHealthChecks();
-
         services.AddMvc();
         
-        // Register your consumers if the need dependencies
-        services.AddScoped<SomeDependency>()
+        // Consumer dependencies should be scoped
+        services.AddScoped<SomeConsumerDependency>()
 
-        // Register MassTransit
-        services.AddMassTransit(x =>
+        // local function to create the bus
+        IBusControl CreateBus(IServiceProvider serviceProvider)
         {
-            x.AddConsumer<OrderConsumer>();
-
-            x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+            return Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
-                var host = cfg.Host(new Uri("rabbitmq://localhost"), hostConfigurator => 
-                { 
-                    hostConfigurator.Username("guest");
-                    hostConfigurator.Password("guest");
-                });
+                cfg.Host("rabbitmq://localhost");
 
-                cfg.ReceiveEndpoint(host, "submit-order", ep =>
+                cfg.ReceiveEndpoint("submit-order", ep =>
                 {
                     ep.PrefetchCount = 16;
                     ep.UseMessageRetry(r => r.Interval(2, 100));
 
                     ep.ConfigureConsumer<OrderConsumer>(provider);
                 });
-            }));
-        });
-    }
+            });
+        }
 
-    // everything else
+        // local function to configure consumers
+        void ConfigureMassTransit(IServiceCollectionConfigurator configurator)
+        {
+            configurator.AddConsumer<OrderConsumer>();
+        }
+
+        // configures MassTransit to integrate with the built-in dependency injection
+        services.AddMassTransit(CreateBus, ConfigureMassTransit);
+    }
 }
 ```
 
@@ -135,8 +128,8 @@ Here is how you can avoid using the container:
 ```csharp
 public class Startup
 {
-    private IConfiguration Configuration { get; }
-    private ILoggerFactory LoggerFactory { get; }
+    IConfiguration Configuration { get; }
+    ILoggerFactory LoggerFactory { get; }
 
     public Startup(IConfiguration configuration, ILoggerFactory loggerFactory)
     {
@@ -163,26 +156,18 @@ public class Startup
         services.AddMassTransit(ConfigureBus(), LoggerFactory);
     }
 
-    private IBusControl ConfigureBus() =>
-        Bus.Factory.CreateUsingRabbitMq(cfg =>
+    IBusControl ConfigureBus() => Bus.Factory.CreateUsingRabbitMq(cfg =>
+    {
+        cfg.Host("localhost");
+
+        cfg.ReceiveEndpoint("submit-order", ep =>
         {
-            var host = cfg.Host(new Uri("rabbitmq://localhost"), hc => 
-            { 
-                hc.Username("guest");
-                hc.Password("guest");
-            });
+            ep.PrefetchCount = 16;
+            ep.UseMessageRetry(x => x.Interval(2, 100));
 
-            cfg.ReceiveEndpoint(host, "submit-order", ep =>
-            {
-                ep.PrefetchCount = 16;
-                ep.UseMessageRetry(x => x.Interval(2, 100));
-
-                ep.Consumer(() => 
-                    new OrderConsumer(someDependency(), anotherDependency));
-            });
+            ep.Consumer(() => new OrderConsumer(someDependency(), anotherDependency));
         });
-
-    // everything else
+    });
 }
 ```
 
@@ -192,8 +177,6 @@ To make the health checks work, remember to add this line to the `Configure` met
 public void Configure(IApplicationBuilder app)
 {
     app.UseHealthChecks("/health", new HealthCheckOptions {Predicate = check => check.Tags.Contains("ready")});
-
-    // everything else
 }
 ```
 
@@ -212,27 +195,27 @@ Of course, health checks only work when you provide an endpoint that is accessib
 
 The Web SDK is used by default if you are using the ASP.NET Core Web Application template, but you can also change it, if you used the Console Application template. In such a case you'd also need to add some more packages to be able to host the http endpoint using Kestrel. The easiest way to migrate a console application to the web application (that still runs as a console application) by creating a new web application with the type `Empty` and checking the differences.
 
-## MassTransit in a Windows service
+## Windows service
 
 A Windows service is recommended for consuming commands and events as it provides an autonomous execution environment for message consumers. The service can be started and stopped using the service control manager, as well as monitored by operations tools.
 
-<div class="alert alert-info">
-<b>Note:</b>
-    To create a Windows service, we strongly recommend using Topshelf, as it was built specifically for this purpose. Topshelf is easy to use, has zero dependencies, and creates a service that can be self-installed without additional tools.
-</div>
+::: tip
+To create a Windows service, we strongly recommend using Topshelf, as it was built specifically for this purpose. Topshelf is easy to use, has zero dependencies, and creates a service that can be self-installed without additional tools.
+:::
 
 The important aspect of configuring a bus in a Windows service is to ensure that the bus is only configured and started when the service is *started*.
 
 ```csharp
 namespace EventService
 {
+    using MassTransit;
     using Topshelf;
 
     public class Program
     {
         public static int Main()
         {
-            return (int)HostFactory.Run(cfg => cfg.Service(x => new EventConsumerService());
+            return (int)HostFactory.Run(cfg => cfg.Service(x => new EventConsumerService()));
         }
     }
 
@@ -260,13 +243,9 @@ namespace EventService
         {
             return Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
-                var host = cfg.Host(new Uri("rabbitmq://localhost"), h =>
-                {
-                    h.Username("guest");
-                    h.Password("guest");
-                });
+                cfg.Host("localhost");
 
-                cfg.ReceiveEndpoint(host, "event_queue", e =>
+                cfg.ReceiveEndpoint("event_queue", e =>
                 {
                     e.Handler<ValueEntered>(context =>
                         Console.Out.WriteLineAsync($"Value was entered: {context.Message.Value}"));
@@ -277,7 +256,7 @@ namespace EventService
 }
 ```
 
-## MassTransit in a web application
+## Web application
 
 Configuring a bus in a web site is typically done to publish events, send commands, as well as engage in request/response conversations. Hosting receive endpoints and persistent consumers is not recommended (use a service as shown above).
 
@@ -285,10 +264,7 @@ Configuring a bus in a web site is typically done to publish events, send comman
 
 In a web application, the `HttpApplication` class methods of `Application_Start` and `Application_End` are used to configure/start the bus and stop the bus respectively.
 
-<div class="alert alert-info">
-<b>Note:</b>
-    While many MassTransit samples use Topshelf, web applications are an exception where the standard web application conventions are followed.
-</div>
+> While many MassTransit samples use Topshelf, web applications are an exception where the standard web application conventions are followed.
 
 ```csharp
 public class MvcApplication : HttpApplication
@@ -315,11 +291,7 @@ public class MvcApplication : HttpApplication
     {
         return Bus.Factory.CreateUsingRabbitMq(cfg =>
         {
-            var host = cfg.Host(new Uri("rabbitmq://localhost"), h =>
-            {
-                h.Username("guest");
-                h.Password("guest");
-            });
+            cfg.Host("localhost");
         });
     }
 }
@@ -358,7 +330,6 @@ The above example is kept simple, providing a static `MvcApplication.Bus` proper
 
 The example controllers show how to publish and send messages as well.
 
-
 ### OWIN Pipeline (WebApi2)
 
 WebApi2 can alternatively use the OWIN pipeline. But OWIN doesn't have `Application_End` and so it requires a different approach to ensure the bus is disposed properly.
@@ -382,18 +353,11 @@ public class Startup
         var builder = new ContainerBuilder();
 
         // Register your Bus
-        builder.Register(c =>
-            {
-                return Bus.Factory.CreateUsingRabbitMq(sbc =>
-                    sbc.Host("localhost","dev", h =>
-                    {
-                        h.Username("guest");
-                        h.Password("guest");
-                    })
-                );
-            })
+        builder.Register(c => Bus.Factory.CreateUsingRabbitMq(sbc => sbc.Host("localhost","dev")))
             .As<IBusControl>()
+            .As<IBus>()
             .As<IPublishEndpoint>()
+            .As<ISendEndpointProvider>()
             .SingleInstance();
 
         // Register anything else you might need...
@@ -415,7 +379,7 @@ public class Startup
 
         // Starts Mass Transit Service bus, and registers stopping of bus on app dispose
         var bus = container.Resolve<IBusControl>();
-        var busHandle = TaskUtil.Await(() => bus.StartAsync());
+        var busHandle = bus.Start();
 
         var properties = new AppProperties(app.Properties);
 

@@ -9,7 +9,7 @@ namespace MassTransit.AzureServiceBusTransport
         IServiceBusHost,
         IBusHostControl
     {
-        Task<ISendTransport> CreateSendTransport(Uri address);
+        Task<ISendTransport> CreateSendTransport(ServiceBusEndpointAddress address);
 
         Task<ISendTransport> CreatePublishTransport<T>()
             where T : class;

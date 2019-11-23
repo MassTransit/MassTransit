@@ -52,10 +52,10 @@ namespace MassTransit.QuartzService
                 {
                     _bus = Bus.Factory.CreateUsingRabbitMq(busConfig =>
                     {
-                        var host = busConfig.Host(serviceBusUri, h => _configurationProvider.GetHostSettings(h));
+                        busConfig.Host(serviceBusUri, h => _configurationProvider.GetHostSettings(h));
                         busConfig.UseJsonSerializer();
 
-                        busConfig.ReceiveEndpoint(host, _queueName, endpoint =>
+                        busConfig.ReceiveEndpoint(_queueName, endpoint =>
                         {
                             endpoint.PrefetchCount = (ushort)_consumerLimit;
 

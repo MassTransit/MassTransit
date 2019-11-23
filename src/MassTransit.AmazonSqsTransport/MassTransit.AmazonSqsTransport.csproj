@@ -2,7 +2,7 @@
   <Import Project="../netfx.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,8 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-        <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.101.71" />
-        <PackageReference Include="AWSSDK.SQS" Version="3.3.102.14" />
+        <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.101.84" />
+        <PackageReference Include="AWSSDK.SQS" Version="3.3.102.27" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
   </ItemGroup>
 

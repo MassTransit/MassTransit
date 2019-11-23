@@ -1,21 +1,8 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing.MessageObservers
+﻿namespace MassTransit.Testing.MessageObservers
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
+
 
     public class ReceivedMessageList :
         MessageList<IReceivedMessage>,
@@ -29,16 +16,13 @@ namespace MassTransit.Testing.MessageObservers
         public IEnumerable<IReceivedMessage<T>> Select<T>()
             where T : class
         {
-            return Select(x => typeof(T).IsAssignableFrom(x.MessageType))
-                .Cast<IReceivedMessage<T>>();
+            return base.Select<IReceivedMessage<T>>(All);
         }
 
         public IEnumerable<IReceivedMessage<T>> Select<T>(Func<IReceivedMessage<T>, bool> filter)
             where T : class
         {
-            return Select(x => typeof(T).IsAssignableFrom(x.MessageType))
-                .Cast<IReceivedMessage<T>>()
-                .Where(filter);
+            return base.Select(filter);
         }
 
         public void Add<T>(ConsumeContext<T> context)
@@ -51,6 +35,12 @@ namespace MassTransit.Testing.MessageObservers
             where T : class
         {
             Add(new ReceivedMessage<T>(context, exception), context.MessageId);
+        }
+
+        static bool All<T>(IReceivedMessage<T> _)
+            where T : class
+        {
+            return true;
         }
     }
 

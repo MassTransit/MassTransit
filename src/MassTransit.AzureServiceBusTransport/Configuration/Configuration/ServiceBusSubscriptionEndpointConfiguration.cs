@@ -73,16 +73,14 @@
 
         protected override IErrorTransport CreateErrorTransport(IServiceBusHostControl host)
         {
-            var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.SubscriptionConfigurator,
-                _hostConfiguration.HostAddress.AbsolutePath);
+            var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.SubscriptionConfigurator, _hostConfiguration.HostAddress);
 
             return new BrokeredMessageErrorTransport(CreateSendEndpointContextSupervisor(host, settings));
         }
 
         protected override IDeadLetterTransport CreateDeadLetterTransport(IServiceBusHostControl host)
         {
-            var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.SubscriptionConfigurator,
-                _hostConfiguration.HostAddress.AbsolutePath);
+            var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.SubscriptionConfigurator, _hostConfiguration.HostAddress);
 
             return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextSupervisor(host, settings));
         }

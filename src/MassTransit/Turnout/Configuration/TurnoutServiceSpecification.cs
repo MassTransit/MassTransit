@@ -39,6 +39,11 @@
 
         public IJobService Service => _jobService.Value;
 
+        public bool AutoStart
+        {
+            set => _configurator.AutoStart = value;
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             if (JobFactory == null)
@@ -100,6 +105,11 @@
         void IReceiveEndpointConfigurator.ClearMessageDeserializers()
         {
             _configurator.ClearMessageDeserializers();
+        }
+
+        public void AddDependency(IReceiveEndpointObserverConnector connector)
+        {
+            _configurator.AddDependency(connector);
         }
 
         Uri IReceiveEndpointConfigurator.InputAddress => _configurator.InputAddress;

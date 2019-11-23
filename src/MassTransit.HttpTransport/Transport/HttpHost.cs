@@ -12,6 +12,7 @@
     using Logging;
     using MassTransit.Topology;
     using Transports;
+    using Util;
 
 
     public class HttpHost :
@@ -61,8 +62,8 @@
             SendLogContext = LogContext.Current.CreateLogContext(LogCategoryName.Transport.Send);
             ReceiveLogContext = LogContext.Current.CreateLogContext(LogCategoryName.Transport.Receive);
 
-            var handlesReady = new TaskCompletionSource<HostReceiveEndpointHandle[]>();
-            var hostStarted = new TaskCompletionSource<bool>();
+            var handlesReady = TaskUtil.GetTask<HostReceiveEndpointHandle[]>();
+            var hostStarted = TaskUtil.GetTask<bool>();
 
             IPipe<HttpHostContext> connectionPipe = Pipe.ExecuteAsync<HttpHostContext>(async context =>
             {

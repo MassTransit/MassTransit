@@ -12,16 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
-    using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
 
 
     /// <summary>
     /// Creates a DbContext for the saga repository
     /// </summary>
-    /// <typeparam name="TSaga"></typeparam>
-    public interface ISagaDbContextFactory<TSaga>
-        where TSaga : class, ISaga
+    public interface ISagaDbContextFactory
     {
         /// <summary>
         /// Create a standalone DbContext

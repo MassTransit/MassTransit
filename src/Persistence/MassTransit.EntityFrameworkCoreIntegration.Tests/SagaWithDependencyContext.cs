@@ -1,32 +1,20 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 {
-    using System;
+    using System.Collections.Generic;
+    using Mappings;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 
-    public class SagaWithDependencyContext : SagaDbContext<SagaWithDependency, SagaWithDependencyMap>
+    public class SagaWithDependencyContext : SagaDbContext
     {
-        public SagaWithDependencyContext(DbContextOptions options)
+        public SagaWithDependencyContext(DbContextOptions<SagaWithDependencyContext> options)
             : base(options)
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override IEnumerable<ISagaClassMap> Configurations
         {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<SagaDependency>().HasOne(it => it.SagaInnerDependency).WithMany().IsRequired();
-
-            ConfigureShadowId(modelBuilder.Entity<SagaDependency>());
-            ConfigureShadowId(modelBuilder.Entity<SagaInnerDependency>());
-        }
-
-        private static void ConfigureShadowId<T>(
-            EntityTypeBuilder<T> entity, string idPropertyName = "Id") where T : class
-        {
-            entity.Property<Guid>(idPropertyName).IsRequired().ValueGeneratedOnAdd();
-            entity.HasKey(idPropertyName);
+            get { yield return new SagaWithDependencyMap(); }
         }
     }
 }

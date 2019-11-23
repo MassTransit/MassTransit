@@ -38,6 +38,7 @@ namespace MassTransit.Audit.MetadataFactories
                 InitiatorId = context.InitiatorId,
                 MessageId = context.MessageId,
                 RequestId = context.RequestId,
+                SentTime = context.SentTime,
                 DestinationAddress = context.DestinationAddress?.AbsoluteUri,
                 SourceAddress = context.SourceAddress?.AbsoluteUri,
                 FaultAddress = context.FaultAddress?.AbsoluteUri,

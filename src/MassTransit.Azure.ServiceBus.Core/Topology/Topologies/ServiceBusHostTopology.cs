@@ -1,9 +1,13 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 {
+    using System;
     using System.Text;
+    using Configuration;
+    using Configuration.Configurators;
     using Core.Configuration;
     using MassTransit.Topology.Topologies;
     using Metadata;
+    using Transports;
 
 
     public class ServiceBusHostTopology :
@@ -11,15 +15,45 @@
         IServiceBusHostTopology
     {
         readonly IServiceBusTopologyConfiguration _configuration;
+        readonly Uri _hostAddress;
+        readonly IMessageNameFormatter _messageNameFormatter;
 
-        public ServiceBusHostTopology(IServiceBusTopologyConfiguration configuration)
+        public ServiceBusHostTopology(IServiceBusTopologyConfiguration configuration, Uri hostAddress)
             : base(configuration)
         {
             _configuration = configuration;
+            _hostAddress = hostAddress;
+
+            _messageNameFormatter = new ServiceBusMessageNameFormatter();
         }
 
         IServiceBusPublishTopology IServiceBusHostTopology.PublishTopology => _configuration.Publish;
         IServiceBusSendTopology IServiceBusHostTopology.SendTopology => _configuration.Send;
+
+        public Uri GetDestinationAddress(string queueName, Action<IQueueConfigurator> configure = null)
+        {
+            var configurator = new QueueConfigurator(queueName);
+
+            configure?.Invoke(configurator);
+
+            return configurator.GetQueueAddress(_hostAddress);
+        }
+
+        public Uri GetDestinationAddress(Type messageType, Action<IQueueConfigurator> configure = null)
+        {
+            var queueName = _messageNameFormatter.GetMessageName(messageType).ToString();
+
+            var configurator = new QueueConfigurator(queueName);
+
+            if (TypeMetadataCache.IsTemporaryMessageType(messageType))
+            {
+                configurator.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle;
+            }
+
+            configure?.Invoke(configurator);
+
+            return configurator.GetQueueAddress(_hostAddress);
+        }
 
         public override string CreateTemporaryQueueName(string prefix)
         {

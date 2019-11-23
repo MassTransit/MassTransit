@@ -53,7 +53,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             _pending = new ConcurrentDictionary<ulong, RabbitMqReceiveContext>();
 
-            _deliveryComplete = new TaskCompletionSource<bool>();
+            _deliveryComplete = TaskUtil.GetTask<bool>();
         }
 
         /// <summary>

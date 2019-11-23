@@ -1,93 +1,45 @@
 namespace MassTransit.AzureServiceBusTransport.Transport
 {
     using System;
-    using EndpointConfigurators;
+    using Configuration;
     using GreenPipes;
-    using MassTransit.Pipeline;
-    using MassTransit.Topology;
     using Pipeline;
     using Topology;
     using Transports;
 
 
     public class ServiceBusHostProxy :
+        BaseHostProxy,
         IServiceBusHost
     {
+        readonly IServiceBusHostConfiguration _configuration;
         IServiceBusHost _host;
 
-        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        public ServiceBusHostProxy(IServiceBusHostConfiguration configuration)
         {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
-
-            return _host.ConnectSendObserver(observer);
+            _configuration = configuration;
         }
 
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        public void SetComplete(IServiceBusHost host)
         {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
+            _host = host;
 
-            return _host.ConnectPublishObserver(observer);
+            base.SetComplete(host);
         }
 
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
+        public override Uri Address => _host?.Address ?? _configuration.HostAddress;
 
-            return _host.ConnectConsumeMessageObserver(observer);
-        }
+        IServiceBusHostTopology IServiceBusHost.Topology => _host?.Topology ?? throw new InvalidOperationException("The host is not ready.");
 
-        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
+        IMessagingFactoryContextSupervisor IServiceBusHost.MessagingFactoryContextSupervisor =>
+            _host?.MessagingFactoryContextSupervisor ?? throw new InvalidOperationException("The host is not ready.");
 
-            return _host.ConnectConsumeObserver(observer);
-        }
+        INamespaceContextSupervisor IServiceBusHost.NamespaceContextSupervisor =>
+            _host?.NamespaceContextSupervisor ?? throw new InvalidOperationException("The host is not ready.");
 
-        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
+        IRetryPolicy IServiceBusHost.RetryPolicy => _host?.RetryPolicy ?? throw new InvalidOperationException("The host is not ready.");
 
-            return _host.ConnectReceiveObserver(observer);
-        }
-
-        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
-        {
-            if (_host == null)
-                throw new InvalidOperationException("The host is not ready.");
-
-            return _host.ConnectReceiveEndpointObserver(observer);
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-        }
-
-        Uri IHost.Address
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Address;
-            }
-        }
-
-        IServiceBusHostTopology IServiceBusHost.Topology
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Topology;
-            }
-        }
+        ServiceBusHostSettings IServiceBusHost.Settings => _configuration.Settings;
 
         public HostReceiveEndpointHandle ConnectSubscriptionEndpoint<T>(string subscriptionName,
             Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
@@ -126,80 +78,5 @@ namespace MassTransit.AzureServiceBusTransport.Transport
             return _host.ConnectReceiveEndpoint(queueName, configure);
         }
 
-        IMessagingFactoryContextSupervisor IServiceBusHost.MessagingFactoryContextSupervisor
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.MessagingFactoryContextSupervisor;
-            }
-        }
-
-        INamespaceContextSupervisor IServiceBusHost.NamespaceContextSupervisor
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.NamespaceContextSupervisor;
-            }
-        }
-
-        IRetryPolicy IServiceBusHost.RetryPolicy
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.RetryPolicy;
-            }
-        }
-
-        ServiceBusHostSettings IServiceBusHost.Settings
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Settings;
-            }
-        }
-
-        IHostTopology IHost.Topology
-        {
-            get
-            {
-                if (_host == null)
-                    throw new InvalidOperationException("The host is not ready.");
-
-                return _host.Topology;
-            }
-        }
-
-        HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            return _host.ConnectReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            return _host.ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
-        }
-
-        ConnectHandle IEndpointConfigurationObserverConnector.ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
-        {
-            return _host.ConnectEndpointConfigurationObserver(observer);
-        }
-
-        public void SetComplete(IServiceBusHost host)
-        {
-            _host = host;
-        }
     }
 }

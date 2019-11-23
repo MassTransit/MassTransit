@@ -12,15 +12,16 @@ A key advantage to using a routing slip is it allows the activities to vary for 
 
 ## MassTransit Courier
 
-MassTransit Courier is a framework that implements the routing slip pattern. Leveraging a durable messaging transport and the advanced saga features of MassTransit, Courier provides a powerful set of components to simplify the use of routing slips in distributed applications. Combining the routing slip pattern with a state machine such as [Automatonymous](https://github.com/phatboyg/Automatonymous) results in a reliable, recoverable, and supportable approach for coordinating and monitoring message processing across multiple services.
+MassTransit Courier is a framework that implements the routing slip pattern. Leveraging a durable messaging transport and the advanced saga features of MassTransit, Courier provides a powerful set of components to simplify the use of routing slips in distributed applications. Combining the routing slip pattern with a state machine such as [Automatonymous][2]results in a reliable, recoverable, and supportable approach for coordinating and monitoring message processing across multiple services.
 
 In addition to the basic routing slip pattern, MassTransit Courier also supports [compensations][1] which allow activities to store execution data so that reversible operations can be undone, using either a traditional rollback mechanism or by applying an offsetting operation. For example, an activity that holds a seat for a patron could release the held seat when compensated.
 
-* [Activities](activities.md)
-* [Builder](builder.md)
-* [Execution](execute.md)
-* [Events](events.md)
-* [Subscriptions](subscriptions.md)
+* [Activities](activities)
+* [Builder](builder)
+* [Execution](execute)
+* [Events](events)
+* [Subscriptions](subscriptions)
     
 
 [1]: http://en.wikipedia.org/wiki/Compensation_%28engineering%29
+[2]: https://github.com/MassTransit/Automatonymous

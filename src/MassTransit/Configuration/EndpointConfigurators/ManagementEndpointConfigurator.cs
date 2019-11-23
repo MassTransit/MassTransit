@@ -39,6 +39,11 @@ namespace MassTransit.EndpointConfigurators
             _configurator.AddPrePipeSpecification(specification);
         }
 
+        public bool AutoStart
+        {
+            set => _configurator.AutoStart = value;
+        }
+
         ConnectHandle IConsumerConfigurationObserverConnector.ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
             return _configurator.ConnectConsumerConfigurationObserver(observer);
@@ -62,6 +67,11 @@ namespace MassTransit.EndpointConfigurators
         public void ClearMessageDeserializers()
         {
             _configurator.ClearMessageDeserializers();
+        }
+
+        public void AddDependency(IReceiveEndpointObserverConnector connector)
+        {
+            _configurator.AddDependency(connector);
         }
 
         Uri IReceiveEndpointConfigurator.InputAddress => _configurator.InputAddress;

@@ -32,7 +32,7 @@ namespace MassTransit.Conductor.Client
 
             ClientId = clientId;
 
-            _serviceAddress = new TaskCompletionSource<Uri>();
+            _serviceAddress = TaskUtil.GetTask<Uri>();
 
             var cacheSettings = new CacheSettings(1000, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(30));
             _cache = new GreenCache<EndpointInfo>(cacheSettings);

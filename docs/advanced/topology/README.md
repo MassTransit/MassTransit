@@ -4,17 +4,12 @@ Topology is how MassTransit configures the broker capabilities (exchanges and qu
 
 Topology also defines how things are named, including RabbitMQ exchanges and Azure Service Bus topics -- both of which are used for publishing messages.
 
-* [Message](message.md)
-* [Publish](publish.md)
-* [Send](send.md)
-* [Consume](consume.md)
-* [Conventions](conventions.md)
-* [RabbitMQ](rabbitmq/README.md)
-  * [Exchange Binding](rabbitmq/binding.md)
-  * [RoutingKey](rabbitmq/routingkey.md)
-* [Azure Service Bus](servicebus/README.md)
-  * [SessionId](servicebus/sessionid.md)
-  * [PartitionKey](servicebus/partitionkey.md)
-  * [Topic Subscription](servicebus/topicsub.md)
+* [Message](message)
+* [Publish](publish)
+* [Send](send)
+* [Consume](consume)
+* [Conventions](conventions)
+* [RabbitMQ](rabbitmq)
+* [Azure Service Bus](servicebus)
 
-You can also view a visual representation of the [default broker topologies](../../understand/default-topology.md) created.
+You can also view a visual representation of the [default broker topologies](/understand/default-topology.md) created.

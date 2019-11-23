@@ -29,10 +29,10 @@
                 var connection1 = HubConnectionContextUtils.Create(client1.Connection);
                 var connection2 = HubConnectionContextUtils.Create(client2.Connection);
 
-                await manager.OnConnectedAsync(connection1).OrTimeout();
-                await manager.OnConnectedAsync(connection2).OrTimeout();
+                await manager.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
+                await manager.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-                await manager.SendAllAsync("Hello", new object[] { "World" }).OrTimeout();
+                await manager.SendAllAsync("Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 Assert.IsTrue(BackplaneHarness.All.Consumed.Select<All<MyHub>>().Any());
 
@@ -61,12 +61,12 @@
                 var connection1 = HubConnectionContextUtils.Create(client1.Connection);
                 var connection2 = HubConnectionContextUtils.Create(client2.Connection);
 
-                await manager.OnConnectedAsync(connection1).OrTimeout();
-                await manager.OnConnectedAsync(connection2).OrTimeout();
+                await manager.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
+                await manager.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-                await manager.OnDisconnectedAsync(connection2).OrTimeout();
+                await manager.OnDisconnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-                await manager.SendAllAsync("Hello", new object[] { "World" }).OrTimeout();
+                await manager.SendAllAsync("Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 Assert.IsTrue(BackplaneHarness.All.Consumed.Select<All<MyHub>>().Any());
 
@@ -91,15 +91,15 @@
                 var connection1 = HubConnectionContextUtils.Create(client1.Connection);
                 var connection2 = HubConnectionContextUtils.Create(client2.Connection);
 
-                await manager.OnConnectedAsync(connection1).OrTimeout();
-                await manager.OnConnectedAsync(connection2).OrTimeout();
+                await manager.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
+                await manager.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-                await manager.AddToGroupAsync(connection1.ConnectionId, "group").OrTimeout();
+                await manager.AddToGroupAsync(connection1.ConnectionId, "group").OrTimeout(Harness.TestTimeout);
 
                 // Because connection is local, should not have any GroupManagement
                 //Assert.IsFalse(backplaneConsumers.GroupManagementConsumer.Consumed.Select<GroupManagement<MyHub>>().Any());
 
-                await manager.SendGroupAsync("group", "Hello", new object[] { "World" }).OrTimeout();
+                await manager.SendGroupAsync("group", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 Assert.IsTrue(BackplaneHarness.Group.Consumed.Select<Group<MyHub>>().Any());
 
@@ -115,7 +115,6 @@
 
         #region From Scaleout
         [Test]
-        [Category("Flakey")]
         public async Task DisconnectConnectionRemovesConnectionFromGroup()
         {
             using (var client = new TestClient())
@@ -124,17 +123,19 @@
 
                 var connection = HubConnectionContextUtils.Create(client.Connection);
 
-                await manager.OnConnectedAsync(connection).OrTimeout();
+                await manager.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
 
-                await manager.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout();
-
-                await Task.Delay(2000);
-
-                await manager.OnDisconnectedAsync(connection).OrTimeout();
+                await manager.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
                 await Task.Delay(2000);
 
-                await manager.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout();
+                await manager.OnDisconnectedAsync(connection).OrTimeout(Harness.TestTimeout);
+
+                await Task.Delay(2000);
+
+                await manager.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+
+                await Task.Delay(2000);
 
                 Assert.Null(client.TryRead());
             }
@@ -149,9 +150,9 @@
 
                 var connection = HubConnectionContextUtils.Create(client.Connection);
 
-                await manager.OnConnectedAsync(connection).OrTimeout();
+                await manager.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
 
-                await manager.RemoveFromGroupAsync(connection.ConnectionId, "name").OrTimeout();
+                await manager.RemoveFromGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
                 Assert.IsFalse(BackplaneHarness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>().Any()); // Should not have published, because connection was local
             }
@@ -166,12 +167,12 @@
 
                 var connection = HubConnectionContextUtils.Create(client.Connection);
 
-                await manager.OnConnectedAsync(connection).OrTimeout();
+                await manager.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
 
-                await manager.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout();
-                await manager.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout();
+                await manager.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
+                await manager.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
-                await manager.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout();
+                await manager.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 await AssertMessageAsync(client);
                 Assert.Null(client.TryRead());
@@ -192,18 +193,18 @@
                 var connection1 = connectionMock;
                 var connection2 = HubConnectionContextUtils.Create(client2.Connection);
 
-                await manager.OnConnectedAsync(connection1).OrTimeout();
-                await manager.AddToGroupAsync(connection1.ConnectionId, "group");
-                await manager.OnConnectedAsync(connection2).OrTimeout();
-                await manager.AddToGroupAsync(connection2.ConnectionId, "group");
+                await manager.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
+                await manager.AddToGroupAsync(connection1.ConnectionId, "group").OrTimeout(Harness.TestTimeout);
+                await manager.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
+                await manager.AddToGroupAsync(connection2.ConnectionId, "group").OrTimeout(Harness.TestTimeout);
 
-                await manager.SendGroupAsync("group", "Hello", new object[] { "World" }).OrTimeout();
+                await manager.SendGroupAsync("group", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
                 // connection1 will throw when receiving a group message, we are making sure other connections
                 // are not affected by another connection throwing
                 await AssertMessageAsync(client2);
 
                 // Repeat to check that group can still be sent to
-                await manager.SendGroupAsync("group", "Hello", new object[] { "World" }).OrTimeout();
+                await manager.SendGroupAsync("group", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
                 await AssertMessageAsync(client2);
             }
         }
@@ -221,11 +222,11 @@
                 var connection2 = HubConnectionContextUtils.Create(client2.Connection, userIdentifier: "userA");
                 var connection3 = HubConnectionContextUtils.Create(client3.Connection, userIdentifier: "userB");
 
-                await manager.OnConnectedAsync(connection1).OrTimeout();
-                await manager.OnConnectedAsync(connection2).OrTimeout();
-                await manager.OnConnectedAsync(connection3).OrTimeout();
+                await manager.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
+                await manager.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
+                await manager.OnConnectedAsync(connection3).OrTimeout(Harness.TestTimeout);
 
-                await manager.SendUserAsync("userA", "Hello", new object[] { "World" }).OrTimeout();
+                await manager.SendUserAsync("userA", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
                 await AssertMessageAsync(client1);
                 await AssertMessageAsync(client2);
             }
@@ -244,17 +245,17 @@
                 var connection2 = HubConnectionContextUtils.Create(client2.Connection, userIdentifier: "userA");
                 var connection3 = HubConnectionContextUtils.Create(client3.Connection, userIdentifier: "userB");
 
-                await manager.OnConnectedAsync(connection1).OrTimeout();
-                await manager.OnConnectedAsync(connection2).OrTimeout();
-                await manager.OnConnectedAsync(connection3).OrTimeout();
+                await manager.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
+                await manager.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
+                await manager.OnConnectedAsync(connection3).OrTimeout(Harness.TestTimeout);
 
-                await manager.SendUserAsync("userA", "Hello", new object[] { "World" }).OrTimeout();
+                await manager.SendUserAsync("userA", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
                 await AssertMessageAsync(client1);
                 await AssertMessageAsync(client2);
 
                 // Disconnect one connection for the user
-                await manager.OnDisconnectedAsync(connection1).OrTimeout();
-                await manager.SendUserAsync("userA", "Hello", new object[] { "World" }).OrTimeout();
+                await manager.OnDisconnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
+                await manager.SendUserAsync("userA", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
                 await AssertMessageAsync(client2);
             }
         }
@@ -274,13 +275,13 @@
         //        var connection1 = HubConnectionContextUtils.Create(client1.Connection);
         //        var connection2 = HubConnectionContextUtils.Create(client2.Connection);
 
-        //        await manager.OnConnectedAsync(connection1).OrTimeout();
-        //        await manager.OnConnectedAsync(connection2).OrTimeout();
+        //        await manager.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
+        //        await manager.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-        //        await manager.AddToGroupAsync(connection1.ConnectionId, "group1").OrTimeout();
-        //        await manager.AddToGroupAsync(connection2.ConnectionId, "group1").OrTimeout();
+        //        await manager.AddToGroupAsync(connection1.ConnectionId, "group1").OrTimeout(Harness.TestTimeout);
+        //        await manager.AddToGroupAsync(connection2.ConnectionId, "group1").OrTimeout(Harness.TestTimeout);
 
-        //        await manager.SendGroupExceptAsync("group1", "Hello", new object[] { "World" }, new[] { connection2.ConnectionId }).OrTimeout();
+        //        await manager.SendGroupExceptAsync("group1", "Hello", new object[] { "World" }, new[] { connection2.ConnectionId }).OrTimeout(Harness.TestTimeout);
 
         //        var message = client1.TryRead() as InvocationMessage;
         //        Assert.NotNull(message);
@@ -303,9 +304,9 @@
         //        var manager = components.HubLifetimeManager;
         //        var connection = HubConnectionContextUtils.Create(client.Connection);
 
-        //        await manager.OnConnectedAsync(connection).OrTimeout();
+        //        await manager.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
 
-        //        await manager.SendConnectionAsync(connection.ConnectionId, "Hello", new object[] { "World" }).OrTimeout();
+        //        await manager.SendConnectionAsync(connection.ConnectionId, "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
         //        var message = client.TryRead() as InvocationMessage;
         //        Assert.NotNull(message);

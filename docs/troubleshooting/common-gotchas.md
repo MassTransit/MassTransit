@@ -1,37 +1,40 @@
-# Common gotchas
+# Common Mistakes
 
-# Trying to share a queue
+Over the years, there are certain concepts that can be confusing and lead to questions for developers new to MassTransit (or message-based asynchronous programming). A few of the common mistakes, issues, and gotchas are described below.
 
-> While a common mistake in MassTransit 2.x, the new receive endpoint syntax of MassTransit 3 should
-> make it easier to recognize that queue names should not be shared.
+::: danger Have you started the bus?
+Seriously, this is so common it's worth repeating at the top of every page. If you are seeing messages not being consumed, or responses timing out on request, or anything that feels weird, make sure you are calling `Start` or `StartAsync` on the `IBusControl`.
+:::
+
+### Sharing a queue
+
+> While a common mistake in MassTransit 2.x, the new receive endpoint syntax of MassTransit 3 should make it easier to recognize that queue names should not be shared.
 
 Each receive endpoint needs to have a unique queue name! If multiple receive endpoints are created,
 each should have a different queue name so that messages are not skipped.
 
 If two receive endpoints share the same queue name, yet have different consumers subscribed, messages
-which are received by one endpoint but meant for the other will be moved to the _skipped queue. It
+which are received by one endpoint but meant for the other will be moved to the _skipped_ queue. It
 would be like sharing a mailbox with your neighbor, sometimes you get all the mail, sometimes they
 get all the mail.
 
-## Send only bus
+### Send/Publish Only
 
-If you need to only send or publish messages, don't create any receive endpoints. The bus will automatically create a temporary queue for the bus which can be used to publish events, as well as send commands and do request/response conversations.
+When creating a bus instance only to send or publish messages, it must be started. Failure to start the bus can lead to some strange side effects. Every bus, even ones without receive endpoints, must be started (and eventually stopped).
 
-However, this does not mean that if you need a send-only bus, you don't need to call `IBusControl.StartAsync()` (or `Start()`). The temporary queue only gets created when you start the bus.
-
-## How do I load balance consumers across machines?
+### How do I load balance consumers across machines?
 
 To load balance consumers, the process with the receive endpoint can be hosted on multiple servers.
 As long as each receive endpoint has the same consumers registered, the messages will be received
 by the first available consumer across all of the machines.
 
-### What links two bus instances together?
+#### What links two bus instances together?
 
 This is a common question. The binding element, really is the
 message contract. If you want message A, then you subscribe to
 message A. The internals of MT wires it all together.
 
-## Why aren't queue / message priorities supported?
+### Why aren't queue / message priorities supported?
 
 Message Priorities are used to allow a message to jump to the front
 of the line. When people ask for this feature they usually have multiple
@@ -50,16 +53,16 @@ error rates, etc. By placing each IServiceBus in its own Topshelf host
 / process you further enhance each bus's ability to process messages, and
 isolate issues / downtime.
 
-### Request client throws a timeout exception
+#### Request client throws a timeout exception
 
 MassTransit uses a temporary non-durable queue and has a consumer to handle responses. This temporary queue only get configured and created when you _start the bus_. If you forget to start the bus in your application code, the request client will fail with a timeout, waiting for a response.
 
-### Reading
+#### Reading
 
 http://www.udidahan.com/2008/01/30/podcast-message-priority-you-arent-gonna-need-it/
 http://lostechies.com/jimmybogard/2010/11/18/queues-are-still-queues/
 
-## I want to know if another bus is subscribed to my message.
+### I want to know if another bus is subscribed to my message.
 
 > So, if you try to program this way, you're going to have a bad time. ;)
 

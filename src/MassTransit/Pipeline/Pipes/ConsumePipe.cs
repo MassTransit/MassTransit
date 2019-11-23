@@ -1,21 +1,11 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Pipeline.Pipes
 {
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using GreenPipes.Filters;
+    using Util;
 
 
     public class ConsumePipe :
@@ -23,12 +13,20 @@ namespace MassTransit.Pipeline.Pipes
     {
         readonly IDynamicFilter<ConsumeContext, Guid> _dynamicFilter;
         readonly IPipe<ConsumeContext> _pipe;
+        readonly TaskCompletionSource<bool> _connected;
 
-        public ConsumePipe(IDynamicFilter<ConsumeContext, Guid> dynamicFilter, IPipe<ConsumeContext> pipe)
+        public ConsumePipe(IDynamicFilter<ConsumeContext, Guid> dynamicFilter, IPipe<ConsumeContext> pipe, bool autoStart)
         {
             _dynamicFilter = dynamicFilter ?? throw new ArgumentNullException(nameof(dynamicFilter));
             _pipe = pipe ?? throw new ArgumentNullException(nameof(pipe));
+
+            _connected = TaskUtil.GetTask<bool>();
+
+            if (autoStart)
+                _connected.TrySetResult(true);
         }
+
+        public Task Connected => _connected.Task;
 
         void IProbeSite.Probe(ProbeContext context)
         {
@@ -49,12 +47,20 @@ namespace MassTransit.Pipeline.Pipes
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            return _dynamicFilter.ConnectPipe(pipe);
+            var handle = _dynamicFilter.ConnectPipe(pipe);
+
+            _connected.TrySetResultOnThreadPool(true);
+
+            return handle;
         }
 
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
-            return _dynamicFilter.ConnectPipe(requestId, pipe);
+            var handle = _dynamicFilter.ConnectPipe(requestId, pipe);
+
+            _connected.TrySetResultOnThreadPool(true);
+
+            return handle;
         }
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)

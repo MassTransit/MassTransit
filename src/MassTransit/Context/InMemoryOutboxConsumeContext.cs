@@ -3,6 +3,7 @@ namespace MassTransit.Context
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Util;
 
 
     public class InMemoryOutboxConsumeContext :
@@ -19,7 +20,7 @@ namespace MassTransit.Context
             ReceiveContext = new InMemoryOutboxReceiveContext(this, context.ReceiveContext);
 
             _pendingActions = new List<Func<Task>>();
-            _clearToSend = new TaskCompletionSource<InMemoryOutboxConsumeContext>();
+            _clearToSend = TaskUtil.GetTask<InMemoryOutboxConsumeContext>();
 
             if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
             {

@@ -29,7 +29,7 @@
 
             _queueConfigurator = new QueueConfigurator(queueName)
             {
-                AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle,
+                AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle
             };
 
             _settings = new ReceiveEndpointSettings(queueName, _queueConfigurator);

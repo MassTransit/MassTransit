@@ -33,6 +33,8 @@
                     h.Password("Ohcrud");
                     h.RequestedConnectionTimeout(2000);
                 });
+
+                x.AutoStart = false;
             });
 
             Assert.That(async () =>
@@ -97,13 +99,13 @@
 
                 await handle.Ready;
 
-                for (var i = 0; i < 10; i++)
+                for (var i = 0; i < 30; i++)
                 {
                     try
                     {
                         await Task.Delay(1000);
 
-                        await busControl.Publish(new TestMessage());
+//                        await busControl.Publish(new TestMessage());
 
                         Console.WriteLine("Published: {0}", i);
                     }
@@ -145,6 +147,25 @@
 
         [Test]
         [Explicit]
+        public async Task Should_start_without_any_configuration()
+        {
+            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+            });
+
+            BusHandle handle = await busControl.StartAsync(new CancellationTokenSource(5000).Token);
+            try
+            {
+                await handle.Ready;
+            }
+            finally
+            {
+                await handle.StopAsync();
+            }
+        }
+
+        [Test]
+        [Explicit]
         public async Task Should_startup_and_shut_down_cleanly_with_an_endpoint()
         {
             IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
@@ -168,7 +189,7 @@
 
                 await handle.Ready;
 
-                await Task.Delay(5000);
+                await Task.Delay(60000);
             }
             finally
             {

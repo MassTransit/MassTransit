@@ -13,13 +13,11 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
     using System;
-    using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
 
 
-    public class DelegateSagaDbContextFactory<TSaga> :
-        ISagaDbContextFactory<TSaga>
-        where TSaga : class, ISaga
+    public class DelegateSagaDbContextFactory :
+        ISagaDbContextFactory
     {
         readonly Func<DbContext> _dbContextFactory;
 

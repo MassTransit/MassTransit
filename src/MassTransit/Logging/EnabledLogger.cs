@@ -2,7 +2,6 @@ namespace MassTransit.Logging
 {
     using System;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Logging.Internal;
 
 
     public readonly struct EnabledLogger
@@ -18,17 +17,12 @@ namespace MassTransit.Logging
 
         public void Log(string message, params object[] args)
         {
-            _logger.Log<object>(_level, 0, new FormattedLogValues(message, args), null, MessageFormatter);
+            _logger.Log(_level, message, args);
         }
 
         public void Log(Exception exception, string message, params object[] args)
         {
-            _logger.Log<object>(_level, 0, new FormattedLogValues(message, args), exception, MessageFormatter);
-        }
-
-        static string MessageFormatter(object state, Exception exception)
-        {
-            return state.ToString();
+            _logger.Log(_level, exception, message, args);
         }
     }
 }

@@ -28,6 +28,11 @@ namespace MassTransit.RabbitMqTransport.Hosting
             _defaultConsumerLimit = Environment.ProcessorCount * 4;
         }
 
+        public bool AutoStart
+        {
+            set => _configurator.AutoStart = value;
+        }
+
         public void ReceiveEndpoint(string queueName, int consumerLimit, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             _configurator.ReceiveEndpoint(queueName, x =>

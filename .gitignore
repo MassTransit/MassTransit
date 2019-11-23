@@ -48,6 +48,7 @@ doc/build/*
 /src/MassTransit.SimpleInjectorIntegration/MassTransit.SimpleInjectorIntegration.csproj.nuspec
 *.DS_Store
 
+docs/.vuepress/dist
 _book
 /node_modules
 .vscode

@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Topology
 {
+    using System;
     using Builders;
     using Entities;
     using MassTransit.Topology;
@@ -25,8 +26,9 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <summary>
         /// Returns the send settings for a publish endpoint, which are mostly unused now with topology
         /// </summary>
+        /// <param name="hostAddress"></param>
         /// <returns></returns>
-        SendSettings GetSendSettings();
+        SendSettings GetSendSettings(Uri hostAddress);
 
         Exchange Exchange { get; }
 

@@ -20,6 +20,13 @@ namespace MassTransit.Transports.InMemory.Configurators
         {
             _busConfiguration = busConfiguration;
             _hostConfiguration = busConfiguration.HostConfiguration;
+
+            busConfiguration.BusEndpointConfiguration.Consume.Configurator.AutoStart = true;
+        }
+
+        public override bool AutoStart
+        {
+            set { }
         }
 
         public IBusControl CreateBus()

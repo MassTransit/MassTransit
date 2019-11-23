@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Conventional
 {
@@ -16,6 +16,7 @@ namespace MassTransit.Tests.Conventional
     using System.Threading.Tasks;
     using ConsumeConnectors;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using GreenPipes.Introspection;
     using Internals.Extensions;
     using NUnit.Framework;
@@ -250,8 +251,8 @@ namespace MassTransit.Tests.Conventional
             await Bus.Publish<MessageA>(new {Value = "Hello"});
             await Bus.Publish<MessageB>(new {Name = "World"});
 
-            Assert.That(async () => await _receivedA.Task.WithTimeout(TimeSpan.FromSeconds(3)), Throws.TypeOf<OperationCanceledException>());
-            Assert.That(async () => await _receivedB.Task.WithTimeout(TimeSpan.FromSeconds(3)), Throws.TypeOf<OperationCanceledException>());
+            Assert.That(async () => await _receivedA.Task.OrTimeout(TimeSpan.FromSeconds(3)), Throws.TypeOf<TimeoutException>());
+            Assert.That(async () => await _receivedB.Task.OrTimeout(TimeSpan.FromSeconds(3)), Throws.TypeOf<TimeoutException>());
         }
     }
 }

@@ -41,14 +41,11 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             return _configuration.Send.GetMessageTopology<T>();
         }
 
-        public SendSettings GetSendSettings(Uri address)
-        {
-            return _configuration.Send.GetSendSettings(address);
-        }
-
         public Uri GetDestinationAddress(string exchangeName, Action<IExchangeConfigurator> configure = null)
         {
-            var sendSettings = new RabbitMqSendSettings(exchangeName, _exchangeTypeSelector.DefaultExchangeType, true, false);
+            var address = new RabbitMqEndpointAddress(_hostAddress, new Uri($"exchange:{exchangeName}"));
+
+            var sendSettings = new RabbitMqSendSettings(address);
 
             configure?.Invoke(sendSettings);
 
@@ -57,16 +54,26 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
 
         public Uri GetDestinationAddress(Type messageType, Action<IExchangeConfigurator> configure = null)
         {
+            var exchangeName = _messageNameFormatter.GetMessageName(messageType).ToString();
             var isTemporary = TypeMetadataCache.IsTemporaryMessageType(messageType);
+            var address = new RabbitMqEndpointAddress(_hostAddress, new Uri($"exchange:{exchangeName}?temporary={isTemporary}"));
 
-            var durable = !isTemporary;
-            var autoDelete = isTemporary;
-
-            var name = _messageNameFormatter.GetMessageName(messageType).ToString();
-
-            var settings = new RabbitMqSendSettings(name, _exchangeTypeSelector.DefaultExchangeType, durable, autoDelete);
+            var settings = new RabbitMqSendSettings(address);
 
             configure?.Invoke(settings);
+
+            return settings.GetSendAddress(_hostAddress);
+        }
+
+        public Uri GetDelayedExchangeDestinationAddress(Uri address)
+        {
+            var endpointAddress = new RabbitMqEndpointAddress(_hostAddress, address);
+
+            var delayedExchangeAddress = endpointAddress.GetDelayAddress();
+
+            var settings = new RabbitMqSendSettings(delayedExchangeAddress);
+
+            settings.BindToExchange(endpointAddress.Name);
 
             return settings.GetSendAddress(_hostAddress);
         }

@@ -18,7 +18,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Settings;
-    using Util;
 
 
     public class AmazonSqsSendTopology :
@@ -39,23 +38,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             return configurator as IAmazonSqsMessageSendTopologyConfigurator<T>;
         }
 
-        public SendSettings GetSendSettings(Uri address)
+        public SendSettings GetSendSettings(AmazonSqsEndpointAddress address)
         {
-            var name = address.AbsolutePath.Substring(1);
-            string[] pathSegments = name.Split('/');
-            if (pathSegments.Length == 2)
-                name = pathSegments[1];
-
-            if (name == "*")
-                throw new ArgumentException("Cannot send to a dynamic address");
-
-            EntityNameValidator.ThrowIfInvalidEntityName(name);
-
-            var isTemporary = address.Query.GetValueFromQueryString("temporary", false);
-            var durable = address.Query.GetValueFromQueryString("durable", !isTemporary);
-            var autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
-
-            return new QueueSendSettings(name, durable, autoDelete);
+            return new QueueSendSettings(address.Path, true, address.AutoDelete);
         }
 
         public ErrorSettings GetErrorSettings(EntitySettings settings)

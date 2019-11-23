@@ -54,17 +54,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         Uri FormatHostAddress()
         {
-            var builder = new UriBuilder
-            {
-                Scheme = "rabbitmq",
-                Host = Host,
-                Port = Port == 5672 ? 0 : Port,
-                Path = string.IsNullOrWhiteSpace(VirtualHost) || VirtualHost == "/"
-                    ? "/"
-                    : $"/{VirtualHost.Trim('/')}"
-            };
-
-            return builder.Uri;
+            return new RabbitMqHostAddress(Host, Port, VirtualHost);
         }
     }
 }

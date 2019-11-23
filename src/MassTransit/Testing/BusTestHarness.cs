@@ -185,7 +185,7 @@
         public Task<ConsumeContext<T>> SubscribeHandler<T>()
             where T : class
         {
-            var source = new TaskCompletionSource<ConsumeContext<T>>();
+            var source = TaskUtil.GetTask<ConsumeContext<T>>();
 
             ConnectHandle handler = null;
             handler = Bus.ConnectHandler<T>(async context =>
@@ -215,7 +215,7 @@
         public Task<ConsumeContext<T>> SubscribeHandler<T>(Func<ConsumeContext<T>, bool> filter)
             where T : class
         {
-            var source = new TaskCompletionSource<ConsumeContext<T>>();
+            var source = TaskUtil.GetTask<ConsumeContext<T>>();
 
             ConnectHandle handler = null;
             handler = Bus.ConnectHandler<T>(async context =>

@@ -238,7 +238,7 @@
                 public Observer(IReceiveEndpoint endpoint, CancellationToken cancellationToken)
                 {
                     _cancellationToken = cancellationToken;
-                    _ready = new TaskCompletionSource<ReceiveEndpointReady>();
+                    _ready = TaskUtil.GetTask<ReceiveEndpointReady>();
 
                     _handle = endpoint.ConnectReceiveEndpointObserver(this);
                 }

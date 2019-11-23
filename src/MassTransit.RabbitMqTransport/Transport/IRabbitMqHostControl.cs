@@ -1,6 +1,5 @@
 namespace MassTransit.RabbitMqTransport.Transport
 {
-    using System;
     using System.Threading.Tasks;
     using Transports;
 
@@ -9,7 +8,7 @@ namespace MassTransit.RabbitMqTransport.Transport
         IRabbitMqHost,
         IBusHostControl
     {
-        Task<ISendTransport> CreateSendTransport(Uri address);
+        Task<ISendTransport> CreateSendTransport(RabbitMqEndpointAddress address);
 
         Task<ISendTransport> CreatePublishTransport<T>()
             where T : class;

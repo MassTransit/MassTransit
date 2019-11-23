@@ -43,7 +43,7 @@ namespace MassTransit.StructureMapIntegration.Registration
         public void AddBus(Func<IContext, IBusControl> busFactory)
         {
             _expression.For<IBusControl>()
-                .Use(context => busFactory(context))
+                .Use(context => BusFactory(context, busFactory))
                 .Singleton();
 
             _expression.For<IBus>()
@@ -61,6 +61,15 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IClientFactory>()
                 .Use(context => context.GetInstance<IBus>().CreateClientFactory(default))
                 .Singleton();
+        }
+
+        IBusControl BusFactory(IContext context, Func<IContext, IBusControl> busFactory)
+        {
+            var provider = context.GetInstance<IConfigurationServiceProvider>();
+
+            ConfigureLogContext(provider);
+
+            return busFactory(context);
         }
 
         IConsumerScopeProvider CreateConsumerScopeProvider(IContext context)

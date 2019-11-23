@@ -6,7 +6,6 @@ namespace MassTransit.RabbitMqTransport.Scheduling
     using GreenPipes;
     using MassTransit.Scheduling;
     using Topology;
-    using Topology.Settings;
     using Util;
 
 
@@ -15,13 +14,11 @@ namespace MassTransit.RabbitMqTransport.Scheduling
     {
         readonly IRabbitMqHostTopology _topology;
         readonly ISendEndpointProvider _sendEndpointProvider;
-        readonly Uri _hostAddress;
 
-        public DelayedExchangeScheduleMessageProvider(ISendEndpointProvider sendEndpointProvider, IRabbitMqHostTopology topology, Uri hostAddress)
+        public DelayedExchangeScheduleMessageProvider(ISendEndpointProvider sendEndpointProvider, IRabbitMqHostTopology topology)
         {
             _sendEndpointProvider = sendEndpointProvider;
             _topology = topology;
-            _hostAddress = hostAddress;
         }
 
         public async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, Task<T> message, IPipe<SendContext<T>> pipe,
@@ -49,20 +46,9 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             return TaskUtil.Completed;
         }
 
-        Task<ISendEndpoint> GetSchedulerEndpoint(Uri destinationAddress)
+        Task<ISendEndpoint> GetSchedulerEndpoint(Uri address)
         {
-            var destinationSettings = _topology.GetSendSettings(destinationAddress);
-
-            var sendSettings = new RabbitMqSendSettings(destinationSettings.ExchangeName + "_delay", "x-delayed-message", destinationSettings.Durable,
-                destinationSettings.AutoDelete);
-
-            sendSettings.SetExchangeArgument("x-delayed-type", destinationSettings.ExchangeType);
-
-            sendSettings.BindToExchange(destinationSettings.ExchangeName);
-
-            var delayExchangeAddress = sendSettings.GetSendAddress(_hostAddress);
-
-            return _sendEndpointProvider.GetSendEndpoint(delayExchangeAddress);
+            return _sendEndpointProvider.GetSendEndpoint(_topology.GetDelayedExchangeDestinationAddress(address));
         }
     }
 }

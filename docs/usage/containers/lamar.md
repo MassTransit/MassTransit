@@ -1,4 +1,4 @@
-# Configuring Lamar
+# Lamar
 
 MassTransit supports Lamar, the successor to StructureMap, created by Jeremy D. Miller.
 

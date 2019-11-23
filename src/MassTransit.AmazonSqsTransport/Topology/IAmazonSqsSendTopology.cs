@@ -23,7 +23,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
         new IAmazonSqsMessageSendTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
 
-        SendSettings GetSendSettings(Uri address);
+        SendSettings GetSendSettings(AmazonSqsEndpointAddress address);
 
         /// <summary>
         /// Return the error settings for the queue

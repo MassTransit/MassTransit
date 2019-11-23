@@ -47,6 +47,11 @@ namespace MassTransit.EndpointSpecifications
             Configuration.Consume.Configurator.AddPrePipeSpecification(specification);
         }
 
+        public bool AutoStart
+        {
+            set => Configuration.AutoStart = value;
+        }
+
         public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
             return Configuration.Consume.Configurator.ConnectConsumerConfigurationObserver(observer);

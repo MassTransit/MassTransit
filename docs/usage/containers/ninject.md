@@ -1,14 +1,13 @@
-# Configuring Ninject
+# Ninject
 
 The following example shows how to configure a simple Ninject container, and include the bus in the
 container. The two bus interfaces, `IBus` and `IBusControl`, are included.
 
-<div class="alert alert-info">
-<b>Note:</b>
-    Consumers should not typically depend upon <i>IBus</i> or <i>IBusControl</i>. A consumer should use the <i>ConsumeContext</i>
-    instead, which has all of the same methods as <i>IBus</i>, but is scoped to the receive endpoint. This ensures that
-    messages can be tracked between consumers, and are sent from the proper address.
-</div>
+::: tip
+Consumers should not typically depend upon <i>IBus</i> or <i>IBusControl</i>. A consumer should use the <i>ConsumeContext</i>
+instead, which has all of the same methods as <i>IBus</i>, but is scoped to the receive endpoint. This ensures that
+messages can be tracked between consumers, and are sent from the proper address.
+:::
 
 ```csharp
 public static void main(string[] args) 
@@ -48,10 +47,9 @@ public static void main(string[] args)
 }
 ```
 
-<div class="alert alert-info">
-<b>Note:</b>
-    The behavior with Ninject is slightly different, in that the current AppDomain types are checked against the
-    container and if any consumer types are registered, they are resolved from the container. The unit tests pass, and
-    it works, but just be aware that container metadata is not being used to support this feature. There is some history
-    on this, found at the <a href="https://github.com/ninject/ninject/issues/35">Ninject issue</a>.
-</div>
+::: tip NOTE
+The behavior with Ninject is slightly different, in that the current AppDomain types are checked against the
+container and if any consumer types are registered, they are resolved from the container. The unit tests pass, and
+it works, but just be aware that container metadata is not being used to support this feature. There is some history
+on this, found at the <a href="https://github.com/ninject/ninject/issues/35">Ninject issue</a>.
+:::

@@ -1,4 +1,4 @@
-# Displaying configuration
+# Show Configuration
 
 A bus instance is composed of many classes, all of which are wired together to form a connection pipeline of
 message processing goodness. This brings a bit of complexity, as there are many moving parts behind the curtain.
@@ -7,14 +7,10 @@ graph of the bus.
 
 To probe bus configuration, use the `GetProbeResult` method as shown below.
 
-```csharp
+```cs
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(new Uri("rabbitmq://localhost/test"), h =>
-    {
-        h.Username("guest");
-        h.Password("guest");
-    });
+    cfg.Host("rabbitmq://localhost/test");
 
     sbc.ReceiveEndpoint("input_queue", ec =>
     {
@@ -40,9 +36,9 @@ The resulting output for the configuration above would be similar to the followi
     "processName": "TestService",
     "processId": 5808,
     "assembly": "MassTransit",
-    "assemblyVersion": "3.0.13.0",
+    "assemblyVersion": "6.0.0.0",
     "frameworkVersion": "4.0.30319.42000",
-    "massTransitVersion": "3.0.13.0",
+    "massTransitVersion": "6.0.0.0",
     "operatingSystemVersion": "Microsoft Windows NT 6.3.9600.0"
   },
   "results": {

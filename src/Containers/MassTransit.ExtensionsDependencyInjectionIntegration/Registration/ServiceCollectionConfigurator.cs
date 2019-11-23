@@ -27,7 +27,16 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         public void AddBus(Func<IServiceProvider, IBusControl> busFactory)
         {
-            Collection.TryAddSingleton(busFactory);
+            IBusControl BusFactory(IServiceProvider serviceProvider)
+            {
+                var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
+
+                ConfigureLogContext(provider);
+
+                return busFactory(serviceProvider);
+            }
+
+            Collection.TryAddSingleton(BusFactory);
 
             Collection.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
             Collection.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());

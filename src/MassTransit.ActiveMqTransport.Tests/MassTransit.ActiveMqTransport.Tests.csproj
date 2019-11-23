@@ -2,12 +2,12 @@
   <Import Project="../netfx.props"/>
 
   <PropertyGroup>
-    <TargetFrameworks>net452;netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>net461;netcoreapp2.2</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0"/>
     <PackageReference Include="NUnit" Version="3.12.0"/>
     <PackageReference Include="NUnit3TestAdapter" Version="3.15.1"/>
     <ProjectReference Include="..\MassTransit.TestFramework\MassTransit.TestFramework.csproj"/>

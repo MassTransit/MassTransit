@@ -22,7 +22,7 @@ namespace MassTransit.ActiveMqTransport.Topology
         new IActiveMqMessageSendTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
 
-        SendSettings GetSendSettings(Uri address);
+        SendSettings GetSendSettings(ActiveMqEndpointAddress address);
 
         /// <summary>
         /// Return the error settings for the queue

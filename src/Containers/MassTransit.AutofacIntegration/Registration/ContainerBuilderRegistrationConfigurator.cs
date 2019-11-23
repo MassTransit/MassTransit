@@ -51,7 +51,16 @@ namespace MassTransit.AutofacIntegration.Registration
 
         public void AddBus(Func<IComponentContext, IBusControl> busFactory)
         {
-            _builder.Register(busFactory)
+            IBusControl BusFactory(IComponentContext context)
+            {
+                var provider = context.Resolve<IConfigurationServiceProvider>();
+
+                ConfigureLogContext(provider);
+
+                return busFactory(context);
+            }
+
+            _builder.Register(BusFactory)
                 .As<IBusControl>()
                 .As<IBus>()
                 .SingleInstance();

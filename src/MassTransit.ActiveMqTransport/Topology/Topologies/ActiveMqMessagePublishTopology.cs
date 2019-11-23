@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Topology.Topologies
 {
     using System;
@@ -21,7 +9,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
     using MassTransit.Topology.Topologies;
     using Metadata;
     using Settings;
-    using Util;
 
 
     public class ActiveMqMessagePublishTopology<TMessage> :
@@ -63,26 +50,22 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
         {
-            publishAddress = GetSendSettings().GetSendAddress(baseAddress);
+            publishAddress = _topic.GetEndpointAddress(baseAddress);
             return true;
         }
 
         public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
         {
-            var exchangeHandle = builder.CreateTopic(_topic.EntityName, _topic.Durable, _topic.AutoDelete);
+            builder.Topic = builder.CreateTopic(_topic.EntityName, _topic.Durable, _topic.AutoDelete);
 
-            if (builder.Topic != null)
-                //                builder.ExchangeBind(builder.Exchange, exchangeHandle, "", new Dictionary<string, object>());
-                //            else
-                //                builder.Exchange = exchangeHandle;
-
-                foreach (IActiveMqMessagePublishTopology configurator in _implementedMessageTypes)
-                    configurator.Apply(builder);
+            // this was disabled previously, so not sure if it can be added
+            // foreach (IActiveMqMessagePublishTopology configurator in _implementedMessageTypes)
+            //     configurator.Apply(builder);
         }
 
-        public SendSettings GetSendSettings()
+        public SendSettings GetSendSettings(Uri hostAddress)
         {
-            return new TopicSendSettings(_topic.EntityName, _topic.Durable, _topic.AutoDelete);
+            return new TopicSendSettings(_topic.GetEndpointAddress(hostAddress));
         }
 
         public BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options)

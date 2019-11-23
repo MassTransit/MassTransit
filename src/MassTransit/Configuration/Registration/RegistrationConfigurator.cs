@@ -5,9 +5,11 @@ namespace MassTransit.Registration
     using System.Linq;
     using Automatonymous;
     using ConsumeConfigurators;
+    using Context;
     using Definition;
     using Internals.Extensions;
     using Metadata;
+    using Microsoft.Extensions.Logging;
 
 
     /// <summary>
@@ -186,6 +188,13 @@ namespace MassTransit.Registration
             }
 
             _endpointRegistrations.GetOrAdd(typeof(TDefinition), ValueFactory);
+        }
+
+        protected void ConfigureLogContext(IConfigurationServiceProvider provider)
+        {
+            var loggerFactory = provider.GetService<ILoggerFactory>();
+            if (loggerFactory != null)
+                LogContext.ConfigureCurrentLogContext(loggerFactory);
         }
 
         void IRegistrationConfigurator.AddRequestClient<T>(RequestTimeout timeout)

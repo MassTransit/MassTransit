@@ -34,6 +34,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                 IRabbitMqHost host = x.Host("127.0.0.1", "test", h =>
                 {
                 });
+
+                x.AutoStart = true;
             });
 
             await bus.StartAsync();

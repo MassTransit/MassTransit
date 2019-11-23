@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../../netfx.props" />
   <PropertyGroup>
-    <TargetFrameworks>net452</TargetFrameworks>
+    <TargetFrameworks>net461</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 

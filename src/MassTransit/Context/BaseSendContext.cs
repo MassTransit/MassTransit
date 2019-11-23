@@ -24,7 +24,12 @@ namespace MassTransit.Context
 
             _headers = new DictionarySendHeaders();
 
-            MessageId = NewId.NextGuid();
+            var messageId = NewId.Next();
+
+            MessageId = messageId.ToGuid();
+
+            SentTime = messageId.Timestamp;
+
             Durable = true;
         }
 
@@ -67,6 +72,7 @@ namespace MassTransit.Context
         public Uri FaultAddress { get; set; }
 
         public TimeSpan? TimeToLive { get; set; }
+        public DateTime? SentTime { get; set; }
 
         public ContentType ContentType { get; set; }
 

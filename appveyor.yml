@@ -11,7 +11,8 @@ skip_tags: true
 skip_commits:
   files:
     - docs/**/*
-    - '**/*.html'
+    - package.json
+    - docs.yml
 
 image:
   - Visual Studio 2017

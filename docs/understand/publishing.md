@@ -49,7 +49,7 @@ namespace Company.Messages
 
 Once the messages have been published, exchanges are created in RabbitMQ for each of the message types:
 
-```text
+```
 Exchanges
 
 Company.Messages.CustomerAddressUpdated
@@ -64,13 +64,9 @@ are bound to the consumer message type exchanges, closing the loop.
 ```csharp
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-    {
-        h.Username("guest");
-        h.Password("guest");
-    });
+    cfg.Host("localhost");
 
-    cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
+    cfg.ReceiveEndpoint("customer_update_queue", e =>
     {
         e.Consumer<UpdateCustomerConsumer>();
     });
@@ -79,7 +75,7 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 
 This results in the creation of a queue, as well as a binding to the queue from the `UpdateCustomerAddress` exchange.
 
-```text
+```
 Exchanges
 
 customer_update_queue

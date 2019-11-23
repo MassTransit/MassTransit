@@ -58,7 +58,13 @@ namespace MassTransit.SignalR
             ConcurrentHashSet<string> groups = connection.Features.Get<IMassTransitFeature>().Groups;
 
             if (groups != null)
-                groups.Clear(); // Removes connection from all groups locally
+            {
+                // Removes connection from all groups locally
+                foreach (var groupName in groups.ToArray())
+                {
+                    RemoveGroupAsyncCore(connection, groupName);
+                }
+            }
 
             return Task.CompletedTask;
         }

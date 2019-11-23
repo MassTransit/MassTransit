@@ -1,20 +1,7 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
+﻿namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
 {
     using System;
     using Configuration;
-    using Internals.Extensions;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Microsoft.ServiceBus.Messaging;
@@ -39,7 +26,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             return GetMessageTopology<T>() as IServiceBusMessageSendTopologyConfigurator<T>;
         }
 
-        public SendSettings GetSendSettings(Uri address)
+        public SendSettings GetSendSettings(ServiceBusEndpointAddress address)
         {
             var queueDescription = GetQueueDescription(address);
 
@@ -54,16 +41,13 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             return new QueueSendSettings(description);
         }
 
-        public SendSettings GetErrorSettings(ISubscriptionConfigurator configurator, string basePath)
+        public SendSettings GetErrorSettings(ISubscriptionConfigurator configurator, Uri hostAddress)
         {
             var description = configurator.GetSubscriptionDescription();
 
-            basePath = basePath.Trim('/');
+            var errorEndpointAddress = new ServiceBusEndpointAddress(hostAddress, description.Name + ErrorQueueSuffix);
 
-            var path = description.Name + ErrorQueueSuffix;
-            var queuePath = string.IsNullOrEmpty(basePath) ? path : $"{basePath}/{path.Trim('/')}";
-
-            var queueDescription = Defaults.CreateQueueDescription(queuePath);
+            var queueDescription = Defaults.CreateQueueDescription(errorEndpointAddress.Path);
             queueDescription.DefaultMessageTimeToLive = description.DefaultMessageTimeToLive;
             queueDescription.AutoDeleteOnIdle = description.AutoDeleteOnIdle;
 
@@ -78,16 +62,13 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             return new QueueSendSettings(description);
         }
 
-        public SendSettings GetDeadLetterSettings(ISubscriptionConfigurator configurator, string basePath)
+        public SendSettings GetDeadLetterSettings(ISubscriptionConfigurator configurator, Uri hostAddress)
         {
             var description = configurator.GetSubscriptionDescription();
 
-            basePath = basePath.Trim('/');
+            var deadLetterEndpointAddress = new ServiceBusEndpointAddress(hostAddress, description.Name + DeadLetterQueueSuffix);
 
-            var path = description.Name + DeadLetterQueueSuffix;
-            var queuePath = string.IsNullOrEmpty(basePath) ? path : $"{basePath}/{path.Trim('/')}";
-            
-            var queueDescription = Defaults.CreateQueueDescription(queuePath);
+            var queueDescription = Defaults.CreateQueueDescription(deadLetterEndpointAddress.Path);
             queueDescription.DefaultMessageTimeToLive = description.DefaultMessageTimeToLive;
             queueDescription.AutoDeleteOnIdle = description.AutoDeleteOnIdle;
 
@@ -103,17 +84,14 @@ namespace MassTransit.AzureServiceBusTransport.Topology.Topologies
             return messageTopology;
         }
 
-        static QueueDescription GetQueueDescription(Uri address)
+        static QueueDescription GetQueueDescription(ServiceBusEndpointAddress address)
         {
-            var queueName = address.AbsolutePath.Trim('/');
+            var queueDescription = Defaults.CreateQueueDescription(address.Path);
 
-            var queueDescription = Defaults.CreateQueueDescription(queueName);
+            if (address.AutoDelete.HasValue)
+                queueDescription.AutoDeleteOnIdle = address.AutoDelete.Value;
+            queueDescription.EnableExpress = address.Express;
 
-            var autoDeleteOnIdleSeconds = address.GetValueFromQueryString("autodelete", 0);
-            if (autoDeleteOnIdleSeconds > 0)
-                queueDescription.AutoDeleteOnIdle = TimeSpan.FromSeconds(autoDeleteOnIdleSeconds);
-
-            queueDescription.EnableExpress = address.GetValueFromQueryString("express", queueDescription.EnableExpress);
             return queueDescription;
         }
     }

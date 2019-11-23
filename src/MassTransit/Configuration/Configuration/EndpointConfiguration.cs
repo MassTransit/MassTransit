@@ -50,6 +50,11 @@
             Serialization = parentConfiguration.Serialization.CreateSerializationConfiguration();
         }
 
+        public bool AutoStart
+        {
+            set => Consume.Configurator.AutoStart = value;
+        }
+
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
             Consume.Configurator.AddPipeSpecification(specification);

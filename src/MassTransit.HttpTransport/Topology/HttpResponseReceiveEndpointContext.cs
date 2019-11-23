@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.HttpTransport.Topology
 {
     using System;
+    using System.Threading.Tasks;
     using ConsumePipeSpecifications;
     using Context;
     using GreenPipes;
@@ -44,6 +45,8 @@
         public IMessageSerializer Serializer => _context.Serializer;
 
         ISendEndpointProvider ReceiveEndpointContext.SendEndpointProvider => _sendEndpointProvider.Value;
+        public Task Dependencies => _context.Dependencies;
+
         IPublishEndpointProvider ReceiveEndpointContext.PublishEndpointProvider => _context.PublishEndpointProvider;
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

@@ -24,14 +24,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             _busConfiguration = busConfiguration;
             _topologyConfiguration = topologyConfiguration;
-            _hostSettings = new ConfigurationHostSettings()
+            _hostSettings = new ConfigurationHostSettings
             {
                 Host = "localhost",
+                VirtualHost = "/",
+                Port = 5672,
                 Username = "guest",
                 Password = "guest"
             };
 
-            _proxy = new RabbitMqHostProxy();
+            _proxy = new RabbitMqHostProxy(this);
         }
 
         public string Description => _hostSettings.ToDescription();
@@ -48,7 +50,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             get => _hostSettings;
             set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
-
 
         public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
@@ -72,6 +73,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
             configuration.ConnectSagaConfigurationObserver(_busConfiguration);
             configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
+            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
 
             configure?.Invoke(configuration);
 

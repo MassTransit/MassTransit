@@ -95,7 +95,7 @@ namespace MassTransit.Serialization
             if (context.TimeToLive.HasValue)
                 headers.Add(ExpirationTimeKey, DateTime.UtcNow + context.TimeToLive.Value);
 
-            headers.Add(SentTimeKey, DateTime.UtcNow);
+            headers.Add(SentTimeKey, context.SentTime ?? DateTime.UtcNow);
 
             headers.Add(new Header(HostInfoKey, HostMetadataCache.Host));
 

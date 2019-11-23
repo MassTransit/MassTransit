@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
@@ -46,7 +46,7 @@ namespace MassTransit
         /// <param name="configure">A callback to further configure the service bus</param>
         /// <returns>The service bus host</returns>
         public static IServiceBusHost Host(this IServiceBusBusFactoryConfigurator configurator, string connectionString,
-            Action<IServiceBusHostConfigurator> configure)
+            Action<IServiceBusHostConfigurator> configure = null)
         {
             // in case they pass a URI by mistake (it happens)
             if (Uri.IsWellFormedUriString(connectionString, UriKind.Absolute))
@@ -58,15 +58,12 @@ namespace MassTransit
 
             var namespaceManager = NamespaceManager.CreateFromConnectionString(connectionString);
 
-            var hostConfigurator = new ServiceBusHostConfigurator(namespaceManager.Address)
-            {
-                TokenProvider = namespaceManager.Settings.TokenProvider
-            };
+            var hostConfigurator = new ServiceBusHostConfigurator(namespaceManager.Address) {TokenProvider = namespaceManager.Settings.TokenProvider};
 
             if (namespaceManager.Settings.OperationTimeout > TimeSpan.Zero)
                 hostConfigurator.OperationTimeout = namespaceManager.Settings.OperationTimeout;
 
-            configure(hostConfigurator);
+            configure?.Invoke(hostConfigurator);
 
             return configurator.Host(hostConfigurator.Settings);
         }
@@ -87,12 +84,10 @@ namespace MassTransit
         /// of this type (created automatically upon the first receiver binding).
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="host"></param>
         /// <param name="configure"></param>
-        public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host,
-            Action<IServiceBusReceiveEndpointConfigurator> configure = null)
+        public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, Action<IServiceBusReceiveEndpointConfigurator> configure = null)
         {
-            configurator.ReceiveEndpoint(host, new TemporaryEndpointDefinition(), DefaultEndpointNameFormatter.Instance, configure);
+            configurator.ReceiveEndpoint(new TemporaryEndpointDefinition(), DefaultEndpointNameFormatter.Instance, configure);
         }
 
         /// <summary>
@@ -101,13 +96,12 @@ namespace MassTransit
         /// of this type (created automatically upon the first receiver binding).
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="host"></param>
         /// <param name="definition"></param>
         /// <param name="configure"></param>
-        public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host, IEndpointDefinition definition,
+        public static void ReceiveEndpoint(this IServiceBusBusFactoryConfigurator configurator, IEndpointDefinition definition,
             Action<IServiceBusReceiveEndpointConfigurator> configure = null)
         {
-            configurator.ReceiveEndpoint(host, definition, DefaultEndpointNameFormatter.Instance, configure);
+            configurator.ReceiveEndpoint(definition, DefaultEndpointNameFormatter.Instance, configure);
         }
     }
 }

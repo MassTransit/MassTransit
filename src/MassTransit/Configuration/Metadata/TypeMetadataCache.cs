@@ -6,7 +6,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading;
-    using GreenPipes.Internals.Extensions;
+    using Definition;
     using Internals.Extensions;
     using Saga;
 
@@ -20,7 +20,12 @@
 
         public static string GetShortName(Type type)
         {
-            return TypeCache.GetShortName(type);
+            return GreenPipes.Internals.Extensions.TypeCache.GetShortName(type);
+        }
+
+        public static IEnumerable<PropertyInfo> GetProperties(Type type)
+        {
+            return GetOrAdd(type).Properties;
         }
 
         public static bool IsValidMessageType(Type type)
@@ -36,6 +41,36 @@
         public static bool HasConsumerInterfaces(Type type)
         {
             return GetOrAdd(type).HasConsumerInterfaces;
+        }
+
+        /// <summary>
+        /// Returns true if the type is a consumer, or a consumer definition
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsConsumerOrDefinition(Type type)
+        {
+            Type[] interfaces = type.GetTypeInfo().GetInterfaces();
+
+            return interfaces.Any(t => t.HasInterface(typeof(IConsumer<>)) || t.HasInterface(typeof(IConsumerDefinition<>)));
+        }
+
+        /// <summary>
+        /// Returns true if the type is a saga, or a saga definition
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsSagaOrDefinition(Type type)
+        {
+            Type[] interfaces = type.GetTypeInfo().GetInterfaces();
+
+            if (interfaces.Contains(typeof(ISaga)))
+                return true;
+
+            return interfaces.Any(t => t.HasInterface(typeof(InitiatedBy<>))
+                || t.HasInterface(typeof(Orchestrates<>))
+                || t.HasInterface(typeof(Observes<,>))
+                || t.HasInterface(typeof(ISagaDefinition<>)));
         }
 
         public static bool HasSagaInterfaces(Type type)
@@ -68,18 +103,22 @@
             bool IsValidMessageType { get; }
             Type[] MessageTypes { get; }
             string[] MessageTypeNames { get; }
+            IEnumerable<PropertyInfo> Properties { get; }
         }
 
 
         class CachedType<T> :
             CachedType
         {
+            PropertyInfo[] _properites;
             public bool HasConsumerInterfaces => TypeMetadataCache<T>.HasConsumerInterfaces;
             public bool HasSagaInterfaces => TypeMetadataCache<T>.HasSagaInterfaces;
             public bool IsTemporaryMessageType => TypeMetadataCache<T>.IsTemporaryMessageType;
             public bool IsValidMessageType => TypeMetadataCache<T>.IsValidMessageType;
             public Type[] MessageTypes => TypeMetadataCache<T>.MessageTypes;
             public string[] MessageTypeNames => TypeMetadataCache<T>.MessageTypeNames;
+
+            public IEnumerable<PropertyInfo> Properties => TypeMetadataCache<T>.Properties;
         }
     }
 
@@ -100,13 +139,13 @@
 
         TypeMetadataCache()
         {
-            _shortName = TypeCache<T>.ShortName;
+            _shortName = GreenPipes.Internals.Extensions.TypeCache<T>.ShortName;
 
             _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
             _hasConsumerInterfaces = new Lazy<bool>(() => !_hasSagaInterfaces.Value && ScanForConsumerInterfaces(), LazyThreadSafetyMode.PublicationOnly);
 
             List<PropertyInfo> PropertyListFactory() =>
-                Internals.Extensions.TypeExtensions.GetAllProperties(typeof(T))
+                typeof(T).GetAllProperties()
                     .GroupBy(x => x.Name)
                     .Select(x => x.Last())
                     .ToList();
@@ -117,7 +156,7 @@
             _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T).GetTypeInfo()));
             _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
-            _implementationType = new Lazy<Type>(() => TypeCache.GetImplementationType(typeof(T)));
+            _implementationType = new Lazy<Type>(() => GreenPipes.Internals.Extensions.TypeCache.GetImplementationType(typeof(T)));
         }
 
         public static string ShortName => Cached.Metadata.Value.ShortName;
@@ -182,9 +221,9 @@
                 return false;
             }
 
-            if (Internals.Extensions.InterfaceExtensions.HasInterface<SendContext>(typeInfo)
-                || Internals.Extensions.InterfaceExtensions.HasInterface<ConsumeContext>(typeInfo)
-                || Internals.Extensions.InterfaceExtensions.HasInterface<ReceiveContext>(typeInfo))
+            if (typeInfo.HasInterface<SendContext>()
+                || typeInfo.HasInterface<ConsumeContext>()
+                || typeInfo.HasInterface<ReceiveContext>())
             {
                 _invalidMessageTypeReason = $"ConsumeContext, ReceiveContext, and SendContext are not valid message types: {ShortName}";
                 return false;
@@ -219,7 +258,7 @@
 
                 if (typeDefinition == typeof(Observes<,>))
                 {
-                    var closingArguments = Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(Observes<,>)).ToArray();
+                    var closingArguments = typeof(T).GetClosingArguments(typeof(Observes<,>)).ToArray();
                     _invalidMessageTypeReason = $"Observes<{closingArguments[0].Name},{closingArguments[1].Name} is not a valid message type";
                     return false;
                 }
@@ -287,7 +326,7 @@
         {
             Type[] interfaces = typeof(T).GetTypeInfo().GetInterfaces();
 
-            return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IConsumer<>)));
+            return interfaces.Any(t => t.HasInterface(typeof(IConsumer<>)));
         }
 
         static bool ScanForSagaInterfaces()
@@ -297,9 +336,9 @@
             if (interfaces.Contains(typeof(ISaga)))
                 return true;
 
-            return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(InitiatedBy<>))
-                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Orchestrates<>))
-                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Observes<,>)));
+            return interfaces.Any(t => t.HasInterface(typeof(InitiatedBy<>))
+                || t.HasInterface(typeof(Orchestrates<>))
+                || t.HasInterface(typeof(Observes<,>)));
         }
 
 

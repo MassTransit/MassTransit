@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.ActiveMqTransport.Topology
 {
+    using System;
     using Builders;
     using Entities;
     using MassTransit.Topology;
@@ -27,8 +28,9 @@ namespace MassTransit.ActiveMqTransport.Topology
         /// <summary>
         /// Returns the send settings for a publish endpoint, which are mostly unused now with topology
         /// </summary>
+        /// <param name="hostAddress"></param>
         /// <returns></returns>
-        SendSettings GetSendSettings();
+        SendSettings GetSendSettings(Uri hostAddress);
 
         BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options = PublishBrokerTopologyOptions.MaintainHierarchy);
     }

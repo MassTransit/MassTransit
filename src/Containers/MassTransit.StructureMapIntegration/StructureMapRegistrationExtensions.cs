@@ -1,8 +1,10 @@
 namespace MassTransit
 {
     using System;
+    using System.Linq;
     using ConsumeConfigurators;
     using Definition;
+    using Metadata;
     using Saga;
     using StructureMap;
     using StructureMapIntegration;
@@ -25,6 +27,33 @@ namespace MassTransit
             var configurator = new ConfigurationExpressionRegistrationConfigurator(expression);
 
             configure?.Invoke(configurator);
+        }
+
+        /// <summary>
+        /// Add consumers that were already added to the container to the registration
+        /// </summary>
+        public static void AddConsumersFromContainer(this IRegistrationConfigurator configurator, IContainer container)
+        {
+            var consumerTypes = container.FindTypes(TypeMetadataCache.IsConsumerOrDefinition);
+            configurator.AddConsumers(consumerTypes);
+        }
+
+        /// <summary>
+        /// Add sagas that were already added to the container to the registration
+        /// </summary>
+        public static void AddSagasFromContainer(this IRegistrationConfigurator configurator, IContainer container)
+        {
+            var sagaTypes = container.FindTypes(TypeMetadataCache.IsSagaOrDefinition);
+            configurator.AddSagas(sagaTypes);
+        }
+
+        static Type[] FindTypes(this IContainer container, Func<Type, bool> filter)
+        {
+            return container.Model.PluginTypes
+                .Where(rs => filter(rs.PluginType))
+                .Select(rs => rs.PluginType)
+                .Concat(container.Model.AllInstances.Where(x => filter(x.ReturnedType)).Select(x => x.ReturnedType))
+                .ToArray();
         }
 
         /// <summary>

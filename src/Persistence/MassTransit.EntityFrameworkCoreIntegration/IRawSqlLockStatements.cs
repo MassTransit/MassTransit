@@ -3,6 +3,7 @@
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
 
+
     public interface IRawSqlLockStatements
     {
         string GetRowLockStatement<TSaga>(DbContext context)

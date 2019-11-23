@@ -1,4 +1,4 @@
-# Using the circuit breaker
+# Circuit Breaker
 
 A circuit breaker is used to protect resources (remote, local, or otherwise) from being overloaded when
 in a failure state. For example, a remote web site may be unavailable and calling that web site in a
@@ -13,7 +13,7 @@ Read Martin Fowler's description of the pattern [here](http://martinfowler.com/b
 To add the circuit breaker to a receive endpoint:
 
 ```csharp
-cfg.ReceiveEndpoint(host, "customer_update_queue", e =>
+cfg.ReceiveEndpoint("customer_update_queue", e =>
 {
     e.UseCircuitBreaker(cb =>
     {

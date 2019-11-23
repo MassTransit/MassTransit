@@ -1,8 +1,10 @@
 namespace MassTransit
 {
     using System;
+    using System.Linq;
     using ConsumeConfigurators;
     using Definition;
+    using Metadata;
     using Saga;
     using SimpleInjector;
     using SimpleInjectorIntegration;
@@ -25,6 +27,32 @@ namespace MassTransit
             var configurator = new SimpleInjectorRegistrationConfigurator(registry);
 
             configure?.Invoke(configurator);
+        }
+
+        /// <summary>
+        /// Add consumers that were already added to the container to the registration
+        /// </summary>
+        public static void AddConsumersFromContainer(this IRegistrationConfigurator configurator, Container container)
+        {
+            var consumerTypes = container.FindTypes(TypeMetadataCache.IsConsumerOrDefinition);
+            configurator.AddConsumers(consumerTypes);
+        }
+
+        /// <summary>
+        /// Add sagas that were already added to the container to the registration
+        /// </summary>
+        public static void AddSagasFromContainer(this IRegistrationConfigurator configurator, Container container)
+        {
+            var sagaTypes = container.FindTypes(TypeMetadataCache.IsSagaOrDefinition);
+            configurator.AddSagas(sagaTypes);
+        }
+
+        static Type[] FindTypes(this Container container, Func<Type, bool> filter)
+        {
+            return container.GetCurrentRegistrations()
+                .Where(rs => filter(rs.Registration.ImplementationType))
+                .Select(rs => rs.Registration.ImplementationType)
+                .ToArray();
         }
 
         /// <summary>

@@ -6,84 +6,31 @@ namespace MassTransit.RabbitMqTransport
     using System.Globalization;
     using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
-    using System.Text.RegularExpressions;
     using Configurators;
     using Metadata;
     using RabbitMQ.Client;
     using Topology;
     using Topology.Settings;
     using Transport;
-    using Util;
 
 
     public static class RabbitMqAddressExtensions
     {
-        static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$");
-
         public static ReceiveSettings GetReceiveSettings(this Uri address)
         {
-            if (string.Compare("rabbitmq", address.Scheme, StringComparison.OrdinalIgnoreCase) != 0)
-                throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme);
+            var hostAddress = new RabbitMqHostAddress(address);
+            var endpointAddress = new RabbitMqEndpointAddress(hostAddress, address);
 
-            var connectionFactory = new ConnectionFactory
+            ReceiveSettings settings = new RabbitMqReceiveSettings(endpointAddress.Name, endpointAddress.ExchangeType, endpointAddress.Durable,
+                endpointAddress.AutoDelete)
             {
-                HostName = address.Host,
-                UserName = "guest",
-                Password = "guest",
+                QueueName = endpointAddress.Name,
+                PrefetchCount = hostAddress.Prefetch ?? (ushort)(Environment.ProcessorCount * 2),
+                Exclusive = endpointAddress.AutoDelete && !endpointAddress.Durable
             };
 
-            if (address.IsDefaultPort)
-                connectionFactory.Port = 5672;
-            else
-                connectionFactory.Port = address.Port;
-
-            string name = address.AbsolutePath.Substring(1);
-            string[] pathSegments = name.Split('/');
-            if (pathSegments.Length == 2)
-            {
-                connectionFactory.VirtualHost = Uri.UnescapeDataString(pathSegments[0]);
-                name = pathSegments[1];
-            }
-
-            ushort heartbeat = address.Query.GetValueFromQueryString("heartbeat", connectionFactory.RequestedHeartbeat);
-            connectionFactory.RequestedHeartbeat = heartbeat;
-
-            if (name == "*")
-            {
-                string uri = address.GetComponents(UriComponents.Scheme | UriComponents.StrongAuthority | UriComponents.Path, UriFormat.UriEscaped);
-                if (uri.EndsWith("*"))
-                {
-                    name = NewId.Next().ToString("NS");
-                    uri = uri.Remove(uri.Length - 1) + name;
-
-                    var builder = new UriBuilder(uri) {Query = string.IsNullOrEmpty(address.Query) ? "" : address.Query.Substring(1)};
-
-                    address = builder.Uri;
-                }
-                else
-                    throw new InvalidOperationException("Uri is not properly formed");
-            }
-            else
-                VerifyQueueOrExchangeNameIsLegal(name);
-
-            ushort prefetch = address.Query.GetValueFromQueryString("prefetch", (ushort)Math.Max(Environment.ProcessorCount, 16));
-            int timeToLive = address.Query.GetValueFromQueryString("ttl", 0);
-
-            bool isTemporary = address.Query.GetValueFromQueryString("temporary", false);
-
-            bool durable = address.Query.GetValueFromQueryString("durable", !isTemporary);
-            bool exclusive = address.Query.GetValueFromQueryString("exclusive", isTemporary);
-            bool autoDelete = address.Query.GetValueFromQueryString("autodelete", isTemporary);
-
-            ReceiveSettings settings = new RabbitMqReceiveSettings(name, ExchangeType.Fanout, durable, autoDelete)
-            {
-                Exclusive = exclusive,
-                QueueName = name,
-                PrefetchCount = prefetch,
-            };
-
-            if (timeToLive > 0)
-                settings.QueueArguments.Add(Headers.XMessageTTL, timeToLive.ToString("F0", CultureInfo.InvariantCulture));
+            if (hostAddress.TimeToLive.HasValue)
+                settings.QueueArguments.Add(Headers.XMessageTTL, hostAddress.TimeToLive.Value.ToString("F0", CultureInfo.InvariantCulture));
 
             return settings;
         }
@@ -164,15 +111,6 @@ namespace MassTransit.RabbitMqTransport
             if (hostInfo.AssemblyVersion != null)
                 factory.ClientProperties["assembly_version"] = hostInfo.AssemblyVersion;
 
-            if (string.IsNullOrEmpty(settings.ClientProvidedName))
-            {
-                factory.ClientProperties["connection_name"] = $"{hostInfo.MachineName}.{hostInfo.Assembly}_{hostInfo.ProcessName}";
-            }
-            else
-            {
-                factory.ClientProperties["connection_name"] = settings.ClientProvidedName;
-            }
-
             return factory;
         }
 
@@ -183,30 +121,18 @@ namespace MassTransit.RabbitMqTransport
 
         internal static ConfigurationHostSettings GetConfigurationHostSettings(this Uri address)
         {
-            short defaultPort = 0;
-            switch (address.Scheme.ToLowerInvariant())
-            {
-                case "rabbitmq":
-                case "amqp":
-                    defaultPort = 5672;
-                    break;
-
-                case "rabbitmqs":
-                case "amqps":
-                    defaultPort = 5671;
-                    break;
-
-                default:
-                    throw new RabbitMqAddressException("The invalid scheme was specified: " + address.Scheme);
-            }
+            var hostAddress = new RabbitMqHostAddress(address);
 
             var hostSettings = new ConfigurationHostSettings
             {
-                Host = address.Host,
+                Host = hostAddress.Host,
+                VirtualHost = hostAddress.VirtualHost,
                 Username = "",
                 Password = "",
-                Port = address.IsDefaultPort ? defaultPort : address.Port
             };
+
+            if (hostAddress.Port.HasValue)
+                hostSettings.Port = hostAddress.Port.Value;
 
             if (!string.IsNullOrEmpty(address.UserInfo))
             {
@@ -217,34 +143,9 @@ namespace MassTransit.RabbitMqTransport
                     hostSettings.Password = parts[1];
             }
 
-            string name = address.AbsolutePath.Substring(1);
-
-            string[] pathSegments = name.Split('/');
-            hostSettings.VirtualHost = pathSegments.Length == 2 ? Uri.UnescapeDataString(pathSegments[0]) : "/";
-
-            hostSettings.Heartbeat = address.Query.GetValueFromQueryString("heartbeat", (ushort)0);
+            hostSettings.Heartbeat = hostAddress.Heartbeat ?? (ushort)0;
 
             return hostSettings;
-        }
-
-        static void VerifyQueueOrExchangeNameIsLegal(string queueName)
-        {
-            if (string.IsNullOrWhiteSpace(queueName))
-                throw new RabbitMqAddressException("The queue name must not be null or empty");
-
-            bool success = IsValidQueueName(queueName);
-            if (!success)
-            {
-                throw new RabbitMqAddressException(
-                    "The queueName must be a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.");
-            }
-        }
-
-        public static bool IsValidQueueName(string queueName)
-        {
-            Match match = _regex.Match(queueName);
-            bool success = match.Success;
-            return success;
         }
     }
 }

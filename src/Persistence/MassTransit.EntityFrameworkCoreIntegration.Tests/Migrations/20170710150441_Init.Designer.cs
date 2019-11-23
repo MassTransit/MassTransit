@@ -8,7 +8,7 @@ using MassTransit.Tests.Saga;
 
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations
 {
-    [DbContext(typeof(SagaDbContext<SimpleSaga, SimpleSagaMap>))]
+    [DbContext(typeof(SimpleSagaDbContext))]
     [Migration("20170710150441_Init")]
     partial class Init
     {

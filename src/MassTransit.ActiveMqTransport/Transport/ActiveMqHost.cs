@@ -91,7 +91,7 @@
             return ReceiveEndpoints.Start(queueName);
         }
 
-        public Task<ISendTransport> CreateSendTransport(Uri address)
+        public Task<ISendTransport> CreateSendTransport(ActiveMqEndpointAddress address)
         {
             var settings = _hostTopology.SendTopology.GetSendSettings(address);
 
@@ -107,7 +107,7 @@
         {
             IActiveMqMessagePublishTopology<T> publishTopology = _hostTopology.Publish<T>();
 
-            var settings = publishTopology.GetSendSettings();
+            var settings = publishTopology.GetSendSettings(_hostConfiguration.HostAddress);
 
             var sessionContextSupervisor = CreateSessionContextSupervisor();
 

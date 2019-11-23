@@ -33,6 +33,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Audit
             typeBuilder.Property(x => x.ConversationId);
             typeBuilder.Property(x => x.CorrelationId);
             typeBuilder.Property(x => x.RequestId);
+            typeBuilder.Property(x => x.SentTime);
             typeBuilder.Property(x => x.SourceAddress);
             typeBuilder.Property(x => x.DestinationAddress);
             typeBuilder.Property(x => x.ResponseAddress);

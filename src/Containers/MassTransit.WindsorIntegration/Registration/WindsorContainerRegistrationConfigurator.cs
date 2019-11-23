@@ -44,10 +44,19 @@ namespace MassTransit.WindsorIntegration.Registration
 
         public void AddBus(Func<IKernel, IBusControl> busFactory)
         {
+            IBusControl BusFactory(IKernel kernel)
+            {
+                var provider = kernel.Resolve<IConfigurationServiceProvider>();
+
+                ConfigureLogContext(provider);
+
+                return busFactory(kernel);
+            }
+
             _container.Register(
                 Component.For<IBusControl>()
                     .Forward<IBus>()
-                    .UsingFactoryMethod(busFactory).LifestyleSingleton(),
+                    .UsingFactoryMethod(BusFactory).LifestyleSingleton(),
                 Component.For<ISendEndpointProvider>()
                     .UsingFactoryMethod(GetCurrentSendEndpointProvider)
                     .LifestyleTransient(),
@@ -58,11 +67,6 @@ namespace MassTransit.WindsorIntegration.Registration
                     .UsingFactoryMethod(kernel => kernel.Resolve<IBus>().CreateClientFactory())
                     .LifestyleSingleton()
             );
-        }
-
-        IConsumerScopeProvider CreateConsumerScopeProvider(IKernel kernel)
-        {
-            return new WindsorConsumerScopeProvider(kernel);
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IKernel context)

@@ -2,7 +2,7 @@
   <Import Project="../netfx.props" />
   <Import Project="../signing.props" />
   <PropertyGroup>
-    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>MassTransit.ActiveMQ</PackageId>
@@ -20,7 +20,7 @@
     <PackageReference Include="Apache.NMS.NetStd" Version="1.7.1.3899" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <PackageReference Include="Apache.NMS.ActiveMQ" Version="1.7.2" />
     <PackageReference Include="Apache.NMS" Version="1.7.1" />
   </ItemGroup>

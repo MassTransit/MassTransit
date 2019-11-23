@@ -26,7 +26,7 @@
             _hostSettings = new HostSettings();
             _topologyConfiguration = topologyConfiguration;
 
-            _proxy = new ServiceBusHostProxy();
+            _proxy = new ServiceBusHostProxy(this);
         }
 
         public override Uri HostAddress => _hostSettings.ServiceUri;
@@ -90,6 +90,7 @@
             configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
             configuration.ConnectSagaConfigurationObserver(_busConfiguration);
             configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
+            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
 
             configure?.Invoke(configuration);
 
@@ -105,14 +106,14 @@
         {
             var settings = new SubscriptionEndpointSettings(_busConfiguration.Topology.Publish.GetMessageTopology<T>().TopicDescription, subscriptionName);
 
-            CreateSubscriptionEndpointConfiguration(settings,  configure);
+            CreateSubscriptionEndpointConfiguration(settings, configure);
         }
 
         public void SubscriptionEndpoint(string subscriptionName, string topicPath, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
             var settings = new SubscriptionEndpointSettings(topicPath, subscriptionName);
 
-            CreateSubscriptionEndpointConfiguration(settings,  configure);
+            CreateSubscriptionEndpointConfiguration(settings, configure);
         }
 
         public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,
@@ -134,6 +135,7 @@
             configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
             configuration.ConnectSagaConfigurationObserver(_busConfiguration);
             configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
+            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
 
             configure?.Invoke(configuration);
 
@@ -146,7 +148,7 @@
 
         public override IBusHostControl Build()
         {
-            var hostTopology = new ServiceBusHostTopology(_topologyConfiguration);
+            var hostTopology = new ServiceBusHostTopology(_topologyConfiguration, _hostSettings.ServiceUri);
 
             var host = new ServiceBusHost(this, hostTopology);
 

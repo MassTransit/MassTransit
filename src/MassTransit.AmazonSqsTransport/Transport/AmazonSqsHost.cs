@@ -91,7 +91,7 @@
             return ReceiveEndpoints.Start(queueName);
         }
 
-        public Task<ISendTransport> CreateSendTransport(Uri address)
+        public Task<ISendTransport> CreateSendTransport(AmazonSqsEndpointAddress address)
         {
             var settings = _hostTopology.SendTopology.GetSendSettings(address);
 

@@ -12,17 +12,15 @@ For message types that have a correlation identifier, but are not using the `Cor
 MessageCorrelation.UseCorrelationId<YourMessageClass>(x => x.SomeGuidValue);
 ```
 
-<div class="alert alert-info">
-<b>Note:</b>
-    This should be called before you start the bus. We currently recommend that you put all of these in a static method for easy grouping and then call it at the beginning of the MassTransit configuration block.
-</div>
+::: warning
+This should be called before you start the bus. We currently recommend that you put all of these in a static method for easy grouping and then call it at the beginning of the MassTransit configuration block.
+:::
 
 Most transactions in a system will end up being logged and wide scale correlation is likely. Therefore, the use of consistent correlation identifiers is recommended. In fact, using a `Guid` type is highly recommended. MassTransit uses the [NewId](https://www.nuget.org/packages/NewId) library to generate identifiers that are unique and sequential that are represented as a `Guid`. The identifiers are clustered-index friendly, being ordered in a way that SQL Server can efficiently insert them into a database with the *uniqueidentifier* as the primary key. Just use `NewId.NextGuid()` to generate an identifier -- it's fast, fun, and all your friends are doing it.
 
-<div class="alert alert-info">
-<b>Note:</b>
-    So, what does correlated actually mean? In short it means that this message is a part of a larger conversation. For instance, you may have a message that says <i>New Order (Item:Hammers; Qty:22; OrderNumber:45)</i> and there may be another message that is a response to that message that says <i>Order Allocated(OrderNumber:45)</i>. In this case, the order number is acting as your correlation identifier, it ties the messages together.
-</div>
+::: tip
+So, what does correlated actually mean? In short it means that this message is a part of a larger conversation. For instance, you may have a message that says <i>New Order (Item:Hammers; Qty:22; OrderNumber:45)</i> and there may be another message that is a response to that message that says <i>Order Allocated(OrderNumber:45)</i>. In this case, the order number is acting as your correlation identifier, it ties the messages together.
+:::
 
 ### Correlation by convention
 

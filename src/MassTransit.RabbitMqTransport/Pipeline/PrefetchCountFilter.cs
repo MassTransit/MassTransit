@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             LogContext.Debug?.Log("Prefetch Count: {PrefetchCount}", _prefetchCount);
 
-            await context.BasicQos(0, _prefetchCount, true).ConfigureAwait(false);
+            await context.BasicQos(0, _prefetchCount, false).ConfigureAwait(false);
 
             using (new SetPrefetchCountConsumer(_managementPipe, context, this))
             {

@@ -3,7 +3,7 @@
   <Import Project="../signing.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -12,7 +12,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+    <DefineConstants>$(DefineConstants);NETCORE;NETSTD</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <DefineConstants>$(DefineConstants);NETSTD</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
@@ -23,16 +27,18 @@
     <Compile Remove="Serialization/ExtensionsForBinaryMessageSerializer.cs" />
     <Compile Remove="Serialization/BinaryMessageSerializer.cs" />
     <Compile Remove="Serialization/BinaryMessageDeserializer.cs" />
-        <Compile Remove="Monitoring/Performance/Windows/**" />
+    <Compile Remove="Monitoring/Performance/Windows/**" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <Compile Remove="Context/LogContext.net46.cs" />
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+    <Compile Remove="Context/LogContext.net45.cs" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Transactions" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Automatonymous" Version="4.2.0-develop.124" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.0.2" />
+    <PackageReference Include="Automatonymous" Version="4.2.0-develop.125" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
     <PackageReference Include="NewId" Version="3.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.1" />
@@ -51,12 +57,4 @@
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Transactions" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Monitoring\Performance\Configuration" />
-  </ItemGroup>
 </Project>

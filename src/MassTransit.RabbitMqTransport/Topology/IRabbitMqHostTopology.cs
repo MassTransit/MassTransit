@@ -11,6 +11,12 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         new IRabbitMqSendTopology SendTopology { get; }
 
+        new IRabbitMqMessagePublishTopology<T> Publish<T>()
+            where T : class;
+
+        new IRabbitMqMessageSendTopology<T> Send<T>()
+            where T : class;
+
         /// <summary>
         /// Returns the destination address for the specified exchange
         /// </summary>
@@ -28,18 +34,10 @@ namespace MassTransit.RabbitMqTransport.Topology
         Uri GetDestinationAddress(Type messageType, Action<IExchangeConfigurator> configure = null);
 
         /// <summary>
-        /// Returns the settings for sending to the specified address. Will parse any arguments
-        /// off the query string to properly configure the settings, including exchange and queue
-        /// durability, etc.
+        /// Returns the address for the delayed exchanged associated with the specified <paramref name="address"/>
         /// </summary>
-        /// <param name="address">The RabbitMQ endpoint address</param>
-        /// <returns>The send settings for the address</returns>
-        SendSettings GetSendSettings(Uri address);
-
-        new IRabbitMqMessagePublishTopology<T> Publish<T>()
-            where T : class;
-
-        new IRabbitMqMessageSendTopology<T> Send<T>()
-            where T : class;
+        /// <param name="address"></param>
+        /// <returns></returns>
+        Uri GetDelayedExchangeDestinationAddress(Uri address);
     }
 }

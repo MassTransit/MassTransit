@@ -43,6 +43,8 @@ namespace MassTransit.ConsumePipeSpecifications
             _sagaObservers = new SagaConfigurationObservable();
             _handlerObservers = new HandlerConfigurationObservable();
             _activityObservers = new ActivityConfigurationObservable();
+
+            AutoStart = true;
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
@@ -88,6 +90,8 @@ namespace MassTransit.ConsumePipeSpecifications
         {
             _consumeContextSpecifications.Add(specification);
         }
+
+        public bool AutoStart { get; set; }
 
         public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
             where TConsumer : class
@@ -177,7 +181,7 @@ namespace MassTransit.ConsumePipeSpecifications
 
             builder.AddFilter(filter);
 
-            return new ConsumePipe(filter, builder.Build());
+            return new ConsumePipe(filter, builder.Build(), AutoStart);
         }
 
         static Guid GetRequestId(ConsumeContext context)

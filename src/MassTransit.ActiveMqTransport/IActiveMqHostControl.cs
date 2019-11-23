@@ -9,7 +9,7 @@
         IBusHostControl,
         IActiveMqHost
     {
-        Task<ISendTransport> CreateSendTransport(Uri address);
+        Task<ISendTransport> CreateSendTransport(ActiveMqEndpointAddress address);
 
         Task<ISendTransport> CreatePublishTransport<T>()
             where T : class;

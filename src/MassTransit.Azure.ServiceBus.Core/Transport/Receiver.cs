@@ -30,7 +30,7 @@
             _messageReceiver = messageReceiver;
 
             Tracker = new DeliveryTracker(HandleDeliveryComplete);
-            _deliveryComplete = new TaskCompletionSource<bool>();
+            _deliveryComplete = TaskUtil.GetTask<bool>();
         }
 
         public DeliveryMetrics GetDeliveryMetrics()

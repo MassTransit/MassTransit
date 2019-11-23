@@ -9,6 +9,7 @@
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Policies;
     using Topology;
     using Transports;
@@ -22,17 +23,17 @@
         readonly IActiveMqHost _host;
         readonly Uri _inputAddress;
         readonly ReceiveSettings _settings;
-        readonly ActiveMqReceiveEndpointContext _receiveEndpointContext;
+        readonly ActiveMqReceiveEndpointContext _context;
 
         public ActiveMqReceiveTransport(IActiveMqHost host, ReceiveSettings settings, IPipe<ConnectionContext> connectionPipe,
-            ActiveMqReceiveEndpointContext receiveEndpointContext)
+            ActiveMqReceiveEndpointContext context)
         {
             _host = host;
             _settings = settings;
-            _receiveEndpointContext = receiveEndpointContext;
+            _context = context;
             _connectionPipe = connectionPipe;
 
-            _inputAddress = receiveEndpointContext.InputAddress;
+            _inputAddress = context.InputAddress;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -41,7 +42,7 @@
             scope.Add("type", "ActiveMQ");
             scope.Set(_settings);
             var topologyScope = scope.CreateScope("topology");
-            _receiveEndpointContext.BrokerTopology.Probe(topologyScope);
+            _context.BrokerTopology.Probe(topologyScope);
         }
 
         /// <summary>
@@ -58,22 +59,22 @@
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveObserver(observer);
+            return _context.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _receiveEndpointContext.ConnectReceiveTransportObserver(observer);
+            return _context.ConnectReceiveTransportObserver(observer);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveEndpointContext.ConnectPublishObserver(observer);
+            return _context.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            return _receiveEndpointContext.ConnectSendObserver(observer);
+            return _context.ConnectSendObserver(observer);
         }
 
         async Task Receiver()
@@ -86,6 +87,10 @@
                     {
                         try
                         {
+                            await _context.OnTransportStartup(_host.ConnectionContextSupervisor, Stopping).ConfigureAwait(false);
+                            if (IsStopping)
+                                return;
+
                             await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
                         }
                         catch (NMSConnectionException ex)
@@ -123,7 +128,7 @@
         {
             LogContext.Error?.Log(exception, "ActiveMQ Connect Failed: {Host}", _host.Settings.ToDescription());
 
-            return _receiveEndpointContext.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, exception));
+            return _context.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, exception));
         }
 
 

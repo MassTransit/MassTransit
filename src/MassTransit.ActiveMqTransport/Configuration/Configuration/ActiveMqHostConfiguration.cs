@@ -24,9 +24,9 @@
         {
             _busConfiguration = busConfiguration;
             _topologyConfiguration = topologyConfiguration;
-            _hostSettings = new ConfigurationHostSettings {Host = "localhost"};
+            _hostSettings = new ConfigurationHostSettings(new Uri("activemq://localhost"));
 
-            _proxy = new ActiveMqHostProxy();
+            _proxy = new ActiveMqHostProxy(this);
         }
 
         public string Description => _hostSettings.ToDescription();
@@ -62,6 +62,7 @@
             configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
             configuration.ConnectSagaConfigurationObserver(_busConfiguration);
             configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
+            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
 
             configure?.Invoke(configuration);
 
