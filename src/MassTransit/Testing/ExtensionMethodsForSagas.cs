@@ -25,11 +25,17 @@ namespace MassTransit.Testing
         public static async Task<Guid?> ShouldContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
+            return await (repository as IQuerySagaRepository<TSaga>).ShouldContainSaga(sagaId, timeout).ConfigureAwait(false);
+        }
+
+        public static async Task<Guid?> ShouldContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
+            where TSaga : class, ISaga
+        {
             DateTime giveUpAt = DateTime.Now + timeout;
 
             while (DateTime.Now < giveUpAt)
             {
-                Guid saga = (await (repository as IQuerySagaRepository<TSaga>).Where(x => x.CorrelationId == sagaId).ConfigureAwait(false)).FirstOrDefault();
+                Guid saga = (await repository.Where(x => x.CorrelationId == sagaId).ConfigureAwait(false)).FirstOrDefault();
                 if (saga != Guid.Empty)
                     return saga;
 
@@ -42,12 +48,18 @@ namespace MassTransit.Testing
         public static async Task<Guid?> ShouldNotContainSaga<TSaga>(this ISagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
+            return await (repository as IQuerySagaRepository<TSaga>).ShouldNotContainSaga(sagaId, timeout).ConfigureAwait(false);
+        }
+
+        public static async Task<Guid?> ShouldNotContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Guid sagaId, TimeSpan timeout)
+            where TSaga : class, ISaga
+        {
             DateTime giveUpAt = DateTime.Now + timeout;
 
             Guid? saga = default;
             while (DateTime.Now < giveUpAt)
             {
-                saga = (await (repository as IQuerySagaRepository<TSaga>).Where(x => x.CorrelationId == sagaId).ConfigureAwait(false)).FirstOrDefault();
+                saga = (await repository.Where(x => x.CorrelationId == sagaId).ConfigureAwait(false)).FirstOrDefault();
                 if (saga == Guid.Empty)
                     return default;
 
@@ -61,13 +73,20 @@ namespace MassTransit.Testing
             TimeSpan timeout)
             where TSaga : class, ISaga
         {
+            return await (repository as IQuerySagaRepository<TSaga>).ShouldContainSaga(filter, timeout).ConfigureAwait(false);
+        }
+
+        public static async Task<Guid?> ShouldContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter,
+            TimeSpan timeout)
+            where TSaga : class, ISaga
+        {
             DateTime giveUpAt = DateTime.Now + timeout;
 
             var query = new SagaQuery<TSaga>(filter);
 
             while (DateTime.Now < giveUpAt)
             {
-                List<Guid> sagas = (await (repository as IQuerySagaRepository<TSaga>).Where(query.FilterExpression).ConfigureAwait(false)).ToList();
+                List<Guid> sagas = (await repository.Where(query.FilterExpression).ConfigureAwait(false)).ToList();
                 if (sagas.Count > 0)
                     return sagas.Single();
 
