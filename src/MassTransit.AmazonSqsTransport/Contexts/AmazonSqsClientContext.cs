@@ -4,16 +4,19 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Net;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Amazon.Auth.AccessControlPolicy;
     using Amazon.Auth.AccessControlPolicy.ActionIdentifiers;
+    using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SimpleNotificationService.Model;
     using Amazon.SQS;
     using Amazon.SQS.Model;
     using Context;
+    using Exceptions;
     using GreenPipes;
     using Pipeline;
     using Topology;
@@ -76,6 +79,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             };
 
             var response = await _amazonSns.CreateTopicAsync(request).ConfigureAwait(false);
+            
+            EnsureSuccessfulResponse(response);
 
             await Task.Delay(500).ConfigureAwait(false);
 
@@ -108,6 +113,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             };
 
             var response = await _amazonSqs.CreateQueueAsync(request).ConfigureAwait(false);
+
+            EnsureSuccessfulResponse(response);
 
             await Task.Delay(500).ConfigureAwait(false);
 
@@ -142,7 +149,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 Attributes = subscriptionAttributes,
             };
 
-            await _amazonSns.SubscribeAsync(subscribeRequest).ConfigureAwait(false);
+            var response = await _amazonSns.SubscribeAsync(subscribeRequest).ConfigureAwait(false);
+            
+            EnsureSuccessfulResponse(response);
 
             var sqsQueueArn = queueAttributes[QueueAttributeName.QueueArn];
             var topicArnPattern = topicArn.Substring(0, topicArn.LastIndexOf(':') + 1) + "*";
@@ -179,13 +188,17 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         async Task ClientContext.DeleteTopic(Topic topic)
         {
             var topicArn = await CreateTopic(topic).ConfigureAwait(false);
-            await _amazonSns.DeleteTopicAsync(topicArn).ConfigureAwait(false);
+            var response = await _amazonSns.DeleteTopicAsync(topicArn).ConfigureAwait(false);
+
+            EnsureSuccessfulResponse(response);
         }
 
         async Task ClientContext.DeleteQueue(Queue queue)
         {
             var queueUrl = await CreateQueue(queue).ConfigureAwait(false);
-            await _amazonSqs.DeleteQueueAsync(queueUrl).ConfigureAwait(false);
+            var response = await _amazonSqs.DeleteQueueAsync(queueUrl).ConfigureAwait(false);
+            
+            EnsureSuccessfulResponse(response);
         }
 
         Task ClientContext.BasicConsume(ReceiveSettings receiveSettings, IBasicConsumer consumer)
@@ -248,7 +261,11 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 MessageAttributeNames = new List<string> {"All"}
             };
 
-            return await _amazonSqs.ReceiveMessageAsync(request, CancellationToken).ConfigureAwait(false);
+            var response = await _amazonSqs.ReceiveMessageAsync(request, CancellationToken).ConfigureAwait(false);
+
+            EnsureSuccessfulResponse(response);
+
+            return response;
         }
 
         PublishRequest ClientContext.CreatePublishRequest(string topicName, byte[] body)
@@ -273,14 +290,18 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             throw new ArgumentException($"The queue was unknown: {queueName}", nameof(queueName));
         }
 
-        Task ClientContext.Publish(PublishRequest request, CancellationToken cancellationToken)
+        async Task ClientContext.Publish(PublishRequest request, CancellationToken cancellationToken)
         {
-            return _amazonSns.PublishAsync(request, cancellationToken);
+            var response = await _amazonSns.PublishAsync(request, cancellationToken).ConfigureAwait(false);
+
+            EnsureSuccessfulResponse(response);
         }
 
-        Task ClientContext.SendMessage(SendMessageRequest request, CancellationToken cancellationToken)
+        async Task ClientContext.SendMessage(SendMessageRequest request, CancellationToken cancellationToken)
         {
-            return _amazonSqs.SendMessageAsync(request, cancellationToken);
+            var response = await _amazonSqs.SendMessageAsync(request, cancellationToken).ConfigureAwait(false);
+
+            EnsureSuccessfulResponse(response);
         }
 
         Task ClientContext.DeleteMessage(string queueName, string receiptHandle, CancellationToken cancellationToken)
@@ -299,6 +320,19 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                     return _amazonSqs.PurgeQueueAsync(queueUrl, cancellationToken);
 
             throw new ArgumentException($"The queue was unknown: {queueName}", nameof(queueName));
+        }
+
+        void EnsureSuccessfulResponse(AmazonWebServiceResponse response)
+        {
+            const string documentationUri = "https://aws.amazon.com/blogs/developer/logging-with-the-aws-sdk-for-net/";
+
+            var statusCode = response.HttpStatusCode;
+            var requestId = response.ResponseMetadata.RequestId;
+
+            if (statusCode >= HttpStatusCode.OK && statusCode < HttpStatusCode.MultipleChoices)
+                return;
+
+            throw new AmazonSqsTransportException($"Received unsuccessful response ({statusCode}) from AWS endpoint. See AWS SDK logs ({requestId}) for more details: {documentationUri}");
         }
     }
 }
