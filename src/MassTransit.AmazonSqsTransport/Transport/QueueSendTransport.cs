@@ -74,7 +74,8 @@
 
                     var transportMessage = clientContext.CreateSendRequest(_context.EntityName, context.Body);
 
-                    transportMessage.MessageAttributes.Set(context.Headers);
+                    if (_context.CopyHeadersToMessageAttributes)
+                        transportMessage.MessageAttributes.Set(context.Headers);
 
                     if (!string.IsNullOrEmpty(context.DeduplicationId))
                         transportMessage.MessageDeduplicationId = context.DeduplicationId;

@@ -28,7 +28,6 @@
         {
             _hostConfiguration = hostConfiguration;
             _hostTopology = hostTopology;
-
             ConnectionRetryPolicy = Retry.CreatePolicy(x =>
             {
                 x.Handle<AmazonSqsTransportException>();
@@ -99,7 +98,8 @@
 
             var configureTopologyPipe = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
 
-            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, SendLogContext);
+            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName,
+                _hostConfiguration.Settings.CopyHeadersToMessageAttributes, SendLogContext);
 
             var transport = new QueueSendTransport(transportContext);
             Add(transport);
@@ -118,7 +118,8 @@
 
             var configureTopologyPipe = new ConfigureTopologyFilter<PublishSettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
 
-            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, SendLogContext);
+            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName,
+                _hostConfiguration.Settings.CopyHeadersToMessageAttributes, SendLogContext);
 
             var transport = new TopicSendTransport(transportContext);
             Add(transport);

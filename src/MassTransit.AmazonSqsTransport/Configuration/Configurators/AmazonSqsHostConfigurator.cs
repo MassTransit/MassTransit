@@ -71,6 +71,11 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             _settings.AmazonSnsConfig = config;
         }
 
+        public bool CopyHeadersToMessageAttributes
+        {
+            set => _settings.CopyHeadersToMessageAttributes = value;
+        }
+
         void SetBasicCredentials()
         {
             if (string.IsNullOrEmpty(_accessKey) || string.IsNullOrEmpty(_secretKey))
