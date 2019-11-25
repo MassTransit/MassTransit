@@ -23,11 +23,17 @@
         readonly IAmazonSqsHostConfiguration _hostConfiguration;
         readonly IAmazonSqsHostTopology _hostTopology;
 
-        public AmazonSqsHost(IAmazonSqsHostConfiguration hostConfiguration, IAmazonSqsHostTopology hostTopology)
+        readonly Action<SendSettings> _configureSendSettings;
+        readonly Action<PublishSettings> _configurePublishSettings;
+
+        public AmazonSqsHost(IAmazonSqsHostConfiguration hostConfiguration, IAmazonSqsHostTopology hostTopology,
+            Action<SendSettings> configureSendSettings = null, Action<PublishSettings> configurePublishSettings = null)
             : base(hostConfiguration, hostTopology)
         {
             _hostConfiguration = hostConfiguration;
             _hostTopology = hostTopology;
+            _configureSendSettings = configureSendSettings;
+            _configurePublishSettings = configurePublishSettings;
 
             ConnectionRetryPolicy = Retry.CreatePolicy(x =>
             {
@@ -95,11 +101,13 @@
         {
             var settings = _hostTopology.SendTopology.GetSendSettings(address);
 
+            _configureSendSettings?.Invoke(settings);
+
             var clientContextSupervisor = new AmazonSqsClientContextSupervisor(ConnectionContextSupervisor);
 
             var configureTopologyPipe = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
 
-            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, SendLogContext);
+            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, settings.PushContextHeadersOverMessageAttributes, SendLogContext);
 
             var transport = new QueueSendTransport(transportContext);
             Add(transport);
@@ -114,11 +122,13 @@
 
             var settings = publishTopology.GetPublishSettings();
 
+            _configurePublishSettings?.Invoke(settings);
+
             var clientContextSupervisor = new AmazonSqsClientContextSupervisor(ConnectionContextSupervisor);
 
             var configureTopologyPipe = new ConfigureTopologyFilter<PublishSettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
 
-            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, SendLogContext);
+            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, settings.PushContextHeadersOverMessageAttributes, SendLogContext);
 
             var transport = new TopicSendTransport(transportContext);
             Add(transport);

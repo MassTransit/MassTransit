@@ -20,6 +20,11 @@ namespace MassTransit.AmazonSqsTransport.Topology
         EntitySettings
     {
         /// <summary>
+        /// Attach context's headers using SQS/SNS Message Attributes.
+        /// </summary>
+        bool PushContextHeadersOverMessageAttributes { get; set; }
+
+        /// <summary>
         /// Returns the send address for the settings
         /// </summary>
         /// <param name="hostAddress"></param>

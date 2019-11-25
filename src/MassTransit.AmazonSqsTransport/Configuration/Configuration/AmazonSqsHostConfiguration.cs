@@ -4,6 +4,7 @@
     using Configurators;
     using Definition;
     using MassTransit.Configurators;
+    using Topology;
     using Topology.Settings;
     using Topology.Topologies;
     using Transport;
@@ -38,6 +39,9 @@
             get => _hostSettings;
             set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
+
+        public Action<SendSettings> ConfigureSendSettings { get; set; }
+        public Action<PublishSettings> ConfigurePublishSettings { get; set; }
 
         public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IAmazonSqsReceiveEndpointConfigurator> configure)
@@ -102,7 +106,7 @@
 
             var hostTopology = new AmazonSqsHostTopology(messageNameFormatter, _hostSettings.HostAddress, _topologyConfiguration);
 
-            var host = new AmazonSqsHost(this, hostTopology);
+            var host = new AmazonSqsHost(this, hostTopology, ConfigureSendSettings, ConfigurePublishSettings);
 
             foreach (var endpointConfiguration in Endpoints)
             {

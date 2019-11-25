@@ -27,6 +27,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         {
         }
 
+        public bool PushContextHeadersOverMessageAttributes { get; set; } = true;
+
         public Uri GetSendAddress(Uri hostAddress)
         {
             var builder = new UriBuilder(hostAddress);

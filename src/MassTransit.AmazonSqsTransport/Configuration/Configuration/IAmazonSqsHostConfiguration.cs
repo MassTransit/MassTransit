@@ -2,6 +2,7 @@
 {
     using System;
     using MassTransit.Configuration;
+    using Topology;
     using Topology.Settings;
 
 
@@ -15,6 +16,9 @@
         /// If true, only the broker topology will be deployed
         /// </summary>
         bool DeployTopologyOnly { get; set; }
+
+        Action<SendSettings> ConfigureSendSettings { get; set; }
+        Action<PublishSettings> ConfigurePublishSettings { get; set; }
 
         IAmazonSqsHost Proxy { get; }
 
