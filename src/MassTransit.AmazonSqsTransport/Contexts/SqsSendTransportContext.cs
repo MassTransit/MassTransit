@@ -12,6 +12,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         string EntityName { get; }
 
+        bool CopyHeadersToMessageAttributes { get; }
+
         IClientContextSupervisor ClientContextSupervisor { get; }
     }
 }

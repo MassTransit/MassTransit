@@ -74,7 +74,8 @@
 
                     var transportMessage = clientContext.CreatePublishRequest(_context.EntityName, context.Body);
 
-                    transportMessage.MessageAttributes.Set(context.Headers);
+                    if (_context.CopyHeadersToMessageAttributes)
+                        transportMessage.MessageAttributes.Set(context.Headers);
 
                     transportMessage.MessageAttributes.Set("Content-Type", context.ContentType.MediaType);
                     transportMessage.MessageAttributes.Set(nameof(context.MessageId), context.MessageId);
