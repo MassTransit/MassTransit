@@ -71,9 +71,9 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             _settings.AmazonSnsConfig = config;
         }
 
-        public bool CopyHeadersToMessageAttributes
+        public Func<string, bool> CopyHeaderToMessageAttributesFilter
         {
-            set => _settings.CopyHeadersToMessageAttributes = value;
+            set => _settings.CopyHeaderToMessageAttributesFilter = value;
         }
 
         void SetBasicCredentials()

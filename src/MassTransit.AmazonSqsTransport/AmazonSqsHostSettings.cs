@@ -39,9 +39,9 @@ namespace MassTransit.AmazonSqsTransport
         string SecretKey { get; }
 
         /// <summary>
-        /// Copy user headers from <see cref="SendContext"/> to the Amazon message attributes
+        /// If provided, only <see cref="SendContext"/> headers passing the filter will be copied to the Amazon message attributes
         /// </summary>
-        bool CopyHeadersToMessageAttributes { get; }
+        Func<string, bool> CopyHeaderToMessageAttributesFilter { get; }
 
         Uri HostAddress { get; }
 

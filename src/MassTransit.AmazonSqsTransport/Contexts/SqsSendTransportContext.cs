@@ -1,5 +1,6 @@
 namespace MassTransit.AmazonSqsTransport.Contexts
 {
+    using System;
     using Context;
     using GreenPipes;
     using Transport;
@@ -12,7 +13,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         string EntityName { get; }
 
-        bool CopyHeadersToMessageAttributes { get; }
+        Func<string, bool> CopyHeaderToMessageAttributesFilter { get; }
 
         IClientContextSupervisor ClientContextSupervisor { get; }
     }

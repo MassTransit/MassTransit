@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Configuration
 {
+    using System;
     using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
@@ -42,6 +43,6 @@
         /// <summary>
         /// Copy user headers from <see cref="SendContext"/> to the Amazon message attributes
         /// </summary>
-        bool CopyHeadersToMessageAttributes { set; }
+        Func<string, bool> CopyHeaderToMessageAttributesFilter { set; }
     }
 }

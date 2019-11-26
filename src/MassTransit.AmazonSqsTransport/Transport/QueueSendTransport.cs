@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -74,8 +75,7 @@
 
                     var transportMessage = clientContext.CreateSendRequest(_context.EntityName, context.Body);
 
-                    if (_context.CopyHeadersToMessageAttributes)
-                        transportMessage.MessageAttributes.Set(context.Headers);
+                    transportMessage.MessageAttributes.Set(context.Headers);
 
                     if (!string.IsNullOrEmpty(context.DeduplicationId))
                         transportMessage.MessageDeduplicationId = context.DeduplicationId;
@@ -90,6 +90,16 @@
                     transportMessage.MessageAttributes.Set(nameof(context.MessageId), context.MessageId);
                     transportMessage.MessageAttributes.Set(nameof(context.CorrelationId), context.CorrelationId);
                     transportMessage.MessageAttributes.Set(nameof(context.TimeToLive), context.TimeToLive);
+
+                    var removeAttributesFilter = _context.CopyHeaderToMessageAttributesFilter;
+
+                    if (removeAttributesFilter != null)
+                    {
+                        var removeKeys = transportMessage.MessageAttributes.Where(ma => !removeAttributesFilter(ma.Key)).Select(ma => ma.Key).ToArray();
+
+                        foreach (var key in removeKeys)
+                            transportMessage.MessageAttributes.Remove(key);
+                    }
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(context).ConfigureAwait(false);

@@ -24,7 +24,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public string AccessKey => (_immutableCredentials ?? (_immutableCredentials = GetImmutableCredentials())).AccessKey;
         public string SecretKey => (_immutableCredentials ?? (_immutableCredentials = GetImmutableCredentials())).SecretKey;
 
-        public bool CopyHeadersToMessageAttributes { get; set; } = true;
+        public Func<string, bool> CopyHeaderToMessageAttributesFilter { get; set; } 
 
         public AWSCredentials Credentials
         {
