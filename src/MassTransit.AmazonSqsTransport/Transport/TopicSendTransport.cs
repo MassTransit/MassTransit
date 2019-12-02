@@ -72,20 +72,17 @@
 
                     activity.AddSendContextHeaders(context);
 
-                    var transportMessage = clientContext.CreatePublishRequest(_context.EntityName, context.Body);
+                    var request = clientContext.CreatePublishRequest(_context.EntityName, context.Body);
 
-                    if (_context.CopyHeadersToMessageAttributes)
-                        transportMessage.MessageAttributes.Set(context.Headers);
+                    _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, context.Headers);
 
-                    transportMessage.MessageAttributes.Set("Content-Type", context.ContentType.MediaType);
-                    transportMessage.MessageAttributes.Set(nameof(context.MessageId), context.MessageId);
-                    transportMessage.MessageAttributes.Set(nameof(context.CorrelationId), context.CorrelationId);
-                    transportMessage.MessageAttributes.Set(nameof(context.TimeToLive), context.TimeToLive);
+                    _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, "Content-Type", context.ContentType.MediaType);
+                    _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, nameof(context.CorrelationId), context.CorrelationId);
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
-                    await clientContext.Publish(transportMessage, context.CancellationToken).ConfigureAwait(false);
+                    await clientContext.Publish(request, context.CancellationToken).ConfigureAwait(false);
 
                     context.LogSent();
 

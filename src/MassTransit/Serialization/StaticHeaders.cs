@@ -1,18 +1,7 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.Remoting.Messaging;
@@ -53,15 +42,14 @@ namespace MassTransit.Serialization
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            object obj;
-            if (!TryGetHeader(key, out obj))
+            if (!TryGetHeader(key, out var obj))
                 return defaultValue;
 
             if (obj == null)
                 return defaultValue;
 
-            if (obj is T)
-                return (T)obj;
+            if (obj is T value)
+                return value;
 
             return defaultValue;
         }
@@ -79,6 +67,16 @@ namespace MassTransit.Serialization
 
             value = null;
             return false;
+        }
+
+        public IEnumerator<HeaderValue> GetEnumerator()
+        {
+            return _headers.Select(x => new HeaderValue(x.Name, x.Value)).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

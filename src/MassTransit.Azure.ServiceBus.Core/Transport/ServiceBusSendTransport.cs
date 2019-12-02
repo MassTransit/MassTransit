@@ -193,7 +193,7 @@
             {
                 var brokeredMessage = new Message(context.Body) {ContentType = context.ContentType.MediaType};
 
-                brokeredMessage.UserProperties.SetTextHeaders(context.Headers, (_, text) => text);
+                brokeredMessage.UserProperties.Set(context.Headers);
 
                 if (context.TimeToLive.HasValue)
                     brokeredMessage.TimeToLive = context.TimeToLive.Value;

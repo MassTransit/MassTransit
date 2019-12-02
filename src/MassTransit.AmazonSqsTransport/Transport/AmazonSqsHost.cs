@@ -98,8 +98,8 @@
 
             var configureTopologyPipe = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
 
-            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName,
-                _hostConfiguration.Settings.CopyHeadersToMessageAttributes, SendLogContext);
+            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, SendLogContext,
+                _hostConfiguration.Settings.AllowTransportHeader);
 
             var transport = new QueueSendTransport(transportContext);
             Add(transport);
@@ -118,8 +118,8 @@
 
             var configureTopologyPipe = new ConfigureTopologyFilter<PublishSettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
 
-            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName,
-                _hostConfiguration.Settings.CopyHeadersToMessageAttributes, SendLogContext);
+            var transportContext = new HostSqsSendTransportContext(clientContextSupervisor, configureTopologyPipe, settings.EntityName, SendLogContext,
+                _hostConfiguration.Settings.AllowTransportHeader);
 
             var transport = new TopicSendTransport(transportContext);
             Add(transport);

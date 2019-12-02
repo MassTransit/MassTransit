@@ -5,6 +5,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
     using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
+    using Transport;
+    using Transports;
 
 
     public class AmazonSqsHostConfigurator :
@@ -71,9 +73,9 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
             _settings.AmazonSnsConfig = config;
         }
 
-        public bool CopyHeadersToMessageAttributes
+        public void AllowTransportHeader(AllowTransportHeader allowTransportHeader)
         {
-            set => _settings.CopyHeadersToMessageAttributes = value;
+            _settings.AllowTransportHeader = allowTransportHeader;
         }
 
         void SetBasicCredentials()

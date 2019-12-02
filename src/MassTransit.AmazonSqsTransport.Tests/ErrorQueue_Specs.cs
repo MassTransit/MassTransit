@@ -17,10 +17,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using System.Threading.Tasks;
     using Configuration;
     using GreenPipes;
-    using Metadata;
     using NUnit.Framework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -36,19 +34,43 @@ namespace MassTransit.AmazonSqsTransport.Tests
         }
 
         [Test]
+        public async Task Should_have_the_frank_header()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get("Frank", (string)null), Is.EqualTo("Happy"));
+        }
+
+        [Test]
+        public async Task Should_not_have_the_estelle_header()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get("Estelle", (string)null), Is.Null);
+        }
+
+        [Test]
         public async Task Should_have_the_exception()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            Assert.That(context.ReceiveContext.TransportHeaders.Get("MT-Fault-Message", (string)null), Is.EqualTo("This is fine, forcing death"));
+            Assert.That(context.ReceiveContext.TransportHeaders.Get(MessageHeaders.FaultMessage, (string)null), Is.EqualTo("This is fine, forcing death"));
         }
 
         [Test]
-        public async Task Should_have_the_host_machine_name()
+        public async Task Should_not_have_the_host_machine_name()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            Assert.That(context.ReceiveContext.TransportHeaders.Get("MT-Host-MachineName", (string)null), Is.EqualTo(HostMetadataCache.Host.MachineName));
+            Assert.That(context.ReceiveContext.TransportHeaders.Get(MessageHeaders.Host.MachineName, (string)null), Is.Null);
+        }
+
+        [Test]
+        public async Task Should_not_have_the_fault_exception_type()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get(MessageHeaders.FaultExceptionType, (string)null), Is.Null);
         }
 
         [Test]
@@ -108,7 +130,19 @@ namespace MassTransit.AmazonSqsTransport.Tests
                 context.CorrelationId = _correlationId;
                 context.ResponseAddress = Bus.Address;
                 context.FaultAddress = Bus.Address;
+                context.Headers.Set("Frank", "Happy");
+                context.Headers.Set("Estelle", "Sad");
             }));
+        }
+
+        protected override void ConfigureAmazonSqsHost(IAmazonSqsHostConfigurator configurator)
+        {
+            bool TransportHeaderCondition(HeaderValue<string> headerValue)
+            {
+                return headerValue.Key != "Estelle";
+            }
+
+            configurator.AllowTransportHeader(TransportHeaderCondition);
         }
 
         protected override void ConfigureAmazonSqsBusHost(IAmazonSqsBusFactoryConfigurator configurator, IAmazonSqsHost host)

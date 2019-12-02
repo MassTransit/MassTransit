@@ -1,17 +1,6 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Transport
+﻿namespace MassTransit.AmazonSqsTransport.Transport
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Amazon.SQS.Model;
     using GreenPipes;
@@ -22,16 +11,19 @@ namespace MassTransit.AmazonSqsTransport.Transport
         SqsMoveTransport,
         IDeadLetterTransport
     {
-        public SqsDeadLetterTransport(string destination, IFilter<ClientContext> topologyFilter)
+        readonly TransportSetHeaderAdapter<MessageAttributeValue> _headerAdapter;
+
+        public SqsDeadLetterTransport(string destination, TransportSetHeaderAdapter<MessageAttributeValue> headerAdapter, IFilter<ClientContext> topologyFilter)
             : base(destination, topologyFilter)
         {
+            _headerAdapter = headerAdapter;
         }
 
         public Task Send(ReceiveContext context, string reason)
         {
-            void PreSend(SendMessageRequest sendMessageRequest, SendHeaders headers)
+            void PreSend(SendMessageRequest sendMessageRequest, IDictionary<string, MessageAttributeValue> headers)
             {
-                headers.Set(MessageHeaders.Reason, reason ?? "Unspecified");
+                _headerAdapter.Set(headers, MessageHeaders.Reason, reason ?? "Unspecified");
             }
 
             return Move(context, PreSend);

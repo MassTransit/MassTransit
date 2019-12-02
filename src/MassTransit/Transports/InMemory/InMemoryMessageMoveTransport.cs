@@ -1,21 +1,8 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports.InMemory
 {
     using System;
-    using System.IO;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Context;
     using Fabric;
 
 
@@ -28,7 +15,7 @@ namespace MassTransit.Transports.InMemory
             _exchange = exchange;
         }
 
-        protected async Task Move(ReceiveContext context, Action<InMemoryTransportMessage, SendHeaders> preSend)
+        protected async Task Move(ReceiveContext context, Action<InMemoryTransportMessage, IDictionary<string, object>> preSend)
         {
             var messageId = GetMessageId(context);
 
@@ -40,11 +27,9 @@ namespace MassTransit.Transports.InMemory
 
             var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
 
-            SendHeaders headers = new DictionarySendHeaders(transportMessage.Headers);
+            transportMessage.Headers.SetHostHeaders();
 
-            headers.SetHostHeaders();
-
-            preSend(transportMessage, headers);
+            preSend(transportMessage, transportMessage.Headers);
 
             await _exchange.Send(transportMessage).ConfigureAwait(false);
         }
@@ -54,16 +39,6 @@ namespace MassTransit.Transports.InMemory
             return context.TransportHeaders.TryGetHeader("MessageId", out var messageIdValue)
                 ? new Guid(messageIdValue.ToString())
                 : NewId.NextGuid();
-        }
-
-        static async Task<byte[]> GetMessageBody(Stream body)
-        {
-            using (var ms = new MemoryStream())
-            {
-                await body.CopyToAsync(ms).ConfigureAwait(false);
-
-                return ms.ToArray();
-            }
         }
     }
 }

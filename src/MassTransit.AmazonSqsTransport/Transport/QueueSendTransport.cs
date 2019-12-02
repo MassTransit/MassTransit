@@ -72,29 +72,26 @@
 
                     activity.AddSendContextHeaders(context);
 
-                    var transportMessage = clientContext.CreateSendRequest(_context.EntityName, context.Body);
+                    var request = clientContext.CreateSendRequest(_context.EntityName, context.Body);
 
-                    if (_context.CopyHeadersToMessageAttributes)
-                        transportMessage.MessageAttributes.Set(context.Headers);
+                    _context.SqsSetHeaderAdapter.Set(request.MessageAttributes, context.Headers);
+
+                    _context.SqsSetHeaderAdapter.Set(request.MessageAttributes, "Content-Type", context.ContentType.MediaType);
+                    _context.SqsSetHeaderAdapter.Set(request.MessageAttributes, nameof(context.CorrelationId), context.CorrelationId);
 
                     if (!string.IsNullOrEmpty(context.DeduplicationId))
-                        transportMessage.MessageDeduplicationId = context.DeduplicationId;
+                        request.MessageDeduplicationId = context.DeduplicationId;
 
                     if (!string.IsNullOrEmpty(context.GroupId))
-                        transportMessage.MessageGroupId = context.GroupId;
+                        request.MessageGroupId = context.GroupId;
 
                     if (context.DelaySeconds.HasValue)
-                        transportMessage.DelaySeconds = context.DelaySeconds.Value;
-
-                    transportMessage.MessageAttributes.Set("Content-Type", context.ContentType.MediaType);
-                    transportMessage.MessageAttributes.Set(nameof(context.MessageId), context.MessageId);
-                    transportMessage.MessageAttributes.Set(nameof(context.CorrelationId), context.CorrelationId);
-                    transportMessage.MessageAttributes.Set(nameof(context.TimeToLive), context.TimeToLive);
+                        request.DelaySeconds = context.DelaySeconds.Value;
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
-                    await clientContext.SendMessage(transportMessage, context.CancellationToken).ConfigureAwait(false);
+                    await clientContext.SendMessage(request, context.CancellationToken).ConfigureAwait(false);
 
                     context.LogSent();
 

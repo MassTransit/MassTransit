@@ -197,7 +197,7 @@
                     ForcePersistence = context.Durable
                 };
 
-                brokeredMessage.Properties.SetTextHeaders(context.Headers, (_, text) => text);
+                brokeredMessage.Properties.Set(context.Headers);
 
                 if (context.TimeToLive.HasValue)
                     brokeredMessage.TimeToLive = context.TimeToLive.Value;

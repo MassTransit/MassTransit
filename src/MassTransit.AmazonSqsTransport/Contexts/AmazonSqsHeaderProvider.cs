@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Contexts
+﻿namespace MassTransit.AmazonSqsTransport.Contexts
 {
     using System;
     using System.Collections.Generic;
@@ -22,32 +10,32 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         IHeaderProvider
     {
         readonly Message _message;
-        readonly SendHeaders _adapter;
+        readonly Headers _headers;
 
         public AmazonSqsHeaderProvider(Message message)
         {
             _message = message;
 
-            _adapter = new AmazonSqsHeaderAdapter(message.MessageAttributes);
+            _headers = new AmazonSqsHeaders(message.MessageAttributes);
         }
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
             yield return new KeyValuePair<string, object>(nameof(_message.MessageId), _message.MessageId);
 
-            foreach (var header in _adapter.GetAll())
+            foreach (var header in _headers.GetAll())
                 yield return header;
         }
 
         public bool TryGetHeader(string key, out object value)
         {
-            if ("MessageId".Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (nameof(Message.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _message.MessageId;
                 return true;
             }
 
-            return _adapter.TryGetHeader(key, out value);
+            return _headers.TryGetHeader(key, out value);
         }
     }
 }

@@ -2,8 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
-    using Context;
     using Contexts;
     using GreenPipes;
     using Microsoft.Azure.ServiceBus;
@@ -20,7 +20,7 @@
             _supervisor = supervisor;
         }
 
-        protected Task Move(ReceiveContext context, Action<Message, SendHeaders> preSend)
+        protected Task Move(ReceiveContext context, Action<Message, IDictionary<string, object>> preSend)
         {
             IPipe<SendEndpointContext> clientPipe = Pipe.ExecuteAsync<SendEndpointContext>(async clientContext =>
             {
@@ -42,14 +42,12 @@
                         SessionId = messageContext.SessionId
                     };
 
-                    SendHeaders headers = new DictionarySendHeaders(message.UserProperties);
+                    foreach (KeyValuePair<string, object> property in messageContext.Properties.Where(x => !x.Key.StartsWith("MT-")))
+                        message.UserProperties.Set(new HeaderValue(property.Key, property.Value));
 
-                    foreach (KeyValuePair<string, object> property in messageContext.Properties)
-                        headers.Set(property.Key, property.Value);
+                    message.UserProperties.SetHostHeaders();
 
-                    headers.SetHostHeaders();
-
-                    preSend(message, headers);
+                    preSend(message, message.UserProperties);
 
                     await clientContext.Send(message).ConfigureAwait(false);
 
