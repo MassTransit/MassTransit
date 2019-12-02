@@ -2,8 +2,6 @@
 
 The officially supported MassTransit packages include:
 
-
-
 * [MassTransit](https://nuget.org/packages/MassTransit/)
 
   [![alt MassTransit](https://ci.appveyor.com/api/projects/status/github/masstransit/masstransit?svg=true "MassTransit")](https://ci.appveyor.com/project/phatboyg/masstransit) [![alt MassTransit on NuGet](https://img.shields.io/nuget/v/MassTransit.svg "MassTransit on NuGet")](https://nuget.org/packages/MassTransit/) [![alt MassTransit Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg "MassTransit Documentation")](/)
@@ -25,8 +23,7 @@ The officially supported MassTransit packages include:
 ### Transports
 
 * [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/)
-* [MassTransit.AzureServiceBus](https://nuget.org/packages/MassTransit.AzureServiceBus/) (.NET Framework 4.6.1)
-* [MassTransit.Azure.ServiceBus.Core](https://nuget.org/packages/MassTransit.Azure.ServiceBus.Core/) (.NET Standard 2.0)
+* [MassTransit.Azure.ServiceBus.Core](https://nuget.org/packages/MassTransit.Azure.ServiceBus.Core/)
   * [MassTransit.WebJobs.ServiceBus](https://nuget.org/packages/MassTransit.WebJobs.ServiceBus/)
   * [MassTransit.WebJobs.EventHubs](https://nuget.org/packages/MassTransit.WebJobs.EventHubs/)
 * [MassTransit.ActiveMQ](https://nuget.org/packages/MassTransit.ActiveMQ/)

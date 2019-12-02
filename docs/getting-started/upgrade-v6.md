@@ -2,6 +2,10 @@
 
 There have been several changes to v6 to reduce complexity, along with a few enhancements.
 
+::: tip NOTE
+MassTransit requires either .NET Standard 2.0 or .NET Framework 4.6.1 (or later). .NET 4.5.2 is no longer supported.
+:::
+
 ## Automatonymous
 
 In previous version, using Automatonymous required an additional package, `MassTransit.Automatonymous`. The contents of that package are now
@@ -25,6 +29,10 @@ The following packages are available for the supported containers:
 - MassTransit.Unity (no registration support)
 - MassTransit.Windsor
 
+## Azure Service Bus
+
+The previous (now legacy) **MassTransit.AzureServiceBus** package, which was only maintained to continue support for .NET 4.5.2, has been deprecated. Going forward, the **MassTransit.Azure.ServiceBus.Core** package should be used. The package supports both .NET 4.6.1 and .NET Standard 2.0.
+
 ## Logging
 
 The previous log abstraction used by MassTransit has been replaced with `Microsoft.Extensions.Logging.Abstractions`.
@@ -43,13 +51,7 @@ This should be done prior to configuring the bus.
 As of version 6, MassTransit now uses DiagnosticSource for tracking messaging operations, such as Send, Receive, Publish, Consume, etc. An `Activity` is
 created for each operation, and context-relevant tags and baggage are added.
 
-To use a specific DiagnosticSource with MassTransit, you can specify it as an additional argument when configuring the LogContext.
-
-```csharp
-LogContext.ConfigureCurrentLogContext(loggerFactory, diagnosticListener);
-```
-
-> If you are using Application Insights (with Azure), you can connect a listener and all message activity will be reported automatically.
+MassTransit follows the [guidance](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md) from Microsoft. To connect listeners, look at the [section](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#subscribe-to-diagnosticsource) that explains how to connect.
 
 ## Receive Endpoint Configuration
 
@@ -64,13 +66,16 @@ So, enjoy the simplicity. Under the covers some other things were also made simp
 To be consistent with the rest of MassTransit, many of the interfaces in Courier has been renamed. For example, `ExecuteActivity<TArguments>` is now
 `IExecuteActivity<TArguments>`. The previous interfaces are still supported, but have been marked obsolete. 
 
-## Conductor
+## Conductor (coming soon)
 
 Hard things are hard. Building distributed applications at scale is a hard thing, and it's hard. In fact, it is really hard.
 
+So hard that it isn't ready yet - but there is enough other stuff to warrant releasing v6 without it.
+
 _Conductor wants to make it easier, with less complexity._
 
-## MassTransit Host Service
+
+## MassTransit Host Service (coming later, but soon)
 
 Previous version of MassTransit provided a generalized service host, built using Topshelf, to get started with your first project. But the world has changed. With ASP.NET Core 3.0, and all the goodness that is the generic host, the developer community has moved to a new place.
 
