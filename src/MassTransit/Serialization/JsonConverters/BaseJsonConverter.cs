@@ -2,6 +2,7 @@ namespace MassTransit.Serialization.JsonConverters
 {
     using System;
     using System.Collections.Concurrent;
+    using Metadata;
     using Newtonsoft.Json;
 
 
@@ -33,7 +34,7 @@ namespace MassTransit.Serialization.JsonConverters
         {
             public object Deserialize(JsonReader reader, Type objectType, JsonSerializer serializer)
             {
-                throw new NotImplementedException();
+                throw new MassTransitException($"Unsupported deserialization object type: {TypeMetadataCache.GetShortName(objectType)}");
             }
 
             public bool IsSupported => false;
