@@ -238,18 +238,23 @@ builder.RegisterGeneric(typeof(NHibernateSagaRepository<>))
 
 Entity Framework saga repository needs to have a context factory as a constructor parameter. This factory just returns a `DbContext` instance, which should have the information about the saga instance class mapping.
 
-When using the `SagaDbContext<TSaga, TSagaClassMapping>`, you need to register each repository separately like this:
+You can register repository for your `SagaDbContext` like this:
 
 ```csharp
-builder.Register(c => new EntityFrameworkSagaRepository<MySaga>(
-    () => new SagaDbContext<MySaga, MySagaMapping>(connectionString)))
+//Optimistic
+builder.Register(c => EntityFrameworkSagaRepository<MySaga>.CreateOptimistic(
+    () => new YourSagaDbContext(connectionString)))
+        .As<ISagaRepository<MySaga>>().SingleInstance();
+//Pessimistic
+builder.Register(c => EntityFrameworkSagaRepository<MySaga>.CreatePessimistic(
+    () => new YourSagaDbContext(connectionString)))
         .As<ISagaRepository<MySaga>>().SingleInstance();
 ```
 
 You can use your own context implementation and register the repository as generic like this:
 
 ```csharp
-builder.Register(c => new AssemblyScanningSagaDbContext(typeof(MySagaMapping).Assembly,
+builder.Register(c => new AssemblyScanningSagaDbContext(typeof(MySagaClassMap).Assembly,
     connectionString).As<DbContext>();
 builder.RegisterGeneric(typeof(EntityFrameworkSagaRepository<>))
     .As(typeof(ISagaRepository<>))
@@ -258,3 +263,29 @@ builder.RegisterStateMachineSagas(typeof(MySaga).Assembly);
 ```
 
 The example above uses the assembly scanning `DbContext` implementation, which you can find in [this gist](https://gist.github.com/alexeyzimarev/34542645ff8f27550d0679c7cb696111).
+
+### MongoDB
+
+Preferred way to use MongoDB saga repository is providing `IMongoDatabase` with `IMongoDbSagaConsumeContextFactory` and `ICollectionNameFormatter` as constructor parameters.
+
+You can register repository like this:
+
+```csharp
+//register default collection name formatter or you could use DotCaseCollectionNameFormatter (SimpleSaga -> simple.sagas). Also you can create your own
+builder.Register<DefaultCollectionNameFormatter>()
+  		 .As<ICollectionNameFormatter>()
+  		 .SingleInstance()
+builder.Register<MongoDbSagaConsumeContextFactory>()
+  		 .As<IMongoDbSagaConsumeContextFactory>()
+  		 .SingleInstance()
+  
+var database = new MongoClient("mongodb://127.0.0.1").GetDatabase("sagas");
+builder.Register(c => new MongoDbSagaRepository<MySaga>(
+        database,
+        c.Resolve<IMongoDbSagaConsumeContextFactory>(),
+        c.Resolve<ICollectionNameFormatter>()
+))
+  .As<ISagaRepository<MySaga>>()
+  .SingleInstance();
+```
+

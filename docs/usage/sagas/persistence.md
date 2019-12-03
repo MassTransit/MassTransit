@@ -291,7 +291,11 @@ The saga repository is created using the simple syntax:
 
 ```csharp
 var database = new MongoClient("mongodb://127.0.0.1").GetDatabase("sagas");
-var repository = new MongoDbSagaRepository<SagaInstance>(database);
+var repository = new MongoDbSagaRepository<SagaInstance>(
+  		database 
+  		new MongoDbSagaConsumeContextFactory()
+  		new DefaultCollectionNameFormatter()
+);
 ```
 
 Each saga instance will be placed in a collection specific to the instance type.
