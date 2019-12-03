@@ -54,7 +54,7 @@
 
         public void  Build(IAmazonSqsHostControl host)
         {
-            var builder = new AmazonSqsReceiveEndpointBuilder(host, this);
+            var builder = new AmazonSqsReceiveEndpointBuilder(host, _hostConfiguration.Settings, this);
 
             ApplySpecifications(builder);
 

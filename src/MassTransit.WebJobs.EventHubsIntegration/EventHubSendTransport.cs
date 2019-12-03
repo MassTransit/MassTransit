@@ -57,7 +57,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
 
                     using (var eventData = new EventData(context.Body))
                     {
-                        eventData.Properties.SetTextHeaders(context.Headers, (_, text) => text);
+                        eventData.Properties.Set(context.Headers);
 
                         // if (context.PartitionKey != null)
                         //     eventData.PartitionKey = context.PartitionKey;

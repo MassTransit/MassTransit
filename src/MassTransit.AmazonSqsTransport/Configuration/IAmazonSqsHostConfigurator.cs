@@ -3,6 +3,8 @@
     using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
+    using Transport;
+    using Transports;
 
 
     public interface IAmazonSqsHostConfigurator
@@ -40,8 +42,9 @@
         void Config(AmazonSimpleNotificationServiceConfig config);
 
         /// <summary>
-        /// Copy user headers from <see cref="SendContext"/> to the Amazon message attributes
+        /// Specifies a method used to determine if a header should be copied to the transport message
         /// </summary>
-        bool CopyHeadersToMessageAttributes { set; }
+        /// <param name="allowTransportHeader"></param>
+        void AllowTransportHeader(AllowTransportHeader allowTransportHeader);
     }
 }

@@ -110,7 +110,6 @@
         class CachedType<T> :
             CachedType
         {
-            PropertyInfo[] _properites;
             public bool HasConsumerInterfaces => TypeMetadataCache<T>.HasConsumerInterfaces;
             public bool HasSagaInterfaces => TypeMetadataCache<T>.HasSagaInterfaces;
             public bool IsTemporaryMessageType => TypeMetadataCache<T>.IsTemporaryMessageType;

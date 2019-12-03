@@ -21,45 +21,38 @@ MassTransit Nuget Packages
 | Package Name | FullFramework | .NET Standard |
 | ------------ | :-----------: | :-----------: |
 | **Main** |
-| [MassTransit][MassTransit.nuget] | 4.5.2 | 2.0 |
+| [MassTransit][MassTransit.nuget] | 4.6.1 | 2.0 |
 | **Other** |
-| [MassTransit.Host][Host.nuget] | 4.5.2 | 2.0 |
-| [MassTransit.Reactive][Reactive.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.Host][Host.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.Reactive][Reactive.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.SignalR][SignalR.nuget] | - | 2.0 |
-| [MassTransit.TestFramework][TestFramework.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.TestFramework][TestFramework.nuget] | 4.6.1 | 2.0 |
 | **Containers** |
-| [MassTransit.Autofac][Autofac.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.Autofac][Autofac.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.Extensions.DependencyInjection][CoreDI.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.Lamar][Lamar.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.Ninject][Ninject.nuget] | 4.5.2 | 2.0 |
-| [MassTransit.SimpleInjector][SimpleInjector.nuget] | 4.5.2 | 2.0 |
-| [MassTransit.StructureMap][StructureMap.nuget] | 4.5.2 | 2.0 |
-| [MassTransit.Unity][Unity.nuget] | 4.5.2 | 2.0 |
-| [MassTransit.CastleWindsor][Windsor.nuget] | 4.5.2 | 2.0 |
-| **Loggers** |
-| [MassTransit.Extensions.Logging][CoreLogger.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.Log4Net][Log4Net.nuget] | 4.5.2 | 2.0 |
-| [MassTransit.NLog][NLog.nuget] | 4.5.2 | 2.0 |
-| [MassTransit.SerilogIntegration][Serilog.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.Ninject][Ninject.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.SimpleInjector][SimpleInjector.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.StructureMap][StructureMap.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.Unity][Unity.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.CastleWindsor][Windsor.nuget] | 4.6.1 | 2.0 |
 | **Monitoring** |
-| [MassTransit.ApplicationInsights][AppInsights.nuget] | 4.5.2 | 2.0 |
-| [MassTransit.AspNetCore][AspNetCore.nuget] | 4.5 | 2.0 |
+| [MassTransit.AspNetCore][AspNetCore.nuget] | 4.6.1 | 2.0 |
 | **Persistence** |
 | [MassTransit.Dapper][Dapper.nuget] | 4.6.1 | - |
-| [MassTransit.DocumentDb][DocumentDb.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.DocumentDb][DocumentDb.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.EntityFrameworkCore][EFCore.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.EntityFramework][EF.nuget] | 4.5.2 | - |
+| [MassTransit.EntityFramework][EF.nuget] | 4.6.1 | - |
 | [MassTransit.Marten][Marten.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.MongoDb][MongoDb.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.MongoDb][MongoDb.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.NHibernate][NHibernate.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.Redis][Redis.nuget] | 4.5.2 | 2.0 |
+| [MassTransit.Redis][Redis.nuget] | 4.6.1 | 2.0 |
 | **Transports** |
-| [MassTransit.ActiveMQ][ActiveMQ.nuget] | 4.5 | 2.0 |
-| [MassTransit.AmazonSQS][AmazonSQS.nuget] | 4.5 | 2.0 |
+| [MassTransit.ActiveMQ][ActiveMQ.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.AmazonSQS][AmazonSQS.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.Azure.ServiceBus.Core][AzureSbCore.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.AzureServiceBus][AzureSb.nuget] | 4.5.2 | - |
-| [MassTransit.Http][Http.nuget] | 4.5 | 2.0 |
-| [MassTransit.RabbitMQ][RabbitMQ.nuget] | 4.5 | 2.0 |
+| [MassTransit.Http][Http.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.RabbitMQ][RabbitMQ.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.WebJobs.EventHubs][EventHubs.nuget] | - | 2.0 |
 | [MassTransit.WebJobs.ServiceBus][AzureFunc.nuget] | - | 2.0 |
 
@@ -86,7 +79,7 @@ async Task Main()
 {
 	var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
 	{
-		var host = sbc.Host(new Uri("rabbitmq://localhost:/"), h =>
+		var host = sbc.Host("localhost"), h =>
 		{
 			h.Username("guest");
 			h.Password("guest");
@@ -178,7 +171,7 @@ enhancements and calls for help from people who forget to check back if they get
 MassTransit is built on [AppVeyor](https://ci.appveyor.com/project/phatboyg/masstransit)
  
 # REQUIREMENTS
-* .Net 4.5.2 or .NET Standard 2.0
+* .Net 4.6.1 or .NET Standard 2.0
 
 # CREDITS
 Logo Design by [The Agile Badger](http://www.theagilebadger.com)
@@ -198,12 +191,6 @@ Logo Design by [The Agile Badger](http://www.theagilebadger.com)
 [Unity.nuget]: https://www.nuget.org/packages/MassTransit.Unity
 [Windsor.nuget]: https://www.nuget.org/packages/MassTransit.CastleWindsor
 
-[CoreLogger.nuget]: https://www.nuget.org/packages/MassTransit.Extensions.Logging
-[Log4Net.nuget]: https://www.nuget.org/packages/MassTransit.Log4Net
-[NLog.nuget]: https://www.nuget.org/packages/MassTransit.NLog
-[Serilog.nuget]: https://www.nuget.org/packages/MassTransit.SerilogIntegration
-
-[AppInsights.nuget]: https://www.nuget.org/packages/MassTransit.ApplicationInsights
 [AspNetCore.nuget]: https://www.nuget.org/packages/MassTransit.AspNetCore
 
 [Dapper.nuget]: https://www.nuget.org/packages/MassTransit.Dapper
@@ -218,7 +205,6 @@ Logo Design by [The Agile Badger](http://www.theagilebadger.com)
 [ActiveMQ.nuget]: https://www.nuget.org/packages/MassTransit.ActiveMQ
 [AmazonSQS.nuget]: https://www.nuget.org/packages/MassTransit.AmazonSQS
 [AzureSbCore.nuget]: https://www.nuget.org/packages/MassTransit.Azure.ServiceBus.Core
-[AzureSb.nuget]: https://www.nuget.org/packages/MassTransit.AzureServiceBus
 [Http.nuget]: https://www.nuget.org/packages/MassTransit.Http
 [RabbitMQ.nuget]: https://www.nuget.org/packages/MassTransit.RabbitMQ
 [EventHubs.nuget]: https://www.nuget.org/packages/MassTransit.WebJobs.EventHubs

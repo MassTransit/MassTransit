@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Configuration.Builders
 {
+    using Amazon.SQS.Model;
     using Configuration;
     using Contexts;
     using GreenPipes;
@@ -16,12 +17,15 @@
         IReceiveEndpointBuilder
     {
         readonly IAmazonSqsHostControl _host;
+        readonly AmazonSqsHostSettings _hostSettings;
         readonly IAmazonSqsReceiveEndpointConfiguration _configuration;
 
-        public AmazonSqsReceiveEndpointBuilder(IAmazonSqsHostControl host, IAmazonSqsReceiveEndpointConfiguration configuration)
+        public AmazonSqsReceiveEndpointBuilder(IAmazonSqsHostControl host, AmazonSqsHostSettings hostSettings,
+            IAmazonSqsReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
             _host = host;
+            _hostSettings = hostSettings;
             _configuration = configuration;
         }
 
@@ -41,8 +45,12 @@
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport();
-            IErrorTransport errorTransport = CreateErrorTransport();
+            var headerAdapter = new TransportSetHeaderAdapter<MessageAttributeValue>(new SqsHeaderValueConverter(_hostSettings.AllowTransportHeader),
+                TransportHeaderOptions.IncludeFaultMessage);
+
+            IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport(headerAdapter);
+
+            IErrorTransport errorTransport = CreateErrorTransport(headerAdapter);
 
             var receiveEndpointContext = new SqsQueueReceiveEndpointContext(_host, _configuration, brokerTopology);
 
@@ -56,27 +64,28 @@
         {
             var builder = new ReceiveEndpointBrokerTopologyBuilder();
 
-            builder.Queue = builder.CreateQueue(settings.EntityName, settings.Durable, settings.AutoDelete, settings.QueueAttributes, settings.QueueSubscriptionAttributes, settings.Tags);
+            builder.Queue = builder.CreateQueue(settings.EntityName, settings.Durable, settings.AutoDelete, settings.QueueAttributes,
+                settings.QueueSubscriptionAttributes, settings.Tags);
 
             _configuration.Topology.Consume.Apply(builder);
 
             return builder.BuildTopologyLayout();
         }
 
-        IErrorTransport CreateErrorTransport()
+        IErrorTransport CreateErrorTransport(TransportSetHeaderAdapter<MessageAttributeValue> headerAdapter)
         {
             var errorSettings = _configuration.Topology.Send.GetErrorSettings(_configuration.Settings);
             var filter = new ConfigureTopologyFilter<ErrorSettings>(errorSettings, errorSettings.GetBrokerTopology());
 
-            return new SqsErrorTransport(errorSettings.EntityName, filter);
+            return new SqsErrorTransport(errorSettings.EntityName, headerAdapter, filter);
         }
 
-        IDeadLetterTransport CreateDeadLetterTransport()
+        IDeadLetterTransport CreateDeadLetterTransport(TransportSetHeaderAdapter<MessageAttributeValue> headerAdapter)
         {
             var deadLetterSettings = _configuration.Topology.Send.GetDeadLetterSettings(_configuration.Settings);
             var filter = new ConfigureTopologyFilter<DeadLetterSettings>(deadLetterSettings, deadLetterSettings.GetBrokerTopology());
 
-            return new SqsDeadLetterTransport(deadLetterSettings.EntityName, filter);
+            return new SqsDeadLetterTransport(deadLetterSettings.EntityName, headerAdapter, filter);
         }
     }
 }

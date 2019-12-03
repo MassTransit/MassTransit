@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.AzureServiceBusTransport.Transport
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.ServiceBus.Messaging;
     using Pipeline;
@@ -17,7 +18,7 @@
 
         public Task Send(ExceptionReceiveContext context)
         {
-            void PreSend(BrokeredMessage message, SendHeaders headers)
+            void PreSend(BrokeredMessage message, IDictionary<string,object> headers)
             {
                 headers.SetExceptionHeaders(context);
 

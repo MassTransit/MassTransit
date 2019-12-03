@@ -6,6 +6,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Transport;
+    using Transports;
 
 
     public class ConfigurationHostSettings :
@@ -24,8 +25,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public string AccessKey => (_immutableCredentials ?? (_immutableCredentials = GetImmutableCredentials())).AccessKey;
         public string SecretKey => (_immutableCredentials ?? (_immutableCredentials = GetImmutableCredentials())).SecretKey;
 
-        public bool CopyHeadersToMessageAttributes { get; set; } = true;
-
         public AWSCredentials Credentials
         {
             get => _credentials;
@@ -41,6 +40,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; set; }
 
         public string Scope { get; set; }
+
+        public AllowTransportHeader AllowTransportHeader { get; set; }
 
         public Uri HostAddress => _hostAddress.Value;
 

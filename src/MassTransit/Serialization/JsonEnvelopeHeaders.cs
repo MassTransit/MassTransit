@@ -1,16 +1,21 @@
 namespace MassTransit.Serialization
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using Util;
 
 
-    public class JsonMessageHeaders :
+    /// <summary>
+    /// The headers stored in the message envelope
+    /// </summary>
+    public class JsonEnvelopeHeaders :
         Headers
     {
         readonly IDictionary<string, object> _headers;
 
-        public JsonMessageHeaders(IDictionary<string, object> headers)
+        public JsonEnvelopeHeaders(IDictionary<string, object> headers)
         {
             _headers = headers ?? new Dictionary<string, object>();
         }
@@ -33,9 +38,20 @@ namespace MassTransit.Serialization
             return ObjectTypeDeserializer.Deserialize(_headers, key, defaultValue);
         }
 
-        public T? Get<T>(string key, T? defaultValue = null) where T : struct
+        public T? Get<T>(string key, T? defaultValue = null)
+            where T : struct
         {
             return ObjectTypeDeserializer.Deserialize(_headers, key, defaultValue);
+        }
+
+        public IEnumerator<HeaderValue> GetEnumerator()
+        {
+            return _headers.Select(x => new HeaderValue(x.Key, x.Value)).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

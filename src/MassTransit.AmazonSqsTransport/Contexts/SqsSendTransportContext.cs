@@ -1,8 +1,10 @@
 namespace MassTransit.AmazonSqsTransport.Contexts
 {
+    using Amazon.SQS.Model;
     using Context;
     using GreenPipes;
     using Transport;
+    using Transports;
 
 
     public interface SqsSendTransportContext :
@@ -12,8 +14,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         string EntityName { get; }
 
-        bool CopyHeadersToMessageAttributes { get; }
-
         IClientContextSupervisor ClientContextSupervisor { get; }
+
+        ITransportSetHeaderAdapter<MessageAttributeValue> SqsSetHeaderAdapter { get; }
+        ITransportSetHeaderAdapter<Amazon.SimpleNotificationService.Model.MessageAttributeValue> SnsSetHeaderAdapter { get; }
     }
 }

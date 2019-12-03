@@ -5,7 +5,7 @@
     <Product>MassTransit</Product>
     <Copyright>Copyright 2007-2019 Chris Patterson</Copyright>
     <Authors>Chris Patterson</Authors>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <WarningLevel>4</WarningLevel>

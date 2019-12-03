@@ -40,7 +40,7 @@ namespace MassTransit.Context
             InputAddress = inputAddress;
             Redelivered = redelivered;
 
-            _headers = new Lazy<Headers>(() => new JsonHeaders(ObjectTypeDeserializer.Instance, HeaderProvider));
+            _headers = new Lazy<Headers>(() => new JsonTransportHeaders(HeaderProvider));
 
             _contentType = new Lazy<ContentType>(GetContentType);
             _receiveTasks = new PendingTaskCollection(4);

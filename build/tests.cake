@@ -11,13 +11,11 @@ public class Tests
         {
             { "MassTransit.Tests", null },
             { "MassTransit.Containers.Tests", null },
-            { "MassTransit.ApplicationInsights.Tests", null },
             { "MassTransit.AutomatonymousIntegration.Tests", "Category!=DocumentDb&Category!=EntityFramework" }, // DocumentDb is only installed on appveyor windows vm, or develoer if they put DocDb emulator
             { "MassTransit.QuartzIntegration.Tests", null },
             { "MassTransit.HttpTransport.Tests", null },
             { "MassTransit.SignalR.Tests", null },
-            { "MassTransit.NHibernateIntegration.Tests", null },
-            // { "MassTransit.AzureServiceBusTransport.Tests", "Category!=Flakey" }
+            { "MassTransit.NHibernateIntegration.Tests", null }
         };
 
         // Add these tests to run in Appveyor Only

@@ -36,6 +36,13 @@ namespace MassTransit.Pipeline.Pipes
             context.RequestId = _context.RequestId;
             context.SourceAddress = _context.ReceiveContext.InputAddress;
 
+            if (_context.ExpirationTime.HasValue)
+            {
+                context.TimeToLive = _context.ExpirationTime.Value - DateTime.UtcNow;
+                if (context.TimeToLive.Value <= TimeSpan.Zero)
+                    context.TimeToLive = TimeSpan.FromSeconds(1);
+            }
+
             if (_pipe.IsNotEmpty())
                 return _pipe.Send(context);
 
@@ -73,7 +80,13 @@ namespace MassTransit.Pipeline.Pipes
         {
             context.RequestId = _context.RequestId;
             context.SourceAddress = _context.ReceiveContext.InputAddress;
-            context.TimeToLive = _context.ExpirationTime - DateTime.UtcNow;
+
+            if (_context.ExpirationTime.HasValue)
+            {
+                context.TimeToLive = _context.ExpirationTime.Value - DateTime.UtcNow;
+                if (context.TimeToLive.Value <= TimeSpan.Zero)
+                    context.TimeToLive = TimeSpan.FromSeconds(1);
+            }
 
             if (_pipe.IsNotEmpty())
                 return _pipe.Send(context);

@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Azure.ServiceBus;
     using Pipeline;
@@ -17,7 +18,7 @@
 
         public Task Send(ExceptionReceiveContext context)
         {
-            void PreSend(Message message, SendHeaders headers)
+            void PreSend(Message message, IDictionary<string, object> headers)
             {
                 headers.SetExceptionHeaders(context);
 
