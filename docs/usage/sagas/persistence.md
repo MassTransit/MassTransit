@@ -136,25 +136,64 @@ public class SagaInstance : SagaStateMachineInstance
     public Guid CorrelationId { get; set; }
     public byte[] RowVersion { get; set; } // For Optimistic Concurrency, omit if using pessimistic
 }
+```
 
-public class SagaInstanceMap : SagaClassMapping<SagaInstance>
+for Entity Framework Core:
+
+```csharp
+public class SagaInstanceMap : SagaClassMap<SagaInstance>
 {
-    public SagaInstanceMap()
+    protected override void Configure(EntityTypeBuilder<SagaInstance> entityTypeBuilder, ModelBuilder modelBuilder)
     {
-        Property(x => x.CurrentState);
-        Property(x => x.ServiceName, x => x.Length(40));
-        Property(x => x.RowVersion).IsRowVersion(); // For Optimistic Concurrency, omit if using pessimistic
+        entityTypeBuilder.Property(x => x.CurrentState);
+        entityTypeBuilder.Property(x => x.ServiceName).HasMaxLength(40);
+        entityTypeBuilder.Property(x => x.RowVersion).IsRowVersion(); // For Optimistic Concurrency, omit if 
+    }
+}
+public class YourSagaDbContext : SagaDbContext
+{
+    public YourSagaDbContext(DbContextOptions options): base(options)
+    {
+    }
+
+    protected override IEnumerable<ISagaClassMap> Configurations
+    {
+      	get { yield return new SagaInstanceMap(); }
+    }
+}
+```
+
+for Entity Framework 6.x:
+
+```csharp
+public class SagaInstanceMap : SagaClassMap<SagaInstance>
+{
+    protected override void Configure(EntityTypeConfiguration<SagaInstance> entityTypeBuilder, DbModelBuilder modelBuilder)
+    {
+        entityTypeBuilder.Property(x => x.CurrentState);
+        entityTypeBuilder.Property(x => x.ServiceName, x => x.Length(40));
+        entityTypeBuilder.Property(x => x.RowVersion).IsRowVersion(); // For Optimistic Concurrency, omit if 
+    }
+}
+public class YourSagaDbContext : SagaDbContext
+{
+    public YourSagaDbContext(string nameOrConnectionString): base(nameOrConnectionString)
+    {
+    }
+
+    protected override IEnumerable<ISagaClassMap> Configurations
+    {
+      	get { yield return new SagaInstanceMap(); }
     }
 }
 ```
 
 > Important:
-> The `SagaClassMapping` has default mapping for the `CorrelationId` as a primary key. If you use your own mapping, you must follow the same convention, or at least make it a Clustered Index + Unique, otherwise there is a big chance to get deadlock exceptions and/or performance issues in case of high throughput.
+> The `SagaClassMap` has default mapping for the `CorrelationId` as a primary key. If you use your own mapping, you must follow the same convention, or at least make it a Clustered Index + Unique, otherwise there is a big chance to get deadlock exceptions and/or performance issues in case of high throughput.
 
 The repository is then created on the context factory:
 ```csharp
-SagaDbContextFactory contextFactory = () => 
-    new SagaDbContext<SagaInstance, SagaInstanceMap>(_connectionString);
+SagaDbContextFactory contextFactory = () => new YourSagaDbContext(_connectionString);
 
 // For Optimistic
 var repository = new EntityFrameworkSagaRepository<SagaInstance>.CreateOptimistic(contextFactory);
