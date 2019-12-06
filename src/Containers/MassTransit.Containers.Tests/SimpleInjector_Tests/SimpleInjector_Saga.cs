@@ -19,13 +19,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container = new Container();
             _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
 
-            _container.AddMassTransit(cfg =>
-            {
-                cfg.AddSaga<SimpleSaga>();
-                cfg.AddBus(() => BusControl);
-            });
-
-            _container.Register(typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>), Lifestyle.Singleton);
+            _container.AddMassTransit(ConfigureRegistration);
         }
 
         [OneTimeTearDown]
@@ -45,6 +39,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         }
     }
 
+
     [TestFixture]
     public class SimpleInjector_Saga_Endpoint :
         Common_Saga_Endpoint
@@ -56,15 +51,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container = new Container();
             _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
 
-            _container.AddMassTransit(x =>
-            {
-                x.AddSaga<SimpleSaga>()
-                    .Endpoint(e => e.Name = "custom-endpoint-name");
-
-                x.AddBus(() => BusControl);
-            });
-
-            _container.RegisterSingleton<ISagaRepository<SimpleSaga>, InMemorySagaRepository<SimpleSaga>>();
+            _container.AddMassTransit(ConfigureRegistration);
         }
 
         protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
@@ -77,5 +64,4 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             return _container.GetInstance<ISagaRepository<T>>();
         }
     }
-
 }

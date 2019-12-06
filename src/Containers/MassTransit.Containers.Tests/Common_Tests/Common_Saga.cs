@@ -1,15 +1,3 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
@@ -83,6 +71,14 @@ namespace MassTransit.Containers.Tests.Common_Tests
             foundId.HasValue.ShouldBe(true);
         }
 
+        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+        {
+            configurator.AddSaga<SimpleSaga>()
+                .InMemoryRepository();
+
+            configurator.AddBus(provider => BusControl);
+        }
+
         protected abstract ISagaRepository<T> GetSagaRepository<T>()
             where T : class, ISaga;
 
@@ -112,6 +108,15 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Guid? foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(message.CorrelationId, TestTimeout);
 
             foundId.HasValue.ShouldBe(true);
+        }
+
+        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+        {
+            configurator.AddSaga<SimpleSaga>()
+                .Endpoint(e => e.Name = "custom-endpoint-name")
+                .InMemoryRepository();
+
+            configurator.AddBus(provider => BusControl);
         }
 
         protected abstract ISagaRepository<T> GetSagaRepository<T>()

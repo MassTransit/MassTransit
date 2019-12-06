@@ -20,11 +20,13 @@ namespace MassTransit
         /// </summary>
         /// <param name="collection"></param>
         /// <param name="configure"></param>
-        public static void AddMassTransit(this IServiceCollection collection, Action<IServiceCollectionConfigurator> configure = null)
+        public static IServiceCollection AddMassTransit(this IServiceCollection collection, Action<IServiceCollectionConfigurator> configure = null)
         {
             var configurator = new ServiceCollectionConfigurator(collection);
 
             configure?.Invoke(configurator);
+
+            return collection;
         }
 
         /// <summary>

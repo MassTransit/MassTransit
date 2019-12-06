@@ -53,6 +53,17 @@ namespace MassTransit.LamarIntegration.Registration
             _registry.AddSingleton<SagaStateMachine<TInstance>>(provider => provider.GetRequiredService<TStateMachine>());
         }
 
+        public void RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
+            where TSaga : class, ISaga
+        {
+            _registry.AddSingleton(provider =>
+            {
+                var configurationServiceProvider = provider.GetRequiredService<IConfigurationServiceProvider>();
+
+                return repositoryFactory(configurationServiceProvider);
+            });
+        }
+
         public void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga

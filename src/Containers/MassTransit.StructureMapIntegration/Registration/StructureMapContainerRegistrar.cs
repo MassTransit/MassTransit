@@ -51,6 +51,12 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<SagaStateMachine<TInstance>>().Use(provider => provider.GetInstance<TStateMachine>()).Singleton();
         }
 
+        public void RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
+            where TSaga : class, ISaga
+        {
+            _expression.For<ISagaRepository<TSaga>>().Use(provider => repositoryFactory(provider.GetInstance<IConfigurationServiceProvider>())).Singleton();
+        }
+
         public void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga

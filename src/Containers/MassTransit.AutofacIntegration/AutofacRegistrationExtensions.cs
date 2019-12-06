@@ -1,7 +1,6 @@
 namespace MassTransit
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using Autofac;
     using Autofac.Core;
@@ -24,11 +23,13 @@ namespace MassTransit
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="configure"></param>
-        public static void AddMassTransit(this ContainerBuilder builder, Action<IContainerBuilderConfigurator> configure = null)
+        public static ContainerBuilder AddMassTransit(this ContainerBuilder builder, Action<IContainerBuilderConfigurator> configure = null)
         {
             var configurator = new ContainerBuilderRegistrationConfigurator(builder);
 
             configure?.Invoke(configurator);
+
+            return builder;
         }
 
         /// <summary>

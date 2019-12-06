@@ -58,6 +58,13 @@ namespace MassTransit.AutofacIntegration.Registration
                 .SingleInstance();
         }
 
+        public void RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
+            where TSaga : class, ISaga
+        {
+            _builder.Register(context => repositoryFactory(context.Resolve<IConfigurationServiceProvider>()))
+                .SingleInstance();
+        }
+
         public void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga

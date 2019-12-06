@@ -19,6 +19,11 @@ namespace MassTransit.Definition
         {
         }
 
+        public void Configure<T>(IReceiveEndpointConfigurator endpointConfigurator, ISagaMessageConfigurator<TSaga, T> sagaMessageConfigurator)
+            where T : class
+        {
+        }
+
         public Type SagaType => typeof(TSaga);
 
         public string GetEndpointName(IEndpointNameFormatter formatter)

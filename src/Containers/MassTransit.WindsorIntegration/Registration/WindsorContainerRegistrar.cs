@@ -61,6 +61,17 @@ namespace MassTransit.WindsorIntegration.Registration
             );
         }
 
+        public void RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
+            where TSaga : class, ISaga
+        {
+            _container.Register(Component.For<ISagaRepository<TSaga>>().UsingFactoryMethod(provider =>
+            {
+                var configurationServiceProvider = provider.Resolve<IConfigurationServiceProvider>();
+
+                return repositoryFactory(configurationServiceProvider);
+            }).LifestyleSingleton());
+        }
+
         public void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga

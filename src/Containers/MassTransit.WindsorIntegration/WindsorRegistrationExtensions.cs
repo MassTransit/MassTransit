@@ -22,11 +22,13 @@ namespace MassTransit
         /// </summary>
         /// <param name="container"></param>
         /// <param name="configure"></param>
-        public static void AddMassTransit(this IWindsorContainer container, Action<IWindsorContainerConfigurator> configure = null)
+        public static IWindsorContainer AddMassTransit(this IWindsorContainer container, Action<IWindsorContainerConfigurator> configure = null)
         {
             var configurator = new WindsorContainerRegistrationConfigurator(container);
 
             configure?.Invoke(configurator);
+
+            return container;
         }
 
         /// <summary>

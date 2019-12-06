@@ -8,7 +8,6 @@
     using Saga;
     using Saga.Connectors;
     using SagaConfigurators;
-    using Util;
 
 
     public static class SagaExtensions

@@ -54,6 +54,17 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             _container.RegisterSingleton<SagaStateMachine<TInstance>>(() => _container.GetInstance<TStateMachine>());
         }
 
+        public void RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
+            where TSaga : class, ISaga
+        {
+            _container.RegisterSingleton(() =>
+            {
+                var configurationServiceProvider = _container.GetInstance<IConfigurationServiceProvider>();
+
+                return repositoryFactory(configurationServiceProvider);
+            });
+        }
+
         public void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga

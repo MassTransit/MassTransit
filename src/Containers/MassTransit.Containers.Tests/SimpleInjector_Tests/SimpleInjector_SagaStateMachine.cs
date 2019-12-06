@@ -2,7 +2,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 {
     using Common_Tests;
     using NUnit.Framework;
-    using Saga;
     using Scenarios.StateMachines;
     using SimpleInjector;
     using SimpleInjector.Lifestyles;
@@ -18,16 +17,9 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container = new Container();
             _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
 
-            _container.AddMassTransit(cfg =>
-            {
-                cfg.AddSagaStateMachine<TestStateMachineSaga, TestInstance>();
-                cfg.AddBus(() => BusControl);
-            });
+            _container.AddMassTransit(ConfigureRegistration);
 
             _container.Register<PublishTestStartedActivity>();
-
-            _container.Register(typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>),
-                Lifestyle.Singleton);
         }
 
         [OneTimeTearDown]

@@ -20,13 +20,15 @@ namespace MassTransit
         /// <summary>
         /// Adds the required services to the service collection, and allows consumers to be added and/or discovered
         /// </summary>
-        /// <param name="registry"></param>
+        /// <param name="container"></param>
         /// <param name="configure"></param>
-        public static void AddMassTransit(this Container registry, Action<ISimpleInjectorConfigurator> configure = null)
+        public static Container AddMassTransit(this Container container, Action<ISimpleInjectorConfigurator> configure = null)
         {
-            var configurator = new SimpleInjectorRegistrationConfigurator(registry);
+            var configurator = new SimpleInjectorRegistrationConfigurator(container);
 
             configure?.Invoke(configurator);
+
+            return container;
         }
 
         /// <summary>
