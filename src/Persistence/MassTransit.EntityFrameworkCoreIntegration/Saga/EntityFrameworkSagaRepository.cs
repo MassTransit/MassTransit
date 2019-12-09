@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Data.SqlClient;
+    using Microsoft.Data.SqlClient;
     using System.Linq;
     using System.Threading.Tasks;
     using Context;
@@ -143,15 +143,13 @@
             {
                 if (instance == null)
                 {
-                    IQueryable<TSaga> queryable = QuerySagas(dbContext);
-
                     // Query with a row Lock instead using FromSql. Still a single trip to the DB (unlike EF6, which has to make one dummy call to row lock)
                     var rowLockQuery = _rawSqlLockStatements?.GetRowLockStatement<TSaga>(dbContext);
                     if (rowLockQuery != null)
-                        instance = await queryable.FromSql(rowLockQuery, new object[] {sagaId}).SingleOrDefaultAsync(context.CancellationToken)
+                        instance = await ApplyCustomQuery(dbContext, dbSet => dbSet.FromSqlRaw(rowLockQuery, new object[] {sagaId})).SingleOrDefaultAsync()
                             .ConfigureAwait(false);
                     else
-                        instance = await queryable.SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken).ConfigureAwait(false);
+                        instance = await ApplyCustomQuery(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken).ConfigureAwait(false);
                 }
 
                 if (instance == null)
@@ -283,7 +281,7 @@
                 // Simple path for Optimistic Concurrency
                 if (_rawSqlLockStatements == null)
                 {
-                    var instances = await QuerySagas(dbContext)
+                    var instances = await ApplyCustomQuery(dbContext)
                         .Where(context.Query.FilterExpression)
                         .ToListAsync(context.CancellationToken)
                         .ConfigureAwait(false);
@@ -311,8 +309,8 @@
                         foreach (var nonTrackedInstance in nonTrackedInstances)
                         {
                             // Query with a row Lock instead using FromSql. Still a single trip to the DB (unlike EF6, which has to make one dummy call to row lock)
-                            var instance = await QuerySagas(dbContext)
-                                .FromSql(rowLockQuery, new object[] {nonTrackedInstance})
+
+                            var instance = await ApplyCustomQuery(dbContext, dbSet => dbSet.FromSqlRaw(rowLockQuery, new object[] {nonTrackedInstance}))
                                 .SingleOrDefaultAsync(context.CancellationToken)
                                 .ConfigureAwait(false);
 
@@ -457,16 +455,14 @@
             }
         }
 
-        IQueryable<TSaga> QuerySagas(DbContext dbContext)
+        IQueryable<TSaga> ApplyCustomQuery(DbContext dbContext, Func<DbSet<TSaga>, IQueryable<TSaga>> query = null)
         {
-            IQueryable<TSaga> query = dbContext.Set<TSaga>();
-
+            var queryable = query?.Invoke(dbContext.Set<TSaga>()) ?? dbContext.Set<TSaga>();
             if (_queryCustomization != null)
-                query = _queryCustomization(query);
+                queryable = _queryCustomization(queryable);
 
-            return query;
+            return queryable;
         }
-
 
         /// <summary>
         /// Once the message pipe has processed the saga instance, add it to the saga repository

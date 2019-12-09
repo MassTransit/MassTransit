@@ -26,18 +26,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         public MsSqlLockStatements(
             string defaultSchema = "dbo",
-            string rowLockStatement = DefaultRowLockStatement,
-            Func<IEntityType, IRelationalEntityTypeAnnotations> relationalEntityTypeAnnotations = null
+            string rowLockStatement = DefaultRowLockStatement
             )
         {
             DefaultSchema = defaultSchema;
             RowLockStatement = rowLockStatement ?? throw new ArgumentNullException(nameof(rowLockStatement));
-            RelationalEntityTypeAnnotations = relationalEntityTypeAnnotations ?? GetRelationalEntityTypeAnnotations;
         }
 
         protected string DefaultSchema { get; }
         protected string RowLockStatement { get; }
-        protected Func<IEntityType, IRelationalEntityTypeAnnotations> RelationalEntityTypeAnnotations { get; }
 
         public virtual string GetRowLockStatement<TSaga>(DbContext context)
             where TSaga : class, ISaga
@@ -54,12 +51,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             if (!TableNames.TryGetValue(t, out var result))
             {
-                var sql = RelationalEntityTypeAnnotations(context.Model.FindEntityType(t));
+                var sql = context.Model.FindEntityType(t);
 
                 result = new SchemaTablePair
                 {
-                    Schema = sql.Schema ?? DefaultSchema,
-                    Table = sql.TableName
+                    Schema = sql.GetSchema() ?? DefaultSchema,
+                    Table = sql.GetTableName()
                 };
 
                 if (result != null
@@ -71,11 +68,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             }
 
             return result;
-        }
-
-        protected virtual IRelationalEntityTypeAnnotations GetRelationalEntityTypeAnnotations(IEntityType entityType)
-        {
-            return entityType.SqlServer();
         }
 
         public class SchemaTablePair
