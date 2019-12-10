@@ -2,7 +2,7 @@
   <Import Project="../netfx.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.2</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

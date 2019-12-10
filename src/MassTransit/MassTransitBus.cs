@@ -156,7 +156,23 @@ namespace MassTransit
 
                 busHandle = new Handle(hostHandle, this, _busObservable, _logContext);
 
-                await busHandle.Ready.ConfigureAwait(false);
+                try
+                {
+                    await busHandle.Ready.OrCanceled(cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException exception) when (exception.CancellationToken == cancellationToken)
+                {
+                    try
+                    {
+                        await busHandle.StopAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogContext.Warning?.Log(ex, "Bus start faulted, and failed to stop host");
+                    }
+
+                    await busHandle.Ready.ConfigureAwait(false);
+                }
 
                 await _busObservable.PostStart(this, busHandle.Ready).ConfigureAwait(false);
 

@@ -71,11 +71,9 @@ namespace MassTransit.Azure.ServiceBus.Core
             }
         }
 
-        public static Task<MessagingFactory> CreateAsync(Uri serviceUri, MessagingFactorySettings settings)
+        public static MessagingFactory Create(Uri serviceUri, MessagingFactorySettings settings)
         {
-            var factory = new MessagingFactory(serviceUri, settings);
-
-            return Task.FromResult(factory);
+            return new MessagingFactory(serviceUri, settings);
         }
     }
 }

@@ -2,14 +2,10 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;
-    using Amazon.SimpleNotificationService;
-    using Amazon.SQS;
     using Configuration.Configuration;
     using GreenPipes;
     using Topology;
     using Transport;
-    using Util;
 
 
     public class AmazonSqsConnectionContext :
@@ -17,7 +13,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         ConnectionContext
     {
         readonly IAmazonSqsHostConfiguration _configuration;
-        readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
         public AmazonSqsConnectionContext(IConnection connection, IAmazonSqsHostConfiguration configuration, IAmazonSqsHostTopology hostTopology,
             CancellationToken cancellationToken)
@@ -26,8 +21,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _configuration = configuration;
             Topology = hostTopology;
             Connection = connection;
-
-            _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
         }
 
         public IConnection Connection { get; }
@@ -35,14 +28,12 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         public Uri HostAddress => _configuration.HostAddress;
 
-        public Task<IAmazonSQS> CreateAmazonSqs()
+        public ClientContext CreateClientContext(CancellationToken cancellationToken)
         {
-            return Task.Factory.StartNew(() => Connection.CreateAmazonSqsClient(), CancellationToken, TaskCreationOptions.None, _taskScheduler);
-        }
+            var amazonSqs = Connection.CreateAmazonSqsClient();
+            var amazonSns = Connection.CreateAmazonSnsClient();
 
-        public Task<IAmazonSimpleNotificationService> CreateAmazonSns()
-        {
-            return Task.Factory.StartNew(() => Connection.CreateAmazonSnsClient(), CancellationToken, TaskCreationOptions.None, _taskScheduler);
+            return new AmazonSqsClientContext(this, amazonSqs, amazonSns, cancellationToken);
         }
     }
 }

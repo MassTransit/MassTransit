@@ -9,6 +9,7 @@
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using Policies;
     using Topology;
 
 
@@ -17,19 +18,26 @@
     {
         readonly IActiveMqHostConfiguration _configuration;
         readonly IActiveMqHostTopology _hostTopology;
+        readonly IRetryPolicy _connectionRetryPolicy;
 
         public ConnectionContextFactory(IActiveMqHostConfiguration configuration, IActiveMqHostTopology hostTopology)
         {
             _configuration = configuration;
             _hostTopology = hostTopology;
+
+            _connectionRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Handle<ActiveMqTransportException>();
+
+                x.Exponential(1000, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+            });
         }
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
             IAsyncPipeContextAgent<ConnectionContext> asyncContext = supervisor.AddAsyncContext<ConnectionContext>();
 
-            var context = Task.Factory.StartNew(() => CreateConnection(asyncContext, supervisor), supervisor.Stopping, TaskCreationOptions.None,
-                TaskScheduler.Default).Unwrap();
+            var context = Task.Run(() => CreateConnection(asyncContext, supervisor), supervisor.Stopping);
 
             void HandleConnectionException(Exception exception)
             {
@@ -63,42 +71,45 @@
 
         async Task<ConnectionContext> CreateConnection(IAsyncPipeContextAgent<ConnectionContext> asyncContext, IAgent supervisor)
         {
-            IConnection connection = null;
-            try
+            return await _connectionRetryPolicy.Retry(async () =>
             {
                 if (supervisor.Stopping.IsCancellationRequested)
                     throw new OperationCanceledException($"The connection is stopping and cannot be used: {_configuration.Description}");
 
-                LogContext.Debug?.Log("Connecting: {Host}", _configuration.Description);
+                IConnection connection = null;
+                try
+                {
+                    LogContext.Debug?.Log("Connecting: {Host}", _configuration.Description);
 
-                connection = _configuration.Settings.CreateConnection();
+                    connection = _configuration.Settings.CreateConnection();
 
-                connection.Start();
+                    connection.Start();
 
-                LogContext.Debug?.Log("Connected: {Host} (client-id: {ClientId}, version: {Version})", _configuration.Description, connection.ClientId,
-                    connection.MetaData.NMSVersion);
+                    LogContext.Debug?.Log("Connected: {Host} (client-id: {ClientId}, version: {Version})", _configuration.Description, connection.ClientId,
+                        connection.MetaData.NMSVersion);
 
-                var connectionContext = new ActiveMqConnectionContext(connection, _configuration, _hostTopology, supervisor.Stopped);
+                    var connectionContext = new ActiveMqConnectionContext(connection, _configuration, _hostTopology, supervisor.Stopped);
 
-                await asyncContext.Created(connectionContext).ConfigureAwait(false);
+                    await asyncContext.Created(connectionContext).ConfigureAwait(false);
 
-                return connectionContext;
-            }
-            catch (OperationCanceledException)
-            {
-                await asyncContext.CreateCanceled().ConfigureAwait(false);
-                throw;
-            }
-            catch (NMSConnectionException ex)
-            {
-                LogContext.Error?.Log(ex, "ActiveMQ connection failed");
+                    return connectionContext;
+                }
+                catch (OperationCanceledException)
+                {
+                    await asyncContext.CreateCanceled().ConfigureAwait(false);
+                    throw;
+                }
+                catch (NMSConnectionException ex)
+                {
+                    LogContext.Error?.Log(ex, "ActiveMQ connection failed");
 
-                await asyncContext.CreateFaulted(ex).ConfigureAwait(false);
+                    await asyncContext.CreateFaulted(ex).ConfigureAwait(false);
 
-                connection?.Dispose();
+                    connection?.Dispose();
 
-                throw new ActiveMqConnectException("Connect failed: " + _configuration.Description, ex);
-            }
+                    throw new ActiveMqConnectException("Connect failed: " + _configuration.Description, ex);
+                }
+            });
         }
     }
 }

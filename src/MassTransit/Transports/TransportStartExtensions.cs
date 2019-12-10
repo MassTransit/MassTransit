@@ -15,7 +15,7 @@ namespace MassTransit.Transports
         public static async Task OnTransportStartup<T>(this ReceiveEndpointContext context, ISupervisor<T> supervisor, CancellationToken cancellationToken)
             where T : class, PipeContext
         {
-            // nothing is connected to the pipe, so signal early that we are available
+            // Nothing connected to the pipe, so signal early we are available
             if (!context.ReceivePipe.Connected.IsCompleted)
             {
                 var pipe = new WaitForConnectionPipe<T>(context, cancellationToken);

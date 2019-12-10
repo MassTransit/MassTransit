@@ -10,6 +10,7 @@
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using Policies;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
     using Topology;
@@ -22,6 +23,7 @@
         readonly IRabbitMqHostTopology _hostTopology;
         readonly Lazy<ConnectionFactory> _connectionFactory;
         readonly string _description;
+        readonly IRetryPolicy _connectionRetryPolicy;
 
         public ConnectionContextFactory(IRabbitMqHostConfiguration configuration, IRabbitMqHostTopology hostTopology)
         {
@@ -30,13 +32,19 @@
 
             _description = configuration.Settings.ToDescription();
 
+            _connectionRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Handle<RabbitMqConnectionException>();
+
+                x.Exponential(1000, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+            });
+
             _connectionFactory = new Lazy<ConnectionFactory>(_configuration.Settings.GetConnectionFactory);
         }
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
-            var context = Task.Factory.StartNew(() => CreateConnection(supervisor), supervisor.Stopping, TaskCreationOptions.None, TaskScheduler.Default)
-                .Unwrap();
+            var context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopping);
 
             IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 
@@ -73,52 +81,66 @@
 
         async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
         {
-            IConnection connection = null;
-            try
+            return await _connectionRetryPolicy.Retry(async () =>
             {
                 if (supervisor.Stopping.IsCancellationRequested)
                     throw new OperationCanceledException($"The connection is stopping and cannot be used: {_description}");
 
-                LogContext.Debug?.Log("Connecting: {Host}", _description);
-
-                if (_configuration.Settings.ClusterMembers?.Any() ?? false)
+                IConnection connection = null;
+                try
                 {
-                    connection = _connectionFactory.Value.CreateConnection(_configuration.Settings.ClusterMembers, _configuration.Settings.ClientProvidedName);
+                    LogContext.Debug?.Log("Connecting: {Host}", _description);
+
+                    if (_configuration.Settings.ClusterMembers?.Any() ?? false)
+                    {
+                        connection = _connectionFactory.Value.CreateConnection(_configuration.Settings.ClusterMembers,
+                            _configuration.Settings.ClientProvidedName);
+                    }
+                    else
+                    {
+                        List<string> hostNames = Enumerable.Repeat(_configuration.Settings.Host, 1).ToList();
+
+                        connection = _connectionFactory.Value.CreateConnection(hostNames, _configuration.Settings.ClientProvidedName);
+                    }
+
+                    LogContext.Debug?.Log("Connected: {Host} (address: {RemoteAddress}, local: {LocalAddress})", _description, connection.Endpoint,
+                        connection.LocalPort);
+
+                    var connectionContext = new RabbitMqConnectionContext(connection, _configuration, _hostTopology, _description, supervisor.Stopped);
+
+                    connectionContext.GetOrAddPayload(() => _configuration.Settings);
+
+                    return (ConnectionContext)connectionContext;
                 }
-                else
+                catch (ConnectFailureException ex)
                 {
-                    List<string> hostNames = Enumerable.Repeat(_configuration.Settings.Host, 1).ToList();
+                    connection?.Dispose();
 
-                    connection = _connectionFactory.Value.CreateConnection(hostNames, _configuration.Settings.ClientProvidedName);
+                    throw new RabbitMqConnectionException("Connect failed: " + _description, ex);
                 }
+                catch (BrokerUnreachableException ex)
+                {
+                    connection?.Dispose();
 
-                LogContext.Debug?.Log("Connected: {Host} (address: {RemoteAddress}, local: {LocalAddress})", _description, connection.Endpoint,
-                    connection.LocalPort);
+                    throw new RabbitMqConnectionException("Broker unreachable: " + _description, ex);
+                }
+                catch (OperationInterruptedException ex)
+                {
+                    connection?.Dispose();
 
-                var connectionContext = new RabbitMqConnectionContext(connection, _configuration, _hostTopology, _description, supervisor.Stopped);
+                    throw new RabbitMqConnectionException("Operation interrupted: " + _description, ex);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    connection?.Dispose();
 
-                connectionContext.GetOrAddPayload(() => _configuration.Settings);
-
-                return connectionContext;
-            }
-            catch (ConnectFailureException ex)
-            {
-                connection?.Dispose();
-
-                throw new RabbitMqConnectionException("Connect failed: " + _description, ex);
-            }
-            catch (BrokerUnreachableException ex)
-            {
-                connection?.Dispose();
-
-                throw new RabbitMqConnectionException("Broker unreachable: " + _description, ex);
-            }
-            catch (OperationInterruptedException ex)
-            {
-                connection?.Dispose();
-
-                throw new RabbitMqConnectionException("Operation interrupted: " + _description, ex);
-            }
+                    throw new RabbitMqConnectionException("Create Connection Faulted: " + _description, ex);
+                }
+            }, supervisor.Stopping).ConfigureAwait(false);
         }
     }
 }
