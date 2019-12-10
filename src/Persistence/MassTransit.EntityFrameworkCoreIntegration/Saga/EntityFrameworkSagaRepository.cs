@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using Microsoft.Data.SqlClient;
     using System.Linq;
     using System.Threading.Tasks;
     using Context;
@@ -101,11 +100,11 @@
             try
             {
                 var execStrategy = dbContext.Database.CreateExecutionStrategy();
-                if (execStrategy is SqlServerRetryingExecutionStrategy)
+                if (execStrategy is ExecutionStrategy)
                 {
                     await execStrategy.Execute(async () =>
                     {
-                        using (var transaction =
+                        await using (var transaction =
                             await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
                         {
                             await SendLogic(transaction, dbContext, context, policy, next).ConfigureAwait(false);
@@ -187,28 +186,6 @@
 
                 throw;
             }
-            catch (DbUpdateException ex)
-            {
-                if (IsDeadlockException(ex))
-                {
-                    // deadlock, no need to rollback
-                }
-                else
-                {
-                    context.LogFault(this, ex, instance?.CorrelationId);
-
-                    try
-                    {
-                        transaction.Rollback();
-                    }
-                    catch (Exception innerException)
-                    {
-                        LogContext.Warning?.Log(innerException, "Transaction rollback failed");
-                    }
-                }
-
-                throw;
-            }
             catch (Exception ex)
             {
                 context.LogFault(this, ex, instance?.CorrelationId);
@@ -249,11 +226,11 @@
                 }
 
                 var execStrategy = dbContext.Database.CreateExecutionStrategy();
-                if (execStrategy is SqlServerRetryingExecutionStrategy)
+                if (execStrategy is ExecutionStrategy)
                 {
                     await execStrategy.Execute(async () =>
                     {
-                        using (var transaction =
+                        await using (var transaction =
                             await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
                         {
                             await SendQueryLogic(nonTrackedInstances, transaction, dbContext, context, policy, next);
@@ -340,7 +317,7 @@
 
                 transaction.Commit();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateException)
             {
                 try
                 {
@@ -349,26 +326,6 @@
                 catch (Exception innerException)
                 {
                     LogContext.Warning?.Log(innerException, "Transaction rollback failed");
-                }
-
-                throw;
-            }
-            catch (DbUpdateException ex)
-            {
-                if (IsDeadlockException(ex))
-                {
-                    // deadlock, no need to rollback
-                }
-                else
-                {
-                    try
-                    {
-                        transaction.Rollback();
-                    }
-                    catch (Exception innerException)
-                    {
-                        LogContext.Warning?.Log(innerException, "Transaction rollback failed");
-                    }
                 }
 
                 throw;
@@ -403,11 +360,6 @@
 
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
             }
-        }
-
-        static bool IsDeadlockException(Exception exception)
-        {
-            return exception.GetBaseException() is SqlException baseException && baseException.Number == 1205;
         }
 
         async Task<bool> PreInsertSagaInstance<T>(DbContext dbContext, ConsumeContext<T> context, TSaga instance)
