@@ -16,7 +16,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using System.Collections.Concurrent;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Metadata;
 
     public class MsSqlLockStatements : IRawSqlLockStatements
     {

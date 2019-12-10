@@ -146,10 +146,13 @@
                     // Query with a row Lock instead using FromSql. Still a single trip to the DB (unlike EF6, which has to make one dummy call to row lock)
                     var rowLockQuery = _rawSqlLockStatements?.GetRowLockStatement<TSaga>(dbContext);
                     if (rowLockQuery != null)
-                        instance = await ApplyCustomQuery(dbContext, dbSet => dbSet.FromSqlRaw(rowLockQuery, new object[] {sagaId})).SingleOrDefaultAsync()
+                        instance = await ApplyCustomQuery(dbContext, dbSet => dbSet.FromSqlRaw(rowLockQuery, new object[] {sagaId}))
+                            .SingleOrDefaultAsync(context.CancellationToken)
                             .ConfigureAwait(false);
                     else
-                        instance = await ApplyCustomQuery(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken).ConfigureAwait(false);
+                        instance = await ApplyCustomQuery(dbContext)
+                            .SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken)
+                            .ConfigureAwait(false);
                 }
 
                 if (instance == null)
