@@ -15,6 +15,7 @@ namespace MassTransit.MongoDbIntegration
     using System;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Audit;
     using Courier;
     using Courier.Documents;
     using Courier.Events;
@@ -25,7 +26,7 @@ namespace MassTransit.MongoDbIntegration
 
     public class MassTransitMongoDbConventions
     {
-        public MassTransitMongoDbConventions(ConventionFilter filter = default(ConventionFilter))
+        public MassTransitMongoDbConventions(ConventionFilter filter = default)
         {
             var conventionFilter = filter ?? IsMassTransitClass;
 
@@ -57,7 +58,7 @@ namespace MassTransit.MongoDbIntegration
 
         static bool IsMassTransitClass(Type type)
         {
-            return type.FullName.StartsWith("MassTransit") || IsSagaClass(type);
+            return type.FullName.StartsWith("MassTransit") || IsSagaClass(type) && type != typeof(AuditDocument);
         }
 
         static bool IsSagaClass(Type type)
@@ -65,7 +66,7 @@ namespace MassTransit.MongoDbIntegration
             return type.GetTypeInfo().IsClass && typeof(IVersionedSaga).IsAssignableFrom(type);
         }
 
-        public void RegisterClass<T>(Expression<Func<T, Guid>> id)
+        public static void RegisterClass<T>(Expression<Func<T, Guid>> id)
         {
             if (BsonClassMap.IsClassMapRegistered(typeof(T)))
                 return;
@@ -77,7 +78,7 @@ namespace MassTransit.MongoDbIntegration
             });
         }
 
-        public void RegisterClass<T>()
+        public static void RegisterClass<T>()
         {
             if (BsonClassMap.IsClassMapRegistered(typeof(T)))
                 return;
