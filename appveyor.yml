@@ -15,7 +15,7 @@ skip_commits:
     - docs.yml
 
 image:
-  - Visual Studio 2017
+  - Visual Studio 2019
   - Ubuntu1804
 
 services:
