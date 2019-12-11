@@ -11,7 +11,7 @@ namespace MassTransit.MongoDbIntegration.Saga.CollectionNameFormatters
 
         public DefaultCollectionNameFormatter(string collectionName = null)
         {
-            collectionName = collectionName ?? DefaultCollectionName;
+            collectionName ??= DefaultCollectionName;
 
             if (string.IsNullOrWhiteSpace(collectionName))
                 throw new ArgumentNullException(nameof(collectionName));
