@@ -17,6 +17,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
             RetryLimit = 10;
 
             TransportType = TransportType.Amqp;
+
+            ServiceUri = new Uri("sb://no-host-configured");
         }
 
         public Uri ServiceUri { get; set; }
