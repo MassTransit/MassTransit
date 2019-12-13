@@ -38,14 +38,14 @@ namespace MassTransit.MongoDbIntegration.Audit
 
         static MongoDbAuditStore()
         {
+            if (BsonClassMap.IsClassMapRegistered(typeof(AuditDocument)))
+                return;
+
             // easiest way to metadata since keys wont become element names, therefore subject to validation
             // will allow keys like $correlationId to be kept
             var headersSerializer = new DictionaryInterfaceImplementerSerializer<AuditHeaders, string, string>(
                 DictionaryRepresentation.ArrayOfDocuments
             );
-
-            if (BsonClassMap.IsClassMapRegistered(typeof(AuditDocument)))
-                return;
 
             BsonClassMap.RegisterClassMap<AuditDocument>(x =>
             {
