@@ -138,6 +138,63 @@ namespace MassTransit.MongoDbIntegration.Tests.Audit
     }
 
 
+    [TestFixture]
+    public class Can_store_two_records_for_both_send_and_consume
+    {
+        [Test]
+        public void Should_have_the_sent_record()
+        {
+            var consumedRecord = _audit.FirstOrDefault(x => x.ContextType == "Consume");
+
+            Assert.NotNull(consumedRecord);
+
+        }
+
+        [Test]
+        public void Should_have_the_consume_record()
+        {
+            var sentRecord = _audit.FirstOrDefault(x => x.ContextType == "Send");
+
+            Assert.NotNull(sentRecord);
+        }
+
+        [Test]
+        public void The_number_of_records_is_two()
+        {
+            Assert.AreEqual(2, _audit.Count);
+        }
+
+        InMemoryTestHarness _harness;
+        List<AuditDocument> _audit;
+
+        [OneTimeSetUp]
+        public async Task Send_message_to_test_consumer()
+        {
+            _harness =  new InMemoryTestHarness();
+            _harness.OnConnectObservers += bus =>
+            {
+                bus.ConnectConsumeAuditObserver(AuditStore);
+                bus.ConnectSendAuditObservers(AuditStore);
+            };
+
+            ConsumerTestHarness<TestConsumer> consumer = _harness.Consumer<TestConsumer>();
+
+            await _harness.Start();
+
+            await _harness.InputQueueSendEndpoint.Send(new A());
+
+            IReceivedMessage<A> consumed = consumer.Consumed.Select<A>().First();
+            _audit = await GetAuditRecordsForMessage(consumed.Context.MessageId.Value);
+        }
+
+        [OneTimeTearDown]
+        public Task Teardown()
+        {
+            return Task.WhenAll(_harness.Stop(), Cleanup());
+        }
+    }
+
+
     class TestConsumer : IConsumer<A>
     {
         public Task Consume(ConsumeContext<A> context)
