@@ -186,8 +186,19 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Adds all sagas in the specified assemblies matching the namespace. If you are using both state machine and regular sagas, be
-        /// sure to call AddSagaStateMachinesFromNamespaceContaining prior to calling this one.
+        /// Adds all saga state machines in the specified assemblies matching the namespace. If you are using both state machine and regular sagas, be
+        /// sure to call AddSagasFromNamespaceContaining after calling this one.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="filter"></param>
+        public static void AddSagaStateMachinesFromNamespaceContaining<T>(this IRegistrationConfigurator configurator, Func<Type, bool> filter = null)
+        {
+            AddSagaStateMachinesFromNamespaceContaining(configurator, typeof(T), filter);
+        }
+
+        /// <summary>
+        /// Adds all saga state machines in the specified assemblies matching the namespace. If you are using both state machine and regular sagas, be
+        /// sure to call AddSagasFromNamespaceContaining after calling this one.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="type">The type to use to identify the assembly and namespace to scan</param>
