@@ -40,6 +40,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; set; }
 
         public string Scope { get; set; }
+        public string VirtualHost { get; set; }
 
         public AllowTransportHeader AllowTransportHeader { get; set; }
 
@@ -52,7 +53,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 
         Uri FormatHostAddress()
         {
-            return new AmazonSqsHostAddress(Region.SystemName, Scope);
+            return new AmazonSqsHostAddress(Region.SystemName, Scope, VirtualHost);
         }
 
         public override string ToString()

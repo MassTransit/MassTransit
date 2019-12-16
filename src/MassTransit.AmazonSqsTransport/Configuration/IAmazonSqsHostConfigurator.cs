@@ -30,6 +30,12 @@
         void Credentials(AWSCredentials credentials);
 
         /// <summary>
+        /// Sets the virtual host for AmazonSQS/AmazonSNS
+        /// </summary>
+        /// <param name="virtualHost"></param>
+        void VirtualHost(string virtualHost);
+
+        /// <summary>
         /// Sets the default config for the connection to AmazonSQS
         /// </summary>
         /// <param name="config"></param>

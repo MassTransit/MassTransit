@@ -2,22 +2,26 @@ namespace MassTransit.AmazonSqsTransport
 {
     using System;
     using System.Diagnostics;
+    using System.Text;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public readonly struct AmazonSqsHostAddress
     {
+        public static readonly string[] PathSeparators = {"/"};
         public const string AmazonSqsScheme = "amazonsqs";
 
         public readonly string Scheme;
         public readonly string Host;
         public readonly string Scope;
+        public readonly string VirtualHost;
 
         public AmazonSqsHostAddress(Uri address)
         {
             Scheme = default;
             Host = default;
             Scope = default;
+            VirtualHost = default;
 
             var scheme = address.Scheme.ToLowerInvariant();
             switch (scheme)
@@ -26,7 +30,7 @@ namespace MassTransit.AmazonSqsTransport
                     Scheme = address.Scheme;
                     Host = address.Host;
 
-                    ParseLeft(address, out Scheme, out Host, out Scope);
+                    ParseLeft(address, out Scheme, out Host, out Scope, out VirtualHost);
                     break;
 
                 default:
@@ -34,34 +38,36 @@ namespace MassTransit.AmazonSqsTransport
             }
         }
 
-        public AmazonSqsHostAddress(string host, string scope)
+        public AmazonSqsHostAddress(string host, string scope, string virtualHost)
         {
             Scheme = AmazonSqsScheme;
             Host = host;
             Scope = scope;
+            VirtualHost = virtualHost;
         }
 
-        static void ParseLeft(Uri address, out string scheme, out string host, out string scope)
+        static void ParseLeft(Uri address, out string scheme, out string host, out string scope, out string virtualHost)
         {
             scheme = address.Scheme;
             host = address.Host;
 
-            scope = ParseScope(address.AbsolutePath);
-        }
-
-        static string ParseScope(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-                return "/";
-
-            if (path.Length == 1 && path[0] == '/')
-                return path;
-
-            int split = path.LastIndexOf('/');
-            if (split > 0)
-                return Uri.UnescapeDataString(path.Substring(1, split - 1));
-
-            return Uri.UnescapeDataString(path.Substring(1));
+            string[] split = address.AbsolutePath.Split(PathSeparators, StringSplitOptions.RemoveEmptyEntries);
+            var length = split.Length;
+            if (length > 1)
+            {
+                virtualHost = Uri.UnescapeDataString(split[length - 1]);
+                scope = Uri.UnescapeDataString(split[length - 2]);
+            }
+            else if (length > 0)
+            {
+                scope = Uri.UnescapeDataString(split[length - 1]);
+                virtualHost = "/";
+            }
+            else
+            {
+                scope = "/";
+                virtualHost = "/";
+            }
         }
 
         public static implicit operator Uri(in AmazonSqsHostAddress address)
@@ -70,12 +76,20 @@ namespace MassTransit.AmazonSqsTransport
             {
                 Scheme = address.Scheme,
                 Host = address.Host,
-                Path = address.Scope == "/"
-                    ? $"/"
-                    : $"/{Uri.EscapeDataString(address.Scope)}"
+                Path = FormatPath(address)
             };
 
             return builder.Uri;
+        }
+
+        static string FormatPath(AmazonSqsHostAddress address)
+        {
+            var sb = new StringBuilder();
+            if (address.Scope != "/")
+                sb.Append("/").Append(address.Scope);
+            if (address.VirtualHost != "/")
+                sb.Append("/").Append(address.VirtualHost);
+            return sb.Length > 0 ? sb.ToString() : "/";
         }
 
         Uri DebuggerDisplay => this;

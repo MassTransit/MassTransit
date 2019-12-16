@@ -5,7 +5,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
     using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using Transport;
     using Transports;
 
 
@@ -23,9 +22,10 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 
             var regionEndpoint = RegionEndpoint.GetBySystemName(hostAddress.Host);
 
-            _settings = new ConfigurationHostSettings()
+            _settings = new ConfigurationHostSettings
             {
                 Scope = hostAddress.Scope,
+                VirtualHost = hostAddress.VirtualHost,
                 Region = regionEndpoint,
                 AmazonSqsConfig = new AmazonSQSConfig {RegionEndpoint = regionEndpoint},
                 AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig {RegionEndpoint = regionEndpoint}
@@ -61,6 +61,11 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public void Credentials(AWSCredentials credentials)
         {
             _settings.Credentials = credentials;
+        }
+
+        public void VirtualHost(string virtualHost)
+        {
+            _settings.VirtualHost = virtualHost;
         }
 
         public void Config(AmazonSQSConfig config)

@@ -31,6 +31,8 @@
 
         Uri HostAddress { get; }
 
+        string VirtualHost { get; }
+
         IConnection CreateConnection();
     }
 }

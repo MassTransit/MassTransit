@@ -4,6 +4,7 @@ namespace MassTransit.AmazonSqsTransport
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Text;
     using Topology;
 
 
@@ -15,6 +16,7 @@ namespace MassTransit.AmazonSqsTransport
         public readonly string Scheme;
         public readonly string Host;
         public readonly string Scope;
+        public readonly string VirtualHost;
 
         public readonly string Name;
         public readonly bool AutoDelete;
@@ -24,6 +26,7 @@ namespace MassTransit.AmazonSqsTransport
             Scheme = default;
             Host = default;
             Scope = default;
+            VirtualHost = default;
 
             AutoDelete = default;
 
@@ -34,11 +37,11 @@ namespace MassTransit.AmazonSqsTransport
                     Scheme = address.Scheme;
                     Host = address.Host;
 
-                    ParsePath(address.AbsolutePath, out Scope, out Name);
+                    ParsePath(address.AbsolutePath, out Scope, out Name, out VirtualHost);
                     break;
 
                 case "queue":
-                    ParseLeft(hostAddress, out Scheme, out Host, out Scope);
+                    ParseLeft(hostAddress, out Scheme, out Host, out Scope, out VirtualHost);
 
                     Name = address.AbsolutePath;
                     break;
@@ -49,26 +52,26 @@ namespace MassTransit.AmazonSqsTransport
 
             AmazonSqsEntityNameValidator.Validator.ThrowIfInvalidEntityName(Name);
 
-            string query = address.Query?.TrimStart('?');
-            if (!string.IsNullOrWhiteSpace(query))
-            {
-                var parameters = query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
+            var query = address.Query?.TrimStart('?');
+            if (string.IsNullOrWhiteSpace(query))
+                return;
 
-                foreach ((string key, string value) in parameters)
+            IEnumerable<(string, string)> parameters =
+                query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
+
+            foreach (var (key, value) in parameters)
+            {
+                AutoDelete = key switch
                 {
-                    switch (key)
-                    {
-                        case AutoDeleteKey when bool.TryParse(value, out var result):
-                            AutoDelete = result;
-                            break;
-                    }
-                }
+                    AutoDeleteKey when bool.TryParse(value, out var result) => result,
+                    _ => AutoDelete
+                };
             }
         }
 
         public AmazonSqsEndpointAddress(Uri hostAddress, string name, bool autoDelete = false)
         {
-            ParseLeft(hostAddress, out Scheme, out Host, out Scope);
+            ParseLeft(hostAddress, out Scheme, out Host, out Scope, out VirtualHost);
 
             Name = name;
 
@@ -77,27 +80,37 @@ namespace MassTransit.AmazonSqsTransport
 
         public string Path => Scope == "/" ? Name : $"{Scope}/{Name}";
 
-        static void ParsePath(string path, out string scope, out string name)
+        static void ParsePath(string path, out string scope, out string name, out string virtualHost)
         {
-            int split = path.LastIndexOf('/');
-            if (split > 0)
+            string[] split = path.Split(AmazonSqsHostAddress.PathSeparators, StringSplitOptions.RemoveEmptyEntries);
+            var length = split.Length;
+            if (length > 2)
             {
-                scope = path.Substring(1, split - 1);
-                name = path.Substring(split + 1);
+                name = split[length - 1];
+                virtualHost = split[length - 2];
+                scope = split[length - 3];
+            }
+            else if (length > 1)
+            {
+                virtualHost = "/";
+                scope = split[length - 2];
+                name = split[length - 1];
             }
             else
             {
                 scope = "/";
-                name = path.Substring(1);
+                virtualHost = "/";
+                name = split[0];
             }
         }
 
-        static void ParseLeft(Uri address, out string scheme, out string host, out string scope)
+        static void ParseLeft(Uri address, out string scheme, out string host, out string scope, out string virtualHost)
         {
             var hostAddress = new AmazonSqsHostAddress(address);
             scheme = hostAddress.Scheme;
             host = hostAddress.Host;
             scope = hostAddress.Scope;
+            virtualHost = hostAddress.VirtualHost;
         }
 
         public static implicit operator Uri(in AmazonSqsEndpointAddress address)
@@ -106,14 +119,23 @@ namespace MassTransit.AmazonSqsTransport
             {
                 Scheme = address.Scheme,
                 Host = address.Host,
-                Path = address.Scope == "/"
-                    ? $"/{address.Name}"
-                    : $"/{address.Scope}/{address.Name}"
+                Path = FormatPath(address)
             };
 
             builder.Query += string.Join("&", address.GetQueryStringOptions());
 
             return builder.Uri;
+        }
+
+        static string FormatPath(AmazonSqsEndpointAddress address)
+        {
+            var sb = new StringBuilder();
+            if (address.Scope != "/")
+                sb.Append("/").Append(address.Scope);
+            if (address.VirtualHost != "/")
+                sb.Append("/").Append(address.VirtualHost);
+            sb.Append("/").Append(address.Name);
+            return sb.ToString();
         }
 
         Uri DebuggerDisplay => this;
