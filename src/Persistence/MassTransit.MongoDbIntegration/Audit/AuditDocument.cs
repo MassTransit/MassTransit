@@ -30,7 +30,7 @@ namespace MassTransit.MongoDbIntegration.Audit
         {
             return new AuditDocument
             {
-                AuditId = Guid.NewGuid().ToString("N"),
+                AuditId = NewId.NextGuid().ToString("N"),
                 ContextType = metadata.ContextType,
                 MessageId = metadata.MessageId.ToString(),
                 ConversationId = metadata.ConversationId.ToString(),
