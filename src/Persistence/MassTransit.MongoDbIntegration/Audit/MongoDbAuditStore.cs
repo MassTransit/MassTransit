@@ -50,7 +50,7 @@ namespace MassTransit.MongoDbIntegration.Audit
             BsonClassMap.RegisterClassMap<AuditDocument>(x =>
             {
                 x.AutoMap();
-                x.MapIdMember(doc => doc.MessageId);
+                x.MapIdMember(doc => doc.AuditId);
                 x.MapMember(doc => doc.Headers).SetSerializer(headersSerializer);
                 x.MapMember(doc => doc.Custom).SetSerializer(headersSerializer);
             });

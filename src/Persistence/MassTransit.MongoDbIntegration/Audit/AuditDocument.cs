@@ -7,6 +7,7 @@ namespace MassTransit.MongoDbIntegration.Audit
 
     public class AuditDocument
     {
+        public string AuditId { get; set; }
         public string MessageId { get; set; }
         public string ConversationId { get; set; }
         public string CorrelationId { get; set; }
@@ -29,6 +30,7 @@ namespace MassTransit.MongoDbIntegration.Audit
         {
             return new AuditDocument
             {
+                AuditId = Guid.NewGuid().ToString("N"),
                 ContextType = metadata.ContextType,
                 MessageId = metadata.MessageId.ToString(),
                 ConversationId = metadata.ConversationId.ToString(),

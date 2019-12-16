@@ -25,6 +25,14 @@ namespace MassTransit.MongoDbIntegration.Tests.Audit
         public static IMessageAuditStore AuditStore { get; }
         public static IMongoCollection<AuditDocument> AuditCollection { get; }
 
+        public static Task<List<AuditDocument>> GetAuditRecordsForMessage(Guid messageId)
+        {
+            return Database.GetCollection<AuditDocument>(AuditCollectionName)
+                .AsQueryable()
+                .Where(x => x.MessageId == messageId.ToString())
+                .ToListAsync();
+        }
+
         public static Task<List<AuditDocument>> GetAuditRecords(string contextType)
         {
             return Database.GetCollection<AuditDocument>(AuditCollectionName)
