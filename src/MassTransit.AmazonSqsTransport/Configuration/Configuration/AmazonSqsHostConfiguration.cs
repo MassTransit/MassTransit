@@ -101,7 +101,7 @@
         {
             var messageNameFormatter = new AmazonSqsMessageNameFormatter();
 
-            var hostTopology = new AmazonSqsHostTopology(messageNameFormatter, _hostSettings.HostAddress, _topologyConfiguration);
+            var hostTopology = new AmazonSqsHostTopology(messageNameFormatter, HostAddress, _topologyConfiguration);
 
             var host = new AmazonSqsHost(this, hostTopology);
 

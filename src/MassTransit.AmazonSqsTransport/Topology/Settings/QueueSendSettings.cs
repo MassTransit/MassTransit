@@ -10,23 +10,12 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         QueueConfigurator,
         SendSettings
     {
-        public QueueSendSettings(string queueName, bool durable, bool autoDelete)
-            : base(queueName, durable, autoDelete)
+        public QueueSendSettings(AmazonSqsEndpointAddress address)
+            : base(address.Name, address.Durable,address.AutoDelete)
         {
         }
 
-        public Uri GetSendAddress(Uri hostAddress)
-        {
-            var builder = new UriBuilder(hostAddress);
-
-            builder.Path = builder.Path == "/"
-                ? $"/{EntityName}"
-                : $"/{string.Join("/", builder.Path.Trim('/'), EntityName)}";
-
-            builder.Query += string.Join("&", GetQueryStringOptions());
-
-            return builder.Uri;
-        }
+        public Uri GetSendAddress(Uri hostAddress) => GetEndpointAddress(hostAddress);
 
         public BrokerTopology GetBrokerTopology()
         {

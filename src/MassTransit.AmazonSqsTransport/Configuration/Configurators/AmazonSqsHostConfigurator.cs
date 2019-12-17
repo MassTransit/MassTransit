@@ -5,7 +5,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
     using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using Transport;
     using Transports;
 
 
@@ -23,7 +22,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 
             var regionEndpoint = RegionEndpoint.GetBySystemName(hostAddress.Host);
 
-            _settings = new ConfigurationHostSettings()
+            _settings = new ConfigurationHostSettings
             {
                 Scope = hostAddress.Scope,
                 Region = regionEndpoint,
@@ -50,6 +49,11 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         {
             _accessKey = accessKey;
             SetBasicCredentials();
+        }
+
+        public void Scope(string scope)
+        {
+            _settings.Scope = scope;
         }
 
         public void SecretKey(string secretKey)

@@ -40,7 +40,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public SendSettings GetSendSettings(AmazonSqsEndpointAddress address)
         {
-            return new QueueSendSettings(address.Path, true, address.AutoDelete);
+            return new QueueSendSettings(address);
         }
 
         public ErrorSettings GetErrorSettings(EntitySettings settings)
@@ -62,7 +62,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             return messageTopology;
         }
 
-        string BuildEntityName(string entityName, string suffix)
+        static string BuildEntityName(string entityName, string suffix)
         {
             const string fifoSuffix = ".fifo";
 

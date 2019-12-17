@@ -112,7 +112,7 @@
         {
             IAmazonSqsMessagePublishTopology<T> publishTopology = _hostTopology.Publish<T>();
 
-            var settings = publishTopology.GetPublishSettings();
+            var settings = publishTopology.GetPublishSettings(_hostConfiguration.HostAddress);
 
             var clientContextSupervisor = new AmazonSqsClientContextSupervisor(ConnectionContextSupervisor);
 
