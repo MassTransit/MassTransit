@@ -3,10 +3,10 @@ namespace MassTransit.ActiveMqTransport
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using Initializers;
     using Initializers.TypeConverters;
     using Topology;
+    using Util;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
@@ -61,7 +61,7 @@ namespace MassTransit.ActiveMqTransport
                         ? 61616
                         : address.Port;
 
-                    ParsePath(address.AbsolutePath, out VirtualHost, out Name);
+                    address.ParseHostPathAndEntityName(out VirtualHost, out Name);
                     break;
 
                 case "queue":
@@ -86,32 +86,26 @@ namespace MassTransit.ActiveMqTransport
 
             ActiveMqEntityNameValidator.Validator.ThrowIfInvalidEntityName(Name);
 
-            string query = address.Query?.TrimStart('?');
-            if (!string.IsNullOrWhiteSpace(query))
+            foreach ((string key, string value) in address.SplitQueryString())
             {
-                var parameters = query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
-
-                foreach ((string key, string value) in parameters)
+                switch (key)
                 {
-                    switch (key)
-                    {
-                        case TemporaryKey when bool.TryParse(value, out bool result):
-                            AutoDelete = result;
-                            Durable = !result;
-                            break;
+                    case TemporaryKey when bool.TryParse(value, out bool result):
+                        AutoDelete = result;
+                        Durable = !result;
+                        break;
 
-                        case DurableKey when bool.TryParse(value, out bool result):
-                            Durable = result;
-                            break;
+                    case DurableKey when bool.TryParse(value, out bool result):
+                        Durable = result;
+                        break;
 
-                        case AutoDeleteKey when bool.TryParse(value, out bool result):
-                            AutoDelete = result;
-                            break;
+                    case AutoDeleteKey when bool.TryParse(value, out bool result):
+                        AutoDelete = result;
+                        break;
 
-                        case TypeKey when _parseConverter.TryConvert(value, out AddressType result):
-                            Type = result;
-                            break;
-                    }
+                    case TypeKey when _parseConverter.TryConvert(value, out AddressType result):
+                        Type = result;
+                        break;
                 }
             }
         }
@@ -145,21 +139,6 @@ namespace MassTransit.ActiveMqTransport
             string name = $"{Name}_delay";
 
             return new ActiveMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, Durable, AutoDelete);
-        }
-
-        static void ParsePath(string path, out string virtualHost, out string name)
-        {
-            int split = path.LastIndexOf('/');
-            if (split > 0)
-            {
-                virtualHost = Uri.UnescapeDataString(path.Substring(1, split - 1));
-                name = path.Substring(split + 1);
-            }
-            else
-            {
-                virtualHost = "/";
-                name = path.Substring(1);
-            }
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out int? port, out string virtualHost)

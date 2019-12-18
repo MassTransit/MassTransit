@@ -1,5 +1,6 @@
 namespace MassTransit.AmazonSqsTransport.Tests
 {
+    using System;
     using System.Threading.Tasks;
     using Configuration;
     using NUnit.Framework;
@@ -63,7 +64,11 @@ namespace MassTransit.AmazonSqsTransport.Tests
         {
             await Bus.Publish<Ping>(new { });
 
-            await _handled;
+            var context = await _handled;
+
+            var entityName = new AmazonSqsMessageNameFormatter().GetMessageName(typeof(Ping));
+
+            Assert.That(context.DestinationAddress, Is.EqualTo(new Uri($"amazonsqs://docker.localhost/test/{entityName}")));
         }
     }
 }
