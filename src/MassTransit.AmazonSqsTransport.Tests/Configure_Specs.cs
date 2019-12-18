@@ -131,8 +131,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
     [TestFixture]
     public class Configuring_AmazonSQS
     {
-        const string AwsAccessKey = "{YOUR AWS ACCESS KEY}";
-        const string AwsSecretKey = "{YOUR AWS SECRET KEY}";
+        const string AwsAccessKey = "AKIAXHHUX6MFV3TVPCA4";
+        const string AwsSecretKey = "VydI4gD7G+nwjy6BYcMUAy1GKEJ+LgYSf1SD3vmc";
         static int _subscribedObserver;
 
         [OneTimeSetUp]

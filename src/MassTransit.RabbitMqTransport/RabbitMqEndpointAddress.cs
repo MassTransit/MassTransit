@@ -5,6 +5,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Diagnostics;
     using System.Linq;
     using Topology;
+    using Util;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
@@ -68,7 +69,7 @@ namespace MassTransit.RabbitMqTransport
                     Host = address.Host;
                     Port = !address.IsDefaultPort ? address.Port : scheme.EndsWith("s") ? 5671 : 5672;
 
-                    ParsePath(address.AbsolutePath, out VirtualHost, out Name);
+                    address.ParseHostPathAndEntityName(out VirtualHost, out Name);
                     break;
 
                 case "queue":
@@ -93,60 +94,54 @@ namespace MassTransit.RabbitMqTransport
 
             RabbitMqEntityNameValidator.Validator.ThrowIfInvalidEntityName(Name);
 
-            string query = address.Query?.TrimStart('?');
-            if (!string.IsNullOrWhiteSpace(query))
+            HashSet<string> bindExchanges = new HashSet<string>();
+
+            foreach ((string key, string value) in address.SplitQueryString())
             {
-                HashSet<string> bindExchanges = new HashSet<string>();
-
-                var parameters = query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
-
-                foreach ((string key, string value) in parameters)
+                switch (key)
                 {
-                    switch (key)
-                    {
-                        case TemporaryKey when bool.TryParse(value, out bool result):
-                            AutoDelete = result;
-                            Durable = !result;
-                            break;
+                    case TemporaryKey when bool.TryParse(value, out bool result):
+                        AutoDelete = result;
+                        Durable = !result;
+                        break;
 
-                        case DurableKey when bool.TryParse(value, out bool result):
-                            Durable = result;
-                            break;
+                    case DurableKey when bool.TryParse(value, out bool result):
+                        Durable = result;
+                        break;
 
-                        case AutoDeleteKey when bool.TryParse(value, out bool result):
-                            AutoDelete = result;
-                            break;
+                    case AutoDeleteKey when bool.TryParse(value, out bool result):
+                        AutoDelete = result;
+                        break;
 
-                        case ExchangeTypeKey when !string.IsNullOrWhiteSpace(value):
-                            ExchangeType = value;
-                            break;
+                    case ExchangeTypeKey when !string.IsNullOrWhiteSpace(value):
+                        ExchangeType = value;
+                        break;
 
-                        case BindQueueKey when bool.TryParse(value, out bool result):
-                            BindToQueue = result;
-                            break;
+                    case BindQueueKey when bool.TryParse(value, out bool result):
+                        BindToQueue = result;
+                        break;
 
-                        case QueueNameKey when !string.IsNullOrWhiteSpace(value):
-                            QueueName = Uri.UnescapeDataString(value);
-                            break;
+                    case QueueNameKey when !string.IsNullOrWhiteSpace(value):
+                        QueueName = Uri.UnescapeDataString(value);
+                        break;
 
-                        case DelayedTypeKey when !string.IsNullOrWhiteSpace(value):
-                            DelayedType = value;
-                            ExchangeType = DelayedMessageExchangeType;
-                            break;
+                    case DelayedTypeKey when !string.IsNullOrWhiteSpace(value):
+                        DelayedType = value;
+                        ExchangeType = DelayedMessageExchangeType;
+                        break;
 
-                        case AlternateExchangeKey when !string.IsNullOrWhiteSpace(value):
-                            AlternateExchange = value;
-                            break;
+                    case AlternateExchangeKey when !string.IsNullOrWhiteSpace(value):
+                        AlternateExchange = value;
+                        break;
 
-                        case BindExchangeKey when !string.IsNullOrWhiteSpace(value):
-                            bindExchanges.Add(value);
-                            break;
-                    }
+                    case BindExchangeKey when !string.IsNullOrWhiteSpace(value):
+                        bindExchanges.Add(value);
+                        break;
                 }
-
-                if (bindExchanges.Count > 0)
-                    BindExchanges = bindExchanges.ToArray();
             }
+
+            if (bindExchanges.Count > 0)
+                BindExchanges = bindExchanges.ToArray();
         }
 
         public RabbitMqEndpointAddress(Uri hostAddress, string exchangeName, string exchangeType = default, bool durable = true, bool autoDelete = false,
@@ -191,21 +186,6 @@ namespace MassTransit.RabbitMqTransport
 
             return new RabbitMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, DelayedMessageExchangeType, Durable, AutoDelete, BindToQueue,
                 QueueName, ExchangeType, BindExchanges, AlternateExchange);
-        }
-
-        static void ParsePath(string path, out string virtualHost, out string name)
-        {
-            int split = path.LastIndexOf('/');
-            if (split > 0)
-            {
-                virtualHost = Uri.UnescapeDataString(path.Substring(1, split - 1));
-                name = path.Substring(split + 1);
-            }
-            else
-            {
-                virtualHost = "/";
-                name = path.Substring(1);
-            }
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out int? port, out string virtualHost)

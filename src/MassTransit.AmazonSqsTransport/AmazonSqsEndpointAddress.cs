@@ -3,8 +3,8 @@ namespace MassTransit.AmazonSqsTransport
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using Topology;
+    using Util;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
@@ -38,7 +38,7 @@ namespace MassTransit.AmazonSqsTransport
                     Scheme = address.Scheme;
                     Host = address.Host;
 
-                    ParsePath(address.AbsolutePath, out Scope, out Name);
+                    address.ParseHostPathAndEntityName(out Scope, out Name);
                     break;
 
                 case "queue":
@@ -59,14 +59,7 @@ namespace MassTransit.AmazonSqsTransport
 
             AmazonSqsEntityNameValidator.Validator.ThrowIfInvalidEntityName(Name);
 
-            var query = address.Query?.TrimStart('?');
-            if (string.IsNullOrWhiteSpace(query))
-                return;
-
-            IEnumerable<(string, string)> parameters =
-                query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
-
-            foreach (var (key, value) in parameters)
+            foreach (var (key, value) in address.SplitQueryString())
             {
                 switch (key)
                 {
@@ -92,25 +85,8 @@ namespace MassTransit.AmazonSqsTransport
 
             Name = name;
 
-            AutoDelete = autoDelete;
             Durable = durable;
-        }
-
-        public string Path => Scope == "/" ? Name : $"{Scope}/{Name}";
-
-        static void ParsePath(string path, out string scope, out string name)
-        {
-            var split = path.LastIndexOf('/');
-            if (split > 0)
-            {
-                scope = path.Substring(1, split - 1);
-                name = path.Substring(split + 1);
-            }
-            else
-            {
-                scope = "/";
-                name = path.Substring(1);
-            }
+            AutoDelete = autoDelete;
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out string scope)
