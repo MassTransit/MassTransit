@@ -48,19 +48,16 @@ namespace MassTransit.AmazonSqsTransport
             if (typeInfo.IsGenericParameter)
                 return "";
 
-            if (typeInfo.Namespace != null)
+            var ns = typeInfo.Namespace?.Replace(".", _nestedTypeSeparator);
+            if (ns != null && !ns.Equals(scope))
             {
-                string ns = typeInfo.Namespace.Replace(".", _nestedTypeSeparator);
-                if (!ns.Equals(scope))
-                {
-                    sb.Append(ns);
-                    sb.Append(_namespaceSeparator);
-                }
+                sb.Append(ns);
+                sb.Append(_namespaceSeparator);
             }
 
             if (typeInfo.IsNested)
             {
-                GetMessageName(sb, typeInfo.DeclaringType, typeInfo.Namespace);
+                GetMessageName(sb, typeInfo.DeclaringType, ns);
                 sb.Append(_nestedTypeSeparator);
             }
 
@@ -82,7 +79,7 @@ namespace MassTransit.AmazonSqsTransport
                     if (i > 0)
                         sb.Append(_genericArgumentSeparator);
 
-                    GetMessageName(sb, arguments[i], typeInfo.Namespace);
+                    GetMessageName(sb, arguments[i], ns);
                 }
 
                 sb.Append(_genericTypeSeparator);
