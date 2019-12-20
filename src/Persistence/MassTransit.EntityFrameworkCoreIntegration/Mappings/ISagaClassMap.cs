@@ -1,6 +1,7 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Mappings
 {
     using System;
+    using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
 
 
@@ -8,5 +9,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Mappings
     {
         Type SagaType { get; }
         void Configure(ModelBuilder modelBuilder);
+    }
+
+
+    public interface ISagaClassMap<TSaga> :
+        ISagaClassMap
+        where TSaga : class, ISaga
+    {
     }
 }

@@ -8,7 +8,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Mappings
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 
-    public abstract class SagaClassMap<TSaga> : ISagaClassMap
+    public abstract class SagaClassMap<TSaga> : ISagaClassMap<TSaga>
         where TSaga : class, ISaga
     {
         public Type SagaType => typeof(TSaga);
