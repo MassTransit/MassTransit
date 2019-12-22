@@ -3,12 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using Microsoft.Data.SqlClient;
     using System.Linq;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
     using MassTransit.Saga;
+    using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
     using Microsoft.EntityFrameworkCore.Storage;
@@ -101,11 +101,11 @@
             try
             {
                 var execStrategy = dbContext.Database.CreateExecutionStrategy();
-                if (execStrategy is SqlServerRetryingExecutionStrategy)
+                if (execStrategy is ExecutionStrategy)
                 {
                     await execStrategy.Execute(async () =>
                     {
-                        using (var transaction =
+                        await using (var transaction =
                             await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
                         {
                             await SendLogic(transaction, dbContext, context, policy, next).ConfigureAwait(false);
@@ -146,10 +146,13 @@
                     // Query with a row Lock instead using FromSql. Still a single trip to the DB (unlike EF6, which has to make one dummy call to row lock)
                     var rowLockQuery = _rawSqlLockStatements?.GetRowLockStatement<TSaga>(dbContext);
                     if (rowLockQuery != null)
-                        instance = await ApplyCustomQuery(dbContext, dbSet => dbSet.FromSqlRaw(rowLockQuery, new object[] {sagaId})).SingleOrDefaultAsync()
+                        instance = await ApplyCustomQuery(dbContext, dbSet => dbSet.FromSqlRaw(rowLockQuery, new object[] {sagaId}))
+                            .SingleOrDefaultAsync(context.CancellationToken)
                             .ConfigureAwait(false);
                     else
-                        instance = await ApplyCustomQuery(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken).ConfigureAwait(false);
+                        instance = await ApplyCustomQuery(dbContext)
+                            .SingleOrDefaultAsync(x => x.CorrelationId == sagaId, context.CancellationToken)
+                            .ConfigureAwait(false);
                 }
 
                 if (instance == null)
@@ -203,7 +206,6 @@
                         LogContext.Warning?.Log(innerException, "Transaction rollback failed");
                     }
                 }
-
                 throw;
             }
             catch (Exception ex)
@@ -246,11 +248,11 @@
                 }
 
                 var execStrategy = dbContext.Database.CreateExecutionStrategy();
-                if (execStrategy is SqlServerRetryingExecutionStrategy)
+                if (execStrategy is ExecutionStrategy)
                 {
                     await execStrategy.Execute(async () =>
                     {
-                        using (var transaction =
+                        await using (var transaction =
                             await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false))
                         {
                             await SendQueryLogic(nonTrackedInstances, transaction, dbContext, context, policy, next);
@@ -336,19 +338,6 @@
                 await dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
 
                 transaction.Commit();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                try
-                {
-                    transaction.Rollback();
-                }
-                catch (Exception innerException)
-                {
-                    LogContext.Warning?.Log(innerException, "Transaction rollback failed");
-                }
-
-                throw;
             }
             catch (DbUpdateException ex)
             {
