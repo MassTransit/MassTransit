@@ -2,7 +2,7 @@
 
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.Saga
 {
     public partial class Init : Migration
     {

@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SimpleSaga
 {
     using System;
     using System.Threading.Tasks;
@@ -20,15 +20,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
     using Saga;
+    using Shared;
     using Shouldly;
-    using TestFramework;
     using Testing;
 
 
-    [TestFixture]
+    [TestFixture(typeof(SqlServerTestDbContextOptionsProvider))]
+    [TestFixture(typeof(SqlServerResiliancyTestDbContextOptionsProvider))]
     [Category("Integration")]
-    public class Locating_an_existing_ef_saga :
-        InMemoryTestFixture
+    public class Locating_an_existing_ef_saga<T> :
+        EntityFrameworkTestFixture<T, SagaDbContext>
+        where T : ITestDbContextOptionsProvider, new()
     {
         [Test]
         public async Task A_correlated_message_should_find_the_correct_saga()
@@ -64,24 +66,21 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
             foundId.HasValue.ShouldBe(true);
         }
 
-        readonly Func<DbContext> _sagaDbContextFactory;
-
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;
 
         public Locating_an_existing_ef_saga()
         {
             // add new migration by calling
             // dotnet ef migrations add --context "SagaDbContext``2" Init  -v
-            var contextFactory = new ContextFactory();
+            var contextFactory = new SimpleSagaContextFactory();
 
-            using (var context = contextFactory.CreateDbContext(Array.Empty<string>()))
+            using (var context = contextFactory.CreateDbContext(DbContextOptionsBuilder))
             {
-                context.Database.Migrate();
+                context.Database.MigrateAsync();
             }
 
-            _sagaDbContextFactory = () => contextFactory.CreateDbContext(Array.Empty<string>());
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() =>
-                EntityFrameworkSagaRepository<SimpleSaga>.CreatePessimistic(_sagaDbContextFactory));
+                EntityFrameworkSagaRepository<SimpleSaga>.CreatePessimistic(() => contextFactory.CreateDbContext(DbContextOptionsBuilder)));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

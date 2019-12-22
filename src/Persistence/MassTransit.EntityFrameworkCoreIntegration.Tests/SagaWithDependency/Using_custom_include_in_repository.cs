@@ -1,20 +1,24 @@
-﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests
+﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency
 {
     using System;
     using System.Threading.Tasks;
+    using DataAccess;
     using MassTransit.Saga;
     using MassTransit.Tests.Saga.Messages;
+    using Messages;
     using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
     using Saga;
+    using Shared;
     using Shouldly;
-    using TestFramework;
     using Testing;
 
-
+    [TestFixture(typeof(SqlServerTestDbContextOptionsProvider))]
+    [TestFixture(typeof(SqlServerResiliancyTestDbContextOptionsProvider))]
     [TestFixture, Category("Integration")]
-    public class Using_custom_include_in_repository :
-        InMemoryTestFixture
+    public class Using_custom_include_in_repository<T> :
+        EntityFrameworkTestFixture<T, SagaWithDependencyContext>
+        where T : ITestDbContextOptionsProvider, new()
     {
         [Test]
         public async Task A_correlated_message_should_update_inner_saga_dependency()
@@ -53,27 +57,26 @@
             foundId.HasValue.ShouldBe(true);
         }
 
-        readonly Func<DbContext> _sagaDbContextFactory;
-
-        readonly Lazy<ISagaRepository<SagaWithDependency>> _sagaRepository;
+        readonly Lazy<ISagaRepository<Tests.SagaWithDependency.SagaWithDependency>> _sagaRepository;
 
         public Using_custom_include_in_repository()
         {
+
             // add new migration by calling
-            // dotnet ef migrations add --context "SagaWithDependencyContext" Init  -v
+            // dotnet ef migrations add --context "SagaDbContext``2" Init  -v
             var contextFactory = new SagaWithDependencyContextFactory();
 
-            using (var context = contextFactory.CreateDbContext(Array.Empty<string>()))
+            using (var context = contextFactory.CreateDbContext(DbContextOptionsBuilder))
             {
                 context.Database.Migrate();
             }
 
-            _sagaDbContextFactory = () => contextFactory.CreateDbContext(Array.Empty<string>());
-            _sagaRepository = new Lazy<ISagaRepository<SagaWithDependency>>(() =>
-                EntityFrameworkSagaRepository<SagaWithDependency>.CreatePessimistic(_sagaDbContextFactory,
+            _sagaRepository = new Lazy<ISagaRepository<Tests.SagaWithDependency.SagaWithDependency>>(() =>
+                EntityFrameworkSagaRepository<Tests.SagaWithDependency.SagaWithDependency>.CreatePessimistic(
+                    () => contextFactory.CreateDbContext(DbContextOptionsBuilder),
                     queryCustomization: queryable =>
                         queryable.Include(it => it.Dependency).ThenInclude(dependency => dependency.SagaInnerDependency)
-                    ));
+                ));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

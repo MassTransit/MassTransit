@@ -1,4 +1,4 @@
-﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests
+﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency.DataAccess
 {
     using System;
     using Mappings;
@@ -8,7 +8,7 @@
 
     class SagaWithDependencyMap : SagaClassMap<SagaWithDependency>
     {
-        protected override void Configure(EntityTypeBuilder<SagaWithDependency> entityTypeBuilder, ModelBuilder modelBuilder)
+        protected override void Configure(EntityTypeBuilder<Tests.SagaWithDependency.SagaWithDependency> entityTypeBuilder, ModelBuilder modelBuilder)
         {
             entityTypeBuilder.Property(x => x.Name).HasMaxLength(40);
             entityTypeBuilder.Property(x => x.Initiated);

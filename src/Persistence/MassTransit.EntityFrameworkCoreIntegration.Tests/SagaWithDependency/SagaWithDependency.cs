@@ -1,10 +1,12 @@
-﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests
+﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency
 {
     using System;
-    using System.Linq.Expressions;
     using System.Threading.Tasks;
+    using DataAccess;
     using MassTransit.Saga;
     using MassTransit.Tests.Saga.Messages;
+    using Messages;
+
 
     public class SagaWithDependency :
         InitiatedBy<InitiateSimpleSaga>,
