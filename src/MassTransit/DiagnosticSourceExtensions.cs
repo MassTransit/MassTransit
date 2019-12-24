@@ -25,9 +25,8 @@ namespace MassTransit
             activity.AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress);
             activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
 
-            activity.AddTag(DiagnosticHeaders.Kind, DiagnosticHeaders.SpanKind.Producer);
-            activity.AddTag(DiagnosticHeaders.PeerHost, context.DestinationAddress.Host);
-            activity.AddTag(DiagnosticHeaders.PeerAddress, context.DestinationAddress.AbsolutePath);
+            activity.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Producer);
+            activity.AddTag(DiagnosticHeaders.DestinationHost, context.DestinationAddress.Host);
 
             activity.AddBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId);
             activity.AddBaggage(DiagnosticHeaders.ConversationId, context.ConversationId);
@@ -42,9 +41,9 @@ namespace MassTransit
 
             activity.AddTag(DiagnosticHeaders.InputAddress, context.InputAddress);
 
-            activity.AddTag(DiagnosticHeaders.Kind, DiagnosticHeaders.SpanKind.Consumer);
-            activity.AddTag(DiagnosticHeaders.PeerHost, context.InputAddress.Host);
-            activity.AddTag(DiagnosticHeaders.PeerAddress, context.InputAddress.AbsolutePath);
+            activity.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Consumer);
+            activity.AddTag(DiagnosticHeaders.DestinationHost, context.InputAddress.Host);
+            activity.AddTag(DiagnosticHeaders.DestinationAddress, context.InputAddress.AbsolutePath);
 
             if (context.TransportHeaders.TryGetHeader("MessageId", out var messageIdHeader) && messageIdHeader != null)
                 activity.AddTag(DiagnosticHeaders.MessageId, messageIdHeader.ToString());
