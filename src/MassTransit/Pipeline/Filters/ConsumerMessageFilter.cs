@@ -47,6 +47,8 @@ namespace MassTransit.Pipeline.Filters
                 ConsumerType = TypeMetadataCache<TConsumer>.ShortName,
                 MessageType = TypeMetadataCache<TMessage>.ShortName
             });
+            activity?.AddTag("span.kind", "consumer");
+            activity?.AddTag("peer.address", TypeMetadataCache<TConsumer>.ShortName);
 
             var timer = Stopwatch.StartNew();
             try
