@@ -11,7 +11,7 @@ namespace MassTransit.Logging
         public const string CorrelationId = "correlation-id";
         public const string InitiatorId = "initiator-id";
         public const string SourceAddress = "source-address";
-        public const string DestinationAddress = "destination-address";
+        public const string DestinationAddress = "peer.address";
         public const string InputAddress = "input-address";
         public const string ConversationId = "conversation-id";
         public const string TrackingNumber = "tracking-number";
@@ -23,6 +23,16 @@ namespace MassTransit.Logging
         public const string SourceHostMassTransitVersion = "source-host-masstransit-version";
         public const string MessageTypes = "message-types";
 
+        public const string ServiceKind = "span.kind";
+        public const string DestinationHost = "peer.host";
+
+        public static class Kind
+        {
+            public const string Producer = "producer";
+            public const string Consumer = "consumer";
+            public const string Client = "client";
+            public const string Server = "server";
+        }
 
         public static class StateMachine
         {

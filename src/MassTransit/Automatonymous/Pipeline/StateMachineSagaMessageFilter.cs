@@ -72,6 +72,11 @@ namespace Automatonymous.Pipeline
             State<TInstance> currentState = await _machine.Accessor.Get(eventContext).ConfigureAwait(false);
 
             var activity = LogContext.IfEnabled(OperationName.Saga.RaiseEvent)?.StartActivity(new {BeginState = currentState.Name});
+
+            activity?.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Producer);
+            activity?.AddTag(DiagnosticHeaders.DestinationHost, context.DestinationAddress.Host);
+            activity?.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
+
             try
             {
                 await _machine.RaiseEvent(eventContext).ConfigureAwait(false);

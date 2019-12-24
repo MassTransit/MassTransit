@@ -32,6 +32,10 @@ namespace MassTransit.Courier.Hosts
                 LogType = TypeMetadataCache<TLog>.ShortName
             });
 
+            activity?.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Consumer);
+            activity?.AddTag(DiagnosticHeaders.DestinationHost, context.DestinationAddress.Host);
+            activity?.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
+
             activity?.AddBaggage(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber);
 
             var timer = Stopwatch.StartNew();

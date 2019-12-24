@@ -48,6 +48,9 @@ namespace MassTransit.Pipeline.Filters
                 MessageType = TypeMetadataCache<TMessage>.ShortName
             });
 
+            activity?.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Consumer);
+            activity?.AddTag(DiagnosticHeaders.DestinationAddress, TypeMetadataCache<TConsumer>.ShortName);
+
             var timer = Stopwatch.StartNew();
             try
             {

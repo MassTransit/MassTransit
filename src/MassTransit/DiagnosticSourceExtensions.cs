@@ -23,6 +23,9 @@ namespace MassTransit
             activity.AddTag(DiagnosticHeaders.MessageId, context.MessageId);
             activity.AddTag(DiagnosticHeaders.InitiatorId, context.InitiatorId);
             activity.AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress);
+
+            activity.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Producer);
+            activity.AddTag(DiagnosticHeaders.DestinationHost, context.DestinationAddress.Host);
             activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
 
             activity.AddBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId);
@@ -37,6 +40,10 @@ namespace MassTransit
             var activity = startedActivity.Value;
 
             activity.AddTag(DiagnosticHeaders.InputAddress, context.InputAddress);
+
+            activity.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Consumer);
+            activity.AddTag(DiagnosticHeaders.DestinationHost, context.InputAddress.Host);
+            activity.AddTag(DiagnosticHeaders.DestinationAddress, context.InputAddress.AbsolutePath);
 
             if (context.TransportHeaders.TryGetHeader("MessageId", out var messageIdHeader) && messageIdHeader != null)
                 activity.AddTag(DiagnosticHeaders.MessageId, messageIdHeader.ToString());
