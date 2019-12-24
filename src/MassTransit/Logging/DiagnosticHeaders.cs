@@ -23,6 +23,15 @@ namespace MassTransit.Logging
         public const string SourceHostMassTransitVersion = "source-host-masstransit-version";
         public const string MessageTypes = "message-types";
 
+        public const string Kind = "span.kind";
+        public const string PeerAddress = "peer.address";
+        public const string PeerHost = "peer.host";
+
+        public static class SpanKind
+        {
+            public const string Producer = "producer";
+            public const string Consumer = "consumer";
+        }
 
         public static class StateMachine
         {
