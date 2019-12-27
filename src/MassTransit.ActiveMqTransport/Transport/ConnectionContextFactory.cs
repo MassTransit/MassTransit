@@ -38,19 +38,7 @@
         {
             IAsyncPipeContextAgent<ConnectionContext> asyncContext = supervisor.AddAsyncContext<ConnectionContext>();
 
-            var context = Task.Run(() => CreateConnection(asyncContext, supervisor), supervisor.Stopping);
-
-            void HandleConnectionException(Exception exception)
-            {
-                asyncContext.Stop($"Connection Exception: {exception}");
-            }
-
-            context.ContinueWith(task =>
-            {
-                task.Result.Connection.ExceptionListener += HandleConnectionException;
-
-                asyncContext.Completed.ContinueWith(_ => task.Result.Connection.ExceptionListener -= HandleConnectionException);
-            }, TaskContinuationOptions.OnlyOnRanToCompletion);
+            Task.Run(() => CreateConnection(asyncContext, supervisor), supervisor.Stopping);
 
             return asyncContext;
         }
@@ -83,6 +71,17 @@
                     TransportLogMessages.ConnectHost(_configuration.Description);
 
                     connection = _configuration.Settings.CreateConnection();
+
+                    void HandleConnectionException(Exception exception)
+                    {
+                        asyncContext.Stop($"Connection Exception: {exception}");
+                    }
+
+                    connection.ExceptionListener += HandleConnectionException;
+
+                #pragma warning disable 4014
+                    asyncContext.Completed.ContinueWith(_ => connection.ExceptionListener -= HandleConnectionException);
+                #pragma warning restore 4014
 
                     connection.Start();
 
