@@ -370,6 +370,7 @@
 
         public interface IMessage
         {
+            IList<Guid> Ids { get; }
             IDocument Document { get; }
             IDocument[] Documents { get; }
             IList<IDocument> DocumentList { get; }
@@ -379,6 +380,12 @@
 
         public class Message : IMessage
         {
+            public Message()
+            {
+                Ids = new List<Guid>();
+            }
+
+            public IList<Guid> Ids { get; }
             public IDocument Document { get; set; }
             public IDocument[] Documents { get; set; }
             public IList<IDocument> DocumentList { get; set; }
