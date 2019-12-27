@@ -137,7 +137,7 @@ public class SubmitOrderConsumer :
 }
 ```
 
-The `EndpointConvention.Map<T>` method is static, so it can be called from everywhere. It is important to remember that you cannot configure conventions for the same message twice. If you try to do this - the `Map` method will throw an exception. This is also important when writing tests, so you need to configure the conventions at the same time as you confgigure your test bus (harness).
+The `EndpointConvention.Map<T>` method is static, so it can be called from everywhere. It is important to remember that you cannot configure conventions for the same message twice. If you try to do this - the `Map` method will throw an exception. This is also important when writing tests, so you need to configure the conventions at the same time as you configure your test bus (harness).
 
 It is better to configure send conventions before you start the bus.
 
