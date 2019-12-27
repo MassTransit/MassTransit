@@ -31,7 +31,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Configuration
         public void AddExistingDbContext<TContext>()
             where TContext : DbContext
         {
-            DatabaseFactory(provider => provider.GetService<TContext>);
+            DatabaseFactory(provider => provider.GetRequiredService<TContext>);
         }
 
         public void DatabaseFactory(Func<DbContext> databaseFactory)

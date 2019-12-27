@@ -1,15 +1,15 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Configuration
 {
-    using System;
+    using Mappings;
     using MassTransit.Saga;
-    using Microsoft.EntityFrameworkCore.Metadata.Builders;
+    using Microsoft.EntityFrameworkCore;
 
 
     public interface IEntityFrameworkSagaRepository
     {
-        void ConfigureSaga<TSaga>(Action<EntityTypeBuilder<TSaga>> configure = null)
+        void AddSagaClassMap<TSaga>(ISagaClassMap<TSaga> sagaClassMap)
             where TSaga : class, ISaga;
 
-        SagaDbContext GetDbContext();
+        DbContext GetDbContext();
     }
 }
