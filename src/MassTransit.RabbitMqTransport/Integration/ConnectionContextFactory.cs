@@ -14,7 +14,6 @@
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
     using Topology;
-    using Transports;
 
 
     public class ConnectionContextFactory :
@@ -45,11 +44,24 @@
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
-            IAsyncPipeContextAgent<ConnectionContext> asyncContext = supervisor.AddAsyncContext<ConnectionContext>();
+            var context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopping);
 
-            Task.Run(() => CreateConnection(asyncContext, supervisor), supervisor.Stopping);
+            IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 
-            return asyncContext;
+            void HandleShutdown(object sender, ShutdownEventArgs args)
+            {
+                if (args.Initiator != ShutdownInitiator.Application)
+                    contextHandle.Stop(args.ReplyText);
+            }
+
+            context.ContinueWith(task =>
+            {
+                task.Result.Connection.ConnectionShutdown += HandleShutdown;
+
+                contextHandle.Completed.ContinueWith(_ => task.Result.Connection.ConnectionShutdown -= HandleShutdown);
+            }, TaskContinuationOptions.OnlyOnRanToCompletion);
+
+            return contextHandle;
         }
 
         IActivePipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
@@ -67,7 +79,7 @@
             return sharedConnection;
         }
 
-        async Task<ConnectionContext> CreateConnection(IAsyncPipeContextAgent<ConnectionContext> asyncContext, ISupervisor supervisor)
+        async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
         {
             return await _connectionRetryPolicy.Retry(async () =>
             {
@@ -77,7 +89,7 @@
                 IConnection connection = null;
                 try
                 {
-                    TransportLogMessages.ConnectHost(_description);
+                    LogContext.Debug?.Log("Connecting: {Host}", _description);
 
                     if (_configuration.Settings.ClusterMembers?.Any() ?? false)
                     {
@@ -93,18 +105,6 @@
 
                     LogContext.Debug?.Log("Connected: {Host} (address: {RemoteAddress}, local: {LocalAddress})", _description, connection.Endpoint,
                         connection.LocalPort);
-
-                    void HandleShutdown(object sender, ShutdownEventArgs args)
-                    {
-                        if (args.Initiator != ShutdownInitiator.Application)
-                            asyncContext.Stop(args.ReplyText);
-                    }
-
-                    connection.ConnectionShutdown += HandleShutdown;
-
-                #pragma warning disable 4014
-                    asyncContext.Completed.ContinueWith(_ => connection.ConnectionShutdown -= HandleShutdown);
-                #pragma warning restore 4014
 
                     var connectionContext = new RabbitMqConnectionContext(connection, _configuration, _hostTopology, _description, supervisor.Stopped);
 
