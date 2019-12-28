@@ -51,24 +51,20 @@
 
                     LogContext.Debug?.Log("Created session: {Host}", connectionContext.Description);
 
-                    var sessionContext = new ActiveMqSessionContext(connectionContext, session, cancellationToken);
-
-                    void HandleException(Exception exception)
+                    void HandleConnectionException(Exception exception)
                     {
-                    #pragma warning disable 4014
-                        sessionContext.DisposeAsync(CancellationToken.None);
-                    #pragma warning restore 4014
+                        // ReSharper disable once MethodSupportsCancellation
+                        asyncContext.Stop($"Connection Exception: {exception}");
                     }
 
-                    connectionContext.Connection.ExceptionListener += HandleException;
+                    connectionContext.Connection.ExceptionListener += HandleConnectionException;
 
                 #pragma warning disable 4014
                     // ReSharper disable once MethodSupportsCancellation
-                    asyncContext.Completed.ContinueWith(task =>
+                    asyncContext.Completed.ContinueWith(_ => connectionContext.Connection.ExceptionListener -= HandleConnectionException);
                 #pragma warning restore 4014
-                    {
-                        connectionContext.Connection.ExceptionListener -= HandleException;
-                    });
+
+                    var sessionContext = new ActiveMqSessionContext(connectionContext, session, cancellationToken);
 
                     await asyncContext.Created(sessionContext).ConfigureAwait(false);
 

@@ -82,7 +82,7 @@ namespace MassTransit.Transformation.TransformConfigurators
 
                 void ConfigureDictionary(Type keyType, Type valueType)
                 {
-                    if (knownTypes.Contains(valueType))
+                    if (!IsUnknownObjectType(knownTypes, valueType))
                         return;
 
                     var providerType = typeof(LoadMessageDataObjectDictionaryTransformConfiguration<,,,>)
@@ -95,7 +95,7 @@ namespace MassTransit.Transformation.TransformConfigurators
 
                 void ConfigureArray(Type elementType)
                 {
-                    if (knownTypes.Contains(elementType))
+                    if (!IsUnknownObjectType(knownTypes, elementType))
                         return;
 
                     var providerType = typeof(LoadMessageDataObjectArrayTransformConfiguration<,,>)
@@ -121,28 +121,24 @@ namespace MassTransit.Transformation.TransformConfigurators
                 }
                 else if (propertyType.ClosesType(typeof(IDictionary<,>), out types) || propertyType.ClosesType(typeof(IReadOnlyDictionary<,>), out types))
                 {
-                    var valueType = types[1];
-                    if (valueType.IsInterfaceOrConcreteClass() && TypeMetadataCache.IsValidMessageType(valueType) && !valueType.IsValueTypeOrObject())
-                        ConfigureDictionary(types[0], valueType);
+                    ConfigureDictionary(types[0], types[1]);
                 }
                 else if (propertyType.IsArray)
                 {
-                    var elementType = propertyType.GetElementType();
-                    if (elementType.IsInterfaceOrConcreteClass() && TypeMetadataCache.IsValidMessageType(elementType) && !elementType.IsValueTypeOrObject())
-                        ConfigureArray(elementType);
+                    ConfigureArray(propertyType.GetElementType());
                 }
                 else if (propertyType.ClosesType(typeof(IEnumerable<>), out Type[] enumerableTypes))
                 {
                     if (enumerableTypes[0].ClosesType(typeof(KeyValuePair<,>), out types))
                     {
-                        var valueType = types[1];
-                        if (valueType.IsInterfaceOrConcreteClass() && TypeMetadataCache.IsValidMessageType(valueType) && !valueType.IsValueTypeOrObject())
-                            ConfigureDictionary(types[0], valueType);
+                        ConfigureDictionary(types[0], types[1]);
                     }
                     else
+                    {
                         ConfigureArray(enumerableTypes[0]);
+                    }
                 }
-                else if (propertyType.IsInterfaceOrConcreteClass() && TypeMetadataCache.IsValidMessageType(propertyType) && !knownTypes.Contains(propertyType))
+                else if (IsUnknownObjectType(knownTypes, propertyType))
                 {
                     var providerType = typeof(LoadMessageDataObjectTransformConfiguration<,>).MakeGenericType(typeof(TMessage), propertyType);
                     var configuration = (IMessageDataTransformConfiguration<TMessage>)Activator.CreateInstance(providerType, repository, knownTypes,
@@ -151,6 +147,12 @@ namespace MassTransit.Transformation.TransformConfigurators
                     configuration.Apply(this);
                 }
             }
+        }
+
+        static bool IsUnknownObjectType(ICollection<Type> knownTypes, Type propertyType)
+        {
+            return propertyType.IsInterfaceOrConcreteClass() && TypeMetadataCache.IsValidMessageType(propertyType) && !propertyType.IsValueTypeOrObject()
+                && !knownTypes.Contains(propertyType);
         }
     }
 }
