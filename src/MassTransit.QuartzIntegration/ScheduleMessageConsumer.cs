@@ -150,7 +150,7 @@ namespace MassTransit.QuartzIntegration
                 builder = builder.UsingJobData("RequestId", context.RequestId.Value.ToString());
 
             if (context.ExpirationTime.HasValue)
-                builder = builder.UsingJobData("ExpirationTime", context.ExpirationTime.Value.ToString(CultureInfo.InvariantCulture));
+                builder = builder.UsingJobData("ExpirationTime", context.ExpirationTime.Value.ToString("O"));
 
             if (tokenId.HasValue)
                 builder = builder.UsingJobData("TokenId", tokenId.Value.ToString("N"));

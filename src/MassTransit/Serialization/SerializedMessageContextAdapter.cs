@@ -14,6 +14,7 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Net.Mime;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -57,7 +58,7 @@ namespace MassTransit.Serialization
             context.InitiatorId = ConvertIdToGuid(_message.InitiatorId);
 
             if (!string.IsNullOrEmpty(_message.ExpirationTime))
-                context.TimeToLive = DateTime.UtcNow - DateTime.Parse(_message.ExpirationTime);
+                context.TimeToLive = DateTime.Parse(_message.ExpirationTime, null, DateTimeStyles.RoundtripKind) - DateTime.UtcNow;
 
             var bodySerializer = new StringMessageSerializer(new ContentType(_message.ContentType), _message.Body);
 
