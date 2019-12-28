@@ -23,10 +23,10 @@ namespace MassTransit
             activity.AddTag(DiagnosticHeaders.MessageId, context.MessageId);
             activity.AddTag(DiagnosticHeaders.InitiatorId, context.InitiatorId);
             activity.AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress);
-            activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
 
             activity.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Producer);
             activity.AddTag(DiagnosticHeaders.DestinationHost, context.DestinationAddress.Host);
+            activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
 
             activity.AddBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId);
             activity.AddBaggage(DiagnosticHeaders.ConversationId, context.ConversationId);

@@ -55,6 +55,10 @@ namespace MassTransit.Saga.Pipeline.Filters
                 MessageType = TypeMetadataCache<TMessage>.ShortName
             });
 
+            activity?.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Producer);
+            activity?.AddTag(DiagnosticHeaders.DestinationHost, context.DestinationAddress.Host);
+            activity?.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
+
             try
             {
                 await Task.Yield();

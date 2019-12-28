@@ -219,6 +219,11 @@ namespace MassTransit.Saga
                 await instance.MarkInUse(context.CancellationToken).ConfigureAwait(false);
 
                 var activity = LogContext.IfEnabled(OperationName.Saga.Add)?.StartActivity(new {context.Saga.CorrelationId});
+
+                activity?.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Producer);
+                activity?.AddTag(DiagnosticHeaders.DestinationHost, context.DestinationAddress.Host);
+                activity?.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
+
                 try
                 {
                     var sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, TMessage>(context, context.Saga,

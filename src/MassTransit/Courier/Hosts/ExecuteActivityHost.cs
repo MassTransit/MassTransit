@@ -36,6 +36,10 @@ namespace MassTransit.Courier.Hosts
 
             activity?.AddBaggage(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber);
 
+            activity?.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Consumer);
+            activity?.AddTag(DiagnosticHeaders.DestinationHost, context.DestinationAddress.Host);
+            activity?.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
+
             var timer = Stopwatch.StartNew();
             try
             {

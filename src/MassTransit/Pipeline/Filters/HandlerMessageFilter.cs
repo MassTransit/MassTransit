@@ -56,6 +56,9 @@ namespace MassTransit.Pipeline.Filters
         {
             var activity = LogContext.IfEnabled(OperationName.Consumer.Handle)?.StartActivity(new {MessageType = TypeMetadataCache<TMessage>.ShortName});
 
+            activity?.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Consumer);
+            activity?.AddTag(DiagnosticHeaders.DestinationAddress, TypeMetadataCache<TMessage>.ShortName);
+
             Stopwatch timer = Stopwatch.StartNew();
             try
             {
