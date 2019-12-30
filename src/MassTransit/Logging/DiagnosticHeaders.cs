@@ -24,7 +24,7 @@ namespace MassTransit.Logging
         public const string MessageTypes = "message-types";
 
         public const string ServiceKind = "span.kind";
-        public const string DestinationHost = "peer.host";
+        public const string DestinationHost = "peer.hostname";
 
         public static class Kind
         {
