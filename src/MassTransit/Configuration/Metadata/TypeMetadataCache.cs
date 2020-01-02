@@ -131,6 +131,7 @@
         readonly Lazy<bool> _isTemporaryMessageType;
         readonly Lazy<bool> _isValidMessageType;
         readonly Lazy<string[]> _messageTypeNames;
+        readonly Lazy<string> _diagnosticAddress;
         readonly Lazy<Type[]> _messageTypes;
         readonly Lazy<List<PropertyInfo>> _properties;
         readonly string _shortName;
@@ -155,10 +156,13 @@
             _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T).GetTypeInfo()));
             _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
+            _diagnosticAddress = new Lazy<string>(() => GetDiagnosticAddress());
             _implementationType = new Lazy<Type>(() => GreenPipes.Internals.Extensions.TypeCache.GetImplementationType(typeof(T)));
         }
 
         public static string ShortName => Cached.Metadata.Value.ShortName;
+
+        public static string DiagnosticAddress => Cached.Metadata.Value.DiagnosticAddress;
         public static bool HasSagaInterfaces => Cached.Metadata.Value.HasSagaInterfaces;
         public static bool HasConsumerInterfaces => Cached.Metadata.Value.HasConsumerInterfaces;
         public static IEnumerable<PropertyInfo> Properties => Cached.Metadata.Value.Properties;
@@ -170,6 +174,7 @@
         public static string[] MessageTypeNames => Cached.Metadata.Value.MessageTypeNames;
         bool ITypeMetadataCache<T>.IsTemporaryMessageType => _isTemporaryMessageType.Value;
         string[] ITypeMetadataCache<T>.MessageTypeNames => _messageTypeNames.Value;
+        string ITypeMetadataCache<T>.DiagnosticAddress => _diagnosticAddress.Value;
         IEnumerable<PropertyInfo> ITypeMetadataCache<T>.Properties => _properties.Value;
         bool ITypeMetadataCache<T>.IsValidMessageType => _isValidMessageType.Value;
         string ITypeMetadataCache<T>.InvalidMessageTypeReason => _invalidMessageTypeReason;
@@ -319,6 +324,12 @@
         static IEnumerable<string> GetMessageTypeNames()
         {
             return MessageTypes.Select(MessageUrn.ForTypeString);
+        }
+
+        static string GetDiagnosticAddress()
+        {
+            var (type, ns, _) = MessageUrn.ForType<T>();
+            return $"{type}/{ns}";
         }
 
         static bool ScanForConsumerInterfaces()

@@ -16,41 +16,31 @@ namespace MassTransit.Logging
             _name = name;
         }
 
-        public StartedActivity? StartActivity(object args = null)
+        public StartedActivity? StartActivity(IEnumerable<(string, string)> bags = null, IEnumerable<(string, string)> tags = null,
+            string parentActivityId = null)
         {
-            Activity activity = new Activity(_name);
+            var activity = new Activity(_name);
 
-            var startActivity = _source.StartActivity(activity, args);
+            if (parentActivityId != null)
+                activity.SetParentId(parentActivityId);
 
-            var scope = LogContext.BeginScope();
+            if (bags != null)
+            {
+                foreach (var (key, value) in bags)
+                    activity.AddBaggage(key, value);
+            }
+
+            if (tags != null)
+            {
+                foreach (var (key, value) in tags)
+                    activity.AddTag(key, value);
+            }
+
+            var startActivity = _source.StartActivity(activity, null);
+
+            EnabledScope? scope = LogContext.BeginScope();
 
             return new StartedActivity(_source, startActivity, scope);
-        }
-    }
-
-
-    /// <summary>
-    /// This is an idea that might eventually be able to support passing value tuples and having them map to an argument type array
-    /// </summary>
-    readonly struct StartActivityArgument
-    {
-        public readonly string Key;
-        public readonly object Value;
-
-        public StartActivityArgument(string key, object value)
-        {
-            Key = key;
-            Value = value;
-        }
-
-        public static implicit operator StartActivityArgument((string, object) input)
-        {
-            return new StartActivityArgument();
-        }
-
-        public static implicit operator KeyValuePair<string, object>(StartActivityArgument argument)
-        {
-            return new KeyValuePair<string, object>(argument.Key, argument.Value);
         }
     }
 }

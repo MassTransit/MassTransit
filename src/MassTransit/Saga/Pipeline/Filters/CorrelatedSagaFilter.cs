@@ -34,10 +34,7 @@ namespace MassTransit.Saga.Pipeline.Filters
         void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("saga");
-            scope.Set(new
-            {
-                Correlation = "Id"
-            });
+            scope.Set(new {Correlation = "Id"});
 
             _sagaRepository.Probe(scope);
 
@@ -46,19 +43,9 @@ namespace MassTransit.Saga.Pipeline.Filters
 
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
+            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartSagaActivity<TSaga, TMessage>();
+
             Stopwatch timer = Stopwatch.StartNew();
-
-            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartActivity(new
-            {
-                context.CorrelationId,
-                SagaType = TypeMetadataCache<TSaga>.ShortName,
-                MessageType = TypeMetadataCache<TMessage>.ShortName
-            });
-
-            activity?.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Producer);
-            activity?.AddTag(DiagnosticHeaders.DestinationHost, context.DestinationAddress.Host);
-            activity?.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
-
             try
             {
                 await Task.Yield();

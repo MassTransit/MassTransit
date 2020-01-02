@@ -134,31 +134,6 @@ namespace MassTransit.TestFramework
         {
         }
 
-        protected Task<ConsumeContext<T>> ConnectPublishHandler<T>()
-            where T : class
-        {
-            Task<ConsumeContext<T>> result = null;
-            Host.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), context =>
-            {
-                result = Handled<T>(context);
-            });
-
-            return result;
-        }
-
-        protected Task<ConsumeContext<T>> ConnectPublishHandler<T>(Func<ConsumeContext<T>, bool> filter)
-            where T : class
-        {
-            Task<ConsumeContext<T>> result = null;
-            Host.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), context =>
-            {
-                result = Handled<T>(context, filter);
-            });
-
-            return result;
-        }
-
-
         interface IBusCreationScope
         {
             Task TestFixtureSetup();

@@ -58,9 +58,7 @@
 
             context.TryGetPayload<MessageLockContext>(out var lockContext);
 
-            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
-            activity.AddReceiveContextHeaders(context);
-
+            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
             try
             {
                 if (_context.ReceiveObservers.Count > 0)

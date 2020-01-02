@@ -28,17 +28,7 @@ namespace MassTransit.Courier.Hosts
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
         {
-            var activity = LogContext.IfEnabled(OperationName.Courier.Execute)?.StartActivity(new
-            {
-                ActivityType = TypeMetadataCache<TActivity>.ShortName,
-                ArgumentType = TypeMetadataCache<TArguments>.ShortName
-            });
-
-            activity?.AddBaggage(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber);
-
-            activity?.AddTag(DiagnosticHeaders.ServiceKind, DiagnosticHeaders.Kind.Consumer);
-            activity?.AddTag(DiagnosticHeaders.DestinationHost, context.DestinationAddress.Host);
-            activity?.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
+            var activity = LogContext.IfEnabled(OperationName.Courier.Execute)?.StartExecuteActivity<TActivity, TArguments>(context);
 
             var timer = Stopwatch.StartNew();
             try
