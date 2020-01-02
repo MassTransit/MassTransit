@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistence", "Persistence", "{56F516D7-BC3C-49E1-A639-83C5F14953F8}"
 EndProject
@@ -137,7 +137,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.SignalR.Sample"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.WebJobs.EventHubsIntegration", "MassTransit.WebJobs.EventHubsIntegration\MassTransit.WebJobs.EventHubsIntegration.csproj", "{56E9DB90-C063-49CA-BAF7-FFCFE963E44C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WebJobs.Tests", "MassTransit.WebJobs.Tests\MassTransit.WebJobs.Tests.csproj", "{0C214618-DBFA-45B6-B1B3-99E90F17FE23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.WebJobs.Tests", "MassTransit.WebJobs.Tests\MassTransit.WebJobs.Tests.csproj", "{0C214618-DBFA-45B6-B1B3-99E90F17FE23}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Monitoring", "Monitoring", "{DE40BDEC-6277-4E14-8EB6-D0B6863571BC}"
 EndProject

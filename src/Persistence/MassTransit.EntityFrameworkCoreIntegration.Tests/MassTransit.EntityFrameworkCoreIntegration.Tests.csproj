@@ -24,6 +24,11 @@
     <ProjectReference Include="..\MassTransit.EntityFrameworkCoreIntegration\MassTransit.EntityFrameworkCoreIntegration.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Transactions" />
+  </ItemGroup>
+
   <ItemGroup>
     <Folder Include="Migrations\" />
     <Folder Include="Migrations\SagaWithDependency" />
