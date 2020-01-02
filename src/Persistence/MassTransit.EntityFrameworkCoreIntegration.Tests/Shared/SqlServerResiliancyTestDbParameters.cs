@@ -5,10 +5,10 @@
     using Microsoft.EntityFrameworkCore;
 
 
-    public class SqlServerTestDbContextOptionsProvider : ITestDbContextOptionsProvider
+    public class SqlServerResiliancyTestDbParameters : ITestDbParameters
     {
         /// <summary>
-        /// Get DB context options for SQL Server.
+        /// Get DB context options for SQL Server, with resiliancy
         /// </summary>
         /// <param name="dbContextType">Type of the dbcontext, used for migration conventions</param>
         public DbContextOptionsBuilder GetDbContextOptions(Type dbContextType)
@@ -20,9 +20,12 @@
                 {
                     m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
                     m.MigrationsHistoryTable($"__{dbContextType.Name}");
+                    m.EnableRetryOnFailure();
                 });
 
             return dbContextOptionsBuilder;
         }
+
+        public IRawSqlLockStatements RawSqlLockStatements => new SqlServerLockStatements(enableSchemaCaching: false);
     }
 }

@@ -17,17 +17,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
 
-    public class MsSqlLockStatements : IRawSqlLockStatements
+    public class RawSqlLockStatements : IRawSqlLockStatements
     {
-        const string DefaultRowLockStatement = "select * from {0}.{1} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0";
-
+        readonly bool _enableSchemaCaching;
         protected static readonly ConcurrentDictionary<Type, SchemaTablePair> TableNames = new ConcurrentDictionary<Type, SchemaTablePair>();
 
-        public MsSqlLockStatements(
-            string defaultSchema = "dbo",
-            string rowLockStatement = DefaultRowLockStatement
-            )
+        public RawSqlLockStatements(string defaultSchema, string rowLockStatement, bool enableSchemaCaching = true)
         {
+            this._enableSchemaCaching = enableSchemaCaching;
             DefaultSchema = defaultSchema;
             RowLockStatement = rowLockStatement ?? throw new ArgumentNullException(nameof(rowLockStatement));
         }
@@ -58,12 +55,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                     Table = sql.GetTableName()
                 };
 
-                if (result != null
-                    && !string.IsNullOrWhiteSpace(result.Schema)
-                    && !string.IsNullOrWhiteSpace(result.Table))
-                    TableNames.TryAdd(t, result);
-                else
+                if (result == null
+                    || string.IsNullOrWhiteSpace(result.Schema)
+                    || string.IsNullOrWhiteSpace(result.Table))
                     throw new MassTransitException("Couldn't determine table and schema name (using model metadata).");
+
+                if (this._enableSchemaCaching)
+                    TableNames.TryAdd(t, result);
             }
 
             return result;

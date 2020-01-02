@@ -1,9 +1,8 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SimpleSaga.DataAccess
 {
-    using System.Reflection;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Design;
-    using SimpleSaga.DataAccess;
+    using Shared;
 
 
     public class SimpleSagaContextFactory : IDesignTimeDbContextFactory<SimpleSagaDbContext>
@@ -14,7 +13,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
             // we only support command line tools for SQL Server, so use SQL Server if you need to do
             // migrations.
 
-            var optionsBuilder = new SqlServerTestDbContextOptionsProvider().GetDbContextOptions(typeof(SimpleSagaDbContext));
+            var optionsBuilder = new SqlServerTestDbParameters().GetDbContextOptions(typeof(SimpleSagaDbContext));
 
             return new SimpleSagaDbContext(optionsBuilder.Options);
         }

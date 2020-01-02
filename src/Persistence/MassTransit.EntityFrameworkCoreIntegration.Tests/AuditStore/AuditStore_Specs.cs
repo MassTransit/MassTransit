@@ -23,12 +23,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
     using Testing;
 
 
-    [TestFixture(typeof(SqlServerTestDbContextOptionsProvider))]
-    [TestFixture(typeof(SqlServerResiliancyTestDbContextOptionsProvider))]
+    [TestFixture(typeof(SqlServerTestDbParameters))]
+    [TestFixture(typeof(SqlServerResiliancyTestDbParameters))]
+    [TestFixture(typeof(PostgresTestDbParameters))]
     [TestFixture]
     public class Saving_audit_records_to_the_audit_store<T> :
         EntityFrameworkTestFixture<T, AuditDbContext>
-        where T : ITestDbContextOptionsProvider, new()
+        where T : ITestDbParameters, new()
     {
         [Test]
         public async Task Should_have_consume_audit_records()
@@ -56,7 +57,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
         EntityFrameworkAuditStore _store;
 
         [OneTimeSetUp]
-        public async Task Send_message_to_test_consumer()
+        public async Task SetUp()
         {
             var contextFactory = new AuditContextFactory();
 
@@ -66,11 +67,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
             }
 
             _store = new EntityFrameworkAuditStore(DbContextOptionsBuilder.Options, "EfCoreAudit");
-            await using (var dbContext = _store.AuditContext)
-            {
-                await dbContext.Database.MigrateAsync();
-                await dbContext.Database.ExecuteSqlCommandAsync("TRUNCATE TABLE EfCoreAudit");
-            }
 
             _harness = new InMemoryTestHarness();
             _harness.OnConnectObservers += bus =>
@@ -89,6 +85,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
         public async Task Teardown()
         {
             await _harness.Stop();
+
+            var contextFactory = new AuditContextFactory();
+
+            await using (var context = contextFactory.CreateDbContext(DbContextOptionsBuilder))
+            {
+                context.Database.EnsureDeleted();
+            }
         }
 
         async Task<int> GetAuditRecords(string contextType)

@@ -17,7 +17,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency.Da
             // we only support command line tools for SQL Server, so use SQL Server if you need to do
             // migrations.
 
-            var optionsBuilder = new SqlServerTestDbContextOptionsProvider().GetDbContextOptions(typeof(SagaWithDependencyContext));
+            var optionsBuilder = new SqlServerTestDbParameters().GetDbContextOptions(typeof(SagaWithDependencyContext));
 
             return new SagaWithDependencyContext(optionsBuilder.Options);
         }

@@ -14,6 +14,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SimpleSaga
 {
     using System;
     using System.Threading.Tasks;
+    using DataAccess;
     using MassTransit.Saga;
     using MassTransit.Tests.Saga;
     using MassTransit.Tests.Saga.Messages;
@@ -25,12 +26,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SimpleSaga
     using Testing;
 
 
-    [TestFixture(typeof(SqlServerTestDbContextOptionsProvider))]
-    [TestFixture(typeof(SqlServerResiliancyTestDbContextOptionsProvider))]
+    [TestFixture(typeof(SqlServerTestDbParameters))]
+    [TestFixture(typeof(SqlServerResiliancyTestDbParameters))]
+    [TestFixture(typeof(PostgresTestDbParameters))]
     [Category("Integration")]
     public class Locating_an_existing_ef_saga<T> :
         EntityFrameworkTestFixture<T, SagaDbContext>
-        where T : ITestDbContextOptionsProvider, new()
+        where T : ITestDbParameters, new()
     {
         [Test]
         public async Task A_correlated_message_should_find_the_correct_saga()
@@ -72,15 +74,28 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SimpleSaga
         {
             // add new migration by calling
             // dotnet ef migrations add --context "SagaDbContext``2" Init  -v
-            var contextFactory = new SimpleSagaContextFactory();
-
-            using (var context = contextFactory.CreateDbContext(DbContextOptionsBuilder))
-            {
-                context.Database.MigrateAsync();
-            }
-
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() =>
-                EntityFrameworkSagaRepository<SimpleSaga>.CreatePessimistic(() => contextFactory.CreateDbContext(DbContextOptionsBuilder)));
+                EntityFrameworkSagaRepository<SimpleSaga>.CreatePessimistic(
+                    () => new SimpleSagaContextFactory().CreateDbContext(DbContextOptionsBuilder),
+                    RawSqlLockStatements));
+        }
+
+        [OneTimeSetUp]
+        public async Task SetUp()
+        {
+            using (var context = new SimpleSagaContextFactory().CreateDbContext(DbContextOptionsBuilder))
+            {
+                await context.Database.MigrateAsync();
+            }
+        }
+
+        [OneTimeTearDown]
+        public async Task TearDown()
+        {
+            using (var context = new SimpleSagaContextFactory().CreateDbContext(DbContextOptionsBuilder))
+            {
+                await context.Database.EnsureDeletedAsync();
+            }
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

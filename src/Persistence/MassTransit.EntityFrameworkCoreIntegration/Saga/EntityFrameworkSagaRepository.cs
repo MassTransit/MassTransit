@@ -52,7 +52,7 @@
             Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
             return new EntityFrameworkSagaRepository<TSaga>(sagaDbContextFactory, IsolationLevel.Serializable, queryCustomization,
-                rawSqlLockStatements ?? new MsSqlLockStatements());
+                rawSqlLockStatements ?? new SqlServerLockStatements());
         }
 
         public static EntityFrameworkSagaRepository<TSaga> CreatePessimistic(Func<DbContext> sagaDbContextFactory,

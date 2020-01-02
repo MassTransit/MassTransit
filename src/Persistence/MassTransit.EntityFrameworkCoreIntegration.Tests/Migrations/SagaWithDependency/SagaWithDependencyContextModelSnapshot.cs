@@ -4,7 +4,6 @@ using MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency.DataAc
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SagaWithDependency
 {
@@ -22,11 +21,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SagaWithDe
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency.DataAccess.SagaDependency", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<Guid>("SagaInnerDependencyId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("SagaInnerDependencyId");
 
                     b.HasKey("Id");
 
@@ -38,11 +35,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SagaWithDe
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency.DataAccess.SagaInnerDependency", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Name");
 
                     b.HasKey("Id");
 
@@ -51,20 +46,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SagaWithDe
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency.SagaWithDependency", b =>
                 {
-                    b.Property<Guid>("CorrelationId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("CorrelationId");
 
-                    b.Property<bool>("Completed")
-                        .HasColumnType("bit");
+                    b.Property<bool>("Completed");
 
-                    b.Property<Guid>("DependencyId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<Guid>("DependencyId");
 
-                    b.Property<bool>("Initiated")
-                        .HasColumnType("bit");
+                    b.Property<bool>("Initiated");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(40)")
                         .HasMaxLength(40);
 
                     b.HasKey("CorrelationId");

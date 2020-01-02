@@ -13,12 +13,13 @@
     using Shouldly;
     using Testing;
 
-    [TestFixture(typeof(SqlServerTestDbContextOptionsProvider))]
-    [TestFixture(typeof(SqlServerResiliancyTestDbContextOptionsProvider))]
+    [TestFixture(typeof(SqlServerTestDbParameters))]
+    [TestFixture(typeof(SqlServerResiliancyTestDbParameters))]
+    [TestFixture(typeof(PostgresTestDbParameters))]
     [TestFixture, Category("Integration")]
     public class Using_custom_include_in_repository<T> :
         EntityFrameworkTestFixture<T, SagaWithDependencyContext>
-        where T : ITestDbContextOptionsProvider, new()
+        where T : ITestDbParameters, new()
     {
         [Test]
         public async Task A_correlated_message_should_update_inner_saga_dependency()
@@ -57,26 +58,36 @@
             foundId.HasValue.ShouldBe(true);
         }
 
-        readonly Lazy<ISagaRepository<Tests.SagaWithDependency.SagaWithDependency>> _sagaRepository;
+        readonly Lazy<ISagaRepository<SagaWithDependency>> _sagaRepository;
 
         public Using_custom_include_in_repository()
         {
+            // // add new migration by calling
+            // // dotnet ef migrations add --context "SagaDbContext``2" Init  -v
+            _sagaRepository = new Lazy<ISagaRepository<SagaWithDependency>>(() =>
+                EntityFrameworkSagaRepository<SagaWithDependency>.CreatePessimistic(
+                    () => new SagaWithDependencyContextFactory().CreateDbContext(DbContextOptionsBuilder),
+                    RawSqlLockStatements,
+                    queryable =>
+                        queryable.Include(it => it.Dependency).ThenInclude(dependency => dependency.SagaInnerDependency)));
+        }
 
-            // add new migration by calling
-            // dotnet ef migrations add --context "SagaDbContext``2" Init  -v
-            var contextFactory = new SagaWithDependencyContextFactory();
-
-            using (var context = contextFactory.CreateDbContext(DbContextOptionsBuilder))
+        [OneTimeSetUp]
+        public async Task SetUp()
+        {
+            using (var context = new SagaWithDependencyContextFactory().CreateDbContext(DbContextOptionsBuilder))
             {
-                context.Database.Migrate();
+                await context.Database.MigrateAsync();
             }
+        }
 
-            _sagaRepository = new Lazy<ISagaRepository<Tests.SagaWithDependency.SagaWithDependency>>(() =>
-                EntityFrameworkSagaRepository<Tests.SagaWithDependency.SagaWithDependency>.CreatePessimistic(
-                    () => contextFactory.CreateDbContext(DbContextOptionsBuilder),
-                    queryCustomization: queryable =>
-                        queryable.Include(it => it.Dependency).ThenInclude(dependency => dependency.SagaInnerDependency)
-                ));
+        [OneTimeTearDown]
+        public async Task TearDown()
+        {
+            using (var context = new SagaWithDependencyContextFactory().CreateDbContext(DbContextOptionsBuilder))
+            {
+                await context.Database.EnsureDeletedAsync();
+            }
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
