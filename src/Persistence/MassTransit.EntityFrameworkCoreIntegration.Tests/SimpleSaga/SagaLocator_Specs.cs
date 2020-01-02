@@ -31,7 +31,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SimpleSaga
     [TestFixture(typeof(PostgresTestDbParameters))]
     [Category("Integration")]
     public class Locating_an_existing_ef_saga<T> :
-        EntityFrameworkTestFixture<T, SagaDbContext>
+        EntityFrameworkTestFixture<T, SimpleSagaDbContext>
         where T : ITestDbParameters, new()
     {
         [Test]
