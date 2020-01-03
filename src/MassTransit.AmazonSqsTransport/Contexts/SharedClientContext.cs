@@ -7,8 +7,8 @@
     using GreenPipes;
     using Pipeline;
     using Topology;
-    using Topic = Topology.Entities.Topic;
-    using Queue = Topology.Entities.Queue;
+    using Topology.Entities;
+    using Util;
 
 
     public class SharedClientContext :
@@ -28,7 +28,7 @@
 
         ConnectionContext ClientContext.ConnectionContext => _context.ConnectionContext;
 
-        Task<string> ClientContext.CreateTopic(Topic topic)
+        Task<string> ClientContext.CreateTopic(Topology.Entities.Topic topic)
         {
             return _context.CreateTopic(topic);
         }
@@ -38,12 +38,12 @@
             return _context.CreateQueue(queue);
         }
 
-        Task ClientContext.CreateQueueSubscription(Topic topic, Queue queue)
+        Task ClientContext.CreateQueueSubscription(Topology.Entities.Topic topic, Queue queue)
         {
             return _context.CreateQueueSubscription(topic, queue);
         }
 
-        Task ClientContext.DeleteTopic(Topic topic)
+        Task ClientContext.DeleteTopic(Topology.Entities.Topic topic)
         {
             return _context.DeleteTopic(topic);
         }
@@ -86,6 +86,11 @@
         Task ClientContext.SendMessage(SendMessageRequest request, CancellationToken cancellationToken)
         {
             return _context.SendMessage(request, cancellationToken);
+        }
+
+        public Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+            return TaskUtil.Completed;
         }
     }
 }

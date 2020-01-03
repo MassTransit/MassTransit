@@ -1,4 +1,4 @@
-version: 6.0.0.{build}
+version: 6.0.2.{build}
 
 branches:
   only:
@@ -15,7 +15,7 @@ skip_commits:
     - docs.yml
 
 image:
-  - Visual Studio 2017
+  - Visual Studio 2019
   - Ubuntu1804
 
 services:

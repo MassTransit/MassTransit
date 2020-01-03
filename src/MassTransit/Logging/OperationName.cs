@@ -20,7 +20,9 @@ namespace MassTransit.Logging
         {
             public const string Send = "Saga.Send";
             public const string SendQuery = "Saga.SendQuery";
-            public const string Add = "Saga.Add";
+            public const string Initiate = "Saga.Initiate";
+            public const string Orchestrate = "Saga.Orchestrate";
+            public const string Observe = "Saga.Observe";
             public const string RaiseEvent = "Saga.RaiseEvent";
         }
 

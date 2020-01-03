@@ -3,7 +3,7 @@ namespace MassTransit.Azure.ServiceBus.Core
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
+    using Util;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
@@ -33,7 +33,7 @@ namespace MassTransit.Azure.ServiceBus.Core
                     Scheme = address.Scheme;
                     Host = address.Host;
 
-                    ParsePath(address.AbsolutePath, out Scope, out Name);
+                    address.ParseHostPathAndEntityName(out Scope, out Name);
                     break;
 
                 case "queue":
@@ -46,19 +46,13 @@ namespace MassTransit.Azure.ServiceBus.Core
                     throw new ArgumentException($"The address scheme is not supported: {address.Scheme}", nameof(address));
             }
 
-            string query = address.Query?.TrimStart('?');
-            if (!string.IsNullOrWhiteSpace(query))
+            foreach ((string key, string value) in address.SplitQueryString())
             {
-                var parameters = query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
-
-                foreach ((string key, string value) in parameters)
+                switch (key)
                 {
-                    switch (key)
-                    {
-                        case AutoDeleteKey when int.TryParse(value, out var result):
-                            AutoDelete = TimeSpan.FromSeconds(result);
-                            break;
-                    }
+                    case AutoDeleteKey when int.TryParse(value, out var result):
+                        AutoDelete = TimeSpan.FromSeconds(result);
+                        break;
                 }
             }
         }
@@ -73,21 +67,6 @@ namespace MassTransit.Azure.ServiceBus.Core
         }
 
         public string Path => Scope == "/" ? Name : $"{Scope}/{Name}";
-
-        static void ParsePath(string path, out string scope, out string name)
-        {
-            int split = path.LastIndexOf('/');
-            if (split > 0)
-            {
-                scope = path.Substring(1, split - 1);
-                name = path.Substring(split + 1);
-            }
-            else
-            {
-                scope = "/";
-                name = path.Substring(1);
-            }
-        }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out string scope)
         {

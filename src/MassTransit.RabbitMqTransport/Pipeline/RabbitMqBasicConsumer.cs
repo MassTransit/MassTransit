@@ -135,9 +135,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
                 _context, _receiveSettings, _model, _model.ConnectionContext);
 
-            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
-            activity.AddReceiveContextHeaders(context);
-
+            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
             try
             {
                 if (!_pending.TryAdd(deliveryTag, context))

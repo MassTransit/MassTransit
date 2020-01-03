@@ -52,7 +52,7 @@
         public override Uri InputAddress => _inputAddress.Value;
         IAmazonSqsTopologyConfiguration IAmazonSqsEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
-        public void  Build(IAmazonSqsHostControl host)
+        public void Build(IAmazonSqsHostControl host)
         {
             var builder = new AmazonSqsReceiveEndpointBuilder(host, _hostConfiguration.Settings, this);
 
@@ -151,6 +151,10 @@
 
         public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
         public IDictionary<string, string> QueueTags => _settings.QueueTags;
+        public AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
+        {
+            return _settings.GetEndpointAddress(hostAddress);
+        }
 
         public void Subscribe(string topicName, Action<ITopicSubscriptionConfigurator> configure = null)
         {

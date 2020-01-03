@@ -73,9 +73,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var context = new ActiveMqReceiveContext(_inputAddress, message, _context, _receiveSettings, _session, _session.ConnectionContext);
 
-            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
-            activity.AddReceiveContextHeaders(context);
-
+            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
             try
             {
                 if (!_pending.TryAdd(message.NMSMessageId, context))

@@ -2,7 +2,7 @@ namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Diagnostics;
-    using System.Linq;
+    using Util;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
@@ -10,6 +10,8 @@ namespace MassTransit.RabbitMqTransport
     {
         const string HeartbeatKey = "heartbeat";
         const string PrefetchKey = "prefetch";
+        const string RabbitMqSchema = "rabbitmq";
+        const string RabbitMqSslSchema = "rabbitmqs";
         const string TimeToLiveKey = "ttl";
 
         public readonly string Scheme;
@@ -21,9 +23,53 @@ namespace MassTransit.RabbitMqTransport
         public readonly ushort? Prefetch;
         public readonly int? TimeToLive;
 
+        public RabbitMqHostAddress(Uri address)
+        {
+            Scheme = default;
+            Host = default;
+            Port = default;
+            VirtualHost = default;
+
+            var scheme = address.Scheme.ToLowerInvariant();
+            switch (scheme)
+            {
+                case RabbitMqSslSchema:
+                case "amqps":
+                case RabbitMqSchema:
+                case "amqp":
+                    ParseLeft(address, out Scheme, out Host, out Port, out VirtualHost);
+                    break;
+
+                default:
+                    throw new ArgumentException($"The address scheme is not supported: {address.Scheme}", nameof(address));
+            }
+
+            Heartbeat = default;
+            Prefetch = default;
+            TimeToLive = default;
+
+            foreach ((string key, string value) in address.SplitQueryString())
+            {
+                switch (key)
+                {
+                    case HeartbeatKey when ushort.TryParse(value, out var result):
+                        Heartbeat = result;
+                        break;
+
+                    case PrefetchKey when ushort.TryParse(value, out var result):
+                        Prefetch = result;
+                        break;
+
+                    case TimeToLiveKey when int.TryParse(value, out var result):
+                        TimeToLive = result;
+                        break;
+                }
+            }
+        }
+
         public RabbitMqHostAddress(string host, int? port, string virtualHost)
         {
-            Scheme = "rabbitmq";
+            Scheme = RabbitMqSchema;
             Host = host;
             Port = port;
             VirtualHost = virtualHost;
@@ -37,63 +83,13 @@ namespace MassTransit.RabbitMqTransport
 
                 if (port.Value == 5671)
                 {
-                    Scheme = "rabbitmqs";
+                    Scheme = RabbitMqSslSchema;
                 }
             }
 
             Heartbeat = default;
             Prefetch = default;
             TimeToLive = default;
-        }
-
-        public RabbitMqHostAddress(Uri address)
-        {
-            Scheme = default;
-            Host = default;
-            Port = default;
-            VirtualHost = default;
-
-            var scheme = address.Scheme.ToLowerInvariant();
-            switch (scheme)
-            {
-                case "rabbitmqs":
-                case "amqps":
-                case "rabbitmq":
-                case "amqp":
-                    ParseLeft(address, out Scheme, out Host, out Port, out VirtualHost);
-                    break;
-
-                default:
-                    throw new ArgumentException($"The address scheme is not supported: {address.Scheme}", nameof(address));
-            }
-
-            Heartbeat = default;
-            Prefetch = default;
-            TimeToLive = default;
-
-            string query = address.Query?.TrimStart('?');
-            if (!string.IsNullOrWhiteSpace(query))
-            {
-                var parameters = query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
-
-                foreach ((string key, string value) in parameters)
-                {
-                    switch (key)
-                    {
-                        case HeartbeatKey when ushort.TryParse(value, out var result):
-                            Heartbeat = result;
-                            break;
-
-                        case PrefetchKey when ushort.TryParse(value, out var result):
-                            Prefetch = result;
-                            break;
-
-                        case TimeToLiveKey when int.TryParse(value, out var result):
-                            TimeToLive = result;
-                            break;
-                    }
-                }
-            }
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out int? port, out string virtualHost)
@@ -105,22 +101,7 @@ namespace MassTransit.RabbitMqTransport
                 ? scheme.EndsWith("s", StringComparison.OrdinalIgnoreCase) ? 5671 : 5672
                 : address.Port;
 
-            virtualHost = ParseVirtualHost(address.AbsolutePath);
-        }
-
-        static string ParseVirtualHost(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-                return "/";
-
-            if (path.Length == 1 && path[0] == '/')
-                return path;
-
-            int split = path.LastIndexOf('/');
-            if (split > 0)
-                return Uri.UnescapeDataString(path.Substring(1, split - 1));
-
-            return Uri.UnescapeDataString(path.Substring(1));
+            virtualHost = address.ParseHostPath();
         }
 
         public static implicit operator Uri(in RabbitMqHostAddress address)

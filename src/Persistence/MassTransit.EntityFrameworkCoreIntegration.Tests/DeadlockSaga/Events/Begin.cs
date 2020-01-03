@@ -1,4 +1,4 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga.Events
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.DeadlockSaga.Events
 {
     using System;
 

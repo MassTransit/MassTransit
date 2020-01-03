@@ -8,6 +8,7 @@
     using GreenPipes;
     using Microsoft.ServiceBus;
     using Microsoft.ServiceBus.Messaging;
+    using Transports;
     using Util;
 
 
@@ -51,7 +52,7 @@
                 var created = false;
                 try
                 {
-                    LogContext.Debug?.Log("Creating queue {Queue}", queueDescription.Path);
+                    TransportLogMessages.CreateQueue(queueDescription.Path);
 
                     queueDescription = await _namespaceManager.CreateQueueAsync(queueDescription).ConfigureAwait(false);
 
@@ -106,7 +107,7 @@
                 var created = false;
                 try
                 {
-                    LogContext.Debug?.Log("Creating topic {Topic}", topicDescription.Path);
+                    TransportLogMessages.CreateTopic(topicDescription.Path);
 
                     topicDescription = await _namespaceManager.CreateTopicAsync(topicDescription).ConfigureAwait(false);
 

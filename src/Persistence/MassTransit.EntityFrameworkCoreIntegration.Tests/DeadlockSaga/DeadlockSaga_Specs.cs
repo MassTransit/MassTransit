@@ -1,4 +1,4 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.DeadlockSaga
 {
     using System;
     using System.Linq;
@@ -18,8 +18,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
     [TestFixture(typeof(SqlServerResiliancyTestDbParameters))]
     [TestFixture(typeof(PostgresTestDbParameters))]
     [Category("Integration")]
-    public class SlowConcurrentSaga_Specs<T> :
-        EntityFrameworkTestFixture<T, SlowConcurrentSagaDbContext>
+    public class DeadlockSaga_Specs<T> :
+        EntityFrameworkTestFixture<T, DeadlockSagaDbContext>
         where T : ITestDbParameters, new()
     {
         [Test]
@@ -28,50 +28,50 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
             var sagaId = NewId.NextGuid();
             var message = new Begin { CorrelationId = sagaId };
 
-            await InputQueueSendEndpoint.Send(message);
+            await this.InputQueueSendEndpoint.Send(message);
 
-            Guid? foundId = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
+            Guid? foundId = await this._sagaRepository.Value.ShouldContainSaga(message.CorrelationId, this.TestTimeout);
 
             foundId.HasValue.ShouldBe(true);
 
             var slowMessage = new IncrementCounterSlowly { CorrelationId = sagaId };
             await Task.WhenAll(
-                Task.Run(() => InputQueueSendEndpoint.Send(slowMessage)),
-                Task.Run(() => InputQueueSendEndpoint.Send(slowMessage)));
+                Task.Run(() => this.InputQueueSendEndpoint.Send(slowMessage)),
+                Task.Run(() => this.InputQueueSendEndpoint.Send(slowMessage)));
 
-            _sagaTestHarness.Consumed.Select<IncrementCounterSlowly>().Take(2).ToList();
+            this._sagaTestHarness.Consumed.Select<IncrementCounterSlowly>().Take(2).ToList();
 
             // I might be getting superstitions but it looks like sometimes the test harness can report consumed before
             // the transaction is properly committed.
             await Task.Delay(1000);
 
-            await _sagaRepository.Value.ShouldContainSaga(
+            await this._sagaRepository.Value.ShouldContainSaga(
                 s => s.CorrelationId == sagaId && s.Counter == 2 && s.CurrentState == "DidIncrement",
                 this.TestTimeout);
         }
 
-        readonly Lazy<ISagaRepository<SlowConcurrentSaga>> _sagaRepository;
-        readonly SagaTestHarness<SlowConcurrentSaga> _sagaTestHarness;
+        readonly Lazy<ISagaRepository<DeadlockSaga>> _sagaRepository;
+        readonly SagaTestHarness<DeadlockSaga> _sagaTestHarness;
 
-        public SlowConcurrentSaga_Specs()
+        public DeadlockSaga_Specs()
         {
             // rowlock statements that don't work so we can cause a deadlock.
             var unworkingRowLockStatements = new RawSqlLockStatements("dbo", "SELECT * FROM \"{1}\" WHERE \"CorrelationId\" = @p0");
 
             // add new migration by calling
             // dotnet ef migrations add --context "SagaDbContext``2" Init  -v
-            _sagaRepository = new Lazy<ISagaRepository<SlowConcurrentSaga>>(() =>
-                EntityFrameworkSagaRepository<SlowConcurrentSaga>.CreatePessimistic(
-                    () => new SlowConcurrentSagaContextFactory().CreateDbContext(DbContextOptionsBuilder),
+            this._sagaRepository = new Lazy<ISagaRepository<DeadlockSaga>>(() =>
+                EntityFrameworkSagaRepository<DeadlockSaga>.CreatePessimistic(
+                    () => new DeadlockSagaContextFactory().CreateDbContext(this.DbContextOptionsBuilder),
                     unworkingRowLockStatements));
 
-            _sagaTestHarness = BusTestHarness.StateMachineSaga(new SlowConcurrentSagaStateMachine(), _sagaRepository.Value);
+            this._sagaTestHarness = this.BusTestHarness.StateMachineSaga(new DeadlockSagaStateMachine(), this._sagaRepository.Value);
         }
 
         [OneTimeSetUp]
         public async Task SetUp()
         {
-            using (var context = new SlowConcurrentSagaContextFactory().CreateDbContext(DbContextOptionsBuilder))
+            using (var context = new DeadlockSagaContextFactory().CreateDbContext(this.DbContextOptionsBuilder))
             {
                 await context.Database.MigrateAsync();
             }
@@ -80,7 +80,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
         [OneTimeTearDown]
         public async Task TearDown()
         {
-            using (var context = new SlowConcurrentSagaContextFactory().CreateDbContext(DbContextOptionsBuilder))
+            using (var context = new DeadlockSagaContextFactory().CreateDbContext(this.DbContextOptionsBuilder))
             {
                 await context.Database.EnsureDeletedAsync();
             }

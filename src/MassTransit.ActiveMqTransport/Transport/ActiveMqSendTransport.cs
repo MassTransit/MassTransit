@@ -83,17 +83,11 @@
 
                 var context = new TransportActiveMqSendContext<T>(_message, _cancellationToken);
 
-                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartActivity(new
-                {
-                    _context.EntityName,
-                    _context.DestinationType
-                });
+                await _pipe.Send(context).ConfigureAwait(false);
+
+                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
                 try
                 {
-                    await _pipe.Send(context).ConfigureAwait(false);
-
-                    activity.AddSendContextHeaders(context);
-
                     byte[] body = context.Body;
 
                     var transportMessage = sessionContext.Session.CreateBytesMessage();

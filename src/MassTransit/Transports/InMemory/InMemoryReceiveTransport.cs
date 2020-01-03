@@ -47,9 +47,7 @@ namespace MassTransit.Transports.InMemory
             var context = new InMemoryReceiveContext(_inputAddress, message, _context);
             var delivery = _tracker.BeginDelivery();
 
-            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
-            activity.AddReceiveContextHeaders(context);
-
+            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
             try
             {
                 if (_context.ReceiveObservers.Count > 0)

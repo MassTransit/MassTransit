@@ -34,17 +34,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
         [Test]
         public async Task Should_have_consume_audit_records()
         {
-            var consumed = this._harness.Consumed;
+            var consumed = _harness.Consumed;
             await Task.Delay(500);
-            (await this.GetAuditRecords("Consume")).ShouldBe(consumed.Count());
+            (await GetAuditRecords("Consume")).ShouldBe(consumed.Count());
         }
 
         [Test]
         public async Task Should_have_send_audit_record()
         {
-            var sent = this._harness.Sent;
+            var sent = _harness.Sent;
             await Task.Delay(500);
-            (await this.GetAuditRecords("Send")).ShouldBe(sent.Count());
+            (await GetAuditRecords("Send")).ShouldBe(sent.Count());
         }
 
         [SetUp]
@@ -53,7 +53,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
         }
 
         InMemoryTestHarness _harness;
-        ConsumerTestHarness<TestConsumer> _consumer;
         EntityFrameworkAuditStore _store;
 
         [OneTimeSetUp]
@@ -71,10 +70,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
             _harness = new InMemoryTestHarness();
             _harness.OnConnectObservers += bus =>
             {
-                bus.ConnectSendAuditObservers(this._store);
-                bus.ConnectConsumeAuditObserver(this._store);
+                bus.ConnectSendAuditObservers(_store);
+                bus.ConnectConsumeAuditObserver(_store);
             };
-            _consumer = _harness.Consumer<TestConsumer>();
+            _harness.Consumer<TestConsumer>();
 
             await _harness.Start();
 
@@ -96,10 +95,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
 
         async Task<int> GetAuditRecords(string contextType)
         {
-            using (var dbContext = this._store.AuditContext)
-                return await dbContext.Set<AuditRecord>()
-                    .Where(x => x.ContextType == contextType)
-                    .CountAsync();
+            using var dbContext = _store.AuditContext;
+
+            return await dbContext.Set<AuditRecord>()
+                .Where(x => x.ContextType == contextType)
+                .CountAsync();
         }
 
 

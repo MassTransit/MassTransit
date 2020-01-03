@@ -11,7 +11,6 @@
     using Metadata;
     using Newtonsoft.Json;
     using Serialization;
-    using Util;
 
 
     /// <summary>
@@ -38,7 +37,7 @@
             if (Guid.TryParse(sessionContext.SessionId, out var sessionId))
                 context = new CorrelationIdConsumeContextProxy<T>(context, sessionId);
 
-            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartActivity(new {context.CorrelationId});
+            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartSagaActivity<TSaga, T>();
             try
             {
                 var saga = await ReadSagaState(sessionContext).ConfigureAwait(false);

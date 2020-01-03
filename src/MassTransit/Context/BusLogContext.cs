@@ -60,6 +60,8 @@ namespace MassTransit.Context
             return new BusLogContext(_source, _loggerFactory, _messageLogger, logger);
         }
 
+        public ILogger Logger => _logger;
+
         public EnabledLogger? IfEnabled(LogLevel level)
         {
             return _logger.IsEnabled(level) ? new EnabledLogger(_logger, level) : default(EnabledLogger?);

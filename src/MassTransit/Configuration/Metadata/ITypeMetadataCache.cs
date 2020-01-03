@@ -10,6 +10,11 @@ namespace MassTransit.Metadata
         string ShortName { get; }
 
         /// <summary>
+        /// The friendly diagnostic address for display in metrics applications
+        /// </summary>
+        string DiagnosticAddress { get; }
+
+        /// <summary>
         /// True if the type implements any known saga interfaces
         /// </summary>
         bool HasConsumerInterfaces { get; }

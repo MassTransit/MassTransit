@@ -10,23 +10,12 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         TopicConfigurator,
         PublishSettings
     {
-        public TopicPublishSettings(string topicName, bool durable, bool autoDelete)
-            : base(topicName, durable, autoDelete)
+        public TopicPublishSettings(AmazonSqsEndpointAddress address)
+            : base(address.Name, address.Durable, address.AutoDelete)
         {
         }
 
-        public Uri GetSendAddress(Uri hostAddress)
-        {
-            var builder = new UriBuilder(hostAddress);
-
-            builder.Path = builder.Path == "/"
-                ? $"/{EntityName}"
-                : $"/{string.Join("/", builder.Path.Trim('/'), EntityName)}";
-
-            builder.Query += string.Join("&", GetQueryStringOptions());
-
-            return builder.Uri;
-        }
+        public Uri GetSendAddress(Uri hostAddress) => GetEndpointAddress(hostAddress);
 
         public BrokerTopology GetBrokerTopology()
         {
@@ -46,9 +35,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
                 yield return "auto-delete";
         }
 
-        public override string ToString()
-        {
-            return string.Join(", ", GetSettingStrings());
-        }
+        public override string ToString() => string.Join(", ", GetSettingStrings());
     }
 }

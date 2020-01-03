@@ -66,10 +66,14 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         IDictionary<string, object> ITopicConfigurator.TopicAttributes => _topic.TopicAttributes;
         IDictionary<string, object> ITopicConfigurator.TopicSubscriptionAttributes => _topic.TopicSubscriptionAttributes;
         IDictionary<string, string> ITopicConfigurator.TopicTags => _topic.TopicTags;
+        public AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
+        {
+            return _topic.GetEndpointAddress(hostAddress);
+        }
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
         {
-            publishAddress = new AmazonSqsEndpointAddress(baseAddress, _topic.EntityName, _topic.AutoDelete);
+            publishAddress = _topic.GetEndpointAddress(baseAddress);
             return true;
         }
 
@@ -90,9 +94,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
                 configurator.Apply(builder);
         }
 
-        public PublishSettings GetPublishSettings()
+        public PublishSettings GetPublishSettings(Uri hostAddress)
         {
-            return new TopicPublishSettings(_topic.EntityName, _topic.Durable, _topic.AutoDelete);
+            return new TopicPublishSettings(GetEndpointAddress(hostAddress));
         }
 
         public BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options)

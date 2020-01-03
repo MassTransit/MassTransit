@@ -2,7 +2,7 @@
 
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SlowConcurrentSaga
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.DeadlockSaga
 {
     public partial class Init : Migration
     {

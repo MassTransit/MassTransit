@@ -80,47 +80,35 @@
         {
             while (!IsStopping)
             {
-                try
+                await _host.ConnectionRetryPolicy.Retry(async () =>
                 {
-                    await _host.ConnectionRetryPolicy.Retry(async () =>
+                    try
                     {
+                        await _context.OnTransportStartup(_host.ConnectionContextSupervisor, Stopping).ConfigureAwait(false);
+
                         if (IsStopping)
                             return;
 
-                        try
-                        {
-                            await _context.OnTransportStartup(_host.ConnectionContextSupervisor, Stopping).ConfigureAwait(false);
-                            if (IsStopping)
-                                return;
-
-                            await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
-                        }
-                        catch (RabbitMqConnectionException ex)
-                        {
-                            await NotifyFaulted(ex).ConfigureAwait(false);
-                            throw;
-                        }
-                        catch (BrokerUnreachableException ex)
-                        {
-                            throw await ConvertToRabbitMqConnectionException(ex, "RabbitMQ Unreachable").ConfigureAwait(false);
-                        }
-                        catch (OperationInterruptedException ex)
-                        {
-                            throw await ConvertToRabbitMqConnectionException(ex, "Operation interrupted").ConfigureAwait(false);
-                        }
-                        catch (OperationCanceledException)
-                        {
-                        }
-                        catch (Exception ex)
-                        {
-                            throw await ConvertToRabbitMqConnectionException(ex, "ReceiveTransport Faulted, Restarting").ConfigureAwait(false);
-                        }
-                    }, Stopping).ConfigureAwait(false);
-                }
-                catch
-                {
-                    // nothing to see here
-                }
+                        await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
+                    }
+                    catch (RabbitMqConnectionException ex)
+                    {
+                        await NotifyFaulted(ex).ConfigureAwait(false);
+                        throw;
+                    }
+                    catch (OperationInterruptedException ex)
+                    {
+                        throw await ConvertToRabbitMqConnectionException(ex, "Operation interrupted: ").ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        throw await ConvertToRabbitMqConnectionException(ex, "ReceiveTransport Faulted, Restarting: ").ConfigureAwait(false);
+                    }
+                }, Stopping).ConfigureAwait(false);
             }
         }
 

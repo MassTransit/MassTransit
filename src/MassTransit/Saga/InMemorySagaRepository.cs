@@ -217,8 +217,6 @@ namespace MassTransit.Saga
                 var instance = new SagaInstance<TSaga>(context.Saga);
 
                 await instance.MarkInUse(context.CancellationToken).ConfigureAwait(false);
-
-                var activity = LogContext.IfEnabled(OperationName.Saga.Add)?.StartActivity(new {context.Saga.CorrelationId});
                 try
                 {
                     var sagaConsumeContext = new InMemorySagaConsumeContext<TSaga, TMessage>(context, context.Saga,
@@ -254,8 +252,6 @@ namespace MassTransit.Saga
                 finally
                 {
                     instance.Release();
-
-                    activity?.Stop();
                 }
             }
 

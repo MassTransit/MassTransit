@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Transport
+﻿namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System;
     using System.Threading;
@@ -18,7 +6,6 @@ namespace MassTransit.AmazonSqsTransport.Transport
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
 
 
     public class ClientContextFactory :
@@ -59,12 +46,9 @@ namespace MassTransit.AmazonSqsTransport.Transport
             {
                 try
                 {
-                    var amazonSqs = await connectionContext.CreateAmazonSqs().ConfigureAwait(false);
-                    var amazonSns = await connectionContext.CreateAmazonSns().ConfigureAwait(false);
+                    var clientContext = connectionContext.CreateClientContext(cancellationToken);
 
-                    var modelContext = new AmazonSqsClientContext(connectionContext, amazonSqs, amazonSns, cancellationToken);
-
-                    await asyncContext.Created(modelContext).ConfigureAwait(false);
+                    await asyncContext.Created(clientContext).ConfigureAwait(false);
 
                     await asyncContext.Completed.ConfigureAwait(false);
                 }

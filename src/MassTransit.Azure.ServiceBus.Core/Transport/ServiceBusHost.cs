@@ -99,11 +99,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
-
             var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, configure);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
+
+            TransportLogMessages.ConnectReceiveEndpoint(configuration.InputAddress);
 
             configuration.Build(this);
 
@@ -147,6 +147,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             Task<CachedSendTransport> Create(Uri transportAddress)
             {
+                TransportLogMessages.CreateSendTransport(address);
+
                 var settings = _hostTopology.SendTopology.GetSendSettings(address);
 
                 var endpointContextSupervisor = CreateQueueSendEndpointContextSupervisor(settings);

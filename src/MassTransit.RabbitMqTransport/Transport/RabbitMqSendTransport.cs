@@ -11,7 +11,6 @@
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
     using Initializers.TypeConverters;
-    using Internals.Extensions;
     using Logging;
     using RabbitMQ.Client;
     using Transports;
@@ -87,13 +86,11 @@
 
                 var context = new BasicPublishRabbitMqSendContext<T>(properties, _context.Exchange, _message, _cancellationToken);
 
-                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartActivity(new {_context.Exchange});
+                await _pipe.Send(context).ConfigureAwait(false);
+
+                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
                 try
                 {
-                    await _pipe.Send(context).ConfigureAwait(false);
-
-                    activity.AddSendContextHeaders(context);
-
                     byte[] body = context.Body;
 
                     if (context.TryGetPayload(out PublishContext publishContext))

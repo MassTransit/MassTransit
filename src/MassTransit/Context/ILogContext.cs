@@ -34,6 +34,8 @@ namespace MassTransit.Context
         /// <returns>The <see cref="T:Microsoft.Extensions.Logging.ILogger" />.</returns>
         ILogContext CreateLogContext(string categoryName);
 
+        ILogger Logger { get; }
+
         EnabledLogger? IfEnabled(LogLevel level);
         EnabledLogger? Critical { get; }
         EnabledLogger? Debug { get; }

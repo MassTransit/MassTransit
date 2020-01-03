@@ -1,12 +1,16 @@
-# Configuring Application Insights
+# Application Insights
 
-Get actionable insights through application performance management and instant analytics
+Application Insights (part of Azure Monitor) is able to capture and record metrics from MassTransit. It can also be configured as a log sink for logging.
 
 [Create an Application Insights resource](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-create-new-resource#create-an-application-insights-resource-1)
 
 [Copy the instrumentation key](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-create-new-resource#copy-the-instrumentation-key)
 
-> Requires NuGets `MassTransit`, `MassTransit.ApplicationInsights`
+To configure an application to use Application Insights with MassTransit:
+
+> Requires NuGets `MassTransit`, `Microsoft.ApplicationInsights.DependencyCollector`
+>
+> (for logging, add `Microsoft.Extensions.Logging.ApplicationInsights`)
 
 ```csharp
 using System;
@@ -16,7 +20,8 @@ using MassTransit;
 
 namespace Example
 {
-    public class MyMessageConsumerConsumer : MassTransit.IConsumer<MyMessage>
+    public class MyMessageConsumerConsumer : 
+        MassTransit.IConsumer<MyMessage>
     {
         public async Task Consume(ConsumeContext<MyMessage> context)
         {
@@ -32,18 +37,30 @@ namespace Example
 
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            var configuration = new TelemetryConfiguration();
-            // Your instrumentation key can be found in Azure Portal
-            configuration.InstrumentationKey = "fb8a0b03-235a-4b52-b491-307e9fd6b209";
+            var module = new DependencyTrackingTelemetryModule();
+            module.IncludeDiagnosticSourceActivities.Add("MassTransit");
+
+            TelemetryConfiguration configuration = TelemetryConfiguration.CreateDefault();
+            configuration.InstrumentationKey = "<your instrumentation key>";
+            configuration.TelemetryInitializers.Add(new HttpDependenciesParsingTelemetryInitializer());
 
             var telemetryClient = new TelemetryClient(configuration);
+            module.Initialize(configuration);
+
+            var loggerOptions = new ApplicationInsightsLoggerOptions();
+
+            var applicationInsightsLoggerProvider = new ApplicationInsightsLoggerProvider(Options.Create(_configuration),
+                Options.Create(loggerOptions));
+
+            ILoggerFactory factory = new LoggerFactory();
+            factory.AddProvider(applicationInsightsLoggerProvider);
+
+            LogContext.ConfigureCurrentLogContext(factory);
 
             var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
             {
-                cfg.UseApplicationInsights(telemetryClient);
-
                 cfg.ReceiveEndpoint("my_queue", ec =>
                 {
                     ec.Consumer<MyMessageConsumer>();
@@ -54,8 +71,15 @@ namespace Example
             {
                 bus.Publish(new MyMessage{Value = "Hello, World."});
 
-                Console.ReadLine();
+                await Task.Run(() => Console.ReadLine());
             }
+
+            module.Dispose();
+
+            telemetryClient.Flush();
+            await Task.Delay(5000);
+
+            configuration.Dispose();
         }
     }
 }

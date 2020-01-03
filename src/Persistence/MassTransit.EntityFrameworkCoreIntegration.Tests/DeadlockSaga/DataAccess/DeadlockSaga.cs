@@ -1,10 +1,10 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga.DataAccess
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.DeadlockSaga.DataAccess
 {
     using System;
     using Automatonymous;
 
 
-    public class SlowConcurrentSaga : SagaStateMachineInstance
+    public class DeadlockSaga : SagaStateMachineInstance
     {
         public Guid CorrelationId { get; set; }
 

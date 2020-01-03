@@ -7,6 +7,7 @@
     using Apache.NMS.Util;
     using Context;
     using GreenPipes;
+    using Transports;
     using Util;
 
 
@@ -90,11 +91,15 @@
 
         public Task DeleteTopic(string topicName)
         {
+            TransportLogMessages.DeleteTopic(topicName);
+
             return Task.Factory.StartNew(() => SessionUtil.DeleteTopic(_session, topicName), CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
         }
 
         public Task DeleteQueue(string queueName)
         {
+            TransportLogMessages.DeleteQueue(queueName);
+
             return Task.Factory.StartNew(() => SessionUtil.DeleteQueue(_session, queueName), CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
         }
     }

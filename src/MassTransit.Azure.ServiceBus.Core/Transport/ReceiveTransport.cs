@@ -8,7 +8,6 @@
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
-    using GreenPipes.Internals.Extensions;
     using Pipeline;
     using Policies;
     using Transports;

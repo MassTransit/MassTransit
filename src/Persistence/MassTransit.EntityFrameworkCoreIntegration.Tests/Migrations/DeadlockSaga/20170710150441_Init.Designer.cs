@@ -6,13 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 using MassTransit.Tests.Saga;
 
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SlowConcurrentSaga
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.DeadlockSaga
 {
-    using SimpleSaga.DataAccess;
-    using Tests.SlowConcurrentSaga.DataAccess;
+    using MassTransit.EntityFrameworkCoreIntegration.Tests.DeadlockSaga.DataAccess;
 
-
-    [DbContext(typeof(SlowConcurrentSagaDbContext))]
+    [DbContext(typeof(DeadlockSagaDbContext))]
     [Migration("20170710150441_Init")]
     partial class Init
     {
@@ -22,7 +20,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SlowConcur
                 .HasAnnotation("ProductVersion", "1.1.1")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga.DataAccess.SlowConcurrentSaga", b =>
+            modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.Tests.DeadlockSaga.DataAccess.DeadlockSaga", b =>
                 {
                     b.Property<Guid>("CorrelationId");
 

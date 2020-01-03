@@ -60,7 +60,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public Uri GetDestinationAddress(string topicName, Action<ITopicConfigurator> configure = null)
         {
-            var sendSettings = new TopicPublishSettings(topicName, true, false);
+            var address = new AmazonSqsEndpointAddress(_hostAddress, new Uri($"topic:{topicName}"));
+
+            var sendSettings = new TopicPublishSettings(address);
 
             configure?.Invoke(sendSettings);
 
@@ -69,14 +71,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public Uri GetDestinationAddress(Type messageType, Action<ITopicConfigurator> configure = null)
         {
+            var topicName = _messageNameFormatter.GetMessageName(messageType).ToString();
             var isTemporary = TypeMetadataCache.IsTemporaryMessageType(messageType);
+            var address = new AmazonSqsEndpointAddress(_hostAddress, new Uri($"topic:{topicName}?temporary={isTemporary}"));
 
-            var durable = !isTemporary;
-            var autoDelete = isTemporary;
-
-            var name = _messageNameFormatter.GetMessageName(messageType).ToString();
-
-            var settings = new TopicPublishSettings(name, durable, autoDelete);
+            var settings = new TopicPublishSettings(address);
 
             configure?.Invoke(settings);
 

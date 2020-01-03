@@ -65,13 +65,11 @@
 
                 var context = new TransportAmazonSqsSendContext<T>(_message, _cancellationToken);
 
-                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartActivity(new {_context.EntityName});
+                await _pipe.Send(context).ConfigureAwait(false);
+
+                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
                 try
                 {
-                    await _pipe.Send(context).ConfigureAwait(false);
-
-                    activity.AddSendContextHeaders(context);
-
                     var request = clientContext.CreatePublishRequest(_context.EntityName, context.Body);
 
                     _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, context.Headers);

@@ -88,6 +88,10 @@
         public IDictionary<string, object> QueueAttributes => _settings.QueueAttributes;
         public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
         public IDictionary<string, string> QueueTags => _settings.QueueTags;
+        public AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
+        {
+            return _settings.GetEndpointAddress(hostAddress);
+        }
 
         public bool DeployTopologyOnly
         {

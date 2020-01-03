@@ -1,13 +1,13 @@
-﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SlowConcurrentSaga
+﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.DeadlockSaga
 {
     using System;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Infrastructure;
     using Microsoft.EntityFrameworkCore.Metadata;
-    using Tests.SlowConcurrentSaga.DataAccess;
+    using Tests.DeadlockSaga.DataAccess;
 
 
-    [DbContext(typeof(SlowConcurrentSagaDbContext))]
+    [DbContext(typeof(DeadlockSagaDbContext))]
     partial class SlowConcurrentSagaDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -16,7 +16,7 @@
                 .HasAnnotation("ProductVersion", "1.1.1")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga.SlowConcurrentSaga", b =>
+            modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.Tests.DeadlockSaga.DeadlockSaga", b =>
                 {
                     b.Property<Guid>("CorrelationId");
 

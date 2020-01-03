@@ -2,9 +2,6 @@
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;
-    using Amazon.SimpleNotificationService;
-    using Amazon.SQS;
     using GreenPipes;
     using Topology;
     using Transport;
@@ -29,14 +26,9 @@
         public Uri HostAddress => _context.HostAddress;
         public IAmazonSqsHostTopology Topology => _context.Topology;
 
-        Task<IAmazonSQS> ConnectionContext.CreateAmazonSqs()
+        public ClientContext CreateClientContext(CancellationToken cancellationToken)
         {
-            return _context.CreateAmazonSqs();
-        }
-
-        Task<IAmazonSimpleNotificationService> ConnectionContext.CreateAmazonSns()
-        {
-            return _context.CreateAmazonSns();
+            return _context.CreateClientContext(cancellationToken);
         }
     }
 }
