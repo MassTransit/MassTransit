@@ -8,7 +8,6 @@
     using Context;
     using GreenPipes;
     using MassTransit.Saga;
-    using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
     using Microsoft.EntityFrameworkCore.Storage;
@@ -189,23 +188,17 @@
             }
             catch (DbUpdateException ex)
             {
-                if (IsDeadlockException(ex))
-                {
-                    // deadlock, no need to rollback
-                }
-                else
-                {
-                    context.LogFault(this, ex, instance?.CorrelationId);
+                context.LogFault(this, ex, instance?.CorrelationId);
 
-                    try
-                    {
-                        transaction.Rollback();
-                    }
-                    catch (Exception innerException)
-                    {
-                        LogContext.Warning?.Log(innerException, "Transaction rollback failed");
-                    }
+                try
+                {
+                    transaction.Rollback();
                 }
+                catch (Exception innerException)
+                {
+                    LogContext.Warning?.Log(innerException, "Transaction rollback failed");
+                }
+
                 throw;
             }
             catch (Exception ex)
@@ -339,22 +332,15 @@
 
                 transaction.Commit();
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
-                if (IsDeadlockException(ex))
+                try
                 {
-                    // deadlock, no need to rollback
+                    transaction.Rollback();
                 }
-                else
+                catch (Exception innerException)
                 {
-                    try
-                    {
-                        transaction.Rollback();
-                    }
-                    catch (Exception innerException)
-                    {
-                        LogContext.Warning?.Log(innerException, "Transaction rollback failed");
-                    }
+                    LogContext.Warning?.Log(innerException, "Transaction rollback failed");
                 }
 
                 throw;
@@ -389,11 +375,6 @@
 
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
             }
-        }
-
-        static bool IsDeadlockException(Exception exception)
-        {
-            return exception.GetBaseException() is SqlException baseException && baseException.Number == 1205;
         }
 
         async Task<bool> PreInsertSagaInstance<T>(DbContext dbContext, ConsumeContext<T> context, TSaga instance)

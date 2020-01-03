@@ -56,7 +56,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
         public SlowConcurrentSaga_Specs()
         {
             // rowlock statements that don't work so we can cause a deadlock.
-            var unworkingRowLockStatements = new RawSqlLockStatements("dbo", "SELECT * FROM {0}.{1} WHERE CorrelationId = @p0");
+            var unworkingRowLockStatements = new RawSqlLockStatements("dbo", "SELECT * FROM \"{1}\" WHERE \"CorrelationId\" = @p0");
 
             // add new migration by calling
             // dotnet ef migrations add --context "SagaDbContext``2" Init  -v
