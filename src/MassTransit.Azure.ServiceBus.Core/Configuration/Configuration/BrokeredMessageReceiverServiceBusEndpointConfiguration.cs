@@ -25,8 +25,6 @@
         {
             return Receive.CreatePipe(ConsumePipe, Serialization.Deserializer, configurator =>
             {
-                Receive.ErrorConfigurator.UseFilter(new GenerateFaultFilter());
-
                 configurator.UseRescue(Receive.ErrorConfigurator.Build(), x =>
                 {
                     x.Ignore<OperationCanceledException>();
