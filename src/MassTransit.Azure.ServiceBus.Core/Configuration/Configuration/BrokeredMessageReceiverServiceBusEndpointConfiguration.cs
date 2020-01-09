@@ -23,13 +23,7 @@
 
         public override IReceivePipe CreateReceivePipe()
         {
-            return Receive.CreatePipe(ConsumePipe, Serialization.Deserializer, configurator =>
-            {
-                configurator.UseRescue(Receive.ErrorConfigurator.Build(), x =>
-                {
-                    x.Ignore<OperationCanceledException>();
-                });
-            });
+            return Receive.CreatePipe(ConsumePipe, Serialization.Deserializer);
         }
     }
 }
