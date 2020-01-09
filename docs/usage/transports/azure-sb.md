@@ -25,6 +25,24 @@ MassTransit supports Azure Service Bus and Azure Event Hub when running from an 
 > The [Sample Code](https://github.com/MassTransit/MassTransit/tree/develop/src/Samples/Sample.AzureFunctions.ServiceBus) is available
 for reference as well.
 
+The functions [host.json](https://docs.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus#host-json) file needs to have messageHandlerOptions > autoComplete set to true. This is so that the message is removed from the queue once processing has completed successfully.
+
+```
+{
+  "version": "2.0",
+  "extensions": {
+    "serviceBus": {
+      "prefetchCount": 20,
+      "messageHandlerOptions": {
+        "autoComplete": true,
+        "maxConcurrentCalls": 20,
+        "maxAutoRenewDuration": "00:55:00"
+      }
+    }
+  },
+}
+```
+
 ### Azure Service Bus
 
 The bindings for using MassTransit with Azure Service Bus are shown below.
