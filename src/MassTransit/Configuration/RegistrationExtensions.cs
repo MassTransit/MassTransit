@@ -26,7 +26,7 @@ namespace MassTransit
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            var types = AssemblyTypeCache.FindTypes(assemblies, IsConsumerOrDefinition).GetAwaiter().GetResult();
+            var types = AssemblyTypeCache.FindTypes(assemblies, TypeMetadataCache.IsConsumerOrDefinition).GetAwaiter().GetResult();
 
             AddConsumers(configurator, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
@@ -59,12 +59,12 @@ namespace MassTransit
             IEnumerable<Type> types;
             if (filter != null)
             {
-                bool IsAllowed(Type candidate) => IsConsumerOrDefinition(candidate) && filter(candidate);
+                bool IsAllowed(Type candidate) => TypeMetadataCache.IsConsumerOrDefinition(candidate) && filter(candidate);
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }
             else
-                types = FindTypesInNamespace(type, IsConsumerOrDefinition);
+                types = FindTypesInNamespace(type, TypeMetadataCache.IsConsumerOrDefinition);
 
             AddConsumers(configurator, types.ToArray());
         }
@@ -102,7 +102,7 @@ namespace MassTransit
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            var types = AssemblyTypeCache.FindTypes(assemblies, IsSagaTypeOrDefinition).GetAwaiter().GetResult();
+            var types = AssemblyTypeCache.FindTypes(assemblies, TypeMetadataCache.IsSagaOrDefinition).GetAwaiter().GetResult();
 
             AddSagas(configurator, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
@@ -136,12 +136,12 @@ namespace MassTransit
             IEnumerable<Type> types;
             if (filter != null)
             {
-                bool IsAllowed(Type candidate) => IsSagaTypeOrDefinition(candidate) && filter(candidate);
+                bool IsAllowed(Type candidate) => TypeMetadataCache.IsSagaOrDefinition(candidate) && filter(candidate);
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }
             else
-                types = FindTypesInNamespace(type, IsSagaTypeOrDefinition);
+                types = FindTypesInNamespace(type, TypeMetadataCache.IsSagaOrDefinition);
 
             AddSagas(configurator, types.ToArray());
         }
@@ -180,7 +180,7 @@ namespace MassTransit
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            var types = AssemblyTypeCache.FindTypes(assemblies, IsSagaStateMachineOrDefinition).GetAwaiter().GetResult();
+            var types = AssemblyTypeCache.FindTypes(assemblies, TypeMetadataCache.IsSagaStateMachineOrDefinition).GetAwaiter().GetResult();
 
             configurator.AddSagaStateMachines(types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
@@ -216,13 +216,13 @@ namespace MassTransit
             {
                 bool IsAllowed(Type candidate)
                 {
-                    return IsSagaStateMachineOrDefinition(candidate) && filter(candidate);
+                    return TypeMetadataCache.IsSagaStateMachineOrDefinition(candidate) && filter(candidate);
                 }
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }
             else
-                types = FindTypesInNamespace(type, IsSagaStateMachineOrDefinition);
+                types = FindTypesInNamespace(type, TypeMetadataCache.IsSagaStateMachineOrDefinition);
 
             AddSagaStateMachines(configurator, types.ToArray());
         }
@@ -283,7 +283,7 @@ namespace MassTransit
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            var types = AssemblyTypeCache.FindTypes(assemblies, IsActivityTypeOrDefinition).GetAwaiter().GetResult();
+            var types = AssemblyTypeCache.FindTypes(assemblies, TypeMetadataCache.IsActivityOrDefinition).GetAwaiter().GetResult();
 
             AddActivities(configurator, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
@@ -315,12 +315,12 @@ namespace MassTransit
             IEnumerable<Type> types;
             if (filter != null)
             {
-                bool IsAllowed(Type candidate) => IsActivityTypeOrDefinition(candidate) && filter(candidate);
+                bool IsAllowed(Type candidate) => TypeMetadataCache.IsActivityOrDefinition(candidate) && filter(candidate);
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }
             else
-                types = FindTypesInNamespace(type, IsActivityTypeOrDefinition);
+                types = FindTypesInNamespace(type, TypeMetadataCache.IsActivityOrDefinition);
 
             AddActivities(configurator, types.ToArray());
         }
@@ -361,31 +361,6 @@ namespace MassTransit
 
             foreach (var executeActivity in executeActivities)
                 configurator.AddExecuteActivity(executeActivity.ActivityType, executeActivity.DefinitionType);
-        }
-
-        static bool IsConsumerOrDefinition(Type type)
-        {
-            return TypeMetadataCache.HasConsumerInterfaces(type) && !TypeMetadataCache.HasSagaInterfaces(type)
-                || type.HasInterface(typeof(IConsumerDefinition<>));
-        }
-
-        static bool IsSagaTypeOrDefinition(Type type)
-        {
-            return TypeMetadataCache.HasSagaInterfaces(type) || type.HasInterface(typeof(ISagaDefinition<>));
-        }
-
-        static bool IsSagaStateMachineOrDefinition(Type type)
-        {
-            return type.HasInterface(typeof(SagaStateMachine<>))
-                || type.HasInterface(typeof(ISagaDefinition<>));
-        }
-
-        static bool IsActivityTypeOrDefinition(Type type)
-        {
-            return type.HasInterface(typeof(IExecuteActivity<>))
-                || type.HasInterface(typeof(ICompensateActivity<>))
-                || type.HasInterface(typeof(IActivityDefinition<,,>))
-                || type.HasInterface(typeof(IExecuteActivityDefinition<,>));
         }
 
         static IEnumerable<Type> FindTypesInNamespace(Type type, Func<Type, bool> typeFilter)

@@ -1,6 +1,8 @@
 namespace MassTransit
 {
+    using Registration;
     using Saga;
+    using Saga.InMemoryRepository;
 
 
     public static class SagaRepositoryRegistrationExtensions
@@ -14,9 +16,20 @@ namespace MassTransit
         public static ISagaRegistrationConfigurator<T> InMemoryRepository<T>(this ISagaRegistrationConfigurator<T> configurator)
             where T : class, ISaga
         {
-            configurator.Repository(x => x.RegisterFactoryMethod(provider => new InMemorySagaRepository<T>()));
+            configurator.Repository(x =>
+            {
+                x.RegisterSingleInstance(new IndexedSagaDictionary<T>());
+                x.RegisterComponents<IndexedSagaDictionary<T>, InMemorySagaConsumeContextFactory<T>, InMemorySagaRepositoryContextFactory<T>>();
+            });
 
             return configurator;
+        }
+
+        public static void RegisterInMemorySagaRepository<T>(this IContainerRegistrar registrar)
+            where T : class, ISaga
+        {
+            registrar.RegisterSingleInstance(new IndexedSagaDictionary<T>());
+            registrar.RegisterSagaRepository<T, IndexedSagaDictionary<T>, InMemorySagaConsumeContextFactory<T>, InMemorySagaRepositoryContextFactory<T>>();
         }
     }
 }

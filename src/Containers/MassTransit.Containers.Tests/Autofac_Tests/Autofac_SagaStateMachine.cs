@@ -3,7 +3,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
     using Autofac;
     using Common_Tests;
     using NUnit.Framework;
-    using Scenarios.StateMachines;
+    using TestFramework.Sagas;
 
 
     public class Autofac_SagaStateMachine :

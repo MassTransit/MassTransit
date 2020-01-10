@@ -98,11 +98,12 @@
             }
         }
 
-        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+        public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
             var tableName = GetTableName();
-            var (whereStatement, parameters) = WhereStatementHelper.GetWhereStatementAndParametersFromExpression(context.Query.FilterExpression);
+            var (whereStatement, parameters) = WhereStatementHelper.GetWhereStatementAndParametersFromExpression(query.FilterExpression);
 
             List<Guid> correlationIds = null;
             using (var connection = new SqlConnection(_connectionString))
@@ -149,12 +150,12 @@
                 }
                 catch (SagaException sex)
                 {
-                    context.LogFault(sex);
+                    context.LogFault(this, sex);
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    context.LogFault(ex);
+                    context.LogFault(this, ex);
 
                     throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                 }
@@ -173,11 +174,11 @@
             {
                 await InsertSagaInstance(sqlConnection, instance).ConfigureAwait(false);
 
-                context.LogInsert(this, instance.CorrelationId);
+                context.LogInsert<TSaga, T>(instance.CorrelationId);
             }
             catch (Exception ex)
             {
-                context.LogInsertFault(this, ex, instance.CorrelationId);
+                context.LogInsertFault<TSaga, T>(ex, instance.CorrelationId);
             }
         }
 

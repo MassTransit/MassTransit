@@ -11,7 +11,6 @@ namespace MassTransit.LamarIntegration.Registration
     public class LamarSagaRepositoryFactory :
         ISagaRepositoryFactory
     {
-        readonly Action<ConsumeContext> _configureScope;
         readonly IContainer _container;
 
         public LamarSagaRepositoryFactory(IContainer container)
@@ -19,22 +18,15 @@ namespace MassTransit.LamarIntegration.Registration
             _container = container;
         }
 
-        public LamarSagaRepositoryFactory(IContainer container, Action<ConsumeContext> configureScope)
-        {
-            _container = container;
-            _configureScope = configureScope;
-        }
-
         ISagaRepository<T> ISagaRepositoryFactory.CreateSagaRepository<T>(Action<ConsumeContext> scopeAction)
         {
             var repository = _container.GetInstance<ISagaRepository<T>>();
+            if (repository is SagaRepository<T>)
+                return repository;
 
             var scopeProvider = new LamarSagaScopeProvider<T>(_container);
             if (scopeAction != null)
                 scopeProvider.AddScopeAction(scopeAction);
-
-            if (_configureScope != null)
-                scopeProvider.AddScopeAction(_configureScope);
 
             return new ScopeSagaRepository<T>(repository, scopeProvider);
         }

@@ -42,7 +42,7 @@ namespace MassTransit.LamarIntegration.Registration
         {
         }
 
-        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+        public void RegisterSagaStateMachine<TStateMachine, TInstance>()
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
@@ -64,6 +64,16 @@ namespace MassTransit.LamarIntegration.Registration
             });
         }
 
+        void IContainerRegistrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
+        {
+            _registry.AddScoped<ISagaConsumeContextFactory<TContext, TSaga>, TConsumeContextFactory>();
+            _registry.AddScoped<ISagaRepositoryContextFactory<TSaga>, TRepositoryContextFactory>();
+
+            _registry.AddSingleton<LamarSagaRepositoryContextFactory<TSaga>>();
+            _registry.AddSingleton<ISagaRepository<TSaga>>(provider =>
+                new SagaRepository<TSaga>(provider.GetRequiredService<LamarSagaRepositoryContextFactory<TSaga>>()));
+        }
+
         public void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga
@@ -80,6 +90,16 @@ namespace MassTransit.LamarIntegration.Registration
 
             _registry.For<IExecuteActivityScopeProvider<TActivity, TArguments>>()
                 .Use(CreateExecuteActivityScopeProvider<TActivity, TArguments>);
+        }
+
+        public void RegisterCompensateActivity<TActivity, TLog>()
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            _registry.ForConcreteType<TActivity>();
+
+            _registry.For<ICompensateActivityScopeProvider<TActivity, TLog>>()
+                .Use(CreateCompensateActivityScopeProvider<TActivity, TLog>);
         }
 
         public void RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>()
@@ -139,14 +159,23 @@ namespace MassTransit.LamarIntegration.Registration
             }).Scoped();
         }
 
-        public void RegisterCompensateActivity<TActivity, TLog>()
-            where TActivity : class, ICompensateActivity<TLog>
-            where TLog : class
+        public void Register<T, TImplementation>()
+            where T : class
+            where TImplementation : class, T
         {
-            _registry.ForConcreteType<TActivity>();
+            _registry.TryAddScoped<T, TImplementation>();
+        }
 
-            _registry.For<ICompensateActivityScopeProvider<TActivity, TLog>>()
-                .Use(CreateCompensateActivityScopeProvider<TActivity, TLog>);
+        public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
+        {
+            _registry.TryAddSingleton(provider => factoryMethod(provider.GetRequiredService<IConfigurationServiceProvider>()));
+        }
+
+        public void RegisterSingleInstance<T>(T instance)
+            where T : class
+        {
+            _registry.TryAddSingleton(instance);
         }
 
         IExecuteActivityScopeProvider<TActivity, TArguments> CreateExecuteActivityScopeProvider<TActivity, TArguments>(IServiceContext context)

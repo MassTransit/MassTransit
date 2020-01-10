@@ -87,12 +87,13 @@
             }
         }
 
-        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+        public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
             try
             {
-                List<TSaga> sagaInstances = await _collection.Find(context.Query.FilterExpression).ToListAsync().ConfigureAwait(false);
+                List<TSaga> sagaInstances = await _collection.Find(query.FilterExpression).ToListAsync().ConfigureAwait(false);
 
                 if (!sagaInstances.Any())
                 {
@@ -110,13 +111,13 @@
             }
             catch (SagaException sex)
             {
-                context.LogFault(sex);
+                context.LogFault(this, sex);
 
                 throw;
             }
             catch (Exception ex)
             {
-                context.LogFault(ex);
+                context.LogFault(this, ex);
 
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
             }
@@ -129,11 +130,11 @@
             {
                 await _collection.InsertOneAsync(instance, cancellationToken: context.CancellationToken).ConfigureAwait(false);
 
-                context.LogInsert(this, instance.CorrelationId);
+                context.LogInsert<TSaga, T>(instance.CorrelationId);
             }
             catch (Exception ex)
             {
-                context.LogInsertFault(this, ex, instance.CorrelationId);
+                context.LogInsertFault<TSaga, T>(ex, instance.CorrelationId);
             }
         }
 

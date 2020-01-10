@@ -11,6 +11,8 @@ namespace MassTransit.RedisIntegration
 
         string KeyPrefix { set; }
 
+        string LockSuffix { set; }
+
         TimeSpan LockTimeout { set; }
 
         TimeSpan LockRetryTimeout { set; }
@@ -28,16 +30,16 @@ namespace MassTransit.RedisIntegration
         void DatabaseConfiguration(ConfigurationOptions configurationOptions);
 
         /// <summary>
-        /// Use a simple factory method to create the database
+        /// Use a simple factory method to create the connection
         /// </summary>
-        /// <param name="databaseFactory"></param>
-        void DatabaseFactory(Func<IDatabase> databaseFactory);
+        /// <param name="connectionFactory"></param>
+        void ConnectionFactory(Func<ConnectionMultiplexer> connectionFactory);
 
         /// <summary>
-        /// Use the configuration service provider to resolve the database factory
+        /// Use the configuration service provider to resolve the connection
         /// </summary>
-        /// <param name="databaseFactory"></param>
-        void DatabaseFactory(Func<IConfigurationServiceProvider, Func<IDatabase>> databaseFactory);
+        /// <param name="connectionFactory"></param>
+        void ConnectionFactory(Func<IConfigurationServiceProvider, ConnectionMultiplexer> connectionFactory);
     }
 
 

@@ -29,7 +29,6 @@
             if (registration != null)
             {
                 registration.ConfigureSagas(configurator);
-
                 return;
             }
 
@@ -41,10 +40,9 @@
 
             var scopeProvider = new SingleLifetimeScopeProvider(scope);
             var repositoryFactory = new AutofacSagaRepositoryFactory(scopeProvider, name, configureScope);
-            var activityFactory = new AutofacStateMachineActivityFactory();
 
             foreach (var sagaType in sagaTypes)
-                StateMachineSagaConfiguratorCache.Configure(sagaType, configurator, stateMachineFactory, repositoryFactory, activityFactory);
+                StateMachineSagaConfiguratorCache.Configure(sagaType, configurator, stateMachineFactory, repositoryFactory);
         }
 
         static IEnumerable<Type> FindStateMachineSagaTypes(IComponentContext context)

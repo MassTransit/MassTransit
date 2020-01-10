@@ -101,10 +101,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                 _configure = configure;
             }
 
-            protected override void Configure(EntityTypeBuilder<T> cfg, ModelBuilder modelBuilder)
+            protected override void Configure(EntityTypeBuilder<T> entityTypeBuilder, ModelBuilder modelBuilder)
             {
-                base.Configure(cfg, modelBuilder);
-                _configure?.Invoke(cfg);
+                base.Configure(entityTypeBuilder, modelBuilder);
+                _configure?.Invoke(entityTypeBuilder);
             }
         }
     }

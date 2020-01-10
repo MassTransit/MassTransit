@@ -1,45 +1,69 @@
 ﻿namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using GreenPipes;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
+    using Util;
 
 
     public class EntityFrameworkSagaConsumeContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
-        SagaConsumeContext<TSaga, TMessage>
+        SagaConsumeContext<TSaga, TMessage>,
+        IAsyncDisposable
         where TMessage : class
         where TSaga : class, ISaga
     {
         readonly DbContext _dbContext;
-        readonly bool _existing;
+        readonly SagaConsumeContextMode _mode;
+        bool _isCompleted;
 
-        public EntityFrameworkSagaConsumeContext(DbContext dbContext, ConsumeContext<TMessage> context, TSaga instance, bool existing = true)
+        public EntityFrameworkSagaConsumeContext(DbContext dbContext, ConsumeContext<TMessage> context, TSaga instance, SagaConsumeContextMode mode)
             : base(context)
         {
-            Saga = instance;
             _dbContext = dbContext;
-            _existing = existing;
+            _mode = mode;
+
+            Saga = instance;
+        }
+
+        public Task DisposeAsync(CancellationToken cancellationToken)
+        {
+            Task Add()
+            {
+                _dbContext.Set<TSaga>().Add(Saga);
+
+                return _dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            return _isCompleted
+                ? TaskUtil.Completed
+                : _mode == SagaConsumeContextMode.Add
+                    ? Add()
+                    : _dbContext.SaveChangesAsync(cancellationToken);
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;
 
+        bool SagaConsumeContext<TSaga>.IsCompleted => _isCompleted;
+
         public async Task SetCompleted()
         {
-            IsCompleted = true;
-            if (_existing)
+            if (_mode == SagaConsumeContextMode.Insert || _mode == SagaConsumeContextMode.Load)
             {
                 _dbContext.Set<TSaga>().Remove(Saga);
 
-                this.LogRemoved();
-
                 await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
             }
+
+            _isCompleted = true;
+
+            this.LogRemoved();
         }
 
-        public bool IsCompleted { get; private set; }
         public TSaga Saga { get; }
     }
 }

@@ -28,10 +28,10 @@
             return _repository.Send(context, policy, next);
         }
 
-        Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
+        Task ISagaRepository<TSaga>.SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            return _repository.SendQuery(context, policy, next);
+            return _repository.SendQuery(context, query, policy, next);
         }
     }
 }

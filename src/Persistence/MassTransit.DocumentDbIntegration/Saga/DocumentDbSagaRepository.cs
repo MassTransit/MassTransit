@@ -152,14 +152,15 @@
                 await SendToInstance(context, policy, next, instance).ConfigureAwait(false);
         }
 
-        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+        public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
             try
             {
                 List<TSaga> sagaInstances = (await _client
                     .CreateDocumentQuery<TSaga>(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), _feedOptions)
-                    .Where(context.Query.FilterExpression).QueryAsync().ConfigureAwait(false)).ToList();
+                    .Where(query.FilterExpression).QueryAsync().ConfigureAwait(false)).ToList();
 
                 if (!sagaInstances.Any())
                 {
@@ -176,13 +177,13 @@
             }
             catch (SagaException sex)
             {
-                context.LogFault(sex);
+                context.LogFault(this, sex);
 
                 throw;
             }
             catch (Exception ex)
             {
-                context.LogFault(ex);
+                context.LogFault(this, ex);
 
                 throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
             }
@@ -197,13 +198,13 @@
                     await _client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), instance, _requestOptions, true)
                         .ConfigureAwait(false);
 
-                context.LogInsert(this, instance.CorrelationId);
+                context.LogInsert<TSaga, T>(instance.CorrelationId);
 
                 return JsonConvert.DeserializeObject<TSaga>(response.Resource.ToString(), _jsonSerializerSettings);
             }
             catch (Exception ex)
             {
-                context.LogInsertFault(this, ex, instance.CorrelationId);
+                context.LogInsertFault<TSaga, T>(ex, instance.CorrelationId);
             }
 
             return null;

@@ -3,7 +3,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
     using Common_Tests;
     using Lamar;
     using NUnit.Framework;
-    using Scenarios.StateMachines;
+    using TestFramework.Sagas;
 
 
     public class Lamar_SagaStateMachine :

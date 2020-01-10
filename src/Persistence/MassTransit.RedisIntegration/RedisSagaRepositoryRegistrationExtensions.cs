@@ -1,7 +1,9 @@
-namespace MassTransit.RedisIntegration
+namespace MassTransit
 {
     using System;
     using Configurators;
+    using RedisIntegration;
+    using RedisIntegration.Configuration;
 
 
     public static class RedisSagaRepositoryRegistrationExtensions
@@ -23,9 +25,7 @@ namespace MassTransit.RedisIntegration
 
             BusConfigurationResult.CompileResults(redisConfigurator.Validate());
 
-            var factoryMethod = redisConfigurator.BuildFactoryMethod();
-
-            configurator.Repository(x => x.RegisterFactoryMethod(factoryMethod));
+            configurator.Repository(x => redisConfigurator.Register(x));
 
             return configurator;
         }
@@ -50,9 +50,7 @@ namespace MassTransit.RedisIntegration
 
             BusConfigurationResult.CompileResults(redisConfigurator.Validate());
 
-            var factoryMethod = redisConfigurator.BuildFactoryMethod();
-
-            configurator.Repository(x => x.RegisterFactoryMethod(factoryMethod));
+            configurator.Repository(x => redisConfigurator.Register(x));
 
             return configurator;
         }

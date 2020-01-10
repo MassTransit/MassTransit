@@ -5,7 +5,8 @@ namespace MassTransit
     using Saga;
 
 
-    public interface ISagaRepositoryRegistrationConfigurator<TSaga>
+    public interface ISagaRepositoryRegistrationConfigurator<TSaga> :
+        IContainerRegistrar
         where TSaga : class, ISaga
     {
         /// <summary>
@@ -13,5 +14,10 @@ namespace MassTransit
         /// </summary>
         /// <param name="repositoryFactory"></param>
         void RegisterFactoryMethod(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory);
+
+        void RegisterComponents<TContext, TConsumeContextFactory, TRepositoryContextFactory>()
+            where TContext : class
+            where TConsumeContextFactory : class, ISagaConsumeContextFactory<TContext, TSaga>
+            where TRepositoryContextFactory : class, ISagaRepositoryContextFactory<TSaga>;
     }
 }

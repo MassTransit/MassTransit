@@ -14,9 +14,9 @@ namespace MassTransit.Registration
         }
 
         public static void Configure(Type sagaType, IReceiveEndpointConfigurator configurator, ISagaStateMachineFactory sagaStateMachineFactory,
-            ISagaRepositoryFactory repositoryFactory, IStateMachineActivityFactory activityFactory)
+            ISagaRepositoryFactory repositoryFactory)
         {
-            GetOrAdd(sagaType).Configure(configurator, sagaStateMachineFactory, repositoryFactory, activityFactory);
+            GetOrAdd(sagaType).Configure(configurator, sagaStateMachineFactory, repositoryFactory);
         }
 
 
@@ -29,7 +29,7 @@ namespace MassTransit.Registration
         interface CachedConfigurator
         {
             void Configure(IReceiveEndpointConfigurator configurator, ISagaStateMachineFactory sagaStateMachineFactory,
-                ISagaRepositoryFactory repositoryFactory, IStateMachineActivityFactory activityFactory);
+                ISagaRepositoryFactory repositoryFactory);
         }
 
 
@@ -38,11 +38,9 @@ namespace MassTransit.Registration
             where T : class, SagaStateMachineInstance
         {
             public void Configure(IReceiveEndpointConfigurator configurator, ISagaStateMachineFactory sagaStateMachineFactory,
-                ISagaRepositoryFactory repositoryFactory, IStateMachineActivityFactory activityFactory)
+                ISagaRepositoryFactory repositoryFactory)
             {
-                void AddStateMachineActivityFactory(ConsumeContext x) => x.GetOrAddPayload(() => activityFactory);
-
-                ISagaRepository<T> repository = repositoryFactory.CreateSagaRepository<T>(AddStateMachineActivityFactory);
+                ISagaRepository<T> repository = repositoryFactory.CreateSagaRepository<T>();
 
                 var stateMachine = sagaStateMachineFactory.CreateStateMachine<T>();
 

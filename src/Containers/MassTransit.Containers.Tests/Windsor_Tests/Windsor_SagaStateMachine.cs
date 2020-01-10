@@ -4,7 +4,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
     using Castle.Windsor;
     using Common_Tests;
     using NUnit.Framework;
-    using Scenarios.StateMachines;
+    using TestFramework.Sagas;
 
 
     public class Windsor_SagaStateMachine :

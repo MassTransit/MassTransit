@@ -36,24 +36,24 @@ namespace MassTransit.Testing
             return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, stateMachine, queueName);
         }
 
-        public static TInstance ContainsInState<TStateMachine, TInstance>(this ISagaList<TInstance> sagas, Guid sagaId, TStateMachine machine,
+        public static TInstance ContainsInState<TStateMachine, TInstance>(this ISagaList<TInstance> sagas, Guid correlationId, TStateMachine machine,
             Func<TStateMachine, State> stateSelector)
             where TStateMachine : SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
             var state = stateSelector(machine);
 
-            return ContainsInState(sagas, sagaId, machine, state);
+            return ContainsInState(sagas, correlationId, machine, state);
         }
 
-        public static TSaga ContainsInState<TSaga>(this ISagaList<TSaga> sagas, Guid sagaId, SagaStateMachine<TSaga> machine, State state)
+        public static TSaga ContainsInState<TSaga>(this ISagaList<TSaga> sagas, Guid correlationId, SagaStateMachine<TSaga> machine, State state)
             where TSaga : class, SagaStateMachineInstance
         {
-            bool any = sagas.Select(x => x.CorrelationId == sagaId && machine.GetState(x).Result.Equals(state)).Any();
-            return any ? sagas.Contains(sagaId) : null;
+            bool any = sagas.Select(x => x.CorrelationId == correlationId && machine.GetState(x).Result.Equals(state)).Any();
+            return any ? sagas.Contains(correlationId) : null;
         }
 
-        public static async Task<Guid?> ShouldContainSagaInState<TStateMachine, TInstance>(this ISagaRepository<TInstance> repository, Guid sagaId,
+        public static async Task<Guid?> ShouldContainSagaInState<TStateMachine, TInstance>(this ISagaRepository<TInstance> repository, Guid correlationId,
             TStateMachine machine, Func<TStateMachine, State> stateSelector, TimeSpan timeout)
             where TStateMachine : SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
@@ -65,12 +65,11 @@ namespace MassTransit.Testing
             var state = stateSelector(machine);
 
             DateTime giveUpAt = DateTime.Now + timeout;
+            var query = new SagaQuery<TInstance>(x => x.CorrelationId == correlationId && machine.GetState(x).Result.Equals(state));
 
             while (DateTime.Now < giveUpAt)
             {
-                Guid saga = (await querySagaRepository.Where(x => x.CorrelationId == sagaId && machine.GetState(x).Result.Equals(state))
-                    .ConfigureAwait(false)).FirstOrDefault();
-
+                Guid saga = (await querySagaRepository.Find(query).ConfigureAwait(false)).FirstOrDefault();
                 if (saga != Guid.Empty)
                     return saga;
 
