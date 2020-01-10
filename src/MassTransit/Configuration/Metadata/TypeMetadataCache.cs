@@ -6,6 +6,8 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading;
+    using Automatonymous;
+    using Courier;
     using Definition;
     using Internals.Extensions;
     using Saga;
@@ -71,6 +73,33 @@
                 || t.HasInterface(typeof(Orchestrates<>))
                 || t.HasInterface(typeof(Observes<,>))
                 || t.HasInterface(typeof(ISagaDefinition<>)));
+        }
+
+        /// <summary>
+        /// Returns true if the type is a state machine or saga definition
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsSagaStateMachineOrDefinition(Type type)
+        {
+            Type[] interfaces = type.GetTypeInfo().GetInterfaces();
+
+            return interfaces.Any(t => t.HasInterface(typeof(SagaStateMachine<>))
+                || t.HasInterface(typeof(ISagaDefinition<>)));
+        }
+
+        /// <summary>
+        /// Returns true if the type is an activity
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsActivityOrDefinition(Type type)
+        {
+            Type[] interfaces = type.GetTypeInfo().GetInterfaces();
+
+            return interfaces.Any(t => t.HasInterface(typeof(IExecuteActivity<>))
+                || t.HasInterface(typeof(ICompensateActivity<>))
+                || t.HasInterface(typeof(IActivityDefinition<,,>)));
         }
 
         public static bool HasSagaInterfaces(Type type)

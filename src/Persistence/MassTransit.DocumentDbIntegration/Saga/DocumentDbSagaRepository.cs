@@ -197,13 +197,13 @@
                     await _client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseName, _collectionName), instance, _requestOptions, true)
                         .ConfigureAwait(false);
 
-                context.LogInsert(this, instance.CorrelationId);
+                context.LogInsert<TSaga, T>(instance.CorrelationId);
 
                 return JsonConvert.DeserializeObject<TSaga>(response.Resource.ToString(), _jsonSerializerSettings);
             }
             catch (Exception ex)
             {
-                context.LogInsertFault(this, ex, instance.CorrelationId);
+                context.LogInsertFault<TSaga, T>(ex, instance.CorrelationId);
             }
 
             return null;

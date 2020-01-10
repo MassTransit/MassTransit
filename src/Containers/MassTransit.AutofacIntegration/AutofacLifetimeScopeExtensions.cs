@@ -3,7 +3,6 @@ namespace MassTransit.AutofacIntegration
     using Autofac;
     using GreenPipes;
     using Metadata;
-    using Util;
 
 
     public static class AutofacLifetimeScopeExtensions

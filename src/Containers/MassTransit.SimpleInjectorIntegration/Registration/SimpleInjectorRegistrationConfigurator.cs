@@ -15,7 +15,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         readonly Lifestyle _hybridLifestyle;
 
         public SimpleInjectorRegistrationConfigurator(Container container)
-            : base(new SimpleInjectorContainerRegistar(container))
+            : base(new SimpleInjectorContainerRegistrar(container))
         {
             Container = container;
 

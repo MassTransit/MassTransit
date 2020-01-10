@@ -173,11 +173,11 @@
             {
                 await InsertSagaInstance(sqlConnection, instance).ConfigureAwait(false);
 
-                context.LogInsert(this, instance.CorrelationId);
+                context.LogInsert<TSaga, T>(instance.CorrelationId);
             }
             catch (Exception ex)
             {
-                context.LogInsertFault(this, ex, instance.CorrelationId);
+                context.LogInsertFault<TSaga, T>(ex, instance.CorrelationId);
             }
         }
 

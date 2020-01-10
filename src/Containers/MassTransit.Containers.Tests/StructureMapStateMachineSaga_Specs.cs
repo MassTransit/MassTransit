@@ -16,10 +16,10 @@ namespace MassTransit.Containers.Tests
     using Automatonymous;
     using NUnit.Framework;
     using Saga;
-    using Scenarios.StateMachines;
     using StructureMap;
     using StructureMap.Pipeline;
     using TestFramework;
+    using TestFramework.Sagas;
 
 
     public class StructureMapStateMachineSaga_Specs :

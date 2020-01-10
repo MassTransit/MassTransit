@@ -31,7 +31,7 @@ namespace MassTransit.Saga
                 context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
         }
 
-        public static void LogInsert<TSaga, TMessage>(this ConsumeContext<TMessage> context, ISagaRepository<TSaga> repository, Guid? correlationId = default)
+        public static void LogInsert<TSaga, TMessage>(this ConsumeContext<TMessage> context, Guid? correlationId = default)
             where TSaga : class, ISaga
             where TMessage : class
         {
@@ -39,7 +39,7 @@ namespace MassTransit.Saga
                 context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
         }
 
-        public static void LogInsertFault<TSaga, TMessage>(this ConsumeContext<TMessage> context, ISagaRepository<TSaga> repository, Exception exception,
+        public static void LogInsertFault<TSaga, TMessage>(this ConsumeContext<TMessage> context, Exception exception,
             Guid? correlationId = default)
             where TSaga : class, ISaga
             where TMessage : class

@@ -14,6 +14,13 @@ namespace MassTransit.SimpleInjectorIntegration
             return (T)service;
         }
 
+        public static T TryGetInstance<T>(this Scope scope)
+        {
+            IServiceProvider serviceProvider = scope;
+            var service = serviceProvider.GetService(typeof(T));
+            return (T)service;
+        }
+
         public static ConsumeContext GetConsumeContext(this Container container)
         {
             var scope = Lifestyle.Scoped.GetCurrentScope(container);

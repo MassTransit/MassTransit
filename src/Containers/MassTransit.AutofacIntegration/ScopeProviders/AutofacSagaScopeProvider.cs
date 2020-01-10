@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using Autofac;
+    using Automatonymous;
     using Context;
     using GreenPipes;
     using Saga;
@@ -41,7 +42,9 @@
             });
             try
             {
-                var proxy = new ConsumeContextScope<T>(context, lifetimeScope);
+                IStateMachineActivityFactory factory = new AutofacStateMachineActivityFactory();
+
+                var proxy = new ConsumeContextScope<T>(context, lifetimeScope, factory);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);
@@ -70,7 +73,9 @@
             });
             try
             {
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, lifetimeScope);
+                IStateMachineActivityFactory factory = new AutofacStateMachineActivityFactory();
+
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, lifetimeScope, factory);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);

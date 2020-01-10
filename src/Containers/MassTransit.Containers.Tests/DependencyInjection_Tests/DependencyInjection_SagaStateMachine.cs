@@ -3,7 +3,7 @@
     using System;
     using Common_Tests;
     using Microsoft.Extensions.DependencyInjection;
-    using Scenarios.StateMachines;
+    using TestFramework.Sagas;
 
 
     public class DependencyInjection_SagaStateMachine :

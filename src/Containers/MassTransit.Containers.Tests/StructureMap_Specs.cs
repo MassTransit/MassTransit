@@ -1,23 +1,9 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests
 {
     using NUnit.Framework;
     using Saga;
     using Scenarios;
     using StructureMap;
-
-
 
 
     public class StructureMap_Saga :
@@ -35,17 +21,15 @@ namespace MassTransit.Containers.Tests
         {
             _container = new Container(x =>
             {
-                x.For(typeof(ISagaRepository<>))
-                    .Singleton()
-                    .Use(typeof(InMemorySagaRepository<>));
+                x.RegisterInMemorySagaRepository<SimpleSaga>();
 
-                x.ForConcreteType<SimpleSaga>();
+                x.AddMassTransit(cfg => cfg.AddSaga<SimpleSaga>());
             });
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.LoadFrom(_container);
+            configurator.ConfigureSagas(_container);
         }
 
         protected override ISagaRepository<T> GetSagaRepository<T>()

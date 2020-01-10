@@ -37,15 +37,8 @@ namespace MassTransit.Registration
             ISagaStateMachineFactory stateMachineFactory = configurationServiceProvider.GetRequiredService<ISagaStateMachineFactory>();
             SagaStateMachine<TInstance> stateMachine = stateMachineFactory.CreateStateMachine<TInstance>();
 
-            IStateMachineActivityFactory activityFactory = configurationServiceProvider.GetRequiredService<IStateMachineActivityFactory>();
-
-            void AddStateMachineActivityFactory(ConsumeContext context)
-            {
-                context.GetOrAddPayload(() => activityFactory);
-            }
-
             var repositoryFactory = configurationServiceProvider.GetRequiredService<ISagaRepositoryFactory>();
-            ISagaRepository<TInstance> repository = repositoryFactory.CreateSagaRepository<TInstance>(AddStateMachineActivityFactory);
+            ISagaRepository<TInstance> repository = repositoryFactory.CreateSagaRepository<TInstance>();
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
 
             GetSagaDefinition(configurationServiceProvider)
@@ -61,7 +54,7 @@ namespace MassTransit.Registration
 
         ISagaDefinition<TInstance> GetSagaDefinition(IConfigurationServiceProvider provider)
         {
-            return _definition ?? (_definition = provider.GetService<ISagaDefinition<TInstance>>() ?? new DefaultSagaDefinition<TInstance>());
+            return _definition ??= provider.GetService<ISagaDefinition<TInstance>>() ?? new DefaultSagaDefinition<TInstance>();
         }
     }
 }

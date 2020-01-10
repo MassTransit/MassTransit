@@ -2,9 +2,9 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 {
     using Common_Tests;
     using NUnit.Framework;
-    using Scenarios.StateMachines;
     using SimpleInjector;
     using SimpleInjector.Lifestyles;
+    using TestFramework.Sagas;
 
 
     public class SimpleInjector_SagaStateMachine :

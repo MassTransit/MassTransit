@@ -57,6 +57,16 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<ISagaRepository<TSaga>>().Use(provider => repositoryFactory(provider.GetInstance<IConfigurationServiceProvider>())).Singleton();
         }
 
+        void IContainerRegistrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
+        {
+            _expression.For<ISagaConsumeContextFactory<TContext, TSaga>>().Use<TConsumeContextFactory>();
+            _expression.For<ISagaRepositoryContextFactory<TSaga>>().Use<TRepositoryContextFactory>();
+
+            _expression.ForConcreteType<StructureMapSagaRepositoryContextFactory<TSaga>>();
+            _expression.For<ISagaRepository<TSaga>>()
+                .Use(context => new SagaRepository<TSaga>(context.GetInstance<StructureMapSagaRepositoryContextFactory<TSaga>>())).Singleton();
+        }
+
         public void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga
@@ -73,6 +83,16 @@ namespace MassTransit.StructureMapIntegration.Registration
 
             _expression.For<IExecuteActivityScopeProvider<TActivity, TArguments>>()
                 .Use(context => CreateExecuteActivityScopeProvider<TActivity, TArguments>(context));
+        }
+
+        public void RegisterCompensateActivity<TActivity, TLog>()
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            _expression.ForConcreteType<TActivity>();
+
+            _expression.For<ICompensateActivityScopeProvider<TActivity, TLog>>()
+                .Use(context => CreateCompensateActivityScopeProvider<TActivity, TLog>(context));
         }
 
         public void RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>()
@@ -116,14 +136,16 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IRequestClient<T>>().Use(context => CreateRequestClient<T>(destinationAddress, timeout, context));
         }
 
-        public void RegisterCompensateActivity<TActivity, TLog>()
-            where TActivity : class, ICompensateActivity<TLog>
-            where TLog : class
+        public void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
         {
-            _expression.ForConcreteType<TActivity>();
+            _expression.For<T>().Use(context => factoryMethod(context.GetInstance<IConfigurationServiceProvider>()));
+        }
 
-            _expression.For<ICompensateActivityScopeProvider<TActivity, TLog>>()
-                .Use(context => CreateCompensateActivityScopeProvider<TActivity, TLog>(context));
+        public void RegisterInstance<T>(T instance)
+            where T : class
+        {
+            _expression.For<T>().Use(instance).Singleton();
         }
 
         static IRequestClient<T> CreateRequestClient<T>(RequestTimeout timeout, IContext context)

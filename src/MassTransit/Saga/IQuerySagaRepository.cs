@@ -10,4 +10,11 @@ namespace MassTransit.Saga
     {
         Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query);
     }
+
+
+    public interface ILoadSagaRepository<TSaga>
+        where TSaga : class, ISaga
+    {
+        Task<TSaga> Load(Guid correlationId);
+    }
 }

@@ -36,8 +36,8 @@
 
                 ConsumeContext<MemberRegistered> registered = await handler;
 
-                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber
-                    && GetCurrentState(x) == _machine.Registered, TestTimeout);
+                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber && Equals(GetCurrentState(x), _machine.Registered),
+                    TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
 
@@ -99,7 +99,7 @@
                 {
                     Console.WriteLine("Address validated: {0}", context.Message.CorrelationId);
 
-                    await context.RespondAsync<AddressValidated>(new{});
+                    await context.RespondAsync<AddressValidated>(new { });
                 });
 
                 configurator.Handler<ValidateName>(async context =>

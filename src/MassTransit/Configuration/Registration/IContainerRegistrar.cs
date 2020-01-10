@@ -26,6 +26,12 @@ namespace MassTransit.Registration
         void RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
             where TSaga : class, ISaga;
 
+        void RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
+            where TSaga : class, ISaga
+            where TContext : class
+            where TConsumeContextFactory : class, ISagaConsumeContextFactory<TContext, TSaga>
+            where TRepositoryContextFactory : class, ISagaRepositoryContextFactory<TSaga>;
+
         void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga;
@@ -57,6 +63,12 @@ namespace MassTransit.Registration
             where T : class;
 
         void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
+            where T : class;
+
+        void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class;
+
+        void RegisterInstance<T>(T instance)
             where T : class;
     }
 }

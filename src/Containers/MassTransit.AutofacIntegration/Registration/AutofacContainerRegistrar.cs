@@ -65,6 +65,16 @@ namespace MassTransit.AutofacIntegration.Registration
                 .SingleInstance();
         }
 
+        void IContainerRegistrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
+        {
+            _builder.RegisterType<TConsumeContextFactory>().As<ISagaConsumeContextFactory<TContext, TSaga>>();
+            _builder.RegisterType<TRepositoryContextFactory>().As<ISagaRepositoryContextFactory<TSaga>>();
+
+            _builder.RegisterType<AutofacSagaRepositoryContextFactory<TSaga>>();
+            _builder.Register<ISagaRepository<TSaga>>(context => new SagaRepository<TSaga>(context.Resolve<AutofacSagaRepositoryContextFactory<TSaga>>()))
+                .SingleInstance();
+        }
+
         public void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga
@@ -137,6 +147,18 @@ namespace MassTransit.AutofacIntegration.Registration
                     ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
                     : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
             });
+        }
+
+        public void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
+        {
+            _builder.Register(context => factoryMethod(context.Resolve<IConfigurationServiceProvider>()));
+        }
+
+        public void RegisterInstance<T>(T instance)
+            where T : class
+        {
+            _builder.RegisterInstance(instance);
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()

@@ -66,7 +66,8 @@
         {
             public ConsumerServiceRegistry()
             {
-                ForConcreteType<SimpleConsumer>();
+                this.AddMassTransit(cfg => cfg.AddConsumer<SimpleConsumer>());
+
                 For<ISimpleConsumerDependency>().Use<SimpleConsumerDependency>();
                 For<AnotherMessageConsumer>().Use<AnotherMessageConsumerImpl>();
             }
@@ -77,7 +78,8 @@
         {
             public BusServiceRegistry()
             {
-                For<IBusControl>().Use(context => Bus.Factory.CreateUsingInMemory(x => x.ReceiveEndpoint("input_queue", e => e.LoadFrom(context)))).Singleton();
+                For<IBusControl>().Use(context => Bus.Factory.CreateUsingInMemory(x => x.ReceiveEndpoint("input_queue", e => e.ConfigureConsumers(context))))
+                .Singleton();
             }
         }
 

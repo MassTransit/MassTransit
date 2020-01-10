@@ -37,6 +37,10 @@ namespace MassTransit.Registration
         {
         }
 
+        void IContainerRegistrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
+        {
+        }
+
         public void RegisterSagaDefinition<TDefinition, TSaga>()
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga
@@ -46,6 +50,12 @@ namespace MassTransit.Registration
         public void RegisterExecuteActivity<TActivity, TArguments>()
             where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
+        {
+        }
+
+        public void RegisterCompensateActivity<TActivity, TLog>()
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
         {
         }
 
@@ -80,9 +90,13 @@ namespace MassTransit.Registration
         {
         }
 
-        public void RegisterCompensateActivity<TActivity, TLog>()
-            where TActivity : class, ICompensateActivity<TLog>
-            where TLog : class
+        public void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
+        {
+        }
+
+        public void RegisterInstance<T>(T instance)
+            where T : class
         {
         }
     }

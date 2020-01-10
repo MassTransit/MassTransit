@@ -4,9 +4,9 @@
     using Autofac;
     using Autofac.Builder;
     using Autofac.Features.Scanning;
+    using AutofacIntegration.Registration;
     using Metadata;
     using Saga;
-    using Util;
 
 
     /// <summary>
@@ -31,24 +31,13 @@
         /// Register types that implement <see cref="IConsumer"/> in the provided assemblies.
         /// </summary>
         /// <param name="builder">The container builder.</param>
-        /// <param name="consumerAssemblies">Assemblies to scan for consumers.</param>
+        /// <param name="sagaAssemblies">Assemblies to scan for consumers.</param>
         /// <returns>Registration builder allowing the consumer components to be customised.</returns>
         public static IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle>
-            RegisterSagas(this ContainerBuilder builder, params Assembly[] consumerAssemblies)
+            RegisterSagas(this ContainerBuilder builder, params Assembly[] sagaAssemblies)
         {
-            return builder.RegisterAssemblyTypes(consumerAssemblies)
+            return builder.RegisterAssemblyTypes(sagaAssemblies)
                 .Where(TypeMetadataCache.HasSagaInterfaces);
-        }
-
-        /// <summary>
-        /// Registers the InMemory saga repository for all saga types (generic, can be overridden)
-        /// </summary>
-        /// <param name="builder"></param>
-        public static void RegisterInMemorySagaRepository(this ContainerBuilder builder)
-        {
-            builder.RegisterGeneric(typeof(InMemorySagaRepository<>))
-                .As(typeof(ISagaRepository<>))
-                .SingleInstance();
         }
 
         /// <summary>
@@ -59,9 +48,9 @@
         public static void RegisterInMemorySagaRepository<T>(this ContainerBuilder builder)
             where T : class, ISaga
         {
-            builder.RegisterType<InMemorySagaRepository<T>>()
-                .As<ISagaRepository<T>>()
-                .SingleInstance();
+            var registrar = new AutofacContainerRegistrar(builder);
+
+            registrar.RegisterInMemorySagaRepository<T>();
         }
     }
 }

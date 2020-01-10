@@ -2,8 +2,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Scenarios.StateMachines;
     using TestFramework;
+    using TestFramework.Sagas;
 
 
     public abstract class Common_SagaStateMachine :

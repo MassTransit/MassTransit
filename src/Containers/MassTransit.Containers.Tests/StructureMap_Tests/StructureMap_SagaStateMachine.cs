@@ -3,7 +3,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
     using Common_Tests;
     using StructureMap;
     using NUnit.Framework;
-    using Scenarios.StateMachines;
+    using TestFramework.Sagas;
 
 
     public class StructureMap_SagaStateMachine :

@@ -2,6 +2,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
 {
     using System;
     using System.Collections.Generic;
+    using Automatonymous;
     using Context;
     using GreenPipes;
     using Saga;
@@ -48,7 +49,9 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
             try
             {
-                var proxy = new ConsumeContextScope<T>(context, nestedContainer);
+                IStateMachineActivityFactory factory = new StructureMapStateMachineActivityFactory();
+
+                var proxy = new ConsumeContextScope<T>(context, nestedContainer, factory);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);
@@ -75,7 +78,9 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
             try
             {
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, nestedContainer);
+                IStateMachineActivityFactory factory = new StructureMapStateMachineActivityFactory();
+
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, nestedContainer, factory);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);

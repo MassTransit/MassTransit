@@ -12,62 +12,68 @@ namespace MassTransit.Policies
         public static async Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod, CancellationToken cancellationToken = default)
         {
             var inlinePipeContext = new InlinePipeContext(cancellationToken);
-            using (RetryPolicyContext<InlinePipeContext> policyContext = retryPolicy.CreatePolicyContext(inlinePipeContext))
+
+            RetryPolicyContext<InlinePipeContext> policyContext = retryPolicy.CreatePolicyContext(inlinePipeContext);
+            try
             {
+                await retryMethod().ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                if (!policyContext.CanRetry(exception, out RetryContext<InlinePipeContext> retryContext))
+                    throw;
+
                 try
                 {
-                    await retryMethod().ConfigureAwait(false);
+                    await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
                 {
-                    throw;
                 }
-                catch (Exception exception)
-                {
-                    if (!policyContext.CanRetry(exception, out RetryContext<InlinePipeContext> retryContext))
-                        throw;
 
-                    try
-                    {
-                        await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
-                    }
-                    catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
-                    {
-                    }
-
-                    throw;
-                }
+                throw;
+            }
+            finally
+            {
+                policyContext.Dispose();
             }
         }
 
         public static async Task<T> Retry<T>(this IRetryPolicy retryPolicy, Func<Task<T>> retryMethod, CancellationToken cancellationToken = default)
         {
             var inlinePipeContext = new InlinePipeContext(cancellationToken);
-            using (RetryPolicyContext<InlinePipeContext> policyContext = retryPolicy.CreatePolicyContext(inlinePipeContext))
+
+            RetryPolicyContext<InlinePipeContext> policyContext = retryPolicy.CreatePolicyContext(inlinePipeContext);
+            try
             {
+                return await retryMethod().ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                if (!policyContext.CanRetry(exception, out RetryContext<InlinePipeContext> retryContext))
+                    throw;
+
                 try
                 {
-                    return await retryMethod().ConfigureAwait(false);
+                    return await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
                 {
-                    throw;
                 }
-                catch (Exception exception)
-                {
-                    if (!policyContext.CanRetry(exception, out RetryContext<InlinePipeContext> retryContext))
-                        throw;
 
-                    try
-                    {
-                        return await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
-                    }
-                    catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
-                    {
-                    }
-
-                    throw;
-                }
+                throw;
+            }
+            finally
+            {
+                policyContext.Dispose();
             }
         }
 
@@ -76,7 +82,7 @@ namespace MassTransit.Policies
         {
             while (context.CancellationToken.IsCancellationRequested == false)
             {
-                LogContext.Warning?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
+                LogContext.Debug?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
 
                 try
                 {
@@ -109,7 +115,7 @@ namespace MassTransit.Policies
         {
             while (context.CancellationToken.IsCancellationRequested == false)
             {
-                LogContext.Warning?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
+                LogContext.Debug?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
 
                 try
                 {

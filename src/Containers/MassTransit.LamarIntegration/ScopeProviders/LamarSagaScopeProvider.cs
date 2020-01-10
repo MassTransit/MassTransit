@@ -2,6 +2,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
 {
     using System;
     using System.Collections.Generic;
+    using Automatonymous;
     using Context;
     using GreenPipes;
     using Lamar;
@@ -41,7 +42,9 @@ namespace MassTransit.LamarIntegration.ScopeProviders
             var nestedContainer = _container.GetNestedContainer(context);
             try
             {
-                var proxy = new ConsumeContextScope<T>(context, nestedContainer);
+                IStateMachineActivityFactory factory = new LamarStateMachineActivityFactory();
+
+                var proxy = new ConsumeContextScope<T>(context, nestedContainer, factory);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);
@@ -68,7 +71,9 @@ namespace MassTransit.LamarIntegration.ScopeProviders
             var nestedContainer = _container.GetNestedContainer(context);
             try
             {
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, nestedContainer);
+                IStateMachineActivityFactory factory = new LamarStateMachineActivityFactory();
+
+                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, nestedContainer, factory);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);

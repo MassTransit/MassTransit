@@ -1,18 +1,15 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
+using System;
+using System.Threading.Tasks;
+using MassTransit;
+using MassTransit.Saga;
+using Microsoft.EntityFrameworkCore;
+
+
 namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
     using System;
+    using System.Threading.Tasks;
+    using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
 
 
@@ -40,6 +37,86 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         public void Release(DbContext dbContext)
         {
             dbContext.Dispose();
+        }
+    }
+
+
+    public class DbContextSagaRepositoryContext<TContext, TSaga, TMessage> :
+        SagaRepositoryContext<TSaga, TMessage>,
+        IDisposable
+        where TContext : DbContext
+        where TSaga : class, ISaga
+        where TMessage : class
+    {
+        readonly TContext _dbContext;
+
+        public DbContextSagaRepositoryContext(TContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+        public void Dispose()
+        {
+            _dbContext.Dispose();
+        }
+
+        public Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<SagaConsumeContext<TSaga, TMessage>> Insert(TSaga instance)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<SagaRepositoryQueryContext<TSaga, TMessage>> Query(ISagaQuery<TSaga> query)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Faulted(Exception exception)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class DbContextSagaRepositoryContext<TContext, TSaga> :
+        SagaRepositoryContext<TSaga>,
+        IDisposable
+        where TContext : DbContext
+        where TSaga : class, ISaga
+    {
+        readonly TContext _dbContext;
+
+        public DbContextSagaRepositoryContext(TContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+        public void Dispose()
+        {
+            _dbContext.Dispose();
+        }
+
+        public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<TSaga> Load(Guid correlationId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Faulted(Exception exception)
+        {
+            throw new NotImplementedException();
         }
     }
 }

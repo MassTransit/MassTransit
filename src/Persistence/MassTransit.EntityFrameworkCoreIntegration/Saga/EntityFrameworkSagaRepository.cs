@@ -418,7 +418,7 @@
                 entry = dbContext.Set<TSaga>().Add(instance);
                 await dbContext.SaveChangesAsync(context.CancellationToken).ConfigureAwait(false);
 
-                context.LogInsert(this, instance.CorrelationId);
+                context.LogInsert<TSaga, T>(instance.CorrelationId);
 
                 return true;
             }
@@ -429,7 +429,7 @@
                 // see here for details: https://www.davideguida.com/how-to-reset-the-entities-state-on-a-entity-framework-db-context/
                 entry.State = EntityState.Detached;
 
-                context.LogInsertFault(this, ex, instance.CorrelationId);
+                context.LogInsertFault<TSaga, T>(ex, instance.CorrelationId);
             }
 
             return false;

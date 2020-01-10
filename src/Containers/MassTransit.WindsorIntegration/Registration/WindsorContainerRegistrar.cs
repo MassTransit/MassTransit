@@ -50,7 +50,7 @@ namespace MassTransit.WindsorIntegration.Registration
             where TInstance : class, SagaStateMachineInstance
         {
             if (!_container.Kernel.HasComponent(typeof(IStateMachineActivityFactory)))
-                _container.Register(Component.For<IStateMachineActivityFactory>().ImplementedBy<WindsorStateMachineActivityFactory>().LifestyleSingleton());
+                _container.Register(Component.For<IStateMachineActivityFactory>().ImplementedBy<WindsorStateMachineActivityFactory>().LifestyleScoped());
 
             if (!_container.Kernel.HasComponent(typeof(ISagaStateMachineFactory)))
                 _container.Register(Component.For<ISagaStateMachineFactory>().ImplementedBy<WindsorSagaStateMachineFactory>().LifestyleSingleton());
@@ -65,11 +65,19 @@ namespace MassTransit.WindsorIntegration.Registration
             where TSaga : class, ISaga
         {
             _container.Register(Component.For<ISagaRepository<TSaga>>().UsingFactoryMethod(provider =>
-            {
-                var configurationServiceProvider = provider.Resolve<IConfigurationServiceProvider>();
+                repositoryFactory(provider.Resolve<IConfigurationServiceProvider>())).LifestyleSingleton());
+        }
 
-                return repositoryFactory(configurationServiceProvider);
-            }).LifestyleSingleton());
+        void IContainerRegistrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
+        {
+            _container.Register(
+                Component.For<ISagaConsumeContextFactory<TContext, TSaga>, TConsumeContextFactory>().LifestyleScoped(),
+                Component.For<ISagaRepositoryContextFactory<TSaga>, TRepositoryContextFactory>().LifestyleScoped(),
+
+                Component.For<WindsorSagaRepositoryContextFactory<TSaga>>().LifestyleSingleton(),
+                Component.For<ISagaRepository<TSaga>>().UsingFactoryMethod(provider =>
+                    new SagaRepository<TSaga>(provider.Resolve<WindsorSagaRepositoryContextFactory<TSaga>>())).LifestyleSingleton()
+            );
         }
 
         public void RegisterSagaDefinition<TDefinition, TSaga>()
@@ -90,6 +98,17 @@ namespace MassTransit.WindsorIntegration.Registration
             _container.Register(
                 Component.For<IExecuteActivityScopeProvider<TActivity, TArguments>>()
                     .ImplementedBy<WindsorExecuteActivityScopeProvider<TActivity, TArguments>>());
+        }
+
+        public void RegisterCompensateActivity<TActivity, TLog>()
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            RegisterActivityIfNotPresent<TActivity>();
+
+            _container.Register(
+                Component.For<ICompensateActivityScopeProvider<TActivity, TLog>>()
+                    .ImplementedBy<WindsorCompensateActivityScopeProvider<TActivity, TLog>>());
         }
 
         public void RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>()
@@ -151,15 +170,19 @@ namespace MassTransit.WindsorIntegration.Registration
             }));
         }
 
-        public void RegisterCompensateActivity<TActivity, TLog>()
-            where TActivity : class, ICompensateActivity<TLog>
-            where TLog : class
+        public void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
         {
-            RegisterActivityIfNotPresent<TActivity>();
+            if (!_container.Kernel.HasComponent(typeof(T)))
+                _container.Register(Component.For<T>().UsingFactoryMethod(kernel => factoryMethod(kernel.Resolve<IConfigurationServiceProvider>()))
+                    .LifestyleSingleton());
+        }
 
-            _container.Register(
-                Component.For<ICompensateActivityScopeProvider<TActivity, TLog>>()
-                    .ImplementedBy<WindsorCompensateActivityScopeProvider<TActivity, TLog>>());
+        public void RegisterInstance<T>(T instance)
+            where T : class
+        {
+            if (!_container.Kernel.HasComponent(typeof(T)))
+                _container.Register(Component.For<T>().Instance(instance).LifestyleSingleton());
         }
 
         void RegisterActivityIfNotPresent<TActivity>()
