@@ -26,7 +26,7 @@
 
   <PropertyGroup Condition="'$(MSBuildProjectName.Contains(Tests))' == false">
     <!-- Nuget Package Details -->
-    <PackageIconUrl>http://masstransit-project.com/public/open-graph-logo.png</PackageIconUrl>
+    <PackageIconUrl>https://masstransit-project.com/mt-logo-color.png</PackageIconUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Description>MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com</Description>
     <IsPackable>True</IsPackable>
