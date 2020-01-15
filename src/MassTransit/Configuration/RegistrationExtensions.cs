@@ -383,8 +383,9 @@ namespace MassTransit
         static bool IsActivityTypeOrDefinition(Type type)
         {
             return type.HasInterface(typeof(IExecuteActivity<>))
+                || type.HasInterface(typeof(ICompensateActivity<>))
                 || type.HasInterface(typeof(IActivityDefinition<,,>))
-                || type.HasInterface(typeof(ICompensateActivity<>));
+                || type.HasInterface(typeof(IExecuteActivityDefinition<,>));
         }
 
         static IEnumerable<Type> FindTypesInNamespace(Type type, Func<Type, bool> typeFilter)
