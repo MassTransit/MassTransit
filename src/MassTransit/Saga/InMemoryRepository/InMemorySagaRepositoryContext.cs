@@ -4,10 +4,12 @@ namespace MassTransit.Saga.InMemoryRepository
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Util;
+    using Context;
+    using GreenPipes;
 
 
     public class InMemorySagaRepositoryContext<TSaga, TMessage> :
+        ConsumeContextScope<TMessage>,
         SagaRepositoryContext<TSaga, TMessage>,
         IDisposable
         where TSaga : class, ISaga
@@ -20,6 +22,7 @@ namespace MassTransit.Saga.InMemoryRepository
 
         public InMemorySagaRepositoryContext(IndexedSagaDictionary<TSaga> sagas, ISagaConsumeContextFactory<IndexedSagaDictionary<TSaga>, TSaga> factory,
             ConsumeContext<TMessage> context)
+            : base(context)
         {
             _sagas = sagas;
             _factory = factory;
@@ -116,11 +119,6 @@ namespace MassTransit.Saga.InMemoryRepository
             return new DefaultSagaRepositoryQueryContext<TSaga, TMessage>(this, matchingInstances);
         }
 
-        public Task Faulted(Exception exception)
-        {
-            return TaskUtil.Completed;
-        }
-
         public void Dispose()
         {
             if (_sagasLocked)
@@ -133,19 +131,21 @@ namespace MassTransit.Saga.InMemoryRepository
 
 
     public class InMemorySagaRepositoryContext<TSaga> :
+        BasePipeContext,
         SagaRepositoryContext<TSaga>
         where TSaga : class, ISaga
     {
         readonly IndexedSagaDictionary<TSaga> _sagas;
 
-        public InMemorySagaRepositoryContext(IndexedSagaDictionary<TSaga> sagas)
+        public InMemorySagaRepositoryContext(IndexedSagaDictionary<TSaga> sagas, CancellationToken cancellationToken)
+            : base(cancellationToken)
         {
             _sagas = sagas;
         }
 
         public async Task<TSaga> Load(Guid correlationId)
         {
-            await _sagas.MarkInUse(CancellationToken.None).ConfigureAwait(false);
+            await _sagas.MarkInUse(CancellationToken).ConfigureAwait(false);
             try
             {
                 SagaInstance<TSaga> saga = _sagas[correlationId];
@@ -166,16 +166,11 @@ namespace MassTransit.Saga.InMemoryRepository
             }
         }
 
-        public async Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query)
+        public async Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
             var matchingInstances = _sagas.Where(query).Select(x => x.Instance.CorrelationId).ToList();
 
             return new DefaultSagaRepositoryQueryContext<TSaga>(this, matchingInstances);
-        }
-
-        public Task Faulted(Exception exception)
-        {
-            return TaskUtil.Completed;
         }
     }
 }

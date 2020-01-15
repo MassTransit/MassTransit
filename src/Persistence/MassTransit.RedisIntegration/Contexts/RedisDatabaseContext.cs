@@ -71,7 +71,7 @@ namespace MassTransit.RedisIntegration.Contexts
         {
             var instance = context.Saga;
 
-            IAsyncDisposable updateLock = _options.Optimistic
+            IAsyncDisposable updateLock = _options.ConcurrencyMode == ConcurrencyMode.Optimistic
                 ? updateLock = await Lock(instance, context.CancellationToken).ConfigureAwait(false)
                 : null;
 
@@ -111,7 +111,7 @@ namespace MassTransit.RedisIntegration.Contexts
             }
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public Task DisposeAsync(CancellationToken cancellationToken = default)
         {
             return _lock != null
                 ? _lock.DisposeAsync(cancellationToken)

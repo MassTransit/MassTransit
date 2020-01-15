@@ -1,10 +1,13 @@
 namespace MassTransit.Saga
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
 
 
-    public interface SagaRepositoryContext<TSaga, TMessage>
+    public interface SagaRepositoryContext<TSaga, TMessage> :
+        ConsumeContext<TMessage>
         where TSaga : class, ISaga
         where TMessage : class
     {
@@ -35,26 +38,19 @@ namespace MassTransit.Saga
         /// <param name="query"></param>
         /// <returns></returns>
         Task<SagaRepositoryQueryContext<TSaga, TMessage>> Query(ISagaQuery<TSaga> query);
-
-        /// <summary>
-        /// Called if the saga operation throws an exception, allowing transactions to be rolled back, etc.
-        /// </summary>
-        /// <param name="exception"></param>
-        /// <returns></returns>
-        Task Faulted(Exception exception);
     }
 
 
-    public interface SagaRepositoryContext<TSaga>
+    public interface SagaRepositoryContext<TSaga> :
+        PipeContext
         where TSaga : class, ISaga
     {
         /// <summary>
         /// Query saga instances
         /// </summary>
         /// <param name="query"></param>
-        /// <typeparam name="T">The message type</typeparam>
         /// <returns></returns>
-        Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query);
+        Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Load an existing saga instance
@@ -62,12 +58,5 @@ namespace MassTransit.Saga
         /// <param name="correlationId"></param>
         /// <returns>The saga, if found, or null</returns>
         Task<TSaga> Load(Guid correlationId);
-
-        /// <summary>
-        /// Called if the saga operation throws an exception, allowing transactions to be rolled back, etc.
-        /// </summary>
-        /// <param name="exception"></param>
-        /// <returns></returns>
-        Task Faulted(Exception exception);
     }
 }

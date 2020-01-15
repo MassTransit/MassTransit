@@ -24,5 +24,9 @@ namespace MassTransit
 
         void RegisterInstance<T>(T instance)
             where T : class;
+
+        void RegisterScoped<T, TImplementation>()
+            where T : class
+            where TImplementation : class, T;
     }
 }

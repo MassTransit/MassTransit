@@ -9,7 +9,7 @@ namespace MassTransit.Saga.InMemoryRepository
         ISagaConsumeContextFactory<IndexedSagaDictionary<TSaga>, TSaga>
         where TSaga : class, ISaga
     {
-        public async Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(IndexedSagaDictionary<TSaga> sagas, ConsumeContext<T> consumeContext,
+        public async Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(IndexedSagaDictionary<TSaga> session, ConsumeContext<T> consumeContext,
             TSaga instance, SagaConsumeContextMode mode)
             where T : class
         {
@@ -22,11 +22,11 @@ namespace MassTransit.Saga.InMemoryRepository
 
                     await sagaInstance.MarkInUse(consumeContext.CancellationToken).ConfigureAwait(false);
 
-                    sagas.Add(sagaInstance);
+                    session.Add(sagaInstance);
                     break;
 
                 case SagaConsumeContextMode.Load:
-                    sagaInstance = sagas[instance.CorrelationId];
+                    sagaInstance = session[instance.CorrelationId];
 
                     await sagaInstance.MarkInUse(consumeContext.CancellationToken).ConfigureAwait(false);
 
@@ -36,7 +36,7 @@ namespace MassTransit.Saga.InMemoryRepository
                     throw new ArgumentOutOfRangeException(nameof(mode));
             }
 
-            return new InMemorySagaConsumeContext<TSaga, T>(consumeContext, sagaInstance, sagas);
+            return new InMemorySagaConsumeContext<TSaga, T>(consumeContext, sagaInstance, session);
         }
     }
 }

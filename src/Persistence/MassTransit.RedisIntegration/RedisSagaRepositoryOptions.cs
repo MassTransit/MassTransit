@@ -1,4 +1,4 @@
-namespace MassTransit.RedisIntegration.Contexts
+namespace MassTransit.RedisIntegration
 {
     using System;
     using GreenPipes;
@@ -8,9 +8,10 @@ namespace MassTransit.RedisIntegration.Contexts
     public class RedisSagaRepositoryOptions<TSaga>
         where TSaga : class, ISaga
     {
-        public RedisSagaRepositoryOptions(bool optimistic, TimeSpan? lockTimeout, string lockSuffix, string keyPrefix)
+        public RedisSagaRepositoryOptions(ConcurrencyMode concurrencyMode, TimeSpan? lockTimeout, string lockSuffix, string keyPrefix)
         {
-            Optimistic = optimistic;
+            ConcurrencyMode = concurrencyMode;
+
             LockTimeout = lockTimeout ?? TimeSpan.FromSeconds(30);
 
             LockSuffix = string.IsNullOrEmpty(lockSuffix) ? "_lock" : lockSuffix;
@@ -25,7 +26,7 @@ namespace MassTransit.RedisIntegration.Contexts
         public string KeyPrefix { get; }
         public TimeSpan LockTimeout { get; }
         public string LockSuffix { get; }
-        public bool Optimistic { get; }
+        public ConcurrencyMode ConcurrencyMode { get; }
 
         public string FormatSagaKey(Guid correlationId)
         {

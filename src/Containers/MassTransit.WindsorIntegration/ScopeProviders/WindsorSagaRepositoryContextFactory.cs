@@ -9,7 +9,6 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
     using Context;
     using GreenPipes;
     using Saga;
-    using Scoping.SagaContexts;
 
 
     public class WindsorSagaRepositoryContextFactory<TSaga> :
@@ -17,13 +16,10 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
         where TSaga : class, ISaga
     {
         readonly IKernel _kernel;
-        readonly IStateMachineActivityFactory _factory;
 
         public WindsorSagaRepositoryContextFactory(IKernel kernel)
         {
             _kernel = kernel;
-
-            _factory = new WindsorStateMachineActivityFactory();
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -31,64 +27,51 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             context.Add("provider", "windsor");
         }
 
-        public Task<SagaRepositoryContext<TSaga, T>> CreateContext<T>(ConsumeContext<T> context, Guid? correlationId)
+        public Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class
         {
             if (context.TryGetPayload<IKernel>(out var existingKernel))
             {
                 existingKernel.UpdateScope(context);
 
-                context.GetOrAddPayload(() => existingKernel.TryResolve<IStateMachineActivityFactory>() ?? _factory);
+                context.GetOrAddPayload(() => existingKernel.TryResolve<IStateMachineActivityFactory>() ?? WindsorStateMachineActivityFactory.Instance);
 
                 var factory = existingKernel.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 
-                return factory.CreateContext(context, correlationId);
+                return factory.Send(context, next);
             }
 
             var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
 
-            async Task<SagaRepositoryContext<TSaga, T>> CreateMessageScope()
+            async Task CreateMessageScope()
             {
                 try
                 {
-                    var activityFactory = _kernel.TryResolve<IStateMachineActivityFactory>() ?? _factory;
+                    var activityFactory = _kernel.TryResolve<IStateMachineActivityFactory>() ?? WindsorStateMachineActivityFactory.Instance;
 
                     var consumeContextScope = new ConsumeContextScope<T>(context, _kernel, activityFactory);
 
                     var factory = _kernel.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 
-                    SagaRepositoryContext<TSaga, T> repositoryContext = await factory.CreateContext(consumeContextScope, correlationId).ConfigureAwait(false);
-
-                    return new ScopeRepositoryContext<TSaga, T>(repositoryContext, scope);
+                    await factory.Send(consumeContextScope, next).ConfigureAwait(false);
                 }
-                catch
+                finally
                 {
-                    scope?.Dispose();
-
-                    throw;
+                    scope.Dispose();
                 }
             }
 
             return CreateMessageScope();
         }
 
-        public async Task<SagaRepositoryContext<TSaga>> CreateContext(CancellationToken cancellationToken = default, Guid? correlationId = default)
+        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+            where T : class
         {
-            var scope = _kernel.BeginScope();
-            try
-            {
-                var factory = _kernel.Resolve<ISagaRepositoryContextFactory<TSaga>>();
+            using var scope = _kernel.BeginScope();
 
-                SagaRepositoryContext<TSaga> repositoryContext = await factory.CreateContext(cancellationToken, correlationId).ConfigureAwait(false);
+            var factory = _kernel.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 
-                return new ScopeRepositoryContext<TSaga>(repositoryContext, scope);
-            }
-            catch
-            {
-                scope.Dispose();
-
-                throw;
-            }
+            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
         }
     }
 }

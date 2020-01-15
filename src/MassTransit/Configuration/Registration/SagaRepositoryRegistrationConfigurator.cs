@@ -34,5 +34,11 @@ namespace MassTransit.Registration
         {
             _registrar.RegisterInstance(instance);
         }
+
+        public void RegisterScoped<T, TImplementation>()
+            where T : class
+            where TImplementation : class, T
+        {
+        }
     }
 }

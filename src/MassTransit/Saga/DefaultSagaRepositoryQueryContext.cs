@@ -3,10 +3,14 @@ namespace MassTransit.Saga
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Context;
+    using GreenPipes;
 
 
     public class DefaultSagaRepositoryQueryContext<TSaga, T> :
+        ConsumeContextProxy<T>,
         SagaRepositoryQueryContext<TSaga, T>
         where TSaga : class, ISaga
         where T : class
@@ -15,6 +19,7 @@ namespace MassTransit.Saga
         readonly IList<Guid> _results;
 
         public DefaultSagaRepositoryQueryContext(SagaRepositoryContext<TSaga, T> context, IList<Guid> results)
+            : base(context)
         {
             _context = context;
             _results = results;
@@ -42,11 +47,6 @@ namespace MassTransit.Saga
             return _context.Query(query);
         }
 
-        public Task Faulted(Exception exception)
-        {
-            return _context.Faulted(exception);
-        }
-
         public IEnumerator<Guid> GetEnumerator()
         {
             return _results.GetEnumerator();
@@ -60,6 +60,7 @@ namespace MassTransit.Saga
 
 
     public class DefaultSagaRepositoryQueryContext<TSaga> :
+        ProxyPipeContext,
         SagaRepositoryQueryContext<TSaga>
         where TSaga : class, ISaga
     {
@@ -67,6 +68,7 @@ namespace MassTransit.Saga
         readonly IList<Guid> _results;
 
         public DefaultSagaRepositoryQueryContext(SagaRepositoryContext<TSaga> context, IList<Guid> results)
+            : base(context)
         {
             _context = context;
             _results = results;
@@ -74,19 +76,14 @@ namespace MassTransit.Saga
 
         public int Count => _results.Count;
 
-        public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query)
+        public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
-            return _context.Query(query);
+            return _context.Query(query, cancellationToken);
         }
 
         public Task<TSaga> Load(Guid correlationId)
         {
             return _context.Load(correlationId);
-        }
-
-        public Task Faulted(Exception exception)
-        {
-            return _context.Faulted(exception);
         }
 
         public IEnumerator<Guid> GetEnumerator()

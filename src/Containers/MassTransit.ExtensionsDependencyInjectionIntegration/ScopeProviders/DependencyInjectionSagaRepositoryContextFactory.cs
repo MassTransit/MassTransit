@@ -8,7 +8,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Saga;
-    using Scoping.SagaContexts;
 
 
     public class DependencyInjectionSagaRepositoryContextFactory<TSaga> :
@@ -27,74 +26,53 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             context.Add("provider", "dependencyInjection");
         }
 
-        public Task<SagaRepositoryContext<TSaga, T>> CreateContext<T>(ConsumeContext<T> context, Guid? correlationId)
+        public Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class
         {
             if (!context.TryGetPayload(out IServiceProvider serviceProvider))
                 serviceProvider = _serviceProvider;
 
-            if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
+            if (context.TryGetPayload<IServiceScope>(out var existingScope))
             {
-                existingServiceScope.UpdateScope(context);
+                existingScope.UpdateScope(context);
 
-                context.GetOrAddPayload(() => existingServiceScope.ServiceProvider.GetService<IStateMachineActivityFactory>()
-                    ?? new DependencyInjectionStateMachineActivityFactory());
+                context.GetOrAddPayload(() => existingScope.ServiceProvider.GetService<IStateMachineActivityFactory>()
+                    ?? DependencyInjectionStateMachineActivityFactory.Instance);
 
-                var factory = existingServiceScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
+                var factory = existingScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 
-                return factory.CreateContext(context, correlationId);
+                return factory.Send(context, next);
             }
 
-            async Task<SagaRepositoryContext<TSaga, T>> CreateScope()
+            async Task CreateScope()
             {
-                var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-                try
-                {
-                    serviceScope.UpdateScope(context);
+                using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
-                    var scopeServiceProvider = serviceScope.ServiceProvider;
+                serviceScope.UpdateScope(context);
 
-                    var factory = scopeServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
+                var scopeServiceProvider = serviceScope.ServiceProvider;
 
-                    var activityFactory = scopeServiceProvider.GetService<IStateMachineActivityFactory>()
-                        ?? new DependencyInjectionStateMachineActivityFactory();
+                var activityFactory = scopeServiceProvider.GetService<IStateMachineActivityFactory>()
+                    ?? DependencyInjectionStateMachineActivityFactory.Instance;
 
-                    var consumeContextScope = new ConsumeContextScope<T>(context, serviceScope, scopeServiceProvider, activityFactory);
+                var consumeContextScope = new ConsumeContextScope<T>(context, serviceScope, scopeServiceProvider, activityFactory);
 
-                    SagaRepositoryContext<TSaga, T> repositoryContext = await factory.CreateContext(consumeContextScope, correlationId).ConfigureAwait(false);
+                var factory = scopeServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 
-                    return new ScopeRepositoryContext<TSaga, T>(repositoryContext, serviceScope);
-                }
-                catch
-                {
-                    serviceScope.Dispose();
-
-                    throw;
-                }
+                await factory.Send(consumeContextScope, next).ConfigureAwait(false);
             }
 
             return CreateScope();
         }
 
-        public async Task<SagaRepositoryContext<TSaga>> CreateContext(CancellationToken cancellationToken = default, Guid? correlationId = default)
+        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+            where T : class
         {
-            var factory = _serviceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
+            using var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
-            var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-            try
-            {
-                SagaRepositoryContext<TSaga> repositoryContext = await factory.CreateContext(cancellationToken, correlationId).ConfigureAwait(false);
+            var factory = serviceScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 
-                var scopeRepositoryContext = new ScopeRepositoryContext<TSaga>(repositoryContext, serviceScope);
-
-                return scopeRepositoryContext;
-            }
-            catch
-            {
-                serviceScope.Dispose();
-
-                throw;
-            }
+            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
         }
     }
 }

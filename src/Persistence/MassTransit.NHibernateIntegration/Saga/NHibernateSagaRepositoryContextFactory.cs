@@ -4,6 +4,7 @@ namespace MassTransit.NHibernateIntegration.Saga
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
     using MassTransit.Saga;
     using NHibernate;
@@ -13,45 +14,66 @@ namespace MassTransit.NHibernateIntegration.Saga
         ISagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
-        readonly ISagaConsumeContextFactory<NHibernateContext, TSaga> _factory;
+        readonly ISagaConsumeContextFactory<ISession, TSaga> _factory;
         readonly ISessionFactory _sessionFactory;
 
-        public NHibernateSagaRepositoryContextFactory(ISessionFactory sessionFactory, ISagaConsumeContextFactory<NHibernateContext, TSaga> factory)
+        public NHibernateSagaRepositoryContextFactory(ISessionFactory sessionFactory, ISagaConsumeContextFactory<ISession, TSaga> factory)
         {
             _sessionFactory = sessionFactory;
             _factory = factory;
         }
 
-        public async Task<SagaRepositoryContext<TSaga, T>> CreateContext<T>(ConsumeContext<T> context, Guid? correlationId = default)
+        public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
+            where T : class
+        {
+            var session = _sessionFactory.OpenSession();
+
+            ITransaction transaction = null;
+            try
+            {
+                transaction = session.BeginTransaction();
+
+                var sagaRepositoryContext = new NHibernateSagaRepositoryContext<TSaga, T>(session, context, _factory);
+
+                await next.Send(sagaRepositoryContext).ConfigureAwait(false);
+
+                await transaction.CommitAsync(sagaRepositoryContext.CancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                if (transaction.IsActive)
+                    try
+                    {
+                        await transaction.RollbackAsync(context.CancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception rollbackException)
+                    {
+                        LogContext.Warning?.Log(rollbackException, "Failed to rollback transaction");
+                    }
+
+                throw;
+            }
+            finally
+            {
+                transaction?.Dispose();
+
+                session.Dispose();
+            }
+        }
+
+        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
             var session = _sessionFactory.OpenSession();
             try
             {
-                var transaction = session.BeginTransaction();
+                var sagaRepositoryContext = new NHibernateSagaRepositoryContext<TSaga>(session, cancellationToken);
 
-                return new NHibernateSagaRepositoryContext<TSaga, T>(new Context(session, transaction), context, _factory);
+                return await asyncMethod(sagaRepositoryContext).ConfigureAwait(false);
             }
-            catch (Exception)
+            finally
             {
                 session.Dispose();
-
-                throw;
-            }
-        }
-
-        public async Task<SagaRepositoryContext<TSaga>> CreateContext(CancellationToken cancellationToken = default, Guid? correlationId = default)
-        {
-            var session = _sessionFactory.OpenSession();
-            try
-            {
-                return new NHibernateSagaRepositoryContext<TSaga>(new Context(session, default));
-            }
-            catch (Exception)
-            {
-                session.Dispose();
-
-                throw;
             }
         }
 
@@ -59,20 +81,6 @@ namespace MassTransit.NHibernateIntegration.Saga
         {
             context.Add("persistence", "nhibernate");
             context.Add("entities", _sessionFactory.GetAllClassMetadata().Select(x => x.Value.EntityName).ToArray());
-        }
-
-
-        class Context :
-            NHibernateContext
-        {
-            public Context(ISession session, ITransaction transaction)
-            {
-                Session = session;
-                Transaction = transaction;
-            }
-
-            public ISession Session { get; }
-            public ITransaction Transaction { get; }
         }
     }
 }

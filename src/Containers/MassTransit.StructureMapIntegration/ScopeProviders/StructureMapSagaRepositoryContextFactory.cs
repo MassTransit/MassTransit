@@ -7,7 +7,6 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
     using Context;
     using GreenPipes;
     using Saga;
-    using Scoping.SagaContexts;
     using StructureMap;
 
 
@@ -33,68 +32,46 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             context.Add("provider", "structuremap");
         }
 
-        public Task<SagaRepositoryContext<TSaga, T>> CreateContext<T>(ConsumeContext<T> context, Guid? correlationId)
+        public Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class
         {
-            if (context.TryGetPayload<IContainer>(out var existingNestedContainer))
+            if (context.TryGetPayload<IContainer>(out var existingContainer))
             {
-                existingNestedContainer.Inject(context);
-                existingNestedContainer.Inject<ConsumeContext>(context);
+                existingContainer.Inject<ConsumeContext>(context);
 
-                context.GetOrAddPayload(() => existingNestedContainer.TryGetInstance<IStateMachineActivityFactory>()
-                    ?? new StructureMapStateMachineActivityFactory());
+                context.GetOrAddPayload(() => existingContainer.TryGetInstance<IStateMachineActivityFactory>()
+                    ?? StructureMapStateMachineActivityFactory.Instance);
 
-                var factory = existingNestedContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
+                var factory = existingContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 
-                return factory.CreateContext(context, correlationId);
+                return factory.Send(context, next);
             }
 
-            async Task<SagaRepositoryContext<TSaga, T>> CreateNestedContainer()
+            async Task CreateNestedContainer()
             {
-                var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
-                try
-                {
-                    var factory = nestedContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
+                using var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
 
-                    var activityFactory = nestedContainer.TryGetInstance<IStateMachineActivityFactory>()
-                        ?? new StructureMapStateMachineActivityFactory();
+                var activityFactory = nestedContainer.TryGetInstance<IStateMachineActivityFactory>()
+                    ?? new StructureMapStateMachineActivityFactory();
 
-                    var consumeContextScope = new ConsumeContextScope<T>(context, nestedContainer, activityFactory);
+                var consumeContextScope = new ConsumeContextScope<T>(context, nestedContainer, activityFactory);
 
-                    SagaRepositoryContext<TSaga, T> repositoryContext = await factory.CreateContext(consumeContextScope, correlationId).ConfigureAwait(false);
+                var factory = nestedContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 
-                    return new ScopeRepositoryContext<TSaga, T>(repositoryContext, nestedContainer);
-                }
-                catch
-                {
-                    nestedContainer.Dispose();
-
-                    throw;
-                }
+                await factory.Send(consumeContextScope, next).ConfigureAwait(false);
             }
 
             return CreateNestedContainer();
         }
 
-        public async Task<SagaRepositoryContext<TSaga>> CreateContext(CancellationToken cancellationToken = default, Guid? correlationId = default)
+        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+            where T : class
         {
             var nestedContainer = _container?.GetNestedContainer() ?? _context?.GetInstance<IContainer>().GetNestedContainer();
-            try
-            {
-                var factory = nestedContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 
-                SagaRepositoryContext<TSaga> repositoryContext = await factory.CreateContext(cancellationToken, correlationId).ConfigureAwait(false);
+            var factory = nestedContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 
-                var scopeRepositoryContext = new ScopeRepositoryContext<TSaga>(repositoryContext, nestedContainer);
-
-                return scopeRepositoryContext;
-            }
-            catch
-            {
-                nestedContainer.Dispose();
-
-                throw;
-            }
+            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
         }
     }
 }

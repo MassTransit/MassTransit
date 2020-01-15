@@ -8,7 +8,6 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
     using Context;
     using GreenPipes;
     using Saga;
-    using Scoping.SagaContexts;
 
 
     public class AutofacSagaRepositoryContextFactory<TSaga> :
@@ -44,65 +43,44 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
             context.Add("scopeTag", _name);
         }
 
-        public Task<SagaRepositoryContext<TSaga, T>> CreateContext<T>(ConsumeContext<T> context, Guid? correlationId)
+        public Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class
         {
             if (context.TryGetPayload<ILifetimeScope>(out var existingScope))
             {
-                context.GetOrAddPayload(() => existingScope.ResolveOptional<IStateMachineActivityFactory>() ?? new AutofacStateMachineActivityFactory());
+                context.GetOrAddPayload(() => existingScope.ResolveOptional<IStateMachineActivityFactory>() ?? AutofacStateMachineActivityFactory.Instance);
 
                 var factory = existingScope.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 
-                return factory.CreateContext(context, correlationId);
+                return factory.Send(context, next);
             }
 
             var parentLifetimeScope = _scopeProvider.GetLifetimeScope(context);
 
-            async Task<SagaRepositoryContext<TSaga, T>> CreateScope()
+            async Task CreateScope()
             {
-                var scope = parentLifetimeScope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context));
-                try
-                {
-                    var activityFactory = scope.ResolveOptional<IStateMachineActivityFactory>() ?? new AutofacStateMachineActivityFactory();
+                using var scope = parentLifetimeScope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context));
 
-                    var consumeContextScope = new ConsumeContextScope<T>(context, scope, activityFactory);
+                var activityFactory = scope.ResolveOptional<IStateMachineActivityFactory>() ?? AutofacStateMachineActivityFactory.Instance;
 
-                    var factory = scope.Resolve<ISagaRepositoryContextFactory<TSaga>>();
+                var consumeContextScope = new ConsumeContextScope<T>(context, scope, activityFactory);
 
-                    SagaRepositoryContext<TSaga, T> repositoryContext = await factory.CreateContext(consumeContextScope, correlationId).ConfigureAwait(false);
+                var factory = scope.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 
-                    return new ScopeRepositoryContext<TSaga, T>(repositoryContext, scope);
-                }
-                catch
-                {
-                    scope.Dispose();
-
-                    throw;
-                }
+                await factory.Send(consumeContextScope, next).ConfigureAwait(false);
             }
 
             return CreateScope();
         }
 
-        public async Task<SagaRepositoryContext<TSaga>> CreateContext(CancellationToken cancellationToken = default, Guid? correlationId = default)
+        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+            where T : class
         {
-            var factory = _scopeProvider.LifetimeScope.Resolve<ISagaRepositoryContextFactory<TSaga>>();
+            using var scope = _scopeProvider.LifetimeScope.BeginLifetimeScope(_name);
 
-            var scope = _scopeProvider.LifetimeScope.BeginLifetimeScope(_name);
-            try
-            {
-                SagaRepositoryContext<TSaga> repositoryContext = await factory.CreateContext(cancellationToken, correlationId).ConfigureAwait(false);
+            var factory = scope.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 
-                var scopeRepositoryContext = new ScopeRepositoryContext<TSaga>(repositoryContext, scope);
-
-                return scopeRepositoryContext;
-            }
-            catch
-            {
-                scope.Dispose();
-
-                throw;
-            }
+            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -1,35 +1,33 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
-    using System;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
 
 
-    public class DelegateSagaDbContextFactory<TSaga> :
+    public class ContainerSagaDbContextFactory<TSaga> :
         ISagaDbContextFactory<TSaga>
         where TSaga : class, ISaga
     {
-        readonly Func<DbContext> _dbContextFactory;
+        readonly DbContext _dbContext;
 
-        public DelegateSagaDbContextFactory(Func<DbContext> dbContextFactory)
+        public ContainerSagaDbContextFactory(DbContext dbContext)
         {
-            _dbContextFactory = dbContextFactory;
+            _dbContext = dbContext;
         }
 
         public DbContext Create()
         {
-            return _dbContextFactory();
+            return _dbContext;
         }
 
         public DbContext CreateScoped<T>(ConsumeContext<T> context)
             where T : class
         {
-            return _dbContextFactory();
+            return _dbContext;
         }
 
         public void Release(DbContext dbContext)
         {
-            dbContext.Dispose();
         }
     }
 }

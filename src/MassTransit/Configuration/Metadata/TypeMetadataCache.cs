@@ -99,7 +99,8 @@
 
             return interfaces.Any(t => t.HasInterface(typeof(IExecuteActivity<>))
                 || t.HasInterface(typeof(ICompensateActivity<>))
-                || t.HasInterface(typeof(IActivityDefinition<,,>)));
+                || t.HasInterface(typeof(IActivityDefinition<,,>))
+                || t.HasInterface(typeof(IExecuteActivityDefinition<,>)));
         }
 
         public static bool HasSagaInterfaces(Type type)

@@ -3,23 +3,25 @@ namespace MassTransit.RedisIntegration.Contexts
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
-    using GreenPipes.Util;
     using Saga;
 
 
-    public class RedisSagaRepositoryContext<TSaga, T> :
-        SagaRepositoryContext<TSaga, T>,
+    public class RedisSagaRepositoryContext<TSaga, TMessage> :
+        ConsumeContextScope<TMessage>,
+        SagaRepositoryContext<TSaga, TMessage>,
         IAsyncDisposable
         where TSaga : class, IVersionedSaga
-        where T : class
+        where TMessage : class
     {
         readonly DatabaseContext<TSaga> _context;
-        readonly ConsumeContext<T> _consumeContext;
+        readonly ConsumeContext<TMessage> _consumeContext;
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;
 
-        public RedisSagaRepositoryContext(DatabaseContext<TSaga> context, ConsumeContext<T> consumeContext,
+        public RedisSagaRepositoryContext(DatabaseContext<TSaga> context, ConsumeContext<TMessage> consumeContext,
             ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory)
+            : base(consumeContext)
         {
             _context = context;
             _consumeContext = consumeContext;
@@ -33,58 +35,55 @@ namespace MassTransit.RedisIntegration.Contexts
             return _context.DisposeAsync(cancellationToken);
         }
 
-        public Task<SagaConsumeContext<TSaga, T>> Add(TSaga instance)
+        public Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
         {
-            return _factory.CreateSagaConsumeContext(_context,_consumeContext, instance, SagaConsumeContextMode.Add);
+            return _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Add);
         }
 
-        public async Task<SagaConsumeContext<TSaga, T>> Insert(TSaga instance)
+        public async Task<SagaConsumeContext<TSaga, TMessage>> Insert(TSaga instance)
         {
             try
             {
-                await _context.Insert<T>(instance).ConfigureAwait(false);
+                await _context.Insert<TMessage>(instance).ConfigureAwait(false);
 
-                _consumeContext.LogInsert<TSaga, T>(instance.CorrelationId);
+                _consumeContext.LogInsert<TSaga, TMessage>(instance.CorrelationId);
 
                 return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Insert).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _consumeContext.LogInsertFault<TSaga, T>(ex, instance.CorrelationId);
+                _consumeContext.LogInsertFault<TSaga, TMessage>(ex, instance.CorrelationId);
 
                 return default;
             }
         }
 
-        public async Task<SagaConsumeContext<TSaga, T>> Load(Guid correlationId)
+        public async Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
         {
-            var instance = await _context.Load<T>(correlationId).ConfigureAwait(false);
+            var instance = await _context.Load<TMessage>(correlationId).ConfigureAwait(false);
             if (instance == null)
                 return default;
 
             return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
         }
 
-        public Task<SagaRepositoryQueryContext<TSaga, T>> Query(ISagaQuery<TSaga> query)
+        public Task<SagaRepositoryQueryContext<TSaga, TMessage>> Query(ISagaQuery<TSaga> query)
         {
             throw new NotImplementedByDesignException("Redis saga repository does not support queries");
-        }
-
-        public Task Faulted(Exception exception)
-        {
-            return TaskUtil.Completed;
         }
     }
 
 
     public class RedisSagaRepositoryContext<TSaga> :
+        BasePipeContext,
         SagaRepositoryContext<TSaga>,
         IAsyncDisposable
         where TSaga : class, IVersionedSaga
     {
         readonly DatabaseContext<TSaga> _context;
 
-        public RedisSagaRepositoryContext(DatabaseContext<TSaga> context)
+        public RedisSagaRepositoryContext(DatabaseContext<TSaga> context, CancellationToken cancellationToken)
+            : base(cancellationToken)
         {
             _context = context;
         }
@@ -96,7 +95,7 @@ namespace MassTransit.RedisIntegration.Contexts
             return _context.DisposeAsync(cancellationToken);
         }
 
-        public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query)
+        public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
             throw new NotImplementedByDesignException("Redis saga repository does not support queries");
         }
@@ -104,11 +103,6 @@ namespace MassTransit.RedisIntegration.Contexts
         public Task<TSaga> Load(Guid correlationId)
         {
             return _context.Load<TSaga>(correlationId);
-        }
-
-        public Task Faulted(Exception exception)
-        {
-            return TaskUtil.Completed;
         }
     }
 }

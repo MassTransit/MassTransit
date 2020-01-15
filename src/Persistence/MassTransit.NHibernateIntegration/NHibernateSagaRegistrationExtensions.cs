@@ -1,5 +1,6 @@
 namespace MassTransit
 {
+    using NHibernate;
     using Saga;
     using NHibernateIntegration.Saga;
 
@@ -16,7 +17,7 @@ namespace MassTransit
             where T : class, ISaga
         {
             configurator.Repository(x =>
-                x.RegisterComponents<NHibernateContext, NHibernateSagaConsumeContextFactory<T>, NHibernateSagaRepositoryContextFactory<T>>());
+                x.RegisterComponents<ISession, NHibernateSagaConsumeContextFactory<T>, NHibernateSagaRepositoryContextFactory<T>>());
 
             return configurator;
         }

@@ -36,31 +36,6 @@ namespace MassTransit.RedisIntegration.Contexts
             _options = options;
         }
 
-        public async Task<SagaRepositoryContext<TSaga, T>> CreateContext<T>(ConsumeContext<T> context, Guid? correlationId = default)
-            where T : class
-        {
-            var database = _databaseFactory();
-
-            var databaseContext = new RedisDatabaseContext<TSaga>(database, _options);
-
-            if (correlationId.HasValue && !_options.Optimistic)
-                await databaseContext.Lock(correlationId.Value, context.CancellationToken).ConfigureAwait(false);
-
-            return new RedisSagaRepositoryContext<TSaga, T>(databaseContext, context, _factory);
-        }
-
-        public async Task<SagaRepositoryContext<TSaga>> CreateContext(CancellationToken cancellationToken = default, Guid? correlationId = default)
-        {
-            var database = _databaseFactory();
-
-            var context = new RedisDatabaseContext<TSaga>(database, _options);
-
-            if (correlationId.HasValue && !_options.Optimistic)
-                await context.Lock(correlationId.Value, cancellationToken).ConfigureAwait(false);
-
-            return new RedisSagaRepositoryContext<TSaga>(context);
-        }
-
         public void Probe(ProbeContext context)
         {
             context.Add("persistence", "redis");
@@ -69,6 +44,45 @@ namespace MassTransit.RedisIntegration.Contexts
         IDatabase GetDatabase()
         {
             return _multiplexer.GetDatabase();
+        }
+
+        public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
+            where T : class
+        {
+            var database = _databaseFactory();
+
+            var databaseContext = new RedisDatabaseContext<TSaga>(database, _options);
+            try
+            {
+                if (_options.ConcurrencyMode == ConcurrencyMode.Pessimistic)
+                    await databaseContext.Lock(context.CorrelationId.Value, context.CancellationToken).ConfigureAwait(false);
+
+                var sagaRepositoryContext = new RedisSagaRepositoryContext<TSaga, T>(databaseContext, context, _factory);
+
+                await next.Send(sagaRepositoryContext).ConfigureAwait(false);
+            }
+            finally
+            {
+                await databaseContext.DisposeAsync().ConfigureAwait(false);
+            }
+        }
+
+        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            var database = _databaseFactory();
+
+            var databaseContext = new RedisDatabaseContext<TSaga>(database, _options);
+            try
+            {
+                var sagaRepositoryContext = new RedisSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);
+
+                return await asyncMethod(sagaRepositoryContext).ConfigureAwait(false);
+            }
+            finally
+            {
+                await databaseContext.DisposeAsync(CancellationToken.None).ConfigureAwait(false);
+            }
         }
     }
 }

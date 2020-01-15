@@ -4,13 +4,15 @@
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
-    using Saga;
     using Metadata;
+    using Saga;
     using StackExchange.Redis;
+    using Util;
 
 
     public class RedisSagaRepository<TSaga> :
         ISagaRepository<TSaga>,
+        ILoadSagaRepository<TSaga>,
         IRetrieveSagaFromRepository<TSaga>
         where TSaga : class, IVersionedSaga
     {
@@ -20,7 +22,8 @@
         public RedisSagaRepository(Func<IDatabase> redisDbFactory, bool optimistic = true, TimeSpan? lockTimeout = null, TimeSpan? lockRetryTimeout = null,
             string keyPrefix = "")
         {
-            var options = new RedisSagaRepositoryOptions<TSaga>(optimistic, lockTimeout, null, keyPrefix);
+            var options = new RedisSagaRepositoryOptions<TSaga>(optimistic ? ConcurrencyMode.Optimistic : ConcurrencyMode.Pessimistic, lockTimeout, null,
+                keyPrefix);
 
             var consumeContextFactory = new RedisSagaConsumeContextFactory<TSaga>();
 
@@ -29,28 +32,27 @@
             _repository = new SagaRepository<TSaga>(_repositoryContextFactory);
         }
 
-        public async Task<TSaga> GetSaga(Guid correlationId)
+        public Task<TSaga> Load(Guid correlationId)
         {
-            SagaRepositoryContext<TSaga> repositoryContext = await _repositoryContextFactory.CreateContext().ConfigureAwait(false);
-            try
+            return _repositoryContextFactory.Execute(context =>
             {
-                if (repositoryContext is RedisSagaRepositoryContext<TSaga> context && context.Context is RedisDatabaseContext<TSaga> databaseContext)
-                    return await databaseContext.Get(correlationId).ConfigureAwait(false);
-            }
-            finally
-            {
-                switch (repositoryContext)
-                {
-                    case IAsyncDisposable asyncDisposable:
-                        await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                        break;
-                    case IDisposable disposable:
-                        disposable.Dispose();
-                        break;
-                }
-            }
+                if (context is RedisSagaRepositoryContext<TSaga> redisSagaRepositoryContext
+                    && redisSagaRepositoryContext.Context is RedisDatabaseContext<TSaga> databaseContext)
+                    return databaseContext.Get(correlationId);
 
-            throw new NotSupportedException($"{nameof(GetSaga)} is not supported for {TypeMetadataCache<TSaga>.ShortName}");
+                return TaskUtil.Faulted<TSaga>(new NotSupportedException(
+                    $"{nameof(GetSaga)} is not supported for {TypeMetadataCache<TSaga>.ShortName}"));
+            });
+        }
+
+        public Task<TSaga> GetSaga(Guid correlationId)
+        {
+            return Load(correlationId);
+        }
+
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            _repository.Probe(context);
         }
 
         Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy,
@@ -63,11 +65,6 @@
             IPipe<SagaConsumeContext<TSaga, T>> next)
         {
             return _repository.SendQuery(context, policy, next);
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            _repository.Probe(context);
         }
     }
 }

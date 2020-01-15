@@ -15,20 +15,23 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
     {
         /// <summary>
-        /// Create a <see cref="SagaRepositoryContext{T}"/>
+        /// Create a <see cref="SagaRepositoryContext{TSaga,T}"/> and send it to the next pipe.
         /// </summary>
-        /// <param name="context">The <see cref="ConsumeContext{T}"/> to scope</param>
-        /// <param name="correlationId">The correlationId of the saga, which may be locked by the factory</param>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        Task<SagaRepositoryContext<TSaga, T>> CreateContext<T>(ConsumeContext<T> context, Guid? correlationId = default)
+        Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class;
 
         /// <summary>
-        /// Create a <see cref="SagaRepositoryContext{T}"/>
+        /// Create a <see cref="SagaRepositoryContext{TSaga}"/> and send it to the next pipe.
         /// </summary>
+        /// <param name="asyncMethod"></param>
         /// <param name="cancellationToken"></param>
-        /// <param name="correlationId"></param>
+        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        Task<SagaRepositoryContext<TSaga>> CreateContext(CancellationToken cancellationToken = default, Guid? correlationId = default);
+        Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class;
     }
 }
