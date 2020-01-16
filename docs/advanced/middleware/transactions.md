@@ -132,3 +132,42 @@ public class MyController : ControllerBase
     }
 }
 ```
+
+Here's an example from within a Console App, with no Container:
+
+```cs
+public class Program
+{
+    public static async Task Main()
+    {
+        var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
+        {
+            sbc.Host("rabbitmq://localhost");
+        });
+
+        await bus.StartAsync(); // This is important!
+
+        var outbox = new TransactionOutbox(bus, bus, new NullLogger()); // Treat this as a singleton, thread safe.
+
+        while(/*some condition*/)
+        {
+            using(var transaction = TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                // Do whatever business logic you need.
+
+                await outbox.Publish(new ReportQueued{...});
+                await outbox.Send(new CalculateReport{...});
+
+                // Maybe other business logic
+
+                transaction.Complete();
+            }
+        }
+
+        Console.WriteLine("Press any key to exit");
+        await Task.Run(() => Console.ReadKey());
+
+        await bus.StopAsync();
+    }
+}
+```
