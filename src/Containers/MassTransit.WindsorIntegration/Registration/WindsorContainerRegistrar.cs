@@ -45,7 +45,7 @@ namespace MassTransit.WindsorIntegration.Registration
         {
         }
 
-        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+        public void RegisterSagaStateMachine<TStateMachine, TInstance>()
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
@@ -73,7 +73,6 @@ namespace MassTransit.WindsorIntegration.Registration
             _container.Register(
                 Component.For<ISagaConsumeContextFactory<TContext, TSaga>, TConsumeContextFactory>().LifestyleScoped(),
                 Component.For<ISagaRepositoryContextFactory<TSaga>, TRepositoryContextFactory>().LifestyleScoped(),
-
                 Component.For<WindsorSagaRepositoryContextFactory<TSaga>>().LifestyleSingleton(),
                 Component.For<ISagaRepository<TSaga>>().UsingFactoryMethod(provider =>
                     new SagaRepository<TSaga>(provider.Resolve<WindsorSagaRepositoryContextFactory<TSaga>>())).LifestyleSingleton()
@@ -170,7 +169,15 @@ namespace MassTransit.WindsorIntegration.Registration
             }));
         }
 
-        public void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        public void Register<T, TImplementation>()
+            where T : class
+            where TImplementation : class, T
+        {
+            if (!_container.Kernel.HasComponent(typeof(T)))
+                _container.Register(Component.For<T>().ImplementedBy<TImplementation>().LifestyleScoped());
+        }
+
+        public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
             if (!_container.Kernel.HasComponent(typeof(T)))
@@ -178,7 +185,7 @@ namespace MassTransit.WindsorIntegration.Registration
                     .LifestyleSingleton());
         }
 
-        public void RegisterInstance<T>(T instance)
+        public void RegisterSingleInstance<T>(T instance)
             where T : class
         {
             if (!_container.Kernel.HasComponent(typeof(T)))

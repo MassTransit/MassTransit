@@ -42,7 +42,7 @@ namespace MassTransit.LamarIntegration.Registration
         {
         }
 
-        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+        public void RegisterSagaStateMachine<TStateMachine, TInstance>()
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
@@ -159,13 +159,20 @@ namespace MassTransit.LamarIntegration.Registration
             }).Scoped();
         }
 
-        public void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        public void Register<T, TImplementation>()
+            where T : class
+            where TImplementation : class, T
+        {
+            _registry.TryAddScoped<T, TImplementation>();
+        }
+
+        public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
             _registry.TryAddSingleton(provider => factoryMethod(provider.GetRequiredService<IConfigurationServiceProvider>()));
         }
 
-        public void RegisterInstance<T>(T instance)
+        public void RegisterSingleInstance<T>(T instance)
             where T : class
         {
             _registry.TryAddSingleton(instance);

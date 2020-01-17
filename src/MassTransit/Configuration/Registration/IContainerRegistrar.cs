@@ -19,7 +19,7 @@ namespace MassTransit.Registration
         void RegisterSaga<T>()
             where T : class, ISaga;
 
-        void RegisterStateMachineSaga<TStateMachine, TInstance>()
+        void RegisterSagaStateMachine<TStateMachine, TInstance>()
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance;
 
@@ -65,10 +65,30 @@ namespace MassTransit.Registration
         void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
             where T : class;
 
-        void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        /// <summary>
+        /// Register a service, implemented by the implementation type, which is created in each
+        /// container scope.
+        /// </summary>
+        /// <typeparam name="T">The interface type</typeparam>
+        /// <typeparam name="TImplementation">The implementation type</typeparam>
+        void Register<T, TImplementation>()
+            where T : class
+            where TImplementation : class, T;
+
+        /// <summary>
+        /// Register a single instance, which is created by the specified factory method
+        /// </summary>
+        /// <param name="factoryMethod">Creates the instance, when it is first accessed by the container</param>
+        /// <typeparam name="T">The interface type</typeparam>
+        void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class;
 
-        void RegisterInstance<T>(T instance)
+        /// <summary>
+        /// Register a single instance, which is specified
+        /// </summary>
+        /// <param name="instance">The service type instance</param>
+        /// <typeparam name="T"></typeparam>
+        void RegisterSingleInstance<T>(T instance)
             where T : class;
     }
 }

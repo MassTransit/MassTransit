@@ -35,7 +35,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         {
         }
 
-        void IContainerRegistrar.RegisterStateMachineSaga<TStateMachine, TInstance>()
+        void IContainerRegistrar.RegisterSagaStateMachine<TStateMachine, TInstance>()
         {
             _collection.TryAddSingleton<IStateMachineActivityFactory, DependencyInjectionStateMachineActivityFactory>();
             _collection.TryAddSingleton<ISagaStateMachineFactory, DependencyInjectionSagaStateMachineFactory>();
@@ -142,12 +142,19 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             });
         }
 
-        void IContainerRegistrar.RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        public void Register<T, TImplementation>()
+            where T : class
+            where TImplementation : class, T
+        {
+            _collection.TryAddScoped<T, TImplementation>();
+        }
+
+        void IContainerRegistrar.RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
         {
             _collection.TryAddSingleton(provider => factoryMethod(provider.GetRequiredService<IConfigurationServiceProvider>()));
         }
 
-        void IContainerRegistrar.RegisterInstance<T>(T instance)
+        void IContainerRegistrar.RegisterSingleInstance<T>(T instance)
         {
             _collection.TryAddSingleton(instance);
         }

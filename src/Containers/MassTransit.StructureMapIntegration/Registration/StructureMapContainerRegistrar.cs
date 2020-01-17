@@ -40,7 +40,7 @@ namespace MassTransit.StructureMapIntegration.Registration
         {
         }
 
-        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+        public void RegisterSagaStateMachine<TStateMachine, TInstance>()
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
@@ -136,13 +136,20 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IRequestClient<T>>().Use(context => CreateRequestClient<T>(destinationAddress, timeout, context));
         }
 
-        public void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        public void Register<T, TImplementation>()
+            where T : class
+            where TImplementation : class, T
+        {
+            _expression.For<T>().Use<TImplementation>();
+        }
+
+        public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
             _expression.For<T>().Use(context => factoryMethod(context.GetInstance<IConfigurationServiceProvider>()));
         }
 
-        public void RegisterInstance<T>(T instance)
+        public void RegisterSingleInstance<T>(T instance)
             where T : class
         {
             _expression.For<T>().Use(instance).Singleton();

@@ -1,6 +1,7 @@
 namespace MassTransit.Registration
 {
     using System;
+    using Definition;
     using Saga;
 
 
@@ -25,20 +26,91 @@ namespace MassTransit.Registration
             _registrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>();
         }
 
-        void ISagaRepositoryRegistrationConfigurator<TSaga>.RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        void IContainerRegistrar.RegisterConsumer<T>()
         {
-            _registrar.RegisterInstance(factoryMethod);
+            _registrar.RegisterConsumer<T>();
         }
 
-        void ISagaRepositoryRegistrationConfigurator<TSaga>.RegisterInstance<T>(T instance)
+        void IContainerRegistrar.RegisterConsumerDefinition<TDefinition, TConsumer>()
         {
-            _registrar.RegisterInstance(instance);
+            _registrar.RegisterConsumerDefinition<TDefinition, TConsumer>();
         }
 
-        public void RegisterScoped<T, TImplementation>()
+        void IContainerRegistrar.RegisterSaga<T>()
+        {
+            _registrar.RegisterSaga<T>();
+        }
+
+        void IContainerRegistrar.RegisterSagaStateMachine<TStateMachine, TInstance>()
+        {
+            _registrar.RegisterSagaStateMachine<TStateMachine, TInstance>();
+        }
+
+        void IContainerRegistrar.RegisterSagaRepository<TSaga1>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga1>> repositoryFactory)
+        {
+            _registrar.RegisterSagaRepository(repositoryFactory);
+        }
+
+        void IContainerRegistrar.RegisterSagaRepository<TSaga1, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
+        {
+            _registrar.RegisterSagaRepository<TSaga1, TContext, TConsumeContextFactory, TRepositoryContextFactory>();
+        }
+
+        void IContainerRegistrar.RegisterSagaDefinition<TDefinition, TSaga1>()
+        {
+            _registrar.RegisterSagaDefinition<TDefinition, TSaga1>();
+        }
+
+        void IContainerRegistrar.RegisterExecuteActivity<TActivity, TArguments>()
+        {
+            _registrar.RegisterExecuteActivity<TActivity, TArguments>();
+        }
+
+        void IContainerRegistrar.RegisterCompensateActivity<TActivity, TLog>()
+        {
+            _registrar.RegisterCompensateActivity<TActivity, TLog>();
+        }
+
+        void IContainerRegistrar.RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>()
+        {
+            _registrar.RegisterActivityDefinition<TDefinition, TActivity, TArguments, TLog>();
+        }
+
+        void IContainerRegistrar.RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>()
+        {
+            _registrar.RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>();
+        }
+
+        void IContainerRegistrar.RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
+        {
+            _registrar.RegisterEndpointDefinition<TDefinition, T>(settings);
+        }
+
+        void IContainerRegistrar.RegisterRequestClient<T>(RequestTimeout timeout)
+        {
+            _registrar.RegisterRequestClient<T>(timeout);
+        }
+
+        void IContainerRegistrar.RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
+        {
+            _registrar.RegisterRequestClient<T>(destinationAddress, timeout);
+        }
+
+        public void Register<T, TImplementation>()
             where T : class
             where TImplementation : class, T
         {
+            _registrar.Register<T, TImplementation>();
+        }
+
+        void IContainerRegistrar.RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        {
+            _registrar.RegisterSingleInstance(factoryMethod);
+        }
+
+        void IContainerRegistrar.RegisterSingleInstance<T>(T instance)
+        {
+            _registrar.RegisterSingleInstance(instance);
         }
     }
 }

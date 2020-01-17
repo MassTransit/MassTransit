@@ -12,7 +12,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         {
             configurator.Repository(r =>
             {
-                r.RegisterScoped<ISagaDbContextFactory<T>, ContainerSagaDbContextFactory<T>>();
+                r.Register<ISagaDbContextFactory<T>, ContainerSagaDbContextFactory<T>>();
 
                 r.RegisterComponents<DbContext, EntityFrameworkSagaConsumeContextFactory<T>, EntityFrameworkSagaRepositoryContextFactory<T>>();
             });

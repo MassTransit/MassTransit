@@ -66,8 +66,8 @@ namespace MassTransit.RedisIntegration.Configuration
         public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
             where T : class, IVersionedSaga
         {
-            configurator.RegisterInstance(_connectionFactory);
-            configurator.RegisterInstance(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix));
+            configurator.RegisterSingleInstance(_connectionFactory);
+            configurator.RegisterSingleInstance(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix));
             configurator.RegisterComponents<DatabaseContext<T>, RedisSagaConsumeContextFactory<T>, RedisSagaRepositoryContextFactory<T>>();
         }
     }

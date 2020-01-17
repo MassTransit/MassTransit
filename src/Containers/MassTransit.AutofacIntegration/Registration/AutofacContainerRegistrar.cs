@@ -40,7 +40,7 @@ namespace MassTransit.AutofacIntegration.Registration
         {
         }
 
-        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+        public void RegisterSagaStateMachine<TStateMachine, TInstance>()
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
@@ -149,13 +149,20 @@ namespace MassTransit.AutofacIntegration.Registration
             });
         }
 
-        public void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        public void Register<T, TImplementation>()
+            where T : class
+            where TImplementation : class, T
+        {
+            _builder.RegisterType<TImplementation>().As<T>().InstancePerLifetimeScope();
+        }
+
+        public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
             _builder.Register(context => factoryMethod(context.Resolve<IConfigurationServiceProvider>()));
         }
 
-        public void RegisterInstance<T>(T instance)
+        public void RegisterSingleInstance<T>(T instance)
             where T : class
         {
             _builder.RegisterInstance(instance);

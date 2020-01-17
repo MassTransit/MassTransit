@@ -5,7 +5,8 @@ namespace MassTransit
     using Saga;
 
 
-    public interface ISagaRepositoryRegistrationConfigurator<TSaga>
+    public interface ISagaRepositoryRegistrationConfigurator<TSaga> :
+        IContainerRegistrar
         where TSaga : class, ISaga
     {
         /// <summary>
@@ -18,15 +19,5 @@ namespace MassTransit
             where TContext : class
             where TConsumeContextFactory : class, ISagaConsumeContextFactory<TContext, TSaga>
             where TRepositoryContextFactory : class, ISagaRepositoryContextFactory<TSaga>;
-
-        void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
-            where T : class;
-
-        void RegisterInstance<T>(T instance)
-            where T : class;
-
-        void RegisterScoped<T, TImplementation>()
-            where T : class
-            where TImplementation : class, T;
     }
 }

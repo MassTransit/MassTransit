@@ -6,7 +6,8 @@
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 
-    class SagaWithDependencyMap : SagaClassMap<SagaWithDependency>
+    class SagaWithDependencyMap :
+        SagaClassMap<SagaWithDependency>
     {
         protected override void Configure(EntityTypeBuilder<SagaWithDependency> entityTypeBuilder, ModelBuilder modelBuilder)
         {

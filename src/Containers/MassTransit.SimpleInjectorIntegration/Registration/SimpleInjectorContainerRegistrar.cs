@@ -43,7 +43,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         {
         }
 
-        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+        public void RegisterSagaStateMachine<TStateMachine, TInstance>()
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
@@ -157,13 +157,20 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             }, _hybridLifestyle);
         }
 
-        public void RegisterInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        public void Register<T, TImplementation>()
+            where T : class
+            where TImplementation : class, T
+        {
+            _container.Register<T, TImplementation>(Lifestyle.Scoped);
+        }
+
+        public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
             _container.Register(() => factoryMethod(_container.GetInstance<IConfigurationServiceProvider>()));
         }
 
-        public void RegisterInstance<T>(T instance)
+        public void RegisterSingleInstance<T>(T instance)
             where T : class
         {
             _container.RegisterInstance(instance);
