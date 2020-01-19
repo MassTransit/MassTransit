@@ -30,6 +30,28 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
         public Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class
         {
+            return Send(context, (consumeContext, factory) => factory.Send(consumeContext, next));
+        }
+
+        public Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
+            where T : class
+        {
+            return Send(context, (consumeContext, factory) => factory.SendQuery(consumeContext, query, next));
+        }
+
+        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+            where T : class
+        {
+            using var scope = _kernel.BeginScope();
+
+            var factory = _kernel.Resolve<ISagaRepositoryContextFactory<TSaga>>();
+
+            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
+        }
+
+        Task Send<T>(ConsumeContext<T> context, Func<ConsumeContext<T>, ISagaRepositoryContextFactory<TSaga>, Task> send)
+            where T : class
+        {
             if (context.TryGetPayload<IKernel>(out var existingKernel))
             {
                 existingKernel.UpdateScope(context);
@@ -38,7 +60,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
 
                 var factory = existingKernel.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 
-                return factory.Send(context, next);
+                return send(context, factory);
             }
 
             var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
@@ -53,7 +75,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
 
                     var factory = _kernel.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 
-                    await factory.Send(consumeContextScope, next).ConfigureAwait(false);
+                    await send(consumeContextScope, factory).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -62,16 +84,6 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             }
 
             return CreateMessageScope();
-        }
-
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
-            where T : class
-        {
-            using var scope = _kernel.BeginScope();
-
-            var factory = _kernel.Resolve<ISagaRepositoryContextFactory<TSaga>>();
-
-            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
         }
     }
 }

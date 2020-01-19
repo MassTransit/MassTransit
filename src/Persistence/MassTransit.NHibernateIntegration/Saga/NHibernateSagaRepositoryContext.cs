@@ -63,15 +63,10 @@ namespace MassTransit.NHibernateIntegration.Saga
             return await _factory.CreateSagaConsumeContext(_session, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
         }
 
-        public async Task<SagaRepositoryQueryContext<TSaga, TMessage>> Query(ISagaQuery<TSaga> query)
+        public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
+            where T : class
         {
-            IList<Guid> instances = await _session.QueryOver<TSaga>()
-                .Where(query.FilterExpression)
-                .Select(x => x.CorrelationId)
-                .ListAsync<Guid>()
-                .ConfigureAwait(false);
-
-            return new DefaultSagaRepositoryQueryContext<TSaga, TMessage>(this, instances);
+            return _factory.CreateSagaConsumeContext(_session, consumeContext, instance, mode);
         }
     }
 

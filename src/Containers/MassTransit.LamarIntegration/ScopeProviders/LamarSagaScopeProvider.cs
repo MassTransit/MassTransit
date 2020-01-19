@@ -58,35 +58,6 @@ namespace MassTransit.LamarIntegration.ScopeProviders
             }
         }
 
-        public ISagaQueryScopeContext<TSaga, T> GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
-            where T : class
-        {
-            if (context.TryGetPayload<INestedContainer>(out var existingNestedContainer))
-            {
-                existingNestedContainer.Inject<ConsumeContext>(context);
-
-                return new ExistingSagaQueryScopeContext<TSaga, T>(context);
-            }
-
-            var nestedContainer = _container.GetNestedContainer(context);
-            try
-            {
-                IStateMachineActivityFactory factory = new LamarStateMachineActivityFactory();
-
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, nestedContainer, factory);
-
-                foreach (Action<ConsumeContext> scopeAction in _scopeActions)
-                    scopeAction(proxy);
-
-                return new CreatedSagaQueryScopeContext<INestedContainer, TSaga, T>(nestedContainer, proxy);
-            }
-            catch
-            {
-                nestedContainer.Dispose();
-                throw;
-            }
-        }
-
         public void AddScopeAction(Action<ConsumeContext> action)
         {
             _scopeActions.Add(action);

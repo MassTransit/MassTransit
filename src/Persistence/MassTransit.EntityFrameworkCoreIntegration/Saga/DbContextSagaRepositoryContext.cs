@@ -9,7 +9,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     using GreenPipes;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
-    using Util;
+    using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 
     public class DbContextSagaRepositoryContext<TSaga, TMessage> :
@@ -19,34 +19,62 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         where TMessage : class
     {
         readonly DbContext _dbContext;
+        readonly ConsumeContext<TMessage> _consumeContext;
         readonly ISagaConsumeContextFactory<DbContext, TSaga> _factory;
+        readonly ISagaRepositoryLockStrategy<TSaga> _lockStrategy;
 
         public DbContextSagaRepositoryContext(DbContext dbContext, ConsumeContext<TMessage> consumeContext,
-            ISagaConsumeContextFactory<DbContext, TSaga> factory)
+            ISagaConsumeContextFactory<DbContext, TSaga> factory, ISagaRepositoryLockStrategy<TSaga> lockStrategy)
             : base(consumeContext)
         {
             _dbContext = dbContext;
+            _consumeContext = consumeContext;
             _factory = factory;
+            _lockStrategy = lockStrategy;
         }
 
         public Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
         {
-            throw new NotImplementedException();
+            return _factory.CreateSagaConsumeContext(_dbContext, _consumeContext, instance, SagaConsumeContextMode.Add);
         }
 
-        public Task<SagaConsumeContext<TSaga, TMessage>> Insert(TSaga instance)
+        public async Task<SagaConsumeContext<TSaga, TMessage>> Insert(TSaga instance)
         {
-            throw new NotImplementedException();
+            EntityEntry<TSaga> entry = _dbContext.Set<TSaga>().Add(instance);
+            try
+            {
+                await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
+
+                _consumeContext.LogInsert<TSaga, TMessage>(instance.CorrelationId);
+
+                return await _factory.CreateSagaConsumeContext(_dbContext, _consumeContext, instance, SagaConsumeContextMode.Insert).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Because we will still be using the same dbContext, we need to reset the entry we just tried to pre-insert (likely a duplicate), so
+                // on the next save changes (which is the update), it will pass.
+                // see here for details: https://www.davideguida.com/how-to-reset-the-entities-state-on-a-entity-framework-db-context/
+                entry.State = EntityState.Detached;
+
+                _consumeContext.LogInsertFault<TSaga, TMessage>(ex, instance.CorrelationId);
+
+                return default;
+            }
         }
 
-        public Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
+        public async Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
         {
-            throw new NotImplementedException();
+            var instance = await _lockStrategy.Load(_dbContext, correlationId, CancellationToken).ConfigureAwait(false);
+            if (instance == null)
+                return default;
+
+            return await _factory.CreateSagaConsumeContext(_dbContext, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
         }
 
-        public Task<SagaRepositoryQueryContext<TSaga, TMessage>> Query(ISagaQuery<TSaga> query)
+        public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
+            where T : class
         {
-            throw new NotImplementedException();
+            return _factory.CreateSagaConsumeContext(_dbContext, consumeContext, instance, mode);
         }
     }
 
@@ -66,7 +94,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         public async Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
-            List<Guid> results = await _dbContext.Set<TSaga>()
+            IList<Guid> results = await _dbContext.Set<TSaga>()
                 .AsNoTracking()
                 .Where(query.FilterExpression)
                 .Select(x => x.CorrelationId)
@@ -80,8 +108,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         {
             return _dbContext.Set<TSaga>()
                 .AsNoTracking()
-                .Where(x => x.CorrelationId == correlationId)
-                .FirstOrDefaultAsync();
+                .SingleOrDefaultAsync(x => x.CorrelationId == correlationId);
         }
     }
 }

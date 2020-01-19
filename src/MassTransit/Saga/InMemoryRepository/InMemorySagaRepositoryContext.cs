@@ -112,13 +112,6 @@ namespace MassTransit.Saga.InMemoryRepository
             return await _factory.CreateSagaConsumeContext(_sagas, _context, saga.Instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
         }
 
-        public async Task<SagaRepositoryQueryContext<TSaga, TMessage>> Query(ISagaQuery<TSaga> query)
-        {
-            var matchingInstances = _sagas.Where(query).Select(x => x.Instance.CorrelationId).ToList();
-
-            return new DefaultSagaRepositoryQueryContext<TSaga, TMessage>(this, matchingInstances);
-        }
-
         public void Dispose()
         {
             if (_sagasLocked)
@@ -126,6 +119,12 @@ namespace MassTransit.Saga.InMemoryRepository
                 _sagas.Release();
                 _sagasLocked = false;
             }
+        }
+
+        public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
+            where T : class
+        {
+            return _factory.CreateSagaConsumeContext(_sagas, consumeContext, instance, mode);
         }
     }
 

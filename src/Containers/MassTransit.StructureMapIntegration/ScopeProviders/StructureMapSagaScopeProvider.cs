@@ -65,35 +65,6 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             }
         }
 
-        public ISagaQueryScopeContext<TSaga, T> GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
-            where T : class
-        {
-            if (context.TryGetPayload<IContainer>(out var existingContainer))
-            {
-                existingContainer.Inject<ConsumeContext>(context);
-
-                return new ExistingSagaQueryScopeContext<TSaga, T>(context);
-            }
-
-            var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
-            try
-            {
-                IStateMachineActivityFactory factory = new StructureMapStateMachineActivityFactory();
-
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, nestedContainer, factory);
-
-                foreach (Action<ConsumeContext> scopeAction in _scopeActions)
-                    scopeAction(proxy);
-
-                return new CreatedSagaQueryScopeContext<IContainer, TSaga, T>(nestedContainer, proxy);
-            }
-            catch
-            {
-                nestedContainer.Dispose();
-                throw;
-            }
-        }
-
         public void AddScopeAction(Action<ConsumeContext> action)
         {
             _scopeActions.Add(action);

@@ -29,7 +29,7 @@
             Saga = instance;
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
+        public Task DisposeAsync(CancellationToken cancellationToken)
         {
             return _isCompleted
                 ? TaskUtil.Completed

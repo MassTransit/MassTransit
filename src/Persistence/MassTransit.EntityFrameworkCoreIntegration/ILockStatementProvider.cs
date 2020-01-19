@@ -4,7 +4,7 @@
     using Microsoft.EntityFrameworkCore;
 
 
-    public interface IRawSqlLockStatements
+    public interface ILockStatementProvider
     {
         string GetRowLockStatement<TSaga>(DbContext context)
             where TSaga : class, ISaga;

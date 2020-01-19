@@ -59,36 +59,6 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
             }
         }
 
-        public ISagaQueryScopeContext<TSaga, T> GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
-            where T : class
-        {
-            if (context.TryGetPayload<Scope>(out var existingScope))
-            {
-                existingScope.UpdateScope(context);
-
-                return new ExistingSagaQueryScopeContext<TSaga, T>(context);
-            }
-
-            var scope = AsyncScopedLifestyle.BeginScope(_container);
-            try
-            {
-                scope.UpdateScope(context);
-
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, scope, scope.Container);
-
-                foreach (Action<ConsumeContext> scopeAction in _scopeActions)
-                    scopeAction(proxy);
-
-                return new CreatedSagaQueryScopeContext<Scope, TSaga, T>(scope, proxy);
-            }
-            catch
-            {
-                scope.Dispose();
-
-                throw;
-            }
-        }
-
         public void AddScopeAction(Action<ConsumeContext> action)
         {
             _scopeActions.Add(action);

@@ -7,6 +7,7 @@ namespace MassTransit.Saga
 
 
     public interface SagaRepositoryContext<TSaga, TMessage> :
+        ISagaConsumeContextFactory<TSaga>,
         ConsumeContext<TMessage>
         where TSaga : class, ISaga
         where TMessage : class
@@ -31,13 +32,6 @@ namespace MassTransit.Saga
         /// <param name="correlationId"></param>
         /// <returns>A valid <see cref="SagaConsumeContext{TSaga,T}"/> if the instance loaded successfully, otherwise default</returns>
         Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId);
-
-        /// <summary>
-        /// Query saga instances
-        /// </summary>
-        /// <param name="query"></param>
-        /// <returns></returns>
-        Task<SagaRepositoryQueryContext<TSaga, TMessage>> Query(ISagaQuery<TSaga> query);
     }
 
 
@@ -49,6 +43,7 @@ namespace MassTransit.Saga
         /// Query saga instances
         /// </summary>
         /// <param name="query"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken = default);
 

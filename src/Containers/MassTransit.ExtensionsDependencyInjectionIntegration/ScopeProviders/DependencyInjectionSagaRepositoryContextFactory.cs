@@ -29,6 +29,28 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
         public Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class
         {
+            return Send(context, (consumeContext, factory) => factory.Send(consumeContext, next));
+        }
+
+        public Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
+            where T : class
+        {
+            return Send(context, (consumeContext, factory) => factory.SendQuery(consumeContext, query, next));
+        }
+
+        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+            where T : class
+        {
+            using var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
+            var factory = serviceScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
+
+            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
+        }
+
+        Task Send<T>(ConsumeContext<T> context, Func<ConsumeContext<T>, ISagaRepositoryContextFactory<TSaga>, Task> send)
+            where T : class
+        {
             if (!context.TryGetPayload(out IServiceProvider serviceProvider))
                 serviceProvider = _serviceProvider;
 
@@ -41,7 +63,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
                 var factory = existingScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 
-                return factory.Send(context, next);
+                return send(context, factory);
             }
 
             async Task CreateScope()
@@ -59,20 +81,10 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
                 var factory = scopeServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 
-                await factory.Send(consumeContextScope, next).ConfigureAwait(false);
+                await send(consumeContextScope, factory).ConfigureAwait(false);
             }
 
             return CreateScope();
-        }
-
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
-            where T : class
-        {
-            using var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-
-            var factory = serviceScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
-
-            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
         }
     }
 }

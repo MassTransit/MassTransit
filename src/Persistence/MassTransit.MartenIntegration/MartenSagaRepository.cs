@@ -78,7 +78,7 @@
             }
         }
 
-        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
+        public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
@@ -87,7 +87,7 @@
                 try
                 {
                     IEnumerable<TSaga> instances = await session.Query<TSaga>()
-                        .Where(context.Query.FilterExpression)
+                        .Where(query.FilterExpression)
                         .ToListAsync().ConfigureAwait(false);
 
                     if (!instances.Any())
@@ -103,13 +103,13 @@
                 }
                 catch (SagaException sex)
                 {
-                    context.LogFault(sex);
+                    context.LogFault(this, sex);
 
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    context.LogFault(ex);
+                    context.LogFault(this, ex);
 
                     throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                 }
@@ -187,7 +187,7 @@
 
             public async Task Send(SagaConsumeContext<TSaga, TMessage> context)
             {
-                SagaConsumeContext<TSaga, TMessage> proxy = new MartenSagaConsumeContext<TSaga, TMessage>(_session,context, context.Saga);
+                SagaConsumeContext<TSaga, TMessage> proxy = new MartenSagaConsumeContext<TSaga, TMessage>(_session, context, context.Saga);
 
                 proxy.LogAdded();
 

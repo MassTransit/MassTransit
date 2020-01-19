@@ -79,7 +79,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 
             var repository = new MongoDbSagaRepository<SimpleSaga>(SagaRepository.Instance, _sagaConsumeContextFactory.Object);
 
-            await repository.SendQuery(_sagaQueryConsumeContext.Object, _sagaPolicy.Object, _nextPipe.Object);
+            await repository.SendQuery(_sagaQueryConsumeContext.Object, _sagaQueryConsumeContext.Object.Query, _sagaPolicy.Object, _nextPipe.Object);
         }
 
         [OneTimeTearDown]

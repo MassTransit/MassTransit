@@ -29,6 +29,28 @@ namespace MassTransit.LamarIntegration.ScopeProviders
         public Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class
         {
+            return Send(context, (consumeContext, factory) => factory.Send(consumeContext, next));
+        }
+
+        public Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
+            where T : class
+        {
+            return Send(context, (consumeContext, factory) => factory.SendQuery(consumeContext, query, next));
+        }
+
+        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+            where T : class
+        {
+            using var nestedContainer = _container.GetNestedContainer();
+
+            var factory = nestedContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
+
+            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
+        }
+
+        Task Send<T>(ConsumeContext<T> context, Func<ConsumeContext<T>, ISagaRepositoryContextFactory<TSaga>, Task> send)
+            where T : class
+        {
             if (context.TryGetPayload<INestedContainer>(out var existingContainer))
             {
                 existingContainer.Inject<ConsumeContext>(context);
@@ -38,7 +60,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
 
                 var factory = existingContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 
-                return factory.Send(context, next);
+                return send(context, factory);
             }
 
             async Task CreateNestedContainer()
@@ -52,20 +74,10 @@ namespace MassTransit.LamarIntegration.ScopeProviders
 
                 var factory = nestedContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 
-                await factory.Send(consumeContextScope, next).ConfigureAwait(false);
+                await send(consumeContextScope, factory).ConfigureAwait(false);
             }
 
             return CreateNestedContainer();
-        }
-
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
-            where T : class
-        {
-            using var nestedContainer = _container.GetNestedContainer();
-
-            var factory = nestedContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
-
-            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
         }
     }
 }

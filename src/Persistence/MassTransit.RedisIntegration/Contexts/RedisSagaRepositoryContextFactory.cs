@@ -57,14 +57,20 @@ namespace MassTransit.RedisIntegration.Contexts
                 if (_options.ConcurrencyMode == ConcurrencyMode.Pessimistic)
                     await databaseContext.Lock(context.CorrelationId.Value, context.CancellationToken).ConfigureAwait(false);
 
-                var sagaRepositoryContext = new RedisSagaRepositoryContext<TSaga, T>(databaseContext, context, _factory);
+                var repositoryContext = new RedisSagaRepositoryContext<TSaga, T>(databaseContext, context, _factory);
 
-                await next.Send(sagaRepositoryContext).ConfigureAwait(false);
+                await next.Send(repositoryContext).ConfigureAwait(false);
             }
             finally
             {
-                await databaseContext.DisposeAsync().ConfigureAwait(false);
+                await databaseContext.DisposeAsync(CancellationToken.None).ConfigureAwait(false);
             }
+        }
+
+        public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
+            where T : class
+        {
+            throw new NotImplementedByDesignException("Redis saga repository does not support queries");
         }
 
         public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
@@ -75,9 +81,9 @@ namespace MassTransit.RedisIntegration.Contexts
             var databaseContext = new RedisDatabaseContext<TSaga>(database, _options);
             try
             {
-                var sagaRepositoryContext = new RedisSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);
+                var repositoryContext = new RedisSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);
 
-                return await asyncMethod(sagaRepositoryContext).ConfigureAwait(false);
+                return await asyncMethod(repositoryContext).ConfigureAwait(false);
             }
             finally
             {

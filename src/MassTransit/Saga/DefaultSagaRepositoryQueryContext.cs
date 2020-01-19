@@ -9,16 +9,16 @@ namespace MassTransit.Saga
     using GreenPipes;
 
 
-    public class DefaultSagaRepositoryQueryContext<TSaga, T> :
-        ConsumeContextProxy<T>,
-        SagaRepositoryQueryContext<TSaga, T>
+    public class DefaultSagaRepositoryQueryContext<TSaga, TMessage> :
+        ConsumeContextProxy<TMessage>,
+        SagaRepositoryQueryContext<TSaga, TMessage>
         where TSaga : class, ISaga
-        where T : class
+        where TMessage : class
     {
-        readonly SagaRepositoryContext<TSaga, T> _context;
+        readonly SagaRepositoryContext<TSaga, TMessage> _context;
         readonly IList<Guid> _results;
 
-        public DefaultSagaRepositoryQueryContext(SagaRepositoryContext<TSaga, T> context, IList<Guid> results)
+        public DefaultSagaRepositoryQueryContext(SagaRepositoryContext<TSaga, TMessage> context, IList<Guid> results)
             : base(context)
         {
             _context = context;
@@ -27,24 +27,19 @@ namespace MassTransit.Saga
 
         public int Count => _results.Count;
 
-        public Task<SagaConsumeContext<TSaga, T>> Add(TSaga instance)
+        public Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
         {
             return _context.Add(instance);
         }
 
-        public Task<SagaConsumeContext<TSaga, T>> Insert(TSaga instance)
+        public Task<SagaConsumeContext<TSaga, TMessage>> Insert(TSaga instance)
         {
             return _context.Insert(instance);
         }
 
-        public Task<SagaConsumeContext<TSaga, T>> Load(Guid correlationId)
+        public Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
         {
             return _context.Load(correlationId);
-        }
-
-        public Task<SagaRepositoryQueryContext<TSaga, T>> Query(ISagaQuery<TSaga> query)
-        {
-            return _context.Query(query);
         }
 
         public IEnumerator<Guid> GetEnumerator()
@@ -55,6 +50,12 @@ namespace MassTransit.Saga
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
+            where T : class
+        {
+            return _context.CreateSagaConsumeContext(consumeContext, instance, mode);
         }
     }
 

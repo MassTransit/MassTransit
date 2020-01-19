@@ -59,37 +59,6 @@
             }
         }
 
-        ISagaQueryScopeContext<TSaga, T> ISagaScopeProvider<TSaga>.GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
-        {
-            if (context.TryGetPayload<ILifetimeScope>(out _))
-                return new ExistingSagaQueryScopeContext<TSaga, T>(context);
-
-            var parentLifetimeScope = _scopeProvider.GetLifetimeScope(context);
-
-            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
-            {
-                builder.ConfigureScope(context);
-                _configureScope?.Invoke(builder, context);
-            });
-            try
-            {
-                IStateMachineActivityFactory factory = new AutofacStateMachineActivityFactory();
-
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, lifetimeScope, factory);
-
-                foreach (Action<ConsumeContext> scopeAction in _scopeActions)
-                    scopeAction(proxy);
-
-                return new CreatedSagaQueryScopeContext<ILifetimeScope, TSaga, T>(lifetimeScope, proxy);
-            }
-            catch
-            {
-                lifetimeScope.Dispose();
-
-                throw;
-            }
-        }
-
         void IProbeSite.Probe(ProbeContext context)
         {
             context.Add("provider", "autofac");

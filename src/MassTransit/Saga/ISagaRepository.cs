@@ -30,10 +30,11 @@ namespace MassTransit.Saga
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="context">The saga query consume context</param>
+        /// <param name="query"></param>
         /// <param name="policy">The saga policy for the message</param>
         /// <param name="next">The saga consume pipe</param>
         /// <returns></returns>
-        Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+        Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class;
     }
 }

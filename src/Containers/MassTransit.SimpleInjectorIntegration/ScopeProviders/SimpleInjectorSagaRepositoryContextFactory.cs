@@ -30,6 +30,28 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
         public Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class
         {
+            return Send(context, (consumeContext, factory) => factory.Send(consumeContext, next));
+        }
+
+        public Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
+            where T : class
+        {
+            return Send(context, (consumeContext, factory) => factory.SendQuery(consumeContext, query, next));
+        }
+
+        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+            where T : class
+        {
+            using var scope = AsyncScopedLifestyle.BeginScope(_container);
+
+            var factory = scope.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
+
+            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
+        }
+
+        Task Send<T>(ConsumeContext<T> context, Func<ConsumeContext<T>, ISagaRepositoryContextFactory<TSaga>, Task> send)
+            where T : class
+        {
             if (context.TryGetPayload<Scope>(out var existingScope))
             {
                 existingScope.UpdateScope(context);
@@ -39,7 +61,7 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
 
                 var factory = existingScope.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 
-                return factory.Send(context, next);
+                return send(context, factory);
             }
 
             var scope = AsyncScopedLifestyle.BeginScope(_container);
@@ -57,7 +79,7 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
 
                     var factory = scope.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 
-                    await factory.Send(consumeContextScope, next).ConfigureAwait(false);
+                    await send(consumeContextScope, factory).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -66,16 +88,6 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
             }
 
             return CreateNestedContainer();
-        }
-
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
-            where T : class
-        {
-            using var scope = AsyncScopedLifestyle.BeginScope(_container);
-
-            var factory = scope.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
-
-            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
         }
     }
 }

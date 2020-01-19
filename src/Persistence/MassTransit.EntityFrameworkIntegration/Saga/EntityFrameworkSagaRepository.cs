@@ -208,7 +208,7 @@
             }
         }
 
-        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
+        public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
@@ -224,7 +224,7 @@
                     // We do this outside of the transaction to make sure we don't create a range lock.
                     nonTrackedInstances = await dbContext.Set<TSaga>()
                         .AsNoTracking()
-                        .Where(context.Query.FilterExpression)
+                        .Where(query.FilterExpression)
                         .Select(x => x.CorrelationId)
                         .ToListAsync(context.CancellationToken)
                         .ConfigureAwait(false);
@@ -238,7 +238,7 @@
                         if (_rawSqlLockStatements == null)
                         {
                             var instances = await QuerySagas(dbContext)
-                                .Where(context.Query.FilterExpression)
+                                .Where(query.FilterExpression)
                                 .ToListAsync(context.CancellationToken)
                                 .ConfigureAwait(false);
 
@@ -331,7 +331,7 @@
                     }
                     catch (SagaException sex)
                     {
-                        context.LogFault(sex);
+                        context.LogFault(this,sex);
 
                         try
                         {
@@ -355,7 +355,7 @@
                             LogContext.Warning?.Log(innerException, "Transaction rollback failed");
                         }
 
-                        context.LogFault(ex);
+                        context.LogFault(this,ex);
 
                         throw new SagaException(ex.Message, typeof(TSaga), typeof(T), Guid.Empty, ex);
                     }
@@ -399,7 +399,7 @@
             return false;
         }
 
-        async Task SendToInstance<T>(SagaQueryConsumeContext<TSaga, T> context, DbContext dbContext, ISagaPolicy<TSaga, T> policy, TSaga instance,
+        async Task SendToInstance<T>(ConsumeContext<T> context, DbContext dbContext, ISagaPolicy<TSaga, T> policy, TSaga instance,
             IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {

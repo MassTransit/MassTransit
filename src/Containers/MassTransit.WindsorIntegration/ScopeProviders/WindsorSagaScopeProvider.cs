@@ -54,33 +54,6 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             }
         }
 
-        public ISagaQueryScopeContext<TSaga, T> GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
-            where T : class
-        {
-            if (context.TryGetPayload<IKernel>(out var kernel))
-            {
-                kernel.UpdateScope(context);
-
-                return new ExistingSagaQueryScopeContext<TSaga, T>(context);
-            }
-
-            var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
-            try
-            {
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, _kernel, _factory);
-
-                foreach (Action<ConsumeContext> scopeAction in _scopeActions)
-                    scopeAction(proxy);
-
-                return new CreatedSagaQueryScopeContext<IDisposable, TSaga, T>(scope, proxy);
-            }
-            catch
-            {
-                scope.Dispose();
-                throw;
-            }
-        }
-
         public void Probe(ProbeContext context)
         {
             context.Add("provider", "windsor");

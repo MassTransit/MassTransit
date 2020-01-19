@@ -1,6 +1,7 @@
 namespace MassTransit.Saga.InMemoryRepository
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -34,17 +35,31 @@ namespace MassTransit.Saga.InMemoryRepository
         {
             await _sagas.MarkInUse(context.CancellationToken).ConfigureAwait(false);
 
-            using var sagaRepositoryContext = new InMemorySagaRepositoryContext<TSaga, T>(_sagas, _factory, context);
+            using var repositoryContext = new InMemorySagaRepositoryContext<TSaga, T>(_sagas, _factory, context);
 
-            await next.Send(sagaRepositoryContext).ConfigureAwait(false);
+            await next.Send(repositoryContext).ConfigureAwait(false);
+        }
+
+        public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
+            where T : class
+        {
+            await _sagas.MarkInUse(context.CancellationToken).ConfigureAwait(false);
+
+            using var repositoryContext = new InMemorySagaRepositoryContext<TSaga, T>(_sagas, _factory, context);
+
+            var matchingInstances = _sagas.Where(query).Select(x => x.Instance.CorrelationId).ToList();
+
+            var queryContext = new DefaultSagaRepositoryQueryContext<TSaga, T>(repositoryContext, matchingInstances);
+
+            await next.Send(queryContext).ConfigureAwait(false);
         }
 
         public Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
-            var sagaRepositoryContext = new InMemorySagaRepositoryContext<TSaga>(_sagas, cancellationToken);
+            var repositoryContext = new InMemorySagaRepositoryContext<TSaga>(_sagas, cancellationToken);
 
-            return asyncMethod(sagaRepositoryContext);
+            return asyncMethod(repositoryContext);
         }
     }
 }

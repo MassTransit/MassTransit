@@ -28,8 +28,6 @@ namespace MassTransit.RedisIntegration.Contexts
             _factory = factory;
         }
 
-        public DatabaseContext<TSaga> Context => _context;
-
         public Task DisposeAsync(CancellationToken cancellationToken)
         {
             return _context.DisposeAsync(cancellationToken);
@@ -67,9 +65,10 @@ namespace MassTransit.RedisIntegration.Contexts
             return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
         }
 
-        public Task<SagaRepositoryQueryContext<TSaga, TMessage>> Query(ISagaQuery<TSaga> query)
+        public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
+            where T : class
         {
-            throw new NotImplementedByDesignException("Redis saga repository does not support queries");
+            return _factory.CreateSagaConsumeContext(_context, consumeContext, instance, mode);
         }
     }
 

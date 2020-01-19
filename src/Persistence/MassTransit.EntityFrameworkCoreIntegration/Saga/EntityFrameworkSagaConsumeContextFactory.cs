@@ -1,6 +1,5 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
-    using System;
     using System.Threading.Tasks;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
@@ -10,11 +9,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         ISagaConsumeContextFactory<DbContext, TSaga>
         where TSaga : class, ISaga
     {
-        public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(DbContext session, ConsumeContext<T> consumeContext, TSaga instance,
+        public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(DbContext context, ConsumeContext<T> consumeContext, TSaga instance,
             SagaConsumeContextMode mode)
             where T : class
         {
-            throw new NotImplementedException();
+            return Task.FromResult<SagaConsumeContext<TSaga, T>>(new EntityFrameworkSagaConsumeContext<TSaga, T>(context, consumeContext, instance, mode));
         }
     }
 }

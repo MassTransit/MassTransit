@@ -64,12 +64,13 @@ namespace MassTransit.Saga
             }
         }
 
-        public async Task SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+        public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
+            IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
             try
             {
-                await _repositoryContextFactory.Send(context, new SendQuerySagaPipe<TSaga, T>(context.Query, policy, next)).ConfigureAwait(false);
+                await _repositoryContextFactory.SendQuery(context, query, new SendQuerySagaPipe<TSaga, T>(policy, next)).ConfigureAwait(false);
             }
             catch (SagaException exception)
             {

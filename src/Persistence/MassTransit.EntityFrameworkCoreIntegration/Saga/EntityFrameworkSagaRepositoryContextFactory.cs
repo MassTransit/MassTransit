@@ -2,12 +2,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
     using System;
     using System.Data;
+    using System.Data.SqlClient;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Storage;
 
 
     public class EntityFrameworkSagaRepositoryContextFactory<TSaga> :
@@ -15,15 +18,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         where TSaga : class, ISaga
     {
         readonly ISagaDbContextFactory<TSaga> _dbContextFactory;
-        readonly ISagaConsumeContextFactory<DbContext, TSaga> _sagaConsumeContextFactory;
+        readonly ISagaConsumeContextFactory<DbContext, TSaga> _consumeContextFactory;
         readonly IsolationLevel _isolationLevel;
+        readonly ISagaRepositoryLockStrategy<TSaga> _lockStrategy;
 
         public EntityFrameworkSagaRepositoryContextFactory(ISagaDbContextFactory<TSaga> dbContextFactory,
-            ISagaConsumeContextFactory<DbContext, TSaga> sagaConsumeContextFactory, IsolationLevel isolationLevel)
+            ISagaConsumeContextFactory<DbContext, TSaga> consumeContextFactory, IsolationLevel isolationLevel, ISagaRepositoryLockStrategy<TSaga> lockStrategy)
         {
             _dbContextFactory = dbContextFactory;
-            _sagaConsumeContextFactory = sagaConsumeContextFactory;
+            _consumeContextFactory = consumeContextFactory;
             _isolationLevel = isolationLevel;
+            _lockStrategy = lockStrategy;
         }
 
         public void Probe(ProbeContext context)
@@ -46,16 +51,50 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             var dbContext = _dbContextFactory.CreateScoped(context);
             try
             {
+                Task Send() =>
+                    WithinTransaction(dbContext, context.CancellationToken, () =>
+                    {
+                        var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
+
+                        return next.Send(repositoryContext);
+                    });
+
+                var executionStrategy = dbContext.Database.CreateExecutionStrategy();
+                if (executionStrategy is SqlServerRetryingExecutionStrategy)
+                {
+                    await executionStrategy.ExecuteAsync(Send).ConfigureAwait(false);
+                }
+                else
+                {
+                    await Send().ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                _dbContextFactory.Release(dbContext);
+            }
+        }
+
+        public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
+            where T : class
+        {
+            var dbContext = _dbContextFactory.CreateScoped(context);
+            try
+            {
                 async Task Send()
                 {
-                    using var transaction =
-                        await dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken).ConfigureAwait(false);
+                    var lockContext = await _lockStrategy.CreateLockContext(dbContext, query, context.CancellationToken).ConfigureAwait(false);
 
-                    var sagaRepositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _sagaConsumeContextFactory);
+                    var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
 
-                    await next.Send(sagaRepositoryContext).ConfigureAwait(false);
+                    await WithinTransaction(dbContext, context.CancellationToken, async () =>
+                    {
+                        var instances = await lockContext.Load().ConfigureAwait(false);
 
-                    transaction.Commit();
+                        var queryContext = new LoadedSagaRepositoryQueryContext<TSaga, T>(repositoryContext, instances);
+
+                        await next.Send(queryContext).ConfigureAwait(false);
+                    });
                 }
 
                 var executionStrategy = dbContext.Database.CreateExecutionStrategy();
@@ -80,19 +119,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             var dbContext = _dbContextFactory.Create();
             try
             {
-                async Task<T> Send()
-                {
-                    using var transaction =
-                        await dbContext.Database.BeginTransactionAsync(_isolationLevel, cancellationToken).ConfigureAwait(false);
+                Task<T> Send() =>
+                    WithinTransaction(dbContext, cancellationToken, () =>
+                    {
+                        var sagaRepositoryContext = new DbContextSagaRepositoryContext<TSaga>(dbContext, cancellationToken);
 
-                    var sagaRepositoryContext = new DbContextSagaRepositoryContext<TSaga>(dbContext, cancellationToken);
-
-                    var result = await asyncMethod(sagaRepositoryContext).ConfigureAwait(false);
-
-                    transaction.Commit();
-
-                    return result;
-                }
+                        return asyncMethod(sagaRepositoryContext);
+                    });
 
                 var executionStrategy = dbContext.Database.CreateExecutionStrategy();
                 if (executionStrategy is SqlServerRetryingExecutionStrategy)
@@ -108,6 +141,95 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             {
                 _dbContextFactory.Release(dbContext);
             }
+        }
+
+        async Task WithinTransaction(DbContext context, CancellationToken cancellationToken, Func<Task> callback)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync(_isolationLevel, cancellationToken).ConfigureAwait(false);
+
+            void Rollback()
+            {
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception innerException)
+                {
+                    LogContext.Warning?.Log(innerException, "Transaction rollback failed");
+                }
+            }
+
+            try
+            {
+                await callback().ConfigureAwait(false);
+
+                transaction.Commit();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                Rollback();
+                throw;
+            }
+            catch (DbUpdateException ex)
+            {
+                if (!IsDeadlockException(ex))
+                    Rollback();
+
+                throw;
+            }
+            catch (Exception)
+            {
+                Rollback();
+                throw;
+            }
+        }
+
+        async Task<T> WithinTransaction<T>(DbContext context, CancellationToken cancellationToken, Func<Task<T>> callback)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync(_isolationLevel, cancellationToken).ConfigureAwait(false);
+
+            void Rollback()
+            {
+                try
+                {
+                    transaction.Rollback();
+                }
+                catch (Exception innerException)
+                {
+                    LogContext.Warning?.Log(innerException, "Transaction rollback failed");
+                }
+            }
+
+            try
+            {
+                var result = await callback().ConfigureAwait(false);
+
+                transaction.Commit();
+
+                return result;
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                Rollback();
+                throw;
+            }
+            catch (DbUpdateException ex)
+            {
+                if (!IsDeadlockException(ex))
+                    Rollback();
+
+                throw;
+            }
+            catch (Exception)
+            {
+                Rollback();
+                throw;
+            }
+        }
+
+        static bool IsDeadlockException(Exception exception)
+        {
+            return exception.GetBaseException() is SqlException baseException && baseException.Number == 1205;
         }
     }
 }
