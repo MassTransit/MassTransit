@@ -6,8 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 using MassTransit.Tests.Saga;
 
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.Saga
 {
+    using SimpleSaga.DataAccess;
+
+
     [DbContext(typeof(SimpleSagaDbContext))]
     [Migration("20170710150441_Init")]
     partial class Init

@@ -29,7 +29,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     /// so this was the easiest project to add a test spec to which has EF Core already referenced.
     /// </summary>
     [TestFixture]
-    [Category("Integration")]
     public class TransactionOutbox_Specs :
         InMemoryTestFixture
     {
@@ -37,10 +36,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
         public async Task Should_publish_after_db_create()
         {
             var message = new InitiateSimpleSaga();
-            var product = new Product { Name = "Should_publish_after_db_create" };
+            var product = new Product {Name = "Should_publish_after_db_create"};
             var transactionOutbox = new TransactionOutbox(Bus, Bus, new NullLoggerFactory());
 
-            using(var dbContext = GetDbContext())
+            using (var dbContext = GetDbContext())
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 dbContext.Products.Add(product);
@@ -67,7 +66,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
         public async Task Should_not_publish_properly()
         {
             var message = new InitiateSimpleSaga();
-            var product = new Product { Name = "Should_not_publish_properly" };
+            var product = new Product {Name = "Should_not_publish_properly"};
             var transactionOutbox = new TransactionOutbox(Bus, Bus, new NullLoggerFactory());
 
             using (var dbContext = GetDbContext())
@@ -89,9 +88,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 
         Task<ConsumeContext<InitiateSimpleSaga>> _received;
 
-        private TransactionOutboxTestsDbContext GetDbContext()
+        TransactionOutboxTestsDbContext GetDbContext()
         {
-            var dbContext = new TransactionOutboxTestsDbContext(new DbContextOptionsBuilder().UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString("MassTransitUnitTests_TransactionOutbox")).Options);
+            var dbContext = new TransactionOutboxTestsDbContext(new DbContextOptionsBuilder()
+                .UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString("MassTransitUnitTests_TransactionOutbox")).Options);
             return dbContext;
         }
 
@@ -111,7 +111,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
         }
     }
 
-    public class TransactionOutboxTestsDbContext : DbContext
+
+    public class TransactionOutboxTestsDbContext :
+        DbContext
     {
         public TransactionOutboxTestsDbContext(DbContextOptions options)
             : base(options)
@@ -120,6 +122,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 
         public DbSet<Product> Products { get; set; }
     }
+
 
     public class Product
     {

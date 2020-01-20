@@ -9,58 +9,84 @@
     using Microsoft.EntityFrameworkCore.Metadata;
 
 
-    public class SqlServerLockStatementProvider :
-        ILockStatementProvider
+    public class PostgresLockStatementProvider :
+        SqlLockStatementProvider
     {
-        const string DefaultRowLockStatement = "select * from {0}.{1} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0";
+        const string DefaultSchemaName = "public";
+        const string DefaultRowLockStatement = "SELECT * FROM \"{0}\".\"{1}\" WHERE \"CorrelationId\" = @p0 FOR UPDATE";
+
+        public PostgresLockStatementProvider(bool enableSchemaCaching = true)
+            : base(DefaultSchemaName, DefaultRowLockStatement, enableSchemaCaching)
+        {
+        }
+    }
+
+
+    public class SqlServerLockStatementProvider :
+        SqlLockStatementProvider
+    {
+        const string DefaultRowLockStatement = "SELECT * FROM {0}.{1} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @p0";
         const string DefaultSchemaName = "dbo";
 
+        public SqlServerLockStatementProvider(bool enableSchemaCaching = true)
+            : base(DefaultSchemaName, DefaultRowLockStatement, enableSchemaCaching)
+        {
+        }
+    }
+
+
+    public class SqlLockStatementProvider :
+        ILockStatementProvider
+    {
+        readonly bool _enableSchemaCaching;
         protected static readonly ConcurrentDictionary<Type, SchemaTablePair> TableNames = new ConcurrentDictionary<Type, SchemaTablePair>();
         protected readonly ConcurrentDictionary<Type, string> Statements = new ConcurrentDictionary<Type, string>();
 
-        public SqlServerLockStatementProvider(string defaultSchema = DefaultSchemaName, string rowLockStatement = DefaultRowLockStatement,
-            Func<IEntityType, IRelationalEntityTypeAnnotations> relationalEntityTypeAnnotations = null)
+        public SqlLockStatementProvider(string defaultSchema, string rowLockStatement, bool enableSchemaCaching = true)
         {
+            _enableSchemaCaching = enableSchemaCaching;
             DefaultSchema = defaultSchema ?? throw new ArgumentNullException(nameof(defaultSchema));
             RowLockStatement = rowLockStatement ?? throw new ArgumentNullException(nameof(rowLockStatement));
-
-            RelationalEntityTypeAnnotations = relationalEntityTypeAnnotations ?? GetRelationalEntityTypeAnnotations;
         }
 
         protected string DefaultSchema { get; }
         protected string RowLockStatement { get; }
-        protected Func<IEntityType, IRelationalEntityTypeAnnotations> RelationalEntityTypeAnnotations { get; }
 
         public virtual string GetRowLockStatement<TSaga>(DbContext context)
             where TSaga : class, ISaga
         {
-            return Statements.GetOrAdd(typeof(TSaga), type =>
-            {
-                var schemaTablePair = GetSchemaAndTableName(context, typeof(TSaga));
+            return _enableSchemaCaching
+                ? Statements.GetOrAdd(typeof(TSaga), type => FormatLockStatement<TSaga>(context))
+                : FormatLockStatement<TSaga>(context);
+        }
 
-                return string.Format(RowLockStatement, schemaTablePair.Schema, schemaTablePair.Table);
-            });
+        string FormatLockStatement<TSaga>(IDbContextDependencies context)
+            where TSaga : class, ISaga
+        {
+            var schemaTablePair = GetSchemaAndTableName(context, typeof(TSaga));
+
+            return string.Format(RowLockStatement, schemaTablePair.Schema, schemaTablePair.Table);
         }
 
         SchemaTablePair GetSchemaAndTableName(IDbContextDependencies dependencies, Type type)
         {
-            if (TableNames.TryGetValue(type, out var result))
+            if (TableNames.TryGetValue(type, out var result) && _enableSchemaCaching)
                 return result;
 
-            var annotations = RelationalEntityTypeAnnotations(dependencies.Model.FindEntityType(type));
+            var entityType = dependencies.Model.FindEntityType(type);
 
-            if (string.IsNullOrWhiteSpace(result.Table))
+            var schema = entityType.GetSchema();
+            var tableName = entityType.GetTableName();
+
+            if (string.IsNullOrWhiteSpace(tableName))
                 throw new MassTransitException($"Unable to determine saga table name: {TypeMetadataCache.GetShortName(type)} (using model metadata).");
 
-            result = new SchemaTablePair(annotations.Schema ?? DefaultSchema, annotations.TableName);
+            result = new SchemaTablePair(schema ?? DefaultSchema, tableName);
 
-            TableNames.TryAdd(type, result);
+            if (_enableSchemaCaching)
+                TableNames.TryAdd(type, result);
+
             return result;
-        }
-
-        protected virtual IRelationalEntityTypeAnnotations GetRelationalEntityTypeAnnotations(IEntityType entityType)
-        {
-            return entityType.SqlServer();
         }
 
 

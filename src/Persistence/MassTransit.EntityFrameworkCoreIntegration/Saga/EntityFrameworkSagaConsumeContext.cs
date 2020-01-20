@@ -4,7 +4,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
     using Util;
@@ -13,7 +12,7 @@
     public class EntityFrameworkSagaConsumeContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
         SagaConsumeContext<TSaga, TMessage>,
-        IAsyncDisposable
+        GreenPipes.IAsyncDisposable
         where TMessage : class
         where TSaga : class, ISaga
     {

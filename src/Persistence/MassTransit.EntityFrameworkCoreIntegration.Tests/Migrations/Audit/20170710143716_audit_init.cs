@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.Audit
 {
+    using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+
+
     public partial class audit_init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,6 +17,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.Audit
                 columns: table => new
                 {
                     AuditRecordId = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     ContextType = table.Column<string>(nullable: true),
                     ConversationId = table.Column<Guid>(nullable: true),

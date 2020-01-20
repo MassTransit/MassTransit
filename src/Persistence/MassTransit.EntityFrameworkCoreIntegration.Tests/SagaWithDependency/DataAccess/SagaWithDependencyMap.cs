@@ -1,4 +1,4 @@
-﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests
+﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency.DataAccess
 {
     using System;
     using Mappings;

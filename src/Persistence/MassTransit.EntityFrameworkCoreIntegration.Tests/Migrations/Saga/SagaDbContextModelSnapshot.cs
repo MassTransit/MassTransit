@@ -1,14 +1,12 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
-using MassTransit.EntityFrameworkCoreIntegration;
-
-using MassTransit.Tests.Saga;
-
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations
+﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.Saga
 {
+    using System;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.EntityFrameworkCore.Metadata;
+    using SimpleSaga.DataAccess;
+
+
     [DbContext(typeof(SimpleSagaDbContext))]
     partial class SagaDbContextModelSnapshot : ModelSnapshot
     {

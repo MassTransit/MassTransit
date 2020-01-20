@@ -10,26 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
 {
     using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
-
+    using Audit;
     using GreenPipes.Util;
-
-    using MassTransit.EntityFrameworkCoreIntegration.Audit;
-    using MassTransit.Testing;
-
     using Microsoft.EntityFrameworkCore;
-
     using NUnit.Framework;
-
+    using Shared;
     using Shouldly;
+    using Testing;
 
 
-    [TestFixture]
-    public class Saving_audit_records_to_the_audit_store
+    [TestFixture(typeof(SqlServerTestDbParameters))]
+    [TestFixture(typeof(SqlServerResiliencyTestDbParameters))]
+    [TestFixture(typeof(PostgresTestDbParameters))]
+    public class Saving_audit_records_to_the_audit_store<T> :
+        EntityFrameworkTestFixture<T, AuditDbContext>
+        where T : ITestDbParameters, new()
     {
         [Test]
         public async Task Should_have_consume_audit_records()
@@ -53,29 +52,20 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
         }
 
         InMemoryTestHarness _harness;
+        ConsumerTestHarness<TestConsumer> _consumer;
         EntityFrameworkAuditStore _store;
 
         [OneTimeSetUp]
-        public async Task Send_message_to_test_consumer()
+        public async Task SetUp()
         {
-            // add migrations by calling
-            // dotnet ef migrations add --context auditdbcontext --output-dir Migrations\\Audit audit_init
-            DbContextOptionsBuilder<AuditDbContext> optionsBuilder = new DbContextOptionsBuilder<AuditDbContext>().
-                UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString(),
-                m =>
-                    {
-                        var executingAssembly = typeof(ContextFactory).GetTypeInfo().Assembly;
+            var contextFactory = new AuditContextFactory();
 
-                        m.MigrationsAssembly(executingAssembly.GetName().Name);
-                        m.MigrationsHistoryTable("__AuditEFMigrationHistoryAudit");
-                    });
-
-            _store = new EntityFrameworkAuditStore(optionsBuilder.Options, "EfCoreAudit");
-            using (var dbContext = _store.AuditContext)
+            await using (var context = contextFactory.CreateDbContext(DbContextOptionsBuilder))
             {
-                await dbContext.Database.MigrateAsync();
-                await dbContext.Database.ExecuteSqlCommandAsync("TRUNCATE TABLE EfCoreAudit");
+                await context.Database.MigrateAsync();
             }
+
+            _store = new EntityFrameworkAuditStore(DbContextOptionsBuilder.Options, "EfCoreAudit");
 
             _harness = new InMemoryTestHarness();
             _harness.OnConnectObservers += bus =>
@@ -91,18 +81,24 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
         }
 
         [OneTimeTearDown]
-        public Task Teardown()
+        public async Task Teardown()
         {
-            return _harness.Stop();
+            await _harness.Stop();
+
+            var contextFactory = new AuditContextFactory();
+
+            await using (var context = contextFactory.CreateDbContext(DbContextOptionsBuilder))
+            {
+                context.Database.EnsureDeleted();
+            }
         }
 
         async Task<int> GetAuditRecords(string contextType)
         {
-            using var dbContext = _store.AuditContext;
-
-            return await dbContext.Set<AuditRecord>()
-                .Where(x => x.ContextType == contextType)
-                .CountAsync();
+            using (var dbContext = this._store.AuditContext)
+                return await dbContext.Set<AuditRecord>()
+                    .Where(x => x.ContextType == contextType)
+                    .CountAsync();
         }
 
 

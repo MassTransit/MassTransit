@@ -12,8 +12,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SagaWithDe
                 name: "SagaInnerDependency",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<Guid>(nullable: false),
+                    Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -24,8 +24,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SagaWithDe
                 name: "SagaDependency",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SagaInnerDependencyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<Guid>(nullable: false),
+                    SagaInnerDependencyId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,11 +42,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SagaWithDe
                 name: "EfCoreSagasWithDepencies",
                 columns: table => new
                 {
-                    CorrelationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Completed = table.Column<bool>(type: "bit", nullable: false),
-                    DependencyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Initiated = table.Column<bool>(type: "bit", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: true)
+                    CorrelationId = table.Column<Guid>(nullable: false),
+                    Completed = table.Column<bool>(nullable: false),
+                    DependencyId = table.Column<Guid>(nullable: false),
+                    Initiated = table.Column<bool>(nullable: false),
+                    Name = table.Column<string>(maxLength: 40, nullable: true)
                 },
                 constraints: table =>
                 {
