@@ -5,8 +5,9 @@
   "main": "index.js",
   "devDependencies": {
     "@vuepress/plugin-active-header-links": "^1.0.0-rc.1",
-    "vuepress": "^1.2.0",
-    "@vuepress/plugin-blog": "^1.5.1"
+    "@vuepress/plugin-blog": "^1.5.1",
+    "@vuepress/plugin-google-analytics": "^1.2.0",
+    "vuepress": "^1.2.0"
   },
   "dependencies": {
     "remove-markdown": "^0.3.0"

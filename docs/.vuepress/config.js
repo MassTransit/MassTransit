@@ -1,7 +1,14 @@
 module.exports = {
   title: 'MassTransit',
   description: 'A free, open-source distributed application framework for .NET.',
-  plugins: ['@vuepress/active-header-links'],
+  plugins: [
+    '@vuepress/active-header-links',
+    [
+      '@vuepress/google-analytics', {
+        'ga': 'UA-156512132-1'
+      }      
+    ]
+  ],
   themeConfig: {
     logo: '/mt-logo-small.png',
     algolia: {
