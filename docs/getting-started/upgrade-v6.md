@@ -51,7 +51,7 @@ This should be done prior to configuring the bus.
 As of version 6, MassTransit now uses DiagnosticSource for tracking messaging operations, such as Send, Receive, Publish, Consume, etc. An `Activity` is
 created for each operation, and context-relevant tags and baggage are added.
 
-MassTransit follows the [guidance](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md) from Microsoft. To connect listeners, look at the [section](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#subscribe-to-diagnosticsource) that explains how to connect.
+MassTransit follows the [guidance](https://github.com/dotnet/runtime/blob/master/src/libraries/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md) from Microsoft. To connect listeners, look at the [section](https://github.com/dotnet/runtime/blob/master/src/libraries/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#subscribe-to-diagnosticsource) that explains how to connect.
 
 ## Receive Endpoint Configuration
 
