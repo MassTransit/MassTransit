@@ -39,10 +39,11 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             List<Task<ActiveMqBasicConsumer>> consumers = new List<Task<ActiveMqBasicConsumer>>
             {
-                CreateConsumer(context, receiveSettings.EntityName, receiveSettings.Selector)
+                CreateConsumer(context, receiveSettings.EntityName, receiveSettings.Selector, receiveSettings.PrefetchCount)
             };
 
-            consumers.AddRange(_context.BrokerTopology.Consumers.Select(x => CreateConsumer(context, x.Destination.EntityName, x.Selector)));
+            consumers.AddRange(_context.BrokerTopology.Consumers.Select(x =>
+                CreateConsumer(context, x.Destination.EntityName, x.Selector, receiveSettings.PrefetchCount)));
 
             var actualConsumers = await Task.WhenAll(consumers).ConfigureAwait(false);
 
@@ -93,11 +94,15 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             return supervisor;
         }
 
-        async Task<ActiveMqBasicConsumer> CreateConsumer(SessionContext context, string entityName, string selector)
+        async Task<ActiveMqBasicConsumer> CreateConsumer(SessionContext context, string entityName, string selector, ushort prefetchCount)
         {
-            var queue = await context.GetQueue(entityName).ConfigureAwait(false);
+            string queueName = $"{entityName}?consumer.prefetchSize={prefetchCount}";
+
+            var queue = await context.GetQueue(queueName).ConfigureAwait(false);
 
             var messageConsumer = await context.CreateMessageConsumer(queue, selector, false).ConfigureAwait(false);
+
+            LogContext.Debug?.Log("Created consumer for {InputAddress}: {Queue}", _context.InputAddress, queueName);
 
             var consumer = new ActiveMqBasicConsumer(context, messageConsumer, _context.InputAddress, _context);
 
