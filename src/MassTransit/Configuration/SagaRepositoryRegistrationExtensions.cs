@@ -16,11 +16,7 @@ namespace MassTransit
         public static ISagaRegistrationConfigurator<T> InMemoryRepository<T>(this ISagaRegistrationConfigurator<T> configurator)
             where T : class, ISaga
         {
-            configurator.Repository(x =>
-            {
-                x.RegisterSingleInstance(new IndexedSagaDictionary<T>());
-                x.RegisterComponents<IndexedSagaDictionary<T>, InMemorySagaConsumeContextFactory<T>, InMemorySagaRepositoryContextFactory<T>>();
-            });
+            configurator.Repository(x => x.RegisterInMemorySagaRepository<T>());
 
             return configurator;
         }

@@ -166,6 +166,12 @@ namespace MassTransit.LamarIntegration.Registration
             _registry.TryAddScoped<T, TImplementation>();
         }
 
+        public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
+        {
+            _registry.TryAddScoped(provider => factoryMethod(provider.GetRequiredService<IConfigurationServiceProvider>()));
+        }
+
         public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {

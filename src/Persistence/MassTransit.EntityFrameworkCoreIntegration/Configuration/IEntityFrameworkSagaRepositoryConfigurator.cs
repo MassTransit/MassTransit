@@ -1,15 +1,22 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Configuration
+namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
+    using System.Data;
     using System.Linq;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
     using Registration;
+    using Saga.Configuration;
 
 
     public interface IEntityFrameworkSagaRepositoryConfigurator
     {
         ConcurrencyMode ConcurrencyMode { set; }
+        IsolationLevel IsolationLevel { set; }
+        ILockStatementProvider LockStatementProvider { set; }
+
+        void UseDbContext<TContext>(Func<DbContextOptions, TContext> factoryMethod, Func<DbContextOptionsBuilder, DbContextOptionsBuilder> configure = null)
+            where TContext : DbContext;
 
         /// <summary>
         /// Use already registered DbContext

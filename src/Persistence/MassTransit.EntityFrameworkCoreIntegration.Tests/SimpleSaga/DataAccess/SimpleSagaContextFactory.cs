@@ -5,7 +5,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SimpleSaga.DataAccess
     using Shared;
 
 
-    public class SimpleSagaContextFactory : IDesignTimeDbContextFactory<SimpleSagaDbContext>
+    public class SimpleSagaContextFactory :
+        IDesignTimeDbContextFactory<SimpleSagaDbContext>
     {
         public SimpleSagaDbContext CreateDbContext(string[] args)
         {

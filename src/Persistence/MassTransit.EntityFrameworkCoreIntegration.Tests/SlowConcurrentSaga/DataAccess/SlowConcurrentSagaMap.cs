@@ -6,12 +6,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga.Da
 
     class SlowConcurrentSagaMap : SagaClassMap<SlowConcurrentSaga>
     {
-        protected override void Configure(EntityTypeBuilder<SlowConcurrentSaga> entityTypeBuilder, ModelBuilder modelBuilder)
+        protected override void Configure(EntityTypeBuilder<SlowConcurrentSaga> entity, ModelBuilder model)
         {
-            entityTypeBuilder.Property(x => x.Name).HasMaxLength(40);
-            entityTypeBuilder.Property(x => x.CurrentState).HasMaxLength(40);
+            entity.Property(x => x.Name).HasMaxLength(40);
+            entity.Property(x => x.CurrentState).HasMaxLength(40);
 
-            entityTypeBuilder.ToTable("EfCoreSlowConcurrentSagas");
+            entity.ToTable("EfCoreSlowConcurrentSagas");
         }
     }
 }

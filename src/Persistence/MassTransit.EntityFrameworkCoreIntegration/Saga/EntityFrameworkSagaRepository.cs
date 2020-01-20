@@ -18,9 +18,9 @@
                 queryProvider = new CustomSagaLoadQueryProvider<TSaga>(queryProvider, queryCustomization);
 
             var queryExecutor = new OptimisticLoadQueryExecutor<TSaga>(queryProvider);
-            var lockStrategy = new OptimisticSagaRepositoryLockStrategy<TSaga>(queryProvider, queryExecutor);
+            var lockStrategy = new OptimisticSagaRepositoryLockStrategy<TSaga>(queryProvider, queryExecutor, IsolationLevel.ReadCommitted);
 
-            return CreateRepository(dbContextFactory, lockStrategy, IsolationLevel.ReadCommitted);
+            return CreateRepository(dbContextFactory, lockStrategy);
         }
 
         public static ISagaRepository<TSaga> CreateOptimistic(Func<DbContext> dbContextFactory,
@@ -36,9 +36,9 @@
             var statementProvider = lockStatementProvider ?? new SqlServerLockStatementProvider();
 
             var queryExecutor = new PessimisticLoadQueryExecutor<TSaga>(statementProvider, queryCustomization);
-            var lockStrategy = new PessimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor);
+            var lockStrategy = new PessimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor, IsolationLevel.Serializable);
 
-            return CreateRepository(dbContextFactory, lockStrategy, IsolationLevel.Serializable);
+            return CreateRepository(dbContextFactory, lockStrategy);
         }
 
         public static ISagaRepository<TSaga> CreatePessimistic(Func<DbContext> dbContextFactory, ILockStatementProvider lockStatementProvider = null,
@@ -47,13 +47,12 @@
             return CreatePessimistic(new DelegateSagaDbContextFactory<TSaga>(dbContextFactory), lockStatementProvider, queryCustomization);
         }
 
-        static ISagaRepository<TSaga> CreateRepository(ISagaDbContextFactory<TSaga> dbContextFactory, ISagaRepositoryLockStrategy<TSaga> lockStrategy,
-            IsolationLevel isolationLevel)
+        static ISagaRepository<TSaga> CreateRepository(ISagaDbContextFactory<TSaga> dbContextFactory, ISagaRepositoryLockStrategy<TSaga> lockStrategy)
         {
             var consumeContextFactory = new EntityFrameworkSagaConsumeContextFactory<TSaga>();
 
             var repositoryFactory =
-                new EntityFrameworkSagaRepositoryContextFactory<TSaga>(dbContextFactory, consumeContextFactory, isolationLevel, lockStrategy);
+                new EntityFrameworkSagaRepositoryContextFactory<TSaga>(dbContextFactory, consumeContextFactory, lockStrategy);
 
             return new SagaRepository<TSaga>(repositoryFactory);
         }

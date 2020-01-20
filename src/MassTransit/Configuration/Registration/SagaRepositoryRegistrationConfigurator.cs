@@ -96,11 +96,14 @@ namespace MassTransit.Registration
             _registrar.RegisterRequestClient<T>(destinationAddress, timeout);
         }
 
-        public void Register<T, TImplementation>()
-            where T : class
-            where TImplementation : class, T
+        void IContainerRegistrar.Register<T, TImplementation>()
         {
             _registrar.Register<T, TImplementation>();
+        }
+
+        void IContainerRegistrar.Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        {
+            _registrar.Register(factoryMethod);
         }
 
         void IContainerRegistrar.RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)

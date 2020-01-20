@@ -1,12 +1,13 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Saga
+namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
-    using Configuration;
     using Configurators;
     using Mappings;
+    using MassTransit.Configurators;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
+    using Saga.Configuration;
 
 
     public static class EntityFrameworkRepositoryRegistrationExtensions
@@ -19,7 +20,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         /// <typeparam name="TSaga"></typeparam>
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<TSaga> EntityFrameworkRepository<TSaga>(this ISagaRegistrationConfigurator<TSaga> configurator,
-            Action<IEntityFrameworkSagaRepositoryConfigurator> configure)
+            Action<IEntityFrameworkSagaRepositoryConfigurator<TSaga>> configure)
             where TSaga : class, ISaga
         {
             var entityFrameworkSagaRepositoryConfigurator = new EntityFrameworkSagaRepositoryConfigurator<TSaga>();
@@ -28,9 +29,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
             BusConfigurationResult.CompileResults(entityFrameworkSagaRepositoryConfigurator.Validate());
 
-            var factoryMethod = entityFrameworkSagaRepositoryConfigurator.BuildFactoryMethod();
-
-            configurator.Repository(x => x.RegisterFactoryMethod(factoryMethod));
+            configurator.Repository(x => entityFrameworkSagaRepositoryConfigurator.Register(x));
 
             return configurator;
         }
@@ -45,10 +44,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         /// <typeparam name="TSaga"></typeparam>
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<TSaga> EntityFrameworkRepository<TSaga>(this ISagaRegistrationConfigurator<TSaga> configurator,
-            IEntityFrameworkSagaRepository sagaRepository, Action<IEntityFrameworkSagaRepositoryConfigurator> configure = null,
+            IEntityFrameworkSagaRepository sagaRepository, Action<IEntityFrameworkSagaRepositoryConfigurator<TSaga>> configure = null,
             Action<EntityTypeBuilder<TSaga>> configureSagaMapping = null)
-            where TSaga : class, ISaga =>
-            configurator.EntityFrameworkRepository(sagaRepository, configure, new ActionSagaClassMap<TSaga>(configureSagaMapping));
+            where TSaga : class, ISaga
+        {
+            //return configurator.EntityFrameworkRepository(sagaRepository, configure, new ActionSagaClassMap<TSaga>(configureSagaMapping));
+
+            return configurator;
+        }
 
         /// <summary>
         /// Adds a EntityFramework saga repository to the registration
@@ -71,6 +74,34 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
                 configure?.Invoke(cfg);
             });
+        }
+
+        /// <summary>
+        /// Configure the repository for use with SQL Server
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IEntityFrameworkSagaRepositoryConfigurator<T> UseSqlServer<T>(this IEntityFrameworkSagaRepositoryConfigurator<T> configurator)
+            where T : class, ISaga
+        {
+            configurator.LockStatementProvider = new SqlServerLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the repository for use with Postgres
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IEntityFrameworkSagaRepositoryConfigurator<T> UsePostgres<T>(this IEntityFrameworkSagaRepositoryConfigurator<T> configurator)
+            where T : class, ISaga
+        {
+            configurator.LockStatementProvider = new PostgresLockStatementProvider();
+
+            return configurator;
         }
 
         /// <summary>
@@ -101,10 +132,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                 _configure = configure;
             }
 
-            protected override void Configure(EntityTypeBuilder<T> entityTypeBuilder, ModelBuilder modelBuilder)
+            protected override void Configure(EntityTypeBuilder<T> entity, ModelBuilder model)
             {
-                base.Configure(entityTypeBuilder, modelBuilder);
-                _configure?.Invoke(entityTypeBuilder);
+                base.Configure(entity, model);
+                _configure?.Invoke(entity);
             }
         }
     }

@@ -143,6 +143,12 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<T>().Use<TImplementation>();
         }
 
+        public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
+        {
+            _expression.For<T>().Use(context => factoryMethod(context.GetInstance<IConfigurationServiceProvider>()));
+        }
+
         public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {

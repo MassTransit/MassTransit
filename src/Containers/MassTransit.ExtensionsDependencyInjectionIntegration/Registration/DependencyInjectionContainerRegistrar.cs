@@ -149,6 +149,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             _collection.TryAddScoped<T, TImplementation>();
         }
 
+        public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
+        {
+            _collection.TryAddScoped(provider => factoryMethod(provider.GetRequiredService<IConfigurationServiceProvider>()));
+        }
+
         void IContainerRegistrar.RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
         {
             _collection.TryAddSingleton(provider => factoryMethod(provider.GetRequiredService<IConfigurationServiceProvider>()));

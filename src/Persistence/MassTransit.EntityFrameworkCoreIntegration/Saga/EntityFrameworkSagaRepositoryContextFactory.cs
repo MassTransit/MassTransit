@@ -1,7 +1,6 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
     using System;
-    using System.Data;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -18,15 +17,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     {
         readonly ISagaDbContextFactory<TSaga> _dbContextFactory;
         readonly ISagaConsumeContextFactory<DbContext, TSaga> _consumeContextFactory;
-        readonly IsolationLevel _isolationLevel;
         readonly ISagaRepositoryLockStrategy<TSaga> _lockStrategy;
 
         public EntityFrameworkSagaRepositoryContextFactory(ISagaDbContextFactory<TSaga> dbContextFactory,
-            ISagaConsumeContextFactory<DbContext, TSaga> consumeContextFactory, IsolationLevel isolationLevel, ISagaRepositoryLockStrategy<TSaga> lockStrategy)
+            ISagaConsumeContextFactory<DbContext, TSaga> consumeContextFactory, ISagaRepositoryLockStrategy<TSaga> lockStrategy)
         {
             _dbContextFactory = dbContextFactory;
             _consumeContextFactory = consumeContextFactory;
-            _isolationLevel = isolationLevel;
             _lockStrategy = lockStrategy;
         }
 
@@ -144,7 +141,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         async Task WithinTransaction(DbContext context, CancellationToken cancellationToken, Func<Task> callback)
         {
-            await using var transaction = await context.Database.BeginTransactionAsync(_isolationLevel, cancellationToken).ConfigureAwait(false);
+            await using var transaction = await context.Database.BeginTransactionAsync(_lockStrategy.IsolationLevel, cancellationToken).ConfigureAwait(false);
 
             void Rollback()
             {
@@ -183,7 +180,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         async Task<T> WithinTransaction<T>(DbContext context, CancellationToken cancellationToken, Func<Task<T>> callback)
         {
-            await using var transaction = await context.Database.BeginTransactionAsync(_isolationLevel, cancellationToken).ConfigureAwait(false);
+            await using var transaction = await context.Database.BeginTransactionAsync(_lockStrategy.IsolationLevel, cancellationToken).ConfigureAwait(false);
 
             void Rollback()
             {
