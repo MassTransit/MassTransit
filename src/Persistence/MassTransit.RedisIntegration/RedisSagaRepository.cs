@@ -12,8 +12,7 @@
 
     public class RedisSagaRepository<TSaga> :
         ISagaRepository<TSaga>,
-        ILoadSagaRepository<TSaga>,
-        IRetrieveSagaFromRepository<TSaga>
+        ILoadSagaRepository<TSaga>
         where TSaga : class, IVersionedSaga
     {
         readonly ISagaRepository<TSaga> _repository;
@@ -41,13 +40,8 @@
                     return databaseContext.Get(correlationId);
 
                 return TaskUtil.Faulted<TSaga>(new NotSupportedException(
-                    $"{nameof(GetSaga)} is not supported for {TypeMetadataCache<TSaga>.ShortName}"));
+                    $"{nameof(Load)} is not supported for {TypeMetadataCache<TSaga>.ShortName}"));
             });
-        }
-
-        public Task<TSaga> GetSaga(Guid correlationId)
-        {
-            return Load(correlationId);
         }
 
         void IProbeSite.Probe(ProbeContext context)
