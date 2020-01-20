@@ -2,7 +2,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
     using System;
     using System.Data;
-    using System.Data.SqlClient;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -60,7 +59,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                     });
 
                 var executionStrategy = dbContext.Database.CreateExecutionStrategy();
-                if (executionStrategy is SqlServerRetryingExecutionStrategy)
+                if (executionStrategy is ExecutionStrategy)
                 {
                     await executionStrategy.ExecuteAsync(Send).ConfigureAwait(false);
                 }
@@ -98,7 +97,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                 }
 
                 var executionStrategy = dbContext.Database.CreateExecutionStrategy();
-                if (executionStrategy is SqlServerRetryingExecutionStrategy)
+                if (executionStrategy is ExecutionStrategy)
                 {
                     await executionStrategy.ExecuteAsync(Send).ConfigureAwait(false);
                 }
@@ -128,7 +127,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                     });
 
                 var executionStrategy = dbContext.Database.CreateExecutionStrategy();
-                if (executionStrategy is SqlServerRetryingExecutionStrategy)
+                if (executionStrategy is ExecutionStrategy)
                 {
                     return await executionStrategy.ExecuteAsync(Send).ConfigureAwait(false);
                 }
@@ -145,7 +144,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         async Task WithinTransaction(DbContext context, CancellationToken cancellationToken, Func<Task> callback)
         {
-            using var transaction = await context.Database.BeginTransactionAsync(_isolationLevel, cancellationToken).ConfigureAwait(false);
+            await using var transaction = await context.Database.BeginTransactionAsync(_isolationLevel, cancellationToken).ConfigureAwait(false);
 
             void Rollback()
             {
@@ -170,11 +169,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                 Rollback();
                 throw;
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
-                if (!IsDeadlockException(ex))
-                    Rollback();
-
+                Rollback();
                 throw;
             }
             catch (Exception)
@@ -186,7 +183,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         async Task<T> WithinTransaction<T>(DbContext context, CancellationToken cancellationToken, Func<Task<T>> callback)
         {
-            using var transaction = await context.Database.BeginTransactionAsync(_isolationLevel, cancellationToken).ConfigureAwait(false);
+            await using var transaction = await context.Database.BeginTransactionAsync(_isolationLevel, cancellationToken).ConfigureAwait(false);
 
             void Rollback()
             {
@@ -213,11 +210,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                 Rollback();
                 throw;
             }
-            catch (DbUpdateException ex)
+            catch (DbUpdateException)
             {
-                if (!IsDeadlockException(ex))
-                    Rollback();
-
+                Rollback();
                 throw;
             }
             catch (Exception)
@@ -225,11 +220,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                 Rollback();
                 throw;
             }
-        }
-
-        static bool IsDeadlockException(Exception exception)
-        {
-            return exception.GetBaseException() is SqlException baseException && baseException.Number == 1205;
         }
     }
 }

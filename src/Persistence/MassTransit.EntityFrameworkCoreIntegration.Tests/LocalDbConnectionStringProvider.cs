@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 {
     using System;
-    using System.Data.SqlClient;
+    using Microsoft.Data.SqlClient;
 
 
     public static class LocalDbConnectionStringProvider

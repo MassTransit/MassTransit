@@ -1,4 +1,4 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency.DataAccess
 {
     using System.Collections.Generic;
     using Mappings;
@@ -7,7 +7,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 
     public class SagaWithDependencyContext : SagaDbContext
     {
-        public SagaWithDependencyContext(DbContextOptions<SagaWithDependencyContext> options)
+        public SagaWithDependencyContext(DbContextOptions options)
             : base(options)
         {
         }

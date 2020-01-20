@@ -1,7 +1,8 @@
-﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests
+﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency.Messages
 {
     using System;
     using MassTransit.Tests.Saga.Messages;
+
 
     [Serializable]
     public class UpdateSagaDependency :

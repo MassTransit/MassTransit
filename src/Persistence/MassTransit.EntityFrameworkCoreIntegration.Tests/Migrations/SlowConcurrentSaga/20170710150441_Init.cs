@@ -2,32 +2,31 @@
 
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.SlowConcurrentSaga
 {
     public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "EfCoreSimpleSagas",
+                name: "EfCoreSlowConcurrentSagas",
                 columns: table => new
                 {
                     CorrelationId = table.Column<Guid>(nullable: false),
-                    Completed = table.Column<bool>(nullable: false),
-                    Initiated = table.Column<bool>(nullable: false),
+                    CurrentState = table.Column<bool>(maxLength: 40, nullable: false),
                     Name = table.Column<string>(maxLength: 40, nullable: true),
-                    Observed = table.Column<bool>(nullable: false)
+                    Counter = table.Column<int>(nullable: false),
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EfCoreSimpleSagas", x => x.CorrelationId);
+                    table.PrimaryKey("PK_EfCoreSlowConcurrentSagas", x => x.CorrelationId);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "EfCoreSimpleSagas");
+                name: "EfCoreSlowConcurrentSagas");
         }
     }
 }

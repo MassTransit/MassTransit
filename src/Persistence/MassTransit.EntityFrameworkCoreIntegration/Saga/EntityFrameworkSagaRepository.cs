@@ -35,11 +35,7 @@
         {
             var statementProvider = lockStatementProvider ?? new SqlServerLockStatementProvider();
 
-            ILoadQueryProvider<TSaga> queryProvider = new DefaultSagaLoadQueryProvider<TSaga>();
-            if (queryCustomization != null)
-                queryProvider = new CustomSagaLoadQueryProvider<TSaga>(queryProvider, queryCustomization);
-
-            var queryExecutor = new PessimisticLoadQueryExecutor<TSaga>(queryProvider, statementProvider);
+            var queryExecutor = new PessimisticLoadQueryExecutor<TSaga>(statementProvider, queryCustomization);
             var lockStrategy = new PessimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor);
 
             return CreateRepository(dbContextFactory, lockStrategy, IsolationLevel.Serializable);

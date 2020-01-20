@@ -1,7 +1,6 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests
+namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SimpleSaga.DataAccess
 {
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Mappings;
     using Microsoft.EntityFrameworkCore;
 
