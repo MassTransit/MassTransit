@@ -76,6 +76,15 @@ namespace MassTransit.Registration
             where TImplementation : class, T;
 
         /// <summary>
+        /// Register a service, implemented by the implementation type, which is created in each
+        /// container scope.
+        /// </summary>
+        /// <typeparam name="T">The interface type</typeparam>
+        /// <param name="factoryMethod">Creates the instance, when it is first accessed by the container</param>
+        void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class;
+
+        /// <summary>
         /// Register a single instance, which is created by the specified factory method
         /// </summary>
         /// <param name="factoryMethod">Creates the instance, when it is first accessed by the container</param>

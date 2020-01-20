@@ -1,0 +1,9 @@
+# this compose file will start local services the same as those running on appveyor CI for testing.
+
+version: '2.3'
+services:
+  mongo:
+    image: "mongo"
+    container_name: mongo
+    ports:
+    - '27017-27019:27017-27019'

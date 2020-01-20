@@ -24,7 +24,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Mappings
             Configure(entityTypeBuilder, modelBuilder);
         }
 
-        protected virtual void Configure(EntityTypeBuilder<TSaga> entityTypeBuilder, ModelBuilder modelBuilder)
+        protected virtual void Configure(EntityTypeBuilder<TSaga> entity, ModelBuilder model)
         {
         }
     }

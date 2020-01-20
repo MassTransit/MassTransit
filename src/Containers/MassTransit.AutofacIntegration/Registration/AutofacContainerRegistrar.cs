@@ -156,10 +156,16 @@ namespace MassTransit.AutofacIntegration.Registration
             _builder.RegisterType<TImplementation>().As<T>().InstancePerLifetimeScope();
         }
 
-        public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
             _builder.Register(context => factoryMethod(context.Resolve<IConfigurationServiceProvider>()));
+        }
+
+        public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
+        {
+            _builder.Register(context => factoryMethod(context.Resolve<IConfigurationServiceProvider>())).SingleInstance();
         }
 
         public void RegisterSingleInstance<T>(T instance)

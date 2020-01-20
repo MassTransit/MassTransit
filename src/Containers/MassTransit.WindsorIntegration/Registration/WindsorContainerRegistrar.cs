@@ -177,6 +177,13 @@ namespace MassTransit.WindsorIntegration.Registration
                 _container.Register(Component.For<T>().ImplementedBy<TImplementation>().LifestyleScoped());
         }
 
+        public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
+        {
+            _container.Register(Component.For<T>().UsingFactoryMethod(kernel => factoryMethod(kernel.Resolve<IConfigurationServiceProvider>()))
+                .LifestyleScoped());
+        }
+
         public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {

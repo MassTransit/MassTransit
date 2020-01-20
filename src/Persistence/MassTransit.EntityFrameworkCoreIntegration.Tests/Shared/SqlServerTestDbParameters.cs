@@ -3,7 +3,6 @@
     using System;
     using System.Reflection;
     using Microsoft.EntityFrameworkCore;
-    using TestFramework.Logging;
 
 
     public class SqlServerTestDbParameters : ITestDbParameters

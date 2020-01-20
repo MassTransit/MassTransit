@@ -5,7 +5,6 @@ namespace MassTransit.MongoDbIntegration.Saga.Configuration
     using CollectionNameFormatters;
     using Context;
     using GreenPipes;
-    using MassTransit.Saga;
     using MongoDB.Driver;
     using Registration;
 
@@ -15,7 +14,6 @@ namespace MassTransit.MongoDbIntegration.Saga.Configuration
         ISpecification
         where TSaga : class, IVersionedSaga
     {
-        readonly IMongoDbSagaConsumeContextFactory _mongoDbSagaConsumeContextFactory;
         Func<IConfigurationServiceProvider, ICollectionNameFormatter> _collectionNameFormatterFactory;
         Func<IConfigurationServiceProvider, IMongoDatabase> _databaseFactory;
         string _databaseName;
@@ -23,7 +21,6 @@ namespace MassTransit.MongoDbIntegration.Saga.Configuration
         public MongoDbSagaRepositoryConfigurator()
         {
             CollectionNameFormatter(_ => DotCaseCollectionNameFormatter.Instance);
-            _mongoDbSagaConsumeContextFactory = new MongoDbSagaConsumeContextFactory();
         }
 
         public string Connection
@@ -82,17 +79,18 @@ namespace MassTransit.MongoDbIntegration.Saga.Configuration
                 yield return this.Failure("DatabaseName", "must be specified");
         }
 
-        public Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> BuildFactoryMethod()
+        public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
+            where T : class, IVersionedSaga
         {
-            ISagaRepository<TSaga> CreateRepository(IConfigurationServiceProvider provider)
+            IMongoCollection<TSaga> MongoCollectionFactory(IConfigurationServiceProvider provider)
             {
-                var databaseFactory = _databaseFactory(provider);
+                var database = _databaseFactory(provider);
                 var collectionNameFormatter = _collectionNameFormatterFactory(provider);
-
-                return new MongoDbSagaRepository<TSaga>(databaseFactory, _mongoDbSagaConsumeContextFactory, collectionNameFormatter);
+                return database.GetCollection<TSaga>(collectionNameFormatter);
             }
 
-            return CreateRepository;
+            configurator.Register(MongoCollectionFactory);
+            configurator.RegisterSagaRepository<T, IMongoCollection<T>, MongoDbSagaConsumeContextFactory<T>, MongoDbSagaRepositoryContextFactory<T>>();
         }
     }
 }

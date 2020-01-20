@@ -9,17 +9,17 @@
     class SagaWithDependencyMap :
         SagaClassMap<SagaWithDependency>
     {
-        protected override void Configure(EntityTypeBuilder<SagaWithDependency> entityTypeBuilder, ModelBuilder modelBuilder)
+        protected override void Configure(EntityTypeBuilder<SagaWithDependency> entity, ModelBuilder model)
         {
-            entityTypeBuilder.Property(x => x.Name).HasMaxLength(40);
-            entityTypeBuilder.Property(x => x.Initiated);
-            entityTypeBuilder.Property(x => x.Completed);
-            entityTypeBuilder.ToTable("EfCoreSagasWithDepencies");
+            entity.Property(x => x.Name).HasMaxLength(40);
+            entity.Property(x => x.Initiated);
+            entity.Property(x => x.Completed);
+            entity.ToTable("EfCoreSagasWithDepencies");
 
-            entityTypeBuilder.HasOne(x => x.Dependency).WithMany().IsRequired();
+            entity.HasOne(x => x.Dependency).WithMany().IsRequired();
 
-            ConfigureSagaDependency(modelBuilder);
-            ConfigureSagaInnerDependency(modelBuilder);
+            ConfigureSagaDependency(model);
+            ConfigureSagaInnerDependency(model);
         }
 
         static void ConfigureSagaDependency(ModelBuilder modelBuilder, string id = "Id")

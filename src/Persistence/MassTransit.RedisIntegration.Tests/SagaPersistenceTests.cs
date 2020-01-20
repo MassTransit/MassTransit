@@ -7,6 +7,7 @@
     using Shouldly;
     using StackExchange.Redis;
     using TestFramework;
+    using Testing;
 
 
     [TestFixture]
@@ -24,17 +25,17 @@
 
             var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            found.ShouldBeTrue();
+            found.ShouldNotBeNull();
 
             var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
             found = await _sagaRepository.Value.ShouldContainSaga(sagaId, x => x != null && x.Moved, TestTimeout);
-            found.ShouldBeTrue();
+            found.ShouldNotBeNull();
 
-            var retrieveRepository = _sagaRepository.Value as IRetrieveSagaFromRepository<SimpleSaga>;
-            var retrieved = await retrieveRepository.GetSaga(sagaId);
+            var retrieveRepository = _sagaRepository.Value as ILoadSagaRepository<SimpleSaga>;
+            var retrieved = await retrieveRepository.Load(sagaId);
             retrieved.ShouldNotBeNull();
             retrieved.Moved.ShouldBeTrue();
         }
@@ -49,7 +50,7 @@
 
             var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            found.ShouldBeTrue();
+            found.ShouldNotBeNull();
         }
 
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;
@@ -83,17 +84,17 @@
 
             var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            found.ShouldBeTrue();
+            found.ShouldNotBeNull();
 
             var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
             found = await _sagaRepository.Value.ShouldContainSaga(sagaId, x => x != null && x.Moved, TestTimeout);
-            found.ShouldBeTrue();
+            found.ShouldNotBeNull();
 
-            var retrieveRepository = _sagaRepository.Value as IRetrieveSagaFromRepository<SimpleSaga>;
-            var retrieved = await retrieveRepository.GetSaga(sagaId);
+            var retrieveRepository = _sagaRepository.Value as ILoadSagaRepository<SimpleSaga>;
+            var retrieved = await retrieveRepository.Load(sagaId);
             retrieved.ShouldNotBeNull();
             retrieved.Moved.ShouldBeTrue();
         }
@@ -108,7 +109,7 @@
 
             var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            found.ShouldBeTrue();
+            found.ShouldNotBeNull();
         }
 
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;
@@ -142,18 +143,17 @@
 
             var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            found.ShouldBeTrue();
+            found.ShouldNotBeNull();
 
             var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
             found = await _sagaRepository.Value.ShouldContainSaga(sagaId, x => x != null && x.Moved, TestTimeout);
-            found.ShouldBeTrue();
+            found.ShouldNotBeNull();
 
-            var retrieveRepository = _sagaRepository.Value as IRetrieveSagaFromRepository<SimpleSaga>;
-
-            var retrieved = await retrieveRepository.GetSaga(sagaId);
+            var retrieveRepository = _sagaRepository.Value as ILoadSagaRepository<SimpleSaga>;
+            var retrieved = await retrieveRepository.Load(sagaId);
             retrieved.ShouldNotBeNull();
             retrieved.Moved.ShouldBeTrue();
         }
@@ -168,7 +168,7 @@
 
             var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            found.ShouldBeTrue();
+            found.ShouldNotBeNull();
         }
 
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;

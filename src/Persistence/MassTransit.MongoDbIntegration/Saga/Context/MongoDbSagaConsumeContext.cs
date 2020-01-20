@@ -17,26 +17,73 @@
         where TMessage : class
         where TSaga : class, IVersionedSaga
     {
-        readonly IMongoCollection<TSaga> _collection;
-        readonly bool _existing;
+        readonly IMongoCollection<TSaga> _mongoCollection;
+        readonly SagaConsumeContextMode _mode;
 
-        public MongoDbSagaConsumeContext(IMongoCollection<TSaga> collection, ConsumeContext<TMessage> context, TSaga instance, bool existing = true)
+        public MongoDbSagaConsumeContext(IMongoCollection<TSaga> mongoCollection, ConsumeContext<TMessage> context, TSaga instance,
+            SagaConsumeContextMode mode)
             : base(context)
         {
             Saga = instance;
-            _collection = collection;
-            _existing = existing;
+            _mongoCollection = mongoCollection;
+            _mode = mode;
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;
 
-        public Task SetCompleted()
+        public async Task SetCompleted()
         {
+            if (_mode == SagaConsumeContextMode.Insert || _mode == SagaConsumeContextMode.Load)
+                await Delete().ConfigureAwait(false);
+
             IsCompleted = true;
 
-            return _existing
-                ? Remove()
-                : TaskUtil.Completed;
+            this.LogRemoved();
+        }
+
+       async Task Add()
+        {
+            try
+            {
+                await _mongoCollection.InsertOneAsync(Saga, null, CancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                throw new SagaException("Saga add failed", typeof(TSaga), typeof(TMessage), Saga.CorrelationId, exception);
+            }
+        }
+
+        async Task Update()
+        {
+            Saga.Version++;
+            try
+            {
+                var result = await _mongoCollection.ReplaceOneAsync(x => x.CorrelationId == Saga.CorrelationId, Saga, null, CancellationToken)
+                    .ConfigureAwait(false);
+
+                if (result == null)
+                    throw new MongoDbConcurrencyException("Unable to update saga. It may not have been found or may have been updated by another process.");
+            }
+            catch (Exception exception)
+            {
+                throw new SagaException("Saga update failed", typeof(TSaga), typeof(TMessage), Saga.CorrelationId, exception);
+            }
+        }
+
+        async Task Delete()
+        {
+            try
+            {
+                var result = await _mongoCollection.DeleteOneAsync(x => x.CorrelationId == Saga.CorrelationId && x.Version <= Saga.Version, CancellationToken)
+                    .ConfigureAwait(false);
+
+                if (result.DeletedCount == 0)
+                    throw new MongoDbConcurrencyException("Unable to delete saga. It may not have been found or may have been updated.");
+            }
+            catch (Exception exception)
+            {
+                throw new SagaException("Saga update failed", typeof(TSaga), typeof(TMessage), Saga.CorrelationId, exception);
+            }
         }
 
         public TSaga Saga { get; }
@@ -47,30 +94,9 @@
         {
             return IsCompleted
                 ? TaskUtil.Completed
-                : Add();
-        }
-
-        async Task Add()
-        {
-            try
-            {
-                await _collection.InsertOneAsync(Saga, null, CancellationToken).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                throw new MongoDbConcurrencyException("Failed to add saga, it may have already been added.", exception);
-            }
-        }
-
-        async Task Remove()
-        {
-            var result = await _collection.DeleteOneAsync(x => x.CorrelationId == Saga.CorrelationId && x.Version <= Saga.Version, CancellationToken)
-                .ConfigureAwait(false);
-
-            if (result.DeletedCount == 0)
-                throw new MongoDbConcurrencyException("Unable to delete saga. It may not have been found or may have been updated.");
-
-            this.LogRemoved();
+                : _mode == SagaConsumeContextMode.Add
+                    ? Add()
+                    : Update();
         }
     }
 }

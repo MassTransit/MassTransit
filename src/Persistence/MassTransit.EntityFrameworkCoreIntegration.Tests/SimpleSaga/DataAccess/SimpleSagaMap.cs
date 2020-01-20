@@ -7,14 +7,14 @@
 
     class SimpleSagaMap : SagaClassMap<MassTransit.Tests.Saga.SimpleSaga>
     {
-        protected override void Configure(EntityTypeBuilder<MassTransit.Tests.Saga.SimpleSaga> entityTypeBuilder, ModelBuilder modelBuilder)
+        protected override void Configure(EntityTypeBuilder<MassTransit.Tests.Saga.SimpleSaga> entity, ModelBuilder model)
         {
-            entityTypeBuilder.Property(x => x.Name).HasMaxLength(40);
-            entityTypeBuilder.Property(x => x.Initiated);
-            entityTypeBuilder.Property(x => x.Observed);
-            entityTypeBuilder.Property(x => x.Completed);
+            entity.Property(x => x.Name).HasMaxLength(40);
+            entity.Property(x => x.Initiated);
+            entity.Property(x => x.Observed);
+            entity.Property(x => x.Completed);
 
-            entityTypeBuilder.ToTable("EfCoreSimpleSagas");
+            entity.ToTable("EfCoreSimpleSagas");
         }
     }
 }

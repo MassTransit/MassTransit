@@ -1,6 +1,7 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
     using System;
+    using System.Data;
     using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Saga;
@@ -14,11 +15,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         readonly ILoadQueryProvider<TSaga> _provider;
         readonly ILoadQueryExecutor<TSaga> _executor;
 
-        public OptimisticSagaRepositoryLockStrategy(ILoadQueryProvider<TSaga> provider, ILoadQueryExecutor<TSaga> executor)
+        public OptimisticSagaRepositoryLockStrategy(ILoadQueryProvider<TSaga> provider, ILoadQueryExecutor<TSaga> executor, IsolationLevel isolationLevel)
         {
             _provider = provider;
             _executor = executor;
+
+            IsolationLevel = isolationLevel;
         }
+
+        public IsolationLevel IsolationLevel { get; }
 
         public Task<TSaga> Load(DbContext context, Guid correlationId, CancellationToken cancellationToken)
         {

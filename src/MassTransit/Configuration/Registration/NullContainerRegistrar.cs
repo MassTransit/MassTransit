@@ -96,6 +96,11 @@ namespace MassTransit.Registration
         {
         }
 
+        public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
+        {
+        }
+
         public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {

@@ -25,7 +25,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         public DbContextSagaRepositoryContext(DbContext dbContext, ConsumeContext<TMessage> consumeContext,
             ISagaConsumeContextFactory<DbContext, TSaga> factory, ISagaRepositoryLockStrategy<TSaga> lockStrategy)
-            : base(consumeContext)
+            : base(consumeContext, dbContext)
         {
             _dbContext = dbContext;
             _consumeContext = consumeContext;
