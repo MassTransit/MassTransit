@@ -10,7 +10,14 @@ namespace MassTransit.Logging
         public static StartedActivity? StartSendActivity<T>(this EnabledDiagnosticSource source, SendContext<T> context, params (string, string)[] tags)
             where T : class
         {
-            var startedActivity = source.StartActivity(GetSendBags(context), GetSendTags(context, tags));
+            string parentActivityId = null;
+            if (context.Headers.TryGetHeader(DiagnosticHeaders.ActivityId, out var headerValue)
+                && headerValue is string activityId && !string.IsNullOrWhiteSpace(activityId))
+            {
+                parentActivityId = activityId;
+            }
+
+            var startedActivity = source.StartActivity(GetSendBags(context), GetSendTags(context, tags), parentActivityId);
 
             var activity = startedActivity.Value;
 

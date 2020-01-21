@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using GreenPipes;
     using NUnit.Framework;
@@ -12,15 +13,21 @@
     {
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
+        string _firstActivityId;
+        string _secondActivityId;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {
+                _firstActivityId = Activity.Current?.Id;
                 await context.ScheduleSend(TimeSpan.FromSeconds(10), new SecondMessage());
             });
 
-            _second = Handled<SecondMessage>(configurator);
+            _second = Handler<SecondMessage>(configurator, async context =>
+            {
+                _secondActivityId = Activity.Current?.Id;
+            });
         }
 
 
@@ -44,6 +51,8 @@
             AdvanceTime(TimeSpan.FromSeconds(10));
 
             await _second;
+
+            Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
         }
     }
 
