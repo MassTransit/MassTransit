@@ -25,9 +25,7 @@ namespace MassTransit.MongoDbIntegration.Saga
 
             BusConfigurationResult.CompileResults(mongoDbConfigurator.Validate());
 
-            var factoryMethod = mongoDbConfigurator.BuildFactoryMethod();
-
-            configurator.Repository(x => x.RegisterFactoryMethod(factoryMethod));
+            configurator.Repository(mongoDbConfigurator.Register);
 
             return configurator;
         }
