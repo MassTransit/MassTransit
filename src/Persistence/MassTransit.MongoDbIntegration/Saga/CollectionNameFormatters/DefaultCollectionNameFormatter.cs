@@ -4,7 +4,8 @@ namespace MassTransit.MongoDbIntegration.Saga.CollectionNameFormatters
     using MassTransit.Saga;
 
 
-    public class DefaultCollectionNameFormatter : ICollectionNameFormatter
+    public class DefaultCollectionNameFormatter :
+        ICollectionNameFormatter
     {
         readonly string _collectionName;
         const string DefaultCollectionName = "sagas";
@@ -23,7 +24,9 @@ namespace MassTransit.MongoDbIntegration.Saga.CollectionNameFormatters
         }
 
         public string Saga<TSaga>()
-            where TSaga : ISaga =>
-            _collectionName;
+            where TSaga : ISaga
+        {
+            return _collectionName;
+        }
     }
 }

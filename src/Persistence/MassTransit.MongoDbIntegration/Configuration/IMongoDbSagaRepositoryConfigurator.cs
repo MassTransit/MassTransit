@@ -1,9 +1,10 @@
-namespace MassTransit.MongoDbIntegration.Saga.Configuration
+namespace MassTransit.MongoDbIntegration
 {
     using System;
-    using CollectionNameFormatters;
     using MongoDB.Driver;
     using Registration;
+    using Saga;
+    using Saga.CollectionNameFormatters;
 
 
     public interface IMongoDbSagaRepositoryConfigurator

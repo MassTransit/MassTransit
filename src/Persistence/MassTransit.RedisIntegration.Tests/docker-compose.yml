@@ -3,7 +3,7 @@
 version: '2.3'
 services:
   redis:
-    image: "redis:5.0.7-alpine"
+    image: "redis:5.0.7"
     container_name: redis
-    expose:
-    - 6379
+    ports:
+      - '6379:6379'

@@ -4,10 +4,8 @@
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
-    using Metadata;
     using Saga;
     using StackExchange.Redis;
-    using Util;
 
 
     public class RedisSagaRepository<TSaga> :
@@ -33,15 +31,7 @@
 
         public Task<TSaga> Load(Guid correlationId)
         {
-            return _repositoryContextFactory.Execute(context =>
-            {
-                if (context is RedisSagaRepositoryContext<TSaga> redisSagaRepositoryContext
-                    && redisSagaRepositoryContext.Context is RedisDatabaseContext<TSaga> databaseContext)
-                    return databaseContext.Get(correlationId);
-
-                return TaskUtil.Faulted<TSaga>(new NotSupportedException(
-                    $"{nameof(Load)} is not supported for {TypeMetadataCache<TSaga>.ShortName}"));
-            });
+            return _repositoryContextFactory.Execute(context => context.Load(correlationId));
         }
 
         void IProbeSite.Probe(ProbeContext context)

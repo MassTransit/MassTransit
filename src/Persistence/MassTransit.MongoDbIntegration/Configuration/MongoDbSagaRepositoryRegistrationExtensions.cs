@@ -1,9 +1,10 @@
-namespace MassTransit.MongoDbIntegration.Saga
+namespace MassTransit.MongoDbIntegration
 {
     using System;
-    using Configuration;
     using Configurators;
+    using MassTransit.Configurators;
     using MongoDB.Driver;
+    using Saga;
 
 
     public static class MongoDbSagaRepositoryRegistrationExtensions
@@ -16,7 +17,7 @@ namespace MassTransit.MongoDbIntegration.Saga
         /// <typeparam name="TSaga"></typeparam>
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<TSaga> MongoDbRepository<TSaga>(this ISagaRegistrationConfigurator<TSaga> configurator,
-            Action<IMongoDbSagaRepositoryConfigurator<TSaga>> configure)
+            Action<IMongoDbSagaRepositoryConfigurator<TSaga>> configure = null)
             where TSaga : class, IVersionedSaga
         {
             var mongoDbConfigurator = new MongoDbSagaRepositoryConfigurator<TSaga>();

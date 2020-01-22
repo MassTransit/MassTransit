@@ -1,12 +1,13 @@
-namespace MassTransit.MongoDbIntegration.Saga.Configuration
+namespace MassTransit.MongoDbIntegration.Configurators
 {
     using System;
     using System.Collections.Generic;
-    using CollectionNameFormatters;
-    using Context;
     using GreenPipes;
     using MongoDB.Driver;
     using Registration;
+    using Saga;
+    using Saga.CollectionNameFormatters;
+    using Saga.Context;
 
 
     class MongoDbSagaRepositoryConfigurator<TSaga> :
@@ -29,32 +30,29 @@ namespace MassTransit.MongoDbIntegration.Saga.Configuration
             {
                 if (string.IsNullOrWhiteSpace(value))
                     throw new ArgumentException("Value should no be empty.", nameof(Connection));
+
                 var mongoUrl = MongoUrl.Create(value);
-                var mongoClient = new MongoClient(mongoUrl);
+
                 if (string.IsNullOrWhiteSpace(_databaseName))
                     _databaseName = mongoUrl.DatabaseName;
-                DatabaseFactory(_ => mongoClient.GetDatabase(_databaseName));
+
+                DatabaseFactory(_ =>
+                {
+                    var mongoClient = new MongoClient(mongoUrl);
+
+                    return mongoClient.GetDatabase(_databaseName);
+                });
             }
         }
 
         public string DatabaseName
         {
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Value should no be empty.", nameof(DatabaseName));
-                _databaseName = value;
-            }
+            set => _databaseName = value;
         }
 
         public string CollectionName
         {
-            set
-            {
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new ArgumentException("Value should no be empty.", nameof(CollectionName));
-                CollectionNameFormatter(_ => new DefaultCollectionNameFormatter(value));
-            }
+            set { CollectionNameFormatter(_ => new DefaultCollectionNameFormatter(value)); }
         }
 
         public void CollectionNameFormatter(Func<IConfigurationServiceProvider, ICollectionNameFormatter> collectionNameFormatterFactory)
@@ -89,7 +87,7 @@ namespace MassTransit.MongoDbIntegration.Saga.Configuration
                 return database.GetCollection<TSaga>(collectionNameFormatter);
             }
 
-            configurator.Register(MongoCollectionFactory);
+            configurator.RegisterSingleInstance(MongoCollectionFactory);
             configurator.RegisterSagaRepository<T, IMongoCollection<T>, MongoDbSagaConsumeContextFactory<T>, MongoDbSagaRepositoryContextFactory<T>>();
         }
     }
