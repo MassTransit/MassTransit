@@ -5,20 +5,25 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
     using Microsoft.EntityFrameworkCore;
 
 
-    public class PostgresTestDbParameters : ITestDbParameters
+    public class PostgresTestDbParameters :
+        ITestDbParameters
     {
         public DbContextOptionsBuilder GetDbContextOptions(Type dbContextType)
         {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder();
+            var builder = new DbContextOptionsBuilder();
 
-            dbContextOptionsBuilder.UseNpgsql("host=localhost;user id=postgres;password=Password12!;database=MassTransitUnitTests;",
-                m =>
-                {
-                    m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-                    m.MigrationsHistoryTable($"__{dbContextType.Name}");
-                });
+            Apply(dbContextType, builder);
 
-            return dbContextOptionsBuilder;
+            return builder;
+        }
+
+        public void Apply(Type dbContextType, DbContextOptionsBuilder builder)
+        {
+            builder.UseNpgsql("host=localhost;user id=postgres;password=Password12!;database=MassTransitUnitTests;", m =>
+            {
+                m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+                m.MigrationsHistoryTable($"__{dbContextType.Name}");
+            });
         }
 
         public ILockStatementProvider RawSqlLockStatements => new PostgresLockStatementProvider(false);

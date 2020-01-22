@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using Marten;
+    using MassTransit.Saga;
     using NUnit.Framework;
     using Saga;
     using Shouldly;

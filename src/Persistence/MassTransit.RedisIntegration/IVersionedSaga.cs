@@ -1,6 +1,6 @@
 ﻿namespace MassTransit.RedisIntegration
 {
-    using MassTransit.Saga;
+    using Saga;
 
 
     public interface IVersionedSaga :

@@ -15,14 +15,27 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         IsolationLevel IsolationLevel { set; }
         ILockStatementProvider LockStatementProvider { set; }
 
-        void UseDbContext<TContext>(Func<DbContextOptions, TContext> factoryMethod, Func<DbContextOptionsBuilder, DbContextOptionsBuilder> configure = null)
-            where TContext : DbContext;
+        /// <summary>
+        /// Add the DbContext to the container, and configure the repository to use it
+        /// </summary>
+        /// <param name="optionsAction"></param>
+        /// <typeparam name="TContext"></typeparam>
+        /// <typeparam name="TImplementation"></typeparam>
+        void AddDbContext<TContext, TImplementation>(Action<IConfigurationServiceProvider, DbContextOptionsBuilder<TImplementation>> optionsAction = null)
+            where TContext : DbContext
+            where TImplementation : DbContext, TContext;
 
         /// <summary>
-        /// Use already registered DbContext
+        /// Add the DbContext to the container using a pool, and configure the repository to use it
         /// </summary>
-        void AddExistingDbContext<TContext>()
-            where TContext : DbContext;
+        /// <param name="optionsAction"></param>
+        /// <param name="poolSize">The maximum number of pooled objects</param>
+        /// <typeparam name="TContext"></typeparam>
+        /// <typeparam name="TImplementation"></typeparam>
+        void AddDbContextPool<TContext, TImplementation>(Action<IConfigurationServiceProvider, DbContextOptionsBuilder<TImplementation>> optionsAction,
+            int poolSize = 128)
+            where TContext : DbContext
+            where TImplementation : DbContext, TContext;
 
         /// <summary>
         /// Use a simple factory method to create the database

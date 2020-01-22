@@ -5,24 +5,29 @@
     using Microsoft.EntityFrameworkCore;
 
 
-    public class SqlServerTestDbParameters : ITestDbParameters
+    public class SqlServerTestDbParameters :
+        ITestDbParameters
     {
         /// <summary>
         /// Get DB context options for SQL Server.
         /// </summary>
-        /// <param name="dbContextType">Type of the dbcontext, used for migration conventions</param>
+        /// <param name="dbContextType">Type of the DbContext, used for migration conventions</param>
         public DbContextOptionsBuilder GetDbContextOptions(Type dbContextType)
         {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder();
+            var builder = new DbContextOptionsBuilder();
 
-            dbContextOptionsBuilder.UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString(),
-                m =>
-                {
-                    m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-                    m.MigrationsHistoryTable($"__{dbContextType.Name}");
-                });
+            Apply(dbContextType, builder);
 
-            return dbContextOptionsBuilder;
+            return builder;
+        }
+
+        public void Apply(Type dbContextType, DbContextOptionsBuilder dbContextOptionsBuilder)
+        {
+            dbContextOptionsBuilder.UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString(), m =>
+            {
+                m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+                m.MigrationsHistoryTable($"__{dbContextType.Name}");
+            });
         }
 
         public ILockStatementProvider RawSqlLockStatements => new SqlServerLockStatementProvider(false);

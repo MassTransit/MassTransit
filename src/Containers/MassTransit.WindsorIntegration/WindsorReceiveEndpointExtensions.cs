@@ -293,7 +293,7 @@ namespace MassTransit
             configurator.AddPrePipeSpecification(specification);
         }
 
-        static void RegisterScopedContextProviderIfNotPresent(IWindsorContainer container)
+        internal static void RegisterScopedContextProviderIfNotPresent(this IWindsorContainer container)
         {
             if (!container.Kernel.HasComponent(typeof(ScopedConsumeContextProvider)))
             {

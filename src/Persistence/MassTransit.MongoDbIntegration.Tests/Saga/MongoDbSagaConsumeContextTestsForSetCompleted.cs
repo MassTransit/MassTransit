@@ -14,6 +14,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 {
     using System;
     using System.Threading.Tasks;
+    using MassTransit.Saga;
     using MongoDbIntegration.Saga.Context;
     using Moq;
     using NUnit.Framework;
@@ -48,7 +49,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Saga
 
             _mongoDbSagaConsumeContext =
                 new MongoDbSagaConsumeContext<SimpleSaga, InitiateSimpleSaga>(SagaRepository.Instance.GetCollection<SimpleSaga>("sagas"),
-                    Mock.Of<ConsumeContext<InitiateSimpleSaga>>(), _saga);
+                    Mock.Of<ConsumeContext<InitiateSimpleSaga>>(), _saga, SagaConsumeContextMode.Insert);
 
             await _mongoDbSagaConsumeContext.SetCompleted();
         }

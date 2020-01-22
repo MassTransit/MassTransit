@@ -15,8 +15,8 @@ namespace MassTransit.RedisIntegration.Contexts
         where TSaga : class, IVersionedSaga
         where TMessage : class
     {
-        readonly DatabaseContext<TSaga> _context;
         readonly ConsumeContext<TMessage> _consumeContext;
+        readonly DatabaseContext<TSaga> _context;
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;
 
         public RedisSagaRepositoryContext(DatabaseContext<TSaga> context, ConsumeContext<TMessage> consumeContext,
@@ -86,8 +86,6 @@ namespace MassTransit.RedisIntegration.Contexts
         {
             _context = context;
         }
-
-        public DatabaseContext<TSaga> Context => _context;
 
         public Task DisposeAsync(CancellationToken cancellationToken)
         {

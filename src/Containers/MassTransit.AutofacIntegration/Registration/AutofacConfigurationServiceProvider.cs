@@ -1,5 +1,6 @@
 namespace MassTransit.AutofacIntegration.Registration
 {
+    using System;
     using Autofac;
     using MassTransit.Registration;
 
@@ -24,6 +25,11 @@ namespace MassTransit.AutofacIntegration.Registration
             where T : class
         {
             return _lifetimeScope.ResolveOptional<T>();
+        }
+
+        public object GetService(Type serviceType)
+        {
+            return _lifetimeScope.ResolveOptional(serviceType);
         }
     }
 }

@@ -16,9 +16,9 @@ namespace MassTransit.MongoDbIntegration.Saga.Context
         where TSaga : class, IVersionedSaga
         where TMessage : class
     {
-        readonly IMongoCollection<TSaga> _mongoCollection;
         readonly ConsumeContext<TMessage> _consumeContext;
         readonly ISagaConsumeContextFactory<IMongoCollection<TSaga>, TSaga> _factory;
+        readonly IMongoCollection<TSaga> _mongoCollection;
 
         public MongoDbSagaRepositoryContext(IMongoCollection<TSaga> mongoCollection, ConsumeContext<TMessage> consumeContext,
             ISagaConsumeContextFactory<IMongoCollection<TSaga>, TSaga> factory)
@@ -45,14 +45,7 @@ namespace MassTransit.MongoDbIntegration.Saga.Context
         {
             try
             {
-                try
-                {
-                    await _mongoCollection.InsertOneAsync(instance).ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    throw new SagaException("Saga insert failed", typeof(TSaga), typeof(TSaga), instance.CorrelationId, exception);
-                }
+                await _mongoCollection.InsertOneAsync(instance).ConfigureAwait(false);
 
                 _consumeContext.LogInsert<TSaga, TMessage>(instance.CorrelationId);
 
@@ -72,6 +65,7 @@ namespace MassTransit.MongoDbIntegration.Saga.Context
             var instance = await _mongoCollection.Find(Builders<TSaga>.Filter.Eq(x => x.CorrelationId, correlationId))
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
+
             if (instance == null)
                 return default;
 
@@ -103,12 +97,9 @@ namespace MassTransit.MongoDbIntegration.Saga.Context
             return new DefaultSagaRepositoryQueryContext<TSaga>(this, instances);
         }
 
-        public async Task<TSaga> Load(Guid correlationId)
+        public Task<TSaga> Load(Guid correlationId)
         {
-            var result = await _context.Find(x => x.CorrelationId == correlationId)
-                .FirstOrDefaultAsync()
-                .ConfigureAwait(false);
-            return result;
+            return _context.Find(x => x.CorrelationId == correlationId).FirstOrDefaultAsync();
         }
     }
 }
