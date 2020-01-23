@@ -19,6 +19,7 @@
     {
         readonly IMongoCollection<TSaga> _mongoCollection;
         readonly SagaConsumeContextMode _mode;
+        bool _isCompleted;
 
         public MongoDbSagaConsumeContext(IMongoCollection<TSaga> mongoCollection, ConsumeContext<TMessage> context, TSaga instance,
             SagaConsumeContextMode mode)
@@ -34,14 +35,16 @@
         public async Task SetCompleted()
         {
             if (_mode == SagaConsumeContextMode.Insert || _mode == SagaConsumeContextMode.Load)
+            {
                 await Delete().ConfigureAwait(false);
 
-            IsCompleted = true;
+                this.LogRemoved();
+            }
 
-            this.LogRemoved();
+            _isCompleted = true;
         }
 
-       async Task Add()
+        async Task Add()
         {
             try
             {
@@ -88,7 +91,7 @@
 
         public TSaga Saga { get; }
 
-        public bool IsCompleted { get; private set; }
+        public bool IsCompleted => _isCompleted;
 
         Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
         {

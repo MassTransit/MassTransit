@@ -1,54 +1,63 @@
 ﻿namespace MassTransit.DocumentDbIntegration.Saga.Context
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes;
     using MassTransit.Context;
     using MassTransit.Saga;
-    using Microsoft.Azure.Documents;
-    using Microsoft.Azure.Documents.Client;
+    using Util;
 
 
     public class DocumentDbSagaConsumeContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
-        SagaConsumeContext<TSaga, TMessage>
+        SagaConsumeContext<TSaga, TMessage>,
+        IAsyncDisposable
         where TMessage : class
         where TSaga : class, IVersionedSaga
     {
-        readonly IDocumentClient _client;
-        readonly string _collectionName;
-        readonly string _databaseName;
-        readonly bool _existing;
-        readonly RequestOptions _requestOptions;
+        readonly DatabaseContext<TSaga> _databaseContext;
+        readonly SagaConsumeContextMode _mode;
+        bool _isCompleted;
 
-        public DocumentDbSagaConsumeContext(IDocumentClient client, string databaseName, string collectionName, ConsumeContext<TMessage> context,
-            TSaga instance, bool existing = true, RequestOptions requestOptions = null)
+        public DocumentDbSagaConsumeContext(DatabaseContext<TSaga> databaseContext, ConsumeContext<TMessage> context, TSaga instance,
+            SagaConsumeContextMode mode)
             : base(context)
         {
+            _databaseContext = databaseContext;
+            _mode = mode;
             Saga = instance;
-            _client = client;
-            _existing = existing;
-            _databaseName = databaseName;
-            _collectionName = collectionName;
-            _requestOptions = requestOptions ?? new RequestOptions();
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;
 
         public async Task SetCompleted()
         {
-            IsCompleted = true;
-
-            if (_existing)
+            if (_mode == SagaConsumeContextMode.Insert || _mode == SagaConsumeContextMode.Load)
             {
-                await _client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, Saga.CorrelationId.ToString()), _requestOptions)
-                    .ConfigureAwait(false);
+                await _databaseContext.Delete(Saga, CancellationToken).ConfigureAwait(false);
 
                 this.LogRemoved();
             }
+
+            _isCompleted = true;
         }
 
         public TSaga Saga { get; }
 
-        public bool IsCompleted { get; private set; }
+        public bool IsCompleted
+        {
+            get => _isCompleted;
+            set => _isCompleted = value;
+        }
+
+        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        {
+            return IsCompleted
+                ? TaskUtil.Completed
+                : _mode == SagaConsumeContextMode.Add
+                    ? _databaseContext.Add(Saga, cancellationToken)
+                    : _databaseContext.Update(Saga, cancellationToken);
+        }
     }
 }
