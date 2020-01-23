@@ -1,5 +1,6 @@
 namespace MassTransit.SimpleInjectorIntegration.Registration
 {
+    using System;
     using MassTransit.Registration;
     using SimpleInjector;
 
@@ -24,6 +25,13 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             where T : class
         {
             return _provider.TryGetInstance<T>();
+        }
+
+        public object GetService(Type serviceType)
+        {
+            IServiceProvider serviceProvider = _provider;
+
+            return serviceProvider.GetService(serviceType);
         }
     }
 }

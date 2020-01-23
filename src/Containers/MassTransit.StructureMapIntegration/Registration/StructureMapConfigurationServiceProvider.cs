@@ -1,5 +1,6 @@
 namespace MassTransit.StructureMapIntegration.Registration
 {
+    using System;
     using MassTransit.Registration;
     using StructureMap;
 
@@ -24,6 +25,11 @@ namespace MassTransit.StructureMapIntegration.Registration
             where T : class
         {
             return _container.TryGetInstance<T>();
+        }
+
+        public object GetService(Type serviceType)
+        {
+            return _container.TryGetInstance(serviceType);
         }
     }
 }

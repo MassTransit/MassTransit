@@ -1,5 +1,6 @@
 namespace MassTransit.WindsorIntegration.Registration
 {
+    using System;
     using Castle.MicroKernel;
     using MassTransit.Registration;
 
@@ -24,6 +25,11 @@ namespace MassTransit.WindsorIntegration.Registration
             where T : class
         {
             return _kernel.HasComponent(typeof(T)) ? _kernel.Resolve<T>() : null;
+        }
+
+        public object GetService(Type serviceType)
+        {
+            return _kernel.HasComponent(serviceType) ? _kernel.Resolve(serviceType) : null;
         }
     }
 }

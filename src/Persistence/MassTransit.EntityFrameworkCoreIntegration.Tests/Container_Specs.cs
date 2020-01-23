@@ -92,7 +92,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                     {
                         r.ConcurrencyMode = ConcurrencyMode.Optimistic;
 
-                        r.UseDbContext(options => new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder));
+                        r.AddDbContext<DbContext, TestInstanceDbContext>(ApplyBuilderOptions);
                     });
 
                 configurator.AddBus(provider => BusControl);
@@ -169,7 +169,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .EntityFrameworkRepository(r =>
                     {
-                        r.UseDbContext(options => new TestInstanceDbContext(options), b => DbContextOptionsBuilder);
+                        r.AddDbContext<DbContext, TestInstanceDbContext>(ApplyBuilderOptions);
 
                         r.ConcurrencyMode = ConcurrencyMode.Pessimistic;
                         if (DbContextOptionsBuilder.Options.Extensions.Any(x => x is NpgsqlOptionsExtension))

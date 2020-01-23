@@ -26,5 +26,10 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         {
             return _provider.GetService<T>();
         }
+
+        public object GetService(Type serviceType)
+        {
+            return _provider.GetService(serviceType);
+        }
     }
 }
