@@ -118,7 +118,7 @@ public class MyController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] string value)
     {
-        using(var transaction = TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+        using(var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
         {
             _dbContext.Posts.Add(new Post{...});
             await _dbContext.SaveChangesAsync();
@@ -151,7 +151,7 @@ public class Program
 
         while(/*some condition*/)
         {
-            using(var transaction = TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            using(var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 // Do whatever business logic you need.
 
