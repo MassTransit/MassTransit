@@ -91,13 +91,12 @@ namespace MassTransit.NHibernateIntegration.Saga
 
         public async Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
-            IList<Guid> instances = await _session.QueryOver<TSaga>()
+            IList<TSaga> instances = await _session.QueryOver<TSaga>()
                 .Where(query.FilterExpression)
-                .Select(x => x.CorrelationId)
-                .ListAsync<Guid>(cancellationToken)
+                .ListAsync<TSaga>(cancellationToken)
                 .ConfigureAwait(false);
 
-            return new DefaultSagaRepositoryQueryContext<TSaga>(this, instances);
+            return new LoadedSagaRepositoryQueryContext<TSaga>(this, instances);
         }
     }
 }
