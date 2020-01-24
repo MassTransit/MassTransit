@@ -7,11 +7,13 @@
 
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj"/>
-    <ProjectReference Include="..\MassTransit.DapperIntegration\MassTransit.DapperIntegration.csproj"/>
+    <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj" />
+    <ProjectReference Include="..\MassTransit.DapperIntegration\MassTransit.DapperIntegration.csproj" />
+    <ProjectReference Include="..\..\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj"/>
   </ItemGroup>
 
 </Project>

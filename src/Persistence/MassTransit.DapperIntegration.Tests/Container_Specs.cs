@@ -12,6 +12,13 @@ namespace MassTransit.MartenIntegration.Tests
 
     namespace ContainerTests
     {
+        using System.Data.SqlClient;
+        using Dapper;
+        using Dapper.Contrib.Extensions;
+        using DapperIntegration;
+        using DapperIntegration.Tests;
+
+
         public class Using_the_container_integration :
             InMemoryTestFixture
         {
@@ -40,7 +47,26 @@ namespace MassTransit.MartenIntegration.Tests
                 await updated;
             }
 
+            [OneTimeSetUp]
+            public async Task Setup()
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    string sql = @"
+                if not exists (select * from sysobjects where name='TestInstances' and xtype='U')
+                CREATE TABLE TestInstances (
+                    CorrelationId uniqueidentifier NOT NULL,
+                    CONSTRAINT PK_TestInstances_CorrelationId PRIMARY KEY CLUSTERED (CorrelationId),
+                    [Key] nvarchar(max),
+                    CurrentState nvarchar(max)
+                );
+            ";
+                    connection.Execute(sql);
+                }
+            }
+
             readonly IServiceProvider _provider;
+            string _connectionString;
 
             public Using_the_container_integration()
             {
@@ -51,8 +77,10 @@ namespace MassTransit.MartenIntegration.Tests
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
             {
+                _connectionString = LocalDbConnectionStringProvider.GetLocalDbConnectionString();
+
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
-                    .MartenRepository("server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;");
+                    .DapperRepository(_connectionString);
 
                 configurator.AddBus(provider => BusControl);
             }
@@ -68,6 +96,7 @@ namespace MassTransit.MartenIntegration.Tests
         public class TestInstance :
             SagaStateMachineInstance
         {
+            [ExplicitKey]
             public Guid CorrelationId { get; set; }
 
             public string CurrentState { get; set; }
