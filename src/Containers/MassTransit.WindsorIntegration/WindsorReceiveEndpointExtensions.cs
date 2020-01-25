@@ -5,10 +5,12 @@ namespace MassTransit
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using ConsumeConfigurators;
+    using Context;
     using Courier;
     using Registration;
     using Saga;
     using Scoping;
+    using WindsorIntegration.Configuration;
     using WindsorIntegration.Registration;
     using WindsorIntegration.ScopeProviders;
 
@@ -150,12 +152,27 @@ namespace MassTransit
             CompensateActivityHost(configurator, container.Kernel, configure);
         }
 
-        static void RegisterScopedContextProviderIfNotPresent(IWindsorContainer container)
+        /// <summary>
+        /// Enables message scope lifetime for windsor containers
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseMessageScope(this IConsumePipeConfigurator configurator)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var specification = new WindsorMessageScopePipeSpecification();
+
+            configurator.AddPrePipeSpecification(specification);
+        }
+
+        internal static void RegisterScopedContextProviderIfNotPresent(this IWindsorContainer container)
         {
             if (!container.Kernel.HasComponent(typeof(ScopedConsumeContextProvider)))
             {
                 container.Register(Component.For<ScopedConsumeContextProvider>().LifestyleScoped(),
-                    Component.For<ConsumeContext>().UsingFactoryMethod(kernel => kernel.Resolve<ScopedConsumeContextProvider>().GetContext())
+                    Component.For<ConsumeContext>()
+                        .UsingFactoryMethod(kernel => kernel.Resolve<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext())
                         .LifestyleScoped());
             }
         }

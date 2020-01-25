@@ -109,7 +109,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             {
                 var clientFactory = context.GetRequiredService<IClientFactory>();
 
-                var consumeContext = context.GetService<ConsumeContext>();
+                var consumeContext = context.GetConsumeContext();
                 return consumeContext != null
                     ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
                     : clientFactory.CreateRequestClient<T>(timeout);
@@ -130,7 +130,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             {
                 var clientFactory = context.GetRequiredService<IClientFactory>();
 
-                var consumeContext = context.GetService<ConsumeContext>();
+                var consumeContext = context.GetConsumeContext();
                 return consumeContext != null
                     ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
                     : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);

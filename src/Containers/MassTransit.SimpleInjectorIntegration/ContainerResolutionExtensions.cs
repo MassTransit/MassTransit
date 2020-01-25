@@ -1,6 +1,7 @@
 namespace MassTransit.SimpleInjectorIntegration
 {
     using System;
+    using Scoping;
     using SimpleInjector;
 
 
@@ -15,15 +16,9 @@ namespace MassTransit.SimpleInjectorIntegration
 
         public static ConsumeContext GetConsumeContext(this Container container)
         {
-            var scope = Lifestyle.Scoped.GetCurrentScope(container) != null;
-            if (scope)
-            {
-                var consumeContext = container.TryGetInstance<ConsumeContext>();
-                if (consumeContext != null)
-                    return consumeContext;
-            }
+            var scope = Lifestyle.Scoped.GetCurrentScope(container);
 
-            return null;
+            return scope?.Container.GetInstance<ScopedConsumeContextProvider>().GetContext();
         }
     }
 }

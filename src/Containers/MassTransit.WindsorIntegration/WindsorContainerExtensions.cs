@@ -9,7 +9,6 @@ namespace MassTransit
     using Internals.Extensions;
     using Registration;
     using Saga;
-    using WindsorIntegration.Configuration;
     using WindsorIntegration.Registration;
     using WindsorIntegration.ScopeProviders;
 
@@ -93,21 +92,7 @@ namespace MassTransit
         [Obsolete("Change to UseMessageScope - method was renamed to match middleware conventions")]
         public static void EnableMessageScope(this IConsumePipeConfigurator configurator)
         {
-            UseMessageScope(configurator);
-        }
-
-        /// <summary>
-        /// Enables message scope lifetime for windsor containers
-        /// </summary>
-        /// <param name="configurator"></param>
-        public static void UseMessageScope(this IConsumePipeConfigurator configurator)
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-
-            var specification = new WindsorMessageScopePipeSpecification();
-
-            configurator.AddPrePipeSpecification(specification);
+            configurator.UseMessageScope();
         }
 
         static IList<Type> FindTypes<T>(IKernel container, Func<Type, bool> filter)
