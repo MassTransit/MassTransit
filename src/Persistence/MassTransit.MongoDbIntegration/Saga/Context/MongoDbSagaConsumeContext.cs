@@ -61,7 +61,7 @@
             Saga.Version++;
             try
             {
-                var result = await _mongoCollection.ReplaceOneAsync(x => x.CorrelationId == Saga.CorrelationId, Saga, null, CancellationToken)
+                var result = await _mongoCollection.ReplaceOneAsync(x => x.CorrelationId == Saga.CorrelationId, Saga, (ReplaceOptions)null, CancellationToken)
                     .ConfigureAwait(false);
 
                 if (result == null)
