@@ -4,7 +4,6 @@ namespace MassTransit.DapperIntegration.Context
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Dapper.Contrib.Extensions;
     using GreenPipes;
     using MassTransit.Context;
     using Saga;

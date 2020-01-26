@@ -1,6 +1,5 @@
 namespace MassTransit.DapperIntegration.Context
 {
-    using System.Data.SqlClient;
     using System.Threading.Tasks;
     using Saga;
 
@@ -13,7 +12,9 @@ namespace MassTransit.DapperIntegration.Context
             SagaConsumeContextMode mode)
             where T : class
         {
-            return Task.FromResult<SagaConsumeContext<TSaga, T>>(new DapperSagaConsumeContext<TSaga, T>(context, consumeContext, instance, mode));
+            var sagaConsumeContext = new DapperSagaConsumeContext<TSaga, T>(context, consumeContext, instance, mode);
+
+            return Task.FromResult<SagaConsumeContext<TSaga, T>>(sagaConsumeContext);
         }
     }
 }

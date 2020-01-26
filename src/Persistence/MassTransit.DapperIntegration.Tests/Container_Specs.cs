@@ -12,7 +12,11 @@ namespace MassTransit.MartenIntegration.Tests
 
     namespace ContainerTests
     {
+    #if NETCOREAPP
+        using Microsoft.Data.SqlClient;
+    #else
         using System.Data.SqlClient;
+    #endif
         using Dapper;
         using Dapper.Contrib.Extensions;
         using DapperIntegration;

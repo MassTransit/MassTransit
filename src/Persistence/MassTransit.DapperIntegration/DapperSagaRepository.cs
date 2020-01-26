@@ -21,10 +21,15 @@
         {
             var consumeContextFactory = new DapperSagaConsumeContextFactory<TSaga>();
 
-            DapperOptions<TSaga> options = new DapperOptions<TSaga>(connectionString, isolationLevel);
+            var options = new DapperOptions<TSaga>(connectionString, isolationLevel);
             var repositoryContextFactory = new DapperSagaRepositoryContextFactory<TSaga>(options, consumeContextFactory);
 
             _repository = new SagaRepository<TSaga>(repositoryContextFactory);
+        }
+
+        public Task<TSaga> Load(Guid correlationId)
+        {
+            return _repository.Load(correlationId);
         }
 
         public Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
@@ -34,8 +39,7 @@
 
         public void Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("sagaRepository");
-            scope.Set(new {Persistence = "dapper"});
+            _repository.Probe(context);
         }
 
         public Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
@@ -48,11 +52,6 @@
             where T : class
         {
             return _repository.SendQuery(context, query, policy, next);
-        }
-
-        public Task<TSaga> Load(Guid correlationId)
-        {
-            return _repository.Load(correlationId);
         }
     }
 }

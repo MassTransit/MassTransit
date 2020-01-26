@@ -2,12 +2,16 @@ namespace MassTransit.DapperIntegration.Context
 {
     using System;
     using System.Collections.Generic;
-    using System.Data.SqlClient;
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
     using Dapper;
     using Dapper.Contrib.Extensions;
+    #if NETCORE
+        using Microsoft.Data.SqlClient;
+    #else
+        using System.Data.SqlClient;
+    #endif
     using Saga;
     using Sql;
 
@@ -107,14 +111,21 @@ namespace MassTransit.DapperIntegration.Context
             }
         }
 
-        static string GetTableName<T>()
-        {
-            return $"{typeof(T).Name}s";
-        }
-
         public void Dispose()
         {
             _inUse.Dispose();
+            _transaction.Dispose();
+            _connection.Dispose();
+        }
+
+        public void Commit()
+        {
+            _transaction.Commit();
+        }
+
+        static string GetTableName<T>()
+        {
+            return $"{typeof(T).Name}s";
         }
     }
 }

@@ -2,7 +2,7 @@
   <Import Project="../../netfx.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net461</TargetFrameworks>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -12,16 +12,25 @@
     <Description>MassTransit Dapper persistence support; $(Description)</Description>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
-      <PackageReference Include="dapper.contrib" Version="1.60.1" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+    <PackageReference Include="dapper.contrib" Version="2.0.30" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup>
-      <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
+    <Reference Include="System"/>
+    <Reference Include="System.Core"/>
+    <Reference Include="System.Data"/>
+    <Reference Include="System.Transactions"/>
   </ItemGroup>
 
-  <ItemGroup>
-      <Reference Include="System.Transactions" />
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="1.0.19269.1"/>
   </ItemGroup>
+
 </Project>

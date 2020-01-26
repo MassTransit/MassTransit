@@ -2,13 +2,19 @@
   <Import Project="../../netfx.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net461</TargetFrameworks>
+    <TargetFrameworks>net461;netcoreapp2.2</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0"/>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0"/>
   </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
+    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit.Tests\MassTransit.Tests.csproj" />

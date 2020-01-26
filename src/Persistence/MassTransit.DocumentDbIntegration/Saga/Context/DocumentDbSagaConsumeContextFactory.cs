@@ -12,7 +12,9 @@
             SagaConsumeContextMode mode)
             where T : class
         {
-            return Task.FromResult<SagaConsumeContext<TSaga, T>>(new DocumentDbSagaConsumeContext<TSaga, T>(context, consumeContext, instance, mode));
+            var sagaConsumeContext = new DocumentDbSagaConsumeContext<TSaga, T>(context, consumeContext, instance, mode);
+
+            return Task.FromResult<SagaConsumeContext<TSaga, T>>(sagaConsumeContext);
         }
     }
 }

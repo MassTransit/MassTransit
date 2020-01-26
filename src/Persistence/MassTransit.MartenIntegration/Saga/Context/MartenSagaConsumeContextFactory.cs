@@ -13,7 +13,9 @@ namespace MassTransit.MartenIntegration.Saga.Context
             SagaConsumeContextMode mode)
             where T : class
         {
-            return Task.FromResult<SagaConsumeContext<TSaga, T>>(new MartenSagaConsumeContext<TSaga, T>(context, consumeContext, instance, mode));
+            var sagaConsumeContext = new MartenSagaConsumeContext<TSaga, T>(context, consumeContext, instance, mode);
+
+            return Task.FromResult<SagaConsumeContext<TSaga, T>>(sagaConsumeContext);
         }
     }
 }
