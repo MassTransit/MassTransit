@@ -104,7 +104,7 @@ public class Startup
                     ep.PrefetchCount = 16;
                     ep.UseMessageRetry(r => r.Interval(2, 100));
 
-                    ep.ConfigureConsumer<OrderConsumer>(provider);
+                    ep.ConfigureConsumer<OrderConsumer>(serviceProvider);
                 });
             });
         }
