@@ -10,7 +10,6 @@ namespace MassTransit.Serialization
     using Metadata;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
-    using Util;
 
 
     public class JsonMessageSerializer :

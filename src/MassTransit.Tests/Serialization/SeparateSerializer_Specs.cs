@@ -1,18 +1,7 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Serialization
+﻿namespace MassTransit.Tests.Serialization
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using MassTransit.Serialization;
     using NUnit.Framework;
@@ -54,6 +43,60 @@ namespace MassTransit.Tests.Serialization
             {
                 await context.RespondAsync(new PongMessage(context.Message.CorrelationId));
             });
+        }
+    }
+
+
+    [TestFixture]
+    public class Sending_and_consuming_raw_json :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_handle_any_requested_message_type()
+        {
+            var message = new BagOfCrap
+            {
+                CommandId = NewId.NextGuid(),
+                ItemNumber = "27",
+            };
+
+            await InputQueueSendEndpoint.Send(message);
+
+            ConsumeContext<Command> context = await _handled;
+
+            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(RawJsonMessageSerializer.RawJsonContentType),
+                $"unexpected content-type {context.ReceiveContext.ContentType}");
+
+            Assert.That(context.Message.CommandId, Is.EqualTo(message.CommandId));
+            Assert.That(context.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
+        }
+
+        Task<ConsumeContext<Command>> _handled;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseRawJsonSerializer();
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
+
+            _handled = Handled<Command>(configurator);
+        }
+
+
+        public interface Command
+        {
+            Guid CommandId { get; }
+            string ItemNumber { get; }
+        }
+
+
+        public class BagOfCrap
+        {
+            public Guid CommandId { get; set; }
+            public string ItemNumber { get; set; }
         }
     }
 }

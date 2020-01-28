@@ -49,20 +49,20 @@ namespace MassTransit.Serialization
 
         public override Task ConsumeCompleted => _consumeTasks.Completed(CancellationToken);
 
-        public override Guid? MessageId => _messageId ?? (_messageId = ConvertIdToGuid(_envelope.MessageId));
-        public override Guid? RequestId => _requestId ?? (_requestId = ConvertIdToGuid(_envelope.RequestId));
-        public override Guid? CorrelationId => _correlationId ?? (_correlationId = ConvertIdToGuid(_envelope.CorrelationId));
-        public override Guid? ConversationId => _conversationId ?? (_conversationId = ConvertIdToGuid(_envelope.ConversationId));
-        public override Guid? InitiatorId => _initiatorId ?? (_initiatorId = ConvertIdToGuid(_envelope.InitiatorId));
+        public override Guid? MessageId => _messageId ??= ConvertIdToGuid(_envelope.MessageId);
+        public override Guid? RequestId => _requestId ??= ConvertIdToGuid(_envelope.RequestId);
+        public override Guid? CorrelationId => _correlationId ??= ConvertIdToGuid(_envelope.CorrelationId);
+        public override Guid? ConversationId => _conversationId ??= ConvertIdToGuid(_envelope.ConversationId);
+        public override Guid? InitiatorId => _initiatorId ??= ConvertIdToGuid(_envelope.InitiatorId);
         public override DateTime? ExpirationTime => _envelope.ExpirationTime;
-        public override Uri SourceAddress => _sourceAddress ?? (_sourceAddress = ConvertToUri(_envelope.SourceAddress));
-        public override Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = ConvertToUri(_envelope.DestinationAddress));
-        public override Uri ResponseAddress => _responseAddress ?? (_responseAddress = ConvertToUri(_envelope.ResponseAddress));
-        public override Uri FaultAddress => _faultAddress ?? (_faultAddress = ConvertToUri(_envelope.FaultAddress));
+        public override Uri SourceAddress => _sourceAddress ??= ConvertToUri(_envelope.SourceAddress);
+        public override Uri DestinationAddress => _destinationAddress ??= ConvertToUri(_envelope.DestinationAddress);
+        public override Uri ResponseAddress => _responseAddress ??= ConvertToUri(_envelope.ResponseAddress);
+        public override Uri FaultAddress => _faultAddress ??= ConvertToUri(_envelope.FaultAddress);
         public override DateTime? SentTime => _envelope.SentTime;
 
         public override Headers Headers =>
-            _headers ?? (_headers = _envelope.Headers != null ? (Headers)new JsonEnvelopeHeaders(_envelope.Headers) : NoMessageHeaders.Instance);
+            _headers ??= _envelope.Headers != null ? (Headers)new JsonEnvelopeHeaders(_envelope.Headers) : NoMessageHeaders.Instance;
 
         public override HostInfo Host => _envelope.Host;
         public override IEnumerable<string> SupportedMessageTypes => _supportedTypes;
@@ -134,7 +134,7 @@ namespace MassTransit.Serialization
         }
 
         /// <summary>
-        ///     Converts a string identifier to a Guid, if it's actually a Guid. Can throw a FormatException
+        ///     Converts a string identifier to a Guid, if it is actually a Guid. Can throw a FormatException
         ///     if things are not right
         /// </summary>
         /// <param name="id"></param>
@@ -151,7 +151,7 @@ namespace MassTransit.Serialization
         }
 
         /// <summary>
-        ///     Convert the string to a Uri, or return null if it's empty
+        ///     Convert the string to a Uri, or return null if it is empty
         /// </summary>
         /// <param name="uri"></param>
         /// <returns></returns>
