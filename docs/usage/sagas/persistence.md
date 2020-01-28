@@ -6,12 +6,14 @@ Sagas are stateful event-based message consumers -- they retain state. Therefore
 - [Identity](#identity)
 - [Publishing and Sending From Sagas](#publishing-and-sending-from-sagas)
 - [Storage Engines](#storage-engines)
+    - [Entity Framework Core](efcore)
     - [Entity Framework](#entity-framework)
+    - [Dapper](dapper)
+    - [DocumentDb](documentdb)
     - [MongoDB](#mongodb)
     - [NHibernate](#nhibernate)
     - [Redis](#redis)
     - [Marten](#marten)
-    - [DocumentDb](#documentdb)
     - [Azure Service Bus](#azure-service-bus)
 
 In order to store the saga state, you need to use one form of saga persistence. There are several types of storage that MassTransit supports, all of those, which are included to the main distribution, are listed below. There is also a in-memory unreliable storage, which allows to temporarily store your saga state. It is useful to try things out since it does not require any infrastructure.
@@ -473,82 +475,6 @@ public class SampleSaga : ISaga
  });
  ```
 
-## DocumentDb
-
-DocumentDb is the predecessor of Azure CosmosDb and the DocumentDb API is still one of the main APIs for the NoSQL document-oriented persistence of CosmosDb. MassTransit supports saga persistence in CosmosDb by using both MongoDb API (using `MassTransit.MongoDb` package) and using DocumentDb API (using `MassTransit.DocumentDb` package).
-
-DocumentDb requires that any document stored there has a property called `id`, to be used as the document identity. Saga instances have `CorrelationId` for the same purpose, so there are two ways to create your DocumentDb saga class, which can have different implications depending on your usage. ETag must also be present, which is used for optimistic concurrency. Please never set this property yourself, it managed 100% by document db.
-
-#### First, the simple (out of box) functionality. Create your saga class:
-
-```csharp
-public class SampleSaga : IVersionedSaga
-{
-    public Guid CorrelationId { get; set; }
-    public string ETag { get; set; }
-    public string State { get; set; }
-    public string SomeProperty { get; set; }
-}
-
-// And in your bus/saga configuration, you explicitly pass in the settings
-var repository = new DocumentDbSagaRepository<SampleSaga>(documentDbClient, "sagaDatabase", JsonSerializerSettingsExtensions.GetSagaRenameSettings<SimpleSaga>());
-```
-
-The only restriction with this method is you might run into trouble if you are using Correlation Expressions that use the CorrelationId property. This is because when passing these expressions into DocumentDb's Create Query, it must have the `[JsonProperty("id")]` attribute instead of using the `JsonSerializerSettingsExtensions.GetSagaRenameSettings<...>()` rename.
-
-#### So the second option for your saga class declaration is:
-
-```csharp
-public class SampleSaga : IVersionedSaga
-{
-    [JsonProperty("id")]
-    public Guid CorrelationId { get; set; }
-    [JsonProperty("_etag")]
-    public string ETag { get; set; }
-    public string State { get; set; }
-    public string SomeProperty { get; set; }
-}
-
-// And in your bus/saga configuration, just follow the example below, no need to use the GetSagaRenameSettings<>()
-```
-
-And optionally, you can make your Saga inherit from the Azure DocumentDb class `Resource`, because.. well why not? It's saving to that store, so you might as well have all the properties there anyways.
-
-#### Third option for saga class declaration:
-
-```csharp
-public class SampleSaga : IVersionedSaga, Resource
-{
-    [JsonProperty("id")] // This overrides the Resource [JsonProperty("id")], which exists on the Resource classes Id property. This means Id will be a null guid, so just always use CorrelationId instead
-    public Guid CorrelationId { get; set; }
-    // The Resource class has the [JsonProperty("_etag")] public string ETag {get;set;}, so we don't need to declare it here
-    public string State { get; set; }
-    public string SomeProperty { get; set; }
-}
-
-// And in your bus/saga configuration, just follow the example below, no need to use the GetSagaRenameSettings<>()
-```
-
-So my preference is option 3, or option 2. Option 1 is there to offer an option as backwards compatibility to existing functionality.
-
-Instantiation of the DocumentDb saga repository could be done like this:
-
-```csharp
-var documentDbClient =  new DocumentClient(endpointUri, authKeyString);
-var repository = new DocumentDbSagaRepository<SampleSaga>(documentDbClient, "sagaDatabase");
-```
-
-If you use a container, you can use the code like this (example for Autofac):
-
-```csharp
-builder.RegisterInstance(new DocumentClient(endpointUri, authKeyString))
-    .As<IDocumentClient>();
-builder.Register(c => 
-        new DocumentDbSagaRepository(c.Resolve<IDocumentClient>(), "sagaDatabase"))
-    .As<ISagaRepository<SampleSaga>>()
-    .SingleInstance();
-```
-
 ## Azure Service Bus
 
 Azure Service Bus provides a feature called *message sessions*, to process multiple messages at once and to store some state on a temporary basis, which can be retrieved by some key.
@@ -573,47 +499,6 @@ sbc.ReceiveEndpoint("test_queue", ep =>
 
 As mentioned before, the message session allows storing and retrieving any state by some unique key. This means that this type of saga persistence only support correlation by id. So, similar to Redis saga persistence, you cannot use `CorrelateBy` to specify how to find the saga instance, but only `CorrelateById`.
 
-## Dapper
-
-Provides persistence for MSSQL using [Dapper][3].
-
-Dapper.Contrib is used for inserts and updates. The methods are virtual, so if you'd rather write the SQL yourself it is supported.
-
-If you do not write your own sql, the model requires you use the `ExplicitKey` attribute for the CorrelationId. And if you have properties that are not available as columns, you can use the `Computed` attribute to not include them in the generated SQL.
-
-```csharp
-public class SampleSaga : ISaga
-{
-    [ExplicitKey]
-    public Guid CorrelationId { get; set; }
-    public string Name { get; set; }
-    public string State { get; set; }
-
-    [Computed]
-    public Expression<Func<SimpleSaga, ObservableSagaMessage, bool>> CorrelationExpression
-    {
-        get { return (saga, message) => saga.Name == message.Name; }
-    }
-}
-```
-
-#### Limitations
-The tablename can only be the pluralized form of the class name. So `SampleSaga` would translate to table SampleSaga**s**. This applies even if you write your own SQL for updates and inserts.
-
-The expressions you can use for correlation is somewhat limited. These types of expressions are handled:
-
-```csharp
-    x => x.CorrelationId == someGuid;
-    x => x.IsDone;
-    x => x.CorrelationId == someGuid && x.IsDone;
-```
-You can use multiple `&&` in the expression.
-
-What you can not use is `||` and negations. So a bool used like this `x.IsDone` can only be handled as true and nothing else.
-
-Dapper does not yet support strong naming, though it is being [worked][4] on.
-
-Also this does not support dotnetcore yet.
 
 [1]: https://www.postgresql.org/docs/9.5/static/functions-json.html
 [2]: http://jasperfx.github.io/marten/

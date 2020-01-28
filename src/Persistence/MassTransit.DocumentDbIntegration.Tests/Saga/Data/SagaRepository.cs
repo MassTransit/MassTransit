@@ -3,6 +3,7 @@
     using System;
     using System.Net;
     using System.Threading.Tasks;
+    using Configuration;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Newtonsoft.Json;
@@ -33,7 +34,7 @@
                 .ConfigureAwait(false);
         }
 
-        readonly DocumentClient _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
+        readonly DocumentClient _documentClient = new DocumentClient(EmulatorConstants.EndpointUri, EmulatorConstants.Key);
         public IDocumentClient Client => _documentClient;
 
         public async Task<Document> InsertSaga<TSaga>(TSaga saga, bool useJsonSerializerSettings)
