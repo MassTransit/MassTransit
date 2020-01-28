@@ -24,6 +24,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
         [Test]
         public async Task Two_Initiating_Messages_Deadlock_Results_In_One_Instance()
         {
+            var activityMonitor = Bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(3000));
+
             var sagaId = NewId.NextGuid();
             var message = new Begin {CorrelationId = sagaId};
 
@@ -40,13 +42,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
 
             _sagaTestHarness.Consumed.Select<IncrementCounterSlowly>().Take(2).ToList();
 
-            // I might be getting superstitions but it looks like sometimes the test harness can report consumed before
-            // the transaction is properly committed.
-            await Task.Delay(1000);
+            await activityMonitor.AwaitBusInactivity(TestTimeout);
 
-            await _sagaRepository.Value.ShouldContainSaga(
-                s => s.CorrelationId == sagaId && s.Counter == 2 && s.CurrentState == "DidIncrement",
-                this.TestTimeout);
+            await _sagaRepository.Value.ShouldContainSaga(sagaId, s => s.Counter == 2 && s.CurrentState == "DidIncrement", TestTimeout);
         }
 
         readonly Lazy<ISagaRepository<SlowConcurrentSaga>> _sagaRepository;
