@@ -57,6 +57,8 @@ public class OrderStateDbContext :
 }
 ```
 
+### Container Integration
+
 Once the class map and associated _DbContext_ class have been created, the saga repository can be configured with the saga registration, which is done using the configuration method passed to _AddMassTransit_. The following example shows how the repository is configured for using Microsoft Dependency Injection Extensions, which are used by default with Entity Framework Core.
 
 ```cs

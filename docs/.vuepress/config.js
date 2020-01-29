@@ -59,7 +59,23 @@ module.exports = {
             collapsable: true,
             children: [
               '/usage/sagas/automatonymous',
-              '/usage/sagas/persistence'
+              '/usage/sagas/consumer-saga',
+              {
+                title: 'Persistence',
+                path: '/usage/sagas/persistence',
+                collapsable: false,
+                children: [
+                  '/usage/sagas/efcore',
+                  '/usage/sagas/dapper',
+                  '/usage/sagas/documentdb',
+                  '/usage/sagas/ef',
+                  '/usage/sagas/marten',
+                  '/usage/sagas/mongodb',
+                  '/usage/sagas/nhibernate',
+                  '/usage/sagas/redis',
+                  '/usage/sagas/session'
+                ]
+              }
             ]
           },
           {
