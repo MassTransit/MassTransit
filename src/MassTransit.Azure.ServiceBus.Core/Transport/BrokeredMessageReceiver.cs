@@ -82,14 +82,14 @@
             }
             catch (SessionLockLostException ex)
             {
-                LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId", message.MessageId);
+                LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId}", message.MessageId);
 
                 if (_context.ReceiveObservers.Count > 0)
                     await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             catch (MessageLockLostException ex)
             {
-                LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId", message.MessageId);
+                LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId}", message.MessageId);
 
                 if (_context.ReceiveObservers.Count > 0)
                     await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
@@ -108,7 +108,7 @@
                 }
                 catch (Exception exception)
                 {
-                    LogContext.Warning?.Log(exception, "Abandon message faulted: {MessageId", message.MessageId);
+                    LogContext.Warning?.Log(exception, "Abandon message faulted: {MessageId}", message.MessageId);
                 }
             }
             finally
