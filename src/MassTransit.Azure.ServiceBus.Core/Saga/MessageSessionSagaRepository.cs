@@ -37,7 +37,7 @@
             if (Guid.TryParse(sessionContext.SessionId, out var sessionId))
                 context = new CorrelationIdConsumeContextProxy<T>(context, sessionId);
 
-            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartSagaActivity<TSaga, T>();
+            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartSagaActivity<TSaga, T>(context);
             try
             {
                 var saga = await ReadSagaState(sessionContext).ConfigureAwait(false);

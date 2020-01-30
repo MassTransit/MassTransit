@@ -46,7 +46,7 @@ namespace MassTransit.Saga.Pipeline.Filters
 
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
-            var activity = LogContext.IfEnabled(OperationName.Saga.SendQuery)?.StartSagaActivity<TSaga, TMessage>();
+            var activity = LogContext.IfEnabled(OperationName.Saga.SendQuery)?.StartSagaActivity<TSaga, TMessage>(context);
 
             Stopwatch timer = Stopwatch.StartNew();
             try

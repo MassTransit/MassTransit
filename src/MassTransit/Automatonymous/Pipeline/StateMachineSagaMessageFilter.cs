@@ -57,8 +57,8 @@ namespace Automatonymous.Pipeline
         {
             var eventContext = new StateMachineEventContextProxy<TInstance, TData>(context, _machine, context.Saga, _event, context.Message);
 
-            var activity = LogContext.IfEnabled(OperationName.Saga.RaiseEvent)?.StartSagaActivity<TInstance, TData>(context.Saga.CorrelationId,
-                (await _machine.Accessor.Get(eventContext).ConfigureAwait(false)).Name);
+            var activity = LogContext.IfEnabled(OperationName.Saga.RaiseEvent)
+                ?.StartSagaActivity(context, (await _machine.Accessor.Get(eventContext).ConfigureAwait(false)).Name);
             try
             {
                 await _machine.RaiseEvent(eventContext).ConfigureAwait(false);

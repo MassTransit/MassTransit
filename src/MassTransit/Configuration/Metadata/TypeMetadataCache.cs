@@ -358,6 +358,17 @@
 
         static string GetDiagnosticAddress()
         {
+            const string activity = "Activity";
+
+            if (typeof(T).HasInterface<IExecuteActivity>())
+            {
+                var activityName = typeof(T).Name;
+                if (activityName.EndsWith(activity, StringComparison.InvariantCultureIgnoreCase))
+                    activityName = activityName.Substring(0, activityName.Length - activity.Length);
+
+                return activityName;
+            }
+
             var (type, ns, _) = MessageUrn.ForType<T>();
             return $"{type}/{ns}";
         }
