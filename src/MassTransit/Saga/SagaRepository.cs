@@ -2,6 +2,7 @@ namespace MassTransit.Saga
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Threading.Tasks;
     using GreenPipes;
 
@@ -53,7 +54,11 @@ namespace MassTransit.Saga
             catch (SagaException exception)
             {
                 context.LogFault(this, exception);
-
+                throw;
+            }
+            catch (DataException exception)
+            {
+                context.LogFault(this, exception);
                 throw;
             }
             catch (Exception exception)
@@ -75,7 +80,11 @@ namespace MassTransit.Saga
             catch (SagaException exception)
             {
                 context.LogFault(this, exception);
-
+                throw;
+            }
+            catch (DataException exception)
+            {
+                context.LogFault(this, exception);
                 throw;
             }
             catch (Exception exception)

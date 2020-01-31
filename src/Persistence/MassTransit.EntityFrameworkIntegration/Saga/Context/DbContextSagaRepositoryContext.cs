@@ -1,15 +1,14 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Saga
+namespace MassTransit.EntityFrameworkIntegration.Saga.Context
 {
     using System;
     using System.Collections.Generic;
+    using System.Data.Entity;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using GreenPipes;
+    using MassTransit.Context;
     using MassTransit.Saga;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 
     public class DbContextSagaRepositoryContext<TSaga, TMessage> :
@@ -40,7 +39,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         public async Task<SagaConsumeContext<TSaga, TMessage>> Insert(TSaga instance)
         {
-            EntityEntry<TSaga> entry = _dbContext.Set<TSaga>().Add(instance);
+            var entity = _dbContext.Set<TSaga>().Add(instance);
             try
             {
                 await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
@@ -54,7 +53,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                 // Because we will still be using the same dbContext, we need to reset the entry we just tried to pre-insert (likely a duplicate), so
                 // on the next save changes (which is the update), it will pass.
                 // see here for details: https://www.davideguida.com/how-to-reset-the-entities-state-on-a-entity-framework-db-context/
-                entry.State = EntityState.Detached;
+                _dbContext.Entry(entity).State = EntityState.Detached;
 
                 _consumeContext.LogInsertFault<TSaga, TMessage>(ex, instance.CorrelationId);
 

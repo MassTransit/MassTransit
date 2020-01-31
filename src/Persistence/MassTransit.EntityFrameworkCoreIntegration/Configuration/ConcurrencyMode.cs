@@ -1,4 +1,4 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Configuration
+namespace MassTransit.EntityFrameworkCoreIntegration
 {
     public enum ConcurrencyMode
     {

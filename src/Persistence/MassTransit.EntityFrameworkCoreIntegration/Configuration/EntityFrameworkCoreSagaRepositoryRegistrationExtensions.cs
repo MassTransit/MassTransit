@@ -1,16 +1,17 @@
-namespace MassTransit.EntityFrameworkCoreIntegration
+namespace MassTransit
 {
     using System;
     using Configurators;
-    using Mappings;
-    using MassTransit.Configurators;
-    using MassTransit.Saga;
+    using EntityFrameworkCoreIntegration;
+    using EntityFrameworkCoreIntegration.Configurators;
+    using EntityFrameworkCoreIntegration.Mappings;
+    using EntityFrameworkCoreIntegration.Saga.Configuration;
+    using Saga;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
-    using Saga.Configuration;
 
 
-    public static class EntityFrameworkRepositoryRegistrationExtensions
+    public static class EntityFrameworkCoreSagaRepositoryRegistrationExtensions
     {
         /// <summary>
         /// Adds a EntityFramework saga repository to the registration

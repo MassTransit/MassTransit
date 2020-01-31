@@ -14,6 +14,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Configurators
     using Registration;
     using Saga;
     using Saga.Configuration;
+    using Saga.Context;
 
 
     public class EntityFrameworkSagaRepositoryConfigurator<TSaga> :

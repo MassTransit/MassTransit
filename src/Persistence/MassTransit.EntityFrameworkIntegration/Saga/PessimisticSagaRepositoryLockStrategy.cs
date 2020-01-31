@@ -1,24 +1,24 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Saga
+namespace MassTransit.EntityFrameworkIntegration.Saga
 {
     using System;
+    using System.Collections.Generic;
     using System.Data;
+    using System.Data.Entity;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using MassTransit.Saga;
-    using Microsoft.EntityFrameworkCore;
 
 
-    public class OptimisticSagaRepositoryLockStrategy<TSaga> :
+    public class PessimisticSagaRepositoryLockStrategy<TSaga> :
         ISagaRepositoryLockStrategy<TSaga>
         where TSaga : class, ISaga
     {
-        readonly ILoadQueryProvider<TSaga> _provider;
         readonly ILoadQueryExecutor<TSaga> _executor;
 
-        public OptimisticSagaRepositoryLockStrategy(ILoadQueryProvider<TSaga> provider, ILoadQueryExecutor<TSaga> executor, IsolationLevel isolationLevel)
+        public PessimisticSagaRepositoryLockStrategy(ILoadQueryExecutor<TSaga> executor, IsolationLevel isolationLevel)
         {
-            _provider = provider;
             _executor = executor;
 
             IsolationLevel = isolationLevel;
@@ -33,7 +33,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         public async Task<SagaLockContext<TSaga>> CreateLockContext(DbContext context, ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
-            return new OptimisticSagaLockContext<TSaga>(context, query, cancellationToken, _provider);
+            IList<Guid> instances = await context.Set<TSaga>()
+                .AsNoTracking()
+                .Where(query.FilterExpression)
+                .Select(x => x.CorrelationId)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return new PessimisticSagaLockContext<TSaga>(context, cancellationToken, instances, _executor);
         }
     }
 }

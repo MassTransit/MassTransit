@@ -11,18 +11,18 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         class EntityFrameworkChoirStateMap :
             SagaClassMap<ChoirStateOptimistic>
         {
-            protected override void Configure(EntityTypeConfiguration<ChoirStateOptimistic> cfg, DbModelBuilder modelBuilder)
+            protected override void Configure(EntityTypeConfiguration<ChoirStateOptimistic> entity, DbModelBuilder modelBuilder)
             {
-                cfg.Property(x => x.RowVersion)
+                entity.Property(x => x.RowVersion)
                     .IsRowVersion();
 
-                cfg.Property(x => x.CurrentState);
-                cfg.Property(x => x.BassName);
-                cfg.Property(x => x.BaritoneName);
-                cfg.Property(x => x.TenorName);
-                cfg.Property(x => x.CountertenorName);
+                entity.Property(x => x.CurrentState);
+                entity.Property(x => x.BassName);
+                entity.Property(x => x.BaritoneName);
+                entity.Property(x => x.TenorName);
+                entity.Property(x => x.CountertenorName);
 
-                cfg.Property(x => x.Harmony);
+                entity.Property(x => x.Harmony);
             }
         }
 

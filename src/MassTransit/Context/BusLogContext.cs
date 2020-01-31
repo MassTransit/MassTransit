@@ -1,5 +1,6 @@
 namespace MassTransit.Context
 {
+    using System;
     using System.Diagnostics;
     using Logging;
     using Microsoft.Extensions.Logging;
@@ -8,31 +9,38 @@ namespace MassTransit.Context
     public class BusLogContext :
         ILogContext
     {
+        const string EnableActivityPropagationEnvironmentVariableSettingName = "MASSTRANSIT_ENABLEACTIVITYPROPAGATION";
+        const string EnableActivityPropagationAppCtxSettingName = "MassTransit.EnableActivityPropagation";
+        readonly bool _enabled;
         readonly ILogger _logger;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogContext _messageLogger;
-        readonly DiagnosticSource _source;
+        readonly DiagnosticListener _source;
 
-        public BusLogContext(ILoggerFactory loggerFactory, DiagnosticSource source)
+        public BusLogContext(ILoggerFactory loggerFactory, DiagnosticListener source)
         {
             _source = source;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger(LogCategoryName.MassTransit);
 
-            _messageLogger = new BusLogContext(source, loggerFactory, loggerFactory.CreateLogger("MassTransit.Messages"));
+            _enabled = GetEnabled();
+
+            _messageLogger = new BusLogContext(source, _enabled, loggerFactory, loggerFactory.CreateLogger("MassTransit.Messages"));
         }
 
-        protected BusLogContext(DiagnosticSource source, ILoggerFactory loggerFactory, ILogContext messageLogger, ILogger logger)
+        protected BusLogContext(DiagnosticListener source, bool enabled, ILoggerFactory loggerFactory, ILogContext messageLogger, ILogger logger)
         {
             _source = source;
+            _enabled = enabled;
             _loggerFactory = loggerFactory;
             _messageLogger = messageLogger;
             _logger = logger;
         }
 
-        BusLogContext(DiagnosticSource source, ILoggerFactory loggerFactory, ILogger logger)
+        BusLogContext(DiagnosticListener source, bool enabled, ILoggerFactory loggerFactory, ILogger logger)
         {
             _source = source;
+            _enabled = enabled;
             _loggerFactory = loggerFactory;
             _logger = logger;
 
@@ -43,21 +51,23 @@ namespace MassTransit.Context
 
         public EnabledDiagnosticSource? IfEnabled(string name)
         {
-            return _source.IsEnabled(name) ? new EnabledDiagnosticSource(_source, name) : default(EnabledDiagnosticSource?);
+            return _enabled && (Activity.Current != null || _source.IsEnabled(name))
+                ? new EnabledDiagnosticSource(_source, name)
+                : default(EnabledDiagnosticSource?);
         }
 
         public ILogContext<T> CreateLogContext<T>()
         {
             ILogger<T> logger = _loggerFactory.CreateLogger<T>();
 
-            return new BusLogContext<T>(_source, _loggerFactory, _messageLogger, logger);
+            return new BusLogContext<T>(_source, _enabled, _loggerFactory, _messageLogger, logger);
         }
 
         public ILogContext CreateLogContext(string categoryName)
         {
             var logger = _loggerFactory.CreateLogger(categoryName);
 
-            return new BusLogContext(_source, _loggerFactory, _messageLogger, logger);
+            return new BusLogContext(_source, _enabled, _loggerFactory, _messageLogger, logger);
         }
 
         public ILogger Logger => _logger;
@@ -83,6 +93,18 @@ namespace MassTransit.Context
         {
             return new EnabledScope(_logger);
         }
+
+        bool GetEnabled()
+        {
+            if (AppContext.TryGetSwitch(EnableActivityPropagationAppCtxSettingName, out var enableActivityPropagation))
+                return enableActivityPropagation;
+
+            var variable = Environment.GetEnvironmentVariable(EnableActivityPropagationEnvironmentVariableSettingName);
+            if (variable != null && (variable.Equals("false", StringComparison.OrdinalIgnoreCase) || variable.Equals("0")))
+                return false;
+
+            return true;
+        }
     }
 
 
@@ -90,8 +112,8 @@ namespace MassTransit.Context
         BusLogContext,
         ILogContext<T>
     {
-        public BusLogContext(DiagnosticSource source, ILoggerFactory loggerFactory, ILogContext messageLogger, ILogger<T> logger)
-            : base(source, loggerFactory, messageLogger, logger)
+        public BusLogContext(DiagnosticListener source, bool enabled, ILoggerFactory loggerFactory, ILogContext messageLogger, ILogger<T> logger)
+            : base(source, enabled, loggerFactory, messageLogger, logger)
         {
         }
     }

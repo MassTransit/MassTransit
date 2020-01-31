@@ -38,6 +38,8 @@
             _documentClient = new DocumentClient(EmulatorConstants.EndpointUri, EmulatorConstants.Key);
 
             _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() => new DocumentDbSagaRepository<ChoirStateOptimistic>(_documentClient, _databaseName, JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirStateOptimistic>()));
+
+            TestTimeout = TimeSpan.FromMinutes(3);
         }
 
         [OneTimeSetUp]
@@ -84,9 +86,7 @@
                 }
                 catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
-                    await Task.Delay(10).ConfigureAwait(false);
-
-                    continue;
+                    await Task.Delay(20).ConfigureAwait(false);
                 }
             }
 
@@ -133,6 +133,8 @@
                 ChoirStateOptimistic instance = await GetSaga(sid);
 
                 someNotInFinalState = !instance.CurrentState.Equals("Harmony");
+                if (someNotInFinalState)
+                    break;
             }
 
             Assert.IsTrue(someNotInFinalState);

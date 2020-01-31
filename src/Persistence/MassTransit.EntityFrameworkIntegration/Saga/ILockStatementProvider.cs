@@ -1,10 +1,10 @@
-﻿namespace MassTransit.EntityFrameworkIntegration
+﻿namespace MassTransit.EntityFrameworkIntegration.Saga
 {
     using System.Data.Entity;
     using MassTransit.Saga;
 
 
-    public interface IRawSqlLockStatements
+    public interface ILockStatementProvider
     {
         string GetRowLockStatement<TSaga>(DbContext context)
             where TSaga : class, ISaga;

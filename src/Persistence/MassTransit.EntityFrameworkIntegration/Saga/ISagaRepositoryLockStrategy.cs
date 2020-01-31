@@ -1,12 +1,12 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Saga
+namespace MassTransit.EntityFrameworkIntegration.Saga
 {
     using System;
     using System.Data;
+    using System.Data.Entity;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using MassTransit.Saga;
-    using Microsoft.EntityFrameworkCore;
 
 
     public interface ISagaRepositoryLockStrategy<TSaga>

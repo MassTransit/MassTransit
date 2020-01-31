@@ -1,4 +1,4 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Saga
+namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;

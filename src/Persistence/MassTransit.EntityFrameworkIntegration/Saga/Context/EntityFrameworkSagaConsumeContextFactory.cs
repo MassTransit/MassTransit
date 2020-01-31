@@ -1,8 +1,8 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.Saga
+namespace MassTransit.EntityFrameworkIntegration.Saga.Context
 {
+    using System.Data.Entity;
     using System.Threading.Tasks;
     using MassTransit.Saga;
-    using Microsoft.EntityFrameworkCore;
 
 
     public class EntityFrameworkSagaConsumeContextFactory<TSaga> :

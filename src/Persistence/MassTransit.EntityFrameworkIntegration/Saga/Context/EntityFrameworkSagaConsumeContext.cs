@@ -1,11 +1,11 @@
-﻿namespace MassTransit.EntityFrameworkCoreIntegration.Saga
+﻿namespace MassTransit.EntityFrameworkIntegration.Saga.Context
 {
     using System;
+    using System.Data.Entity;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
+    using MassTransit.Context;
     using MassTransit.Saga;
-    using Microsoft.EntityFrameworkCore;
     using Util;
 
 

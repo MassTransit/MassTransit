@@ -6,6 +6,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
 
