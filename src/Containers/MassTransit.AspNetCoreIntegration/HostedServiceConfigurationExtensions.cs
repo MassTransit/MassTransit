@@ -29,7 +29,7 @@ namespace MassTransit
         /// Adds the MassTransit <see cref="IHostedService"/>, which includes a bus and endpoint health check
         /// </summary>
         /// <param name="collection"></param>
-        public static void AddMassTransitHostedService(this IServiceCollection collection)
+        public static IServiceCollection AddMassTransitHostedService(this IServiceCollection collection)
         {
             var busCheck = new BusHealthCheck();
             var receiveEndpointCheck = new ReceiveEndpointHealthCheck();
@@ -40,7 +40,7 @@ namespace MassTransit
                 .AddBusHealthCheck("bus", busCheck)
                 .AddBusHealthCheck("endpoint", receiveEndpointCheck);
 
-            collection.AddSingleton<IHostedService>(p =>
+            return collection.AddSingleton<IHostedService>(p =>
             {
                 var bus = p.GetRequiredService<IBusControl>();
 
