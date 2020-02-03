@@ -72,7 +72,7 @@ namespace MassTransit.Serialization
             headers.Add(new Header(PolymorphicMessageTypesKey, string.Join(";", TypeMetadataCache<T>.MessageTypeNames)));
 
             if (context.CorrelationId.HasValue)
-                headers.Add(RequestIdKey, context.CorrelationId.Value.ToString());
+                headers.Add(CorrelationIdKey, context.CorrelationId.Value.ToString());
 
             if (context.RequestId.HasValue)
                 headers.Add(RequestIdKey, context.RequestId.Value.ToString());
