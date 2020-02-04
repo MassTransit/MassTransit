@@ -121,7 +121,7 @@ namespace MassTransit.Tests
             await bus.StartAsync();
             try
             {
-                var correlationId = Guid.NewGuid();
+                var correlationId = NewId.NextGuid();
 
                 // Create a recursive list
                 var head = new ListNode {Value = 100};
