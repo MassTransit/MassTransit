@@ -8,6 +8,7 @@
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
+    using Integration;
     using Policies;
     using RabbitMQ.Client.Exceptions;
     using Topology;
@@ -18,19 +19,19 @@
         Supervisor,
         IReceiveTransport
     {
-        readonly IPipe<ConnectionContext> _connectionPipe;
+        readonly IPipe<ModelContext> _modelPipe;
         readonly IRabbitMqHost _host;
         readonly Uri _inputAddress;
         readonly ReceiveSettings _settings;
         readonly RabbitMqReceiveEndpointContext _context;
 
-        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IPipe<ConnectionContext> connectionPipe,
+        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IPipe<ModelContext> modelPipe,
             RabbitMqReceiveEndpointContext context)
         {
             _host = host;
             _settings = settings;
             _context = context;
-            _connectionPipe = connectionPipe;
+            _modelPipe = modelPipe;
 
             _inputAddress = context.InputAddress;
         }
@@ -84,12 +85,12 @@
                 {
                     try
                     {
-                        await _context.OnTransportStartup(_host.ConnectionContextSupervisor, Stopping).ConfigureAwait(false);
+                        await _context.OnTransportStartup(_context.ModelContextSupervisor, Stopping).ConfigureAwait(false);
 
                         if (IsStopping)
                             return;
 
-                        await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
+                        await _context.ModelContextSupervisor.Send(_modelPipe, Stopped).ConfigureAwait(false);
                     }
                     catch (RabbitMqConnectionException ex)
                     {

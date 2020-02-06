@@ -20,40 +20,42 @@ namespace MassTransit.Serialization
         readonly JToken _messageToken;
         readonly IDictionary<Type, ConsumeContext> _messageTypes;
 
-        Guid? _conversationId;
-        Guid? _correlationId;
-        Uri _destinationAddress;
-        Uri _faultAddress;
-        Headers _headers;
-        Guid? _initiatorId;
-        Guid? _messageId;
-        Guid? _requestId;
-        Uri _responseAddress;
-        Uri _sourceAddress;
-
-        public RawJsonConsumeContext(JsonSerializer deserializer, ReceiveContext receiveContext, JToken messageToken, Guid? messageId = default)
+        public RawJsonConsumeContext(JsonSerializer deserializer, ReceiveContext receiveContext, JToken messageToken)
             : base(receiveContext)
         {
             _messageToken = messageToken ?? new JObject();
-            _messageId = messageId;
 
             _deserializer = deserializer;
             _messageTypes = new Dictionary<Type, ConsumeContext>();
             _consumeTasks = new PendingTaskCollection(4);
+
+            MessageId = receiveContext.TransportHeaders.Get<Guid>(nameof(MessageContext.MessageId));
+            CorrelationId = receiveContext.TransportHeaders.Get<Guid>(nameof(MessageContext.CorrelationId));
+            RequestId = receiveContext.TransportHeaders.Get<Guid>(nameof(MessageContext.RequestId));
         }
 
         public override Task ConsumeCompleted => _consumeTasks.Completed(CancellationToken);
 
-        public override Guid? MessageId => _messageId;
-        public override Guid? RequestId => _requestId;
-        public override Guid? CorrelationId => _correlationId;
-        public override Guid? ConversationId => _conversationId;
-        public override Guid? InitiatorId => _initiatorId;
+        public override Guid? MessageId { get; }
+
+        public override Guid? RequestId { get; }
+
+        public override Guid? CorrelationId { get; }
+
+        public override Guid? ConversationId { get; } = default;
+
+        public override Guid? InitiatorId { get; } = default;
+
         public override DateTime? ExpirationTime => default;
-        public override Uri SourceAddress => _sourceAddress;
-        public override Uri DestinationAddress => _destinationAddress;
-        public override Uri ResponseAddress => _responseAddress;
-        public override Uri FaultAddress => _faultAddress;
+
+        public override Uri SourceAddress { get; } = default;
+
+        public override Uri DestinationAddress { get; } = default;
+
+        public override Uri ResponseAddress { get; } = default;
+
+        public override Uri FaultAddress { get; } = default;
+
         public override DateTime? SentTime => default;
 
         public override Headers Headers => NoMessageHeaders.Instance;
@@ -87,8 +89,6 @@ namespace MassTransit.Serialization
                     _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, _messageToken as T);
                     return true;
                 }
-
-                string typeUrn = MessageUrn.ForTypeString<T>();
 
                 try
                 {

@@ -1,33 +1,24 @@
-namespace MassTransit.Context
+namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Converters;
+    using Context.Converters;
     using GreenPipes;
-    using Initializers;
+    using MassTransit.Pipeline;
+    using Util;
 
 
-    /// <summary>
-    /// Intercepts the ISendEndpoint and makes it part of the current consume context
-    /// </summary>
-    public class ConsumeSendEndpoint :
+    public class ReplyToSendEndpoint :
         ISendEndpoint
     {
-        public delegate Task ConsumeTaskTracker(Task task);
-
-
-        readonly ConsumeContext _context;
         readonly ISendEndpoint _endpoint;
-        readonly ConsumeTaskTracker _tracker;
-        readonly Guid? _requestId;
+        readonly string _queueName;
 
-        public ConsumeSendEndpoint(ISendEndpoint endpoint, ConsumeContext context, ConsumeTaskTracker tracker, Guid? requestId)
+        public ReplyToSendEndpoint(ISendEndpoint endpoint, string queueName)
         {
             _endpoint = endpoint;
-            _context = context;
-            _tracker = tracker;
-            _requestId = requestId;
+            _queueName = queueName;
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -41,9 +32,9 @@ namespace MassTransit.Context
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, _requestId);
+            var replyToPipe = new ReplyToPipe<T>(_queueName);
 
-            return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
+            return _endpoint.Send(message, replyToPipe, cancellationToken);
         }
 
         public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -55,9 +46,9 @@ namespace MassTransit.Context
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, pipe, _requestId);
+            var replyToPipe = new ReplyToPipe<T>(_queueName, pipe);
 
-            return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
+            return _endpoint.Send(message, replyToPipe, cancellationToken);
         }
 
         public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -69,9 +60,9 @@ namespace MassTransit.Context
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, pipe, _requestId);
+            var replyToPipe = new ReplyToPipe<T>(_queueName, pipe);
 
-            return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
+            return _endpoint.Send(message, replyToPipe, cancellationToken);
         }
 
         public Task Send(object message, CancellationToken cancellationToken)
@@ -112,7 +103,6 @@ namespace MassTransit.Context
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
@@ -128,9 +118,9 @@ namespace MassTransit.Context
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+            var replyToPipe = new ReplyToPipe<T>(_queueName);
 
-            return initializer.Send(this, initializer.Create(_context), values);
+            return _endpoint.Send<T>(values, replyToPipe, cancellationToken);
         }
 
         public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -138,13 +128,12 @@ namespace MassTransit.Context
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+            var replyToPipe = new ReplyToPipe<T>(_queueName, pipe);
 
-            return initializer.Send(this, initializer.Create(_context), values, pipe);
+            return _endpoint.Send<T>(values, replyToPipe, cancellationToken);
         }
 
         public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -152,13 +141,58 @@ namespace MassTransit.Context
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+            var replyToPipe = new ReplyToPipe<T>(_queueName, pipe);
 
-            return initializer.Send(this, initializer.Create(_context), values, pipe);
+            return _endpoint.Send<T>(values, replyToPipe, cancellationToken);
+        }
+
+
+        struct ReplyToPipe<TMessage> :
+            IPipe<SendContext<TMessage>>,
+            ISendContextPipe
+            where TMessage : class
+        {
+            readonly string _queueName;
+            readonly IPipe<SendContext<TMessage>> _pipe;
+            readonly ISendContextPipe _sendContextPipe;
+
+            public ReplyToPipe(string queueName)
+            {
+                _queueName = queueName;
+
+                _pipe = default;
+                _sendContextPipe = default;
+            }
+
+            public ReplyToPipe(string queueName, IPipe<SendContext<TMessage>> pipe)
+            {
+                _queueName = queueName;
+                _pipe = pipe;
+                _sendContextPipe = pipe as ISendContextPipe;
+            }
+
+            void IProbeSite.Probe(ProbeContext context)
+            {
+                _pipe?.Probe(context);
+            }
+
+            public Task Send(SendContext<TMessage> context)
+            {
+                context.SetRoutingKey(_queueName);
+
+                return _pipe?.Send(context) ?? TaskUtil.Completed;
+            }
+
+            public Task Send<T>(SendContext<T> context)
+                where T : class
+            {
+                return _sendContextPipe != null
+                    ? _sendContextPipe.Send(context)
+                    : TaskUtil.Completed;
+            }
         }
     }
 }

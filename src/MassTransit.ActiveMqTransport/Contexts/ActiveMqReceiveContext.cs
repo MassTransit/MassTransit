@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.ActiveMqTransport.Contexts
 {
-    using System;
     using System.IO;
     using System.Text;
     using Apache.NMS;
@@ -15,8 +14,8 @@
         readonly IMessage _transportMessage;
         byte[] _body;
 
-        public ActiveMqReceiveContext(Uri inputAddress, IMessage transportMessage, ActiveMqReceiveEndpointContext context, params object[] payloads)
-            : base(inputAddress, transportMessage.NMSRedelivered, context, payloads)
+        public ActiveMqReceiveContext(IMessage transportMessage, ActiveMqReceiveEndpointContext context, params object[] payloads)
+            : base(transportMessage.NMSRedelivered, context, payloads)
         {
             _transportMessage = transportMessage;
         }

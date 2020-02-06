@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit
+﻿namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
@@ -63,8 +51,8 @@ namespace MassTransit
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the
-        /// sending message. The caller may choose to await the response to ensure it was sent, or 
-        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// sending message. The caller may choose to await the response to ensure it was sent, or
+        /// allow the framework to wait for it (which will happen automatically before the message is acknowledged)
         /// </summary>
         /// <typeparam name="T">The type of the message to respond with.</typeparam>
         /// <param name="message">The message to send in response</param>
@@ -73,8 +61,8 @@ namespace MassTransit
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the
-        /// sending message. The caller may choose to await the response to ensure it was sent, or 
-        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// sending message. The caller may choose to await the response to ensure it was sent, or
+        /// allow the framework to wait for it (which will happen automatically before the message is acknowledged)
         /// </summary>
         /// <typeparam name="T">The type of the message to respond with.</typeparam>
         /// <param name="message">The message to send in response</param>
@@ -84,8 +72,8 @@ namespace MassTransit
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the
-        /// sending message. The caller may choose to await the response to ensure it was sent, or 
-        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// sending message. The caller may choose to await the response to ensure it was sent, or
+        /// allow the framework to wait for it (which will happen automatically before the message is acknowledged)
         /// </summary>
         /// <typeparam name="T">The type of the message to respond with.</typeparam>
         /// <param name="message">The message to send in response</param>
@@ -95,16 +83,16 @@ namespace MassTransit
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the
-        /// sending message. The caller may choose to await the response to ensure it was sent, or 
-        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// sending message. The caller may choose to await the response to ensure it was sent, or
+        /// allow the framework to wait for it (which will happen automatically before the message is acknowledged)
         /// </summary>
         /// <param name="message">The message to send</param>
         Task RespondAsync(object message);
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the
-        /// sending message. The caller may choose to await the response to ensure it was sent, or 
-        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// sending message. The caller may choose to await the response to ensure it was sent, or
+        /// allow the framework to wait for it (which will happen automatically before the message is acknowledged)
         /// </summary>
         /// <param name="message">The message to send</param>
         /// <param name="messageType">The message type to send</param>
@@ -112,8 +100,8 @@ namespace MassTransit
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the
-        /// sending message. The caller may choose to await the response to ensure it was sent, or 
-        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// sending message. The caller may choose to await the response to ensure it was sent, or
+        /// allow the framework to wait for it (which will happen automatically before the message is acknowledged)
         /// </summary>
         /// <param name="message">The message to send</param>
         /// <param name="sendPipe"></param>
@@ -121,8 +109,8 @@ namespace MassTransit
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the
-        /// sending message. The caller may choose to await the response to ensure it was sent, or 
-        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// sending message. The caller may choose to await the response to ensure it was sent, or
+        /// allow the framework to wait for it (which will happen automatically before the message is acknowledged)
         /// </summary>
         /// <param name="message">The message to send</param>
         /// <param name="messageType">The message type to send</param>
@@ -131,8 +119,8 @@ namespace MassTransit
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the
-        /// sending message. The caller may choose to await the response to ensure it was sent, or 
-        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// sending message. The caller may choose to await the response to ensure it was sent, or
+        /// allow the framework to wait for it (which will happen automatically before the message is acknowledged)
         /// </summary>
         /// <typeparam name="T">The type of the message to respond with.</typeparam>
         /// <param name="values">The values for the message properties</param>
@@ -141,8 +129,8 @@ namespace MassTransit
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the
-        /// sending message. The caller may choose to await the response to ensure it was sent, or 
-        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// sending message. The caller may choose to await the response to ensure it was sent, or
+        /// allow the framework to wait for it (which will happen automatically before the message is acknowledged)
         /// </summary>
         /// <typeparam name="T">The type of the message to respond with.</typeparam>
         /// <param name="values">The values for the message properties</param>
@@ -152,8 +140,8 @@ namespace MassTransit
 
         /// <summary>
         /// Responds to the current message immediately, returning the Task for the
-        /// sending message. The caller may choose to await the response to ensure it was sent, or 
-        /// allow the framework to wait for it (which will happen automatically before the message is acked)
+        /// sending message. The caller may choose to await the response to ensure it was sent, or
+        /// allow the framework to wait for it (which will happen automatically before the message is acknowledged)
         /// </summary>
         /// <typeparam name="T">The type of the message to respond with.</typeparam>
         /// <param name="values">The values for the message properties</param>

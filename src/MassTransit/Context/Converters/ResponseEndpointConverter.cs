@@ -1,44 +1,44 @@
 namespace MassTransit.Context.Converters
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
     using Metadata;
 
 
     /// <summary>
-    /// Converts the object message type to the generic type T and publishes it on the endpoint specified.
+    /// Converts the object type message to the appropriate generic type and invokes the send method with that
+    /// generic overload.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class PublishEndpointConverter<T> :
-        IPublishEndpointConverter
+    public class ResponseEndpointConverter<T> :
+        IResponseEndpointConverter
         where T : class
     {
-        Task IPublishEndpointConverter.Publish(IPublishEndpoint endpoint, object message, CancellationToken cancellationToken)
+        Task IResponseEndpointConverter.Respond(ConsumeContext consumeContext, object message)
         {
-            if (endpoint == null)
-                throw new ArgumentNullException(nameof(endpoint));
+            if (consumeContext == null)
+                throw new ArgumentNullException(nameof(consumeContext));
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
             if (message is T msg)
-                return endpoint.Publish(msg, cancellationToken);
+                return consumeContext.RespondAsync(msg);
 
             throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
         }
 
-        Task IPublishEndpointConverter.Publish(IPublishEndpoint endpoint, object message, IPipe<PublishContext> pipe, CancellationToken cancellationToken)
+        Task IResponseEndpointConverter.Respond(ConsumeContext consumeContext, object message, IPipe<SendContext> pipe)
         {
-            if (endpoint == null)
-                throw new ArgumentNullException(nameof(endpoint));
+            if (consumeContext == null)
+                throw new ArgumentNullException(nameof(consumeContext));
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
             if (message is T msg)
-                return endpoint.Publish(msg, pipe, cancellationToken);
+                return consumeContext.RespondAsync(msg, pipe);
 
             throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
         }

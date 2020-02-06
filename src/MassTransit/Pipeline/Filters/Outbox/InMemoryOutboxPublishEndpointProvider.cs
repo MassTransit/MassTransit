@@ -1,6 +1,5 @@
 namespace MassTransit.Pipeline.Filters.Outbox
 {
-    using System;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
@@ -23,17 +22,12 @@ namespace MassTransit.Pipeline.Filters.Outbox
             return _publishEndpointProvider.ConnectPublishObserver(observer);
         }
 
-        public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, ConsumeContext context = null)
-        {
-            var publishEndpoint = _publishEndpointProvider.CreatePublishEndpoint(sourceAddress, context);
-
-            return new OutboxPublishEndpoint(_outboxContext, publishEndpoint);
-        }
-
-        public Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
+        public async Task<ISendEndpoint> GetPublishSendEndpoint<T>()
             where T : class
         {
-            return _publishEndpointProvider.GetPublishSendEndpoint<T>(message);
+            var endpoint = await _publishEndpointProvider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
+
+            return new OutboxSendEndpoint(_outboxContext, endpoint);
         }
     }
 }

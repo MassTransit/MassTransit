@@ -1,9 +1,11 @@
 ﻿namespace MassTransit.RabbitMqTransport.Builders
 {
+    using System;
     using System.Collections.Generic;
     using Configuration;
     using Contexts;
     using GreenPipes;
+    using Integration;
     using MassTransit.Builders;
     using Pipeline;
     using Topology;
@@ -45,7 +47,9 @@
             IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport();
             IErrorTransport errorTransport = CreateErrorTransport();
 
-            var receiveEndpointContext = new RabbitMqQueueReceiveEndpointContext(_host, _configuration, brokerTopology);
+            IModelContextSupervisor supervisor = new ModelContextSupervisor(_host.ConnectionContextSupervisor);
+
+            var receiveEndpointContext = new RabbitMqQueueReceiveEndpointContext(_host, supervisor, _configuration, brokerTopology);
 
             receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
             receiveEndpointContext.GetOrAddPayload(() => errorTransport);
@@ -73,6 +77,9 @@
         {
             var topologyBuilder = new ReceiveEndpointBrokerTopologyBuilder();
 
+            if (settings.QueueName.Equals(RabbitMqExchangeNames.ReplyTo, StringComparison.OrdinalIgnoreCase))
+                return topologyBuilder.BuildBrokerTopology();
+
             var queueArguments = new Dictionary<string, object>(settings.QueueArguments);
 
             bool queueAutoDelete = settings.AutoDelete;
@@ -94,7 +101,7 @@
 
             _configuration.Topology.Consume.Apply(topologyBuilder);
 
-            return topologyBuilder.BuildTopologyLayout();
+            return topologyBuilder.BuildBrokerTopology();
         }
     }
 }

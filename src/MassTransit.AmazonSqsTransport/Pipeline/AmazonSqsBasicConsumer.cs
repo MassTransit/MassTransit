@@ -75,7 +75,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             var delivery = _tracker.BeginDelivery();
 
-            var context = new AmazonSqsReceiveContext(_inputAddress, message, redelivered, _context, _receiveSettings, _client, _client.ConnectionContext);
+            var context = new AmazonSqsReceiveContext(message, redelivered, _context, _receiveSettings, _client, _client.ConnectionContext);
 
             var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
             try

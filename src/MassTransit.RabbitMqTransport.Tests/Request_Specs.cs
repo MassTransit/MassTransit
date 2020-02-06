@@ -297,7 +297,7 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _clientFactory = await Host.CreateClientFactory(RequestTimeout.After(s: 8));
+            _clientFactory = await Bus.CreateReplyToClientFactory();
 
             _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, RequestTimeout.After(s: 8));
 
@@ -474,6 +474,44 @@
         {
             _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TimeSpan.FromSeconds(8));
         }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async x =>
+            {
+                throw new InvalidOperationException("This is an expected test failure");
+            });
+        }
+    }
+
+    [TestFixture]
+    public class Sending_a_request_to_a_faulty_service_using_reply_to :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public void Should_receive_the_exception()
+        {
+            Assert.That(async () => await _requestClient.GetResponse<PongMessage>(new PingMessage()), Throws.TypeOf<RequestFaultException>());
+        }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        IRequestClient<PingMessage> _requestClient;
+        IClientFactory _clientFactory;
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            _clientFactory = await Bus.CreateReplyToClientFactory();
+
+            _requestClient = _clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(8));
+        }
+
+        [OneTimeTearDown]
+        public async Task Teardown()
+        {
+            await _clientFactory.DisposeAsync();
+        }
+
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {

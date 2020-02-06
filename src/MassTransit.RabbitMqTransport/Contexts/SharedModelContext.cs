@@ -8,7 +8,7 @@
 
 
     public class SharedModelContext :
-        ProxyPipeContext,
+        ScopePipeContext,
         ModelContext
     {
         readonly ModelContext _context;

@@ -62,9 +62,7 @@
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            var settingsPipe = new EndpointSendContextPipe<T>(this);
-
-            return _transport.Send(message, settingsPipe, cancellationToken);
+            return _transport.Send(message, new SendEndpointPipe<T>(this), cancellationToken);
         }
 
         public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -72,13 +70,10 @@
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var settingsPipe = new EndpointSendContextPipe<T>(this, pipe);
-
-            return _transport.Send(message, settingsPipe, cancellationToken);
+            return _transport.Send(message, new SendEndpointPipe<T>(this, pipe), cancellationToken);
         }
 
         public Task Send(object message, CancellationToken cancellationToken)
@@ -95,7 +90,6 @@
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
@@ -116,20 +110,16 @@
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var settingsPipe = new EndpointSendContextPipe<T>(this, pipe);
-
-            return _transport.Send(message, settingsPipe, cancellationToken);
+            return _transport.Send(message, new SendEndpointPipe<T>(this, pipe), cancellationToken);
         }
 
         public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -142,10 +132,8 @@
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -174,22 +162,27 @@
         }
 
 
-        class EndpointSendContextPipe<T> :
+        readonly struct SendEndpointPipe<T> :
             IPipe<SendContext<T>>
             where T : class
         {
             readonly SendEndpoint _endpoint;
             readonly IPipe<SendContext<T>> _pipe;
+            readonly ISendContextPipe _sendContextPipe;
 
-            public EndpointSendContextPipe(SendEndpoint endpoint)
+            public SendEndpointPipe(SendEndpoint endpoint)
             {
                 _endpoint = endpoint;
+                _pipe = default;
+                _sendContextPipe = default;
             }
 
-            public EndpointSendContextPipe(SendEndpoint endpoint, IPipe<SendContext<T>> pipe)
+            public SendEndpointPipe(SendEndpoint endpoint, IPipe<SendContext<T>> pipe)
             {
                 _endpoint = endpoint;
                 _pipe = pipe;
+                // ReSharper disable once SuspiciousTypeConversion.Global
+                _sendContextPipe = pipe as ISendContextPipe;
             }
 
             void IProbeSite.Probe(ProbeContext context)
@@ -205,8 +198,8 @@
                 if (context.SourceAddress == null)
                     context.SourceAddress = _endpoint.SourceAddress;
 
-                if (_pipe is ISendContextPipe sendContextPipe)
-                    await sendContextPipe.Send(context).ConfigureAwait(false);
+                if (_sendContextPipe != null)
+                    await _sendContextPipe.Send(context).ConfigureAwait(false);
 
                 if (_endpoint._sendPipe != null)
                     await _endpoint._sendPipe.Send(context).ConfigureAwait(false);

@@ -3,7 +3,7 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Initializers;
+    using GreenPipes;
 
 
     public class RequestClient<TRequest> :
@@ -23,7 +23,14 @@
 
         public RequestHandle<TRequest> Create(TRequest message, CancellationToken cancellationToken, RequestTimeout timeout)
         {
-            return new ClientRequestHandle<TRequest>(_context, _requestSendEndpoint, Task.FromResult(message), cancellationToken, timeout.Or(_timeout));
+            async Task<TRequest> Request(Guid requestId, IPipe<SendContext<TRequest>> pipe, CancellationToken token)
+            {
+                await _requestSendEndpoint.Send(requestId, message, pipe, token).ConfigureAwait(false);
+
+                return message;
+            }
+
+            return new ClientRequestHandle<TRequest>(_context, Request, cancellationToken, timeout.Or(_timeout));
         }
 
         public RequestHandle<TRequest> Create(object values, CancellationToken cancellationToken = default, RequestTimeout timeout = default)
@@ -31,22 +38,25 @@
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            Task<InitializeContext<TRequest>> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
-
-            async Task<TRequest> Message()
+            async Task<TRequest> Request(Guid requestId, IPipe<SendContext<TRequest>> pipe, CancellationToken token)
             {
-                var message = await request.ConfigureAwait(false);
-
-                return message.Message;
+                return await _requestSendEndpoint.Send(requestId, values, pipe, token).ConfigureAwait(false);
             }
 
-            return new ClientRequestHandle<TRequest>(_context, _requestSendEndpoint, Message(), cancellationToken, timeout.Or(_timeout));
+            return new ClientRequestHandle<TRequest>(_context, Request, cancellationToken, timeout.Or(_timeout));
         }
 
         public Task<Response<T>> GetResponse<T>(TRequest message, CancellationToken cancellationToken, RequestTimeout timeout)
             where T : class
         {
-            return GetResponse<T>(Task.FromResult(message), cancellationToken, timeout);
+            async Task<TRequest> Request(Guid requestId, IPipe<SendContext<TRequest>> pipe, CancellationToken token)
+            {
+                await _requestSendEndpoint.Send(requestId, message, pipe, token).ConfigureAwait(false);
+
+                return message;
+            }
+
+            return GetResponseInternal<T>(Request, cancellationToken, timeout);
         }
 
         public Task<Response<T>> GetResponse<T>(object values, CancellationToken cancellationToken, RequestTimeout timeout)
@@ -55,26 +65,21 @@
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            Task<InitializeContext<TRequest>> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
-
-            async Task<TRequest> Message()
+            async Task<TRequest> Request(Guid requestId, IPipe<SendContext<TRequest>> pipe, CancellationToken token)
             {
-                var message = await request.ConfigureAwait(false);
-
-                return message.Message;
+                return await _requestSendEndpoint.Send(requestId, values, pipe, token).ConfigureAwait(false);
             }
 
-            return GetResponse<T>(Message(), cancellationToken, timeout);
+            return GetResponseInternal<T>(Request, cancellationToken, timeout);
         }
 
-        async Task<Response<T>> GetResponse<T>(Task<TRequest> message, CancellationToken cancellationToken, RequestTimeout timeout)
+        async Task<Response<T>> GetResponseInternal<T>(ClientRequestHandle<TRequest>.SendRequestCallback request, CancellationToken cancellationToken,
+            RequestTimeout timeout)
             where T : class
         {
-            using (RequestHandle<TRequest> handle = new ClientRequestHandle<TRequest>(_context, _requestSendEndpoint, message, cancellationToken,
-                timeout.Or(_timeout)))
-            {
-                return await handle.GetResponse<T>().ConfigureAwait(false);
-            }
+            using RequestHandle<TRequest> handle = new ClientRequestHandle<TRequest>(_context, request, cancellationToken, timeout.Or(_timeout));
+
+            return await handle.GetResponse<T>().ConfigureAwait(false);
         }
 
         public Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponse<T1, T2>(TRequest message, CancellationToken cancellationToken,
@@ -82,7 +87,14 @@
             where T1 : class
             where T2 : class
         {
-            return GetResponse<T1, T2>(Task.FromResult(message), cancellationToken, timeout);
+            async Task<TRequest> Request(Guid requestId, IPipe<SendContext<TRequest>> pipe, CancellationToken token)
+            {
+                await _requestSendEndpoint.Send(requestId, message, pipe, token).ConfigureAwait(false);
+
+                return message;
+            }
+
+            return GetResponseInternal<T1, T2>(Request, cancellationToken, timeout);
         }
 
         public Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponse<T1, T2>(object values, CancellationToken cancellationToken = default,
@@ -93,34 +105,28 @@
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            Task<InitializeContext<TRequest>> request = _requestSendEndpoint.CreateMessage(values, cancellationToken);
-
-            async Task<TRequest> Message()
+            async Task<TRequest> Request(Guid requestId, IPipe<SendContext<TRequest>> pipe, CancellationToken token)
             {
-                var message = await request.ConfigureAwait(false);
-
-                return message.Message;
+                return await _requestSendEndpoint.Send(requestId, values, pipe, token).ConfigureAwait(false);
             }
 
-
-            return GetResponse<T1, T2>(Message(), cancellationToken, timeout);
+            return GetResponseInternal<T1, T2>(Request, cancellationToken, timeout);
         }
 
-        async Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponse<T1, T2>(Task<TRequest> message, CancellationToken cancellationToken,
+        async Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponseInternal<T1, T2>(ClientRequestHandle<TRequest>.SendRequestCallback request,
+            CancellationToken cancellationToken,
             RequestTimeout timeout)
             where T1 : class
             where T2 : class
         {
-            using (RequestHandle<TRequest> handle =
-                new ClientRequestHandle<TRequest>(_context, _requestSendEndpoint, message, cancellationToken, timeout.Or(_timeout)))
-            {
-                Task<Response<T1>> result1 = handle.GetResponse<T1>(false);
-                Task<Response<T2>> result2 = handle.GetResponse<T2>();
+            using RequestHandle<TRequest> handle = new ClientRequestHandle<TRequest>(_context, request, cancellationToken, timeout.Or(_timeout));
 
-                await Task.WhenAny(result1, result2).ConfigureAwait(false);
+            Task<Response<T1>> result1 = handle.GetResponse<T1>(false);
+            Task<Response<T2>> result2 = handle.GetResponse<T2>();
 
-                return (result1, result2);
-            }
+            await Task.WhenAny(result1, result2).ConfigureAwait(false);
+
+            return (result1, result2);
         }
     }
 }

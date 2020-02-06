@@ -14,8 +14,8 @@
     {
         readonly Message _message;
 
-        public ServiceBusReceiveContext(Uri inputAddress, Message message, ReceiveEndpointContext receiveEndpointContext)
-            : base(inputAddress, message.SystemProperties.DeliveryCount > 1, receiveEndpointContext)
+        public ServiceBusReceiveContext(Message message, ReceiveEndpointContext receiveEndpointContext)
+            : base(message.SystemProperties.DeliveryCount > 1, receiveEndpointContext)
         {
             _message = message;
         }

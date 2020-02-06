@@ -40,12 +40,7 @@ namespace MassTransit.Serialization
 
                 var messageToken = _deserializer.Deserialize<JToken>(jsonReader);
 
-                Guid? messageId = default;
-                if (receiveContext.TransportHeaders.TryGetHeader(MessageHeaders.MessageId, out var headerValue)
-                    && headerValue is string value && Guid.TryParse(value, out var id))
-                    messageId = id;
-
-                return new RawJsonConsumeContext(_deserializer, receiveContext, messageToken, messageId);
+                return new RawJsonConsumeContext(_deserializer, receiveContext, messageToken);
             }
             catch (JsonSerializationException ex)
             {

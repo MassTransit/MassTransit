@@ -48,6 +48,13 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _modelConfigurator = new PipeConfigurator<ModelContext>();
 
             _inputAddress = new Lazy<Uri>(FormatInputAddress);
+
+            if (settings.QueueName == RabbitMqExchangeNames.ReplyTo)
+            {
+                settings.ExchangeName = null;
+                settings.BindQueue = true;
+                settings.NoAck = true;
+            }
         }
 
         public IRabbitMqReceiveEndpointConfigurator Configurator => this;
@@ -94,11 +101,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 consumerAgent = consumerFilter;
             }
 
-            IFilter<ConnectionContext> modelFilter = new ReceiveEndpointFilter(_modelConfigurator.Build());
+            IPipe<ModelContext> modelPipe = _modelConfigurator.Build();
 
-            _connectionConfigurator.UseFilter(modelFilter);
-
-            var transport = new RabbitMqReceiveTransport(host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
+            var transport = new RabbitMqReceiveTransport(host, _settings, modelPipe, receiveEndpointContext);
 
             transport.Add(consumerAgent);
 

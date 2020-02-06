@@ -71,5 +71,10 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
         public TimeSpan? QueueExpiration { get; set; }
 
         public IDictionary<string, object> QueueArguments { get; }
+
+        public override RabbitMqEndpointAddress GetEndpointAddress(Uri hostAddress)
+        {
+            return new RabbitMqEndpointAddress(hostAddress, ExchangeName ?? QueueName, ExchangeType, Durable, AutoDelete);
+        }
     }
 }
