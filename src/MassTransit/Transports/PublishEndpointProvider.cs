@@ -36,11 +36,6 @@ namespace MassTransit.Transports
             _cache = new SendEndpointCache<Type>();
         }
 
-        public IPublishEndpoint CreatePublishEndpoint()
-        {
-            return new PublishEndpoint(this);
-        }
-
         public Task<ISendEndpoint> GetPublishSendEndpoint<T>()
             where T : class
         {

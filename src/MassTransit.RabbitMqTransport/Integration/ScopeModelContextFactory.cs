@@ -1,8 +1,7 @@
-﻿namespace MassTransit.RabbitMqTransport.Integration
+namespace MassTransit.RabbitMqTransport.Integration
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -10,12 +9,12 @@
     using RabbitMQ.Client;
 
 
-    public class ModelContextFactory :
+    public class ScopeModelContextFactory :
         IPipeContextFactory<ModelContext>
     {
-        readonly IConnectionContextSupervisor _supervisor;
+        readonly IModelContextSupervisor _supervisor;
 
-        public ModelContextFactory(IConnectionContextSupervisor supervisor)
+        public ScopeModelContextFactory(IModelContextSupervisor supervisor)
         {
             _supervisor = supervisor;
         }
@@ -52,18 +51,16 @@
         {
             var modelContext = await context.ConfigureAwait(false);
 
-            return new ScopeModelContext(modelContext, cancellationToken);
+            var sharedModel = new SharedModelContext(modelContext, cancellationToken);
+
+            return sharedModel;
         }
 
         Task<ModelContext> CreateModel(IAsyncPipeContextAgent<ModelContext> asyncContext, CancellationToken cancellationToken)
         {
-            async Task<ModelContext> CreateModelContext(ConnectionContext connectionContext, CancellationToken createCancellationToken)
+            async Task<ModelContext> CreateModelContext(ModelContext context, CancellationToken createCancellationToken)
             {
-                var modelContext = await connectionContext.CreateModelContext(createCancellationToken).ConfigureAwait(false);
-
-                LogContext.Debug?.Log("Created model: {ChannelNumber} {Host}", modelContext.Model.ChannelNumber, connectionContext.Description);
-
-                return modelContext;
+                return new SharedModelContext(context, cancellationToken);
             }
 
             return _supervisor.CreateAgent(asyncContext, CreateModelContext, cancellationToken);

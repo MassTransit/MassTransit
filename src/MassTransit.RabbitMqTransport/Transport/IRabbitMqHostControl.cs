@@ -9,11 +9,9 @@ namespace MassTransit.RabbitMqTransport.Transport
         IRabbitMqHost,
         IBusHostControl
     {
-        Task<ISendTransport> CreateSendTransport(RabbitMqEndpointAddress address);
-
         Task<ISendTransport> CreateSendTransport(RabbitMqEndpointAddress address, IModelContextSupervisor modelContextSupervisor);
 
-        Task<ISendTransport> CreatePublishTransport<T>()
+        Task<ISendTransport> CreatePublishTransport<T>(IModelContextSupervisor modelContextSupervisor)
             where T : class;
     }
 }

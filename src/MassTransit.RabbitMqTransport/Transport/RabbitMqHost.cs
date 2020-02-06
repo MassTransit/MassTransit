@@ -99,23 +99,6 @@ namespace MassTransit.RabbitMqTransport.Transport
             return ReceiveEndpoints.Start(queueName);
         }
 
-        public Task<ISendTransport> CreateSendTransport(RabbitMqEndpointAddress address)
-        {
-            TransportLogMessages.CreateSendTransport(address);
-
-            var settings = _hostTopology.SendTopology.GetSendSettings(address);
-
-            var brokerTopology = settings.GetBrokerTopology();
-
-            var supervisor = CreateModelContextSupervisor();
-
-            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
-
-            var transport = CreateSendTransport(supervisor, pipe, settings.ExchangeName);
-
-            return Task.FromResult(transport);
-        }
-
         public Task<ISendTransport> CreateSendTransport(RabbitMqEndpointAddress address, IModelContextSupervisor modelContextSupervisor)
         {
             TransportLogMessages.CreateSendTransport(address);
@@ -126,12 +109,14 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
 
-            var transport = CreateSendTransport(modelContextSupervisor, pipe, settings.ExchangeName);
+            var supervisor = new ModelContextSupervisor(modelContextSupervisor);
+
+            var transport = CreateSendTransport(supervisor, pipe, settings.ExchangeName);
 
             return Task.FromResult(transport);
         }
 
-        public Task<ISendTransport> CreatePublishTransport<T>()
+        public Task<ISendTransport> CreatePublishTransport<T>(IModelContextSupervisor modelContextSupervisor)
             where T : class
         {
             IRabbitMqMessagePublishTopology<T> publishTopology = _hostTopology.Publish<T>();
@@ -140,7 +125,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
             var brokerTopology = publishTopology.GetBrokerTopology();
 
-            var supervisor = CreateModelContextSupervisor();
+            var supervisor = new ModelContextSupervisor(modelContextSupervisor);
 
             IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology).ToPipe();
 
@@ -157,11 +142,6 @@ namespace MassTransit.RabbitMqTransport.Transport
             Add(transport);
 
             return transport;
-        }
-
-        IModelContextSupervisor CreateModelContextSupervisor()
-        {
-            return new ModelContextSupervisor(ConnectionContextSupervisor);
         }
 
         protected override IAgent[] GetAgentHandles()

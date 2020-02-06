@@ -14,8 +14,8 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
         }
 
-        public ModelContextSupervisor(IPipeContextFactory<ModelContext> contextFactory)
-            : base(contextFactory)
+        public ModelContextSupervisor(IModelContextSupervisor modelContextSupervisor)
+            : base(new ScopeModelContextFactory(modelContextSupervisor))
         {
         }
 

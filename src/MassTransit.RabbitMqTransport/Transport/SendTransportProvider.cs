@@ -11,8 +11,8 @@ namespace MassTransit.RabbitMqTransport.Transport
         ISendTransportProvider
     {
         readonly IRabbitMqHostControl _host;
-        readonly IModelContextSupervisor _modelContextSupervisor;
         readonly IIndex<Uri, CachedSendTransport> _index;
+        readonly IModelContextSupervisor _modelContextSupervisor;
 
         public SendTransportProvider(IRabbitMqHostControl host, IModelContextSupervisor modelContextSupervisor)
         {
@@ -32,10 +32,10 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         async Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
         {
-            var endpointAddress = new RabbitMqEndpointAddress(_host.Address, address);
-
             async Task<CachedSendTransport> Create(Uri transportAddress)
             {
+                var endpointAddress = new RabbitMqEndpointAddress(_host.Address, address);
+
                 var transport = await _host.CreateSendTransport(endpointAddress, _modelContextSupervisor);
 
                 return new CachedSendTransport(transportAddress, transport);

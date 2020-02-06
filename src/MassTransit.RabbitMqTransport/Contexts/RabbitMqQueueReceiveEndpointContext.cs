@@ -38,7 +38,7 @@
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_host);
+            return new PublishTransportProvider(_host, ModelContextSupervisor);
         }
     }
 }
