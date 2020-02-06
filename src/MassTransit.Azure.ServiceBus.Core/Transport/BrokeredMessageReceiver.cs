@@ -53,7 +53,7 @@
         {
             LogContext.Current = _context.LogContext;
 
-            var context = new ServiceBusReceiveContext(_inputAddress, message, _context);
+            var context = new ServiceBusReceiveContext(message, _context);
             contextCallback?.Invoke(context);
 
             context.TryGetPayload<MessageLockContext>(out var lockContext);

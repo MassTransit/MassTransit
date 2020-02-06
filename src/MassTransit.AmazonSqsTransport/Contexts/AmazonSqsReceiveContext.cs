@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Contexts
 {
-    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
@@ -16,9 +15,9 @@
     {
         byte[] _body;
 
-        public AmazonSqsReceiveContext(Uri inputAddress, Message transportMessage, bool redelivered, SqsReceiveEndpointContext context,
+        public AmazonSqsReceiveContext(Message transportMessage, bool redelivered, SqsReceiveEndpointContext context,
             params object[] payloads)
-            : base(inputAddress, redelivered, context, payloads)
+            : base(redelivered, context, payloads)
         {
             TransportMessage = transportMessage;
         }

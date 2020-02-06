@@ -46,7 +46,7 @@ namespace MassTransit.Conductor.Client
 
             Task<IMessageClient<T>> messageClient = GetMessageClient<T>();
 
-            return new ServiceClientRequestSendEndpoint<T>(messageClient, consumeContext);
+            return new ServiceClientRequestSendEndpoint<T>(messageClient, _clientFactory.Context, consumeContext);
         }
 
         public IRequestSendEndpoint<T> CreateRequestSendEndpoint<T>()

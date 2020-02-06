@@ -24,7 +24,7 @@ namespace MassTransit.Pipeline.Filters
         {
             if (!context.IsFaulted)
             {
-                GenerateFault(context);
+                await GenerateFault(context).ConfigureAwait(false);
 
                 await context.NotifyFaulted(context.Exception).ConfigureAwait(false);
             }
@@ -32,33 +32,53 @@ namespace MassTransit.Pipeline.Filters
             await next.Send(context).ConfigureAwait(false);
         }
 
-        static void GenerateFault(ExceptionReceiveContext context)
+        static async Task GenerateFault(ExceptionReceiveContext context)
         {
-            IPublishEndpoint publishEndpoint;
-            Guid? faultedMessageId;
-            string[] faultMessageTypes = null;
+            Guid? messageId;
+            Guid? requestId;
+            string[] messageTypes = null;
 
             if (context.TryGetPayload(out ConsumeContext consumeContext))
             {
-                publishEndpoint = consumeContext;
-                faultedMessageId = consumeContext.MessageId;
-                faultMessageTypes = consumeContext.SupportedMessageTypes.ToArray();
+                messageId = consumeContext.MessageId;
+                requestId = consumeContext.RequestId;
+                messageTypes = consumeContext.SupportedMessageTypes.ToArray();
             }
             else
             {
-                faultedMessageId = context.TransportHeaders.Get("MessageId", default(Guid?));
-
-                publishEndpoint = context.PublishEndpointProvider.CreatePublishEndpoint(context.InputAddress);
+                messageId = context.TransportHeaders.Get("MessageId", default(Guid?));
+                requestId = context.TransportHeaders.Get("RequestId", default(Guid?));
             }
 
-            ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType.MediaType, faultedMessageId,
-                faultMessageTypes);
+            ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType.MediaType, messageId, messageTypes);
 
-            var contextPipe = new ConsumeSendContextPipe<ReceiveFault>(consumeContext);
+            var faultEndpoint = await GetFaultEndpoint(context, consumeContext, requestId).ConfigureAwait(false);
 
-            var publishTask = publishEndpoint.Publish(fault, contextPipe, context.CancellationToken);
+            await faultEndpoint.Send(fault).ConfigureAwait(false);
+        }
 
-            context.AddReceiveTask(publishTask);
+        static async Task<ISendEndpoint> GetFaultEndpoint(ReceiveContext context, ConsumeContext consumeContext, Guid? requestId)
+        {
+            Task ConsumeTask(Task task)
+            {
+                context.AddReceiveTask(task);
+                return task;
+            }
+
+            var destinationAddress = consumeContext?.FaultAddress ?? consumeContext?.ResponseAddress;
+            if (destinationAddress != null)
+            {
+                var sendEndpoint = await context.SendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+
+                return new ConsumeSendEndpoint(sendEndpoint, consumeContext, ConsumeTask, requestId);
+            }
+
+            var publishSendEndpoint = await context.PublishEndpointProvider.GetPublishSendEndpoint<ReceiveFault>().ConfigureAwait(false);
+
+            if (consumeContext != null)
+                return new ConsumeSendEndpoint(publishSendEndpoint, consumeContext, ConsumeTask, requestId);
+
+            return publishSendEndpoint;
         }
     }
 }

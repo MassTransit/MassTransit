@@ -26,7 +26,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         RabbitMqDeliveryMetrics
     {
         readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly Uri _inputAddress;
         readonly ModelContext _model;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly ReceiveSettings _receiveSettings;
@@ -39,12 +38,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// The basic consumer receives messages pushed from the broker.
         /// </summary>
         /// <param name="model">The model context for the consumer</param>
-        /// <param name="inputAddress">The input address for messages received by the consumer</param>
         /// <param name="context">The topology</param>
-        public RabbitMqBasicConsumer(ModelContext model, Uri inputAddress, RabbitMqReceiveEndpointContext context)
+        public RabbitMqBasicConsumer(ModelContext model, RabbitMqReceiveEndpointContext context)
         {
             _model = model;
-            _inputAddress = inputAddress;
             _context = context;
 
             _tracker = new DeliveryTracker(HandleDeliveryComplete);
@@ -124,7 +121,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             LogContext.Current = _context.LogContext;
 
-            if (IsStopping)
+            if (IsStopping && _receiveSettings.NoAck == false)
             {
                 await WaitAndAbandonMessage(deliveryTag).ConfigureAwait(false);
                 return;
@@ -132,8 +129,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             var delivery = _tracker.BeginDelivery();
 
-            var context = new RabbitMqReceiveContext(_inputAddress, exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
-                _context, _receiveSettings, _model, _model.ConnectionContext);
+            var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties, _context, _receiveSettings,
+                _model, _model.ConnectionContext);
 
             var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
             try
@@ -148,7 +145,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 await context.ReceiveCompleted.ConfigureAwait(false);
 
-                _model.BasicAck(deliveryTag, false);
+                if (_receiveSettings.NoAck == false)
+                    _model.BasicAck(deliveryTag, false);
 
                 if (_context.ReceiveObservers.Count > 0)
                     await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
@@ -160,7 +158,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
                 try
                 {
-                    _model.BasicNack(deliveryTag, false, true);
+                    if (_receiveSettings.NoAck == false)
+                        _model.BasicNack(deliveryTag, false, true);
                 }
                 catch (Exception ackEx)
                 {

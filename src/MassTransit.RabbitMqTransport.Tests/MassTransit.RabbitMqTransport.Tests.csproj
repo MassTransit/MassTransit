@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <Reference Include="System.Runtime"/>
+    <Reference Include="System.Runtime" />
   </ItemGroup>
 
 </Project>

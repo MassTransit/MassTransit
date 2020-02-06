@@ -5,9 +5,6 @@ namespace MassTransit.Transports
     using System.Threading.Tasks;
     using Context.Converters;
     using GreenPipes;
-    using Initializers;
-    using Pipeline;
-    using Pipeline.Observables;
 
 
     /// <summary>
@@ -16,41 +13,26 @@ namespace MassTransit.Transports
     public class PublishEndpoint :
         IPublishEndpoint
     {
-        readonly ConsumeContext _consumeContext;
-        readonly IPublishEndpointProvider _endpointProvider;
-        readonly PublishObservable _publishObserver;
-        readonly IPublishPipe _publishPipe;
-        readonly Uri _sourceAddress;
+        readonly IPublishEndpointProvider _provider;
 
-        public PublishEndpoint(Uri sourceAddress, IPublishEndpointProvider endpointProvider, PublishObservable publishObserver, IPublishPipe publishPipe,
-            ConsumeContext consumeContext)
+        public PublishEndpoint(IPublishEndpointProvider provider)
         {
-            _sourceAddress = sourceAddress;
-            _endpointProvider = endpointProvider;
-            _publishObserver = publishObserver;
-            _publishPipe = publishPipe;
-            _consumeContext = consumeContext;
+            _provider = provider;
         }
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
-            var adapter = new PublishEndpointPipeAdapter<T>(message, _publishPipe, _publishObserver, _sourceAddress, _consumeContext);
-
-            return Publish(cancellationToken, message, adapter);
+            return PublishInternal(cancellationToken, message);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishEndpointPipeAdapter<T>(message, publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext);
-
-            return Publish(cancellationToken, message, adapter);
+            return PublishInternal(cancellationToken, message, publishPipe);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
-            var adapter = new PublishEndpointPipeAdapter<T>(message, publishPipe, _publishPipe, _publishObserver, _sourceAddress, _consumeContext);
-
-            return Publish(cancellationToken, message, adapter);
+            return PublishInternal(cancellationToken, message, publishPipe);
         }
 
         Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
@@ -88,12 +70,7 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
-
-            if (_consumeContext != null)
-                return initializer.Publish(this, initializer.Create(_consumeContext), values);
-
-            return initializer.Publish(this, values, cancellationToken);
+            return PublishInternal<T>(cancellationToken, values);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
@@ -101,12 +78,7 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
-
-            if (_consumeContext != null)
-                return initializer.Publish(this, initializer.Create(_consumeContext), values, publishPipe);
-
-            return initializer.Publish(this, values, publishPipe, cancellationToken);
+            return PublishInternal<T>(cancellationToken, values, publishPipe);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
@@ -114,37 +86,64 @@ namespace MassTransit.Transports
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
-
-            if (_consumeContext != null)
-                return initializer.Publish(this, initializer.Create(_consumeContext), values, publishPipe);
-
-            return initializer.Publish(this, values, publishPipe, cancellationToken);
+            return PublishInternal<T>(cancellationToken, values, publishPipe);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _endpointProvider.ConnectPublishObserver(observer);
+            return _provider.ConnectPublishObserver(observer);
         }
 
-        async Task Publish<T>(CancellationToken cancellationToken, T message, PublishEndpointPipeAdapter<T> adapter)
+        protected virtual async Task<ISendEndpoint> GetPublishSendEndpoint<T>()
             where T : class
         {
-            try
+            return await _provider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
+        }
+
+        async Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>> pipe = default)
+            where T : class
+        {
+            var sendEndpoint = await GetPublishSendEndpoint<T>().ConfigureAwait(false);
+
+            if (pipe.IsNotEmpty())
+                await sendEndpoint.Send(message, new PublishPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
+            else
+                await sendEndpoint.Send(message, cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task PublishInternal<T>(CancellationToken cancellationToken, object values, IPipe<PublishContext<T>> pipe = default)
+            where T : class
+        {
+            var sendEndpoint = await GetPublishSendEndpoint<T>().ConfigureAwait(false);
+
+            if (pipe.IsNotEmpty())
+                await sendEndpoint.Send(values, new PublishPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
+            else
+                await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
+        }
+
+
+        readonly struct PublishPipeAdapter<T> :
+            IPipe<SendContext<T>>
+            where T : class
+        {
+            readonly IPipe<PublishContext<T>> _pipe;
+
+            public PublishPipeAdapter(IPipe<PublishContext<T>> pipe)
             {
-                var sendEndpoint = await _endpointProvider.GetPublishSendEndpoint(message).ConfigureAwait(false);
-
-                await sendEndpoint.Send(message, adapter, cancellationToken).ConfigureAwait(false);
-
-                if (adapter.ObserverCount > 0)
-                    await adapter.PostPublish().ConfigureAwait(false);
+                _pipe = pipe;
             }
-            catch (Exception ex)
-            {
-                if (adapter.ObserverCount > 0)
-                    await adapter.PublishFaulted(ex).ConfigureAwait(false);
 
-                throw;
+            void IProbeSite.Probe(ProbeContext context)
+            {
+                _pipe.Probe(context);
+            }
+
+            public Task Send(SendContext<T> context)
+            {
+                var publishContext = context.GetPayload<PublishContext<T>>();
+
+                return _pipe.Send(publishContext);
             }
         }
     }

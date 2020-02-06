@@ -58,7 +58,7 @@
             if (EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 return CreateRequestClient<T>(destinationAddress, timeout);
 
-            return new RequestClient<T>(_context, new PublishRequestSendEndpoint<T>(_context.PublishEndpoint), timeout.Or(_context.DefaultTimeout));
+            return new RequestClient<T>(_context, _context.GetRequestEndpoint<T>(), timeout.Or(_context.DefaultTimeout));
         }
 
         public IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, RequestTimeout timeout)
@@ -67,13 +67,13 @@
             if (EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 return CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
 
-            return new RequestClient<T>(_context, new PublishRequestSendEndpoint<T>(consumeContext), timeout.Or(_context.DefaultTimeout));
+            return new RequestClient<T>(_context, _context.GetRequestEndpoint<T>(consumeContext), timeout.Or(_context.DefaultTimeout));
         }
 
         public IRequestClient<T> CreateRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
             where T : class
         {
-            var requestSendEndpoint = new SendRequestSendEndpoint<T>(_context, destinationAddress);
+            var requestSendEndpoint = _context.GetRequestEndpoint<T>(destinationAddress);
 
             return new RequestClient<T>(_context, requestSendEndpoint, timeout.Or(_context.DefaultTimeout));
         }
@@ -81,9 +81,7 @@
         public IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, Uri destinationAddress, RequestTimeout timeout)
             where T : class
         {
-            var requestSendEndpoint = new SendRequestSendEndpoint<T>(consumeContext, destinationAddress);
-
-            return new RequestClient<T>(_context, requestSendEndpoint, timeout.Or(_context.DefaultTimeout));
+            return new RequestClient<T>(_context, _context.GetRequestEndpoint<T>(destinationAddress, consumeContext), timeout.Or(_context.DefaultTimeout));
         }
 
         Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)

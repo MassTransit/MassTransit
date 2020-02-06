@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Context
 {
     using System;
@@ -18,7 +6,6 @@ namespace MassTransit.Context
     using System.Threading.Tasks;
     using GreenPipes;
     using Initializers;
-    using Pipeline.Pipes;
 
 
     public class MessageConsumeContext<TMessage> :
@@ -217,17 +204,17 @@ namespace MassTransit.Context
 
         Task ConsumeContext.RespondAsync<T>(object values)
         {
-            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this));
+            return RespondAsyncInternal<T>(values);
         }
 
         Task ConsumeContext.RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe)
         {
-            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this, sendPipe));
+            return RespondAsyncInternal<T>(values, sendPipe);
         }
 
         Task ConsumeContext.RespondAsync<T>(object values, IPipe<SendContext> sendPipe)
         {
-            return RespondAsyncInternal<T>(values, new ResponsePipe<T>(this, sendPipe));
+            return RespondAsyncInternal<T>(values, sendPipe);
         }
 
         void ConsumeContext.Respond<T>(T message)
@@ -245,7 +232,7 @@ namespace MassTransit.Context
             return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
-        async Task RespondAsyncInternal<T>(object values, IPipe<SendContext<T>> responsePipe)
+        async Task RespondAsyncInternal<T>(object values, IPipe<SendContext<T>> responsePipe = default)
             where T : class
         {
             if (values == null)
@@ -255,14 +242,27 @@ namespace MassTransit.Context
 
             IMessageInitializer<T> initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
+            var responseEndpoint = await GetResponseEndpoint<T>().ConfigureAwait(false);
+
+            if (responsePipe.IsNotEmpty())
+                await ConsumeTask(initializer.Send(responseEndpoint, context, values, responsePipe)).ConfigureAwait(false);
+            else
+                await ConsumeTask(initializer.Send(responseEndpoint, context, values)).ConfigureAwait(false);
+        }
+
+        protected virtual async Task<ISendEndpoint> GetResponseEndpoint<T>()
+            where T : class
+        {
             if (_context.ResponseAddress != null)
             {
-                var endpoint = await _context.GetSendEndpoint(_context.ResponseAddress).ConfigureAwait(false);
+                var sendEndpoint = await _context.ReceiveContext.SendEndpointProvider.GetSendEndpoint(_context.ResponseAddress).ConfigureAwait(false);
 
-                await ConsumeTask(initializer.Send(endpoint, context, values, responsePipe)).ConfigureAwait(false);
+                return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask, _context.RequestId);
             }
-            else
-                await ConsumeTask(initializer.Publish(_context, context, values, responsePipe)).ConfigureAwait(false);
+
+            var publishSendEndpoint = await _context.ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
+
+            return new ConsumeSendEndpoint(publishSendEndpoint, this, ConsumeTask, _context.RequestId);
         }
 
         Task ConsumeTask(Task task)

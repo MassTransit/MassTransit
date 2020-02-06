@@ -1,36 +1,34 @@
 namespace MassTransit.Context
 {
+    using System;
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Util;
     using Pipeline;
 
 
-    public struct ConsumeSendContextPipe<TMessage> :
+    public struct ConsumeSendEndpointPipe<TMessage> :
         IPipe<SendContext<TMessage>>,
         ISendContextPipe
         where TMessage : class
     {
         readonly ConsumeContext _consumeContext;
         readonly IPipe<SendContext<TMessage>> _pipe;
+        readonly Guid? _requestId;
 
-        public ConsumeSendContextPipe(ConsumeContext consumeContext)
+        public ConsumeSendEndpointPipe(ConsumeContext consumeContext, Guid? requestId)
         {
             _consumeContext = consumeContext;
+            _requestId = requestId;
 
             _pipe = default;
         }
 
-        public ConsumeSendContextPipe(ConsumeContext consumeContext, IPipe<SendContext<TMessage>> pipe)
+        public ConsumeSendEndpointPipe(ConsumeContext consumeContext, IPipe<SendContext<TMessage>> pipe, Guid? requestId)
         {
             _consumeContext = consumeContext;
             _pipe = pipe;
-        }
-
-        public ConsumeSendContextPipe(ConsumeContext consumeContext, IPipe<SendContext> pipe)
-        {
-            _consumeContext = consumeContext;
-            _pipe = pipe;
+            _requestId = requestId;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -46,8 +44,20 @@ namespace MassTransit.Context
         public Task Send<T>(SendContext<T> context)
             where T : class
         {
+            if (_requestId.HasValue)
+                context.RequestId = _requestId;
+
             if (_consumeContext != null)
+            {
                 context.TransferConsumeContextHeaders(_consumeContext);
+
+                if (_requestId.HasValue && _consumeContext.ExpirationTime.HasValue)
+                {
+                    context.TimeToLive = _consumeContext.ExpirationTime.Value - DateTime.UtcNow;
+                    if (context.TimeToLive.Value <= TimeSpan.Zero)
+                        context.TimeToLive = TimeSpan.FromSeconds(1);
+                }
+            }
 
             return TaskUtil.Completed;
         }

@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
     using System.Threading.Tasks;
@@ -28,11 +16,11 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         Supervisor,
         IFilter<ModelContext>
     {
-        readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
+        readonly RabbitMqReceiveEndpointContext _context;
 
-        public RabbitMqConsumerFilter(RabbitMqReceiveEndpointContext receiveEndpointContext)
+        public RabbitMqConsumerFilter(RabbitMqReceiveEndpointContext context)
         {
-            _receiveEndpointContext = receiveEndpointContext;
+            _context = context;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -43,18 +31,17 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostAddress);
+            var consumer = new RabbitMqBasicConsumer(context, _context);
 
-            var consumer = new RabbitMqBasicConsumer(context, inputAddress, _receiveEndpointContext);
-
-            await context.BasicConsume(receiveSettings.QueueName, false, _receiveEndpointContext.ExclusiveConsumer, receiveSettings.ConsumeArguments, consumer)
+            await context.BasicConsume(receiveSettings.QueueName, receiveSettings.NoAck, _context.ExclusiveConsumer, receiveSettings
+            .ConsumeArguments, consumer)
                 .ConfigureAwait(false);
 
             await consumer.Ready.ConfigureAwait(false);
 
             Add(consumer);
 
-            await _receiveEndpointContext.TransportObservers.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
+            await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(_context.InputAddress)).ConfigureAwait(false);
 
             try
             {
@@ -63,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             finally
             {
                 RabbitMqDeliveryMetrics metrics = consumer;
-                await _receiveEndpointContext.TransportObservers.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics)).ConfigureAwait(false);
+                await _context.TransportObservers.Completed(new ReceiveTransportCompletedEvent(_context.InputAddress, metrics)).ConfigureAwait(false);
 
                 LogContext.Debug?.Log("Consumer completed {ConsumerTag}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent", metrics.ConsumerTag,
                     metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);

@@ -8,7 +8,6 @@ namespace MassTransit.RabbitMqTransport.Transport
     using Definition;
     using GreenPipes;
     using GreenPipes.Agents;
-    using GreenPipes.Caching;
     using Integration;
     using MassTransit.Configurators;
     using Pipeline;
@@ -22,7 +21,6 @@ namespace MassTransit.RabbitMqTransport.Transport
     {
         readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly IRabbitMqHostTopology _hostTopology;
-        readonly IIndex<Uri, CachedSendTransport> _index;
 
         public RabbitMqHost(IRabbitMqHostConfiguration hostConfiguration, IRabbitMqHostTopology hostTopology)
             : base(hostConfiguration, hostTopology)
@@ -38,11 +36,6 @@ namespace MassTransit.RabbitMqTransport.Transport
             });
 
             ConnectionContextSupervisor = new RabbitMqConnectionContextSupervisor(hostConfiguration, hostTopology);
-
-            var cacheSettings = new CacheSettings(SendEndpointCacheDefaults.Capacity, SendEndpointCacheDefaults.MinAge, SendEndpointCacheDefaults.MaxAge);
-
-            var cache = new GreenCache<CachedSendTransport>(cacheSettings);
-            _index = cache.AddIndex("key", x => x.Address);
         }
 
         protected override void Probe(ProbeContext context)
@@ -106,26 +99,36 @@ namespace MassTransit.RabbitMqTransport.Transport
             return ReceiveEndpoints.Start(queueName);
         }
 
-        public async Task<ISendTransport> CreateSendTransport(RabbitMqEndpointAddress address)
+        public Task<ISendTransport> CreateSendTransport(RabbitMqEndpointAddress address)
         {
-            Task<CachedSendTransport> Create(Uri transportAddress)
-            {
-                TransportLogMessages.CreateSendTransport(address);
+            TransportLogMessages.CreateSendTransport(address);
 
-                var settings = _hostTopology.SendTopology.GetSendSettings(address);
+            var settings = _hostTopology.SendTopology.GetSendSettings(address);
 
-                var brokerTopology = settings.GetBrokerTopology();
+            var brokerTopology = settings.GetBrokerTopology();
 
-                var supervisor = CreateModelContextSupervisor();
+            var supervisor = CreateModelContextSupervisor();
 
-                IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
+            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
 
-                var transport = CreateSendTransport(supervisor, pipe, settings.ExchangeName);
+            var transport = CreateSendTransport(supervisor, pipe, settings.ExchangeName);
 
-                return Task.FromResult(new CachedSendTransport(transportAddress, transport));
-            }
+            return Task.FromResult(transport);
+        }
 
-            return await _index.Get(address, Create).ConfigureAwait(false);
+        public Task<ISendTransport> CreateSendTransport(RabbitMqEndpointAddress address, IModelContextSupervisor modelContextSupervisor)
+        {
+            TransportLogMessages.CreateSendTransport(address);
+
+            var settings = _hostTopology.SendTopology.GetSendSettings(address);
+
+            var brokerTopology = settings.GetBrokerTopology();
+
+            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
+
+            var transport = CreateSendTransport(modelContextSupervisor, pipe, settings.ExchangeName);
+
+            return Task.FromResult(transport);
         }
 
         public Task<ISendTransport> CreatePublishTransport<T>()

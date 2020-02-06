@@ -71,7 +71,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var delivery = _tracker.BeginDelivery();
 
-            var context = new ActiveMqReceiveContext(_inputAddress, message, _context, _receiveSettings, _session, _session.ConnectionContext);
+            var context = new ActiveMqReceiveContext(message, _context, _receiveSettings, _session, _session.ConnectionContext);
 
             var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
             try

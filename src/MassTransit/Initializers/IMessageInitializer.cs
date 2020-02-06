@@ -42,7 +42,7 @@
         /// <param name="input">The input object</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task Send(ISendEndpoint endpoint, object input, CancellationToken cancellationToken);
+        Task<TMessage> Send(ISendEndpoint endpoint, object input, CancellationToken cancellationToken);
 
         /// <summary>
         /// Initialize the message using the input and send it to the endpoint.
@@ -51,7 +51,7 @@
         /// <param name="context"></param>
         /// <param name="input">The input object</param>
         /// <returns></returns>
-        Task Send(ISendEndpoint endpoint, InitializeContext<TMessage> context, object input);
+        Task<TMessage> Send(ISendEndpoint endpoint, InitializeContext<TMessage> context, object input);
 
         /// <summary>
         /// Initialize the message using the input and send it to the endpoint.
@@ -61,7 +61,7 @@
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task Send(ISendEndpoint endpoint, object input, IPipe<SendContext> pipe, CancellationToken cancellationToken);
+        Task<TMessage> Send(ISendEndpoint endpoint, object input, IPipe<SendContext> pipe, CancellationToken cancellationToken);
 
         /// <summary>
         /// Initialize the message using the input and send it to the endpoint.
@@ -71,7 +71,7 @@
         /// <param name="input">The input object</param>
         /// <param name="pipe"></param>
         /// <returns></returns>
-        Task Send(ISendEndpoint endpoint, InitializeContext<TMessage> context, object input, IPipe<SendContext> pipe);
+        Task<TMessage> Send(ISendEndpoint endpoint, InitializeContext<TMessage> context, object input, IPipe<SendContext> pipe);
 
         /// <summary>
         /// Initialize the message using the input and send it to the endpoint.
@@ -81,7 +81,7 @@
         /// <param name="pipe"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task Send(ISendEndpoint endpoint, object input, IPipe<SendContext<TMessage>> pipe, CancellationToken cancellationToken);
+        Task<TMessage> Send(ISendEndpoint endpoint, object input, IPipe<SendContext<TMessage>> pipe, CancellationToken cancellationToken);
 
         /// <summary>
         /// Initialize the message using the input and send it to the endpoint.
@@ -91,64 +91,6 @@
         /// <param name="input">The input object</param>
         /// <param name="pipe"></param>
         /// <returns></returns>
-        Task Send(ISendEndpoint endpoint, InitializeContext<TMessage> context, object input, IPipe<SendContext<TMessage>> pipe);
-
-        /// <summary>
-        /// Initialize the message using the input and publish it
-        /// </summary>
-        /// <param name="endpoint"></param>
-        /// <param name="input"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task Publish(IPublishEndpoint endpoint, object input, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Initialize the message using the input and publish it
-        /// </summary>
-        /// <param name="endpoint"></param>
-        /// <param name="context"></param>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        Task Publish(IPublishEndpoint endpoint, InitializeContext<TMessage> context, object input);
-
-        /// <summary>
-        /// Initialize the message using the input and publish it
-        /// </summary>
-        /// <param name="endpoint"></param>
-        /// <param name="input"></param>
-        /// <param name="pipe"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task Publish(IPublishEndpoint endpoint, object input, IPipe<PublishContext<TMessage>> pipe, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Initialize the message using the input and publish it
-        /// </summary>
-        /// <param name="endpoint"></param>
-        /// <param name="context"></param>
-        /// <param name="input"></param>
-        /// <param name="pipe"></param>
-        /// <returns></returns>
-        Task Publish(IPublishEndpoint endpoint, InitializeContext<TMessage> context, object input, IPipe<PublishContext<TMessage>> pipe);
-
-        /// <summary>
-        /// Initialize the message using the input and publish it
-        /// </summary>
-        /// <param name="endpoint"></param>
-        /// <param name="input"></param>
-        /// <param name="pipe"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task Publish(IPublishEndpoint endpoint, object input, IPipe<PublishContext> pipe, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Initialize the message using the input and publish it
-        /// </summary>
-        /// <param name="endpoint"></param>
-        /// <param name="context"></param>
-        /// <param name="input"></param>
-        /// <param name="pipe"></param>
-        /// <returns></returns>
-        Task Publish(IPublishEndpoint endpoint, InitializeContext<TMessage> context, object input, IPipe<PublishContext> pipe);
+        Task<TMessage> Send(ISendEndpoint endpoint, InitializeContext<TMessage> context, object input, IPipe<SendContext<TMessage>> pipe);
     }
 }
