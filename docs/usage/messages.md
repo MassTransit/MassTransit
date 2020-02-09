@@ -1,9 +1,9 @@
 # Messages
 
-In MassTransit, a message is defined using the .NET type system. Messages can be defined using both classes and interfaces, however, it is suggested that types use read-only properties and no behavior.
+In MassTransit, a message contract is defined _code first_ by creating a .NET type. A message can be defined using a class or an interface, resulting in a strongly-typed contract. Messages should be limited to read-only properties and not include methods or behavior.
 
-::: tip
-It is strongly suggested to use interfaces for message contracts, based on experience over several years with varying levels of developer experience. MassTransit will create dynamic interface implementations for the messages, ensuring a clean separation of the message contract from the consumer.
+::: warning Important
+MassTransit uses the full type name, including the _namespace_, for message contracts. When creating the same message *type* in two separate projects, the namespaces **must** match or the message will not be consumed.
 :::
 
 An example message to update a customer address is shown below.
@@ -26,6 +26,10 @@ An example message to update a customer address is shown below.
 		}
 	}
 ```
+
+::: tip
+It is strongly suggested to use interfaces for message contracts, based on experience over several years with varying levels of developer experience. MassTransit will create dynamic interface implementations for the messages, ensuring a clean separation of the message contract from the consumer.
+:::
 
 A common mistake when engineers are new to messaging is to create a base class for messages, and try to dispatch that base class in the consumer – including the behavior of the subclass. Ouch. This always leads to pain and suffering, so just say no to base classes.
 
