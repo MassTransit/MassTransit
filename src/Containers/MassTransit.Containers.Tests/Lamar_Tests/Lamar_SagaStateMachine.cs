@@ -6,6 +6,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
     using TestFramework.Sagas;
 
 
+    [TestFixture]
     public class Lamar_SagaStateMachine :
         Common_SagaStateMachine
     {

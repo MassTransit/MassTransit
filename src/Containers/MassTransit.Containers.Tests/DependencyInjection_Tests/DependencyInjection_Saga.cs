@@ -18,7 +18,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
         {
             _provider = new ServiceCollection()
                 .AddMassTransit(ConfigureRegistration)
-                .BuildServiceProvider();
+                .BuildServiceProvider(true);
         }
 
         protected override void ConfigureSaga(IInMemoryReceiveEndpointConfigurator configurator)

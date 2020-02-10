@@ -104,18 +104,11 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         void IContainerRegistrar.RegisterRequestClient<T>(RequestTimeout timeout)
         {
-            _collection.AddSingleton(provider =>
-            {
-                var clientFactory = provider.GetRequiredService<IClientFactory>();
-
-                return clientFactory.CreateRequestClient<T>(timeout);
-            });
-
             _collection.AddScoped(context =>
             {
                 var clientFactory = context.GetRequiredService<IClientFactory>();
 
-                var consumeContext = context.GetConsumeContext();
+                var consumeContext = context.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
                 return consumeContext != null
                     ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
                     : clientFactory.CreateRequestClient<T>(timeout);
@@ -124,18 +117,11 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         void IContainerRegistrar.RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
         {
-            _collection.AddSingleton(provider =>
-            {
-                var clientFactory = provider.GetRequiredService<IClientFactory>();
-
-                return clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-            });
-
             _collection.AddScoped(context =>
             {
                 var clientFactory = context.GetRequiredService<IClientFactory>();
 
-                var consumeContext = context.GetConsumeContext();
+                var consumeContext = context.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
                 return consumeContext != null
                     ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
                     : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);

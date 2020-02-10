@@ -7,6 +7,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     using TestFramework.Sagas;
 
 
+    [TestFixture]
     public class SimpleInjector_SagaStateMachine :
         Common_SagaStateMachine
     {
@@ -26,6 +27,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public void Close_container()
         {
             _container.Dispose();
+        }
+
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
         }
 
         protected override void ConfigureSagaStateMachine(IInMemoryReceiveEndpointConfigurator configurator)

@@ -3,9 +3,11 @@
     using System;
     using Common_Tests;
     using Microsoft.Extensions.DependencyInjection;
+    using NUnit.Framework;
     using TestFramework.Sagas;
 
 
+    [TestFixture]
     public class DependencyInjection_SagaStateMachine :
         Common_SagaStateMachine
     {
@@ -15,7 +17,8 @@
         {
             _provider = new ServiceCollection()
                 .AddMassTransit(ConfigureRegistration)
-                .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
+                .AddScoped<PublishTestStartedActivity>()
+                .BuildServiceProvider(true);
         }
 
         protected override void ConfigureSagaStateMachine(IInMemoryReceiveEndpointConfigurator configurator)

@@ -6,6 +6,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
     using TestFramework.Sagas;
 
 
+    [TestFixture]
     public class Autofac_SagaStateMachine :
         Common_SagaStateMachine
     {

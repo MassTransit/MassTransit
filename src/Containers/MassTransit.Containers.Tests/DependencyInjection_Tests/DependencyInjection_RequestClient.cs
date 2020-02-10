@@ -40,10 +40,10 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
             collection.AddSingleton<IConsumeMessageObserver<InitialRequest>>(context => GetConsumeObserver<InitialRequest>());
 
-            _provider = collection.BuildServiceProvider();
+            _provider = collection.BuildServiceProvider(true);
         }
 
-        protected override IRequestClient<InitialRequest> RequestClient => _provider.GetRequiredService<IRequestClient<InitialRequest>>();
+        protected override IRequestClient<InitialRequest> RequestClient => _provider.CreateRequestClient<InitialRequest>();
 
         protected override void ConfigureInitialConsumer(IInMemoryReceiveEndpointConfigurator configurator)
         {

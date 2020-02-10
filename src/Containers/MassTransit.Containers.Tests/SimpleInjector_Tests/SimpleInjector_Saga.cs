@@ -28,6 +28,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Dispose();
         }
 
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         protected override void ConfigureSaga(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.ConfigureSaga<SimpleSaga>(_container);
@@ -52,6 +58,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
 
             _container.AddMassTransit(ConfigureRegistration);
+        }
+
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
         }
 
         protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)

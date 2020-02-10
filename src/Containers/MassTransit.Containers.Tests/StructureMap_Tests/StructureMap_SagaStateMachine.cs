@@ -6,6 +6,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
     using TestFramework.Sagas;
 
 
+    [TestFixture]
     public class StructureMap_SagaStateMachine :
         Common_SagaStateMachine
     {

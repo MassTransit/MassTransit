@@ -39,9 +39,31 @@ namespace MassTransit
             registrar.RegisterInMemorySagaRepository<T>();
         }
 
-        public static ConsumeContext GetConsumeContext(this IServiceProvider provider)
+        /// <summary>
+        /// Create a request client, using the specified service address, using the <see cref="IClientFactory"/> from the container.
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="timeout">The default timeout for requests</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IRequestClient<T> CreateRequestClient<T>(this IServiceProvider provider, RequestTimeout timeout = default)
+            where T : class
         {
-            return provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
+            return provider.GetRequiredService<IClientFactory>().CreateRequestClient<T>(timeout);
+        }
+
+        /// <summary>
+        /// Create a request client, using the specified service address, using the <see cref="IClientFactory"/> from the container.
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="destinationAddress">The destination service address</param>
+        /// <param name="timeout">The default timeout for requests</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IRequestClient<T> CreateRequestClient<T>(this IServiceProvider provider, Uri destinationAddress, RequestTimeout timeout = default)
+            where T : class
+        {
+            return provider.GetRequiredService<IClientFactory>().CreateRequestClient<T>(destinationAddress, timeout);
         }
     }
 }

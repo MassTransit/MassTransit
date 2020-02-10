@@ -7,6 +7,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
     using TestFramework.Sagas;
 
 
+    [TestFixture]
     public class Windsor_SagaStateMachine :
         Common_SagaStateMachine
     {

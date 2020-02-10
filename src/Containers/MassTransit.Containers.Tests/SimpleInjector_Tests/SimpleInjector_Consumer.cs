@@ -31,6 +31,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Register<AnotherMessageConsumer, AnotherMessageConsumerImpl>(Lifestyle.Scoped);
         }
 
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         [TearDown]
         public void Close_container()
         {

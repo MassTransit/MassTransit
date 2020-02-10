@@ -31,6 +31,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Register<IConsumeMessageObserver<InitialRequest>>(GetConsumeObserver<InitialRequest>);
         }
 
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         protected override IRequestClient<InitialRequest> RequestClient => _container.GetInstance<IRequestClient<InitialRequest>>();
 
         protected override void ConfigureInitialConsumer(IInMemoryReceiveEndpointConfigurator configurator)

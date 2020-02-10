@@ -36,6 +36,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             });
         }
 
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         protected override void ConfigureExecuteActivity(IReceiveEndpointConfigurator endpointConfigurator)
         {
             endpointConfigurator.ConfigureExecuteActivity(_container, typeof(SetVariableActivity));
@@ -62,6 +68,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             });
         }
 
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ConfigureEndpoints(_container);
@@ -84,6 +96,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
                 cfg.AddActivity<TestActivity, TestArguments, TestLog>();
                 cfg.AddBus(() => BusControl);
             });
+        }
+
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
         }
 
         protected override void ConfigureActivity(IReceiveEndpointConfigurator executeEndpointConfigurator,
@@ -111,6 +129,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 
                 cfg.AddBus(() => BusControl);
             });
+        }
+
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
         }
 
         protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
