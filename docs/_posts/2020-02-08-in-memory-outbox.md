@@ -58,7 +58,7 @@ If retrying the database failure isn't enough, it may make sense to retry the en
 
 > Because it's bad. Study _poison message handling_.
 
-A new issue related to retry is duplicate messages. Sent or published messages may be sent or published multiple times – once for each attempt. This can create non-deterministic behavior in services that are consumed those messages. Therefore, a method of delaying those messages from being sent until the saga instance is saved is needed.
+A new retry-related issue is duplicate messages. Messages may be sent or published multiple times – once for each attempt. This can create non-deterministic behavior in services that consume those messages. Therefore, a method to delay messages from being sent until the saga instance is saved is needed.
 
 ## The Outbox
 

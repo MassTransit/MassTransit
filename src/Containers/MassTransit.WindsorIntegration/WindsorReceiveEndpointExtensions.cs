@@ -58,6 +58,46 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Connect a consumer with a consumer factory method
+        /// </summary>
+        /// <typeparam name="TConsumer"></typeparam>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="kernel"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static void Consumer<TConsumer, TMessage>(this IBatchConfigurator<TMessage> configurator, IKernel kernel,
+            Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure = null)
+            where TConsumer : class, IConsumer<Batch<TMessage>>
+            where TMessage : class
+        {
+            IConsumerScopeProvider scopeProvider = new WindsorConsumerScopeProvider(kernel);
+
+            IConsumerFactory<TConsumer> consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
+
+            configurator.Consumer(consumerFactory, configure);
+        }
+
+        /// <summary>
+        /// Connect a consumer with a consumer factory method
+        /// </summary>
+        /// <typeparam name="TConsumer"></typeparam>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="container"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static void Consumer<TConsumer, TMessage>(this IBatchConfigurator<TMessage> configurator, IWindsorContainer container,
+            Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure = null)
+            where TConsumer : class, IConsumer<Batch<TMessage>>
+            where TMessage : class
+        {
+            RegisterScopedContextProviderIfNotPresent(container);
+
+            Consumer(configurator, container.Kernel, configure);
+        }
+
+        /// <summary>
         /// Registers a saga using the container that has the repository resolved from the container
         /// </summary>
         /// <typeparam name="T"></typeparam>

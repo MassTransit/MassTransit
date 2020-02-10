@@ -56,3 +56,27 @@ The `Batch` interface also includes the timestamp of the first message, the time
 ::: tip NOTE
 The batch support provided is basic, there isn't any support for advanced concepts like acknowledging individual messages, faulting individual messages, etc. Sharp scissors, use with caution.
 :::
+
+To configure the consumer using a container, extension methods have been added for the fully-supported containers.
+
+```cs
+var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+{
+    cfg.Host("localhost");
+
+    cfg.ReceiveEndpoint("log-queue", e =>
+    {
+        // the transport must be configured to deliver at least the batch message limit
+        e.PrefetchCount = 200;
+
+        e.Batch<LogMessage>(b =>
+        {
+            b.MessageLimit = 100;
+            b.TimeLimit = TimeSpan.FromSeconds(1);
+
+            b.Consumer<LogBatchConsumer, LogMessage>(container); // provider, context, etc.
+        })
+    });
+});
+```
+

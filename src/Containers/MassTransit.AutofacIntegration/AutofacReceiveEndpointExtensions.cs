@@ -120,6 +120,50 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Connect a consumer with a consumer factory method
+        /// </summary>
+        /// <typeparam name="TConsumer"></typeparam>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="scope"></param>
+        /// <param name="configure"></param>
+        /// <param name="name">The name of the scope created per-message</param>
+        /// <param name="configureScope">Configuration for scope container</param>
+        /// <returns></returns>
+        public static void Consumer<TConsumer, TMessage>(this IBatchConfigurator<TMessage> configurator, ILifetimeScope scope,
+            Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure = null, string name = "message",
+            Action<ContainerBuilder, ConsumeContext> configureScope = null)
+            where TConsumer : class, IConsumer<Batch<TMessage>>
+            where TMessage : class
+        {
+            IConsumerScopeProvider scopeProvider = new AutofacConsumerScopeProvider(new SingleLifetimeScopeProvider(scope), name, configureScope);
+
+            IConsumerFactory<TConsumer> consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
+
+            configurator.Consumer(consumerFactory, configure);
+        }
+
+        /// <summary>
+        /// Connect a consumer with a consumer factory method
+        /// </summary>
+        /// <typeparam name="TConsumer"></typeparam>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        /// <param name="configure"></param>
+        /// <param name="name">The name of the scope created per-message</param>
+        /// <param name="configureScope">Configuration for scope container</param>
+        /// <returns></returns>
+        public static void Consumer<TConsumer, TMessage>(this IBatchConfigurator<TMessage> configurator, IComponentContext context,
+            Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure = null, string name = "message",
+            Action<ContainerBuilder, ConsumeContext> configureScope = null)
+            where TConsumer : class, IConsumer<Batch<TMessage>>
+            where TMessage : class
+        {
+            Consumer(configurator, context.Resolve<ILifetimeScope>(), configure, name, configureScope);
+        }
+
+        /// <summary>
         /// Registers a saga using the container that has the repository resolved from the container
         /// </summary>
         /// <typeparam name="T"></typeparam>
