@@ -10,10 +10,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Configurators
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.EntityFrameworkCore.Infrastructure;
-    using Microsoft.EntityFrameworkCore.Internal;
     using Registration;
     using Saga;
-    using Saga.Configuration;
     using Saga.Context;
 
 
@@ -65,17 +63,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Configurators
             };
         }
 
-        public void AddDbContextPool<TContext, TImplementation>(Action<IConfigurationServiceProvider, DbContextOptionsBuilder<TImplementation>> optionsAction,
-            int poolSize = 128)
-            where TContext : DbContext
-            where TImplementation : DbContext, TContext
-        {
-            _configureDbContext = configurator =>
-            {
-                AddDbContextPool<TContext, TImplementation>(configurator, optionsAction, poolSize);
-            };
-        }
-
         public void DatabaseFactory(Func<DbContext> databaseFactory)
         {
             DatabaseFactory(_ => databaseFactory);
@@ -116,50 +103,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Configurators
             if (optionsAction != null)
                 CheckContextConstructors<TImplementation>();
 
-            AddCoreServices(registrar, optionsAction);
+            registrar.RegisterSingleInstance(provider => DbContextOptionsFactory(provider, optionsAction));
+            registrar.Register<DbContextOptions>(provider => provider.GetRequiredService<DbContextOptions<TImplementation>>());
 
             registrar.Register<TContext, TImplementation>();
 
             registrar.Register<ISagaDbContextFactory<TSaga>, ContainerSagaDbContextFactory<TContext, TSaga>>();
-        }
-
-        void AddDbContextPool<TContext, TImplementation>(IContainerRegistrar registrar,
-            Action<IConfigurationServiceProvider, DbContextOptionsBuilder<TImplementation>> optionsAction, int poolSize = 128)
-            where TImplementation : DbContext, TContext
-            where TContext : DbContext
-        {
-            if (poolSize <= 0)
-                throw new ArgumentOutOfRangeException(nameof(poolSize), CoreStrings.InvalidPoolSize);
-
-            CheckContextConstructors<TImplementation>();
-
-            void ConfigureOptions(IConfigurationServiceProvider provider, DbContextOptionsBuilder<TImplementation> builder)
-            {
-                optionsAction?.Invoke(provider, builder);
-
-                var extension = (builder.Options.FindExtension<CoreOptionsExtension>() ?? new CoreOptionsExtension())
-                    .WithMaxPoolSize(poolSize);
-
-                ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(extension);
-            }
-
-            AddCoreServices<TImplementation>(registrar, ConfigureOptions);
-
-            registrar.RegisterSingleInstance(provider => new DbContextPool<TImplementation>(provider.GetService<DbContextOptions<TImplementation>>()));
-
-            registrar.Register(provider => new DbContextPool<TImplementation>.Lease(provider.GetRequiredService<DbContextPool<TImplementation>>()));
-
-            registrar.Register<TContext>(provider => provider.GetService<DbContextPool<TImplementation>.Lease>().Context);
-
-            registrar.Register<ISagaDbContextFactory<TSaga>, ContainerSagaDbContextFactory<TContext, TSaga>>();
-        }
-
-        void AddCoreServices<TImplementation>(IContainerRegistrar registrar,
-            Action<IConfigurationServiceProvider, DbContextOptionsBuilder<TImplementation>> optionsAction)
-            where TImplementation : DbContext
-        {
-            registrar.RegisterSingleInstance(provider => DbContextOptionsFactory(provider, optionsAction));
-            registrar.Register<DbContextOptions>(provider => provider.GetRequiredService<DbContextOptions<TImplementation>>());
         }
 
         static DbContextOptions<TContext> DbContextOptionsFactory<TContext>(IConfigurationServiceProvider provider,

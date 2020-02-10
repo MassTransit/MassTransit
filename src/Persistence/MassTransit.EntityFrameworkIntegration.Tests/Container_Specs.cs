@@ -21,18 +21,19 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         public class Using_pessimistic_concurrency :
             InMemoryTestFixture
         {
-            [Test]
+            [Test, Explicit]
             public async Task Should_work_as_expected()
             {
                 Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
                 Task<ConsumeContext<TestUpdated>> updated = ConnectPublishHandler<TestUpdated>();
 
                 var correlationId = NewId.NextGuid();
+                var testKey = NewId.NextGuid().ToString();
 
                 await InputQueueSendEndpoint.Send(new StartTest
                 {
                     CorrelationId = correlationId,
-                    TestKey = "Unique"
+                    TestKey = testKey
                 });
 
                 await started;
@@ -40,7 +41,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                 await InputQueueSendEndpoint.Send(new UpdateTest
                 {
                     TestId = correlationId,
-                    TestKey = "Unique"
+                    TestKey = testKey
                 });
 
                 await updated;
@@ -74,34 +75,39 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
+                configurator.UseMessageRetry(r => r.Immediate(5));
                 configurator.UseInMemoryOutbox();
                 configurator.ConfigureSaga<TestInstance>(_provider);
             }
         }
 
+
         public class Using_optimistic_concurrency :
             InMemoryTestFixture
         {
-            [Test]
+            [Test, Explicit]
             public async Task Should_work_as_expected()
             {
                 Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
                 Task<ConsumeContext<TestUpdated>> updated = ConnectPublishHandler<TestUpdated>();
 
                 var correlationId = NewId.NextGuid();
+                var testKey = NewId.NextGuid().ToString();
 
                 await InputQueueSendEndpoint.Send(new StartTest
                 {
                     CorrelationId = correlationId,
-                    TestKey = "Unique"
+                    TestKey = testKey
                 });
 
                 await started;
 
+                await Task.Delay(1000);
+
                 await InputQueueSendEndpoint.Send(new UpdateTest
                 {
                     TestId = correlationId,
-                    TestKey = "Unique"
+                    TestKey = testKey
                 });
 
                 await updated;
@@ -135,6 +141,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
+                configurator.UseMessageRetry(r => r.Immediate(5));
                 configurator.UseInMemoryOutbox();
                 configurator.ConfigureSaga<TestInstance>(_provider);
             }
@@ -188,7 +195,11 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             {
                 InstanceState(x => x.CurrentState);
 
-                Event(() => Updated, x => x.CorrelateById(m => m.Message.TestId));
+                Event(() => Updated, x =>
+                {
+                    x.CorrelateById(m => m.Message.TestId);
+                    x.OnMissingInstance(i => i.Fault());
+                });
 
                 Initially(
                     When(Started)

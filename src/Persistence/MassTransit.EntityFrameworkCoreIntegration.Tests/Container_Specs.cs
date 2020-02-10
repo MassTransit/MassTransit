@@ -2,7 +2,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Threading.Tasks;
     using Automatonymous;
     using EntityFrameworkCoreIntegration;
@@ -13,7 +12,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
-    using Saga.Configuration;
     using Shared;
     using TestFramework.Sagas;
 
@@ -54,11 +52,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 Task<ConsumeContext<TestUpdated>> updated = ConnectPublishHandler<TestUpdated>();
 
                 var correlationId = NewId.NextGuid();
+                var testKey = NewId.NextGuid().ToString();
 
                 await InputQueueSendEndpoint.Send(new StartTest
                 {
                     CorrelationId = correlationId,
-                    TestKey = "Unique"
+                    TestKey = testKey
                 });
 
                 await started;
@@ -66,7 +65,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 await InputQueueSendEndpoint.Send(new UpdateTest
                 {
                     TestId = correlationId,
-                    TestKey = "Unique"
+                    TestKey = testKey
                 });
 
                 await updated;
@@ -100,6 +99,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
+                configurator.UseMessageRetry(r => r.Immediate(5));
                 configurator.UseInMemoryOutbox();
                 configurator.ConfigureSaga<TestInstance>(_provider);
             }
@@ -136,11 +136,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 Task<ConsumeContext<TestUpdated>> updated = ConnectPublishHandler<TestUpdated>();
 
                 var correlationId = NewId.NextGuid();
+                var testKey = NewId.NextGuid().ToString();
 
                 await InputQueueSendEndpoint.Send(new StartTest
                 {
                     CorrelationId = correlationId,
-                    TestKey = "Unique"
+                    TestKey = testKey
                 });
 
                 await started;
@@ -148,7 +149,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 await InputQueueSendEndpoint.Send(new UpdateTest
                 {
                     TestId = correlationId,
-                    TestKey = "Unique"
+                    TestKey = testKey
                 });
 
                 await updated;
@@ -183,6 +184,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
+                configurator.UseMessageRetry(r => r.Immediate(5));
+
                 // TODO figure out why Postgres locking isn't working :(
                 if (DbContextOptionsBuilder.Options.Extensions.Any(x => x is NpgsqlOptionsExtension))
                     configurator.UseInMemoryOutbox();
@@ -260,7 +263,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
             {
                 InstanceState(x => x.CurrentState);
 
-                Event(() => Updated, x => x.CorrelateById(m => m.Message.TestId));
+                Event(() => Updated, x =>
+                {
+                    x.CorrelateById(m => m.Message.TestId);
+                    x.OnMissingInstance(i => i.Fault());
+                });
 
                 Initially(
                     When(Started)

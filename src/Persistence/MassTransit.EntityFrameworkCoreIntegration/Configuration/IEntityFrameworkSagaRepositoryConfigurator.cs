@@ -6,7 +6,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
     using Registration;
-    using Saga.Configuration;
 
 
     public interface IEntityFrameworkSagaRepositoryConfigurator
@@ -22,18 +21,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         /// <typeparam name="TContext"></typeparam>
         /// <typeparam name="TImplementation"></typeparam>
         void AddDbContext<TContext, TImplementation>(Action<IConfigurationServiceProvider, DbContextOptionsBuilder<TImplementation>> optionsAction = null)
-            where TContext : DbContext
-            where TImplementation : DbContext, TContext;
-
-        /// <summary>
-        /// Add the DbContext to the container using a pool, and configure the repository to use it
-        /// </summary>
-        /// <param name="optionsAction"></param>
-        /// <param name="poolSize">The maximum number of pooled objects</param>
-        /// <typeparam name="TContext"></typeparam>
-        /// <typeparam name="TImplementation"></typeparam>
-        void AddDbContextPool<TContext, TImplementation>(Action<IConfigurationServiceProvider, DbContextOptionsBuilder<TImplementation>> optionsAction,
-            int poolSize = 128)
             where TContext : DbContext
             where TImplementation : DbContext, TContext;
 
