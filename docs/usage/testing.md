@@ -121,7 +121,7 @@ public async Task Should_test_the_state_machine_saga()
     {
         Guid sagaId = NewId.NextGuid();
 
-        await harness.Publish(new InitialEvent(sagaId));
+        await harness.Bus.Publish(new InitialEvent(sagaId));
 
         // did the endpoint consume the message
         Assert.IsTrue(harness.Consumed.Select<InitialEvent>().Any());
@@ -129,7 +129,7 @@ public async Task Should_test_the_state_machine_saga()
         // did the actual consumer consume the message
         Assert.IsTrue(sagaHarness.Consumed.Select<InitialEvent>().Any());
 
-        MyInstance instance = saga.Created.ContainsInState(sagaId, machine, machine.Active);
+        MyInstance instance = sagaHarness.Created.ContainsInState(sagaId, machine, machine.Active);
         Assert.IsNotNull(instance, "Saga instance not found");
     }
     finally
