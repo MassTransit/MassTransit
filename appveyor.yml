@@ -68,7 +68,7 @@ deploy:
 - provider: NuGet
   name: Prerelease
   server: https://api.nuget.org/v3/index.json
-    api_key:
+  api_key:
     secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
   on:
     branch: develop
