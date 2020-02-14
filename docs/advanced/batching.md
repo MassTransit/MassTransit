@@ -51,6 +51,31 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 });
 ```
 
+::: tip Important
+Each transport has its own limitations. For instance, Amazon SQS only delivers up to ten messages at once – so batch sizes above ten would always time out rather than reaching the batch limit.
+:::
+
+For instance, when using Azure Service Bus, there are two settings which must be configured as shown below.
+
+```cs
+var busControl = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
+{
+    cfg.ReceiveEndpoint("log-queue", e =>
+    {
+        e.PrefetchCount = 20;
+        e.MaxConcurrentCalls = 20;
+
+        e.Batch<LogMessage>(b =>
+        {
+            b.MessageLimit = 20;
+            b.TimeLimit = TimeSpan.FromSeconds(5);
+
+            b.Consumer(() => new LogBatchConsumer());
+        })
+    });
+});
+```
+
 The `Batch` interface also includes the timestamp of the first message, the timestamp of the last message, and the completion mode of the batch (message limit or time limit was reached).
 
 ::: tip NOTE
