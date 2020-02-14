@@ -60,6 +60,9 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         {
             try
             {
+                await Task.WhenAll(_brokerTopology.Consumers.Where(x => x.Destination.AutoDelete).Select(consumer => Delete(context, consumer.Destination)))
+                    .ConfigureAwait(false);
+
                 await Task.WhenAll(_brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic))).ConfigureAwait(false);
 
                 await Task.WhenAll(_brokerTopology.Queues.Where(x => x.AutoDelete).Select(queue => Delete(context, queue))).ConfigureAwait(false);
