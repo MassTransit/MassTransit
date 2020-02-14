@@ -50,6 +50,35 @@ public async Task Should_test_the_consumer()
 
 Adding the consumer harness to the test harness will configure the consumer on the receive endpoint. As messages are received and consumed, they are added to collections via observers so that test assertions can be used to verify message consumption.
 
+If you want to test for consumer exceptions you can check for published `Fault<T>` messages
+
+```cs
+public async Task Should_test_the_consumer()
+{
+    var harness = new InMemoryTestHarness();
+    var consumerHarness = harness.Consumer<MyConsumer>();
+
+    await harness.Start();
+    try
+    {
+        await harness.InputQueueSendEndpoint.Send(new MyMessage());
+
+        // did the endpoint consume the message
+        Assert.IsTrue(harness.Consumed.Select<MyMessage>().Any());
+
+        // did the actual consumer consume the message
+        Assert.IsTrue(consumerHarness.Consumed.Select<MyMessage>().Any());
+
+        // did the actual consumer throws exception
+        Assert.IsTrue(harness.Published.Select<Fault<MyMessage>>().Any();
+    }
+    finally
+    {
+        await harness.Stop();
+    }
+}
+```
+
 If the consumer published an event, that too could be observed:
 
 ```cs
