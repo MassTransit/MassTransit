@@ -16,11 +16,11 @@ To configure a turnout, a turnout endpoint is created for the command message ty
 ```csharp
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    cfg.Host("localhost");
+    var host = cfg.Host("localhost");
 
     cfg.UseInMemoryScheduler();
 
-    cfg.TurnoutEndpoint<AuditCustomerHistory>("audit_consumer_history", e =>
+    cfg.TurnoutEndpoint<AuditCustomerHistory>(host, "audit_consumer_history", e =>
     {
         e.SuperviseInterval = TimeSpan.FromSeconds(30);
         e.SetJobFactory(async context =>
