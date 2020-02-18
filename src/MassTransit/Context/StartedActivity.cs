@@ -60,9 +60,9 @@ namespace MassTransit.Context
             Activity.SetParentId(parentId);
         }
 
-        public void Stop(object args = default)
+        public void Stop()
         {
-            Source.StopActivity(Activity, args);
+            Source.StopActivity(Activity, null);
 
             Scope?.Dispose();
         }

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.EntityFrameworkIntegration.Tests
+﻿namespace MassTransit.EntityFrameworkIntegration.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -31,7 +19,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
     public class StateMachineTest :
         InMemoryTestFixture
     {
-        ISagaDbContextFactory _sagaDbContextFactory;
+        ISagaDbContextFactory<SimpleState> _sagaDbContextFactory;
 
         [Test]
         public async Task Test_Discarded_Missing_Saga_Instance_Is_Not_Persisted()
@@ -95,11 +83,11 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                 _discarded.TrySetResult(true);
             });
 
-            _sagaDbContextFactory = new DelegateSagaDbContextFactory(() =>
+            _sagaDbContextFactory = new DelegateSagaDbContextFactory<SimpleState>(() =>
                 new SimpleStateSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
 
             _simpleStateRepository = new Lazy<ISagaRepository<SimpleState>>(() =>
-                new EntityFrameworkSagaRepository<SimpleState>(_sagaDbContextFactory, System.Data.IsolationLevel.Serializable, new MsSqlLockStatements()));
+                EntityFrameworkSagaRepository<SimpleState>.CreatePessimistic(_sagaDbContextFactory));
 
 
             configurator.StateMachineSaga(_simpleStateMachine, _simpleStateRepository.Value);
@@ -137,14 +125,14 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         class SimpleStateMap :
             SagaClassMap<SimpleState>
         {
-            protected override void Configure(EntityTypeConfiguration<SimpleState> cfg, DbModelBuilder modelBuilder)
+            protected override void Configure(EntityTypeConfiguration<SimpleState> entity, DbModelBuilder modelBuilder)
             {
-                cfg.Property(x => x.CurrentState)
+                entity.Property(x => x.CurrentState)
                     .HasMaxLength(64);
 
-                cfg.Property(x => x.CorrelationId);
-                cfg.Property(x => x.TestName);
-                cfg.Property(x => x.PublishDate);
+                entity.Property(x => x.CorrelationId);
+                entity.Property(x => x.TestName);
+                entity.Property(x => x.PublishDate);
             }
         }
 

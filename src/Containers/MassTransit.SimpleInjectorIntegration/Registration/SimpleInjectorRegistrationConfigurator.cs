@@ -1,6 +1,7 @@
 namespace MassTransit.SimpleInjectorIntegration.Registration
 {
     using System;
+    using Context;
     using MassTransit.Registration;
     using ScopeProviders;
     using Scoping;
@@ -14,7 +15,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         readonly Lifestyle _hybridLifestyle;
 
         public SimpleInjectorRegistrationConfigurator(Container container)
-            : base(new SimpleInjectorContainerRegistar(container))
+            : base(new SimpleInjectorContainerRegistrar(container))
         {
             Container = container;
 
@@ -31,13 +32,18 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         public void AddBus(Func<IBusControl> busFactory)
         {
+            AddBus(_ => busFactory());
+        }
+
+        public void AddBus(Func<Container, IBusControl> busFactory)
+        {
             IBusControl BusFactory()
             {
                 var provider = Container.GetInstance<IConfigurationServiceProvider>();
 
                 ConfigureLogContext(provider);
 
-                return busFactory();
+                return busFactory(Container);
             }
 
             Container.RegisterSingleton(BusFactory);
@@ -65,7 +71,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         {
             container.Register<ScopedConsumeContextProvider>(Lifestyle.Scoped);
 
-            container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext(), Lifestyle.Scoped);
+            container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(), Lifestyle.Scoped);
 
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
             container.RegisterSingleton<ISagaRepositoryFactory>(() => new SimpleInjectorSagaRepositoryFactory(container));

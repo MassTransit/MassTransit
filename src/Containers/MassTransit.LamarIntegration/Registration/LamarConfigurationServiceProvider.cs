@@ -1,5 +1,6 @@
 namespace MassTransit.LamarIntegration.Registration
 {
+    using System;
     using Lamar;
     using MassTransit.Registration;
 
@@ -24,6 +25,11 @@ namespace MassTransit.LamarIntegration.Registration
             where T : class
         {
             return _container.TryGetInstance<T>();
+        }
+
+        public object GetService(Type serviceType)
+        {
+            return _container.GetService(serviceType);
         }
     }
 }

@@ -2,42 +2,18 @@ namespace MassTransit.ActiveMqTransport
 {
     using System;
     using System.Diagnostics;
-    using System.Linq;
+    using Util;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public readonly struct ActiveMqHostAddress
     {
         public const string ActiveMqScheme = "activemq";
-        const string HeartbeatKey = "heartbeat";
-        const string PrefetchKey = "prefetch";
-        const string TimeToLiveKey = "ttl";
 
         public readonly string Scheme;
         public readonly string Host;
         public readonly int? Port;
         public readonly string VirtualHost;
-
-        public readonly ushort? Heartbeat;
-        public readonly ushort? Prefetch;
-        public readonly int? TimeToLive;
-
-        public ActiveMqHostAddress(string host, int? port, string virtualHost)
-        {
-            Scheme = ActiveMqScheme;
-            Host = host;
-            Port = port;
-            VirtualHost = virtualHost;
-
-            if (port.HasValue && port.Value == 0)
-            {
-                Port = 61616;
-            }
-
-            Heartbeat = default;
-            Prefetch = default;
-            TimeToLive = default;
-        }
 
         public ActiveMqHostAddress(Uri address)
         {
@@ -56,33 +32,18 @@ namespace MassTransit.ActiveMqTransport
                 default:
                     throw new ArgumentException($"The address scheme is not supported: {address.Scheme}", nameof(address));
             }
+        }
 
-            Heartbeat = default;
-            Prefetch = default;
-            TimeToLive = default;
+        public ActiveMqHostAddress(string host, int? port, string virtualHost)
+        {
+            Scheme = ActiveMqScheme;
+            Host = host;
+            Port = port;
+            VirtualHost = virtualHost;
 
-            string query = address.Query?.TrimStart('?');
-            if (!string.IsNullOrWhiteSpace(query))
+            if (port.HasValue && port.Value == 0)
             {
-                var parameters = query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
-
-                foreach ((string key, string value) in parameters)
-                {
-                    switch (key)
-                    {
-                        case HeartbeatKey when ushort.TryParse(value, out var result):
-                            Heartbeat = result;
-                            break;
-
-                        case PrefetchKey when ushort.TryParse(value, out var result):
-                            Prefetch = result;
-                            break;
-
-                        case TimeToLiveKey when int.TryParse(value, out var result):
-                            TimeToLive = result;
-                            break;
-                    }
-                }
+                Port = 61616;
             }
         }
 
@@ -95,22 +56,7 @@ namespace MassTransit.ActiveMqTransport
                 ? 61616
                 : address.Port;
 
-            virtualHost = ParseVirtualHost(address.AbsolutePath);
-        }
-
-        static string ParseVirtualHost(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-                return "/";
-
-            if (path.Length == 1 && path[0] == '/')
-                return path;
-
-            int split = path.LastIndexOf('/');
-            if (split > 0)
-                return Uri.UnescapeDataString(path.Substring(1, split - 1));
-
-            return Uri.UnescapeDataString(path.Substring(1));
+            virtualHost = address.ParseHostPath();
         }
 
         public static implicit operator Uri(in ActiveMqHostAddress address)

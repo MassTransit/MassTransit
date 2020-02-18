@@ -10,7 +10,8 @@
     using Newtonsoft.Json;
 
 
-    public class SimpleSagaResource : Resource,
+    public class SimpleSagaResource :
+        Resource,
         InitiatedBy<InitiateSimpleSaga>,
         Orchestrates<CompleteSimpleSaga>,
         Observes<ObservableSagaMessage, SimpleSaga>,

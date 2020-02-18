@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Clients
+﻿namespace MassTransit.Clients
 {
     using System;
     using System.Collections.Generic;
@@ -29,13 +17,16 @@ namespace MassTransit.Clients
         IPipe<SendContext<TRequest>>
         where TRequest : class
     {
+        public delegate Task<TRequest> SendRequestCallback(Guid requestId, IPipe<SendContext<TRequest>> pipe, CancellationToken cancellationToken);
+
+
         readonly CancellationToken _cancellationToken;
         readonly ClientFactoryContext _context;
-        readonly Task<TRequest> _message;
+        readonly SendRequestCallback _sendRequestCallback;
+        readonly TaskCompletionSource<TRequest> _message;
         readonly IBuildPipeConfigurator<SendContext<TRequest>> _pipeConfigurator;
         readonly TaskCompletionSource<bool> _readyToSend;
         readonly Guid _requestId;
-        readonly IRequestSendEndpoint<TRequest> _requestSendEndpoint;
         readonly Dictionary<Type, HandlerConnectHandle> _responseHandlers;
         readonly Task _send;
         readonly TaskCompletionSource<SendContext<TRequest>> _sendContext;
@@ -46,12 +37,11 @@ namespace MassTransit.Clients
         int _faultedOrCanceled;
         RequestTimeout _timeToLive;
 
-        public ClientRequestHandle(ClientFactoryContext context, IRequestSendEndpoint<TRequest> requestSendEndpoint, Task<TRequest> message,
-            CancellationToken cancellationToken = default, RequestTimeout timeout = default, Guid? requestId = default, TaskScheduler taskScheduler = default)
+        public ClientRequestHandle(ClientFactoryContext context, SendRequestCallback sendRequestCallback, CancellationToken cancellationToken = default,
+            RequestTimeout timeout = default, Guid? requestId = default, TaskScheduler taskScheduler = default)
         {
             _context = context;
-            _message = message;
-            _requestSendEndpoint = requestSendEndpoint;
+            _sendRequestCallback = sendRequestCallback;
             _cancellationToken = cancellationToken;
 
             var requestTimeout = timeout.HasValue ? timeout : _context.DefaultTimeout.HasValue ? _context.DefaultTimeout.Value : RequestTimeout.Default;
@@ -64,6 +54,7 @@ namespace MassTransit.Clients
                     ? TaskScheduler.Default
                     : TaskScheduler.FromCurrentSynchronizationContext());
 
+            _message = new TaskCompletionSource<TRequest>();
             _pipeConfigurator = new PipeConfigurator<SendContext<TRequest>>();
             _sendContext = TaskUtil.GetTask<SendContext<TRequest>>();
             _readyToSend = TaskUtil.GetTask<bool>();
@@ -140,15 +131,15 @@ namespace MassTransit.Clients
                 CancelAndDispose();
         }
 
-        Task<TRequest> RequestHandle<TRequest>.Message => _message;
+        Task<TRequest> RequestHandle<TRequest>.Message => _message.Task;
 
         async Task SendRequest()
         {
             try
             {
-                var message = await _message.ConfigureAwait(false);
+                var message = await _sendRequestCallback(_requestId, this, _cancellationTokenSource.Token).ConfigureAwait(false);
 
-                await _requestSendEndpoint.Send(message, this, _cancellationTokenSource.Token).ConfigureAwait(false);
+                _message.TrySetResult(message);
             }
             catch (RequestException exception)
             {
@@ -205,7 +196,7 @@ namespace MassTransit.Clients
         {
             try
             {
-                var response = await Response<Fault<TRequest>>(FaultHandler).ConfigureAwait(false);
+                await Response<Fault<TRequest>>(FaultHandler).ConfigureAwait(false);
             }
             catch
             {
@@ -242,6 +233,8 @@ namespace MassTransit.Clients
                 if (cancel)
                     _cancellationTokenSource.Cancel();
 
+                _message.TrySetException(exception);
+
                 lock (_responseHandlers)
                 {
                     foreach (var handle in _responseHandlers.Values)
@@ -266,6 +259,8 @@ namespace MassTransit.Clients
             bool cancel = _sendContext.TrySetCanceled();
             if (cancel)
                 _cancellationTokenSource.Cancel();
+
+            _message.TrySetCanceled();
 
             lock (_responseHandlers)
             {

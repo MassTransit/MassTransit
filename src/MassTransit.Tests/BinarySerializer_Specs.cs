@@ -61,7 +61,7 @@ namespace MassTransit.Tests
 
         [Test]
         [Category("Unit")]
-        public async Task Should_be_possibile_to_send_and_consume_faults()
+        public async Task Should_be_possible_to_send_and_consume_faults()
         {
             await Bus.Publish(new A());
             var faultTask = _faultTaskTcs.Task;
@@ -72,7 +72,7 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
-    public class When_sending_messages_using_the_binary_serializer_between_multiple_bus_istances
+    public class When_sending_messages_using_the_binary_serializer_between_multiple_bus_instances
     {
         [Serializable]
         public class ListNode
@@ -83,10 +83,11 @@ namespace MassTransit.Tests
 
 
         [Serializable]
-        public class Base
+        public class Base: CorrelatedBy<Guid>
         {
             public ListNode Head { get; set; }
             public int PropBase { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -100,7 +101,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_be_able_to_consume_messages_polymorphically_if_the_receiving_bus_support_the_binary_serializer()
         {
-            var consumed = TaskUtil.GetTask<Base>();
+            var consumed = TaskUtil.GetTask<ConsumeContext<Base>>();
 
             var bus = Bus.Factory.CreateUsingInMemory(x =>
             {
@@ -111,7 +112,7 @@ namespace MassTransit.Tests
                 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
                     configurator.Handler<Base>(async ctx =>
                     {
-                        consumed.TrySetResult(ctx.Message);
+                        consumed.TrySetResult(ctx);
                     });
                 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
                 });
@@ -120,6 +121,8 @@ namespace MassTransit.Tests
             await bus.StartAsync();
             try
             {
+                var correlationId = NewId.NextGuid();
+
                 // Create a recursive list
                 var head = new ListNode {Value = 100};
                 var tail = new ListNode {Next = head, Value = 200};
@@ -129,7 +132,8 @@ namespace MassTransit.Tests
                 {
                     PropBase = 10,
                     PropDerived = 20,
-                    Head = head
+                    Head = head,
+                    CorrelationId = correlationId
                 };
 
                 await bus.Publish(messageToSend);
@@ -139,8 +143,15 @@ namespace MassTransit.Tests
                 Assert.AreEqual(consumed.Task, completedTask,
                     "Timeout while waiting to receive the message sent on the source bus.");
 
-                var message = await consumed.Task;
+                var ctx = await consumed.Task;
+                var message = ctx.Message;
                 Assert.NotNull(message);
+
+                Assert.AreEqual(correlationId, ctx.CorrelationId);
+                Assert.AreNotEqual(correlationId, ctx.RequestId);
+                Assert.AreNotEqual(correlationId, ctx.MessageId);
+
+                Assert.AreEqual(correlationId, message.CorrelationId);
                 Assert.AreEqual(messageToSend.PropBase, message.PropBase);
                 Assert.AreEqual(head.Value, message.Head.Value);
                 Assert.AreEqual(tail.Value, message.Head.Next.Value);

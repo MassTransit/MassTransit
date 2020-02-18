@@ -1,11 +1,13 @@
 ﻿namespace MassTransit.DocumentDbIntegration.Tests.Saga.Data
 {
     using System;
+    using System.Net;
     using System.Threading.Tasks;
+    using Configuration;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
     using Newtonsoft.Json;
-    using static JsonSerializerSettingsExtensions;
+
 
     public sealed class SagaRepository
     {
@@ -32,18 +34,16 @@
                 .ConfigureAwait(false);
         }
 
-        readonly DocumentClient _documentClient = new DocumentClient(new Uri(EmulatorConstants.EndpointUri), EmulatorConstants.Key);
+        readonly DocumentClient _documentClient = new DocumentClient(EmulatorConstants.EndpointUri, EmulatorConstants.Key);
         public IDocumentClient Client => _documentClient;
 
-        public async Task<Document> InsertSaga<TSaga>(TSaga saga, bool useJsonSerializerSettings) where TSaga : class, IVersionedSaga
+        public async Task<Document> InsertSaga<TSaga>(TSaga saga, bool useJsonSerializerSettings)
+            where TSaga : class, IVersionedSaga
         {
             RequestOptions options = null;
 
             if (useJsonSerializerSettings)
-            {
-                options = new RequestOptions();
-                options.JsonSerializerSettings = GetSagaRenameSettings<TSaga>();
-            }
+                options = new RequestOptions {JsonSerializerSettings = JsonSerializerSettingsExtensions.GetSagaRenameSettings<TSaga>()};
 
             return await Client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName), saga, options, true);
         }
@@ -54,13 +54,14 @@
             {
                 await Client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseName, CollectionName, correlationId.ToString()));
             }
-            catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (DocumentClientException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
                 // Swallow not found
             }
         }
 
-        public async Task<TSaga> GetSaga<TSaga>(Guid correlationId, bool useJsonSerializerSettings) where TSaga : class, IVersionedSaga
+        public async Task<TSaga> GetSaga<TSaga>(Guid correlationId, bool useJsonSerializerSettings)
+            where TSaga : class, IVersionedSaga
         {
             try
             {
@@ -70,7 +71,7 @@
                 if (useJsonSerializerSettings)
                 {
                     options = new RequestOptions();
-                    serializerSettings = GetSagaRenameSettings<TSaga>();
+                    serializerSettings = JsonSerializerSettingsExtensions.GetSagaRenameSettings<TSaga>();
                     options.JsonSerializerSettings = serializerSettings;
                 }
 
@@ -79,7 +80,7 @@
 
                 return JsonConvert.DeserializeObject<TSaga>(document.Resource.ToString(), serializerSettings);
             }
-            catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (DocumentClientException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
@@ -94,7 +95,7 @@
 
                 return document.Resource;
             }
-            catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (DocumentClientException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }

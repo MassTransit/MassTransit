@@ -12,6 +12,7 @@
     /// </summary>
     public interface IBus :
         IPublishEndpoint,
+        IPublishEndpointProvider,
         ISendEndpointProvider,
         IConsumePipeConnector,
         IRequestPipeConnector,

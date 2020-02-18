@@ -8,6 +8,8 @@
     public class LamarStateMachineActivityFactory :
         IStateMachineActivityFactory
     {
+        public static readonly IStateMachineActivityFactory Instance = new LamarStateMachineActivityFactory();
+
         public Activity<TInstance, TData> GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
             where TActivity : Activity<TInstance, TData>
         {

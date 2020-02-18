@@ -35,5 +35,18 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
         {
             context.AddOrUpdatePayload(() => kernel, existing => kernel);
         }
+
+        public static T TryResolve<T>(this IKernel kernel)
+            where T : class
+        {
+            return kernel.HasComponent(typeof(T)) ? kernel.Resolve<T>() : default;
+        }
+
+        public static ConsumeContext GetConsumeContext(this IKernel kernel)
+        {
+            return CallContextLifetimeScope.ObtainCurrentScope() != null
+                ? kernel.Resolve<ScopedConsumeContextProvider>().GetContext()
+                : null;
+        }
     }
 }

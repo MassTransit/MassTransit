@@ -39,10 +39,10 @@ MassTransit Nuget Packages
 | **Monitoring** |
 | [MassTransit.AspNetCore][AspNetCore.nuget] | 4.6.1 | 2.0 |
 | **Persistence** |
-| [MassTransit.Dapper][Dapper.nuget] | 4.6.1 | - |
+| [MassTransit.Dapper][Dapper.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.DocumentDb][DocumentDb.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.EntityFrameworkCore][EFCore.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.EntityFramework][EF.nuget] | 4.6.1 | - |
+| [MassTransit.EntityFramework][EF.nuget] | 4.6.1 | 2.1 |
 | [MassTransit.Marten][Marten.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.MongoDb][MongoDb.nuget] | 4.6.1 | 2.0 |
 | [MassTransit.NHibernate][NHibernate.nuget] | 4.6.1 | 2.0 |

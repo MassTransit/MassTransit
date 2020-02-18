@@ -1,15 +1,3 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace Automatonymous.Pipeline
 {
     using System;
@@ -69,9 +57,8 @@ namespace Automatonymous.Pipeline
         {
             var eventContext = new StateMachineEventContextProxy<TInstance, TData>(context, _machine, context.Saga, _event, context.Message);
 
-            State<TInstance> currentState = await _machine.Accessor.Get(eventContext).ConfigureAwait(false);
-
-            var activity = LogContext.IfEnabled(OperationName.Saga.RaiseEvent)?.StartActivity(new {BeginState = currentState.Name});
+            var activity = LogContext.IfEnabled(OperationName.Saga.RaiseEvent)
+                ?.StartSagaActivity(context, (await _machine.Accessor.Get(eventContext).ConfigureAwait(false)).Name);
             try
             {
                 await _machine.RaiseEvent(eventContext).ConfigureAwait(false);
@@ -81,11 +68,14 @@ namespace Automatonymous.Pipeline
             }
             catch (UnhandledEventException ex)
             {
+                var currentState = await _machine.Accessor.Get(eventContext).ConfigureAwait(false);
+
                 throw new NotAcceptedStateMachineException(typeof(TInstance), typeof(TData), context.CorrelationId ?? Guid.Empty, currentState.Name, ex);
             }
             finally
             {
-                activity?.Stop(new {EndState = (await _machine.Accessor.Get(eventContext).ConfigureAwait(false)).Name});
+                activity?.AddTag(DiagnosticHeaders.EndState, (await _machine.Accessor.Get(eventContext).ConfigureAwait(false)).Name);
+                activity?.Stop();
             }
         }
     }

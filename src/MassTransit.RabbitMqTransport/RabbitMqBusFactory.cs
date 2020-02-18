@@ -18,14 +18,14 @@
         /// </summary>
         /// <param name="configure">The configuration callback to configure the bus</param>
         /// <returns></returns>
-        public static IBusControl Create(Action<IRabbitMqBusFactoryConfigurator> configure)
+        public static IBusControl Create(Action<IRabbitMqBusFactoryConfigurator> configure = null)
         {
             var topologyConfiguration = new RabbitMqTopologyConfiguration(MessageTopology);
             var busConfiguration = new RabbitMqBusConfiguration(topologyConfiguration);
 
             var configurator = new RabbitMqBusFactoryConfigurator(busConfiguration);
 
-            configure(configurator);
+            configure?.Invoke(configurator);
 
             return configurator.Build();
         }

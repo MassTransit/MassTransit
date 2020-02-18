@@ -1,33 +1,30 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Mappings
 {
     using System;
-    using GreenPipes.Internals.Extensions;
-    using GreenPipes.Internals.Reflection;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 
-    public abstract class SagaClassMap<TSaga> : ISagaClassMap
+    public abstract class SagaClassMap<TSaga> :
+        ISagaClassMap<TSaga>
         where TSaga : class, ISaga
     {
         public Type SagaType => typeof(TSaga);
 
         public virtual void Configure(ModelBuilder modelBuilder)
         {
-            if (!TypeCache<TSaga>.ReadWritePropertyCache.TryGetProperty("CorrelationId", out ReadWriteProperty<TSaga> _))
-                throw new ConfigurationException("The CorrelationId property must be read/write for use with Entity Framework. Add a setter to the property.");
-            EntityTypeBuilder<TSaga> cfg = modelBuilder.Entity<TSaga>();
+            EntityTypeBuilder<TSaga> entityTypeBuilder = modelBuilder.Entity<TSaga>();
 
-            cfg.HasKey(t => t.CorrelationId);
+            entityTypeBuilder.HasKey(p => p.CorrelationId);
 
-            cfg.Property(t => t.CorrelationId)
+            entityTypeBuilder.Property(p => p.CorrelationId)
                 .ValueGeneratedNever();
 
-            Configure(cfg, modelBuilder);
+            Configure(entityTypeBuilder, modelBuilder);
         }
 
-        protected virtual void Configure(EntityTypeBuilder<TSaga> cfg, ModelBuilder modelBuilder)
+        protected virtual void Configure(EntityTypeBuilder<TSaga> entity, ModelBuilder model)
         {
         }
     }

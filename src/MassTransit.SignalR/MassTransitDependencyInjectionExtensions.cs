@@ -23,7 +23,7 @@ namespace MassTransit.SignalR
         /// </summary>
         /// <param name="signalRServerBuilder">The SignalR builder abstraction for configuring SignalR servers.</param>
         /// <param name="configureOptions">The MassTransit SignalR configuration options</param>
-        public static void AddMassTransitBackplane(this ISignalRServerBuilder signalRServerBuilder,
+        public static ISignalRServerBuilder AddMassTransitBackplane(this ISignalRServerBuilder signalRServerBuilder,
             Action<MassTransitSignalROptions> configureOptions = null)
         {
             var options = new MassTransitSignalROptions();
@@ -36,6 +36,8 @@ namespace MassTransit.SignalR
                 signalRServerBuilder.Services.AddSingleton(typeof(HubLifetimeManager<>), typeof(MassTransitMessageDataHubLifetimeManager<>));
             else
                 signalRServerBuilder.Services.AddSingleton(typeof(HubLifetimeManager<>), typeof(MassTransitHubLifetimeManager<>));
+
+            return signalRServerBuilder;
         }
     }
 }

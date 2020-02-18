@@ -34,23 +34,19 @@
                     h.RequestedConnectionTimeout(2000);
                 });
 
-                x.AutoStart = false;
+                x.AutoStart = true;
             });
 
-            Assert.That(async () =>
+            Assert.ThrowsAsync<RabbitMqConnectionException>(async () =>
             {
-                BusHandle handle = await busControl.StartAsync(new CancellationTokenSource(20000).Token);
-                try
+                BusHandle handle;
+                using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
                 {
-                    TestContext.Out.WriteLine("Waiting for connection...");
+                    handle = await busControl.StartAsync(timeout.Token);
+                }
 
-                    await handle.Ready;
-                }
-                finally
-                {
-                    await handle.StopAsync();
-                }
-            }, Throws.TypeOf<RabbitMqConnectionException>());
+                await handle.StopAsync(CancellationToken.None);
+            });
         }
 
         [Test]
@@ -105,7 +101,7 @@
                     {
                         await Task.Delay(1000);
 
-//                        await busControl.Publish(new TestMessage());
+                        //                        await busControl.Publish(new TestMessage());
 
                         Console.WriteLine("Published: {0}", i);
                     }
@@ -125,23 +121,27 @@
         [Explicit]
         public async Task Should_startup_and_shut_down_cleanly()
         {
-            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
-            {
-                x.Host(new Uri("rabbitmq://localhost/"), h =>
-                {
-                });
-            });
+            var loggerFactory = new TestOutputLoggerFactory(true);
 
-            BusHandle handle = await busControl.StartAsync();
+            LogContext.ConfigureCurrentLogContext(loggerFactory);
+
+            DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
+
+            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq();
+
+            BusHandle handle;
+            using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
+            {
+                handle = await busControl.StartAsync(timeout.Token);
+            }
+
             try
             {
-                Console.WriteLine("Waiting for connection...");
-
                 await handle.Ready;
             }
             finally
             {
-                await handle.StopAsync();
+                await handle.StopAsync(CancellationToken.None);
             }
         }
 

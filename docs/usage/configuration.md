@@ -1,6 +1,6 @@
 # Configuration
 
-MassTransit can be used in any .NET application, however, the application type can influence the bus configuration. Several different application type examples are shwon below, each of which lists any additional dependencies are required. Each example focuses on simplicity, and therefore may omit certain extra features to avoid confusion. 
+MassTransit can be used in any .NET application, however, the application type can influence the bus configuration. Several different application type examples are shown below, each of which lists any additional dependencies are required. Each example focuses on simplicity, and therefore may omit certain extra features to avoid confusion. 
 
 ::: tip NOTE
 Except where required by the application type, no dependency injection container is used. For container configuration examples, refer to the [containers](/usage/containers) section.
@@ -104,7 +104,7 @@ public class Startup
                     ep.PrefetchCount = 16;
                     ep.UseMessageRetry(r => r.Interval(2, 100));
 
-                    ep.ConfigureConsumer<OrderConsumer>(provider);
+                    ep.ConfigureConsumer<OrderConsumer>(serviceProvider);
                 });
             });
         }

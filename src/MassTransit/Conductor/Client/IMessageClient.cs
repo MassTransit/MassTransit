@@ -3,14 +3,16 @@ namespace MassTransit.Conductor.Client
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Clients;
     using GreenPipes;
 
 
-    public interface IMessageClient<in T> :
+    public interface IMessageClient<T> :
         IMessageClient
         where T : class
     {
-        Task<ISendEndpoint> GetServiceSendEndpoint(ISendEndpointProvider sendEndpointProvider, T message, CancellationToken cancellationToken = default);
+        Task<IRequestSendEndpoint<T>> GetServiceSendEndpoint(ClientFactoryContext clientFactoryContext, T message, ConsumeContext consumeContext = default,
+            CancellationToken cancellationToken = default);
     }
 
 

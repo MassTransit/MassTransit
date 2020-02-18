@@ -1,7 +1,13 @@
 ﻿namespace MassTransit.DapperIntegration.Tests
 {
     using System;
+#if NETCOREAPP
+    using Microsoft.Data.SqlClient;
+#else
+        using System.Data.SqlClient;
+#endif
     using System.Threading.Tasks;
+    using Dapper;
     using MassTransit.Tests.Saga.Messages;
     using NUnit.Framework;
     using Saga;
@@ -26,7 +32,7 @@
 
             foundId.HasValue.ShouldBe(true);
 
-            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
+            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
 
             await this.InputQueueSendEndpoint.Send(nextMessage);
 
@@ -39,7 +45,7 @@
         public async Task An_observed_message_should_find_and_update_the_correct_saga()
         {
             Guid sagaId = NewId.NextGuid();
-            var message = new InitiateSimpleSaga(sagaId) { Name = "MySimpleSaga" };
+            var message = new InitiateSimpleSaga(sagaId) {Name = "MySimpleSaga"};
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -47,7 +53,7 @@
 
             found.ShouldBe(sagaId);
 
-            var nextMessage = new ObservableSagaMessage { Name = "MySimpleSaga" };
+            var nextMessage = new ObservableSagaMessage {Name = "MySimpleSaga"};
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -68,12 +74,34 @@
             foundId.HasValue.ShouldBe(true);
         }
 
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                string sql = @"
+                if not exists (select * from sysobjects where name='SimpleSagas' and xtype='U')
+                CREATE TABLE SimpleSagas (
+                    CorrelationId uniqueidentifier NOT NULL,
+                    CONSTRAINT PK_SimpleSagas_CorrelationId PRIMARY KEY CLUSTERED (CorrelationId),
+                    Name nvarchar(max),
+                    Completed bit,
+                    Initiated bit,
+                    Observed bit,
+                    CorrelateBySomething nvarchar(max)
+                );
+            ";
+                connection.Execute(sql);
+            }
+        }
+
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;
+        string _connectionString;
 
         public DapperSagaRepositoryTests()
         {
-            var connectionString = LocalDbConnectionStringProvider.GetLocalDbConnectionString();
-            this._sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new DapperSagaRepository<SimpleSaga>(connectionString));
+            _connectionString = LocalDbConnectionStringProvider.GetLocalDbConnectionString();
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new DapperSagaRepository<SimpleSaga>(_connectionString));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

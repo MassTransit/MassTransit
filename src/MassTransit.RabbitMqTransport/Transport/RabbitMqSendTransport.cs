@@ -11,7 +11,6 @@
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
     using Initializers.TypeConverters;
-    using Internals.Extensions;
     using Logging;
     using RabbitMQ.Client;
     using Transports;
@@ -87,13 +86,20 @@
 
                 var context = new BasicPublishRabbitMqSendContext<T>(properties, _context.Exchange, _message, _cancellationToken);
 
-                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartActivity(new {_context.Exchange});
+                await _pipe.Send(context).ConfigureAwait(false);
+
+                var exchange = context.Exchange;
+                if (exchange.Equals(RabbitMqExchangeNames.ReplyTo))
+                {
+                    if (string.IsNullOrWhiteSpace(context.RoutingKey))
+                        throw new TransportException(context.DestinationAddress, "RoutingKey must be specified when sending to reply-to address");
+
+                    exchange = "";
+                }
+
+                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
                 try
                 {
-                    await _pipe.Send(context).ConfigureAwait(false);
-
-                    activity.AddSendContextHeaders(context);
-
                     byte[] body = context.Body;
 
                     if (context.TryGetPayload(out PublishContext publishContext))
@@ -119,11 +125,14 @@
                     if (context.TimeToLive.HasValue)
                         properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
 
+                    if (context.RequestId.HasValue && (context.ResponseAddress?.AbsolutePath?.EndsWith(RabbitMqExchangeNames.ReplyTo) ?? false))
+                        context.BasicProperties.ReplyTo = RabbitMqExchangeNames.ReplyTo;
+
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
-                    var publishTask = modelContext.BasicPublishAsync(context.Exchange, context.RoutingKey ?? "", context.Mandatory,
-                        context.BasicProperties, body, context.AwaitAck);
+                    var publishTask = modelContext.BasicPublishAsync(exchange, context.RoutingKey ?? "", context.Mandatory, context.BasicProperties, body,
+                        context.AwaitAck);
 
                     await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
 

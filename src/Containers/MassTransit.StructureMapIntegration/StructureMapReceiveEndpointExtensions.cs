@@ -59,6 +59,44 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Connect a consumer with a consumer factory method
+        /// </summary>
+        /// <typeparam name="TConsumer"></typeparam>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static void Consumer<TConsumer, TMessage>(this IBatchConfigurator<TMessage> configurator, IContext context,
+            Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure = null)
+            where TConsumer : class, IConsumer<Batch<TMessage>>
+            where TMessage : class
+        {
+            Consumer(configurator, context.GetInstance<IContainer>(), configure);
+        }
+
+        /// <summary>
+        /// Connect a consumer with a consumer factory method
+        /// </summary>
+        /// <typeparam name="TConsumer"></typeparam>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="container"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static void Consumer<TConsumer, TMessage>(this IBatchConfigurator<TMessage> configurator, IContainer container,
+            Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure = null)
+            where TConsumer : class, IConsumer<Batch<TMessage>>
+            where TMessage : class
+        {
+            IConsumerScopeProvider scopeProvider = new StructureMapConsumerScopeProvider(container);
+
+            IConsumerFactory<TConsumer> consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
+
+            configurator.Consumer(consumerFactory, configure);
+        }
+
+        /// <summary>
         /// Registers a saga using the container that has the repository resolved from the container
         /// </summary>
         /// <typeparam name="T"></typeparam>

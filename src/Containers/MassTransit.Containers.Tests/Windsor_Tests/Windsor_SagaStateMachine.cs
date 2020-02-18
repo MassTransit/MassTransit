@@ -4,10 +4,10 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
     using Castle.Windsor;
     using Common_Tests;
     using NUnit.Framework;
-    using Saga;
-    using Scenarios.StateMachines;
+    using TestFramework.Sagas;
 
 
+    [TestFixture]
     public class Windsor_SagaStateMachine :
         Common_SagaStateMachine
     {
@@ -16,14 +16,9 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
         public Windsor_SagaStateMachine()
         {
             _container = new WindsorContainer();
-            _container.AddMassTransit(x =>
-            {
-                x.AddSagaStateMachine<TestStateMachineSaga, TestInstance>();
-                x.AddBus(provider => BusControl);
-            });
+            _container.AddMassTransit(ConfigureRegistration);
 
-            _container.Register(Component.For<PublishTestStartedActivity>().LifestyleScoped(),
-                Component.For(typeof(ISagaRepository<>)).ImplementedBy(typeof(InMemorySagaRepository<>)).LifestyleSingleton());
+            _container.Register(Component.For<PublishTestStartedActivity>().LifestyleScoped());
         }
 
         [OneTimeTearDown]

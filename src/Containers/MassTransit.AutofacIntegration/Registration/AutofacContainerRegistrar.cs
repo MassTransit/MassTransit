@@ -40,7 +40,7 @@ namespace MassTransit.AutofacIntegration.Registration
         {
         }
 
-        public void RegisterStateMachineSaga<TStateMachine, TInstance>()
+        public void RegisterSagaStateMachine<TStateMachine, TInstance>()
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
@@ -55,6 +55,23 @@ namespace MassTransit.AutofacIntegration.Registration
             _builder.RegisterType<TStateMachine>()
                 .AsSelf()
                 .As<SagaStateMachine<TInstance>>()
+                .SingleInstance();
+        }
+
+        public void RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
+            where TSaga : class, ISaga
+        {
+            _builder.Register(context => repositoryFactory(context.Resolve<IConfigurationServiceProvider>()))
+                .SingleInstance();
+        }
+
+        void IContainerRegistrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
+        {
+            _builder.RegisterType<TConsumeContextFactory>().As<ISagaConsumeContextFactory<TContext, TSaga>>();
+            _builder.RegisterType<TRepositoryContextFactory>().As<ISagaRepositoryContextFactory<TSaga>>();
+
+            _builder.RegisterType<AutofacSagaRepositoryContextFactory<TSaga>>();
+            _builder.Register<ISagaRepository<TSaga>>(context => new SagaRepository<TSaga>(context.Resolve<AutofacSagaRepositoryContextFactory<TSaga>>()))
                 .SingleInstance();
         }
 
@@ -130,6 +147,31 @@ namespace MassTransit.AutofacIntegration.Registration
                     ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
                     : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
             });
+        }
+
+        public void Register<T, TImplementation>()
+            where T : class
+            where TImplementation : class, T
+        {
+            _builder.RegisterType<TImplementation>().As<T>().InstancePerLifetimeScope();
+        }
+
+        public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
+        {
+            _builder.Register(context => factoryMethod(context.Resolve<IConfigurationServiceProvider>()));
+        }
+
+        public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
+        {
+            _builder.Register(context => factoryMethod(context.Resolve<IConfigurationServiceProvider>())).SingleInstance();
+        }
+
+        public void RegisterSingleInstance<T>(T instance)
+            where T : class
+        {
+            _builder.RegisterInstance(instance);
         }
 
         public void RegisterCompensateActivity<TActivity, TLog>()

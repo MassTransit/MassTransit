@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.EntityFrameworkIntegration.Tests
+﻿namespace MassTransit.EntityFrameworkIntegration.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -35,7 +23,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         InMemoryTestFixture
     {
         SuperShopper _machine;
-        readonly ISagaDbContextFactory _sagaDbContextFactory;
+        readonly ISagaDbContextFactory<ShoppingChore> _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<ShoppingChore>> _repository;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -53,7 +41,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
         public When_using_EntityFramework()
         {
-            _sagaDbContextFactory = new DelegateSagaDbContextFactory(
+            _sagaDbContextFactory = new DelegateSagaDbContextFactory<ShoppingChore>(
                 () => new ShoppingChoreSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
 
             _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => EntityFrameworkSagaRepository<ShoppingChore>.CreatePessimistic(_sagaDbContextFactory));
@@ -150,12 +138,12 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         class EntityFrameworkShoppingChoreMap :
             SagaClassMap<ShoppingChore>
         {
-            protected override void Configure(EntityTypeConfiguration<ShoppingChore> cfg, DbModelBuilder modelBuilder)
+            protected override void Configure(EntityTypeConfiguration<ShoppingChore> entity, DbModelBuilder modelBuilder)
             {
-                cfg.Property(x => x.CurrentState);
-                cfg.Property(x => x.Everything);
+                entity.Property(x => x.CurrentState);
+                entity.Property(x => x.Everything);
 
-                cfg.Property(x => x.Screwed);
+                entity.Property(x => x.Screwed);
             }
         }
 

@@ -52,7 +52,13 @@
                 _exchange.ExchangeArguments);
 
             if (builder.Exchange != null)
-                builder.ExchangeBind(builder.Exchange, exchangeHandle, "", new Dictionary<string, object>());
+            {
+                string routingKey = builder.Exchange.Exchange.ExchangeType == RabbitMQ.Client.ExchangeType.Topic
+                    ? "#"
+                    : "";
+
+                builder.ExchangeBind(builder.Exchange, exchangeHandle, routingKey, new Dictionary<string, object>());
+            }
             else
                 builder.Exchange = exchangeHandle;
 

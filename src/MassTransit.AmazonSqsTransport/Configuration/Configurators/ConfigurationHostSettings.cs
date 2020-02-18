@@ -22,8 +22,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         }
 
         public RegionEndpoint Region { get; set; }
-        public string AccessKey => (_immutableCredentials ?? (_immutableCredentials = GetImmutableCredentials())).AccessKey;
-        public string SecretKey => (_immutableCredentials ?? (_immutableCredentials = GetImmutableCredentials())).SecretKey;
+        public string AccessKey => (_immutableCredentials ??= GetImmutableCredentials()).AccessKey;
+        public string SecretKey => (_immutableCredentials ??= GetImmutableCredentials()).SecretKey;
 
         public AWSCredentials Credentials
         {
@@ -52,9 +52,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
 
         Uri FormatHostAddress()
         {
-            var hostAddress = new AmazonSqsHostAddress(Region.SystemName, Scope);
-
-            return hostAddress;
+            return new AmazonSqsHostAddress(Region.SystemName, Scope);
         }
 
         public override string ToString()

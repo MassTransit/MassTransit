@@ -1,19 +1,8 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Serialization
+﻿namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Net.Mime;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -56,8 +45,17 @@ namespace MassTransit.Serialization
             context.ConversationId = ConvertIdToGuid(_message.ConversationId);
             context.InitiatorId = ConvertIdToGuid(_message.InitiatorId);
 
-            if (!string.IsNullOrEmpty(_message.ExpirationTime))
-                context.TimeToLive = DateTime.UtcNow - DateTime.Parse(_message.ExpirationTime);
+            if (!string.IsNullOrWhiteSpace(_message.ExpirationTime))
+            {
+                if (DateTime.TryParse(_message.ExpirationTime, null, DateTimeStyles.RoundtripKind, out var expirationTime)
+                    || DateTime.TryParse(_message.ExpirationTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out expirationTime))
+                {
+                    var timeToLive = expirationTime - DateTime.UtcNow;
+                    context.TimeToLive = timeToLive > TimeSpan.Zero
+                        ? timeToLive
+                        : TimeSpan.FromSeconds(1);
+                }
+            }
 
             var bodySerializer = new StringMessageSerializer(new ContentType(_message.ContentType), _message.Body);
 

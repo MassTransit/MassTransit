@@ -3,8 +3,8 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using GreenPipes;
+    using Transports;
 
 
     public class ServiceBusMessagingFactoryContext :
@@ -22,9 +22,13 @@
 
         public async Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
         {
+            var address = _messagingFactory.Address.ToString();
+
+            TransportLogMessages.DisconnectHost(address);
+
             await _messagingFactory.CloseAsync().ConfigureAwait(false);
 
-            LogContext.Debug?.Log("Closed messaging factory: {Host}", _messagingFactory.Address);
+            TransportLogMessages.DisconnectedHost(address);
         }
 
         MessagingFactory MessagingFactoryContext.MessagingFactory => _messagingFactory;

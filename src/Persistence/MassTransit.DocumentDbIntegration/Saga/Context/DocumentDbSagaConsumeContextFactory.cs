@@ -1,18 +1,20 @@
 ﻿namespace MassTransit.DocumentDbIntegration.Saga.Context
 {
-    using Microsoft.Azure.Documents;
-    using Microsoft.Azure.Documents.Client;
+    using System.Threading.Tasks;
+    using MassTransit.Saga;
 
 
-    public class DocumentDbSagaConsumeContextFactory :
-        IDocumentDbSagaConsumeContextFactory
+    public class DocumentDbSagaConsumeContextFactory<TSaga> :
+        ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>
+        where TSaga : class, IVersionedSaga
     {
-        public SagaConsumeContext<TSaga, TMessage> Create<TSaga, TMessage>(IDocumentClient client, string databaseName, string collectionName,
-            ConsumeContext<TMessage> message, TSaga instance, bool existing = true, RequestOptions requestOptions = null)
-            where TSaga : class, IVersionedSaga
-            where TMessage : class
+        public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(DatabaseContext<TSaga> context, ConsumeContext<T> consumeContext, TSaga instance,
+            SagaConsumeContextMode mode)
+            where T : class
         {
-            return new DocumentDbSagaConsumeContext<TSaga, TMessage>(client, databaseName, collectionName, message, instance, existing, requestOptions);
+            var sagaConsumeContext = new DocumentDbSagaConsumeContext<TSaga, T>(context, consumeContext, instance, mode);
+
+            return Task.FromResult<SagaConsumeContext<TSaga, T>>(sagaConsumeContext);
         }
     }
 }

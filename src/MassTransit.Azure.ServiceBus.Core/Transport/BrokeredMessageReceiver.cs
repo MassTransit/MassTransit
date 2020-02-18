@@ -53,14 +53,12 @@
         {
             LogContext.Current = _context.LogContext;
 
-            var context = new ServiceBusReceiveContext(_inputAddress, message, _context);
+            var context = new ServiceBusReceiveContext(message, _context);
             contextCallback?.Invoke(context);
 
             context.TryGetPayload<MessageLockContext>(out var lockContext);
 
-            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartActivity();
-            activity.AddReceiveContextHeaders(context);
-
+            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
             try
             {
                 if (_context.ReceiveObservers.Count > 0)
@@ -84,14 +82,14 @@
             }
             catch (SessionLockLostException ex)
             {
-                LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId", message.MessageId);
+                LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId}", message.MessageId);
 
                 if (_context.ReceiveObservers.Count > 0)
                     await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
             }
             catch (MessageLockLostException ex)
             {
-                LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId", message.MessageId);
+                LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId}", message.MessageId);
 
                 if (_context.ReceiveObservers.Count > 0)
                     await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
@@ -110,7 +108,7 @@
                 }
                 catch (Exception exception)
                 {
-                    LogContext.Warning?.Log(exception, "Abandon message faulted: {MessageId", message.MessageId);
+                    LogContext.Warning?.Log(exception, "Abandon message faulted: {MessageId}", message.MessageId);
                 }
             }
             finally

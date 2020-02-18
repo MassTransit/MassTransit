@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persistence", "Persistence", "{56F516D7-BC3C-49E1-A639-83C5F14953F8}"
 EndProject
@@ -137,7 +137,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.SignalR.Sample"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.WebJobs.EventHubsIntegration", "MassTransit.WebJobs.EventHubsIntegration\MassTransit.WebJobs.EventHubsIntegration.csproj", "{56E9DB90-C063-49CA-BAF7-FFCFE963E44C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.WebJobs.Tests", "MassTransit.WebJobs.Tests\MassTransit.WebJobs.Tests.csproj", "{0C214618-DBFA-45B6-B1B3-99E90F17FE23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.WebJobs.Tests", "MassTransit.WebJobs.Tests\MassTransit.WebJobs.Tests.csproj", "{0C214618-DBFA-45B6-B1B3-99E90F17FE23}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Monitoring", "Monitoring", "{DE40BDEC-6277-4E14-8EB6-D0B6863571BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ApplicationInsights.Tests", "MassTransit.ApplicationInsights.Tests\MassTransit.ApplicationInsights.Tests.csproj", "{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -748,6 +752,18 @@ Global
 		{0C214618-DBFA-45B6-B1B3-99E90F17FE23}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 		{0C214618-DBFA-45B6-B1B3-99E90F17FE23}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{0C214618-DBFA-45B6-B1B3-99E90F17FE23}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.Debug|x86.Build.0 = Debug|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.Release|x86.ActiveCfg = Release|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.Release|x86.Build.0 = Release|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.ReleaseUnsigned|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -802,6 +818,7 @@ Global
 		{7F01D669-493D-473E-84AE-452BC38F0328} = {C0CD5A16-BD57-429A-8E9A-0DED4DD507F3}
 		{56E9DB90-C063-49CA-BAF7-FFCFE963E44C} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{0C214618-DBFA-45B6-B1B3-99E90F17FE23} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
+		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF} = {DE40BDEC-6277-4E14-8EB6-D0B6863571BC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}

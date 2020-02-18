@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.MongoDbIntegration.Tests
 {
@@ -48,7 +48,7 @@ namespace MassTransit.MongoDbIntegration.Tests
         }
 
         [OneTimeSetUp]
-        public void GivenAMongoMessageDataRepository_WhenPuttingMessageData()
+        public async Task GivenAMongoMessageDataRepository_WhenPuttingMessageData()
         {
             var db = new MongoClient().GetDatabase("messagedatastoretests");
             _bucket = new GridFSBucket(db);
@@ -61,17 +61,15 @@ namespace MassTransit.MongoDbIntegration.Tests
 
             IMessageDataRepository repository = new MongoDbMessageDataRepository(_resolver, _bucket, _nameCreator);
 
-            using (var stream = new MemoryStream(_expectedData))
-            {
-                _actualUri = repository.Put(stream).GetAwaiter().GetResult();
+            using var stream = new MemoryStream(_expectedData);
 
-            }
+            _actualUri = await repository.Put(stream);
         }
 
         [OneTimeTearDown]
-        public void Kill()
+        public Task Kill()
         {
-            _bucket.DropAsync().GetAwaiter().GetResult();
+            return _bucket.DropAsync();
         }
 
         GridFSBucket _bucket;

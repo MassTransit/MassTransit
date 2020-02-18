@@ -37,7 +37,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             collection.AddScoped<ISimpleConsumerDependency, SimpleConsumerDependency>();
             collection.AddScoped<AnotherMessageConsumer, AnotherMessageConsumerImpl>();
 
-            _provider = collection.BuildServiceProvider();
+            _provider = collection.BuildServiceProvider(true);
         }
 
         protected override void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator)

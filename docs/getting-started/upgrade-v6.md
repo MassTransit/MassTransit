@@ -29,6 +29,10 @@ The following packages are available for the supported containers:
 - MassTransit.Unity (no registration support)
 - MassTransit.Windsor
 
+## Saga Repository Update (v6.1+)
+
+The saga repositories have been completely refactored, to eliminate duplicate logic and increase consistency across the various storage engines. All repositories also now support the container registration extensions, which provides a consistent syntax for registering and configuring saga repositories for use with dependency injection containers. When using the `.AddMassTransit()` container registration method, a repository can now be registered with the saga. For details, see the updated [documentation](/usage/sagas/persistence).
+
 ## Azure Service Bus
 
 The previous (now legacy) **MassTransit.AzureServiceBus** package, which was only maintained to continue support for .NET 4.5.2, has been deprecated. Going forward, the **MassTransit.Azure.ServiceBus.Core** package should be used. The package supports both .NET 4.6.1 and .NET Standard 2.0.
@@ -51,7 +55,7 @@ This should be done prior to configuring the bus.
 As of version 6, MassTransit now uses DiagnosticSource for tracking messaging operations, such as Send, Receive, Publish, Consume, etc. An `Activity` is
 created for each operation, and context-relevant tags and baggage are added.
 
-MassTransit follows the [guidance](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md) from Microsoft. To connect listeners, look at the [section](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#subscribe-to-diagnosticsource) that explains how to connect.
+MassTransit follows the [guidance](https://github.com/dotnet/runtime/blob/master/src/libraries/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md) from Microsoft. To connect listeners, look at the [section](https://github.com/dotnet/runtime/blob/master/src/libraries/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#subscribe-to-diagnosticsource) that explains how to connect.
 
 ## Receive Endpoint Configuration
 

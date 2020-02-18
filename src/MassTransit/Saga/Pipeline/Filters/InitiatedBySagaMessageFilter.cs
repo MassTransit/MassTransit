@@ -2,7 +2,9 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
+    using Logging;
     using Metadata;
 
 
@@ -24,9 +26,17 @@
 
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
-            await context.Saga.Consume(context).ConfigureAwait(false);
+            var activity = LogContext.IfEnabled(OperationName.Saga.Initiate)?.StartSagaActivity(context);
+            try
+            {
+                await context.Saga.Consume(context).ConfigureAwait(false);
 
-            await next.Send(context).ConfigureAwait(false);
+                await next.Send(context).ConfigureAwait(false);
+            }
+            finally
+            {
+                activity?.Stop();
+            }
         }
     }
 }

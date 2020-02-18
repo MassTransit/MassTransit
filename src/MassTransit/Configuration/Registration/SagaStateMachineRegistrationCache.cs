@@ -52,7 +52,7 @@ namespace MassTransit.Registration
         {
             public void Register(IContainerRegistrar registrar)
             {
-                registrar.RegisterStateMachineSaga<TStateMachine, TInstance>();
+                registrar.RegisterSagaStateMachine<TStateMachine, TInstance>();
 
                 SagaRegistrationCache.DoNotRegister(typeof(TInstance));
             }

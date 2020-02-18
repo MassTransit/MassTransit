@@ -55,6 +55,11 @@
                 yield return this.Failure("Bus", "The bus queue name must not be null or empty");
         }
 
+        public ushort PrefetchCount
+        {
+            set => _settings.PrefetchCount = value;
+        }
+
         public bool Durable
         {
             set => _settings.Durable = value;

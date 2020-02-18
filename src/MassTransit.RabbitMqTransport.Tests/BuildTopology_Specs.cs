@@ -122,7 +122,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             _consumeTopology.Apply(_builder);
 
-            var topology = _builder.BuildTopologyLayout();
+            var topology = _builder.BuildBrokerTopology();
 
             var interfaceName = _nameFormatter.GetMessageName(typeof(SecondInterface)).ToString();
 
@@ -143,7 +143,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             _consumeTopology.Apply(_builder);
 
-            var topology = _builder.BuildTopologyLayout();
+            var topology = _builder.BuildBrokerTopology();
 
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
 

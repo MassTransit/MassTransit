@@ -10,7 +10,7 @@ namespace MassTransit.Saga.Pipeline.Filters
 
 
     /// <summary>
-    /// Creates a send a query to the saga repository using the query factory and saga policy provided.
+    /// Creates a filter to send a query to the saga repository using the query factory and saga policy provided.
     /// </summary>
     /// <typeparam name="TSaga">The saga type</typeparam>
     /// <typeparam name="TMessage">The message type</typeparam>
@@ -36,10 +36,7 @@ namespace MassTransit.Saga.Pipeline.Filters
         void IProbeSite.Probe(ProbeContext context)
         {
             ProbeContext scope = context.CreateFilterScope("saga");
-            scope.Set(new
-            {
-                Correlation = "Query"
-            });
+            scope.Set(new {Correlation = "Query"});
 
             _queryFactory.Probe(scope);
             _sagaRepository.Probe(scope);
@@ -49,22 +46,16 @@ namespace MassTransit.Saga.Pipeline.Filters
 
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
+            var activity = LogContext.IfEnabled(OperationName.Saga.SendQuery)?.StartSagaActivity<TSaga, TMessage>(context);
+
             Stopwatch timer = Stopwatch.StartNew();
-
-            var activity = LogContext.IfEnabled(OperationName.Saga.SendQuery)?.StartActivity(new
-            {
-                SagaType = TypeMetadataCache<TSaga>.ShortName,
-                MessageType = TypeMetadataCache<TMessage>.ShortName
-            });
-
             try
             {
+                await Task.Yield();
+
                 ISagaQuery<TSaga> query = _queryFactory.CreateQuery(context);
 
-                SagaQueryConsumeContext<TSaga, TMessage> queryContext = new SagaQueryConsumeContextScope<TSaga, TMessage>(context, query);
-
-                await Task.Yield();
-                await _sagaRepository.SendQuery(queryContext, _policy, _messagePipe).ConfigureAwait(false);
+                await _sagaRepository.SendQuery(context, query, _policy, _messagePipe).ConfigureAwait(false);
 
                 await next.Send(context).ConfigureAwait(false);
 

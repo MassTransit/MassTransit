@@ -13,15 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" Version="1.2.6" Condition="'$(TargetFramework)' == 'net461'"/>
-    <PackageReference Include="StackExchange.Redis" Version="2.0.601" Condition="'$(TargetFramework)' != 'net461'"/>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+    <PackageReference Include="StackExchange.Redis" Version="1.2.6" Condition="'$(TargetFramework)' == 'net461'" />
+    <PackageReference Include="StackExchange.Redis" Version="2.0.601" Condition="'$(TargetFramework)' != 'net461'" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <Reference Include="System"/>
-    <Reference Include="System.Core"/>
-    <Reference Include="System.Data"/>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
   </ItemGroup>
 </Project>

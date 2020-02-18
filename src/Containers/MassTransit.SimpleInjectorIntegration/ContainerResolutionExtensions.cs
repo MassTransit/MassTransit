@@ -1,6 +1,7 @@
 namespace MassTransit.SimpleInjectorIntegration
 {
     using System;
+    using Scoping;
     using SimpleInjector;
 
 
@@ -13,17 +14,18 @@ namespace MassTransit.SimpleInjectorIntegration
             return (T)service;
         }
 
+        public static T TryGetInstance<T>(this Scope scope)
+        {
+            IServiceProvider serviceProvider = scope;
+            var service = serviceProvider.GetService(typeof(T));
+            return (T)service;
+        }
+
         public static ConsumeContext GetConsumeContext(this Container container)
         {
-            var scope = Lifestyle.Scoped.GetCurrentScope(container) != null;
-            if (scope)
-            {
-                var consumeContext = container.TryGetInstance<ConsumeContext>();
-                if (consumeContext != null)
-                    return consumeContext;
-            }
+            var scope = Lifestyle.Scoped.GetCurrentScope(container);
 
-            return null;
+            return scope?.Container.GetInstance<ScopedConsumeContextProvider>().GetContext();
         }
     }
 }

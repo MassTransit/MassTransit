@@ -2,6 +2,7 @@
 {
     using Configuration;
     using Context;
+    using Integration;
     using Topology.Builders;
     using Transport;
 
@@ -12,10 +13,13 @@
     {
         readonly IRabbitMqHostControl _host;
 
-        public RabbitMqQueueReceiveEndpointContext(IRabbitMqHostControl host, IRabbitMqReceiveEndpointConfiguration configuration, BrokerTopology brokerTopology)
+        public RabbitMqQueueReceiveEndpointContext(IRabbitMqHostControl host, IModelContextSupervisor supervisor,
+            IRabbitMqReceiveEndpointConfiguration configuration,
+            BrokerTopology brokerTopology)
             : base(configuration)
         {
             _host = host;
+            ModelContextSupervisor = supervisor;
 
             ExclusiveConsumer = configuration.Settings.ExclusiveConsumer;
             BrokerTopology = brokerTopology;
@@ -25,14 +29,16 @@
 
         public bool ExclusiveConsumer { get; }
 
+        public IModelContextSupervisor ModelContextSupervisor { get; }
+
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendTransportProvider(_host);
+            return new SendTransportProvider(_host, ModelContextSupervisor);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_host);
+            return new PublishTransportProvider(_host, ModelContextSupervisor);
         }
     }
 }

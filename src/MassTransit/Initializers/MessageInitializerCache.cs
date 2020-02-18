@@ -68,21 +68,6 @@
             return GetInitializer(values.GetType()).Send(endpoint, values, pipe, cancellationToken);
         }
 
-        public static Task Publish(IPublishEndpoint endpoint, object values, CancellationToken cancellationToken)
-        {
-            return GetInitializer(values.GetType()).Publish(endpoint, values, cancellationToken);
-        }
-
-        public static Task Publish(IPublishEndpoint endpoint, object values, IPipe<PublishContext> pipe, CancellationToken cancellationToken)
-        {
-            return GetInitializer(values.GetType()).Publish(endpoint, values, pipe, cancellationToken);
-        }
-
-        public static Task Publish(IPublishEndpoint endpoint, object values, IPipe<PublishContext<TMessage>> pipe, CancellationToken cancellationToken)
-        {
-            return GetInitializer(values.GetType()).Publish(endpoint, values, pipe, cancellationToken);
-        }
-
         public static Task<InitializeContext<TMessage>> Initialize(object values, CancellationToken cancellationToken = default)
         {
             if (values == null)

@@ -98,15 +98,10 @@ namespace MassTransit.Transports
             return _context.SendEndpointProvider.GetSendEndpoint(address);
         }
 
-        public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, ConsumeContext context = null)
-        {
-            return _context.PublishEndpointProvider.CreatePublishEndpoint(sourceAddress, context);
-        }
-
-        public Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
+        public Task<ISendEndpoint> GetPublishSendEndpoint<T>()
             where T : class
         {
-            return _context.PublishEndpointProvider.GetPublishSendEndpoint(message);
+            return _context.PublishEndpointProvider.GetPublishSendEndpoint<T>();
         }
 
 

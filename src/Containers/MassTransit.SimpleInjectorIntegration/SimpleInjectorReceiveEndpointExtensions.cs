@@ -22,6 +22,18 @@ namespace MassTransit
             configurator.Consumer(consumerFactory, configure);
         }
 
+        public static void Consumer<TConsumer, TMessage>(this IBatchConfigurator<TMessage> configurator, Container container,
+            Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure = null)
+            where TConsumer : class, IConsumer<Batch<TMessage>>
+            where TMessage : class
+        {
+            IConsumerScopeProvider scopeProvider = new SimpleInjectorConsumerScopeProvider(container);
+
+            IConsumerFactory<TConsumer> consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
+
+            configurator.Consumer(consumerFactory, configure);
+        }
+
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, Container container, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {

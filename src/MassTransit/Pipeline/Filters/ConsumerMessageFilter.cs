@@ -10,8 +10,7 @@ namespace MassTransit.Pipeline.Filters
 
 
     /// <summary>
-    /// Consumes a message via Consumer, resolved through the consumer factory and notifies
-    /// the context that the message was consumed.
+    /// Consumes a message via Consumer, resolved through the consumer factory and notifies the context that the message was consumed.
     /// </summary>
     /// <typeparam name="TConsumer">The consumer type</typeparam>
     /// <typeparam name="TMessage">The message type</typeparam>
@@ -42,16 +41,13 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
-            var activity = LogContext.IfEnabled(OperationName.Consumer.Consume)?.StartActivity(new
-            {
-                ConsumerType = TypeMetadataCache<TConsumer>.ShortName,
-                MessageType = TypeMetadataCache<TMessage>.ShortName
-            });
+            var activity = LogContext.IfEnabled(OperationName.Consumer.Consume)?.StartConsumerActivity<TConsumer, TMessage>(context);
 
             var timer = Stopwatch.StartNew();
             try
             {
                 await Task.Yield();
+
                 await _consumerFactory.Send(context, _consumerPipe).ConfigureAwait(false);
 
                 await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName).ConfigureAwait(false);

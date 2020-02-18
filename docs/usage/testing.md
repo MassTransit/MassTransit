@@ -50,6 +50,35 @@ public async Task Should_test_the_consumer()
 
 Adding the consumer harness to the test harness will configure the consumer on the receive endpoint. As messages are received and consumed, they are added to collections via observers so that test assertions can be used to verify message consumption.
 
+If you want to test for consumer exceptions you can check for published `Fault<T>` messages
+
+```cs
+public async Task Should_test_the_consumer()
+{
+    var harness = new InMemoryTestHarness();
+    var consumerHarness = harness.Consumer<MyConsumer>();
+
+    await harness.Start();
+    try
+    {
+        await harness.InputQueueSendEndpoint.Send(new MyMessage());
+
+        // did the endpoint consume the message
+        Assert.IsTrue(harness.Consumed.Select<MyMessage>().Any());
+
+        // did the actual consumer consume the message
+        Assert.IsTrue(consumerHarness.Consumed.Select<MyMessage>().Any());
+
+        // did the actual consumer throws exception
+        Assert.IsTrue(harness.Published.Select<Fault<MyMessage>>().Any();
+    }
+    finally
+    {
+        await harness.Stop();
+    }
+}
+```
+
 If the consumer published an event, that too could be observed:
 
 ```cs
@@ -121,7 +150,7 @@ public async Task Should_test_the_state_machine_saga()
     {
         Guid sagaId = NewId.NextGuid();
 
-        await harness.Publish(new InitialEvent(sagaId));
+        await harness.Bus.Publish(new InitialEvent(sagaId));
 
         // did the endpoint consume the message
         Assert.IsTrue(harness.Consumed.Select<InitialEvent>().Any());
@@ -129,7 +158,7 @@ public async Task Should_test_the_state_machine_saga()
         // did the actual consumer consume the message
         Assert.IsTrue(sagaHarness.Consumed.Select<InitialEvent>().Any());
 
-        MyInstance instance = saga.Created.ContainsInState(sagaId, machine, machine.Active);
+        MyInstance instance = sagaHarness.Created.ContainsInState(sagaId, machine, machine.Active);
         Assert.IsNotNull(instance, "Saga instance not found");
     }
     finally

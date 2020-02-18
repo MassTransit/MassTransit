@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 {
     using System;
-    using System.Data.SqlClient;
+    using Microsoft.Data.SqlClient;
 
 
     public static class LocalDbConnectionStringProvider
@@ -24,15 +24,15 @@
         /// <summary>
         /// Loops through the array of potential localdb connection strings to find one that we can use for the unit tests
         /// </summary>
-        public static string GetLocalDbConnectionString()
+        public static string GetLocalDbConnectionString(string initialCatalog = "MassTransitUnitTests_v12_2015;")
         {
             if (!string.IsNullOrWhiteSpace(_connectionString))
-                return _connectionString;
+                return _connectionString + "Initial Catalog=" + initialCatalog;
 
             lock (_lockConnectionString)
             {
                 if (!string.IsNullOrWhiteSpace(_connectionString))
-                    return _connectionString;
+                    return _connectionString + "Initial Catalog=" + initialCatalog;
 
                 // Lets find a localdb that we can use for our unit test
                 foreach (var connectionString in _possibleLocalDbConnectionStrings)
@@ -44,7 +44,7 @@
                             connection.Open();
 
                             // It worked, we can save this as our connection string
-                            _connectionString = connectionString + "Initial Catalog=MassTransitUnitTests_v12_2015;";
+                            _connectionString = connectionString;
                             break;
                         }
                     }
@@ -60,7 +60,7 @@
                         "Couldn't connect to any of the LocalDB Databases. You might have a version installed that is not in the list. Please check the list and modify as necessary");
             }
 
-            return _connectionString;
+            return _connectionString + "Initial Catalog=" + initialCatalog;
         }
     }
 }

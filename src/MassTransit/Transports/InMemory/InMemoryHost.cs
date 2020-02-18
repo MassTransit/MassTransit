@@ -41,7 +41,7 @@ namespace MassTransit.Transports.InMemory
         {
             LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            LogContext.Debug?.Log("Create receive transport: {Queue}", queueName);
+            TransportLogMessages.CreateReceiveTransport(receiveEndpointContext.InputAddress);
 
             var queue = _messageFabric.GetQueue(queueName);
 
@@ -63,7 +63,8 @@ namespace MassTransit.Transports.InMemory
             return ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint = null)
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint = null)
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
 
@@ -79,9 +80,9 @@ namespace MassTransit.Transports.InMemory
         {
             LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
-
             var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, configure);
+
+            TransportLogMessages.ConnectReceiveEndpoint(configuration.InputAddress);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
 
@@ -94,13 +95,13 @@ namespace MassTransit.Transports.InMemory
         {
             LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            var queueName = address.GetQueueOrExchangeName();
+            var exchangeName = address.GetQueueOrExchangeName();
 
-            return await _index.Get(queueName, async key =>
+            return await _index.Get(exchangeName, async key =>
             {
-                LogContext.Debug?.Log("Create send transport: {Exchange}", queueName);
+                TransportLogMessages.CreateSendTransport(address);
 
-                var exchange = _messageFabric.GetExchange(queueName);
+                var exchange = _messageFabric.GetExchange(exchangeName);
 
                 var context = new ExchangeInMemorySendTransportContext(exchange, SendLogContext);
 

@@ -19,19 +19,19 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container = new Container();
             _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
 
-            _container.AddMassTransit(cfg =>
-            {
-                cfg.AddSaga<SimpleSaga>();
-                cfg.AddBus(() => BusControl);
-            });
-
-            _container.Register(typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>), Lifestyle.Singleton);
+            _container.AddMassTransit(ConfigureRegistration);
         }
 
         [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();
+        }
+
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
         }
 
         protected override void ConfigureSaga(IInMemoryReceiveEndpointConfigurator configurator)
@@ -45,6 +45,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         }
     }
 
+
     [TestFixture]
     public class SimpleInjector_Saga_Endpoint :
         Common_Saga_Endpoint
@@ -56,15 +57,13 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container = new Container();
             _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
 
-            _container.AddMassTransit(x =>
-            {
-                x.AddSaga<SimpleSaga>()
-                    .Endpoint(e => e.Name = "custom-endpoint-name");
+            _container.AddMassTransit(ConfigureRegistration);
+        }
 
-                x.AddBus(() => BusControl);
-            });
-
-            _container.RegisterSingleton<ISagaRepository<SimpleSaga>, InMemorySagaRepository<SimpleSaga>>();
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
         }
 
         protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
@@ -77,5 +76,4 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             return _container.GetInstance<ISagaRepository<T>>();
         }
     }
-
 }

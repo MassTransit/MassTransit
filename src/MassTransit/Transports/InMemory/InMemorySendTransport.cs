@@ -12,8 +12,7 @@ namespace MassTransit.Transports.InMemory
 
 
     /// <summary>
-    /// Support in-memory message queue that is not durable, but supports parallel delivery of messages
-    /// based on TPL usage.
+    /// Support in-memory message queue that is not durable, but supports parallel delivery of messages based on TPL usage.
     /// </summary>
     public class InMemorySendTransport :
         ISendTransport
@@ -33,13 +32,11 @@ namespace MassTransit.Transports.InMemory
 
             var context = new InMemorySendContext<T>(message, cancellationToken);
 
-            var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartActivity(new {Exchange = ExchangeName});
+            await pipe.Send(context).ConfigureAwait(false);
+
+            var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
             try
             {
-                await pipe.Send(context).ConfigureAwait(false);
-
-                activity.AddSendContextHeaders(context);
-
                 var messageId = context.MessageId ?? NewId.NextGuid();
 
                 if (_context.SendObservers.Count > 0)

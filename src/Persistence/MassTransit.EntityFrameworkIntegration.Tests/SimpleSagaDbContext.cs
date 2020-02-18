@@ -12,13 +12,13 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         class SimpleSagaMap :
             SagaClassMap<SimpleSaga>
         {
-            protected override void Configure(EntityTypeConfiguration<SimpleSaga> cfg, DbModelBuilder modelBuilder)
+            protected override void Configure(EntityTypeConfiguration<SimpleSaga> entity, DbModelBuilder modelBuilder)
             {
-                cfg.Property(x => x.Name)
+                entity.Property(x => x.Name)
                     .HasMaxLength(40);
-                cfg.Property(x => x.Initiated);
-                cfg.Property(x => x.Observed);
-                cfg.Property(x => x.Completed);
+                entity.Property(x => x.Initiated);
+                entity.Property(x => x.Observed);
+                entity.Property(x => x.Completed);
             }
         }
 

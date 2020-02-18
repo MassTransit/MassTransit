@@ -34,7 +34,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 cfg.AddBus(context => BusControl);
             });
 
-            _container = builder.BuildServiceProvider();
+            _container = builder.BuildServiceProvider(true);
         }
 
         protected override void ConfigureExecuteActivity(IReceiveEndpointConfigurator endpointConfigurator)

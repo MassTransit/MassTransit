@@ -97,3 +97,10 @@ Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Quar
 Test the performance of MassTransit in your environment.
 
 Clone the sample: [GitHub Repository](https://github.com/MassTransit/MassTransit-Benchmark)
+
+
+### RabbitMQ MQTT Consumer
+
+Utilise RabbitMQ as a MQTT server and consume IOT data.
+
+Clone the sample: [GitHub Repository](https://github.com/morganphilo/MassTransit.Mqtt)

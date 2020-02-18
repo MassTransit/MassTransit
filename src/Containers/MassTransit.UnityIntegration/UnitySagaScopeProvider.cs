@@ -43,25 +43,5 @@ namespace MassTransit.UnityIntegration
                 throw;
             }
         }
-
-        ISagaQueryScopeContext<TSaga, T> ISagaScopeProvider<TSaga>.GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
-        {
-            if (context.TryGetPayload<IUnityContainer>(out var existingScope))
-                return new ExistingSagaQueryScopeContext<TSaga, T>(context);
-
-            var scope = _container.CreateChildContainer();
-            try
-            {
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, scope);
-
-                return new CreatedSagaQueryScopeContext<IUnityContainer, TSaga, T>(scope, proxy);
-            }
-            catch
-            {
-                scope.Dispose();
-
-                throw;
-            }
-        }
     }
 }

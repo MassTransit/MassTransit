@@ -1,0 +1,17 @@
+﻿# this compose file will start local services the same as those running on appveyor CI for testing.
+
+version: '2.3'
+services:
+  mssql:
+    image: "mcr.microsoft.com/mssql/server:2017-latest"
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "SA_PASSWORD=Password12!"
+    ports:
+      - 1433:1433
+  postgres:
+    image: "postgres:9.6"
+    environment:
+      - "POSTGRES_PASSWORD=Password12!"
+    ports:
+      - 5432:5432

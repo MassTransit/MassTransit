@@ -66,6 +66,30 @@ namespace MassTransit.TestFramework
             return BusTestHarness.SubscribeHandler(filter);
         }
 
+        protected Task<ConsumeContext<T>> ConnectPublishHandler<T>()
+            where T : class
+        {
+            Task<ConsumeContext<T>> result = null;
+            Bus.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), context =>
+            {
+                result = Handled<T>(context);
+            });
+
+            return result;
+        }
+
+        protected Task<ConsumeContext<T>> ConnectPublishHandler<T>(Func<ConsumeContext<T>, bool> filter)
+            where T : class
+        {
+            Task<ConsumeContext<T>> result = null;
+            Bus.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), context =>
+            {
+                result = Handled<T>(context, filter);
+            });
+
+            return result;
+        }
+
         /// <summary>
         /// Registers a handler on the receive endpoint that is cancelled when the test is canceled
         /// and completed when the message is received.

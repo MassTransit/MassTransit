@@ -9,7 +9,6 @@
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
-    using GreenPipes.Internals.Extensions;
     using Policies;
     using Topology;
     using Transports;
@@ -81,35 +80,29 @@
         {
             while (!IsStopping)
             {
-                try
+                await _host.ConnectionRetryPolicy.Retry(async () =>
                 {
-                    await _host.ConnectionRetryPolicy.Retry(async () =>
+                    try
                     {
-                        try
-                        {
-                            await _context.OnTransportStartup(_host.ConnectionContextSupervisor, Stopping).ConfigureAwait(false);
-                            if (IsStopping)
-                                return;
+                        await _context.OnTransportStartup(_host.ConnectionContextSupervisor, Stopping).ConfigureAwait(false);
+                        if (IsStopping)
+                            return;
 
-                            await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
-                        }
-                        catch (NMSConnectionException ex)
-                        {
-                            throw await ConvertToActiveMqConnectionException(ex, "NMSConnectionException").ConfigureAwait(false);
-                        }
-                        catch (OperationCanceledException)
-                        {
-                        }
-                        catch (Exception ex)
-                        {
-                            throw await ConvertToActiveMqConnectionException(ex, "ReceiveTransport Faulted, Restarting").ConfigureAwait(false);
-                        }
-                    }, Stopping).ConfigureAwait(false);
-                }
-                catch
-                {
-                    // seriously, nothing to see here
-                }
+                        await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
+                    }
+                    catch (NMSConnectionException ex)
+                    {
+                        throw await ConvertToActiveMqConnectionException(ex, "NMSConnectionException").ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        throw await ConvertToActiveMqConnectionException(ex, "ReceiveTransport Faulted, Restarting").ConfigureAwait(false);
+                    }
+                }, Stopping).ConfigureAwait(false);
             }
         }
 

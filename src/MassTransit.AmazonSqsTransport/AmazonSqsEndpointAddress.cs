@@ -3,14 +3,16 @@ namespace MassTransit.AmazonSqsTransport
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
     using Topology;
+    using Util;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public readonly struct AmazonSqsEndpointAddress
     {
         const string AutoDeleteKey = "autodelete";
+        const string DurableKey = "durable";
+        const string TemporaryKey = "temporary";
 
         public readonly string Scheme;
         public readonly string Host;
@@ -18,6 +20,7 @@ namespace MassTransit.AmazonSqsTransport
 
         public readonly string Name;
         public readonly bool AutoDelete;
+        public readonly bool Durable;
 
         public AmazonSqsEndpointAddress(Uri hostAddress, Uri address)
         {
@@ -25,7 +28,8 @@ namespace MassTransit.AmazonSqsTransport
             Host = default;
             Scope = default;
 
-            AutoDelete = default;
+            Durable = true;
+            AutoDelete = false;
 
             var scheme = address.Scheme.ToLowerInvariant();
             switch (scheme)
@@ -34,10 +38,16 @@ namespace MassTransit.AmazonSqsTransport
                     Scheme = address.Scheme;
                     Host = address.Host;
 
-                    ParsePath(address.AbsolutePath, out Scope, out Name);
+                    address.ParseHostPathAndEntityName(out Scope, out Name);
                     break;
 
                 case "queue":
+                    ParseLeft(hostAddress, out Scheme, out Host, out Scope);
+
+                    Name = address.AbsolutePath;
+                    break;
+
+                case "topic":
                     ParseLeft(hostAddress, out Scheme, out Host, out Scope);
 
                     Name = address.AbsolutePath;
@@ -49,47 +59,34 @@ namespace MassTransit.AmazonSqsTransport
 
             AmazonSqsEntityNameValidator.Validator.ThrowIfInvalidEntityName(Name);
 
-            string query = address.Query?.TrimStart('?');
-            if (!string.IsNullOrWhiteSpace(query))
+            foreach (var (key, value) in address.SplitQueryString())
             {
-                var parameters = query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
-
-                foreach ((string key, string value) in parameters)
+                switch (key)
                 {
-                    switch (key)
-                    {
-                        case AutoDeleteKey when bool.TryParse(value, out var result):
-                            AutoDelete = result;
-                            break;
-                    }
+                    case TemporaryKey when bool.TryParse(value, out var result):
+                        AutoDelete = result;
+                        Durable = !result;
+                        break;
+
+                    case DurableKey when bool.TryParse(value, out var result):
+                        Durable = result;
+                        break;
+
+                    case AutoDeleteKey when bool.TryParse(value, out var result):
+                        AutoDelete = result;
+                        break;
                 }
             }
         }
 
-        public AmazonSqsEndpointAddress(Uri hostAddress, string name, bool autoDelete = false)
+        public AmazonSqsEndpointAddress(Uri hostAddress, string name, bool durable = true, bool autoDelete = false)
         {
             ParseLeft(hostAddress, out Scheme, out Host, out Scope);
 
             Name = name;
 
+            Durable = durable;
             AutoDelete = autoDelete;
-        }
-
-        public string Path => Scope == "/" ? Name : $"{Scope}/{Name}";
-
-        static void ParsePath(string path, out string scope, out string name)
-        {
-            int split = path.LastIndexOf('/');
-            if (split > 0)
-            {
-                scope = path.Substring(1, split - 1);
-                name = path.Substring(split + 1);
-            }
-            else
-            {
-                scope = "/";
-                name = path.Substring(1);
-            }
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out string scope)
@@ -120,6 +117,8 @@ namespace MassTransit.AmazonSqsTransport
 
         IEnumerable<string> GetQueryStringOptions()
         {
+            if (!Durable)
+                yield return $"{DurableKey}=false";
             if (AutoDelete)
                 yield return $"{AutoDeleteKey}=true";
         }

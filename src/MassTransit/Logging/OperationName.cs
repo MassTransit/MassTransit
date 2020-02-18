@@ -4,30 +4,32 @@ namespace MassTransit.Logging
     {
         public static class Transport
         {
-            public const string Send = "Transport.Send";
-            public const string Receive = "Transport.Receive";
+            public const string Send = "MassTransit.Transport.Send";
+            public const string Receive = "MassTransit.Transport.Receive";
         }
 
 
         public static class Consumer
         {
-            public const string Consume = "Consumer.Consume";
-            public const string Handle = "Consumer.Handle";
+            public const string Consume = "MassTransit.Consumer.Consume";
+            public const string Handle = "MassTransit.Consumer.Handle";
         }
 
 
         public static class Saga
         {
-            public const string Send = "Saga.Send";
-            public const string SendQuery = "Saga.SendQuery";
-            public const string Add = "Saga.Add";
-            public const string RaiseEvent = "Saga.RaiseEvent";
+            public const string Send = "MassTransit.Saga.Send";
+            public const string SendQuery = "MassTransit.Saga.SendQuery";
+            public const string Initiate = "MassTransit.Saga.Initiate";
+            public const string Orchestrate = "MassTransit.Saga.Orchestrate";
+            public const string Observe = "MassTransit.Saga.Observe";
+            public const string RaiseEvent = "MassTransit.Saga.RaiseEvent";
         }
 
         public static class Courier
         {
-            public const string Execute = "Activity.Execute";
-            public const string Compensate = "Activity.Compensate";
+            public const string Execute = "MassTransit.Activity.Execute";
+            public const string Compensate = "MassTransit.Activity.Compensate";
         }
     }
 }

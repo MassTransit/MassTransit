@@ -5,6 +5,7 @@ namespace MassTransit.Conductor.Client
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Clients;
     using Context;
     using Contracts;
     using Distribution;
@@ -77,8 +78,8 @@ namespace MassTransit.Conductor.Client
         public Guid ClientId { get; }
         public Type MessageType => typeof(TMessage);
 
-        public async Task<ISendEndpoint> GetServiceSendEndpoint(ISendEndpointProvider sendEndpointProvider, TMessage message,
-            CancellationToken cancellationToken = default)
+        public async Task<IRequestSendEndpoint<TMessage>> GetServiceSendEndpoint(ClientFactoryContext clientFactoryContext, TMessage message,
+            ConsumeContext consumeContext = default, CancellationToken cancellationToken = default)
         {
             // TODO use the message to generate the hash key
 
@@ -94,7 +95,7 @@ namespace MassTransit.Conductor.Client
 
             var endpointAddress = endpointInfo?.EndpointAddress ?? await _serviceAddress.Task.ConfigureAwait(false);
 
-            return await sendEndpointProvider.GetSendEndpoint(endpointAddress).ConfigureAwait(false);
+            return clientFactoryContext.GetRequestEndpoint<TMessage>(endpointAddress, consumeContext);
         }
 
         async Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)

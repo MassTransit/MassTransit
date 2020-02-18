@@ -58,7 +58,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
 
         async Task IEventDataReceiver.Handle(Microsoft.Azure.EventHubs.EventData message, Action<ReceiveContext> contextCallback)
         {
-            var context = new EventDataReceiveContext(_inputAddress, message, _receiveEndpointContext);
+            var context = new EventDataReceiveContext(message, _receiveEndpointContext);
             contextCallback?.Invoke(context);
 
             try

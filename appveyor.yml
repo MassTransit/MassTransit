@@ -1,10 +1,9 @@
-version: 6.0.0.{build}
+version: 6.1.0.{build}
 
 branches:
   only:
     - develop
     - master
-    - v6
 
 skip_tags: true
 
@@ -15,7 +14,7 @@ skip_commits:
     - docs.yml
 
 image:
-  - Visual Studio 2017
+  - Visual Studio 2019
   - Ubuntu1804
 
 services:
@@ -68,18 +67,14 @@ install:
 deploy:
 - provider: NuGet
   name: Prerelease
+  symbol_server: https://www.nuget.org
   api_key:
     secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
   on:
     branch: develop
 - provider: NuGet
-  name: v6
-  api_key:
-    secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
-  on:
-    branch: v6
-- provider: NuGet
   name: Release
+  symbol_server: https://www.nuget.org
   api_key:
     secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
   on:

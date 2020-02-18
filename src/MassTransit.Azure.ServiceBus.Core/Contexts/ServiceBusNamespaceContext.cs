@@ -9,6 +9,7 @@
     using Internals.Extensions;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
+    using Transports;
     using Util;
 
 
@@ -46,7 +47,7 @@
             {
                 try
                 {
-                    LogContext.Debug?.Log("Creating queue {Queue}", queueDescription.Path);
+                    TransportLogMessages.CreateQueue(queueDescription.Path);
 
                     queueDescription = await _namespaceManager.CreateQueueAsync(queueDescription).ConfigureAwait(false);
                 }
@@ -83,7 +84,7 @@
             {
                 try
                 {
-                    LogContext.Debug?.Log("Creating topic {Topic}", topicDescription.Path);
+                    TransportLogMessages.CreateTopic(topicDescription.Path);
 
                     topicDescription = await _namespaceManager.CreateTopicAsync(topicDescription).ConfigureAwait(false);
                 }

@@ -1,0 +1,9 @@
+﻿# this compose file will start local services the same as those running on appveyor CI for testing.
+
+version: '2.3'
+services:
+  redis:
+    image: "redis:5.0.7"
+    container_name: redis
+    ports:
+      - '6379:6379'

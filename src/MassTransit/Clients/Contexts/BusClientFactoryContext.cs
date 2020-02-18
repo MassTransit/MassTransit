@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Clients.Contexts
 {
     using System;
-    using System.Threading.Tasks;
     using GreenPipes;
 
 
@@ -29,19 +28,21 @@
             return _bus.ConnectRequestPipe(requestId, pipe);
         }
 
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
-        {
-            return _bus.ConnectSendObserver(observer);
-        }
-
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
-        {
-            return _bus.GetSendEndpoint(address);
-        }
-
         public Uri ResponseAddress => _bus.Address;
 
-        public IPublishEndpoint PublishEndpoint => _bus;
+        public IRequestSendEndpoint<T> GetRequestEndpoint<T>(ConsumeContext consumeContext = default)
+            where T : class
+        {
+            return new PublishRequestSendEndpoint<T>(consumeContext != null
+                ? consumeContext.ReceiveContext.PublishEndpointProvider
+                : _bus, consumeContext);
+        }
+
+        public IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext consumeContext = default)
+            where T : class
+        {
+            return new SendRequestSendEndpoint<T>((ISendEndpointProvider)consumeContext ?? _bus, destinationAddress, consumeContext);
+        }
 
         public RequestTimeout DefaultTimeout { get; }
     }

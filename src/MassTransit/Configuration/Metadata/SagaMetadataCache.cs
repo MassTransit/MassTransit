@@ -9,7 +9,6 @@ namespace MassTransit.Metadata
     using Context;
     using Saga;
     using Saga.Factories;
-    using Util;
 
 
     public class SagaMetadataCache<TSaga> :

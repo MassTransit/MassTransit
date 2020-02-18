@@ -2,7 +2,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 {
     using System;
     using System.Threading.Tasks;
-    using Context;
     using Contracts;
     using GreenPipes;
     using Management;
@@ -34,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
-            LogContext.Debug?.Log("Prefetch Count: {PrefetchCount}", _prefetchCount);
+            RabbitMqLogMessages.PrefetchCount(_prefetchCount);
 
             await context.BasicQos(0, _prefetchCount, false).ConfigureAwait(false);
 
@@ -72,7 +71,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 var prefetchCount = context.Message.PrefetchCount;
 
-                LogContext.Debug?.Log("Set Prefetch Count: (count: {PrefetchCount})", prefetchCount);
+                RabbitMqLogMessages.PrefetchCount(prefetchCount);
 
                 await _modelContext.BasicQos(0, prefetchCount, true).ConfigureAwait(false);
 

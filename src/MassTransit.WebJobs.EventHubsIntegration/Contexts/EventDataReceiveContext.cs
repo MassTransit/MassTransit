@@ -16,8 +16,8 @@
         readonly EventData _eventData;
         byte[] _body;
 
-        public EventDataReceiveContext(Uri inputAddress, EventData eventData, ReceiveEndpointContext receiveEndpointContext)
-            : base(inputAddress, false, receiveEndpointContext)
+        public EventDataReceiveContext(EventData eventData, ReceiveEndpointContext receiveEndpointContext)
+            : base(false, receiveEndpointContext)
         {
             _eventData = eventData;
         }

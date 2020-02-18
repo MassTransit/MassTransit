@@ -11,7 +11,6 @@ public class Tests
         {
             { "MassTransit.Tests", null },
             { "MassTransit.Containers.Tests", null },
-            { "MassTransit.AutomatonymousIntegration.Tests", "Category!=DocumentDb&Category!=EntityFramework" }, // DocumentDb is only installed on appveyor windows vm, or develoer if they put DocDb emulator
             { "MassTransit.QuartzIntegration.Tests", null },
             { "MassTransit.HttpTransport.Tests", null },
             { "MassTransit.SignalR.Tests", null },
@@ -22,8 +21,8 @@ public class Tests
         if(parameters.IsRunningOnAppVeyor)
         {
             testsToRun["MassTransit.MongoDbIntegration.Tests"] = null;
-            testsToRun["MassTransit.EntityFrameworkCoreIntegration.Tests"] = null;
-            testsToRun["MassTransit.EntityFrameworkIntegration.Tests"] = null;
+            testsToRun["MassTransit.EntityFrameworkCoreIntegration.Tests"] = "Category!=Flakey&Category!=Integration";
+            testsToRun["MassTransit.EntityFrameworkIntegration.Tests"] = "Category!=Flakey&Category!=Integration";
         }
 
         // Add/Update these tests to run in appveyor+windows
@@ -31,7 +30,6 @@ public class Tests
         {
             testsToRun["MassTransit.MartenIntegration.Tests"] = null;
             testsToRun["MassTransit.DocumentDbIntegration.Tests"] = null;
-            testsToRun["MassTransit.AutomatonymousIntegration.Tests"] = null; // We can include the DocumentDb and EF tests
         }
 
         // Add/Update these tests to run in appveyor+linux
@@ -39,7 +37,6 @@ public class Tests
         {
             testsToRun["MassTransit.RedisIntegration.Tests"] = null;
             testsToRun["MassTransit.RabbitMqTransport.Tests"] = null;
-            testsToRun["MassTransit.AutomatonymousIntegration.Tests"] = "Category!=DocumentDb";
         }
 
         return new Tests{ Criteria = testsToRun };

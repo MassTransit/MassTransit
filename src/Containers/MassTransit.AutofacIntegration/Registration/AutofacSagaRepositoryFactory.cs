@@ -15,16 +15,19 @@ namespace MassTransit.AutofacIntegration.Registration
         readonly string _name;
         readonly ILifetimeScopeProvider _scopeProvider;
 
-        public AutofacSagaRepositoryFactory(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configureScope)
+        public AutofacSagaRepositoryFactory(ILifetimeScopeProvider scopeProvider, string name = default, Action<ContainerBuilder, ConsumeContext>
+            configureScope = default)
         {
             _scopeProvider = scopeProvider;
-            _name = name;
+            _name = name ?? "message";
             _configureScope = configureScope;
         }
 
         ISagaRepository<T> ISagaRepositoryFactory.CreateSagaRepository<T>(Action<ConsumeContext> scopeAction)
         {
             var repository = _scopeProvider.LifetimeScope.Resolve<ISagaRepository<T>>();
+            if (repository is SagaRepository<T>)
+                return repository;
 
             var scopeProvider = new AutofacSagaScopeProvider<T>(_scopeProvider, _name, _configureScope);
             if (scopeAction != null)

@@ -1,5 +1,6 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
 {
+    using System;
     using System.Collections.Generic;
 
 
@@ -23,6 +24,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
 
             if (AutoDelete)
                 yield return "autodelete=true";
+        }
+
+        public virtual AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
+        {
+            return new AmazonSqsEndpointAddress(hostAddress, EntityName, Durable, AutoDelete);
         }
     }
 }

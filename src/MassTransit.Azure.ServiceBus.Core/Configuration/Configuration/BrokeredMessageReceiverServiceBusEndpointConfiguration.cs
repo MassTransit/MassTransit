@@ -4,7 +4,6 @@
     using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Pipeline;
-    using MassTransit.Pipeline.Filters;
 
 
     public class BrokeredMessageReceiverServiceBusEndpointConfiguration :
@@ -15,6 +14,10 @@
         {
             HostAddress = busConfiguration.HostConfiguration.HostAddress;
             InputAddress = new Uri(busConfiguration.HostConfiguration.HostAddress, "no-queue-specified");
+
+            var deadLetterPipe = Pipe.Execute<ReceiveContext>(context => throw new TransportException(context.InputAddress, "The message was not consumed"));
+
+            Receive.DeadLetterConfigurator.UseDeadLetter(deadLetterPipe);
         }
 
         public override Uri HostAddress { get; }
@@ -23,15 +26,7 @@
 
         public override IReceivePipe CreateReceivePipe()
         {
-            return Receive.CreatePipe(ConsumePipe, Serialization.Deserializer, configurator =>
-            {
-                Receive.ErrorConfigurator.UseFilter(new GenerateFaultFilter());
-
-                configurator.UseRescue(Receive.ErrorConfigurator.Build(), x =>
-                {
-                    x.Ignore<OperationCanceledException>();
-                });
-            });
+            return Receive.CreatePipe(ConsumePipe, Serialization.Deserializer);
         }
     }
 }

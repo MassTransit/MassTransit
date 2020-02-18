@@ -11,7 +11,6 @@
     using Metadata;
     using Newtonsoft.Json;
     using Serialization;
-    using Util;
 
 
     /// <summary>
@@ -38,7 +37,7 @@
             if (Guid.TryParse(sessionContext.SessionId, out var sessionId))
                 context = new CorrelationIdConsumeContextProxy<T>(context, sessionId);
 
-            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartActivity(new {context.CorrelationId});
+            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartSagaActivity<TSaga, T>(context);
             try
             {
                 var saga = await ReadSagaState(sessionContext).ConfigureAwait(false);
@@ -72,7 +71,7 @@
             }
         }
 
-        Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
+        Task ISagaRepository<TSaga>.SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next)
         {
             throw new NotImplementedException(

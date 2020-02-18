@@ -1,15 +1,3 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing
 {
     using System;
@@ -28,22 +16,19 @@ namespace MassTransit.Testing
         readonly ReceivedMessageList _consumed;
         readonly SagaList<TSaga> _created;
         readonly IQuerySagaRepository<TSaga> _querySagaRepository;
-        readonly ISagaRepository<TSaga> _repository;
         readonly SagaList<TSaga> _sagas;
-        readonly TimeSpan _testTimeout;
 
         public SagaTestHarness(BusTestHarness testHarness, ISagaRepository<TSaga> repository, string queueName)
         {
-            _repository = repository;
-            _querySagaRepository = _repository as IQuerySagaRepository<TSaga>;
+            _querySagaRepository = repository as IQuerySagaRepository<TSaga>;
 
-            _testTimeout = testHarness.TestTimeout;
+            TestTimeout = testHarness.TestTimeout;
 
             _consumed = new ReceivedMessageList(testHarness.TestTimeout);
             _created = new SagaList<TSaga>(testHarness.TestTimeout);
             _sagas = new SagaList<TSaga>(testHarness.TestTimeout);
 
-            TestRepository = new TestSagaRepositoryDecorator<TSaga>(_repository, _consumed, _created, _sagas);
+            TestRepository = new TestSagaRepositoryDecorator<TSaga>(repository, _consumed, _created, _sagas);
 
             if (string.IsNullOrWhiteSpace(queueName))
                 testHarness.OnConfigureReceiveEndpoint += ConfigureReceiveEndpoint;
@@ -51,11 +36,14 @@ namespace MassTransit.Testing
                 testHarness.OnConfigureBus += configurator => ConfigureNamedReceiveEndpoint(configurator, queueName);
         }
 
-        public TestSagaRepositoryDecorator<TSaga> TestRepository { get; }
+        protected TestSagaRepositoryDecorator<TSaga> TestRepository { get; }
+        protected TimeSpan TestTimeout { get; }
 
         public IReceivedMessageList Consumed => _consumed;
         public ISagaList<TSaga> Sagas => _sagas;
         public ISagaList<TSaga> Created => _created;
+
+        protected IQuerySagaRepository<TSaga> QuerySagaRepository => _querySagaRepository;
 
         protected virtual void ConfigureReceiveEndpoint(IReceiveEndpointConfigurator configurator)
         {
@@ -73,26 +61,28 @@ namespace MassTransit.Testing
         /// <summary>
         /// Waits until a saga exists with the specified correlationId
         /// </summary>
-        /// <param name="sagaId"></param>
+        /// <param name="correlationId"></param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public async Task<Guid?> Exists(Guid sagaId, TimeSpan? timeout = default(TimeSpan?))
+        public async Task<Guid?> Exists(Guid correlationId, TimeSpan? timeout = default)
         {
             if (_querySagaRepository == null)
                 throw new InvalidOperationException("The repository does not support Query operations");
 
-            var giveUpAt = DateTime.Now + (timeout ?? _testTimeout);
+            var giveUpAt = DateTime.Now + (timeout ?? TestTimeout);
+
+            var query = new SagaQuery<TSaga>(x => x.CorrelationId == correlationId);
 
             while (DateTime.Now < giveUpAt)
             {
-                var saga = (await _querySagaRepository.Where(x => x.CorrelationId == sagaId).ConfigureAwait(false)).FirstOrDefault();
+                var saga = (await _querySagaRepository.Find(query).ConfigureAwait(false)).FirstOrDefault();
                 if (saga != Guid.Empty)
                     return saga;
 
                 await Task.Delay(10).ConfigureAwait(false);
             }
 
-            return default(Guid?);
+            return default;
         }
 
         /// <summary>
@@ -101,18 +91,18 @@ namespace MassTransit.Testing
         /// <param name="filter"></param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public async Task<IList<Guid>> Match(Expression<Func<TSaga, bool>> filter, TimeSpan? timeout = default(TimeSpan?))
+        public async Task<IList<Guid>> Match(Expression<Func<TSaga, bool>> filter, TimeSpan? timeout = default)
         {
             if (_querySagaRepository == null)
                 throw new InvalidOperationException("The repository does not support Query operations");
 
-            var giveUpAt = DateTime.Now + (timeout ?? _testTimeout);
+            var giveUpAt = DateTime.Now + (timeout ?? TestTimeout);
 
             var query = new SagaQuery<TSaga>(filter);
 
             while (DateTime.Now < giveUpAt)
             {
-                List<Guid> sagas = (await _querySagaRepository.Where(query.FilterExpression).ConfigureAwait(false)).ToList();
+                List<Guid> sagas = (await _querySagaRepository.Find(query).ConfigureAwait(false)).ToList();
                 if (sagas.Count > 0)
                     return sagas;
 
@@ -125,22 +115,24 @@ namespace MassTransit.Testing
         /// <summary>
         /// Waits until the saga matching the specified correlationId does NOT exist
         /// </summary>
-        /// <param name="sagaId"></param>
+        /// <param name="correlationId"></param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public async Task<Guid?> NotExists(Guid sagaId, TimeSpan? timeout = default(TimeSpan?))
+        public async Task<Guid?> NotExists(Guid correlationId, TimeSpan? timeout = default)
         {
             if (_querySagaRepository == null)
                 throw new InvalidOperationException("The repository does not support Query operations");
 
-            var giveUpAt = DateTime.Now + (timeout ?? _testTimeout);
+            var giveUpAt = DateTime.Now + (timeout ?? TestTimeout);
 
-            Guid? saga = default(Guid?);
+            var query = new SagaQuery<TSaga>(x => x.CorrelationId == correlationId);
+
+            Guid? saga = default;
             while (DateTime.Now < giveUpAt)
             {
-                saga = (await _querySagaRepository.Where(x => x.CorrelationId == sagaId).ConfigureAwait(false)).FirstOrDefault();
+                saga = (await _querySagaRepository.Find(query).ConfigureAwait(false)).FirstOrDefault();
                 if (saga == Guid.Empty)
-                    return default(Guid?);
+                    return default;
 
                 await Task.Delay(10).ConfigureAwait(false);
             }

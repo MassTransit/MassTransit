@@ -4,14 +4,15 @@ namespace MassTransit.MongoDbIntegration.Saga.CollectionNameFormatters
     using MassTransit.Saga;
 
 
-    public class DefaultCollectionNameFormatter : ICollectionNameFormatter
+    public class DefaultCollectionNameFormatter :
+        ICollectionNameFormatter
     {
         readonly string _collectionName;
         const string DefaultCollectionName = "sagas";
 
         public DefaultCollectionNameFormatter(string collectionName = null)
         {
-            collectionName = collectionName ?? DefaultCollectionName;
+            collectionName ??= DefaultCollectionName;
 
             if (string.IsNullOrWhiteSpace(collectionName))
                 throw new ArgumentNullException(nameof(collectionName));
@@ -23,7 +24,9 @@ namespace MassTransit.MongoDbIntegration.Saga.CollectionNameFormatters
         }
 
         public string Saga<TSaga>()
-            where TSaga : ISaga =>
-            _collectionName;
+            where TSaga : ISaga
+        {
+            return _collectionName;
+        }
     }
 }

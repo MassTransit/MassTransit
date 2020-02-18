@@ -3,7 +3,6 @@
     using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using Transport;
     using Transports;
 
 
@@ -28,6 +27,12 @@
         /// </summary>
         /// <param name="credentials"></param>
         void Credentials(AWSCredentials credentials);
+
+        /// <summary>
+        /// Set scope for AmazonSQS. Will be used as a prefix for queue/topic name
+        /// </summary>
+        /// <param name="scope"></param>
+        void Scope(string scope);
 
         /// <summary>
         /// Sets the default config for the connection to AmazonSQS

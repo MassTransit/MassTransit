@@ -8,6 +8,7 @@
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
+    using Integration;
     using Policies;
     using RabbitMQ.Client.Exceptions;
     using Topology;
@@ -18,19 +19,19 @@
         Supervisor,
         IReceiveTransport
     {
-        readonly IPipe<ConnectionContext> _connectionPipe;
+        readonly IPipe<ModelContext> _modelPipe;
         readonly IRabbitMqHost _host;
         readonly Uri _inputAddress;
         readonly ReceiveSettings _settings;
         readonly RabbitMqReceiveEndpointContext _context;
 
-        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IPipe<ConnectionContext> connectionPipe,
+        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IPipe<ModelContext> modelPipe,
             RabbitMqReceiveEndpointContext context)
         {
             _host = host;
             _settings = settings;
             _context = context;
-            _connectionPipe = connectionPipe;
+            _modelPipe = modelPipe;
 
             _inputAddress = context.InputAddress;
         }
@@ -80,47 +81,35 @@
         {
             while (!IsStopping)
             {
-                try
+                await _host.ConnectionRetryPolicy.Retry(async () =>
                 {
-                    await _host.ConnectionRetryPolicy.Retry(async () =>
+                    try
                     {
+                        await _context.OnTransportStartup(_context.ModelContextSupervisor, Stopping).ConfigureAwait(false);
+
                         if (IsStopping)
                             return;
 
-                        try
-                        {
-                            await _context.OnTransportStartup(_host.ConnectionContextSupervisor, Stopping).ConfigureAwait(false);
-                            if (IsStopping)
-                                return;
-
-                            await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
-                        }
-                        catch (RabbitMqConnectionException ex)
-                        {
-                            await NotifyFaulted(ex).ConfigureAwait(false);
-                            throw;
-                        }
-                        catch (BrokerUnreachableException ex)
-                        {
-                            throw await ConvertToRabbitMqConnectionException(ex, "RabbitMQ Unreachable").ConfigureAwait(false);
-                        }
-                        catch (OperationInterruptedException ex)
-                        {
-                            throw await ConvertToRabbitMqConnectionException(ex, "Operation interrupted").ConfigureAwait(false);
-                        }
-                        catch (OperationCanceledException)
-                        {
-                        }
-                        catch (Exception ex)
-                        {
-                            throw await ConvertToRabbitMqConnectionException(ex, "ReceiveTransport Faulted, Restarting").ConfigureAwait(false);
-                        }
-                    }, Stopping).ConfigureAwait(false);
-                }
-                catch
-                {
-                    // nothing to see here
-                }
+                        await _context.ModelContextSupervisor.Send(_modelPipe, Stopped).ConfigureAwait(false);
+                    }
+                    catch (RabbitMqConnectionException ex)
+                    {
+                        await NotifyFaulted(ex).ConfigureAwait(false);
+                        throw;
+                    }
+                    catch (OperationInterruptedException ex)
+                    {
+                        throw await ConvertToRabbitMqConnectionException(ex, "Operation interrupted: ").ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        throw await ConvertToRabbitMqConnectionException(ex, "ReceiveTransport Faulted, Restarting: ").ConfigureAwait(false);
+                    }
+                }, Stopping).ConfigureAwait(false);
             }
         }
 

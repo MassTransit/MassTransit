@@ -10,7 +10,45 @@
     using Context;
     using GreenPipes;
     using GreenPipes.Util;
+    using Logging;
     using Transports;
+    using Transports.InMemory;
+    using Transports.InMemory.Builders;
+    using Transports.InMemory.Configuration;
+    using Transports.InMemory.Topology.Topologies;
+
+
+    public static class TestConsumeContext
+    {
+        static ReceiveEndpointContext Build()
+        {
+            var topologyConfiguration = new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology);
+            IInMemoryBusConfiguration busConfiguration = new InMemoryBusConfiguration(topologyConfiguration, null);
+
+            var receiveEndpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("input-queue");
+
+            var hostTopology = new InMemoryHostTopology(topologyConfiguration);
+            var host = new InMemoryHost(busConfiguration.HostConfiguration, hostTopology);
+
+            var builder = new InMemoryReceiveEndpointBuilder(host, receiveEndpointConfiguration);
+
+            if (LogContext.Current == null)
+            {
+                var loggerFactory = new TestOutputLoggerFactory(true);
+
+                LogContext.ConfigureCurrentLogContext(loggerFactory);
+            }
+
+            return builder.CreateReceiveEndpointContext();
+        }
+
+        static ReceiveEndpointContext _receiveEndpointContext;
+
+        public static ReceiveEndpointContext GetContext()
+        {
+            return _receiveEndpointContext ??= Build();
+        }
+    }
 
 
     public class TestConsumeContext<TMessage> :
@@ -18,7 +56,7 @@
         ConsumeContext<TMessage>
         where TMessage : class
     {
-        ReceiveContext _receiveContext;
+        readonly ReceiveContext _receiveContext;
 
         public TestConsumeContext(TMessage message)
         {
@@ -28,7 +66,7 @@
             SourceAddress = new Uri("loopback://localhost/input_queue");
             DestinationAddress = new Uri("loopback://localhost/input_queue");
 
-            _receiveContext = new TestReceiveContext(SourceAddress);
+            _receiveContext = new TestReceiveContext(TestConsumeContext.GetContext());
         }
 
         public Guid? MessageId { get; }
@@ -137,10 +175,10 @@
 
         public void AddConsumeTask(Task task)
         {
-
         }
 
-        public Task RespondAsync<T>(T message) where T : class
+        public Task RespondAsync<T>(T message)
+            where T : class
         {
             throw new NotImplementedException();
         }
@@ -150,27 +188,32 @@
             throw new NotImplementedException();
         }
 
-        public Task RespondAsync<T>(object values) where T : class
+        public Task RespondAsync<T>(object values)
+            where T : class
         {
             throw new NotImplementedException();
         }
 
-        public Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe) where T : class
+        public Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe)
+            where T : class
         {
             throw new NotImplementedException();
         }
 
-        public Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe) where T : class
+        public Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe)
+            where T : class
         {
             throw new NotImplementedException();
         }
 
-        public Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe) where T : class
+        public Task RespondAsync<T>(T message, IPipe<SendContext<T>> sendPipe)
+            where T : class
         {
             throw new NotImplementedException();
         }
 
-        public Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe) where T : class
+        public Task RespondAsync<T>(T message, IPipe<SendContext> sendPipe)
+            where T : class
         {
             throw new NotImplementedException();
         }
@@ -190,7 +233,8 @@
             throw new NotImplementedException();
         }
 
-        public void Respond<T>(T message) where T : class
+        public void Respond<T>(T message)
+            where T : class
         {
             throw new NotImplementedException();
         }
@@ -200,7 +244,8 @@
             throw new NotImplementedException();
         }
 
-        public async Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
+        public async Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+            where T : class
         {
         }
 
@@ -236,8 +281,8 @@
     public class TestReceiveContext :
         BaseReceiveContext
     {
-        public TestReceiveContext(Uri sourceAddress)
-            : base(sourceAddress, false, null)
+        public TestReceiveContext(ReceiveEndpointContext receiveEndpointContext)
+            : base(false, receiveEndpointContext)
         {
             HeaderProvider = new DictionaryHeaderProvider(new Dictionary<string, object>());
         }

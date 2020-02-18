@@ -63,7 +63,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                     TransportType = TransportType.Amqp
                 };
 
-                var factory = await MessagingFactory.CreateAsync(serviceUri, mfs);
+                var factory = MessagingFactory.Create(serviceUri, mfs);
 
                 var receiver = factory.CreateQueueClient("Control");
                 receiver.PrefetchCount = 100;

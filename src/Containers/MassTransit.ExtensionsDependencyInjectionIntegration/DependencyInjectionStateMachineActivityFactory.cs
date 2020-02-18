@@ -5,12 +5,13 @@
     using GreenPipes;
     using Metadata;
     using Microsoft.Extensions.DependencyInjection;
-    using Util;
 
 
     public class DependencyInjectionStateMachineActivityFactory :
         IStateMachineActivityFactory
     {
+        public static readonly IStateMachineActivityFactory Instance = new DependencyInjectionStateMachineActivityFactory();
+
         Activity<TInstance, TData> IStateMachineActivityFactory.GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
         {
             return GetActivity<TActivity>(context);

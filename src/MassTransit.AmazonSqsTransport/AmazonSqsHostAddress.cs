@@ -2,6 +2,7 @@ namespace MassTransit.AmazonSqsTransport
 {
     using System;
     using System.Diagnostics;
+    using Util;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
@@ -46,22 +47,7 @@ namespace MassTransit.AmazonSqsTransport
             scheme = address.Scheme;
             host = address.Host;
 
-            scope = ParseScope(address.AbsolutePath);
-        }
-
-        static string ParseScope(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-                return "/";
-
-            if (path.Length == 1 && path[0] == '/')
-                return path;
-
-            int split = path.LastIndexOf('/');
-            if (split > 0)
-                return Uri.UnescapeDataString(path.Substring(1, split - 1));
-
-            return Uri.UnescapeDataString(path.Substring(1));
+            scope = address.ParseHostPath();
         }
 
         public static implicit operator Uri(in AmazonSqsHostAddress address)

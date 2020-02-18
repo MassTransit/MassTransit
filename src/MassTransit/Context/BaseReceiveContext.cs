@@ -29,7 +29,7 @@ namespace MassTransit.Context
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly ReceiveEndpointContext _receiveEndpointContext;
 
-        protected BaseReceiveContext(Uri inputAddress, bool redelivered, ReceiveEndpointContext receiveEndpointContext, params object[] payloads)
+        protected BaseReceiveContext(bool redelivered, ReceiveEndpointContext receiveEndpointContext, params object[] payloads)
             : base(receiveEndpointContext, payloads)
         {
             _receiveTimer = Stopwatch.StartNew();
@@ -37,7 +37,7 @@ namespace MassTransit.Context
             _cancellationTokenSource = new CancellationTokenSource();
             _receiveEndpointContext = receiveEndpointContext;
 
-            InputAddress = inputAddress;
+            InputAddress = receiveEndpointContext.InputAddress;
             Redelivered = redelivered;
 
             _headers = new Lazy<Headers>(() => new JsonTransportHeaders(HeaderProvider));

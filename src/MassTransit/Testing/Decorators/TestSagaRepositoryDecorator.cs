@@ -50,13 +50,13 @@ namespace MassTransit.Testing.Decorators
             return _sagaRepository.Send(context, interceptPolicy, interceptPipe);
         }
 
-        Task ISagaRepository<TSaga>.SendQuery<T>(SagaQueryConsumeContext<TSaga, T> context, ISagaPolicy<TSaga, T> policy,
+        Task ISagaRepository<TSaga>.SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next)
         {
             var interceptPipe = new InterceptPipe<T>(_sagas, _received, next);
             var interceptPolicy = new InterceptPolicy<T>(_created, policy);
 
-            return _sagaRepository.SendQuery(context, interceptPolicy, interceptPipe);
+            return _sagaRepository.SendQuery(context, query, interceptPolicy, interceptPipe);
         }
 
 

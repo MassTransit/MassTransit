@@ -2,6 +2,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
 {
     using System;
     using System.Collections.Generic;
+    using Automatonymous;
     using Castle.MicroKernel;
     using Context;
     using GreenPipes;
@@ -16,11 +17,14 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
     {
         readonly IKernel _kernel;
         readonly IList<Action<ConsumeContext>> _scopeActions;
+        readonly IStateMachineActivityFactory _factory;
 
         public WindsorSagaScopeProvider(IKernel kernel)
         {
             _kernel = kernel;
             _scopeActions = new List<Action<ConsumeContext>>();
+
+            _factory = new WindsorStateMachineActivityFactory();
         }
 
         public ISagaScopeContext<T> GetScope<T>(ConsumeContext<T> context)
@@ -36,7 +40,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
             try
             {
-                var proxy = new ConsumeContextScope<T>(context, _kernel);
+                var proxy = new ConsumeContextScope<T>(context, _kernel, _factory);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);
@@ -45,34 +49,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             }
             catch
             {
-                scope.Dispose();
-                throw;
-            }
-        }
-
-        public ISagaQueryScopeContext<TSaga, T> GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
-            where T : class
-        {
-            if (context.TryGetPayload<IKernel>(out var kernel))
-            {
-                kernel.UpdateScope(context);
-
-                return new ExistingSagaQueryScopeContext<TSaga, T>(context);
-            }
-
-            var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
-            try
-            {
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, _kernel);
-
-                foreach (Action<ConsumeContext> scopeAction in _scopeActions)
-                    scopeAction(proxy);
-
-                return new CreatedSagaQueryScopeContext<IDisposable, TSaga, T>(scope, proxy);
-            }
-            catch
-            {
-                scope.Dispose();
+                scope?.Dispose();
                 throw;
             }
         }

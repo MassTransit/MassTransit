@@ -99,9 +99,9 @@ namespace MassTransit.AzureServiceBusTransport
         {
             LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            LogContext.Debug?.Log("Connect receive endpoint: {Queue}", queueName);
-
             var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, configure);
+
+            TransportLogMessages.ConnectReceiveEndpoint(configuration.InputAddress);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
 
@@ -132,9 +132,9 @@ namespace MassTransit.AzureServiceBusTransport
         {
             LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            LogContext.Debug?.Log("Connect subscription endpoint: {Topic}/{SubscriptionName}", settings.Path, settings.Name);
-
             var configuration = _hostConfiguration.CreateSubscriptionEndpointConfiguration(settings, configure);
+
+            TransportLogMessages.ConnectSubscriptionEndpoint(configuration.InputAddress, settings.Name);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
 
@@ -147,6 +147,8 @@ namespace MassTransit.AzureServiceBusTransport
         {
             Task<CachedSendTransport> Create(Uri transportAddress)
             {
+                TransportLogMessages.CreateSendTransport(address);
+
                 var settings = _hostTopology.SendTopology.GetSendSettings(address);
 
                 var endpointContextSupervisor = CreateQueueSendEndpointContextSupervisor(settings);
@@ -169,6 +171,8 @@ namespace MassTransit.AzureServiceBusTransport
 
             if (!publishTopology.TryGetPublishAddress(_hostConfiguration.HostAddress, out Uri publishAddress))
                 throw new ArgumentException($"The type did not return a valid publish address: {TypeMetadataCache<T>.ShortName}");
+
+            TransportLogMessages.CreatePublishTransport(publishAddress);
 
             var settings = publishTopology.GetSendSettings();
 
@@ -204,9 +208,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         IPipe<NamespaceContext> CreateConfigureTopologyPipe(SendSettings settings)
         {
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false, Stopping);
-
-            return configureTopologyFilter.ToPipe();
+            return new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false, Stopping).ToPipe();
         }
 
         protected override IAgent[] GetAgentHandles()

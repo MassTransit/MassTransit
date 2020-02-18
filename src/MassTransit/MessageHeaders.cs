@@ -77,6 +77,11 @@
         /// </summary>
         public const string EndpointId = "MT-Request-EndpointId";
 
+        /// <summary>
+        /// The messageId, which is typically only in a transport header
+        /// </summary>
+        public const string MessageId = "MessageId";
+
 
         public static class Host
         {

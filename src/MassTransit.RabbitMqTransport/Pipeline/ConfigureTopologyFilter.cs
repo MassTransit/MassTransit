@@ -2,7 +2,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 {
     using System.Linq;
     using System.Threading.Tasks;
-    using Context;
     using GreenPipes;
     using Topology.Builders;
     using Topology.Entities;
@@ -57,28 +56,28 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         Task Declare(ModelContext context, Exchange exchange)
         {
-            LogContext.Debug?.Log("Declare exchange {Exchange}", exchange);
+            RabbitMqLogMessages.DeclareExchange(exchange);
 
             return context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete, exchange.ExchangeArguments);
         }
 
         Task Declare(ModelContext context, Queue queue)
         {
-            LogContext.Debug?.Log("Declare queue {Queue}", queue);
+            RabbitMqLogMessages.DeclareQueue(queue);
 
             return context.QueueDeclare(queue.QueueName, queue.Durable, queue.Exclusive, queue.AutoDelete, queue.QueueArguments);
         }
 
         Task Bind(ModelContext context, ExchangeToExchangeBinding binding)
         {
-            LogContext.Debug?.Log("Bind exchange to exchange {Binding}", binding);
+            RabbitMqLogMessages.BindToExchange(binding);
 
             return context.ExchangeBind(binding.Destination.ExchangeName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments);
         }
 
         Task Bind(ModelContext context, ExchangeToQueueBinding binding)
         {
-            LogContext.Debug?.Log("Bind exchange to queue {Binding}", binding);
+            RabbitMqLogMessages.BindToQueue(binding);
 
             return context.QueueBind(binding.Destination.QueueName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments);
         }

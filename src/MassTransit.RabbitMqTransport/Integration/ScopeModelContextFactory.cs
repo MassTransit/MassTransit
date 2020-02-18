@@ -1,0 +1,69 @@
+namespace MassTransit.RabbitMqTransport.Integration
+{
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Contexts;
+    using GreenPipes;
+    using GreenPipes.Agents;
+    using Internals.Extensions;
+    using RabbitMQ.Client;
+
+
+    public class ScopeModelContextFactory :
+        IPipeContextFactory<ModelContext>
+    {
+        readonly IModelContextSupervisor _supervisor;
+
+        public ScopeModelContextFactory(IModelContextSupervisor supervisor)
+        {
+            _supervisor = supervisor;
+        }
+
+        IPipeContextAgent<ModelContext> IPipeContextFactory<ModelContext>.CreateContext(ISupervisor supervisor)
+        {
+            IAsyncPipeContextAgent<ModelContext> asyncContext = supervisor.AddAsyncContext<ModelContext>();
+
+            var context = CreateModel(asyncContext, supervisor.Stopped);
+
+            void HandleShutdown(object sender, ShutdownEventArgs args)
+            {
+                if (args.Initiator != ShutdownInitiator.Application)
+                    asyncContext.Stop(args.ReplyText);
+            }
+
+            context.ContinueWith(task =>
+            {
+                task.Result.Model.ModelShutdown += HandleShutdown;
+
+                asyncContext.Completed.ContinueWith(_ => task.Result.Model.ModelShutdown -= HandleShutdown);
+            }, TaskContinuationOptions.OnlyOnRanToCompletion);
+
+            return asyncContext;
+        }
+
+        IActivePipeContextAgent<ModelContext> IPipeContextFactory<ModelContext>.CreateActiveContext(ISupervisor supervisor,
+            PipeContextHandle<ModelContext> context, CancellationToken cancellationToken)
+        {
+            return supervisor.AddActiveContext(context, CreateSharedModel(context.Context, cancellationToken));
+        }
+
+        async Task<ModelContext> CreateSharedModel(Task<ModelContext> context, CancellationToken cancellationToken)
+        {
+            var modelContext = await context.ConfigureAwait(false);
+
+            var sharedModel = new SharedModelContext(modelContext, cancellationToken);
+
+            return sharedModel;
+        }
+
+        Task<ModelContext> CreateModel(IAsyncPipeContextAgent<ModelContext> asyncContext, CancellationToken cancellationToken)
+        {
+            async Task<ModelContext> CreateModelContext(ModelContext context, CancellationToken createCancellationToken)
+            {
+                return new SharedModelContext(context, cancellationToken);
+            }
+
+            return _supervisor.CreateAgent(asyncContext, CreateModelContext, cancellationToken);
+        }
+    }
+}

@@ -21,14 +21,12 @@ namespace MassTransit.UnityIntegration
             where T : class, ISaga
         {
             var repository = _container.Resolve<ISagaRepository<T>>();
+            if (repository is SagaRepository<T>)
+                return repository;
 
             var scopeProvider = new UnitySagaScopeProvider<T>(_container);
-            // if (scopeAction != null)
-            //     scopeProvider.AddScopeAction(scopeAction);
 
-            var sagaRepository = new ScopeSagaRepository<T>(repository, scopeProvider);
-
-            return sagaRepository;
+            return new ScopeSagaRepository<T>(repository, scopeProvider);
         }
     }
 }

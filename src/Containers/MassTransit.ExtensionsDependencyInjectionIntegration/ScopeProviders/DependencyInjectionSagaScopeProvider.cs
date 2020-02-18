@@ -60,38 +60,6 @@
             }
         }
 
-        ISagaQueryScopeContext<TSaga, T> ISagaScopeProvider<TSaga>.GetQueryScope<T>(SagaQueryConsumeContext<TSaga, T> context)
-        {
-            if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
-            {
-                existingServiceScope.UpdateScope(context);
-
-                return new ExistingSagaQueryScopeContext<TSaga, T>(context);
-            }
-
-            if (!context.TryGetPayload(out IServiceProvider serviceProvider))
-                serviceProvider = _serviceProvider;
-
-            var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-            try
-            {
-                serviceScope.UpdateScope(context);
-
-                var proxy = new SagaQueryConsumeContextScope<TSaga, T>(context, context.Query, serviceScope, serviceScope.ServiceProvider);
-
-                foreach (Action<ConsumeContext> scopeAction in _scopeActions)
-                    scopeAction(proxy);
-
-                return new CreatedSagaQueryScopeContext<IServiceScope, TSaga, T>(serviceScope, proxy);
-            }
-            catch
-            {
-                serviceScope.Dispose();
-
-                throw;
-            }
-        }
-
         public void AddScopeAction(Action<ConsumeContext> action)
         {
             _scopeActions.Add(action);

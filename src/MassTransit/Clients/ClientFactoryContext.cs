@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Clients
+﻿namespace MassTransit.Clients
 {
     using System;
     using Pipeline;
@@ -21,8 +9,7 @@ namespace MassTransit.Clients
     /// </summary>
     public interface ClientFactoryContext :
         IConsumePipeConnector,
-        IRequestPipeConnector,
-        ISendEndpointProvider
+        IRequestPipeConnector
     {
         /// <summary>
         /// Default timeout for requests
@@ -35,9 +22,19 @@ namespace MassTransit.Clients
         Uri ResponseAddress { get; }
 
         /// <summary>
-        /// Return the publish endpoint for the client factory
+        /// Returns an endpoint to which requests are sent
         /// </summary>
-        /// <value></value>
-        IPublishEndpoint PublishEndpoint { get; }
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        IRequestSendEndpoint<T> GetRequestEndpoint<T>(ConsumeContext consumeContext = default)
+            where T : class;
+
+        /// <summary>
+        /// Returns an endpoint to which requests are sent
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext consumeContext = default)
+            where T : class;
     }
 }

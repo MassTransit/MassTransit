@@ -50,6 +50,9 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         {
             var builder = new PublishEndpointBrokerTopologyBuilder();
 
+            if (ExchangeName.Equals(RabbitMqExchangeNames.ReplyTo, StringComparison.OrdinalIgnoreCase))
+                return builder.BuildBrokerTopology();
+
             builder.Exchange = builder.ExchangeDeclare(ExchangeName, ExchangeType, Durable, AutoDelete, ExchangeArguments);
 
             foreach (var specification in _exchangeBindings)

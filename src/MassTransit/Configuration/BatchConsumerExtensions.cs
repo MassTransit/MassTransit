@@ -5,7 +5,6 @@
     using Context;
     using Metadata;
     using Pipeline.ConsumerFactories;
-    using Util;
 
 
     public static class BatchConsumerExtensions

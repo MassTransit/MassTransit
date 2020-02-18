@@ -83,3 +83,91 @@ public class TransactionalConsumer :
 The connection (and by use of the connection, the command) are enlisted in the transaction. Once the method completes, and control is returned to the transaction middleware, if no exceptions are thrown the transaction is committed (which should complete the database operation). If an exception is thrown, the transaction is rolled back.
 
 While not shown here, a class that provides the connection, and enlists the connection upon creation, should be added to the container to ensure that the transaction is not enlisted twice (not sure that's a bad thing though, it should be ignored). Also, as long as only a single connection string is enlisted, the DTC should not get involved. Using the same transaction across multiple connection strings is a bad thing, as it will make the DTC come into play which slows the world down significantly.
+
+## Transaction Outbox
+
+While the [In Memory Outbox](/usage/exceptions#outbox) is the best choice for an outbox when within a consumer, sometimes you need to Publish/Send a message onto the bus from outside a consumer. Such scenarios might be from a console app, or maybe an HTTP Endpoint. Below is an example of registration and usage for the Transaction Outbox.
+
+```cs
+services.AddMassTransit(x =>
+{
+    x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+    {
+        var host = cfg.Host("localhost", "/");
+    }));
+
+    // This needs to be after AddBus, because it registers a decorator over IPublishEndpoint and ISendEndpointProvider, and DI Registration order matters (last registration wins)
+    x.AddTransactionOutbox();
+});
+```
+
+That is all that's needed. Now here's an example usage within an MVC Action.  It's also important to use `TransactionScopeAsyncFlowOption.Enabled` as shown below.
+
+```cs
+public class MyController : ControllerBase
+{
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly MyDbContext _dbContext;
+
+    public ValuesController(IPublishEndpoint publishEndpoint, MyDbContext dbContext)
+    {
+        _publishEndpoint = publishEndpoint;
+        _dbContext = dbContext;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Post([FromBody] string value)
+    {
+        using(var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+        {
+            _dbContext.Posts.Add(new Post{...});
+            await _dbContext.SaveChangesAsync();
+
+            await _publishEndpoint.Publish(new PostCreated{...});
+
+            transaction.Complete();
+        }
+
+        return Ok();
+    }
+}
+```
+
+Here's an example from within a Console App, with no Container:
+
+```cs
+public class Program
+{
+    public static async Task Main()
+    {
+        var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
+        {
+            sbc.Host("rabbitmq://localhost");
+        });
+
+        await bus.StartAsync(); // This is important!
+
+        var outbox = new TransactionOutbox(bus, bus, new NullLogger()); // Treat this as a singleton, thread safe.
+
+        while(/*some condition*/)
+        {
+            using(var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                // Do whatever business logic you need.
+
+                await outbox.Publish(new ReportQueued{...});
+                await outbox.Send(new CalculateReport{...});
+
+                // Maybe other business logic
+
+                transaction.Complete();
+            }
+        }
+
+        Console.WriteLine("Press any key to exit");
+        await Task.Run(() => Console.ReadKey());
+
+        await bus.StopAsync();
+    }
+}
+```

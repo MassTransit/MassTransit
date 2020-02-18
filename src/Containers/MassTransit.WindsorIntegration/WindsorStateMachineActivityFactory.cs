@@ -8,6 +8,8 @@
     public class WindsorStateMachineActivityFactory :
         IStateMachineActivityFactory
     {
+        public static readonly IStateMachineActivityFactory Instance = new WindsorStateMachineActivityFactory();
+
         public Activity<TInstance, TData> GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
             where TActivity : Activity<TInstance, TData>
         {

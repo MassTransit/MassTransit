@@ -52,7 +52,9 @@ namespace MassTransit.Conductor.Server
         {
             var receiveEndpoint = await _receiveEndpoint.Task.ConfigureAwait(false);
 
-            await receiveEndpoint.CreatePublishEndpoint(_instanceAddress.Value).Publish<Up<T>>(new
+            var sendEndpoint = await receiveEndpoint.GetPublishSendEndpoint<Up<T>>().ConfigureAwait(false);
+
+            await sendEndpoint.Send<Up<T>>(new
             {
                 __CorrelationId = NewId.NextGuid(),
                 endpoint.ServiceAddress,
@@ -72,7 +74,9 @@ namespace MassTransit.Conductor.Server
                 Endpoint = endpoint.EndpointInfo
             }).ConfigureAwait(false);
 
-            await receiveEndpoint.CreatePublishEndpoint(_instanceAddress.Value).Publish(initializeContext.Message).ConfigureAwait(false);
+            var publishSendEndpoint = await receiveEndpoint.GetPublishSendEndpoint<Down<T>>().ConfigureAwait(false);
+
+            await publishSendEndpoint.Send(initializeContext.Message).ConfigureAwait(false);
 
             await endpoint.NotifyClients(receiveEndpoint, initializeContext.Message).ConfigureAwait(false);
         }

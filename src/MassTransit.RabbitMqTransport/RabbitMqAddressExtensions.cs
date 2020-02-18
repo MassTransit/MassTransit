@@ -94,7 +94,7 @@ namespace MassTransit.RabbitMqTransport
                 factory.Ssl.CertPassphrase = settings.ClientCertificatePassphrase;
             }
 
-            factory.ClientProperties = factory.ClientProperties ?? new Dictionary<string, object>();
+            factory.ClientProperties ??= new Dictionary<string, object>();
 
             HostInfo hostInfo = HostMetadataCache.Host;
 

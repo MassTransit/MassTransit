@@ -2,12 +2,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 {
     using Common_Tests;
     using NUnit.Framework;
-    using Saga;
-    using Scenarios.StateMachines;
     using SimpleInjector;
     using SimpleInjector.Lifestyles;
+    using TestFramework.Sagas;
 
 
+    [TestFixture]
     public class SimpleInjector_SagaStateMachine :
         Common_SagaStateMachine
     {
@@ -18,22 +18,21 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container = new Container();
             _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
 
-            _container.AddMassTransit(cfg =>
-            {
-                cfg.AddSagaStateMachine<TestStateMachineSaga, TestInstance>();
-                cfg.AddBus(() => BusControl);
-            });
+            _container.AddMassTransit(ConfigureRegistration);
 
             _container.Register<PublishTestStartedActivity>();
-
-            _container.Register(typeof(ISagaRepository<>), typeof(InMemorySagaRepository<>),
-                Lifestyle.Singleton);
         }
 
         [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();
+        }
+
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
         }
 
         protected override void ConfigureSagaStateMachine(IInMemoryReceiveEndpointConfigurator configurator)

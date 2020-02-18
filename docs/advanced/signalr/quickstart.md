@@ -29,6 +29,8 @@ public void ConfigureServices(IServiceCollection services)
             cfg.AddSignalRHubEndpoints<ChatHub>(provider);
         }));
     });
+
+    services.AddMassTransitHostedService();
 }
 ```
 

@@ -21,7 +21,7 @@
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
-            yield return new KeyValuePair<string, object>(nameof(_message.MessageId), _message.MessageId);
+            yield return new KeyValuePair<string, object>(MessageHeaders.MessageId, _message.MessageId);
 
             foreach (var header in _headers.GetAll())
                 yield return header;

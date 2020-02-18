@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Contexts
+﻿namespace MassTransit.RabbitMqTransport.Contexts
 {
     using System;
     using System.Collections.Generic;
@@ -38,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             if (!string.IsNullOrWhiteSpace(_context.ConsumerTag))
                 yield return new KeyValuePair<string, object>(RabbitMqHeaders.ConsumerTag, _context.ConsumerTag);
             if (!string.IsNullOrWhiteSpace(_context.Properties.MessageId))
-                yield return new KeyValuePair<string, object>(nameof(_context.Properties.MessageId), _context.Properties.MessageId);
+                yield return new KeyValuePair<string, object>(nameof(MessageHeaders.MessageId), _context.Properties.MessageId);
             if (!string.IsNullOrWhiteSpace(_context.Properties.CorrelationId))
                 yield return new KeyValuePair<string, object>(nameof(_context.Properties.CorrelationId), _context.Properties.CorrelationId);
 

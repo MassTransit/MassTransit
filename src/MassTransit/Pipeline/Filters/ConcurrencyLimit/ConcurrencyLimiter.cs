@@ -14,9 +14,9 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
     public class ConcurrencyLimiter :
         IConcurrencyLimiter
     {
-        readonly int _concurrencyLimit;
         readonly string _id;
         readonly SemaphoreSlim _limit;
+        int _concurrencyLimit;
         DateTime _lastUpdated;
 
         public ConcurrencyLimiter(int concurrencyLimit, string id = null)
@@ -55,12 +55,26 @@ namespace MassTransit.Pipeline.Filters.ConcurrencyLimit
 
                         var previousLimit = _concurrencyLimit;
                         if (concurrencyLimit > previousLimit)
-                            _limit.Release(concurrencyLimit - previousLimit);
-                        else
+                        {
+                            var releaseCount = concurrencyLimit - previousLimit;
+
+                            _limit.Release(releaseCount);
+
+                            Interlocked.Add(ref _concurrencyLimit, releaseCount);
+
+                            _lastUpdated = context.Message.Timestamp;
+                        }
+                        else if (concurrencyLimit < previousLimit)
+                        {
                             for (; previousLimit > concurrencyLimit; previousLimit--)
+                            {
                                 await _limit.WaitAsync().ConfigureAwait(false);
 
-                        _lastUpdated = context.Message.Timestamp;
+                                Interlocked.Decrement(ref _concurrencyLimit);
+
+                                _lastUpdated = context.Message.Timestamp;
+                            }
+                        }
 
                         await context.RespondAsync<ConcurrencyLimitUpdated>(new
                         {

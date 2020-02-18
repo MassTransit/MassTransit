@@ -6,7 +6,6 @@ namespace MassTransit.Transports
     using Metadata;
     using Pipeline;
     using Pipeline.Observables;
-    using Pipeline.Pipes;
     using Topology;
 
 
@@ -16,8 +15,8 @@ namespace MassTransit.Transports
         readonly ISendEndpointCache<Type> _cache;
         readonly Uri _hostAddress;
         readonly PublishObservable _publishObservers;
-        readonly IPublishPipe _publishPipe;
         readonly IPublishTopology _publishTopology;
+        readonly ISendPipe _sendPipe;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
         readonly IPublishTransportProvider _transportProvider;
@@ -29,20 +28,15 @@ namespace MassTransit.Transports
             _hostAddress = hostAddress;
             _serializer = serializer;
             _sourceAddress = sourceAddress;
-            _publishPipe = publishPipe;
             _publishTopology = publishTopology;
-
             _publishObservers = publishObservers;
+
+            _sendPipe = new SendPipe(publishPipe);
 
             _cache = new SendEndpointCache<Type>();
         }
 
-        public IPublishEndpoint CreatePublishEndpoint(Uri sourceAddress, ConsumeContext consumeContext)
-        {
-            return new PublishEndpoint(sourceAddress, this, _publishObservers, _publishPipe, consumeContext);
-        }
-
-        public Task<ISendEndpoint> GetPublishSendEndpoint<T>(T message)
+        public Task<ISendEndpoint> GetPublishSendEndpoint<T>()
             where T : class
         {
             return _cache.GetSendEndpoint(typeof(T), type => CreateSendEndpoint<T>());
@@ -63,7 +57,34 @@ namespace MassTransit.Transports
 
             var sendTransport = await _transportProvider.GetPublishTransport<T>(publishAddress).ConfigureAwait(false);
 
-            return new SendEndpoint(sendTransport, _serializer, publishAddress, _sourceAddress, SendPipe.Empty);
+            var handle = sendTransport.ConnectSendObserver(_publishObservers);
+
+            return new SendEndpoint(sendTransport, _serializer, publishAddress, _sourceAddress, _sendPipe, handle);
+        }
+
+
+        class SendPipe :
+            ISendPipe
+        {
+            readonly IPublishPipe _publishPipe;
+
+            public SendPipe(IPublishPipe publishPipe)
+            {
+                _publishPipe = publishPipe;
+            }
+
+            public Task Send<T>(SendContext<T> context)
+                where T : class
+            {
+                var publishContext = context.GetPayload<PublishContext<T>>();
+
+                return _publishPipe.Send(publishContext);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+                _publishPipe.Probe(context);
+            }
         }
     }
 }

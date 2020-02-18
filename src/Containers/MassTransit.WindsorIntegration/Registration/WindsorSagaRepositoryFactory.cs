@@ -22,6 +22,8 @@ namespace MassTransit.WindsorIntegration.Registration
             where T : class, ISaga
         {
             var repository = _kernel.Resolve<ISagaRepository<T>>();
+            if (repository is SagaRepository<T>)
+                return repository;
 
             var scopeProvider = new WindsorSagaScopeProvider<T>(_kernel);
             if (scopeAction != null)

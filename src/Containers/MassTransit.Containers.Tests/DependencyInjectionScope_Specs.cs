@@ -29,7 +29,7 @@ namespace MassTransit.Containers.Tests
             collection.AddScoped<ISimpleConsumerDependency, SimpleConsumerDependency>();
             collection.AddScoped<AnotherMessageConsumer, AnotherMessageConsumerImpl>();
 
-            _provider = collection.BuildServiceProvider();
+            _provider = collection.BuildServiceProvider(true);
         }
 
         protected void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator)

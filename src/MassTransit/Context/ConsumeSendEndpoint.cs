@@ -20,12 +20,14 @@ namespace MassTransit.Context
         readonly ConsumeContext _context;
         readonly ISendEndpoint _endpoint;
         readonly ConsumeTaskTracker _tracker;
+        readonly Guid? _requestId;
 
-        public ConsumeSendEndpoint(ISendEndpoint endpoint, ConsumeContext context, ConsumeTaskTracker tracker)
+        public ConsumeSendEndpoint(ISendEndpoint endpoint, ConsumeContext context, ConsumeTaskTracker tracker, Guid? requestId)
         {
             _endpoint = endpoint;
             _context = context;
             _tracker = tracker;
+            _requestId = requestId;
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -39,7 +41,7 @@ namespace MassTransit.Context
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            var sendContextPipe = new ConsumeSendContextPipe<T>(_context);
+            var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, _requestId);
 
             return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
         }
@@ -53,7 +55,7 @@ namespace MassTransit.Context
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var sendContextPipe = new ConsumeSendContextPipe<T>(_context, pipe);
+            var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, pipe, _requestId);
 
             return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
         }
@@ -67,7 +69,7 @@ namespace MassTransit.Context
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var sendContextPipe = new ConsumeSendContextPipe<T>(_context, pipe);
+            var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, pipe, _requestId);
 
             return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
         }
