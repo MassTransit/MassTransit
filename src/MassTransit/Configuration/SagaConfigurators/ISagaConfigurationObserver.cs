@@ -1,5 +1,6 @@
 namespace MassTransit.SagaConfigurators
 {
+    using System.ComponentModel;
     using Automatonymous;
     using Saga;
 
@@ -11,6 +12,7 @@ namespace MassTransit.SagaConfigurators
         /// </summary>
         /// <typeparam name="TSaga"></typeparam>
         /// <param name="configurator"></param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
             where TSaga : class, ISaga;
 
@@ -21,6 +23,7 @@ namespace MassTransit.SagaConfigurators
         /// <param name="configurator"></param>
         /// <param name="stateMachine"></param>
         /// <typeparam name="TInstance"></typeparam>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
             where TInstance : class, ISaga, SagaStateMachineInstance;
 
@@ -30,6 +33,7 @@ namespace MassTransit.SagaConfigurators
         /// <typeparam name="TSaga"></typeparam>
         /// <typeparam name="TMessage"></typeparam>
         /// <param name="configurator"></param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
             where TSaga : class, ISaga
             where TMessage : class;

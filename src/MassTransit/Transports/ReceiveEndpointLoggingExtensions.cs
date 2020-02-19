@@ -29,7 +29,7 @@ namespace MassTransit.Transports
         static readonly LogMessage<Uri, Guid?> _logSkipped = LogContext.Define<Uri, Guid?>(LogLevel.Debug,
             "SKIP {InputAddress} {MessageId}");
 
-        static LogMessage<Uri, Guid?> _logRetry = LogContext.Define<Uri, Guid?>(LogLevel.Warning,
+        static readonly LogMessage<Uri, Guid?> _logRetry = LogContext.Define<Uri, Guid?>(LogLevel.Warning,
             "R-RETRY {InputAddress} {MessageId}");
 
         /// <summary>

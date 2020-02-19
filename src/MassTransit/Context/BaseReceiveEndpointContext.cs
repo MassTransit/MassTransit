@@ -102,7 +102,7 @@
             return _endpointObservers.Connect(observer);
         }
 
-        public Uri InputAddress { get; }
+        public Uri InputAddress { get; protected set; }
 
         public Task Dependencies { get; }
 
@@ -116,6 +116,11 @@
 
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
 
+        public IReceivePipeDispatcher CreateReceivePipeDispatcher()
+        {
+            return new ReceivePipeDispatcher(_receivePipe.Value, _receiveObservers, _logContext);
+        }
+
         protected virtual ISendEndpointProvider CreateSendEndpointProvider()
         {
             return new SendEndpointProvider(_sendTransportProvider.Value, SendObservers, Serializer, InputAddress, SendPipe);
@@ -128,6 +133,7 @@
         }
 
         protected abstract ISendTransportProvider CreateSendTransportProvider();
+
         protected abstract IPublishTransportProvider CreatePublishTransportProvider();
 
         protected ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;

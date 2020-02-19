@@ -10,25 +10,23 @@
         AmazonSqsEndpointConfiguration,
         IAmazonSqsBusConfiguration
     {
-        readonly IAmazonSqsEndpointConfiguration _busEndpointConfiguration;
         readonly BusObservable _busObservers;
-        readonly IAmazonSqsHostConfiguration _hostConfiguration;
 
         public AmazonSqsBusConfiguration(IAmazonSqsTopologyConfiguration topologyConfiguration)
             : base(topologyConfiguration)
         {
-            _hostConfiguration = new AmazonSqsHostConfiguration(this, topologyConfiguration);
-            _busEndpointConfiguration = CreateEndpointConfiguration();
+            HostConfiguration = new AmazonSqsHostConfiguration(this, topologyConfiguration);
+            BusEndpointConfiguration = CreateEndpointConfiguration();
 
             _busObservers = new BusObservable();
         }
 
-        IHostConfiguration IBusConfiguration.HostConfiguration => _hostConfiguration;
-        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
+        IHostConfiguration IBusConfiguration.HostConfiguration => HostConfiguration;
+        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => BusEndpointConfiguration;
         IBusObserver IBusConfiguration.BusObservers => _busObservers;
 
-        IAmazonSqsEndpointConfiguration IAmazonSqsBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
-        IAmazonSqsHostConfiguration IAmazonSqsBusConfiguration.HostConfiguration => _hostConfiguration;
+        public IAmazonSqsEndpointConfiguration BusEndpointConfiguration { get; }
+        public IAmazonSqsHostConfiguration HostConfiguration { get; }
 
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
@@ -37,8 +35,7 @@
 
         public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
-            return _hostConfiguration.ConnectEndpointConfigurationObserver(observer);
+            return HostConfiguration.ConnectEndpointConfigurationObserver(observer);
         }
-
     }
 }

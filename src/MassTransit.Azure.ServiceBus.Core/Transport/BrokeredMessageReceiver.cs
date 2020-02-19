@@ -5,25 +5,22 @@
     using Context;
     using Contexts;
     using GreenPipes;
-    using Logging;
     using MassTransit.Pipeline;
     using Microsoft.Azure.ServiceBus;
     using Transports;
 
 
-    /// <summary>
-    /// Receives a <see cref="Message"/>.
-    /// </summary>
     public class BrokeredMessageReceiver :
         IBrokeredMessageReceiver
     {
-        readonly Uri _inputAddress;
         readonly ReceiveEndpointContext _context;
+        readonly IReceivePipeDispatcher _dispatcher;
 
-        public BrokeredMessageReceiver(Uri inputAddress, ReceiveEndpointContext context)
+        public BrokeredMessageReceiver(ReceiveEndpointContext context)
         {
-            _inputAddress = inputAddress;
             _context = context;
+
+            _dispatcher = context.CreateReceivePipeDispatcher();
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -51,34 +48,16 @@
 
         async Task IBrokeredMessageReceiver.Handle(Message message, Action<ReceiveContext> contextCallback)
         {
-            LogContext.Current = _context.LogContext;
-
             var context = new ServiceBusReceiveContext(message, _context);
             contextCallback?.Invoke(context);
 
-            context.TryGetPayload<MessageLockContext>(out var lockContext);
+            var receiveLock = context.TryGetPayload<MessageLockContext>(out var lockContext)
+                ? new MessageLockContextReceiveLock(lockContext, context)
+                : default;
 
-            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
             try
             {
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
-
-                if (message.SystemProperties.LockedUntilUtc <= DateTime.UtcNow)
-                    throw new MessageLockExpiredException(_inputAddress, $"The message lock expired: {message.MessageId}");
-
-                if (message.ExpiresAtUtc < DateTime.UtcNow)
-                    throw new MessageTimeToLiveExpiredException(_inputAddress, $"The message TTL expired: {message.MessageId}");
-
-                await _context.ReceivePipe.Send(context).ConfigureAwait(false);
-
-                await context.ReceiveCompleted.ConfigureAwait(false);
-
-                if (lockContext != null)
-                    await lockContext.Complete().ConfigureAwait(false);
-
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
             }
             catch (SessionLockLostException ex)
             {
@@ -86,35 +65,20 @@
 
                 if (_context.ReceiveObservers.Count > 0)
                     await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
+
+                throw;
             }
             catch (MessageLockLostException ex)
             {
-                LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId}", message.MessageId);
+                LogContext.Warning?.Log(ex, "Message Lock Lost: {MessageId}", message.MessageId);
 
                 if (_context.ReceiveObservers.Count > 0)
                     await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
 
-                if (lockContext == null)
-                    throw;
-
-                try
-                {
-                    await lockContext.Abandon(ex).ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    LogContext.Warning?.Log(exception, "Abandon message faulted: {MessageId}", message.MessageId);
-                }
+                throw;
             }
             finally
             {
-                activity?.Stop();
-
                 context.Dispose();
             }
         }

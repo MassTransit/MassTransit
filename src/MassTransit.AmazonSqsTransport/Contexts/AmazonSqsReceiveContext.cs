@@ -1,24 +1,34 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Contexts
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
+    using System.Threading.Tasks;
     using Amazon.SQS.Model;
     using Context;
     using Exceptions;
     using Metadata;
+    using Topology;
+    using Transports;
+    using Util;
 
 
     public sealed class AmazonSqsReceiveContext :
         BaseReceiveContext,
-        AmazonSqsMessageContext
+        AmazonSqsMessageContext,
+        ReceiveLockContext
     {
+        readonly ClientContext _clientContext;
+        readonly ReceiveSettings _receiveSettings;
         byte[] _body;
 
         public AmazonSqsReceiveContext(Message transportMessage, bool redelivered, SqsReceiveEndpointContext context,
-            params object[] payloads)
+            ClientContext clientContext, ReceiveSettings receiveSettings, params object[] payloads)
             : base(redelivered, context, payloads)
         {
+            _clientContext = clientContext;
+            _receiveSettings = receiveSettings;
             TransportMessage = transportMessage;
         }
 
@@ -44,6 +54,21 @@
         public override Stream GetBodyStream()
         {
             return new MemoryStream(GetBody());
+        }
+
+        public Task Complete()
+        {
+            return _clientContext.DeleteMessage(_receiveSettings.EntityName, TransportMessage.ReceiptHandle);
+        }
+
+        public Task Faulted(Exception exception)
+        {
+            return TaskUtil.Completed;
+        }
+
+        public Task ValidateLockStatus()
+        {
+            return TaskUtil.Completed;
         }
     }
 }

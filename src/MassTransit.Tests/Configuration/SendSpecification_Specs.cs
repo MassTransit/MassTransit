@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
     using GreenPipes.Filters;
     using GreenPipes.Observers;
@@ -13,7 +14,6 @@
     using MassTransit.Topology;
     using MassTransit.Topology.Observers;
     using MassTransit.Topology.Topologies;
-    using MassTransit.Transports.InMemory.Contexts;
     using Metadata;
     using NUnit.Framework;
     using SendPipeSpecifications;
@@ -48,7 +48,7 @@
 
             IPipe<SendContext<MyMessage>> pipe = specification.GetMessageSpecification<MyMessage>().BuildMessagePipe();
 
-            var sendContext = new InMemorySendContext<MyMessage>(new MyMessage());
+            var sendContext = new MessageSendContext<MyMessage>(new MyMessage());
 
             await pipe.Send(sendContext).ConfigureAwait(false);
         }
@@ -71,7 +71,7 @@
 
             IPipe<SendContext<MyMessage>> pipe = endpointSpecification.GetMessageSpecification<MyMessage>().BuildMessagePipe();
 
-            var sendContext = new InMemorySendContext<MyMessage>(new MyMessage());
+            var sendContext = new MessageSendContext<MyMessage>(new MyMessage());
 
             await pipe.Send(sendContext).ConfigureAwait(false);
         }
@@ -100,7 +100,7 @@
 
             IPipe<SendContext<MyMessage>> pipe = endpointSpecification.GetMessageSpecification<MyMessage>().BuildMessagePipe();
 
-            var sendContext = new InMemorySendContext<MyMessage>(new MyMessage());
+            var sendContext = new MessageSendContext<MyMessage>(new MyMessage());
 
             await pipe.Send(sendContext).ConfigureAwait(false);
         }
@@ -135,7 +135,7 @@
 
             IPipe<SendContext<MyMessage>> pipe = endpointSpecification.GetMessageSpecification<MyMessage>().BuildMessagePipe();
 
-            var sendContext = new InMemorySendContext<MyMessage>(new MyMessage());
+            var sendContext = new MessageSendContext<MyMessage>(new MyMessage());
 
             await pipe.Send(sendContext).ConfigureAwait(false);
         }
@@ -169,7 +169,7 @@
 
             IPipe<SendContext<MyMessage>> pipe = endpointSpecification.GetMessageSpecification<MyMessage>().BuildMessagePipe();
 
-            var sendContext = new InMemorySendContext<MyMessage>(new MyMessage());
+            var sendContext = new MessageSendContext<MyMessage>(new MyMessage());
 
             await pipe.Send(sendContext).ConfigureAwait(false);
         }

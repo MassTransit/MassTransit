@@ -49,5 +49,7 @@
         /// Task completed when dependencies are ready
         /// </summary>
         Task Dependencies { get; }
+
+        IReceivePipeDispatcher CreateReceivePipeDispatcher();
     }
 }

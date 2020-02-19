@@ -10,9 +10,7 @@ namespace MassTransit
     /// Configure a receiving endpoint
     /// </summary>
     public interface IReceiveEndpointConfigurator :
-        IConsumePipeConfigurator,
-        ISendPipelineConfigurator,
-        IPublishPipelineConfigurator,
+        IEndpointConfigurator,
         IReceiveEndpointObserverConnector
     {
         /// <summary>

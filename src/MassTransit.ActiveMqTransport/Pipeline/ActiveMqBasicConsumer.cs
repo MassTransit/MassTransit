@@ -10,8 +10,8 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Logging;
     using Topology;
+    using Transports;
     using Transports.Metrics;
     using Util;
 
@@ -24,29 +24,24 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         DeliveryMetrics
     {
         readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly Uri _inputAddress;
         readonly SessionContext _session;
         readonly IMessageConsumer _messageConsumer;
         readonly ConcurrentDictionary<string, ActiveMqReceiveContext> _pending;
         readonly ReceiveSettings _receiveSettings;
         readonly ActiveMqReceiveEndpointContext _context;
-        readonly IDeliveryTracker _tracker;
+        readonly IReceivePipeDispatcher _dispatcher;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
         /// </summary>
         /// <param name="session">The model context for the consumer</param>
         /// <param name="messageConsumer"></param>
-        /// <param name="inputAddress">The input address for messages received by the consumer</param>
         /// <param name="context">The topology</param>
-        public ActiveMqBasicConsumer(SessionContext session, IMessageConsumer messageConsumer, Uri inputAddress, ActiveMqReceiveEndpointContext context)
+        public ActiveMqBasicConsumer(SessionContext session, IMessageConsumer messageConsumer, ActiveMqReceiveEndpointContext context)
         {
             _session = session;
             _messageConsumer = messageConsumer;
-            _inputAddress = inputAddress;
             _context = context;
-
-            _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
             _receiveSettings = session.GetPayload<ReceiveSettings>();
 
@@ -54,65 +49,47 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
 
+            _dispatcher = context.CreateReceivePipeDispatcher();
+            _dispatcher.ZeroActivity += HandleDeliveryComplete;
+
             messageConsumer.Listener += HandleMessage;
 
             SetReady();
         }
 
-        async void HandleMessage(IMessage message)
+        void HandleMessage(IMessage message)
         {
-            LogContext.Current = _context.LogContext;
-
-            if (IsStopping)
+            Task.Run(async () =>
             {
-                await WaitAndAbandonMessage(message).ConfigureAwait(false);
-                return;
-            }
+                LogContext.Current = _context.LogContext;
 
-            var delivery = _tracker.BeginDelivery();
+                if (IsStopping)
+                {
+                    await WaitAndAbandonMessage().ConfigureAwait(false);
+                    return;
+                }
 
-            var context = new ActiveMqReceiveContext(message, _context, _receiveSettings, _session, _session.ConnectionContext);
-
-            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
-            try
-            {
+                var context = new ActiveMqReceiveContext(message, _context, _receiveSettings, _session, _session.ConnectionContext);
                 if (!_pending.TryAdd(message.NMSMessageId, context))
                     LogContext.Warning?.Log("Duplicate message: {MessageId}", message.NMSMessageId);
 
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                try
+                {
+                    await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
+                }
+                finally
+                {
+                    _pending.TryRemove(message.NMSMessageId, out _);
 
-                await _context.ReceivePipe.Send(context).ConfigureAwait(false);
-
-                await context.ReceiveCompleted.ConfigureAwait(false);
-
-                message.Acknowledge();
-
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
-            }
-            finally
-            {
-                activity?.Stop();
-
-                delivery.Dispose();
-
-                _pending.TryRemove(message.NMSMessageId, out _);
-
-                context.Dispose();
-            }
+                    context.Dispose();
+                }
+            });
         }
 
-        long DeliveryMetrics.DeliveryCount => _tracker.DeliveryCount;
+        long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
+        int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
 
-        int DeliveryMetrics.ConcurrentDeliveryCount => _tracker.MaxConcurrentDeliveryCount;
-
-        void HandleDeliveryComplete()
+        Task HandleDeliveryComplete()
         {
             if (IsStopping)
             {
@@ -120,9 +97,11 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
                 _deliveryComplete.TrySetResult(true);
             }
+
+            return TaskUtil.Completed;
         }
 
-        async Task WaitAndAbandonMessage(IMessage message)
+        async Task WaitAndAbandonMessage()
         {
             try
             {
@@ -147,7 +126,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         {
             await Task.WhenAll(context.Agents.Select(x => Completed)).OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
-            if (_tracker.ActiveDeliveryCount > 0)
+            if (_dispatcher.ActiveDispatchCount > 0)
             {
                 try
                 {

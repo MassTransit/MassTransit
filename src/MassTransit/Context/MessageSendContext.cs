@@ -8,7 +8,7 @@ namespace MassTransit.Context
     using GreenPipes;
 
 
-    public abstract class BaseSendContext<TMessage> :
+    public class MessageSendContext<TMessage> :
         BasePipeContext,
         PublishContext<TMessage>
         where TMessage : class
@@ -17,8 +17,23 @@ namespace MassTransit.Context
         byte[] _body;
         IMessageSerializer _serializer;
 
-        protected BaseSendContext(TMessage message, CancellationToken cancellationToken)
+        public MessageSendContext(TMessage message, CancellationToken cancellationToken)
             : base(cancellationToken)
+        {
+            Message = message;
+
+            _headers = new DictionarySendHeaders();
+
+            var messageId = NewId.Next();
+
+            MessageId = messageId.ToGuid();
+
+            SentTime = messageId.Timestamp;
+
+            Durable = true;
+        }
+
+        public MessageSendContext(TMessage message)
         {
             Message = message;
 

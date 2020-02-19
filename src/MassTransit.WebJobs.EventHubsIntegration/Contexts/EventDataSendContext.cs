@@ -18,7 +18,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration.Contexts
 
 
     public class EventDataSendContext<T> :
-        BaseSendContext<T>,
+        MessageSendContext<T>,
         EventHubSendContext<T>
         where T : class
     {

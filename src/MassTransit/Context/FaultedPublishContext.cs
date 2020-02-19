@@ -4,7 +4,7 @@
 
 
     public class FaultedPublishContext<TMessage> :
-        BaseSendContext<TMessage>
+        MessageSendContext<TMessage>
         where TMessage : class
     {
         public FaultedPublishContext(TMessage message, CancellationToken cancellationToken)

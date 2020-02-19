@@ -15,8 +15,7 @@
 
 
     public class ServiceBusReceiveEndpointBuilder :
-        ReceiveEndpointBuilder,
-        IReceiveEndpointBuilder
+        ReceiveEndpointBuilder
     {
         readonly IServiceBusHostControl _host;
         readonly IServiceBusReceiveEndpointConfiguration _configuration;

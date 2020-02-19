@@ -6,7 +6,7 @@
 
 
     public class BasicPublishRabbitMqSendContext<T> :
-        BaseSendContext<T>,
+        MessageSendContext<T>,
         RabbitMqSendContext<T>
         where T : class
     {

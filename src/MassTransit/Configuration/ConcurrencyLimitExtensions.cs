@@ -29,7 +29,7 @@
         /// <param name="managementEndpointConfigurator">A management endpoint configurator to support runtime adjustment</param>
         /// <param name="id">An identifier for the concurrency limit to allow selective adjustment</param>
         public static void UseConcurrencyLimit(this IConsumePipeConfigurator configurator, int concurrentMessageLimit,
-            IManagementEndpointConfigurator managementEndpointConfigurator, string id = default)
+            IReceiveEndpointConfigurator managementEndpointConfigurator, string id = default)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));

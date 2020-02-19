@@ -349,7 +349,7 @@ namespace MassTransit.Context
             return new ConsumeSendEndpoint(publishSendEndpoint, this, ConsumeTask, RequestId);
         }
 
-        protected async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
+        protected virtual async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
             where T : class
         {
             Fault<T> fault = new FaultEvent<T>(context.Message, context.MessageId, HostMetadataCache.Host, exception, context.SupportedMessageTypes.ToArray());

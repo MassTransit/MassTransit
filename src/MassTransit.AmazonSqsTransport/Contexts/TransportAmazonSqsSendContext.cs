@@ -17,7 +17,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
 
     public class TransportAmazonSqsSendContext<T> :
-        BaseSendContext<T>,
+        MessageSendContext<T>,
         AmazonSqsSendContext<T>
         where T : class
     {

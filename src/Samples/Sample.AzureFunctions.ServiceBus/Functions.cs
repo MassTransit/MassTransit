@@ -18,13 +18,8 @@
         public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue")] Message message, IBinder binder, Microsoft.Extensions.Logging.ILogger logger,
             CancellationToken cancellationToken)
         {
-            LogContext.ConfigureCurrentLogContext(logger);
-
-            LogContext.Info?.Log("Creating brokered message receiver");
-
-            var handler = Bus.Factory.CreateBrokeredMessageReceiver(binder, cfg =>
+            var handler = binder.CreateBrokeredMessageReceiver(logger, cancellationToken, cfg =>
             {
-                cfg.CancellationToken = cancellationToken;
                 cfg.InputAddress = new Uri("sb://masstransit-build.servicebus.windows.net/input-queue");
 
                 cfg.UseRetry(x => x.Intervals(10, 100, 500, 1000));
@@ -38,13 +33,8 @@
         public static Task AuditOrderAsync([EventHubTrigger("input-hub")] EventData message, IBinder binder, Microsoft.Extensions.Logging.ILogger logger,
             CancellationToken cancellationToken)
         {
-            LogContext.ConfigureCurrentLogContext(logger);
-
-            LogContext.Info?.Log("Creating event hub receiver");
-
-            var handler = Bus.Factory.CreateEventDataReceiver(binder, cfg =>
+            var handler = binder.CreateEventDataReceiver(logger, cancellationToken, cfg =>
             {
-                cfg.CancellationToken = cancellationToken;
                 cfg.InputAddress = new Uri("sb://masstransit-eventhub.servicebus.windows.net/input-hub");
 
                 cfg.UseRetry(x => x.Intervals(10, 100, 500, 1000));

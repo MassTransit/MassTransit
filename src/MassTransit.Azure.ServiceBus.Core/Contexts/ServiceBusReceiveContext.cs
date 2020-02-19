@@ -28,6 +28,8 @@
 
         public TimeSpan TimeToLive => _message.TimeToLive;
 
+        public DateTime ExpiresAt => _message.ExpiresAtUtc;
+
         public IDictionary<string, object> Properties => _message.UserProperties;
 
         public int DeliveryCount => _message.SystemProperties.DeliveryCount;
@@ -41,6 +43,7 @@
         public string LockToken => _message.SystemProperties.LockToken;
 
         public DateTime LockedUntil => _message.SystemProperties.LockedUntilUtc;
+
 
         public string SessionId => _message.SessionId;
 

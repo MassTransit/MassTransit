@@ -42,7 +42,7 @@ namespace MassTransit.RabbitMqTransport
         /// Configure a management endpoint for this receive endpoint
         /// </summary>
         /// <param name="management"></param>
-        void ConnectManagementEndpoint(IManagementEndpointConfigurator management);
+        void ConnectManagementEndpoint(IReceiveEndpointConfigurator management);
 
         /// <summary>
         /// Bind an exchange to the receive endpoint exchange

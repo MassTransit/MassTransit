@@ -10,25 +10,23 @@
         ServiceBusEndpointConfiguration,
         IServiceBusBusConfiguration
     {
-        readonly IServiceBusEndpointConfiguration _busEndpointConfiguration;
         readonly BusObservable _busObservers;
-        readonly IServiceBusHostConfiguration _hostConfiguration;
 
         public ServiceBusBusConfiguration(IServiceBusTopologyConfiguration topologyConfiguration)
             : base(topologyConfiguration)
         {
-            _hostConfiguration = new ServiceBusHostConfiguration(this, topologyConfiguration);
-            _busEndpointConfiguration = CreateEndpointConfiguration();
+            HostConfiguration = new ServiceBusHostConfiguration(this, topologyConfiguration);
+            BusEndpointConfiguration = CreateEndpointConfiguration();
 
             _busObservers = new BusObservable();
         }
 
-        IHostConfiguration IBusConfiguration.HostConfiguration => _hostConfiguration;
-        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
+        IHostConfiguration IBusConfiguration.HostConfiguration => HostConfiguration;
+        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => BusEndpointConfiguration;
         IBusObserver IBusConfiguration.BusObservers => _busObservers;
 
-        IServiceBusEndpointConfiguration IServiceBusBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
-        IServiceBusHostConfiguration IServiceBusBusConfiguration.HostConfiguration => _hostConfiguration;
+        public IServiceBusEndpointConfiguration BusEndpointConfiguration { get; }
+        public IServiceBusHostConfiguration HostConfiguration { get; }
 
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
@@ -37,7 +35,7 @@
 
         public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
-            return _hostConfiguration.ConnectEndpointConfigurationObserver(observer);
+            return HostConfiguration.ConnectEndpointConfigurationObserver(observer);
         }
     }
 }

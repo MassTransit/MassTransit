@@ -13,8 +13,7 @@
 
 
     public class AmazonSqsReceiveEndpointBuilder :
-        ReceiveEndpointBuilder,
-        IReceiveEndpointBuilder
+        ReceiveEndpointBuilder
     {
         readonly IAmazonSqsHostControl _host;
         readonly AmazonSqsHostSettings _hostSettings;

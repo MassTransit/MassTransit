@@ -15,17 +15,14 @@ namespace MassTransit.Tests.Serialization
     using System;
     using System.Diagnostics;
     using System.IO;
-    using MassTransit.Pipeline;
+    using Context;
     using MassTransit.Serialization;
-    using MassTransit.Transports;
-    using MassTransit.Transports.InMemory;
     using MassTransit.Transports.InMemory.Contexts;
     using MassTransit.Transports.InMemory.Fabric;
     using Messages;
     using Metadata;
     using NUnit.Framework;
     using TestFramework;
-    using Util;
 
 
     [TestFixture(typeof(JsonMessageSerializer))]
@@ -58,8 +55,7 @@ namespace MassTransit.Tests.Serialization
         {
             ConsumeContext consumeContext = Deserializer.Deserialize(receiveContext);
 
-            ConsumeContext<T> messageContext;
-            consumeContext.TryGetMessage(out messageContext);
+            consumeContext.TryGetMessage(out ConsumeContext<T> messageContext);
 
             return messageContext;
         }
@@ -81,7 +77,7 @@ namespace MassTransit.Tests.Serialization
                 DoubleValue = 1823.172,
             };
 
-            var sendContext = new InMemorySendContext<SerializationTestMessage>(message);
+            var sendContext = new MessageSendContext<SerializationTestMessage>(message);
             ReceiveContext receiveContext = null;
             //warm it up
             for (int i = 0; i < 10; i++)

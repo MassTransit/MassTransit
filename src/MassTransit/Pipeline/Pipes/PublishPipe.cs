@@ -60,7 +60,6 @@ namespace MassTransit.Pipeline.Pipes
             readonly IMessagePublishPipeSpecification<TMessage> _specification;
 
             public MessagePipe(IMessagePublishPipeSpecification<TMessage> specification)
-
             {
                 _output = new Lazy<IMessagePublishPipe<TMessage>>(CreateFilter);
 

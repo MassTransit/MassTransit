@@ -104,7 +104,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             LogContext.Debug?.Log("Created consumer for {InputAddress}: {Queue}", _context.InputAddress, queueName);
 
-            var consumer = new ActiveMqBasicConsumer(context, messageConsumer, _context.InputAddress, _context);
+            var consumer = new ActiveMqBasicConsumer(context, messageConsumer, _context);
 
             await consumer.Ready.ConfigureAwait(false);
 

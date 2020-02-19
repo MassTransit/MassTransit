@@ -2,41 +2,42 @@
 {
     using System;
     using System.Threading;
-    using Azure.ServiceBus.Core.Builders;
+    using Azure.ServiceBus.Core.Configuration;
     using Azure.ServiceBus.Core.Configurators;
+    using Builders;
     using Configurators;
     using Context;
     using Contexts;
     using MassTransit.Configuration;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Extensions.Logging;
 
 
     public class WebJobEventDataReceiverSpecification :
-        MessageReceiverSpecification,
-        IWebJobReceiverConfigurator,
+        AzureReceiverConfiguration,
         IWebJobHandlerFactory
     {
         readonly IBinder _binder;
+        readonly CancellationToken _cancellationToken;
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
-        CancellationToken _cancellationToken;
 
-        public WebJobEventDataReceiverSpecification(IBinder binder, IReceiveEndpointConfiguration endpointConfiguration,
+        public WebJobEventDataReceiverSpecification(IBinder binder, ILogger logger, IServiceBusReceiveEndpointConfiguration endpointConfiguration,
             CancellationToken cancellationToken = default)
             : base(endpointConfiguration)
         {
             _binder = binder;
             _endpointConfiguration = endpointConfiguration;
             _cancellationToken = cancellationToken;
-        }
 
-        public CancellationToken CancellationToken
-        {
-            set => _cancellationToken = value;
+            LogContext.ConfigureCurrentLogContext(logger);
+
+            RethrowExceptions();
+            ThrowOnDeadLetter();
         }
 
         protected virtual ReceiveEndpointContext CreateReceiveEndpointContext()
         {
-            return new WebJobEventDataReceiveEndpointContext(_endpointConfiguration, _binder, _cancellationToken);
+            return new WebJobEventDataReceiveEndpointContext(_endpointConfiguration, InputAddress, _binder, _cancellationToken);
         }
 
         public IEventDataReceiver Build()
@@ -45,16 +46,16 @@
 
             try
             {
-                var builder = new MessageReceiverBuilder(_endpointConfiguration);
+                var builder = new ReceiveEndpointBuilder(_endpointConfiguration);
 
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
 
-                return new EventDataReceiver(InputAddress, CreateReceiveEndpointContext());
+                return new EventDataReceiver(CreateReceiveEndpointContext());
             }
             catch (Exception ex)
             {
-                throw new ConfigurationException(result, "An exception occurred during handler creation", ex);
+                throw new ConfigurationException(result, "An exception occurred creating the EventDataReceiver", ex);
             }
         }
     }

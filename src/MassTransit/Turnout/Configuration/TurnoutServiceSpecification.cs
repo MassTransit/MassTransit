@@ -210,5 +210,20 @@
         {
             _configurator.CompensateActivityConfigured(configurator);
         }
+
+        void IReceivePipelineConfigurator.ConfigureReceive(Action<IReceivePipeConfigurator> callback)
+        {
+            _configurator.ConfigureReceive(callback);
+        }
+
+        void IReceivePipelineConfigurator.ConfigureDeadLetter(Action<IPipeConfigurator<ReceiveContext>> callback)
+        {
+            _configurator.ConfigureDeadLetter(callback);
+        }
+
+        void IReceivePipelineConfigurator.ConfigureError(Action<IPipeConfigurator<ExceptionReceiveContext>> callback)
+        {
+            _configurator.ConfigureError(callback);
+        }
     }
 }

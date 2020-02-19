@@ -46,7 +46,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostAddress);
 
-            var consumer = new AmazonSqsBasicConsumer(context, inputAddress, _context);
+            var consumer = new AmazonSqsBasicConsumer(context, _context);
 
             await context.BasicConsume(receiveSettings, consumer).ConfigureAwait(false);
 

@@ -153,7 +153,7 @@
             }
             else
             {
-                var messageReceiver = new BrokeredMessageReceiver(InputAddress, receiveEndpointContext);
+                var messageReceiver = new BrokeredMessageReceiver(receiveEndpointContext);
 
                 var errorTransport = CreateErrorTransport(host);
                 var deadLetterTransport = CreateDeadLetterTransport(host);

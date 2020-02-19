@@ -17,7 +17,7 @@ namespace MassTransit.HttpTransport.Clients
 
 
     public class HttpSendContextImpl<T> :
-        BaseSendContext<T>,
+        MessageSendContext<T>,
         HttpSendContext<T>
         where T : class
     {

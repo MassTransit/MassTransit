@@ -10,25 +10,23 @@ namespace MassTransit.RabbitMqTransport.Configuration
         RabbitMqEndpointConfiguration,
         IRabbitMqBusConfiguration
     {
-        readonly IRabbitMqEndpointConfiguration _busEndpointConfiguration;
         readonly BusObservable _busObservers;
-        readonly IRabbitMqHostConfiguration _hostConfiguration;
 
         public RabbitMqBusConfiguration(IRabbitMqTopologyConfiguration topologyConfiguration)
             : base(topologyConfiguration)
         {
-            _hostConfiguration = new RabbitMqHostConfiguration(this, topologyConfiguration);
-            _busEndpointConfiguration = CreateEndpointConfiguration();
+            HostConfiguration = new RabbitMqHostConfiguration(this, topologyConfiguration);
+            BusEndpointConfiguration = CreateEndpointConfiguration();
 
             _busObservers = new BusObservable();
         }
 
-        IHostConfiguration IBusConfiguration.HostConfiguration => _hostConfiguration;
-        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
+        IHostConfiguration IBusConfiguration.HostConfiguration => HostConfiguration;
+        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => BusEndpointConfiguration;
         IBusObserver IBusConfiguration.BusObservers => _busObservers;
 
-        IRabbitMqEndpointConfiguration IRabbitMqBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
-        IRabbitMqHostConfiguration IRabbitMqBusConfiguration.HostConfiguration => _hostConfiguration;
+        public IRabbitMqEndpointConfiguration BusEndpointConfiguration { get; }
+        public IRabbitMqHostConfiguration HostConfiguration { get; }
 
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
@@ -37,7 +35,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
-            return _hostConfiguration.ConnectEndpointConfigurationObserver(observer);
+            return HostConfiguration.ConnectEndpointConfigurationObserver(observer);
         }
     }
 }

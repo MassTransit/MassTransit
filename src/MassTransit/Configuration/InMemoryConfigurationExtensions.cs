@@ -1,18 +1,9 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit
+﻿namespace MassTransit
 {
     using System;
+    using Context;
+    using Transports;
+    using Transports.InMemory.Configuration;
 
 
     public static class InMemoryConfigurationExtensions
@@ -58,6 +49,33 @@ namespace MassTransit
             }
 
             configurator.AddBus(BusFactory);
+        }
+
+        /// <summary>
+        /// Create a mediator, which sends messages to consumers, handlers, and sagas. Messages are dispatched to the consumers asynchronously.
+        /// Consumers are not directly coupled to the sender. Can be used entirely in-memory without a broker.
+        /// </summary>
+        /// <param name="selector"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static IMediator CreateInMemoryMediator(this IBusFactorySelector selector, Action<IInMemoryReceiveEndpointConfigurator> configure)
+        {
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+
+            var topologyConfiguration = new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology);
+            var busConfiguration = new InMemoryBusConfiguration(topologyConfiguration, new Uri("loopback://localhost"));
+
+            var receiveEndpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("unspecified");
+
+            var configurator = new InMemoryReceivePipeDispatcherConfiguration(receiveEndpointConfiguration);
+
+            configure(configurator);
+
+            var receiver = configurator.Build();
+
+            return new InMemoryMediator(LogContext.Current, receiveEndpointConfiguration, receiver);
         }
     }
 }

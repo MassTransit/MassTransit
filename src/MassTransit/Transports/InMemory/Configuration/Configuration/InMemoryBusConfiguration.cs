@@ -11,25 +11,23 @@
         InMemoryEndpointConfiguration,
         IInMemoryBusConfiguration
     {
-        readonly IInMemoryEndpointConfiguration _busEndpointConfiguration;
         readonly BusObservable _busObservers;
-        readonly IInMemoryHostConfiguration _hostConfiguration;
 
         public InMemoryBusConfiguration(IInMemoryTopologyConfiguration topologyConfiguration, Uri baseAddress)
             : base(topologyConfiguration)
         {
-            _hostConfiguration = new InMemoryHostConfiguration(this, baseAddress, topologyConfiguration);
-            _busEndpointConfiguration = CreateEndpointConfiguration();
+            HostConfiguration = new InMemoryHostConfiguration(this, baseAddress, topologyConfiguration);
+            BusEndpointConfiguration = CreateEndpointConfiguration();
 
             _busObservers = new BusObservable();
         }
 
-        IHostConfiguration IBusConfiguration.HostConfiguration => _hostConfiguration;
-        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
+        IHostConfiguration IBusConfiguration.HostConfiguration => HostConfiguration;
+        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => BusEndpointConfiguration;
         IBusObserver IBusConfiguration.BusObservers => _busObservers;
 
-        IInMemoryEndpointConfiguration IInMemoryBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
-        IInMemoryHostConfiguration IInMemoryBusConfiguration.HostConfiguration => _hostConfiguration;
+        public IInMemoryEndpointConfiguration BusEndpointConfiguration { get; }
+        public IInMemoryHostConfiguration HostConfiguration { get; }
 
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
@@ -38,7 +36,7 @@
 
         public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
-            return _hostConfiguration.ConnectEndpointConfigurationObserver(observer);
+            return HostConfiguration.ConnectEndpointConfigurationObserver(observer);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace MassTransit.Transports.InMemory
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            var context = new InMemorySendContext<T>(message, cancellationToken);
+            var context = new MessageSendContext<T>(message, cancellationToken);
 
             await pipe.Send(context).ConfigureAwait(false);
 
