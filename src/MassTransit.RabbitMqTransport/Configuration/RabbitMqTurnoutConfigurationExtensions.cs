@@ -16,8 +16,7 @@
         /// <param name="busFactoryConfigurator">The bus factory configuration to use a separate endpoint for the control traffic</param>
         /// <param name="queueName">The receive queue name for commands</param>
         /// <param name="configure"></param>
-        /// <param name="host">The host on which to configure the endpoint</param>
-        public static void TurnoutEndpoint<T>(this IRabbitMqBusFactoryConfigurator busFactoryConfigurator, IRabbitMqHost host, string queueName,
+        public static void TurnoutEndpoint<T>(this IRabbitMqBusFactoryConfigurator busFactoryConfigurator, string queueName,
             Action<ITurnoutServiceConfigurator<T>> configure)
             where T : class
         {

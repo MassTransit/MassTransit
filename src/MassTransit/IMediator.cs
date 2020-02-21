@@ -1,7 +1,9 @@
 namespace MassTransit
 {
     public interface IMediator :
-        ISendEndpoint
+        ISendEndpoint,
+        IPublishEndpoint,
+        IClientFactory
     {
     }
 }

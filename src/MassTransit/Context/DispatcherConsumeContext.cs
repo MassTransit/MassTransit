@@ -1,14 +1,13 @@
-namespace MassTransit.Transports
+namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Context;
     using Metadata;
     using Util;
 
 
-    public class DeliveryConsumeContext<TMessage> :
+    public class DispatcherConsumeContext<TMessage> :
         DeserializerConsumeContext,
         ConsumeContext<TMessage>
         where TMessage : class
@@ -16,7 +15,7 @@ namespace MassTransit.Transports
         readonly PendingTaskCollection _consumeTasks;
         readonly SendContext<TMessage> _sendContext;
 
-        public DeliveryConsumeContext(ReceiveContext receiveContext, SendContext<TMessage> sendContext)
+        public DispatcherConsumeContext(ReceiveContext receiveContext, SendContext<TMessage> sendContext)
             : base(receiveContext)
         {
             Message = sendContext.Message;
@@ -53,13 +52,13 @@ namespace MassTransit.Transports
 
         public override Guid? MessageId => _sendContext.MessageId;
 
-        public override Guid? RequestId => _sendContext.MessageId;
+        public override Guid? RequestId => _sendContext.RequestId;
 
-        public override Guid? CorrelationId => _sendContext.MessageId;
+        public override Guid? CorrelationId => _sendContext.CorrelationId;
 
-        public override Guid? ConversationId => _sendContext.MessageId;
+        public override Guid? ConversationId => _sendContext.ConversationId;
 
-        public override Guid? InitiatorId => _sendContext.MessageId;
+        public override Guid? InitiatorId => _sendContext.InitiatorId;
 
         public override DateTime? ExpirationTime => _sendContext.SentTime + _sendContext.TimeToLive;
 

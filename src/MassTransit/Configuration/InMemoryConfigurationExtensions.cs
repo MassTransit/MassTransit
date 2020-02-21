@@ -67,15 +67,20 @@
             var topologyConfiguration = new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology);
             var busConfiguration = new InMemoryBusConfiguration(topologyConfiguration, new Uri("loopback://localhost"));
 
-            var receiveEndpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("unspecified");
+            var endpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("mediator");
 
-            var configurator = new InMemoryReceivePipeDispatcherConfiguration(receiveEndpointConfiguration);
+            var configurator = new InMemoryReceivePipeDispatcherConfiguration(endpointConfiguration);
 
             configure(configurator);
 
-            var receiver = configurator.Build();
+            var mediatorDispatcher = configurator.Build();
 
-            return new InMemoryMediator(LogContext.Current, receiveEndpointConfiguration, receiver);
+            var responseEndpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("response");
+            var responseConfigurator = new InMemoryReceivePipeDispatcherConfiguration(responseEndpointConfiguration);
+
+            var responseDispatcher = responseConfigurator.Build();
+
+            return new InMemoryMediator(LogContext.Current, endpointConfiguration, mediatorDispatcher, responseEndpointConfiguration, responseDispatcher);
         }
     }
 }

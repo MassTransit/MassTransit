@@ -32,6 +32,23 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public async Task Should_handle_request_response()
+        {
+            var mediator = MassTransit.Bus.Factory.CreateInMemoryMediator(cfg =>
+            {
+                cfg.Handler<PingMessage>(context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
+            });
+
+            var client = mediator.CreateRequestClient<PingMessage>();
+
+            var pingMessage = new PingMessage();
+
+            var response = await client.GetResponse<PongMessage>(pingMessage);
+
+            Assert.That(response.Message.CorrelationId, Is.EqualTo(pingMessage.CorrelationId));
+        }
+
+        [Test]
         public async Task Should_fault_at_the_send()
         {
             var mediator = MassTransit.Bus.Factory.CreateInMemoryMediator(cfg =>
@@ -41,11 +58,15 @@ namespace MassTransit.Tests
 
             Assert.That(async () => await mediator.Send(new PingMessage()), Throws.TypeOf<IntentionalTestException>());
         }
+    }
 
+
+    public class Mediator_performance
+    {
         [Test, Explicit]
-        public async Task Should_deliver_messages_quickly()
+        public async Task Send()
         {
-            var mediator = MassTransit.Bus.Factory.CreateInMemoryMediator(cfg =>
+            var mediator = Bus.Factory.CreateInMemoryMediator(cfg =>
             {
                 cfg.Handler<PingMessage>(context => TaskUtil.Completed);
             });
@@ -66,6 +87,34 @@ namespace MassTransit.Tests
 
             Console.WriteLine("Time to process {0} messages = {1}", count, timer.ElapsedMilliseconds + "ms");
             Console.WriteLine("Messages per second: {0}", count * 1000 / timer.ElapsedMilliseconds);
+        }
+
+        [Test, Explicit]
+        public async Task Request_client()
+        {
+            var mediator = Bus.Factory.CreateInMemoryMediator(cfg =>
+            {
+                cfg.Handler<PingMessage>(context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
+            });
+
+            var client = mediator.CreateRequestClient<PingMessage>();
+
+            var message = new PingMessage();
+
+            Stopwatch timer = Stopwatch.StartNew();
+
+            const int count = 200000;
+            const int split = 200;
+
+            for (int i = 0; i < count / split; i++)
+            {
+                await Task.WhenAll(Enumerable.Range(0, split).Select(_ => client.GetResponse<PongMessage>(message)));
+            }
+
+            timer.Stop();
+
+            Console.WriteLine("Time to process {0} messages = {1}", count * 2, timer.ElapsedMilliseconds + "ms");
+            Console.WriteLine("Requests per second: {0}", count * 1000 / timer.ElapsedMilliseconds);
         }
     }
 }

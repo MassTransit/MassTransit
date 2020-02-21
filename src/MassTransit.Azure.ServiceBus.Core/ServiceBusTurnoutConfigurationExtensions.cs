@@ -15,8 +15,7 @@
         /// <param name="busFactoryConfigurator">The bus factory configuration to use a separate endpoint for the control traffic</param>
         /// <param name="queueName"></param>
         /// <param name="configure"></param>
-        /// <param name="host"></param>
-        public static void TurnoutEndpoint<T>(this IServiceBusBusFactoryConfigurator busFactoryConfigurator, IServiceBusHost host, string queueName,
+        public static void TurnoutEndpoint<T>(this IServiceBusBusFactoryConfigurator busFactoryConfigurator, string queueName,
             Action<ITurnoutServiceConfigurator<T>> configure)
             where T : class
         {

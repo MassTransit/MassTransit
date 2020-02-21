@@ -1,4 +1,4 @@
-namespace MassTransit.Transports
+namespace MassTransit.Context
 {
     using System;
     using System.Diagnostics;
@@ -6,60 +6,59 @@ namespace MassTransit.Transports
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using GreenPipes;
     using Metadata;
     using Serialization;
     using Topology;
+    using Transports;
     using Util;
 
 
-    public sealed class DeliveryReceiveContext<TMessage> :
-        BasePipeContext,
-        ReceiveContext,
-        IDisposable
-        where TMessage : class
+    static class DispatcherReceiveContext
     {
         const string ContentTypeHeaderValue = "application/vnd.masstransit+obj";
-        static readonly ContentType ObjectContentType = new ContentType(ContentTypeHeaderValue);
+        internal static readonly ContentType ObjectContentType = new ContentType(ContentTypeHeaderValue);
+    }
 
+
+    public sealed class DispatcherReceiveContext<TMessage> :
+        BasePipeContext,
+        ReceiveContext
+        where TMessage : class
+    {
         readonly IReceiveObserver _observers;
-        readonly CancellationTokenSource _cancellationTokenSource;
+        readonly CancellationToken _cancellationToken;
         readonly PendingTaskCollection _receiveTasks;
         readonly Stopwatch _receiveTimer;
-        CancellationTokenRegistration _registration;
         readonly MessageIdMessageHeader _headers;
-        readonly DeliveryConsumeContext<TMessage> _consumeContext;
+        readonly DispatcherConsumeContext<TMessage> _consumeContext;
 
-        public DeliveryReceiveContext(SendContext<TMessage> sendContext, IReceiveObserver observers, CancellationToken cancellationToken,
+        public DispatcherReceiveContext(SendContext<TMessage> sendContext, ISendEndpointProvider sendEndpointProvider,
+            IPublishEndpointProvider publishEndpointProvider, IPublishTopology publishTopology, IReceiveObserver observers, CancellationToken cancellationToken,
             params object[] payloads)
             : base(payloads)
         {
             _observers = observers;
+            _cancellationToken = cancellationToken;
+
+            SendEndpointProvider = sendEndpointProvider;
+            PublishEndpointProvider = publishEndpointProvider;
+            PublishTopology = publishTopology;
+
             _receiveTimer = Stopwatch.StartNew();
 
-            var messageId = NewId.NextGuid();
+            var messageId = sendContext.MessageId ?? throw new ArgumentNullException(nameof(MessageContext.MessageId));
 
             _headers = new MessageIdMessageHeader(messageId);
 
-            _cancellationTokenSource = new CancellationTokenSource();
-            if (cancellationToken.CanBeCanceled)
-                _registration = cancellationToken.Register(Cancel);
-
             _receiveTasks = new PendingTaskCollection(4);
 
-            _consumeContext = new DeliveryConsumeContext<TMessage>(this, sendContext);
+            _consumeContext = new DispatcherConsumeContext<TMessage>(this, sendContext);
 
             AddOrUpdatePayload<ConsumeContext>(() => _consumeContext, existing => _consumeContext);
         }
 
-        public void Dispose()
-        {
-            _registration.Dispose();
-            _cancellationTokenSource.Dispose();
-        }
-
-        CancellationToken PipeContext.CancellationToken => _cancellationTokenSource.Token;
+        CancellationToken PipeContext.CancellationToken => _cancellationToken;
 
         public bool IsDelivered { get; private set; }
         public bool IsFaulted { get; private set; }
@@ -121,12 +120,7 @@ namespace MassTransit.Transports
 
         public TimeSpan ElapsedTime => _receiveTimer.Elapsed;
         public Uri InputAddress => _consumeContext.DestinationAddress;
-        public ContentType ContentType => ObjectContentType;
-
-        public void Cancel()
-        {
-            _cancellationTokenSource.Cancel();
-        }
+        public ContentType ContentType => DispatcherReceiveContext.ObjectContentType;
 
 
         class FaultInfo :
