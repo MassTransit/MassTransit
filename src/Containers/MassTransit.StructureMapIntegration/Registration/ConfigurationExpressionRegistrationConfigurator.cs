@@ -72,6 +72,31 @@ namespace MassTransit.StructureMapIntegration.Registration
             return busFactory(context);
         }
 
+        public void AddMediator(Action<IContext, IReceiveEndpointConfigurator> configure = null)
+        {
+            _expression.For<IMediator>()
+                .Use(context => MediatorFactory(context, configure))
+                .Singleton();
+
+            _expression.For<IClientFactory>()
+                .Use(context => context.GetInstance<IMediator>())
+                .Singleton();
+        }
+
+        IMediator MediatorFactory(IContext context, Action<IContext, IReceiveEndpointConfigurator> configure)
+        {
+            var provider = context.GetInstance<IConfigurationServiceProvider>();
+
+            ConfigureLogContext(provider);
+
+            return Bus.Factory.CreateMediator(cfg =>
+            {
+                configure?.Invoke(context, cfg);
+
+                ConfigureMediator(cfg, provider);
+            });
+        }
+
         IConsumerScopeProvider CreateConsumerScopeProvider(IContext context)
         {
             return new StructureMapConsumerScopeProvider(context.GetInstance<IContainer>());

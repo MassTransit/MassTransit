@@ -27,7 +27,6 @@ namespace MassTransit.Context
         where TMessage : class
     {
         readonly IReceiveObserver _observers;
-        readonly CancellationToken _cancellationToken;
         readonly PendingTaskCollection _receiveTasks;
         readonly Stopwatch _receiveTimer;
         readonly MessageIdMessageHeader _headers;
@@ -36,10 +35,9 @@ namespace MassTransit.Context
         public DispatcherReceiveContext(SendContext<TMessage> sendContext, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpointProvider, IPublishTopology publishTopology, IReceiveObserver observers, CancellationToken cancellationToken,
             params object[] payloads)
-            : base(payloads)
+            : base(cancellationToken, payloads)
         {
             _observers = observers;
-            _cancellationToken = cancellationToken;
 
             SendEndpointProvider = sendEndpointProvider;
             PublishEndpointProvider = publishEndpointProvider;
@@ -57,8 +55,6 @@ namespace MassTransit.Context
 
             AddOrUpdatePayload<ConsumeContext>(() => _consumeContext, existing => _consumeContext);
         }
-
-        CancellationToken PipeContext.CancellationToken => _cancellationToken;
 
         public bool IsDelivered { get; private set; }
         public bool IsFaulted { get; private set; }

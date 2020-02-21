@@ -21,7 +21,7 @@ namespace MassTransit.Tests
             var multiConsumer = new MultiTestConsumer(TimeSpan.FromSeconds(8));
             var received = multiConsumer.Consume<PingMessage>();
 
-            var mediator = MassTransit.Bus.Factory.CreateInMemoryMediator(cfg =>
+            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
             {
                 multiConsumer.Configure(cfg);
             });
@@ -34,7 +34,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_handle_request_response()
         {
-            var mediator = MassTransit.Bus.Factory.CreateInMemoryMediator(cfg =>
+            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
             {
                 cfg.Handler<PingMessage>(context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
             });
@@ -51,7 +51,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_fault_at_the_send()
         {
-            var mediator = MassTransit.Bus.Factory.CreateInMemoryMediator(cfg =>
+            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
             {
                 cfg.Handler<PingMessage>(context => throw new IntentionalTestException("No thank you!"));
             });
@@ -66,7 +66,7 @@ namespace MassTransit.Tests
         [Test, Explicit]
         public async Task Send()
         {
-            var mediator = Bus.Factory.CreateInMemoryMediator(cfg =>
+            var mediator = Bus.Factory.CreateMediator(cfg =>
             {
                 cfg.Handler<PingMessage>(context => TaskUtil.Completed);
             });
@@ -92,7 +92,7 @@ namespace MassTransit.Tests
         [Test, Explicit]
         public async Task Request_client()
         {
-            var mediator = Bus.Factory.CreateInMemoryMediator(cfg =>
+            var mediator = Bus.Factory.CreateMediator(cfg =>
             {
                 cfg.Handler<PingMessage>(context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
             });

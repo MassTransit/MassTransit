@@ -197,6 +197,14 @@ namespace MassTransit.Registration
                 LogContext.ConfigureCurrentLogContext(loggerFactory);
         }
 
+        protected void ConfigureMediator(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider provider)
+        {
+            var registration = provider.GetRequiredService<IRegistration>();
+
+            registration.ConfigureConsumers(configurator);
+            registration.ConfigureSagas(configurator);
+        }
+
         void IRegistrationConfigurator.AddRequestClient<T>(RequestTimeout timeout)
         {
             _containerRegistrar.RegisterRequestClient<T>(timeout);

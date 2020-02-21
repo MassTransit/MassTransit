@@ -57,6 +57,27 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             Container.RegisterSingleton(() => Container.GetInstance<IBus>().CreateClientFactory());
         }
 
+        public void AddMediator(Action<Container, IReceiveEndpointConfigurator> configure = null)
+        {
+            IMediator MediatorFactory()
+            {
+                var provider = Container.GetInstance<IConfigurationServiceProvider>();
+
+                ConfigureLogContext(provider);
+
+                return Bus.Factory.CreateMediator(cfg =>
+                {
+                    configure?.Invoke(Container, cfg);
+
+                    ConfigureMediator(cfg, provider);
+                });
+            }
+
+            Container.RegisterSingleton(MediatorFactory);
+
+            Container.RegisterSingleton<IClientFactory>(() => Container.GetInstance<IMediator>());
+        }
+
         ISendEndpointProvider GetSendEndpointProvider()
         {
             return (ISendEndpointProvider)Container.GetConsumeContext() ?? Container.GetInstance<IBus>();

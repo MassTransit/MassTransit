@@ -137,6 +137,7 @@ module.exports = {
                   '/advanced/middleware/custom'
                 ]
               },
+              '/usage/mediator',
               '/usage/message-data',
               {
                 title: 'Monitoring',
@@ -189,6 +190,7 @@ module.exports = {
         children: [
           '/troubleshooting/common-gotchas',
           '/troubleshooting/show-config',
+          '/learn/analyzers',
           '/learn/samples',
           '/learn/videos',
           '/learn/courses',

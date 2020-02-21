@@ -10,12 +10,13 @@
     using Microsoft.Azure.EventHubs;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Extensions.Logging;
 
 
     public static class Functions
     {
         [FunctionName("SubmitOrder")]
-        public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue")] Message message, IBinder binder, Microsoft.Extensions.Logging.ILogger logger,
+        public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue")] Message message, IBinder binder, ILogger logger,
             CancellationToken cancellationToken)
         {
             var handler = binder.CreateBrokeredMessageReceiver(logger, cancellationToken, cfg =>
@@ -30,7 +31,7 @@
         }
 
         [FunctionName("AuditOrder")]
-        public static Task AuditOrderAsync([EventHubTrigger("input-hub")] EventData message, IBinder binder, Microsoft.Extensions.Logging.ILogger logger,
+        public static Task AuditOrderAsync([EventHubTrigger("input-hub")] EventData message, IBinder binder, ILogger logger,
             CancellationToken cancellationToken)
         {
             var handler = binder.CreateEventDataReceiver(logger, cancellationToken, cfg =>

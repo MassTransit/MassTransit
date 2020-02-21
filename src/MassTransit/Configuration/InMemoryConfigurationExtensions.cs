@@ -59,7 +59,7 @@
         /// <param name="configure"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static IMediator CreateInMemoryMediator(this IBusFactorySelector selector, Action<IInMemoryReceiveEndpointConfigurator> configure)
+        public static IMediator CreateMediator(this IBusFactorySelector selector, Action<IReceiveEndpointConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
