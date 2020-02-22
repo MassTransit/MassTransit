@@ -1,4 +1,4 @@
-namespace MassTransit.Context
+namespace MassTransit.Transports.Mediator.Contexts
 {
     using System;
     using System.Diagnostics;
@@ -6,22 +6,22 @@ namespace MassTransit.Context
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
     using Metadata;
     using Serialization;
     using Topology;
-    using Transports;
     using Util;
 
 
-    static class DispatcherReceiveContext
+    static class MediatorReceiveContext
     {
         const string ContentTypeHeaderValue = "application/vnd.masstransit+obj";
         internal static readonly ContentType ObjectContentType = new ContentType(ContentTypeHeaderValue);
     }
 
 
-    public sealed class DispatcherReceiveContext<TMessage> :
+    public sealed class MediatorReceiveContext<TMessage> :
         BasePipeContext,
         ReceiveContext
         where TMessage : class
@@ -30,9 +30,9 @@ namespace MassTransit.Context
         readonly PendingTaskCollection _receiveTasks;
         readonly Stopwatch _receiveTimer;
         readonly MessageIdMessageHeader _headers;
-        readonly DispatcherConsumeContext<TMessage> _consumeContext;
+        readonly MediatorConsumeContext<TMessage> _consumeContext;
 
-        public DispatcherReceiveContext(SendContext<TMessage> sendContext, ISendEndpointProvider sendEndpointProvider,
+        public MediatorReceiveContext(SendContext<TMessage> sendContext, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpointProvider, IPublishTopology publishTopology, IReceiveObserver observers, CancellationToken cancellationToken,
             params object[] payloads)
             : base(cancellationToken, payloads)
@@ -51,7 +51,7 @@ namespace MassTransit.Context
 
             _receiveTasks = new PendingTaskCollection(4);
 
-            _consumeContext = new DispatcherConsumeContext<TMessage>(this, sendContext);
+            _consumeContext = new MediatorConsumeContext<TMessage>(this, sendContext);
 
             AddOrUpdatePayload<ConsumeContext>(() => _consumeContext, existing => _consumeContext);
         }
@@ -116,7 +116,7 @@ namespace MassTransit.Context
 
         public TimeSpan ElapsedTime => _receiveTimer.Elapsed;
         public Uri InputAddress => _consumeContext.DestinationAddress;
-        public ContentType ContentType => DispatcherReceiveContext.ObjectContentType;
+        public ContentType ContentType => MediatorReceiveContext.ObjectContentType;
 
 
         class FaultInfo :

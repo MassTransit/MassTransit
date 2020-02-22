@@ -1,6 +1,7 @@
-namespace MassTransit.Clients.Contexts
+namespace MassTransit.Transports.Mediator.Contexts
 {
     using System;
+    using Clients;
     using GreenPipes;
     using Pipeline;
 
@@ -37,13 +38,13 @@ namespace MassTransit.Clients.Contexts
         public IRequestSendEndpoint<T> GetRequestEndpoint<T>(ConsumeContext consumeContext = default)
             where T : class
         {
-            return new DispatcherRequestSendEndpoint<T>(_endpoint, consumeContext);
+            return new MediatorRequestSendEndpoint<T>(_endpoint, consumeContext);
         }
 
         public IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext consumeContext = default)
             where T : class
         {
-            return new DispatcherRequestSendEndpoint<T>(_endpoint, consumeContext);
+            return new MediatorRequestSendEndpoint<T>(_endpoint, consumeContext);
         }
 
         public RequestTimeout DefaultTimeout { get; }

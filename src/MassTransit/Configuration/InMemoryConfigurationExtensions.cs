@@ -4,6 +4,7 @@
     using Context;
     using Transports;
     using Transports.InMemory.Configuration;
+    using Transports.Mediator;
 
 
     public static class InMemoryConfigurationExtensions
@@ -80,7 +81,7 @@
 
             var responseDispatcher = responseConfigurator.Build();
 
-            return new InMemoryMediator(LogContext.Current, endpointConfiguration, mediatorDispatcher, responseEndpointConfiguration, responseDispatcher);
+            return new Mediator(LogContext.Current, endpointConfiguration, mediatorDispatcher, responseEndpointConfiguration, responseDispatcher);
         }
     }
 }

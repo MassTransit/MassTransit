@@ -1,13 +1,14 @@
-namespace MassTransit.Context
+namespace MassTransit.Transports.Mediator.Contexts
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Context;
     using Metadata;
     using Util;
 
 
-    public class DispatcherConsumeContext<TMessage> :
+    public class MediatorConsumeContext<TMessage> :
         DeserializerConsumeContext,
         ConsumeContext<TMessage>
         where TMessage : class
@@ -15,7 +16,7 @@ namespace MassTransit.Context
         readonly PendingTaskCollection _consumeTasks;
         readonly SendContext<TMessage> _sendContext;
 
-        public DispatcherConsumeContext(ReceiveContext receiveContext, SendContext<TMessage> sendContext)
+        public MediatorConsumeContext(ReceiveContext receiveContext, SendContext<TMessage> sendContext)
             : base(receiveContext)
         {
             Message = sendContext.Message;

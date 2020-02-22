@@ -104,11 +104,13 @@ namespace MassTransit.Tests
             Stopwatch timer = Stopwatch.StartNew();
 
             const int count = 200000;
-            const int split = 200;
+            const int split = 10;
 
             for (int i = 0; i < count / split; i++)
             {
-                await Task.WhenAll(Enumerable.Range(0, split).Select(_ => client.GetResponse<PongMessage>(message)));
+                async Task<Response<PongMessage>> MakeRequest(int _) => await client.GetResponse<PongMessage>(message);
+
+                await Task.WhenAll(Enumerable.Range(0, split).Select(MakeRequest));
             }
 
             timer.Stop();

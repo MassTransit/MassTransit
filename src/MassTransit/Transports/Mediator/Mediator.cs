@@ -1,12 +1,13 @@
-namespace MassTransit.Transports
+namespace MassTransit.Transports.Mediator
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Clients;
-    using Clients.Contexts;
     using Configuration;
     using Context;
+    using Context.Converters;
+    using Contexts;
     using GreenPipes;
     using InMemory.Configuration;
     using Pipeline;
@@ -16,28 +17,18 @@ namespace MassTransit.Transports
     /// <summary>
     /// Sends messages directly to the <see cref="IReceivePipe"/>, without serialization
     /// </summary>
-    public class InMemoryMediator :
-        IMediator,
-        IPublishEndpointProvider
+    public class Mediator :
+        IMediator
     {
         readonly IClientFactory _clientFactory;
-        readonly IPublishEndpoint _publishEndpoint;
-        readonly ISendEndpoint _responseEndpoint;
-        readonly ISendEndpoint _endpoint;
-        readonly SendObservable _sendObservable;
-        readonly PublishObservable _publishObservable;
+        readonly MediatorSendEndpoint _endpoint;
 
-        public InMemoryMediator(ILogContext logContext, IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher,
+        public Mediator(ILogContext logContext, IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher,
             IInMemoryReceiveEndpointConfiguration responseConfiguration, IReceivePipeDispatcher responseDispatcher)
         {
-            _sendObservable = new SendObservable();
-            _publishObservable = new PublishObservable();
+            var sendObservable = new SendObservable();
 
-            _endpoint = new DispatcherSendEndpoint(configuration, dispatcher, logContext,
-                _sendObservable, responseConfiguration, responseDispatcher);
-            _publishEndpoint = new PublishEndpoint(this);
-
-            _responseEndpoint = new DispatcherSendEndpoint(responseConfiguration, responseDispatcher, logContext, _sendObservable, configuration, dispatcher);
+            _endpoint = new MediatorSendEndpoint(configuration, dispatcher, logContext, sendObservable, responseConfiguration, responseDispatcher);
 
             var clientFactoryContext = new MediatorClientFactoryContext(_endpoint, responseConfiguration.ConsumePipe, responseConfiguration.InputAddress);
             _clientFactory = new ClientFactory(clientFactoryContext);
@@ -45,7 +36,7 @@ namespace MassTransit.Transports
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _sendObservable.Connect(observer);
+            return _endpoint.ConnectSendObserver(observer);
         }
 
         Task ISendEndpoint.Send<T>(T message, CancellationToken cancellationToken)
@@ -100,63 +91,104 @@ namespace MassTransit.Transports
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _publishObservable.Connect(observer);
+            return _endpoint.ConnectPublishObserver(observer);
         }
 
-        Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, messageType, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(message, messageType, publishPipe, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish<T>(values, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish(values, publishPipe, cancellationToken);
-        }
-
-        Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
-        }
-
-        Task<ISendEndpoint> IPublishEndpointProvider.GetPublishSendEndpoint<T>()
+        public  Task Publish<T>(T message, CancellationToken cancellationToken)
             where T : class
         {
-            return Task.FromResult(_endpoint);
+            return PublishInternal(cancellationToken, message);
+        }
+
+        public  Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+            where T : class
+        {
+            return PublishInternal(cancellationToken, message, publishPipe);
+        }
+
+        public  Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+            where T : class
+        {
+            return PublishInternal(cancellationToken, message, publishPipe);
+        }
+
+        public  Task Publish(object message, CancellationToken cancellationToken)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            var messageType = message.GetType();
+
+            return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
+        }
+
+        public  Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            var messageType = message.GetType();
+
+            return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
+        }
+
+        public  Task Publish(object message, Type messageType, CancellationToken cancellationToken)
+        {
+            return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
+        }
+
+        public  Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        {
+            return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
+        }
+
+        public  Task Publish<T>(object values, CancellationToken cancellationToken)
+            where T : class
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            return PublishInternal<T>(cancellationToken, values);
+        }
+
+        public  Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+            where T : class
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            return PublishInternal(cancellationToken, values, publishPipe);
+        }
+
+        public  Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+            where T : class
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            return PublishInternal<T>(cancellationToken, values, publishPipe);
+        }
+
+        async Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>> pipe = default)
+            where T : class
+        {
+            var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
+
+            if (pipe.IsNotEmpty())
+                await sendEndpoint.Send(message, new PublishPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
+            else
+                await sendEndpoint.Send(message, cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task PublishInternal<T>(CancellationToken cancellationToken, object values, IPipe<PublishContext<T>> pipe = default)
+            where T : class
+        {
+            var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
+
+            if (pipe.IsNotEmpty())
+                await sendEndpoint.Send(values, new PublishPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
+            else
+                await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
         }
 
         Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
@@ -206,5 +238,30 @@ namespace MassTransit.Transports
         }
 
         ClientFactoryContext IClientFactory.Context => _clientFactory.Context;
+
+
+        readonly struct PublishPipe<T> :
+            IPipe<SendContext<T>>
+            where T : class
+        {
+            readonly IPipe<PublishContext<T>> _pipe;
+
+            public PublishPipe(IPipe<PublishContext<T>> pipe)
+            {
+                _pipe = pipe;
+            }
+
+            void IProbeSite.Probe(ProbeContext context)
+            {
+                _pipe.Probe(context);
+            }
+
+            public Task Send(SendContext<T> context)
+            {
+                var publishContext = context.GetPayload<PublishContext<T>>();
+
+                return _pipe.Send(publishContext);
+            }
+        }
     }
 }

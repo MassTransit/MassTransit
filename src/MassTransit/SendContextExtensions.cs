@@ -122,7 +122,7 @@
             if (consumeContext.CorrelationId.HasValue)
                 sendContext.InitiatorId = consumeContext.CorrelationId;
             else if (consumeContext.RequestId.HasValue)
-                sendContext.InitiatorId = consumeContext.RequestId;
+                sendContext.RequestId = consumeContext.RequestId;
 
             foreach (KeyValuePair<string, object> header in consumeContext.Headers.GetAll())
             {

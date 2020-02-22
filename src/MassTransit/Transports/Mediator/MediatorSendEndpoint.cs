@@ -1,4 +1,4 @@
-namespace MassTransit.Transports
+namespace MassTransit.Transports.Mediator
 {
     using System;
     using System.Threading;
@@ -6,13 +6,14 @@ namespace MassTransit.Transports
     using Configuration;
     using Context;
     using Context.Converters;
+    using Contexts;
     using GreenPipes;
     using Initializers;
     using Pipeline;
     using Pipeline.Observables;
 
 
-    public class DispatcherSendEndpoint :
+    public class MediatorSendEndpoint :
         ISendEndpoint,
         IPublishEndpointProvider,
         ISendEndpointProvider
@@ -20,12 +21,13 @@ namespace MassTransit.Transports
         readonly IReceiveEndpointConfiguration _configuration;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly ILogContext _logContext;
-        readonly Uri _sourceAddress;
+        readonly PublishSendEndpoint _publishSendEndpoint;
         readonly SendObservable _sendObservers;
-        readonly DispatcherSendEndpoint _sourceEndpoint;
-        readonly PublishObservable _publishObservable;
+        readonly ISendPipe _sendPipe;
+        readonly Uri _sourceAddress;
+        readonly MediatorSendEndpoint _sourceEndpoint;
 
-        DispatcherSendEndpoint(IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher, ILogContext logContext,
+        MediatorSendEndpoint(IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher, ILogContext logContext,
             SendObservable sendObservers)
         {
             _configuration = configuration;
@@ -33,25 +35,33 @@ namespace MassTransit.Transports
             _logContext = logContext;
             _sendObservers = sendObservers;
 
-            _publishObservable = new PublishObservable();
+            _sendPipe = configuration.Send.CreatePipe();
+
+            _publishSendEndpoint = new PublishSendEndpoint(this, configuration.Publish.CreatePipe());
         }
 
-        public DispatcherSendEndpoint(IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher, ILogContext logContext,
+        public MediatorSendEndpoint(IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher, ILogContext logContext,
             SendObservable sendObservers, IReceiveEndpointConfiguration sourceConfiguration, IReceivePipeDispatcher sourceDispatcher)
             : this(configuration, dispatcher, logContext, sendObservers)
         {
             _sourceAddress = sourceConfiguration.InputAddress;
-            _sourceEndpoint = new DispatcherSendEndpoint(sourceConfiguration, sourceDispatcher, logContext, sendObservers);
+            _sourceEndpoint = new MediatorSendEndpoint(sourceConfiguration, sourceDispatcher, logContext, sendObservers);
+        }
+
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishSendEndpoint.ConnectPublishObserver(observer);
+        }
+
+        public Task<ISendEndpoint> GetPublishSendEndpoint<T>()
+            where T : class
+        {
+            return Task.FromResult<ISendEndpoint>(_publishSendEndpoint);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _sendObservers.Connect(observer);
-        }
-
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
-        {
-            return Task.FromResult<ISendEndpoint>(_sourceEndpoint);
         }
 
         public Task Send<T>(T message, CancellationToken cancellationToken)
@@ -60,7 +70,7 @@ namespace MassTransit.Transports
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            return SendMessage(message, new DispatcherPipe<T>(this), cancellationToken);
+            return SendMessage(message, new MediatorPipe<T>(this), cancellationToken);
         }
 
         public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -71,7 +81,7 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            return SendMessage(message, new DispatcherPipe<T>(this, pipe), cancellationToken);
+            return SendMessage(message, new MediatorPipe<T>(this, pipe), cancellationToken);
         }
 
         public Task Send(object message, CancellationToken cancellationToken)
@@ -111,7 +121,7 @@ namespace MassTransit.Transports
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            return SendMessage(message, new DispatcherPipe<T>(this, pipe), cancellationToken);
+            return SendMessage(message, new MediatorPipe<T>(this, pipe), cancellationToken);
         }
 
         public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -159,6 +169,14 @@ namespace MassTransit.Transports
             return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
         }
 
+        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        {
+            if (address.Equals(_sourceAddress))
+                return Task.FromResult<ISendEndpoint>(_sourceEndpoint);
+
+            return Task.FromResult<ISendEndpoint>(this);
+        }
+
         async Task SendMessage<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
@@ -168,7 +186,7 @@ namespace MassTransit.Transports
 
             await pipe.Send(context).ConfigureAwait(false);
 
-            var receiveContext = new DispatcherReceiveContext<T>(context, this, this, _configuration.Topology.Publish, _configuration.ReceiveObservers,
+            var receiveContext = new MediatorReceiveContext<T>(context, this, this, _configuration.Topology.Publish, _configuration.ReceiveObservers,
                 cancellationToken);
 
             try
@@ -190,34 +208,23 @@ namespace MassTransit.Transports
             }
         }
 
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
-        {
-            return _publishObservable.Connect(observer);
-        }
 
-        public Task<ISendEndpoint> GetPublishSendEndpoint<T>()
-            where T : class
-        {
-            return Task.FromResult<ISendEndpoint>(_sourceEndpoint);
-        }
-
-
-        readonly struct DispatcherPipe<TMessage> :
+        readonly struct MediatorPipe<TMessage> :
             IPipe<SendContext<TMessage>>
             where TMessage : class
         {
-            readonly DispatcherSendEndpoint _endpoint;
+            readonly MediatorSendEndpoint _endpoint;
             readonly IPipe<SendContext<TMessage>> _pipe;
             readonly ISendContextPipe _sendContextPipe;
 
-            public DispatcherPipe(DispatcherSendEndpoint endpoint)
+            public MediatorPipe(MediatorSendEndpoint endpoint)
             {
                 _endpoint = endpoint;
                 _pipe = default;
                 _sendContextPipe = default;
             }
 
-            public DispatcherPipe(DispatcherSendEndpoint endpoint, IPipe<SendContext<TMessage>> pipe)
+            public MediatorPipe(MediatorSendEndpoint endpoint, IPipe<SendContext<TMessage>> pipe)
             {
                 _endpoint = endpoint;
                 _pipe = pipe;
@@ -233,10 +240,14 @@ namespace MassTransit.Transports
             public async Task Send(SendContext<TMessage> context)
             {
                 context.DestinationAddress = _endpoint._configuration.InputAddress;
-                context.SourceAddress = _endpoint._sourceAddress;
+
+                if (context.SourceAddress == null)
+                    context.SourceAddress = _endpoint._sourceAddress;
 
                 if (_sendContextPipe != null)
                     await _sendContextPipe.Send(context).ConfigureAwait(false);
+
+                await _endpoint._sendPipe.Send(context).ConfigureAwait(false);
 
                 if (_pipe.IsNotEmpty())
                     await _pipe.Send(context).ConfigureAwait(false);

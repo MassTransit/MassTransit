@@ -1,21 +1,22 @@
-namespace MassTransit.Clients
+namespace MassTransit.Transports.Mediator
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Clients;
     using Context;
     using GreenPipes;
     using Initializers;
 
 
-    public class DispatcherRequestSendEndpoint<TRequest> :
+    public class MediatorRequestSendEndpoint<TRequest> :
         IRequestSendEndpoint<TRequest>
         where TRequest : class
     {
         readonly ISendEndpoint _endpoint;
         readonly ConsumeContext _consumeContext;
 
-        public DispatcherRequestSendEndpoint(ISendEndpoint endpoint, ConsumeContext consumeContext)
+        public MediatorRequestSendEndpoint(ISendEndpoint endpoint, ConsumeContext consumeContext)
         {
             _endpoint = endpoint;
             _consumeContext = consumeContext;

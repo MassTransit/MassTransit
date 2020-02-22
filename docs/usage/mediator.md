@@ -25,7 +25,7 @@ class SubmitOrderConsumer :
     }
 }
 
-var mediator = Bus.Factory.CreateInMemoryMediator(cfg =>
+var mediator = Bus.Factory.CreateMediator(cfg =>
 {
     cfg.Consumer<SubmitOrderConsumer>();
 });
@@ -65,7 +65,7 @@ class OrderStatusConsumer :
     }
 }
 
-var mediator = Bus.Factory.CreateInMemoryMediator(cfg =>
+var mediator = Bus.Factory.CreateMediator(cfg =>
 {
     cfg.Consumer<OrderStatusConsumer>();
 });
