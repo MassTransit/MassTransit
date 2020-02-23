@@ -170,7 +170,7 @@ so if you publish to it, the message will just disappear.
     1. Set `AutoDelete=true` in the endpoint configuration. This causes the queue to be removed when your application stops.
 
 - How are Retries handled?
-  - This is handled by [middleware](middleware.md). Each endpoint has a [retry policy](retry.md).
+  - This is handled by [middleware](../../advanced/middleware/README.md). Each endpoint has a [retry policy](../exceptions.md#retry).
 
 - Can I have a different retry policy per each message type?
   - No. This is set at an endpoint level. You would have to have a specific queue per consumer to achieve this.
