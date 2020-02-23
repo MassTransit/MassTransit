@@ -5,6 +5,7 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using Initializers;
 
 
@@ -250,19 +251,37 @@ namespace MassTransit.Context
                 await ConsumeTask(initializer.Send(responseEndpoint, context, values)).ConfigureAwait(false);
         }
 
-        protected virtual async Task<ISendEndpoint> GetResponseEndpoint<T>()
+        protected virtual Task<ISendEndpoint> GetResponseEndpoint<T>()
             where T : class
         {
             if (_context.ResponseAddress != null)
             {
-                var sendEndpoint = await _context.ReceiveContext.SendEndpointProvider.GetSendEndpoint(_context.ResponseAddress).ConfigureAwait(false);
+                var sendEndpointTask = _context.ReceiveContext.SendEndpointProvider.GetSendEndpoint(_context.ResponseAddress);
+                if (sendEndpointTask.IsCompletedSuccessfully())
+                    return Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(sendEndpointTask.Result, this, ConsumeTask, _context.RequestId));
+
+                async Task<ISendEndpoint> GetResponseEndpointAsync()
+                {
+                    var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
+
+                    return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask, _context.RequestId);
+                }
+
+                return GetResponseEndpointAsync();
+            }
+
+            var publishSendEndpointTask = _context.ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>();
+            if (publishSendEndpointTask.IsCompletedSuccessfully())
+                return Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(publishSendEndpointTask.Result, this, ConsumeTask, _context.RequestId));
+
+            async Task<ISendEndpoint> GetPublishEndpointAsync()
+            {
+                var sendEndpoint = await publishSendEndpointTask.ConfigureAwait(false);
 
                 return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask, _context.RequestId);
             }
 
-            var publishSendEndpoint = await _context.ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
-
-            return new ConsumeSendEndpoint(publishSendEndpoint, this, ConsumeTask, _context.RequestId);
+            return GetPublishEndpointAsync();
         }
 
         Task ConsumeTask(Task task)

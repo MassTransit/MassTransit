@@ -61,12 +61,12 @@ namespace MassTransit.Transports.Mediator.Contexts
 
         public Stream GetBodyStream()
         {
-            return new MemoryStream();
+            throw new NotImplementedByDesignException("The mediator should not be serializing messages");
         }
 
         public byte[] GetBody()
         {
-            return new byte[0];
+            throw new NotImplementedByDesignException("The mediator should not be serializing messages");
         }
 
         public Task ReceiveCompleted => _receiveTasks.Completed(CancellationToken);

@@ -4,18 +4,15 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using System.Threading.Tasks;
     using Context;
     using Metadata;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Util;
 
 
     public class JsonConsumeContext :
         DeserializerConsumeContext
     {
-        readonly PendingTaskCollection _consumeTasks;
         readonly JsonSerializer _deserializer;
         readonly MessageEnvelope _envelope;
         readonly JToken _messageToken;
@@ -44,10 +41,7 @@ namespace MassTransit.Serialization
             _messageToken = GetMessageToken(envelope.Message);
             _supportedTypes = envelope.MessageType.ToArray();
             _messageTypes = new Dictionary<Type, ConsumeContext>();
-            _consumeTasks = new PendingTaskCollection(4);
         }
-
-        public override Task ConsumeCompleted => _consumeTasks.Completed(CancellationToken);
 
         public override Guid? MessageId => _messageId ??= ConvertIdToGuid(_envelope.MessageId);
         public override Guid? RequestId => _requestId ??= ConvertIdToGuid(_envelope.RequestId);
@@ -117,11 +111,6 @@ namespace MassTransit.Serialization
                 _messageTypes[typeof(T)] = message = null;
                 return false;
             }
-        }
-
-        public override void AddConsumeTask(Task task)
-        {
-            _consumeTasks.Add(task);
         }
 
         static JToken GetMessageToken(object message)

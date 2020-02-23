@@ -5,7 +5,6 @@
     using System.Linq;
     using GreenPipes;
     using GreenPipes.Specifications;
-    using GreenPipes.Util;
     using Metadata;
     using PipeBuilders;
 
@@ -35,20 +34,10 @@
 
         IMessagePublishPipeSpecification<T> IMessagePublishPipeSpecification.GetMessageSpecification<T>()
         {
-            var result = this as IMessagePublishPipeSpecification<T>;
-            if (result == null)
-                throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
+            if (this is IMessagePublishPipeSpecification<T> result)
+                return result;
 
-            return result;
-        }
-
-        public ConnectHandle Connect(IPipeConnector connector)
-        {
-            IPipe<PublishContext<TMessage>> messagePipe = BuildMessagePipe();
-
-            return messagePipe.IsNotEmpty()
-                ? connector.ConnectPipe(messagePipe)
-                : new EmptyConnectHandle();
+            throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
         }
 
         public void AddPipeSpecification(IPipeSpecification<PublishContext<TMessage>> specification)
@@ -65,31 +54,30 @@
         {
             if (!builder.IsDelegated && _implementedMessageTypeSpecifications.Count > 0)
             {
-                ISpecificationPipeBuilder<PublishContext<TMessage>> implementedBuilder = builder.CreateImplementedBuilder();
+                var implementedBuilder = builder.CreateImplementedBuilder();
 
-                foreach (ISpecificationPipeSpecification<PublishContext<TMessage>> specification in _implementedMessageTypeSpecifications.Reverse())
-                {
-                    specification.Apply(implementedBuilder);
-                }
+                for (var index = _implementedMessageTypeSpecifications.Count - 1; index >= 0; index--)
+                    _implementedMessageTypeSpecifications[index].Apply(implementedBuilder);
             }
 
-            ISpecificationPipeBuilder<PublishContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
-
-            foreach (ISpecificationPipeSpecification<PublishContext<TMessage>> specification in _parentMessageSpecifications)
+            var parentCount = _parentMessageSpecifications.Count;
+            if (parentCount > 0)
             {
-                specification.Apply(delegatedBuilder);
+                var delegatedBuilder = builder.CreateDelegatedBuilder();
+
+                for (var index = 0; index < parentCount; index++)
+                    _parentMessageSpecifications[index].Apply(delegatedBuilder);
             }
 
-            foreach (IPipeSpecification<PublishContext<TMessage>> specification in _specifications)
-            {
-                specification.Apply(builder);
-            }
+            for (var index = 0; index < _specifications.Count; index++)
+                _specifications[index].Apply(builder);
 
             if (!builder.IsImplemented)
             {
-                foreach (IPipeSpecification<PublishContext> specification in _baseSpecifications)
+                for (var index = 0; index < _baseSpecifications.Count; index++)
                 {
-                    var split = new SplitFilterPipeSpecification<PublishContext<TMessage>, PublishContext>(specification, MergeContext, FilterContext);
+                    var split = new SplitFilterPipeSpecification<PublishContext<TMessage>, PublishContext>(_baseSpecifications[index], MergeContext,
+                        FilterContext);
 
                     split.Apply(builder);
                 }

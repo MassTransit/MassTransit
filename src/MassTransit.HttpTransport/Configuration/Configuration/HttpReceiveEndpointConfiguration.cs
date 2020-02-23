@@ -22,7 +22,7 @@
         readonly string _pathMatch;
 
         public HttpReceiveEndpointConfiguration(IHttpHostConfiguration hostConfiguration, string pathMatch, IHttpEndpointConfiguration endpointConfiguration)
-            : base(endpointConfiguration)
+            : base(hostConfiguration, endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
             _pathMatch = pathMatch;

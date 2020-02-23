@@ -20,10 +20,10 @@
         readonly IList<IReceiveEndpointDependency> _dependencies;
         IReceiveEndpoint _receiveEndpoint;
 
-        protected ReceiveEndpointConfiguration(IEndpointConfiguration endpointConfiguration)
+        protected ReceiveEndpointConfiguration(IHostConfiguration hostConfiguration, IEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)
         {
-            _consumePipe = new Lazy<IConsumePipe>(() => Consume.CreatePipe());
+            _consumePipe = new Lazy<IConsumePipe>(() => Consume.Specification.BuildConsumePipe());
             _specifications = new List<IReceiveEndpointSpecification>();
             _lateConfigurationKeys = new List<string>();
             _dependencies = new List<IReceiveEndpointDependency>();
@@ -31,6 +31,11 @@
             EndpointObservers = new ReceiveEndpointObservable();
             ReceiveObservers = new ReceiveObservable();
             TransportObservers = new ReceiveTransportObservable();
+
+            ConnectConsumerConfigurationObserver(hostConfiguration.BusConfiguration);
+            ConnectSagaConfigurationObserver(hostConfiguration.BusConfiguration);
+            ConnectHandlerConfigurationObserver(hostConfiguration.BusConfiguration);
+            ConnectActivityConfigurationObserver(hostConfiguration.BusConfiguration);
         }
 
         public ReceiveEndpointObservable EndpointObservers { get; }

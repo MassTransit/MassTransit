@@ -10,6 +10,8 @@
         IEndpointConfigurationObserverConnector,
         ISpecification
     {
+        IBusConfiguration BusConfiguration { get; }
+
         Uri HostAddress { get; }
 
         IBusHostControl Build();

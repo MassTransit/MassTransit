@@ -13,7 +13,6 @@ namespace MassTransit.Transports.Mediator.Contexts
         ConsumeContext<TMessage>
         where TMessage : class
     {
-        readonly PendingTaskCollection _consumeTasks;
         readonly SendContext<TMessage> _sendContext;
 
         public MediatorConsumeContext(ReceiveContext receiveContext, SendContext<TMessage> sendContext)
@@ -21,11 +20,7 @@ namespace MassTransit.Transports.Mediator.Contexts
         {
             Message = sendContext.Message;
             _sendContext = sendContext;
-
-            _consumeTasks = new PendingTaskCollection(4);
         }
-
-        public override Task ConsumeCompleted => _consumeTasks.Completed();
 
         public override IEnumerable<string> SupportedMessageTypes => TypeMetadataCache<TMessage>.MessageTypeNames;
 
@@ -44,11 +39,6 @@ namespace MassTransit.Transports.Mediator.Contexts
 
             consumeContext = default;
             return false;
-        }
-
-        public override void AddConsumeTask(Task task)
-        {
-            _consumeTasks.Add(task);
         }
 
         public override Guid? MessageId => _sendContext.MessageId;

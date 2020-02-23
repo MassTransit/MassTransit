@@ -38,7 +38,7 @@ namespace MassTransit.Context
 
         public Task Send(SendContext<TMessage> context)
         {
-            return _pipe?.Send(context) ?? TaskUtil.Completed;
+            return _pipe.IsNotEmpty() ? _pipe.Send(context) : TaskUtil.Completed;
         }
 
         public Task Send<T>(SendContext<T> context)

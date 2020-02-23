@@ -11,6 +11,7 @@ namespace MassTransit.Transports.Mediator
     using Initializers;
     using Pipeline;
     using Pipeline.Observables;
+    using Topology;
 
 
     public class MediatorSendEndpoint :
@@ -18,10 +19,12 @@ namespace MassTransit.Transports.Mediator
         IPublishEndpointProvider,
         ISendEndpointProvider
     {
-        readonly IReceiveEndpointConfiguration _configuration;
+        readonly Uri _destinationAddress;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly ILogContext _logContext;
         readonly PublishSendEndpoint _publishSendEndpoint;
+        readonly IPublishTopologyConfigurator _publishTopology;
+        readonly ReceiveObservable _receiveObservers;
         readonly SendObservable _sendObservers;
         readonly ISendPipe _sendPipe;
         readonly Uri _sourceAddress;
@@ -30,10 +33,13 @@ namespace MassTransit.Transports.Mediator
         MediatorSendEndpoint(IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher, ILogContext logContext,
             SendObservable sendObservers)
         {
-            _configuration = configuration;
             _dispatcher = dispatcher;
             _logContext = logContext;
             _sendObservers = sendObservers;
+
+            _destinationAddress = configuration.InputAddress;
+            _publishTopology = configuration.Topology.Publish;
+            _receiveObservers = configuration.ReceiveObservers;
 
             _sendPipe = configuration.Send.CreatePipe();
 
@@ -186,8 +192,7 @@ namespace MassTransit.Transports.Mediator
 
             await pipe.Send(context).ConfigureAwait(false);
 
-            var receiveContext = new MediatorReceiveContext<T>(context, this, this, _configuration.Topology.Publish, _configuration.ReceiveObservers,
-                cancellationToken);
+            var receiveContext = new MediatorReceiveContext<T>(context, this, this, _publishTopology, _receiveObservers, cancellationToken);
 
             try
             {
@@ -215,21 +220,17 @@ namespace MassTransit.Transports.Mediator
         {
             readonly MediatorSendEndpoint _endpoint;
             readonly IPipe<SendContext<TMessage>> _pipe;
-            readonly ISendContextPipe _sendContextPipe;
 
             public MediatorPipe(MediatorSendEndpoint endpoint)
             {
                 _endpoint = endpoint;
                 _pipe = default;
-                _sendContextPipe = default;
             }
 
             public MediatorPipe(MediatorSendEndpoint endpoint, IPipe<SendContext<TMessage>> pipe)
             {
                 _endpoint = endpoint;
                 _pipe = pipe;
-                // ReSharper disable once SuspiciousTypeConversion.Global
-                _sendContextPipe = pipe as ISendContextPipe;
             }
 
             void IProbeSite.Probe(ProbeContext context)
@@ -239,24 +240,20 @@ namespace MassTransit.Transports.Mediator
 
             public async Task Send(SendContext<TMessage> context)
             {
-                context.DestinationAddress = _endpoint._configuration.InputAddress;
+                context.DestinationAddress = _endpoint._destinationAddress;
 
-                if (context.SourceAddress == null)
-                    context.SourceAddress = _endpoint._sourceAddress;
+                context.SourceAddress ??= _endpoint._sourceAddress;
 
-                if (_sendContextPipe != null)
-                    await _sendContextPipe.Send(context).ConfigureAwait(false);
+                // ReSharper disable once SuspiciousTypeConversion.Global
+                if(_pipe is ISendContextPipe sendContextPipe)
+                    await sendContextPipe.Send(context).ConfigureAwait(false);
 
                 await _endpoint._sendPipe.Send(context).ConfigureAwait(false);
 
                 if (_pipe.IsNotEmpty())
                     await _pipe.Send(context).ConfigureAwait(false);
 
-                if (context.RequestId.HasValue)
-                    context.ResponseAddress = _endpoint._sourceAddress;
-
-                if (!context.ConversationId.HasValue)
-                    context.ConversationId = NewId.NextGuid();
+                context.ConversationId ??= NewId.NextGuid();
             }
         }
     }

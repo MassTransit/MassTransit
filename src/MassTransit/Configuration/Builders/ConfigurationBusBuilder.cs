@@ -5,8 +5,7 @@ namespace MassTransit.Builders
     using Util;
 
 
-    public class ConfigurationBusBuilder :
-        IBusBuilder
+    public class ConfigurationBusBuilder
     {
         readonly IReceiveEndpointConfiguration _busEndpointConfiguration;
         readonly IBusConfiguration _busConfiguration;

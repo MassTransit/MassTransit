@@ -25,11 +25,5 @@ namespace MassTransit.PublishPipeSpecifications
     {
         IMessagePublishPipeSpecification<T> GetMessageSpecification<T>()
             where T : class;
-
-        /// <summary>
-        /// Connect the pipe for the specification to the specified connector
-        /// </summary>
-        /// <param name="connector"></param>
-        ConnectHandle Connect(IPipeConnector connector);
     }
 }

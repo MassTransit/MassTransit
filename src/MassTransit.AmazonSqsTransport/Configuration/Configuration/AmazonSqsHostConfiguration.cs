@@ -21,6 +21,7 @@
 
         public AmazonSqsHostConfiguration(IAmazonSqsBusConfiguration busConfiguration, IAmazonSqsTopologyConfiguration
             topologyConfiguration)
+            : base(busConfiguration)
         {
             _busConfiguration = busConfiguration;
             _topologyConfiguration = topologyConfiguration;
@@ -58,11 +59,6 @@
                 throw new ArgumentNullException(nameof(endpointConfiguration));
 
             var configuration = new AmazonSqsReceiveEndpointConfiguration(this, settings, endpointConfiguration);
-
-            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
-            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
-            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
-            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
 
             configure?.Invoke(configuration);
 

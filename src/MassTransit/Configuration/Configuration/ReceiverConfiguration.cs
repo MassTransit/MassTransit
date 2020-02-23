@@ -5,22 +5,18 @@ namespace MassTransit.Configuration
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using GreenPipes.Builders;
-    using GreenPipes.Configurators;
     using Internals.Extensions;
 
 
     public class ReceiverConfiguration :
         EndpointConfiguration
     {
-        protected readonly IBuildPipeConfigurator<ReceiveContext> ReceivePipeConfigurator;
         protected readonly IList<IReceiveEndpointSpecification> Specifications;
 
         protected ReceiverConfiguration(IEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)
         {
             Specifications = new List<IReceiveEndpointSpecification>();
-            ReceivePipeConfigurator = new PipeConfigurator<ReceiveContext>();
 
             if (LogContext.Current == null)
                 LogContext.ConfigureCurrentLogContext();

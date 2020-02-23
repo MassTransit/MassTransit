@@ -28,14 +28,16 @@
                 _properties[key] = value;
         }
 
-        public void Set(string key, object value)
+        public void Set(string key, object value, bool overwrite)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
             if (value == null)
                 _properties.Remove(key);
-            else
+            else if (overwrite)
+                _properties[key] = value;
+            else if (!_properties.Contains(key))
                 _properties[key] = value;
         }
 

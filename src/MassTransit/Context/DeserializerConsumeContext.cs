@@ -1,15 +1,20 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Threading.Tasks;
     using GreenPipes;
+    using Util;
 
 
     public abstract class DeserializerConsumeContext :
         BaseConsumeContext
     {
+        readonly PendingTaskCollection _consumeTasks;
+
         protected DeserializerConsumeContext(ReceiveContext receiveContext)
             : base(receiveContext)
         {
+            _consumeTasks = new PendingTaskCollection(4);
         }
 
         /// <summary>
@@ -66,6 +71,13 @@ namespace MassTransit.Context
                 return context;
 
             return ReceiveContext.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
+        public override Task ConsumeCompleted => _consumeTasks.Completed(CancellationToken);
+
+        public override void AddConsumeTask(Task task)
+        {
+            _consumeTasks.Add(task);
         }
     }
 }

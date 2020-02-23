@@ -49,7 +49,8 @@ namespace MassTransit.Pipeline.Pipes
         {
             var handle = _dynamicFilter.ConnectPipe(pipe);
 
-            _connected.TrySetResultOnThreadPool(true);
+            if (_connected.Task.Status == TaskStatus.WaitingForActivation)
+                _connected.TrySetResultOnThreadPool(true);
 
             return handle;
         }
@@ -58,7 +59,8 @@ namespace MassTransit.Pipeline.Pipes
         {
             var handle = _dynamicFilter.ConnectPipe(requestId, pipe);
 
-            _connected.TrySetResultOnThreadPool(true);
+            if (_connected.Task.Status == TaskStatus.WaitingForActivation)
+                _connected.TrySetResultOnThreadPool(true);
 
             return handle;
         }

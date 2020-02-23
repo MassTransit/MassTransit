@@ -1,21 +1,21 @@
-namespace MassTransit.Transports.InMemory.Configuration
+namespace MassTransit.Configuration
 {
     using System;
+    using Builders;
+    using Configurators;
     using Context;
     using GreenPipes;
     using Logging;
-    using MassTransit.Builders;
-    using MassTransit.Configuration;
-    using MassTransit.Configurators;
+    using Transports;
 
 
-    public class InMemoryReceivePipeDispatcherConfiguration :
+    public class ReceivePipeDispatcherConfiguration :
         ReceiverConfiguration,
-        IInMemoryReceiveEndpointConfigurator
+        IReceiveEndpointConfigurator
     {
-        readonly IInMemoryReceiveEndpointConfiguration _endpointConfiguration;
+        readonly IReceiveEndpointConfiguration _endpointConfiguration;
 
-        public InMemoryReceivePipeDispatcherConfiguration(IInMemoryReceiveEndpointConfiguration endpointConfiguration)
+        public ReceivePipeDispatcherConfiguration(IReceiveEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)
         {
             _endpointConfiguration = endpointConfiguration;
@@ -30,17 +30,11 @@ namespace MassTransit.Transports.InMemory.Configuration
 
         public void AddDependency(IReceiveEndpointObserverConnector connector)
         {
-            _endpointConfiguration.Configurator.AddDependency(connector);
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
             return _endpointConfiguration.ConnectReceiveEndpointObserver(observer);
-        }
-
-        public int ConcurrencyLimit
-        {
-            set => _endpointConfiguration.Configurator.ConcurrencyLimit = value;
         }
 
         public IReceivePipeDispatcher Build()

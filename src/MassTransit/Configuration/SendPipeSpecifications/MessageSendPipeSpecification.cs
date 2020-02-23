@@ -1,28 +1,13 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.SendPipeSpecifications
+﻿namespace MassTransit.SendPipeSpecifications
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using Context;
     using GreenPipes;
-    using GreenPipes.Pipes;
     using GreenPipes.Specifications;
-    using GreenPipes.Util;
     using Metadata;
     using PipeBuilders;
-    using Util;
 
 
     public class MessageSendPipeSpecification<TMessage> :
@@ -50,21 +35,10 @@ namespace MassTransit.SendPipeSpecifications
 
         IMessageSendPipeSpecification<T> IMessageSendPipeSpecification.GetMessageSpecification<T>()
         {
-            var result = this as IMessageSendPipeSpecification<T>;
-            if (result == null)
-                throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
+            if (this is IMessageSendPipeSpecification<T> result)
+                return result;
 
-            return result;
-        }
-
-        public ConnectHandle Connect(IPipeConnector connector)
-        {
-            IPipe<SendContext<TMessage>> messagePipe = BuildMessagePipe();
-
-            if (messagePipe is EmptyPipe<SendContext<TMessage>>)
-                return new EmptyConnectHandle();
-
-            return connector.ConnectPipe(messagePipe);
+            throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
         }
 
         public void AddPipeSpecification(IPipeSpecification<SendContext<TMessage>> specification)
@@ -81,32 +55,29 @@ namespace MassTransit.SendPipeSpecifications
         {
             if (!builder.IsDelegated && _implementedMessageTypeSpecifications.Count > 0)
             {
-                ISpecificationPipeBuilder<SendContext<TMessage>> implementedBuilder = builder.CreateImplementedBuilder();
+                var implementedBuilder = builder.CreateImplementedBuilder();
 
-                foreach (ISpecificationPipeSpecification<SendContext<TMessage>> specification in _implementedMessageTypeSpecifications.Reverse())
-                {
-                    specification.Apply(implementedBuilder);
-                }
+                for (var index = _implementedMessageTypeSpecifications.Count - 1; index >= 0; index--)
+                    _implementedMessageTypeSpecifications[index].Apply(implementedBuilder);
             }
 
-            ISpecificationPipeBuilder<SendContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
-
-            foreach (ISpecificationPipeSpecification<SendContext<TMessage>> specification in _parentMessageSpecifications)
+            var parentCount = _parentMessageSpecifications.Count;
+            if (parentCount > 0)
             {
-                specification.Apply(delegatedBuilder);
+                var delegatedBuilder = builder.CreateDelegatedBuilder();
+
+                for (var index = 0; index < parentCount; index++)
+                    _parentMessageSpecifications[index].Apply(delegatedBuilder);
             }
 
-            foreach (IPipeSpecification<SendContext<TMessage>> specification in _specifications)
-            {
-                specification.Apply(builder);
-            }
-
+            for (var index = 0; index < _specifications.Count; index++)
+                _specifications[index].Apply(builder);
 
             if (!builder.IsImplemented)
             {
-                foreach (IPipeSpecification<SendContext> specification in _baseSpecifications)
+                for (var index = 0; index < _baseSpecifications.Count; index++)
                 {
-                    var split = new SplitFilterPipeSpecification<SendContext<TMessage>, SendContext>(specification, MergeContext, FilterContext);
+                    var split = new SplitFilterPipeSpecification<SendContext<TMessage>, SendContext>(_baseSpecifications[index], MergeContext, FilterContext);
 
                     split.Apply(builder);
                 }

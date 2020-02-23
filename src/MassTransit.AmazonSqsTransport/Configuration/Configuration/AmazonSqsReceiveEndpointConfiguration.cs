@@ -31,7 +31,7 @@
 
         public AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, QueueReceiveSettings settings,
             IAmazonSqsEndpointConfiguration endpointConfiguration)
-            : base(endpointConfiguration)
+            : base(hostConfiguration, endpointConfiguration)
         {
             _settings = settings;
 
@@ -151,6 +151,7 @@
 
         public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
         public IDictionary<string, string> QueueTags => _settings.QueueTags;
+
         public AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
         {
             return _settings.GetEndpointAddress(hostAddress);

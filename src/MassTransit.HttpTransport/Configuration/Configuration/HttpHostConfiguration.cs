@@ -18,6 +18,7 @@
         HttpHostSettings _hostSettings;
 
         public HttpHostConfiguration(IHttpBusConfiguration busConfiguration, IHttpTopologyConfiguration topologyConfiguration)
+            : base(busConfiguration)
         {
             _busConfiguration = busConfiguration;
             _hostSettings = new ConfigurationHostSettings();
@@ -46,11 +47,6 @@
                 throw new ArgumentNullException(nameof(pathMatch));
 
             var configuration = new HttpReceiveEndpointConfiguration(this, pathMatch, endpointConfiguration);
-
-            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
-            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
-            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
-            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
 
             configure?.Invoke(configuration);
 
