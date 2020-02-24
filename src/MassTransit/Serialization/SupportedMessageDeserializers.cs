@@ -11,10 +11,16 @@
     public class SupportedMessageDeserializers :
         IMessageDeserializer
     {
+        readonly string _defaultContentType;
         readonly IDictionary<string, IMessageDeserializer> _deserializers;
 
-        public SupportedMessageDeserializers(params IMessageDeserializer[] deserializers)
+        public SupportedMessageDeserializers(string defaultContentType, params IMessageDeserializer[] deserializers)
         {
+            if (string.IsNullOrWhiteSpace(defaultContentType))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(defaultContentType));
+
+            _defaultContentType = defaultContentType;
+
             _deserializers = new Dictionary<string, IMessageDeserializer>(StringComparer.OrdinalIgnoreCase);
 
             foreach (IMessageDeserializer deserializer in deserializers)
@@ -43,12 +49,12 @@
 
         bool TryGetSerializer(ContentType contentType, out IMessageDeserializer deserializer)
         {
-            if (contentType == null)
-                throw new ArgumentNullException(nameof(contentType));
-            if (string.IsNullOrWhiteSpace(contentType.MediaType))
+            string mediaType = contentType?.MediaType ?? _defaultContentType;
+
+            if (string.IsNullOrWhiteSpace(mediaType))
                 throw new ArgumentException("The media type must be specified", nameof(contentType));
 
-            return _deserializers.TryGetValue(contentType.MediaType, out deserializer);
+            return _deserializers.TryGetValue(mediaType, out deserializer);
         }
 
         void AddSerializer(IMessageDeserializer deserializer)
@@ -56,9 +62,9 @@
             if (deserializer == null)
                 throw new ArgumentNullException(nameof(deserializer));
 
-            string contentType = deserializer.ContentType.MediaType;
+            string mediaType = deserializer.ContentType.MediaType;
 
-            _deserializers[contentType] = deserializer;
+            _deserializers[mediaType] = deserializer;
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Tests.Serialization
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using MassTransit.Serialization;
     using NUnit.Framework;

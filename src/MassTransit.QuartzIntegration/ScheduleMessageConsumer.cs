@@ -103,11 +103,11 @@
         {
             string body = Encoding.UTF8.GetString(context.ReceiveContext.GetBody());
 
-            if (string.Compare(context.ReceiveContext.ContentType.MediaType, JsonMessageSerializer.JsonContentType.MediaType,
-                StringComparison.OrdinalIgnoreCase) == 0)
+            var mediaType = context.ReceiveContext.ContentType?.MediaType;
+
+            if (JsonMessageSerializer.JsonContentType.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))
                 body = TranslateJsonBody(body, destination.ToString());
-            else if (string.Compare(context.ReceiveContext.ContentType.MediaType, XmlMessageSerializer.XmlContentType.MediaType,
-                StringComparison.OrdinalIgnoreCase) == 0)
+            else if (XmlMessageSerializer.XmlContentType.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))
                 body = TranslateXmlBody(body, destination.ToString());
             else
                 throw new InvalidOperationException("Only JSON and XML messages can be scheduled");
@@ -119,7 +119,7 @@
                 .UsingJobData("ResponseAddress", ToString(context.ResponseAddress))
                 .UsingJobData("FaultAddress", ToString(context.FaultAddress))
                 .UsingJobData("Body", body)
-                .UsingJobData("ContentType", context.ReceiveContext.ContentType.MediaType);
+                .UsingJobData("ContentType", mediaType);
 
             if (context.MessageId.HasValue)
                 builder = builder.UsingJobData("MessageId", context.MessageId.Value.ToString());

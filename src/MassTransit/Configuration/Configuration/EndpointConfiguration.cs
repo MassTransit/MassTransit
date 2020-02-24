@@ -222,7 +222,8 @@
                 .Concat(Publish.Specification.Validate())
                 .Concat(Consume.Specification.Validate())
                 .Concat(Receive.Specification.Validate())
-                .Concat(Topology.Validate());
+                .Concat(Topology.Validate())
+                .Concat(Serialization.Validate());
         }
 
         public IConsumePipeConfiguration Consume { get; }

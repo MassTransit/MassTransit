@@ -82,6 +82,11 @@
         /// </summary>
         public const string MessageId = "MessageId";
 
+        /// <summary>
+        /// When a transport header is used, this is the name
+        /// </summary>
+        public const string ContentType = "Content-Type";
+
 
         public static class Host
         {
