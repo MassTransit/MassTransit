@@ -62,29 +62,32 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
         public async Task HandleMessage(Message message)
         {
-            if (IsStopping)
+            await Task.Run(async () =>
             {
-                await WaitAndAbandonMessage().ConfigureAwait(false);
-                return;
-            }
+                if (IsStopping)
+                {
+                    await WaitAndAbandonMessage().ConfigureAwait(false);
+                    return;
+                }
 
-            var redelivered = message.Attributes.TryGetValue("ApproximateReceiveCount", out var receiveCountStr)
-                && int.TryParse(receiveCountStr, out var receiveCount) && receiveCount > 1;
+                var redelivered = message.Attributes.TryGetValue("ApproximateReceiveCount", out var receiveCountStr)
+                    && int.TryParse(receiveCountStr, out var receiveCount) && receiveCount > 1;
 
-            var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
-            if (!_pending.TryAdd(message.MessageId, context))
-                LogContext.Error?.Log("Duplicate message: {MessageId}", message.MessageId);
+                var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
+                if (!_pending.TryAdd(message.MessageId, context))
+                    LogContext.Error?.Log("Duplicate message: {MessageId}", message.MessageId);
 
-            try
-            {
-                await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
-            }
-            finally
-            {
-                _pending.TryRemove(message.MessageId, out _);
+                try
+                {
+                    await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
+                }
+                finally
+                {
+                    _pending.TryRemove(message.MessageId, out _);
 
-                context.Dispose();
-            }
+                    context.Dispose();
+                }
+            });
         }
 
         long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;

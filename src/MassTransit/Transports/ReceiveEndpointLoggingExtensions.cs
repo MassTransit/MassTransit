@@ -32,6 +32,9 @@ namespace MassTransit.Transports
         static readonly LogMessage<Uri, Guid?> _logRetry = LogContext.Define<Uri, Guid?>(LogLevel.Warning,
             "R-RETRY {InputAddress} {MessageId}");
 
+        static readonly LogMessage<Uri, Guid?> _logFault = LogContext.Define<Uri, Guid?>(LogLevel.Error,
+            "T-FAULT {InputAddress} {MessageId}");
+
         /// <summary>
         /// Log a skipped message that was moved to the dead-letter queue
         /// </summary>
@@ -79,6 +82,12 @@ namespace MassTransit.Transports
         public static void LogFaulted(this ReceiveContext context, Exception exception)
         {
             _logReceiveFault(context.InputAddress, GetMessageId(context), context.ElapsedTime, exception);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void LogTransportFaulted(this ReceiveContext context, Exception exception)
+        {
+            _logFault(context.InputAddress, GetMessageId(context), exception);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

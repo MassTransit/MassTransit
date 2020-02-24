@@ -45,7 +45,7 @@ namespace MassTransit.Courier
             _host = HostMetadataCache.Host;
         }
 
-        static IDictionary<string, object> EmptyObject => _emptyObject ?? (_emptyObject = JsonConvert.DeserializeObject<IDictionary<string, object>>("{}"));
+        static IDictionary<string, object> EmptyObject => _emptyObject ??= JsonConvert.DeserializeObject<IDictionary<string, object>>("{}");
 
         public Task PublishRoutingSlipCompleted(DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables)
         {

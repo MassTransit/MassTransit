@@ -9,6 +9,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Microsoft.Extensions.Logging;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using Topology;
@@ -141,6 +142,10 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 try
                 {
                     await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    context.LogTransportFaulted(exception);
                 }
                 finally
                 {

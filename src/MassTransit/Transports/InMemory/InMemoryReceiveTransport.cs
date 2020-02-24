@@ -47,9 +47,10 @@ namespace MassTransit.Transports.InMemory
             {
                 await _dispatcher.Dispatch(context).ConfigureAwait(false);
             }
-            catch (Exception)
+            catch (Exception exception)
             {
                 message.DeliveryCount++;
+                context.LogTransportFaulted(exception);
             }
             finally
             {

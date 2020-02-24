@@ -77,6 +77,10 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 {
                     await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
                 }
+                catch (Exception exception)
+                {
+                    context.LogTransportFaulted(exception);
+                }
                 finally
                 {
                     _pending.TryRemove(message.NMSMessageId, out _);

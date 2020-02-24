@@ -45,13 +45,13 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="connector"></param>
-        /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        /// <param name="specifications"></param>
+        /// <param name="handler">The callback to invoke when messages of the specified type arrive at the service bus</param>
+        /// <param name="configurator"></param>
         public static ConnectHandle ConnectHandler<T>(this IConsumePipeConnector connector, MessageHandler<T> handler,
-            params IPipeSpecification<ConsumeContext<T>>[] specifications)
+            IBuildPipeConfigurator<ConsumeContext<T>> configurator = null)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.ConnectHandler(connector, handler, specifications);
+            return HandlerConnectorCache<T>.Connector.ConnectHandler(connector, handler, configurator);
         }
 
         /// <summary>
