@@ -1,4 +1,4 @@
-namespace MassTransit.Tests
+namespace MassTransit.Tests.Conductor
 {
     using System;
     using Contracts;
@@ -11,6 +11,7 @@ namespace MassTransit.Tests
 
     namespace TestContracts
     {
+        using System;
         using System.Collections.Generic;
 
 

@@ -1,10 +1,10 @@
-namespace MassTransit.Tests
+namespace MassTransit.Tests.Conductor
 {
     using System;
     using System.Linq;
     using System.Text;
-    using Conductor.Distribution;
     using Contracts;
+    using MassTransit.Conductor.Distribution;
     using NUnit.Framework;
 
 

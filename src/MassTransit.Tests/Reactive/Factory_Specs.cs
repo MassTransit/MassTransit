@@ -10,16 +10,15 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Reactive.Tests
+namespace MassTransit.Tests.Reactive
 {
     using System;
-    using System.Linq;
     using System.Reactive;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
+    using MassTransit.Testing.Observers;
     using NUnit.Framework;
     using TestFramework;
-    using Testing.Observers;
     using Util;
 
 

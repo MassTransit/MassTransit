@@ -1,4 +1,4 @@
-namespace MassTransit.Tests
+namespace MassTransit.Tests.Conductor
 {
     using System;
     using System.Diagnostics;
@@ -206,7 +206,7 @@ namespace MassTransit.Tests
     }
 
 
-    [TestFixture]
+    [TestFixture, Explicit("Future")]
     public class Linking_a_service_that_later_gets_a_second_instance
     {
         [Test]
@@ -292,9 +292,6 @@ namespace MassTransit.Tests
 
         namespace Contracts
         {
-            using System;
-
-
             public interface DeployHappiness
             {
                 string Target { get; }
