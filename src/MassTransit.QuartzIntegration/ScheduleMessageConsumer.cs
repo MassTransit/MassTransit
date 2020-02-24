@@ -32,28 +32,27 @@
 
             var jobKey = new JobKey(correlationId);
 
-            LogContext.Debug?.Log("ScheduleMessage: {Id} at {ScheduledTime}", jobKey, context.Message.ScheduledTime);
-
             var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
+            var triggerKey = new TriggerKey(correlationId);
             var trigger = TriggerBuilder.Create()
                 .ForJob(jobDetail)
                 .StartAt(context.Message.ScheduledTime)
                 .WithSchedule(SimpleScheduleBuilder.Create().WithMisfireHandlingInstructionFireNow())
-                .WithIdentity(new TriggerKey(correlationId))
+                .WithIdentity(triggerKey)
                 .Build();
 
             if (await _scheduler.CheckExists(trigger.Key, context.CancellationToken).ConfigureAwait(false))
                 await _scheduler.UnscheduleJob(trigger.Key, context.CancellationToken).ConfigureAwait(false);
 
             await _scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
+
+            LogContext.Debug?.Log("Scheduled: {Key} {Schedule}", jobKey, trigger.GetNextFireTimeUtc());
         }
 
         public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
         {
             var jobKey = new JobKey(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
-
-            LogContext.Debug?.Log("Schedule recurring message: {Id}", jobKey);
 
             var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
@@ -65,6 +64,8 @@
                 await _scheduler.UnscheduleJob(triggerKey, context.CancellationToken).ConfigureAwait(false);
 
             await _scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
+
+            LogContext.Debug?.Log("Scheduled: {Key} {Schedule}", jobKey, trigger.GetNextFireTimeUtc());
         }
 
         ITrigger CreateTrigger(RecurringSchedule schedule, IJobDetail jobDetail, TriggerKey triggerKey)
