@@ -105,7 +105,7 @@ services.AddMassTransit(x =>
                 // the code might be different
                 r.Handle<DbUpdateException>(y => y.InnerException is SqlException e && e.Number == 2627);
 
-                x.Interval(5, TimeSpan.FromMilliseconds(100)));
+                r.Interval(5, TimeSpan.FromMilliseconds(100));
             });
 
             e.ConfigureSaga<OrderState>(provider);
