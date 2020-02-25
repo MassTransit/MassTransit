@@ -35,6 +35,9 @@ namespace MassTransit.Registration
 
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(executeActivityFactory, configurator);
 
+            GetActivityDefinition(configurationServiceProvider)
+                .Configure(configurator, specification);
+
             foreach (var action in _configureActions)
                 action(specification);
 
@@ -48,8 +51,8 @@ namespace MassTransit.Registration
 
         IExecuteActivityDefinition<TActivity, TArguments> GetActivityDefinition(IConfigurationServiceProvider provider)
         {
-            return _definition ?? (_definition = provider.GetService<IExecuteActivityDefinition<TActivity, TArguments>>()
-                ?? new DefaultExecuteActivityDefinition<TActivity, TArguments>());
+            return _definition ??= provider.GetService<IExecuteActivityDefinition<TActivity, TArguments>>()
+                ?? new DefaultExecuteActivityDefinition<TActivity, TArguments>();
         }
     }
 }
