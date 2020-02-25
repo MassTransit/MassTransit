@@ -3,6 +3,7 @@ module.exports = {
   description: 'A free, open-source distributed application framework for .NET.',
   plugins: [
     '@vuepress/active-header-links',
+    '@vuepress/back-to-top',
     [
       '@vuepress/google-analytics', {
         'ga': 'UA-156512132-1'
