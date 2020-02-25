@@ -2,7 +2,7 @@ namespace MassTransit.Transports.Tests.Observers
 {
     using System;
     using System.Threading.Tasks;
-    using Util;
+    using Testing;
 
 
     public class PublishObserver :
@@ -12,27 +12,16 @@ namespace MassTransit.Transports.Tests.Observers
         readonly TaskCompletionSource<PublishContext> _preSend;
         readonly TaskCompletionSource<PublishContext> _sendFaulted;
 
-        public PublishObserver()
+        public PublishObserver(AsyncTestHarness fixture)
         {
-            _sendFaulted = TaskUtil.GetTask<PublishContext>();
-            _preSend = TaskUtil.GetTask<PublishContext>();
-            _postSend = TaskUtil.GetTask<PublishContext>();
+            _postSend = fixture.GetTask<PublishContext>();
+            _preSend = fixture.GetTask<PublishContext>();
+            _sendFaulted = fixture.GetTask<PublishContext>();
         }
 
-        public Task<PublishContext> PrePublished
-        {
-            get { return _preSend.Task; }
-        }
-
-        public Task<PublishContext> PostPublished
-        {
-            get { return _postSend.Task; }
-        }
-
-        public Task<PublishContext> PublishFaulted
-        {
-            get { return _sendFaulted.Task; }
-        }
+        public Task<PublishContext> PrePublished => _preSend.Task;
+        public Task<PublishContext> PostPublished => _postSend.Task;
+        public Task<PublishContext> PublishFaulted => _sendFaulted.Task;
 
         public async Task PrePublish<T>(PublishContext<T> context)
             where T : class

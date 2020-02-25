@@ -88,6 +88,9 @@
                 var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
                 try
                 {
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
+
                     byte[] body = context.Body;
 
                     var transportMessage = sessionContext.Session.CreateBytesMessage();
@@ -111,9 +114,6 @@
                         transportMessage.NMSPriority = context.Priority.Value;
 
                     transportMessage.Content = body;
-
-                    if (_context.SendObservers.Count > 0)
-                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
                     var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
 

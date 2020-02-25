@@ -12,6 +12,7 @@
     {
         ISendEndpoint _quartzEndpoint;
         TimeSpan _testOffset;
+        IScheduler _scheduler;
 
         public QuartzInMemoryTestFixture()
         {
@@ -25,14 +26,18 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseInMemoryScheduler();
+            configurator.UseInMemoryScheduler(out _scheduler);
 
             base.ConfigureInMemoryBus(configurator);
         }
 
         protected void AdvanceTime(TimeSpan duration)
         {
+            _scheduler.Standby();
+
             _testOffset += duration;
+
+            _scheduler.Start();
         }
 
         [OneTimeSetUp]

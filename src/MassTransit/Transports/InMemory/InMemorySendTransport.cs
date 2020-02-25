@@ -37,10 +37,10 @@ namespace MassTransit.Transports.InMemory
             var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
             try
             {
-                var messageId = context.MessageId ?? NewId.NextGuid();
-
                 if (_context.SendObservers.Count > 0)
                     await _context.SendObservers.PreSend(context).ConfigureAwait(false);
+
+                var messageId = context.MessageId ?? NewId.NextGuid();
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 

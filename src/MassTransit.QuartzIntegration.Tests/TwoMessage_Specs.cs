@@ -23,8 +23,13 @@ namespace MassTransit.QuartzIntegration.Tests
             await InputQueueSendEndpoint.Send<OpenAccount>(new {AccountId = accountId});
 
             await opened;
+            await Task.Delay(1000);
+
+            AdvanceTime(TimeSpan.FromDays(30));
 
             await defaulted;
+
+            AdvanceTime(TimeSpan.FromDays(60));
 
             await closed;
         }
@@ -100,13 +105,13 @@ namespace MassTransit.QuartzIntegration.Tests
 
                 Schedule(() => GracePeriod, x => x.GracePeriodToken, x =>
                 {
-                    x.Delay = TimeSpan.FromSeconds(10);
+                    x.Delay = TimeSpan.FromDays(30);
                     x.Received = e => e.CorrelateById(ctx => ctx.Message.AccountId);
                 });
 
                 Schedule(() => PaymentTimeFrame, x => x.PaymentTimeFrameToken, x =>
                 {
-                    x.Delay = TimeSpan.FromSeconds(15);
+                    x.Delay = TimeSpan.FromDays(90);
                     x.Received = e => e.CorrelateById(ctx => ctx.Message.AccountId);
                 });
 

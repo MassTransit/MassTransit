@@ -146,7 +146,7 @@ namespace MassTransit.Tests
 
             var sendObserver = new TestSendObserver(TimeSpan.FromSeconds(3));
 
-            using (InputQueueSendEndpoint.ConnectSendObserver(sendObserver))
+            using (Bus.ConnectSendObserver(sendObserver))
             {
                 await InputQueueSendEndpoint.Send(new A());
 

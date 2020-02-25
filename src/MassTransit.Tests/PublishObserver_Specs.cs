@@ -64,7 +64,7 @@
                 var observer = new Observer();
                 using (Bus.ConnectPublishObserver(observer))
                 {
-                    var sendObserver = new SendObserver();
+                    var sendObserver = new SendObserver(this);
                     using (Bus.ConnectSendObserver(sendObserver))
                     {
                         await Bus.Publish(new PingMessage());
@@ -107,20 +107,11 @@
                     _postSend = TaskUtil.GetTask<PublishContext>();
                 }
 
-                public Task<PublishContext> PreSent
-                {
-                    get { return _preSend.Task; }
-                }
+                public Task<PublishContext> PreSent => _preSend.Task;
 
-                public Task<PublishContext> PostSent
-                {
-                    get { return _postSend.Task; }
-                }
+                public Task<PublishContext> PostSent => _postSend.Task;
 
-                public Task<PublishContext> SendFaulted
-                {
-                    get { return _sendFaulted.Task; }
-                }
+                public Task<PublishContext> SendFaulted => _sendFaulted.Task;
 
                 public async Task PrePublish<T>(PublishContext<T> context)
                     where T : class
