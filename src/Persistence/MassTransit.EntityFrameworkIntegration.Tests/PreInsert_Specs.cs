@@ -15,6 +15,7 @@
         using System.Collections.Generic;
         using System.Data.Entity;
         using System.Data.Entity.ModelConfiguration;
+        using GreenPipes;
         using Mappings;
         using MassTransit.Saga;
 
@@ -205,6 +206,7 @@
             {
                 _machine = new TestStateMachine();
 
+                configurator.UseMessageRetry(r => r.Immediate(5));
                 configurator.StateMachineSaga(_machine, _repository);
             }
 
@@ -261,6 +263,8 @@
                 await _repository.ShouldContainSaga(sagaId, TestTimeout);
 
                 var message = new Start(sagaId, "Joe");
+
+                await Task.Delay(1000);
 
                 await InputQueueSendEndpoint.Send(message);
 
