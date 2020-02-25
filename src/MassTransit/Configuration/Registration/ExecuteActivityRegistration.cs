@@ -35,6 +35,9 @@ namespace MassTransit.Registration
 
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(executeActivityFactory, configurator);
 
+            GetActivityDefinition(configurationServiceProvider)
+                .Configure(configurator, specification);
+
             foreach (var action in _configureActions)
                 action(specification);
 
