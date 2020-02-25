@@ -205,6 +205,7 @@ module.exports = {
           '/architecture/packages',
           '/architecture/interoperability',
           '/architecture/versioning',
+          '/architecture/newid',
           '/architecture/encrypted-messages',
           '/architecture/green-cache',
           '/architecture/history'
