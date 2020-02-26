@@ -11,6 +11,7 @@
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Quartz;
+    using Quartz.Util;
     using Scheduling;
     using Serialization;
 
@@ -72,7 +73,7 @@
         {
             var tz = TimeZoneInfo.Local;
             if (!string.IsNullOrWhiteSpace(schedule.TimeZoneId) && schedule.TimeZoneId != tz.Id)
-                tz = TimeZoneInfo.FindSystemTimeZoneById(schedule.TimeZoneId);
+                tz = TimeZoneUtil.FindTimeZoneById(schedule.TimeZoneId);
 
             var triggerBuilder = TriggerBuilder.Create()
                 .ForJob(jobDetail)
