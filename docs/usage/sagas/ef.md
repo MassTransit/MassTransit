@@ -90,7 +90,7 @@ services.AddMassTransit(x =>
         {
             r.ConcurrencyMode = ConcurrencyMode.Optimistic;
 
-            r.AddDbContext<DbContext, OrderStateDbContext>(connectionString)
+            r.DatabaseFactory(() => new OrderStateDbContext(connectionString));
         });
 
     x.AddBus(provider => Bus.Factory.CreateUsingInMemory(cfg =>
