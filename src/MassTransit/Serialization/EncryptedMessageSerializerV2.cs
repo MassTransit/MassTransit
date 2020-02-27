@@ -49,6 +49,8 @@ namespace MassTransit.Serialization
                     _serializer.Serialize(jsonWriter, envelope, typeof(MessageEnvelope));
 
                     jsonWriter.Flush();
+
+                    ((System.Security.Cryptography.CryptoStream)cryptoStream).FlushFinalBlock();
                 }
             }
         }
