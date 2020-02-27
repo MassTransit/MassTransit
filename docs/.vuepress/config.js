@@ -18,7 +18,7 @@ module.exports = {
     },
     nav: [
       { text: "Blog", link: "/updates/" },
-      { text: 'Gitter', link: 'https://gitter.im/MassTransit/MassTransit' },
+      { text: "Discord", link: "/discord" },
       { text: 'NuGet', link: 'https://nuget.org/packages/MassTransit' }
     ],
     sidebarDepth: 1,

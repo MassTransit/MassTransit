@@ -10,6 +10,18 @@ There is a MassTransit tag on [Stack Overflow][1], which has many questions that
 
 Before you just post your question, however, spend a few moments to compose your thoughts and formulate your question. There is nothing as pointless as simply telling us "MassTransit does not work for me" with no further information to give any clue to why. Before you post, search the web to see if your question has already been asked or even answered. And if it has been, you will already have your answer.
 
+## Discord
+
+MassTransit has a Discord server, which will ultimately replace the Gitter chat room, since it's a better platform for chat that also adds voice collaboration.
+
+<iframe src="https://discordapp.com/widget?id=682238261753675864&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>
+
+## Gitter
+
+[![alt Gitter](https://badges.gitter.im/Join%20Chat.svg "Gitter")][5]
+
+Our chat room at [Gitter][5] is becoming more and more popular. There you can find people who use MassTransit in their systems and can provide you with quick advise. Get engaged, get help and help others too!
+
 ## Mailing List
 
 [![alt Google Group](https://img.shields.io/badge/groups-join%20convo-lightgrey.svg "Google Group")][2] 
@@ -19,12 +31,6 @@ A long history of support is available on the mailing list, which is hosted on [
 When posting on the mailing list, pick a good subject line, and if the subject of the thread changes, please change the subject to match. Some of us deal with hundreds of emails per day and we need all the help we can get to pick the interesting or important ones.
 
 Also, if you are seeing some unexpected behavior, generate a [diagnostic result](/troubleshooting/show-config.md) and post it as a [Gist][4] so that it can be reviewed (mail attachments rarely work, so avoid them). This will help a lot towards understanding how your configuration is setup.
-
-## Gitter
-
-[![alt Gitter](https://badges.gitter.im/Join%20Chat.svg "Gitter")][5]
-
-Our chat room at [Gitter][5] is becoming more and more popular. There you can find people who use MassTransit in their systems and can provide you with quick advise. Get engaged, get help and help others too!
 
 ## Twitter
 
