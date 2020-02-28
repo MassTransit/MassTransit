@@ -9,5 +9,7 @@ namespace MassTransit.Azure.ServiceBus.Core
         Task Complete();
 
         Task Abandon(Exception exception);
+        Task DeadLetter();
+        Task DeadLetter(Exception exception);
     }
 }

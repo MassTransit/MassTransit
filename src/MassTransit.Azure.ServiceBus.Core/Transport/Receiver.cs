@@ -107,10 +107,9 @@
                 return;
             }
 
-            using (var delivery = Tracker.BeginDelivery())
-            {
-                await _messageReceiver.Handle(message, context => AddReceiveContextPayloads(context, messageReceiver, message)).ConfigureAwait(false);
-            }
+            using var delivery = Tracker.BeginDelivery();
+
+            await _messageReceiver.Handle(message, context => AddReceiveContextPayloads(context, messageReceiver, message)).ConfigureAwait(false);
         }
 
         void AddReceiveContextPayloads(ReceiveContext receiveContext, IReceiverClient receiverClient, Message message)
