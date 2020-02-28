@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace MassTransit.Analyzers
 {
@@ -150,6 +151,25 @@ namespace MassTransit.Analyzers
             }
 
             elementType = null;
+            return false;
+        }
+
+        public static bool IsInVar(this ITypeSymbol type, out ITypeSymbol inVarType)
+        {
+            if (type.TypeKind == TypeKind.Class &&
+                type.ContainingAssembly.Name == "MassTransit")
+            {
+                var inVar = type.Interfaces.FirstOrDefault(i => i.Name == "IInitializerVariable");
+                if (inVar != null && 
+                    inVar.IsGenericType &&
+                    inVar.TypeArguments.Length == 1)
+                {
+                    inVarType = inVar.TypeArguments[0];
+                    return true;
+                }
+            }
+
+            inVarType = null;
             return false;
         }
     }
