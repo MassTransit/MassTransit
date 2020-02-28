@@ -25,6 +25,7 @@ namespace TestHelper
         private static readonly MetadataReference NetStandardReference = MetadataReference.CreateFromFile(Assembly.Load("netstandard, Version=2.0.0.0").Location);
         private static readonly MetadataReference MassTransitReference = MetadataReference.CreateFromFile(typeof(MassTransit.Bus).Assembly.Location);
         private static readonly MetadataReference GreenPipesReference = MetadataReference.CreateFromFile(typeof(GreenPipes.IProbeSite).Assembly.Location);
+        private static readonly MetadataReference NewIdReference = MetadataReference.CreateFromFile(typeof(MassTransit.NewId).Assembly.Location);
         private static readonly MetadataReference SystemPrivateUriReference = MetadataReference.CreateFromFile(typeof(System.Uri).Assembly.Location);
 
         internal static string DefaultFilePathPrefix = "Test";
@@ -165,6 +166,7 @@ namespace TestHelper
                 .AddMetadataReference(projectId, NetStandardReference)
                 .AddMetadataReference(projectId, MassTransitReference)
                 .AddMetadataReference(projectId, GreenPipesReference)
+                .AddMetadataReference(projectId, NewIdReference)
                 .AddMetadataReference(projectId, SystemPrivateUriReference);
 
             int count = 0;

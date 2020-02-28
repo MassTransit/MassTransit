@@ -6,195 +6,172 @@ using System.Threading.Tasks;
 
 namespace MassTransit.Analyzers
 {
-
-    public interface OrderItem
+    public interface OrderSubmitted
     {
-        Guid OrderId { get; }
-        string ItemNumber { get; }
+        Guid Id { get; }
+        string CustomerId { get; }
+        IReadOnlyList<OrderItem> OrderItems { get; }
     }
 
     public interface SubmitOrder
     {
-        Guid OrderId { get; }
-        DateTime OrderDate { get; }
-        string OrderNumber { get; }
-        decimal OrderAmount { get; }
-        OrderItem[] OrderItems { get; }
+        Guid Id { get; }
+        string CustomerId { get; }
+        IReadOnlyList<OrderItem> OrderItems { get; }
     }
 
-    public interface OrderSubmitted
+    public interface OrderItem
     {
-        string OrderId { get; }
-        DateTime OrderDate { get; }
+        Guid Id { get; }
+        Product Product { get; }
+        int Quantity { get; }
+        decimal Price { get; }
+    }
+
+    public interface Product
+    {
+        string Name { get; }
+        string Category { get; }
+    }
+
+    public class OrderDto
+    {
+        public Guid Id { get; set; }
+        public string CustomerId { get; set; }
+        public ICollection<OrderItemDto> OrderItems { get; set; }
+    }
+
+    public class OrderItemDto
+    {
+        public Guid Id { get; set; }
+        public ProductDto Product { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+    }
+
+    public class ProductDto
+    {
+        public string Name { get; set; }
+        public string Category { get; set; }
     }
 
     public interface CheckOrderStatus
     {
-        string OrderId { get; }
+        Guid OrderId { get; }
     }
 
     public interface OrderStatusResult
     {
-        string OrderId { get; }
-        DateTime Timestamp { get; }
-        short StatusCode { get; }
-        string StatusText { get; }
-    }
-
-    public interface UpdateCustomerAddress
-    {
-        Guid CommandId { get; }
-        DateTime Timestamp { get; }
-        string CustomerId { get; }
-        string HouseNumber { get; }
-        string Street { get; }
-        string City { get; }
-        string State { get; }
-        string PostalCode { get; }
-    }
-
-    public interface OrderUpdated
-    {
-        Guid CorrelationId { get; }
-        DateTime Timestamp { get; }
         Guid OrderId { get; }
-        //Customer Customer { get; }
+        string Status { get; }
     }
-
-
-
-
-
-
-    public interface ICommand
-    {
-        Guid CommandId { get; }
-        Guid StreamId { get; }
-    }
-
-    public interface IAddress
-    {
-        string Street { get; }
-        string Place { get; }
-    }
-
-    public interface IIdentification
-    {
-        string Type { get; }
-        string IssuingCountry { get; }
-        string Number { get; }
-    }
-
-    public interface ICreateCommand : ICommand
-    {
-        string Name { get; }
-        IAddress BillingAddress { get; }
-        IAddress DeliveryAddress { get; }
-        IReadOnlyList<IIdentification> Identifications { get; }
-        IReadOnlyList<IIdentification> Documents { get; }
-    }
-
-    public class AddressModel
-    {
-        public string Street { get; }
-        public string Place { get; }
-    }
-
-    public class IdentificationModel
-    {
-        public string Type { get; }
-        public string IssuingCountry { get; }
-        public string Number { get; }
-    }
-
-    public class CreateRequest
-    {
-        public string Name { get; }
-        public AddressModel BillingAddress { get; } = new AddressModel();
-        public AddressModel DeliveryAddress { get; } = new AddressModel();
-        public IReadOnlyList<IdentificationModel> Identifications { get; } = new List<IdentificationModel>();
-        public IReadOnlyList<IdentificationModel> Documents { get; } = new List<IdentificationModel>();
-    }
-
+         
     class Program
     {
         static async Task Main()
         {
-            var busControl = Bus.Factory.CreateUsingInMemory(cfg => { });
-            
-            //var requestClient = busControl.CreateRequestClient<OrderRequest>(null);
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
 
-            //var request = requestClient.Create(new
+            //var requestClient = bus.CreateRequestClient<CheckOrderStatus>(null);
+
+            //using (var request = requestClient.Create(new
+            //{
+            //    OrderId = default(string)
+            //}))
+            //{
+            //    var response = await request.GetResponse<OrderStatusResult>();
+            //    var result = response.Message;
+            //}
+
+            //var response = await bus.Request<CheckOrderStatus, OrderStatusResult>(new
             //{
             //});
 
+            //var response = await bus.Request<CheckOrderStatus, OrderStatusResult>(null, new
+            //{
+            //});
+            //var result = response.Message;
 
-            var sendEndpoint = await busControl.GetSendEndpoint(new Uri("queue:queue_name"));
-            
-            await sendEndpoint.Send<ICreateCommand>(new
+            //var publishRequestClient = bus.CreatePublishRequestClient<CheckOrderStatus, OrderStatusResult>(TimeSpan.FromSeconds(1));
+            //var result = await publishRequestClient.Request(new { });
+
+            await bus.Publish<OrderSubmitted>(new
             {
-                Name = string.Empty,
-                BillingAddress = new
-                {
-                    Street = string.Empty,
-                    Place = string.Empty
-                },
-                DeliveryAddress = new
-                {
-                    Street = string.Empty,
-                    Place = string.Empty
-                },
-                Identifications = new[] 
+                Id = NewId.NextGuid(),
+                CustomerId = "Customer",
+                OrderItems = new[]
                 {
                     new
                     {
-                        Type = string.Empty,
-                        IssuingCountry = string.Empty,
-                        Number = string.Empty
+                        Id = NewId.NextGuid(),
+                        Product = new
+                        {
+                            Name = "Product",
+                            Category = "Category"
+                        },
+                        Quantity = 10,
+                        Price = 10.0m
                     }
-                },
-                Documents = new[] 
-                {
-                    new
-                    {
-                        Type = string.Empty,
-                        IssuingCountry = string.Empty,
-                        Number = string.Empty
-                    }
-                },
-                CommandId = Guid.NewGuid(),
-                StreamId = Guid.NewGuid()
+                }
             });
 
-            var request = new CreateRequest();
+            var sendEndpoint = await bus.GetSendEndpoint(null);
 
-            await sendEndpoint.Send<ICreateCommand>(new
+            await sendEndpoint.Send<SubmitOrder>(new
             {
-                request.Name,
-                BillingAddress = new
+                Id = NewId.NextGuid(),
+                CustomerId = "Customer",
+                OrderItems = new[]
                 {
-                    request.BillingAddress.Place,
-                    request.BillingAddress.Street
-                },
-                DeliveryAddress = new
+                    new
+                    {
+                        Id = NewId.NextGuid(),
+                        Product = new
+                        {
+                            Name = "Product",
+                            Category = "Category"
+                        },
+                        Quantity = 10,
+                        Price = 10.0m
+                    }
+                }
+            });
+
+            var order = new OrderDto
+            {
+                Id = Guid.NewGuid(),
+                CustomerId = "Customer",
+                OrderItems =
                 {
-                    request.DeliveryAddress.Place,
-                    request.DeliveryAddress.Street
-                },
-                Identifications = request.Identifications.Select(i => new
+                    new OrderItemDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Product = new ProductDto
+                        {
+                            Name ="Product",
+                            Category = "Category"
+                        },
+                        Quantity = 10,
+                        Price = 10.0m
+                    }
+                }
+            };
+
+            await bus.Publish<OrderSubmitted>(new
+            {
+                order.Id,
+                order.CustomerId,
+                OrderItems = order.OrderItems.Select(item => new
                 {
-                    i.Type,
-                    i.IssuingCountry,
-                    i.Number
-                }).ToList(),
-                Documents = request.Documents.Select(d => new
-                {
-                    d.Type,
-                    d.IssuingCountry,
-                    d.Number
-                }).ToList(),
-                CommandId = Guid.NewGuid(),
-                StreamId = Guid.NewGuid(),
+                    item.Id,
+                    Product = new
+                    {
+                        item.Product.Name,
+                        item.Product.Category
+                    },
+                    item.Quantity,
+                    item.Price
+                }).ToList()
             });
         }
     }
