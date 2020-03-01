@@ -1,16 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
-
 namespace MassTransit.Analyzers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Immutable;
+    using System.Linq;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using Microsoft.CodeAnalysis.Diagnostics;
+
+
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class MessageContractAnalyzerAnalyzer : DiagnosticAnalyzer
+    public class MessageContractAnalyzerAnalyzer :
+        DiagnosticAnalyzer
     {
         public const string StructurallyCompatibleRuleId = "MCA0001";
         public const string ValidMessageContractStructureRuleId = "MCA0002";
@@ -19,34 +21,33 @@ namespace MassTransit.Analyzers
         // You can change these strings in the Resources.resx file. If you do not want your analyzer to be localize-able, you can use regular strings for Title and MessageFormat.
         // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/Localizing%20Analyzers.md for more on localization
 
-        private const string Category = "Usage";
+        const string Category = "Usage";
 
-        private static readonly DiagnosticDescriptor StructurallyCompatibleRule = new DiagnosticDescriptor(StructurallyCompatibleRuleId,
+        static readonly DiagnosticDescriptor StructurallyCompatibleRule = new DiagnosticDescriptor(StructurallyCompatibleRuleId,
             "Anonymous type does not map to message contract",
             "Anonymous type does not map to message contract '{0}'. The following properties of the anonymous type are incompatible: {1}",
-            Category, DiagnosticSeverity.Error, isEnabledByDefault: true,
-            description: "Anonymous type should map to message contract");
+            Category, DiagnosticSeverity.Error, true,
+            "Anonymous type should map to message contract");
 
-        private static readonly DiagnosticDescriptor ValidMessageContractStructureRule = new DiagnosticDescriptor(ValidMessageContractStructureRuleId,
+        static readonly DiagnosticDescriptor ValidMessageContractStructureRule = new DiagnosticDescriptor(ValidMessageContractStructureRuleId,
             "Message contract does not have a valid structure",
             "Message contract '{0}' does not have a valid structure",
-            Category, DiagnosticSeverity.Error, isEnabledByDefault: true,
-            description: "Message contract should have a valid structure. Properties should be primitive, string or IReadOnlyList or ImmatableArray of a primitive, string or message contract");
+            Category, DiagnosticSeverity.Error, true,
+            "Message contract should have a valid structure. Properties should be primitive, string or IReadOnlyList or ImmutableArray of a primitive, string or message contract");
 
-        private static readonly DiagnosticDescriptor MissingPropertiesRule = new DiagnosticDescriptor(MissingPropertiesRuleId,
+        static readonly DiagnosticDescriptor MissingPropertiesRule = new DiagnosticDescriptor(MissingPropertiesRuleId,
             "Anonymous type is missing properties that are in the message contract",
             "Anonymous type is missing properties that are in the message contract '{0}'. The following properties are missing: {1}",
-            Category, DiagnosticSeverity.Info, isEnabledByDefault: true,
-            description: "Anonymous type misses properties that are in the message contract");
+            Category, DiagnosticSeverity.Info, true,
+            "Anonymous type misses properties that are in the message contract");
 
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(StructurallyCompatibleRule, ValidMessageContractStructureRule, MissingPropertiesRule);
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
+            ImmutableArray.Create(StructurallyCompatibleRule, ValidMessageContractStructureRule, MissingPropertiesRule);
 
         public override void Initialize(AnalysisContext context)
         {
             if (context == null)
-            {
                 throw new ArgumentNullException(nameof(context));
-            }
 
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
@@ -55,7 +56,7 @@ namespace MassTransit.Analyzers
             context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.AnonymousObjectCreationExpression);
         }
 
-        private static void AnalyzeNode(SyntaxNodeAnalysisContext context)
+        static void AnalyzeNode(SyntaxNodeAnalysisContext context)
         {
             var anonymousObject = (AnonymousObjectCreationExpressionSyntax)context.Node;
 
@@ -93,10 +94,11 @@ namespace MassTransit.Analyzers
         static bool TypesAreStructurallyCompatible(ITypeSymbol messageType, ITypeSymbol messageContractType, string path,
             ICollection<string> incompatibleProperties)
         {
-            if (SymbolEqualityComparer.Default.Equals(messageType, messageContractType)) return true;
+            if (SymbolEqualityComparer.Default.Equals(messageType, messageContractType))
+                return true;
 
-            var messageContractProperties = GetMessageContractProperties(messageContractType);
-            var messageProperties = GetMessageProperties(messageType);
+            List<IPropertySymbol> messageContractProperties = GetMessageContractProperties(messageContractType);
+            List<IPropertySymbol> messageProperties = GetMessageProperties(messageType);
             var result = true;
 
             foreach (var messageProperty in messageProperties)
@@ -127,9 +129,9 @@ namespace MassTransit.Analyzers
                         }
                     }
                     else if (messageProperty.Type.IsImmutableArray(out var messagePropertyTypeArgument) ||
-                             messageProperty.Type.IsReadOnlyList(out messagePropertyTypeArgument) ||
-                             messageProperty.Type.IsList(out messagePropertyTypeArgument) ||
-                             messageProperty.Type.IsArray(out messagePropertyTypeArgument))
+                        messageProperty.Type.IsReadOnlyList(out messagePropertyTypeArgument) ||
+                        messageProperty.Type.IsList(out messagePropertyTypeArgument) ||
+                        messageProperty.Type.IsArray(out messagePropertyTypeArgument))
                     {
                         if (messageContractProperty.Type.IsImmutableArray(out var messageContractPropertyTypeArgument) ||
                             messageContractProperty.Type.IsReadOnlyList(out messageContractPropertyTypeArgument) ||
@@ -169,8 +171,8 @@ namespace MassTransit.Analyzers
 
         static bool HasMissingProperties(ITypeSymbol messageType, ITypeSymbol messageContractType, string path, ICollection<string> missingProperties)
         {
-            var messageContractProperties = GetMessageContractProperties(messageContractType);
-            var messageProperties = GetMessageProperties(messageType);
+            List<IPropertySymbol> messageContractProperties = GetMessageContractProperties(messageContractType);
+            List<IPropertySymbol> messageProperties = GetMessageProperties(messageType);
             var result = false;
 
             foreach (var messageContractProperty in messageContractProperties)
@@ -184,10 +186,11 @@ namespace MassTransit.Analyzers
                     result = true;
                 }
                 else if (messageContractProperty.Type.IsImmutableArray(out var messageContractPropertyTypeArgument) ||
-                         messageContractProperty.Type.IsReadOnlyList(out messageContractPropertyTypeArgument) ||
-                         messageContractProperty.Type.IsArray(out messageContractPropertyTypeArgument))
+                    messageContractProperty.Type.IsReadOnlyList(out messageContractPropertyTypeArgument) ||
+                    messageContractProperty.Type.IsArray(out messageContractPropertyTypeArgument))
                 {
                     if (messageContractPropertyTypeArgument.TypeKind == TypeKind.Interface)
+                    {
                         if (messageProperty.Type.IsImmutableArray(out var messagePropertyTypeArgument) ||
                             messageProperty.Type.IsReadOnlyList(out messagePropertyTypeArgument) ||
                             messageProperty.Type.IsList(out messagePropertyTypeArgument) ||
@@ -195,8 +198,10 @@ namespace MassTransit.Analyzers
                         {
                             var hasMissingProperties = HasMissingProperties(messagePropertyTypeArgument, messageContractPropertyTypeArgument,
                                 Append(path, messageContractProperty.Name), missingProperties);
-                            if (hasMissingProperties) result = true;
+                            if (hasMissingProperties)
+                                result = true;
                         }
+                    }
                 }
                 else if (messageContractProperty.Type.TypeKind == TypeKind.Interface)
                 {
@@ -204,7 +209,8 @@ namespace MassTransit.Analyzers
                     {
                         var hasMissingProperties = HasMissingProperties(messageProperty.Type, messageContractProperty.Type,
                             Append(path, messageContractProperty.Name), missingProperties);
-                        if (hasMissingProperties) result = true;
+                        if (hasMissingProperties)
+                            result = true;
                     }
                 }
             }
@@ -212,14 +218,14 @@ namespace MassTransit.Analyzers
             return result;
         }
 
-        private static List<IPropertySymbol> GetMessageProperties(ITypeSymbol messageType)
+        static List<IPropertySymbol> GetMessageProperties(ITypeSymbol messageType)
         {
             return messageType.GetMembers().OfType<IPropertySymbol>().Where(p => !p.Name.StartsWith("__")).ToList();
         }
 
         static List<IPropertySymbol> GetMessageContractProperties(ITypeSymbol messageContractType)
         {
-            var messageContractTypes = new List<ITypeSymbol> { messageContractType };
+            var messageContractTypes = new List<ITypeSymbol> {messageContractType};
             messageContractTypes.AddRange(messageContractType.AllInterfaces);
 
             return messageContractTypes.SelectMany(i => i.GetMembers().OfType<IPropertySymbol>()).ToList();
@@ -227,9 +233,11 @@ namespace MassTransit.Analyzers
 
         static string Append(string path, string propertyName)
         {
-            if (string.IsNullOrEmpty(path)) return propertyName;
+            if (string.IsNullOrEmpty(path))
+                return propertyName;
 
-            if (path.EndsWith(".", StringComparison.Ordinal)) return $"{path}{propertyName}";
+            if (path.EndsWith(".", StringComparison.Ordinal))
+                return $"{path}{propertyName}";
 
             return $"{path}.{propertyName}";
         }

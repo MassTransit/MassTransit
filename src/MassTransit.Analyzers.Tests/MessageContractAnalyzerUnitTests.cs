@@ -10,7 +10,7 @@ namespace MassTransit.Analyzers.Tests
     public class UnitTest :
     CodeFixVerifier
     {
-        private readonly string Usings = @"
+        readonly string Usings = @"
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 using MassTransit;
 ";
 
-        private readonly string MessageContracts = @"
+        readonly string MessageContracts = @"
 namespace ConsoleApplication1
 {
     public interface OrderSubmitted
@@ -62,7 +62,7 @@ namespace ConsoleApplication1
 }
 ";
 
-        private readonly string MessageContractsDifferentNamespace = @"
+        readonly string MessageContractsDifferentNamespace = @"
 namespace ConsoleApplication1.Messages
 {
     public interface OrderSubmitted
@@ -106,7 +106,7 @@ namespace ConsoleApplication1.Messages
 }
 ";
 
-        private readonly string Dtos = @"
+        readonly string Dtos = @"
     public class OrderDto
     {
         public Guid Id { get; set; }
@@ -129,7 +129,7 @@ namespace ConsoleApplication1.Messages
     }
 ";
 
-        private readonly string DtosIncompatibe = @"
+        readonly string DtosIncompatibe = @"
     public class OrderDto
     {
         public Guid Id { get; set; }

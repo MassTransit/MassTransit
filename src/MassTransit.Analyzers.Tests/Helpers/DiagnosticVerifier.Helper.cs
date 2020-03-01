@@ -5,6 +5,7 @@ namespace MassTransit.Analyzers.Tests
     using System.Collections.Immutable;
     using System.Linq;
     using System.Reflection;
+    using GreenPipes;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.Diagnostics;
@@ -17,24 +18,22 @@ namespace MassTransit.Analyzers.Tests
     /// </summary>
     public abstract partial class DiagnosticVerifier
     {
-        private static readonly MetadataReference CorlibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
-        private static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
-        private static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
-        private static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
-        private static readonly MetadataReference CollectionsReference = MetadataReference.CreateFromFile(typeof(Stack<>).Assembly.Location);
-        private static readonly MetadataReference RuntimeReference = MetadataReference.CreateFromFile(typeof(ISet<>).Assembly.Location);
-        private static readonly MetadataReference NetStandardReference = MetadataReference.CreateFromFile(Assembly.Load("netstandard, Version=2.0.0.0").Location);
-        private static readonly MetadataReference MassTransitReference = MetadataReference.CreateFromFile(typeof(MassTransit.Bus).Assembly.Location);
-        private static readonly MetadataReference GreenPipesReference = MetadataReference.CreateFromFile(typeof(GreenPipes.IProbeSite).Assembly.Location);
-        private static readonly MetadataReference NewIdReference = MetadataReference.CreateFromFile(typeof(MassTransit.NewId).Assembly.Location);
-        private static readonly MetadataReference SystemPrivateUriReference = MetadataReference.CreateFromFile(typeof(System.Uri).Assembly.Location);
+        static readonly MetadataReference CoreLibReference = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
+        static readonly MetadataReference SystemCoreReference = MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
+        static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
+        static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
+        static readonly MetadataReference CollectionsReference = MetadataReference.CreateFromFile(typeof(Stack<>).Assembly.Location);
+        static readonly MetadataReference RuntimeReference = MetadataReference.CreateFromFile(typeof(ISet<>).Assembly.Location);
+        static readonly MetadataReference NetStandardReference = MetadataReference.CreateFromFile(Assembly.Load("netstandard, Version=2.0.0.0").Location);
+        static readonly MetadataReference MassTransitReference = MetadataReference.CreateFromFile(typeof(Bus).Assembly.Location);
+        static readonly MetadataReference GreenPipesReference = MetadataReference.CreateFromFile(typeof(IProbeSite).Assembly.Location);
+        static readonly MetadataReference NewIdReference = MetadataReference.CreateFromFile(typeof(NewId).Assembly.Location);
+        static readonly MetadataReference SystemPrivateUriReference = MetadataReference.CreateFromFile(typeof(Uri).Assembly.Location);
 
         internal static string DefaultFilePathPrefix = "Test";
         internal static string CSharpDefaultFileExt = "cs";
         internal static string VisualBasicDefaultExt = "vb";
         internal static string TestProjectName = "TestProject";
-
-        #region  Get Diagnostics
 
         /// <summary>
         /// Given classes in the form of strings, their language, and an IDiagnosticAnalyzer to apply to it, return the diagnostics found in the string after converting it to a document.
@@ -43,7 +42,7 @@ namespace MassTransit.Analyzers.Tests
         /// <param name="language">The language the source classes are in</param>
         /// <param name="analyzer">The analyzer to be run on the sources</param>
         /// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location</returns>
-        private static Diagnostic[] GetSortedDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer)
+        static Diagnostic[] GetSortedDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer)
         {
             return GetSortedDiagnosticsFromDocuments(analyzer, GetDocuments(sources, language));
         }
@@ -59,37 +58,31 @@ namespace MassTransit.Analyzers.Tests
         {
             var projects = new HashSet<Project>();
             foreach (var document in documents)
-            {
                 projects.Add(document.Project);
-            }
 
             var diagnostics = new List<Diagnostic>();
             foreach (var project in projects)
             {
                 var compilationWithAnalyzers = project.GetCompilationAsync().Result.WithAnalyzers(ImmutableArray.Create(analyzer));
-                var diags = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().Result;
+                ImmutableArray<Diagnostic> diags = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().Result;
                 foreach (var diag in diags)
                 {
                     if (diag.Location == Location.None || diag.Location.IsInMetadata)
-                    {
                         diagnostics.Add(diag);
-                    }
                     else
                     {
-                        for (int i = 0; i < documents.Length; i++)
+                        for (var i = 0; i < documents.Length; i++)
                         {
                             var document = documents[i];
                             var tree = document.GetSyntaxTreeAsync().Result;
                             if (tree == diag.Location.SourceTree)
-                            {
                                 diagnostics.Add(diag);
-                            }
                         }
                     }
                 }
             }
 
-            var results = SortDiagnostics(diagnostics);
+            Diagnostic[] results = SortDiagnostics(diagnostics);
             diagnostics.Clear();
             return results;
         }
@@ -99,34 +92,27 @@ namespace MassTransit.Analyzers.Tests
         /// </summary>
         /// <param name="diagnostics">The list of Diagnostics to be sorted</param>
         /// <returns>An IEnumerable containing the Diagnostics in order of Location</returns>
-        private static Diagnostic[] SortDiagnostics(IEnumerable<Diagnostic> diagnostics)
+        static Diagnostic[] SortDiagnostics(IEnumerable<Diagnostic> diagnostics)
         {
             return diagnostics.OrderBy(d => d.Location.SourceSpan.Start).ToArray();
         }
 
-        #endregion
-
-        #region Set up compilation and documents
         /// <summary>
         /// Given an array of strings as sources and a language, turn them into a project and return the documents and spans of it.
         /// </summary>
         /// <param name="sources">Classes in the form of strings</param>
         /// <param name="language">The language the source code is in</param>
         /// <returns>A Tuple containing the Documents produced from the sources and their TextSpans if relevant</returns>
-        private static Document[] GetDocuments(string[] sources, string language)
+        static Document[] GetDocuments(string[] sources, string language)
         {
             if (language != LanguageNames.CSharp && language != LanguageNames.VisualBasic)
-            {
                 throw new ArgumentException("Unsupported Language");
-            }
 
             var project = CreateProject(sources, language);
-            var documents = project.Documents.ToArray();
+            Document[] documents = project.Documents.ToArray();
 
             if (sources.Length != documents.Length)
-            {
                 throw new InvalidOperationException("Amount of sources did not match amount of Documents created");
-            }
 
             return documents;
         }
@@ -139,7 +125,7 @@ namespace MassTransit.Analyzers.Tests
         /// <returns>A Document created from the source string</returns>
         protected static Document CreateDocument(string source, string language = LanguageNames.CSharp)
         {
-            return CreateProject(new[] { source }, language).Documents.First();
+            return CreateProject(new[] {source}, language).Documents.First();
         }
 
         /// <summary>
@@ -148,17 +134,17 @@ namespace MassTransit.Analyzers.Tests
         /// <param name="sources">Classes in the form of strings</param>
         /// <param name="language">The language the source code is in</param>
         /// <returns>A Project created out of the Documents created from the source strings</returns>
-        private static Project CreateProject(string[] sources, string language = LanguageNames.CSharp)
+        static Project CreateProject(string[] sources, string language = LanguageNames.CSharp)
         {
-            string fileNamePrefix = DefaultFilePathPrefix;
-            string fileExt = language == LanguageNames.CSharp ? CSharpDefaultFileExt : VisualBasicDefaultExt;
+            var fileNamePrefix = DefaultFilePathPrefix;
+            var fileExt = language == LanguageNames.CSharp ? CSharpDefaultFileExt : VisualBasicDefaultExt;
 
-            var projectId = ProjectId.CreateNewId(debugName: TestProjectName);
+            var projectId = ProjectId.CreateNewId(TestProjectName);
 
             var solution = new AdhocWorkspace()
                 .CurrentSolution
                 .AddProject(projectId, TestProjectName, TestProjectName, language)
-                .AddMetadataReference(projectId, CorlibReference)
+                .AddMetadataReference(projectId, CoreLibReference)
                 .AddMetadataReference(projectId, SystemCoreReference)
                 .AddMetadataReference(projectId, CSharpSymbolsReference)
                 .AddMetadataReference(projectId, CodeAnalysisReference)
@@ -170,17 +156,16 @@ namespace MassTransit.Analyzers.Tests
                 .AddMetadataReference(projectId, NewIdReference)
                 .AddMetadataReference(projectId, SystemPrivateUriReference);
 
-            int count = 0;
+            var count = 0;
             foreach (var source in sources)
             {
                 var newFileName = fileNamePrefix + count + "." + fileExt;
-                var documentId = DocumentId.CreateNewId(projectId, debugName: newFileName);
+                var documentId = DocumentId.CreateNewId(projectId, newFileName);
                 solution = solution.AddDocument(documentId, newFileName, SourceText.From(source));
                 count++;
             }
+
             return solution.GetProject(projectId);
         }
-        #endregion
     }
 }
-

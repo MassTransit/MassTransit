@@ -1,9 +1,10 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
-
 namespace MassTransit.Analyzers
 {
+    using System.Linq;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+
     public static class CommonExpressions
     {
         public static bool IsActivator(this ArgumentSyntax argumentSyntax, SemanticModel semanticModel, out ITypeSymbol typeArgument)
@@ -38,18 +39,18 @@ namespace MassTransit.Analyzers
         static bool IsGenericInitializerMethod(IMethodSymbol method)
         {
             return method != null
-                   && method.ContainingType.ContainingAssembly.Name == "MassTransit"
-                   && (method.Name == "Publish" && method.ContainingType.Name == "IPublishEndpoint"
-                       || method.Name == "Send" && method.ContainingType.Name == "ISendEndpoint"
-                       || method.Name == "Create" && method.ContainingType.Name == "IRequestClient"
-                       || method.Name == "RespondAsync" && method.ContainingType.Name == "ConsumeContext");
+                && method.ContainingType.ContainingAssembly.Name == "MassTransit"
+                && (method.Name == "Publish" && method.ContainingType.Name == "IPublishEndpoint"
+                    || method.Name == "Send" && method.ContainingType.Name == "ISendEndpoint"
+                    || method.Name == "Create" && method.ContainingType.Name == "IRequestClient"
+                    || method.Name == "RespondAsync" && method.ContainingType.Name == "ConsumeContext");
         }
 
         static bool IsInitializerMethod(IMethodSymbol method)
         {
             return method != null
-                   && method.ContainingType.ContainingAssembly.Name == "MassTransit"
-                   && method.Name == "Create" && method.ContainingType.Name == "IRequestClient";
+                && method.ContainingType.ContainingAssembly.Name == "MassTransit"
+                && method.Name == "Create" && method.ContainingType.Name == "IRequestClient";
         }
 
         public static bool HasMessageContract(this ITypeSymbol typeArgument, out ITypeSymbol messageContractType)
@@ -72,7 +73,7 @@ namespace MassTransit.Analyzers
             messageContractType = null;
             return false;
         }
-        
+
         public static bool IsImmutableArray(this ITypeSymbol type, out ITypeSymbol typeArgument)
         {
             if (type.TypeKind == TypeKind.Struct &&
@@ -160,7 +161,7 @@ namespace MassTransit.Analyzers
                 type.ContainingAssembly.Name == "MassTransit")
             {
                 var inVar = type.Interfaces.FirstOrDefault(i => i.Name == "IInitializerVariable");
-                if (inVar != null && 
+                if (inVar != null &&
                     inVar.IsGenericType &&
                     inVar.TypeArguments.Length == 1)
                 {

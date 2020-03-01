@@ -26,7 +26,7 @@
 
   <PropertyGroup Condition="'$(MSBuildProjectName.Contains(Tests))' == false">
     <!-- Nuget Package Details -->
-    <PackageIconUrl>https://masstransit-project.com/mt-logo-color.png</PackageIconUrl>
+    <PackageIcon>mt-logo-small.png</PackageIcon>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Description>MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com</Description>
     <IsPackable>True</IsPackable>
@@ -38,6 +38,10 @@
     <!-- SourceLink Config, needs nuget package in each csproj Microsoft.SourceLink.GitHub in order to work -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(MSBuildProjectName.Contains(Tests))' == false">
+    <None Include="../mt-logo-small.png" Pack="true" Visible="false" PackagePath=""/>
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(MSBuildProjectName.Contains(Tests))' == true">
     <NoWarn>$(NoWarn),CS0618</NoWarn>
