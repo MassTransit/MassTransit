@@ -1,8 +1,11 @@
 using System;
 using System.Threading.Tasks;
 
-namespace MassTransit.Analyzers
+namespace Sample.Analyzers
 {
+    using MassTransit;
+
+
     public interface OrderRequest
     {
         Guid CorrelationId { get; }

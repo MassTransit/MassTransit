@@ -4,8 +4,11 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MassTransit.Analyzers
+namespace Sample.Analyzers
 {
+    using MassTransit;
+
+
     public interface OrderSubmitted
     {
         Guid Id { get; }

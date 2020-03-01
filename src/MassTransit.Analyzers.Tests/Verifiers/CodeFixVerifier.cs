@@ -1,20 +1,21 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeActions;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-
-namespace TestHelper
+namespace MassTransit.Analyzers.Tests
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CodeActions;
+    using Microsoft.CodeAnalysis.CodeFixes;
+    using Microsoft.CodeAnalysis.Diagnostics;
+    using Microsoft.CodeAnalysis.Formatting;
+    using NUnit.Framework;
+
+
     /// <summary>
     /// Superclass of all Unit tests made for diagnostics with codefixes.
     /// Contains methods used to verify correctness of codefixes
     /// </summary>
-    public abstract partial class CodeFixVerifier : DiagnosticVerifier
+    public abstract partial class CodeFixVerifier
     {
         /// <summary>
         /// Returns the codefix being tested (C#) - to be implemented in non-abstract class
@@ -121,7 +122,8 @@ namespace TestHelper
             }
 
             //after applying all of the code fixes, compare the resulting string to the inputted one
-            var actual = GetStringFromDocument(document);
+            var actual = GetStringFromDocument(document).Replace("\r\n", "\n");
+
             Assert.AreEqual(newSource, actual);
         }
     }

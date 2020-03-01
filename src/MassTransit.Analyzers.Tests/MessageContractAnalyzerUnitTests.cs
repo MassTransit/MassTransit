@@ -1,13 +1,14 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TestHelper;
-
-namespace MassTransit.Analyzers.MessageContractAnalyzer.Test
+namespace MassTransit.Analyzers.Tests
 {
-    [TestClass]
-    public class UnitTest : CodeFixVerifier
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CodeFixes;
+    using Microsoft.CodeAnalysis.Diagnostics;
+    using NUnit.Framework;
+
+
+    [TestFixture]
+    public class UnitTest :
+    CodeFixVerifier
     {
         private readonly string Usings = @"
 using System;
@@ -19,7 +20,7 @@ using MassTransit;
 
         private readonly string MessageContracts = @"
 namespace ConsoleApplication1
-{        
+{
     public interface OrderSubmitted
     {
         Guid Id { get; }
@@ -63,7 +64,7 @@ namespace ConsoleApplication1
 
         private readonly string MessageContractsDifferentNamespace = @"
 namespace ConsoleApplication1.Messages
-{        
+{
     public interface OrderSubmitted
     {
         Guid Id { get; }
@@ -151,12 +152,12 @@ namespace ConsoleApplication1.Messages
     }
 ";
 
-        [TestMethod]
+        [Test]
         public void WhenPublishTypesAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
 namespace ConsoleApplication1
-{        
+{
     class Program
     {
         static async Task Main()
@@ -186,12 +187,12 @@ namespace ConsoleApplication1
 
         }
 
-        [TestMethod]
+        [Test]
         public void WhenSendTypesAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
 namespace ConsoleApplication1
-{        
+{
     class Program
     {
         static async Task Main()
@@ -220,12 +221,12 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenCreateRequestTypesAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
 namespace ConsoleApplication1
-{        
+{
     class Program
     {
         static async Task Main()
@@ -259,12 +260,12 @@ namespace ConsoleApplication1
         }
 
 
-        [TestMethod]
+        [Test]
         public void WhenTypeNotValidStructure_ShouldHaveDiagnostic()
         {
             var test = Usings + Dtos + @"
 namespace ConsoleApplication1
-{        
+{
     class Program
     {
         static async Task Main()
@@ -310,12 +311,12 @@ namespace ConsoleApplication1
         }
 
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyCompatibleAndNoMissingProperties_ShouldHaveNoDiagnostics()
         {
             var test = Usings + MessageContracts + @"
 namespace ConsoleApplication1
-{        
+{
     class Program
     {
         static async Task Main()
@@ -350,7 +351,7 @@ namespace ConsoleApplication1
         }
 
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyIncompatibleAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
@@ -399,7 +400,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyIncompatibleWithUnknownPropertyAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
@@ -449,7 +450,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyIncompatibleAtNestedTypePropertyAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
@@ -498,7 +499,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyIncompatibleWithUnknownPropertyAtNestedTypePropertyAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
@@ -548,7 +549,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyIncompatibleAtNestedArrayTypePropertyAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
@@ -597,7 +598,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyIncompatibleWithUnknownPropertyAtNestedArrayTypePropertyAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
@@ -647,7 +648,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyIncompatibleAtDifferentNodesAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
@@ -697,7 +698,7 @@ namespace ConsoleApplication1
         }
 
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnosticAndCodeFix()
         {
             var test = Usings + MessageContracts + @"
@@ -780,7 +781,7 @@ namespace ConsoleApplication1
             VerifyCSharpFix(test, fixtest);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyCompatibleAndMissingPropertyInNestedType_ShouldHaveDiagnosticAndCodeFix()
         {
             var test = Usings + MessageContracts + @"
@@ -862,7 +863,7 @@ Category = default(string) },
             VerifyCSharpFix(test, fixtest);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyCompatibleAndMissingPropertyInNestedArrayType_ShouldHaveDiagnosticAndCodeFix()
         {
             var test = Usings + MessageContracts + @"
@@ -944,7 +945,7 @@ Price = default(decimal) }
             VerifyCSharpFix(test, fixtest);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyCompatibleAndMissingNestedTypeProperty_ShouldHaveDiagnosticAndCodeFix()
         {
             var test = Usings + MessageContracts + @"
@@ -1019,7 +1020,7 @@ Category = default(string) } }
             VerifyCSharpFix(test, fixtest);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyCompatibleAndMissingNestedArrayTypeProperty_ShouldHaveDiagnosticAndCodeFix()
         {
             var test = Usings + MessageContracts + @"
@@ -1087,8 +1088,8 @@ namespace ConsoleApplication1
 ";
             VerifyCSharpFix(test, fixtest);
         }
-        
-        [TestMethod]
+
+        [Test]
         public void WhenTypesAreStructurallyCompatibleAndMissingMultiplePropertiesAtDifferentNodes_ShouldHaveDiagnosticAndCodeFix()
         {
             var test = Usings + MessageContracts + @"
@@ -1170,7 +1171,7 @@ Price = default(decimal) }
         }
 
 
-        [TestMethod]
+        [Test]
         public void WhenAnonymousTypeUsingInferredMemberNamesAreStructurallyCompatibleAndNoMissingProperties_ShouldHaveNoDiagnostics()
         {
             var test = Usings + MessageContracts + Dtos + @"
@@ -1226,7 +1227,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenAnonymousTypeUsingInferredMemberNamesAreStructurallyIncompatibleAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + DtosIncompatibe + @"
@@ -1293,7 +1294,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenAnonymousTypeUsingInferredMemberNamesAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnosticAndCodeFix()
         {
             var test = Usings + MessageContracts + Dtos + @"
@@ -1411,7 +1412,7 @@ namespace ConsoleApplication1
         }
 
 
-        [TestMethod]
+        [Test]
         public void WhenSimpleArrayTypesAreStructurallyCompatibleAndNoMissingProperties_ShouldHaveNoDiagnostics()
         {
             var test = Usings + @"
@@ -1444,7 +1445,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenSimpleArrayTypesAreStructurallyIncompatibleAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + @"
@@ -1487,7 +1488,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenSimpleArrayTypesAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnosticAndCodeFix()
         {
             var test = Usings + @"
@@ -1559,7 +1560,7 @@ namespace ConsoleApplication1
         }
 
 
-        [TestMethod]
+        [Test]
         public void WhenMessageContractHasNamespaceAreStructurallyCompatibleAndNoMissingProperties_ShouldHaveNoDiagnostics()
         {
             var test = Usings + MessageContractsDifferentNamespace + @"
@@ -1598,7 +1599,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenMessageContractHasNamespaceAreStructurallyIncompatibleAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContractsDifferentNamespace + @"
@@ -1647,7 +1648,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenMessageContractHasNamespaceAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnosticAndCodeFix()
         {
             var test = Usings + MessageContractsDifferentNamespace + @"
@@ -1729,7 +1730,7 @@ Price = default(decimal) }
         }
 
 
-        [TestMethod]
+        [Test]
         public void WhenMessageContractHasNullableAreStructurallyCompatibleAndMissingNullableProperty_ShouldHaveDiagnosticAndCodeFix()
         {
             var test = Usings + @"
@@ -1801,7 +1802,7 @@ namespace ConsoleApplication1
         }
 
 
-        [TestMethod]
+        [Test]
         public void WhenActivatingGenericContractAreStructurallyCompatibleAndNoMissingProperties_ShouldHaveNoDiagnostics()
         {
             var test = Usings + @"
@@ -1813,7 +1814,7 @@ namespace ConsoleApplication1
     }
 
     public interface IProjectionUpdatedNotification : INotification
-    {        
+    {
     }
 
     class Program
@@ -1839,7 +1840,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenActivatingGenericContractAreStructurallyIncompatibleAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + @"
@@ -1851,7 +1852,7 @@ namespace ConsoleApplication1
     }
 
     public interface IProjectionUpdatedNotification : INotification
-    {        
+    {
     }
 
     class Program
@@ -1887,7 +1888,7 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenActivatingGenericContractAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnosticAndCodeFix()
         {
             var test = Usings + @"
@@ -1899,7 +1900,7 @@ namespace ConsoleApplication1
     }
 
     public interface IProjectionUpdatedNotification : INotification
-    {        
+    {
     }
 
     class Program
@@ -1942,7 +1943,7 @@ namespace ConsoleApplication1
     }
 
     public interface IProjectionUpdatedNotification : INotification
-    {        
+    {
     }
 
     class Program
@@ -1969,12 +1970,12 @@ namespace ConsoleApplication1
         }
 
 
-        [TestMethod]
+        [Test]
         public void WhenTypesAreStructurallyCompatibleWithDunderProperty_ShouldHaveNoDiagnostics()
         {
             var test = Usings + MessageContracts + @"
 namespace ConsoleApplication1
-{        
+{
     class Program
     {
         static async Task Main()
@@ -2009,12 +2010,12 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesWithVariablesAreStructurallyCompatibleAndNoMissingProperties_ShouldHaveNoDiagnostics()
         {
             var test = Usings + MessageContracts + @"
 namespace ConsoleApplication1
-{        
+{
     class Program
     {
         static async Task Main()
@@ -2045,16 +2046,16 @@ namespace ConsoleApplication1
     }
 }
 ";
-            
+
             VerifyCSharpDiagnostic(test);
         }
 
-        [TestMethod]
+        [Test]
         public void WhenTypesWithVariablesAreStructurallyIncompatibleAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
 namespace ConsoleApplication1
-{        
+{
     class Program
     {
         static async Task Main()
