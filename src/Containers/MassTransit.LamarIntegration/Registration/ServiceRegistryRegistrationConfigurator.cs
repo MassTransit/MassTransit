@@ -74,6 +74,31 @@ namespace MassTransit.LamarIntegration.Registration
                 .Singleton();
         }
 
+        public void AddMediator(Action<IServiceContext, IReceiveEndpointConfigurator> configure = null)
+        {
+            IMediator MediatorFactory(IServiceContext context)
+            {
+                var provider = context.GetInstance<IConfigurationServiceProvider>();
+
+                ConfigureLogContext(provider);
+
+                return Bus.Factory.CreateMediator(cfg =>
+                {
+                    configure?.Invoke(context, cfg);
+
+                    ConfigureMediator(cfg, provider);
+                });
+            }
+
+            _registry.For<IMediator>()
+                .Use(MediatorFactory)
+                .Singleton();
+
+            _registry.For<IClientFactory>()
+                .Use(context => context.GetInstance<IMediator>())
+                .Singleton();
+        }
+
         IConsumerScopeProvider CreateConsumerScopeProvider(IServiceContext context)
         {
             return new LamarConsumerScopeProvider(context.GetInstance<IContainer>());

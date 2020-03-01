@@ -15,8 +15,7 @@
 
 
     public class RabbitMqReceiveEndpointBuilder :
-        ReceiveEndpointBuilder,
-        IReceiveEndpointBuilder
+        ReceiveEndpointBuilder
     {
         readonly IRabbitMqHostControl _host;
         readonly IRabbitMqReceiveEndpointConfiguration _configuration;

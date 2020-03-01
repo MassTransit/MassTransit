@@ -69,6 +69,29 @@ namespace MassTransit.WindsorIntegration.Registration
             );
         }
 
+        public void AddMediator(Action<IKernel, IReceiveEndpointConfigurator> configure = null)
+        {
+            IMediator MediatorFactory(IKernel kernel)
+            {
+                var provider = kernel.Resolve<IConfigurationServiceProvider>();
+
+                ConfigureLogContext(provider);
+
+                return Bus.Factory.CreateMediator(cfg =>
+                {
+                    configure?.Invoke(kernel, cfg);
+
+                    ConfigureMediator(cfg, provider);
+                });
+            }
+
+            _container.Register(
+                Component.For<IMediator>()
+                    .Forward<IClientFactory>()
+                    .UsingFactoryMethod(MediatorFactory).LifestyleSingleton()
+            );
+        }
+
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IKernel context)
         {
             var currentScope = CallContextLifetimeScope.ObtainCurrentScope();

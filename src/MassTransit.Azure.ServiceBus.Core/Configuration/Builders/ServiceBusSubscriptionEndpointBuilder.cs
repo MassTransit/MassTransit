@@ -9,8 +9,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Builders
 
 
     public class ServiceBusSubscriptionEndpointBuilder :
-        ReceiveEndpointBuilder,
-        IReceiveEndpointBuilder
+        ReceiveEndpointBuilder
     {
         readonly IServiceBusHostControl _host;
         readonly IServiceBusSubscriptionEndpointConfiguration _configuration;

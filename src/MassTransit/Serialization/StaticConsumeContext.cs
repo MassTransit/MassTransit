@@ -4,9 +4,7 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.Remoting.Messaging;
-    using System.Threading.Tasks;
     using Context;
-    using Util;
 
 
     /// <summary>
@@ -19,7 +17,6 @@ namespace MassTransit.Serialization
         readonly object _message;
         readonly IDictionary<Type, ConsumeContext> _messageTypes;
         readonly string[] _supportedTypes;
-        readonly PendingTaskCollection _consumeTasks;
         Guid? _conversationId;
         Guid? _correlationId;
         Uri _destinationAddress;
@@ -40,24 +37,21 @@ namespace MassTransit.Serialization
             _binaryHeaders = headers;
             _supportedTypes = GetSupportedMessageTypes().ToArray();
             _messageTypes = new Dictionary<Type, ConsumeContext>();
-            _consumeTasks = new PendingTaskCollection(4);
         }
 
-        public override Task ConsumeCompleted => _consumeTasks.Completed(CancellationToken);
-
-        public override Guid? MessageId => _messageId ?? (_messageId = GetHeaderGuid(BinaryMessageSerializer.MessageIdKey));
-        public override Guid? RequestId => _requestId ?? (_requestId = GetHeaderGuid(BinaryMessageSerializer.RequestIdKey));
-        public override Guid? CorrelationId => _correlationId ?? (_correlationId = GetHeaderGuid(BinaryMessageSerializer.CorrelationIdKey));
-        public override Guid? ConversationId => _conversationId ?? (_conversationId = GetHeaderGuid(BinaryMessageSerializer.ConversationIdKey));
-        public override Guid? InitiatorId => _initiatorId ?? (_initiatorId = GetHeaderGuid(BinaryMessageSerializer.InitiatorIdKey));
+        public override Guid? MessageId => _messageId ??= GetHeaderGuid(BinaryMessageSerializer.MessageIdKey);
+        public override Guid? RequestId => _requestId ??= GetHeaderGuid(BinaryMessageSerializer.RequestIdKey);
+        public override Guid? CorrelationId => _correlationId ??= GetHeaderGuid(BinaryMessageSerializer.CorrelationIdKey);
+        public override Guid? ConversationId => _conversationId ??= GetHeaderGuid(BinaryMessageSerializer.ConversationIdKey);
+        public override Guid? InitiatorId => _initiatorId ??= GetHeaderGuid(BinaryMessageSerializer.InitiatorIdKey);
         public override DateTime? ExpirationTime => GetHeaderDateTime(BinaryMessageSerializer.ExpirationTimeKey);
-        public override Uri SourceAddress => _sourceAddress ?? (_sourceAddress = GetHeaderUri(BinaryMessageSerializer.SourceAddressKey));
-        public override Uri DestinationAddress => _destinationAddress ?? (_destinationAddress = GetHeaderUri(BinaryMessageSerializer.DestinationAddressKey));
-        public override Uri ResponseAddress => _responseAddress ?? (_responseAddress = GetHeaderUri(BinaryMessageSerializer.ResponseAddressKey));
-        public override Uri FaultAddress => _faultAddress ?? (_faultAddress = GetHeaderUri(BinaryMessageSerializer.FaultAddressKey));
-        public override DateTime? SentTime => _sentTime ?? (_sentTime = GetHeaderDateTime(BinaryMessageSerializer.SentTimeKey));
-        public override Headers Headers => _headers ?? (_headers = new StaticHeaders(_binaryHeaders));
-        public override HostInfo Host => _host ?? (_host = GetHeaderObject<HostInfo>(BinaryMessageSerializer.HostInfoKey));
+        public override Uri SourceAddress => _sourceAddress ??= GetHeaderUri(BinaryMessageSerializer.SourceAddressKey);
+        public override Uri DestinationAddress => _destinationAddress ??= GetHeaderUri(BinaryMessageSerializer.DestinationAddressKey);
+        public override Uri ResponseAddress => _responseAddress ??= GetHeaderUri(BinaryMessageSerializer.ResponseAddressKey);
+        public override Uri FaultAddress => _faultAddress ??= GetHeaderUri(BinaryMessageSerializer.FaultAddressKey);
+        public override DateTime? SentTime => _sentTime ??= GetHeaderDateTime(BinaryMessageSerializer.SentTimeKey);
+        public override Headers Headers => _headers ??= new StaticHeaders(_binaryHeaders);
+        public override HostInfo Host => _host ??= GetHeaderObject<HostInfo>(BinaryMessageSerializer.HostInfoKey);
         public override IEnumerable<string> SupportedMessageTypes => _supportedTypes;
 
         IEnumerable<string> GetSupportedMessageTypes()
@@ -114,11 +108,6 @@ namespace MassTransit.Serialization
                 _messageTypes[typeof(T)] = message = null;
                 return false;
             }
-        }
-
-        public override void AddConsumeTask(Task task)
-        {
-            _consumeTasks.Add(task);
         }
 
         string GetHeaderString(string headerName)

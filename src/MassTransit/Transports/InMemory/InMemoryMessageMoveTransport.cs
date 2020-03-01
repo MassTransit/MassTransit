@@ -25,7 +25,7 @@ namespace MassTransit.Transports.InMemory
             if (context.TryGetPayload(out InMemoryTransportMessage receivedMessage))
                 messageType = receivedMessage.MessageType;
 
-            var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType.MediaType, messageType);
+            var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType?.MediaType, messageType);
 
             transportMessage.Headers.SetHostHeaders();
 

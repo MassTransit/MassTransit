@@ -5,7 +5,6 @@ namespace MassTransit.Configurators
     using System.Linq;
     using Configuration;
     using EndpointConfigurators;
-    using EndpointSpecifications;
     using GreenPipes;
     using Transports;
 
@@ -17,12 +16,14 @@ namespace MassTransit.Configurators
         readonly IList<TReceiveEndpointConfiguration> _endpoints;
         readonly EndpointConfigurationObservable _endpointObservable;
 
-        protected BaseHostConfiguration()
+        protected BaseHostConfiguration(IBusConfiguration busConfiguration)
         {
+            BusConfiguration = busConfiguration;
             _endpoints = new List<TReceiveEndpointConfiguration>();
             _endpointObservable = new EndpointConfigurationObservable();
         }
 
+        public IBusConfiguration BusConfiguration { get; }
         protected IEndpointConfigurationObserver Observers => _endpointObservable;
 
         protected void Add(TReceiveEndpointConfiguration configuration)

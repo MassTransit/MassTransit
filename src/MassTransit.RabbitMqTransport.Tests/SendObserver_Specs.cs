@@ -11,8 +11,9 @@
 
     namespace ObserverTests
     {
+        using System.Threading;
         using GreenPipes.Internals.Extensions;
-        using Util;
+        using TestFramework;
 
 
         [TestFixture]
@@ -22,7 +23,7 @@
             [Test]
             public async Task Should_invoke_the_exception_after_send_failure()
             {
-                var observer = new PublishObserver();
+                var observer = new PublishObserver(this);
                 using (Bus.ConnectPublishObserver(observer))
                 {
                     Assert.That(
@@ -36,7 +37,7 @@
             [Test]
             public async Task Should_invoke_the_observer_after_send()
             {
-                var observer = new PublishObserver();
+                var observer = new PublishObserver(this);
                 using (Bus.ConnectPublishObserver(observer))
                 {
                     await Bus.Publish(new PingMessage());
@@ -48,7 +49,7 @@
             [Test]
             public async Task Should_invoke_the_observer_prior_to_send()
             {
-                var observer = new PublishObserver();
+                var observer = new PublishObserver(this);
                 using (Bus.ConnectPublishObserver(observer))
                 {
                     await Bus.Publish(new PingMessage());
@@ -60,17 +61,17 @@
             [Test]
             public async Task Should_not_invoke_the_send_observer_prior_to_send()
             {
-                var observer = new PublishObserver();
+                var observer = new PublishObserver(this);
                 using (Bus.ConnectPublishObserver(observer))
                 {
-                    var sendObserver = new SendObserver();
+                    var sendObserver = new SendObserver(this);
                     using (Bus.ConnectSendObserver(sendObserver))
                     {
                         await Bus.Publish(new PingMessage());
 
                         await observer.PreSent;
 
-                        Assert.That(async () => await sendObserver.PreSent.OrTimeout(s:5), Throws.TypeOf<TimeoutException>());
+                        Assert.That(async () => await sendObserver.PreSent.OrTimeout(s: 5), Throws.TypeOf<TimeoutException>());
                     }
                 }
             }
@@ -78,7 +79,7 @@
             [Test]
             public async Task Should_not_invoke_post_sent_on_exception()
             {
-                var observer = new PublishObserver();
+                var observer = new PublishObserver(this);
                 using (Bus.ConnectPublishObserver(observer))
                 {
                     Assert.That(
@@ -100,27 +101,16 @@
             readonly TaskCompletionSource<PublishContext> _preSend;
             readonly TaskCompletionSource<PublishContext> _sendFaulted;
 
-            public PublishObserver()
+            public PublishObserver(AsyncTestFixture fixture)
             {
-                _sendFaulted = TaskUtil.GetTask<PublishContext>();
-                _preSend = TaskUtil.GetTask<PublishContext>();
-                _postSend = TaskUtil.GetTask<PublishContext>();
+                _postSend = fixture.GetTask<PublishContext>();
+                _preSend = fixture.GetTask<PublishContext>();
+                _sendFaulted = fixture.GetTask<PublishContext>();
             }
 
-            public Task<PublishContext> PreSent
-            {
-                get { return _preSend.Task; }
-            }
-
-            public Task<PublishContext> PostSent
-            {
-                get { return _postSend.Task; }
-            }
-
-            public Task<PublishContext> SendFaulted
-            {
-                get { return _sendFaulted.Task; }
-            }
+            public Task<PublishContext> PreSent => _preSend.Task;
+            public Task<PublishContext> PostSent => _postSend.Task;
+            public Task<PublishContext> SendFaulted => _sendFaulted.Task;
 
             public async Task PrePublish<T>(PublishContext<T> context)
                 where T : class
@@ -145,40 +135,49 @@
         class SendObserver :
             ISendObserver
         {
-            readonly TaskCompletionSource<SendContext> _postSend = TaskUtil.GetTask<SendContext>();
-            readonly TaskCompletionSource<SendContext> _preSend = TaskUtil.GetTask<SendContext>();
-            readonly TaskCompletionSource<SendContext> _sendFaulted = TaskUtil.GetTask<SendContext>();
+            readonly TaskCompletionSource<SendContext> _postSend;
+            readonly TaskCompletionSource<SendContext> _preSend;
+            readonly TaskCompletionSource<SendContext> _sendFaulted;
 
-            public Task<SendContext> PreSent
+            int _preSentCount;
+            int _postSentCount;
+            int _sendFaultCount;
+
+            public SendObserver(AsyncTestFixture fixture)
             {
-                get { return _preSend.Task; }
+                _postSend = fixture.GetTask<SendContext>();
+                _preSend = fixture.GetTask<SendContext>();
+                _sendFaulted = fixture.GetTask<SendContext>();
             }
 
-            public Task<SendContext> PostSent
-            {
-                get { return _postSend.Task; }
-            }
+            public int PreSentCount => _preSentCount;
+            public int PostSentCount => _postSentCount;
+            public int SendFaultCount => _sendFaultCount;
 
-            public Task<SendContext> SendFaulted
-            {
-                get { return _sendFaulted.Task; }
-            }
+            public Task<SendContext> PreSent => _preSend.Task;
+
+            public Task<SendContext> PostSent => _postSend.Task;
+
+            public Task<SendContext> SendFaulted => _sendFaulted.Task;
 
             public async Task PreSend<T>(SendContext<T> context)
                 where T : class
             {
+                Interlocked.Increment(ref _preSentCount);
                 _preSend.TrySetResult(context);
             }
 
             public async Task PostSend<T>(SendContext<T> context)
                 where T : class
             {
+                Interlocked.Increment(ref _postSentCount);
                 _postSend.TrySetResult(context);
             }
 
             public async Task SendFault<T>(SendContext<T> context, Exception exception)
                 where T : class
             {
+                Interlocked.Increment(ref _sendFaultCount);
                 _sendFaulted.TrySetResult(context);
             }
         }
@@ -191,54 +190,66 @@
             [Test]
             public async Task Should_invoke_the_exception_after_send_failure()
             {
-                var observer = new SendObserver();
+                var observer = new SendObserver(this);
                 using (InputQueueSendEndpoint.ConnectSendObserver(observer))
                 {
-                    Assert.That(
-                        async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                    Assert.That(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
                         Throws.TypeOf<SerializationException>());
 
+                    await observer.PreSent;
                     await observer.SendFaulted;
+                    Assert.That(observer.PreSentCount, Is.EqualTo(1));
+                    Assert.That(observer.SendFaultCount, Is.EqualTo(1));
                 }
             }
 
             [Test]
             public async Task Should_invoke_the_observer_after_send()
             {
-                var observer = new SendObserver();
+                var observer = new SendObserver(this);
                 using (InputQueueSendEndpoint.ConnectSendObserver(observer))
                 {
                     await InputQueueSendEndpoint.Send(new PingMessage());
 
+                    await observer.PreSent;
                     await observer.PostSent;
+
+                    Assert.That(observer.PreSentCount, Is.EqualTo(1));
+                    Assert.That(observer.PostSentCount, Is.EqualTo(1));
                 }
             }
 
             [Test]
             public async Task Should_invoke_the_observer_prior_to_send()
             {
-                var observer = new SendObserver();
+                var observer = new SendObserver(this);
                 using (InputQueueSendEndpoint.ConnectSendObserver(observer))
                 {
                     await InputQueueSendEndpoint.Send(new PingMessage());
 
                     await observer.PreSent;
+
+                    Assert.That(observer.PreSentCount, Is.EqualTo(1));
+                    Assert.That(observer.PostSentCount, Is.EqualTo(1));
                 }
             }
 
             [Test]
             public async Task Should_not_invoke_post_sent_on_exception()
             {
-                var observer = new SendObserver();
+                var observer = new SendObserver(this);
                 using (InputQueueSendEndpoint.ConnectSendObserver(observer))
                 {
-                    Assert.That(
-                        async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                    Assert.That(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
                         Throws.TypeOf<SerializationException>());
 
                     await observer.SendFaulted;
 
                     observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
+
+                    Assert.That(observer.PreSentCount, Is.EqualTo(1));
+                    Assert.That(observer.PostSentCount, Is.EqualTo(0));
+                    Assert.That(observer.SendFaultCount, Is.EqualTo(1));
                 }
             }
         }

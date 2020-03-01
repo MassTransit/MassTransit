@@ -6,7 +6,6 @@ namespace MassTransit.RabbitMqTransport.Hosting
     using ConsumeConfigurators;
     using EndpointConfigurators;
     using GreenPipes;
-    using MassTransit.Builders;
     using MassTransit.Hosting;
     using MassTransit.Topology;
     using Saga;
@@ -69,11 +68,6 @@ namespace MassTransit.RabbitMqTransport.Hosting
         public ISendTopologyConfigurator SendTopology => _configurator.SendTopology;
 
         public IPublishTopologyConfigurator PublishTopology => _configurator.PublishTopology;
-
-        public void AddBusFactorySpecification(IBusFactorySpecification specification)
-        {
-            _configurator.AddBusFactorySpecification(specification);
-        }
 
         public void Message<T>(Action<IMessageTopologyConfigurator<T>> configureTopology)
             where T : class
@@ -155,7 +149,8 @@ namespace MassTransit.RabbitMqTransport.Hosting
             _configurator.SagaConfigured(configurator);
         }
 
-        void ISagaConfigurationObserver.StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
+        void ISagaConfigurationObserver.StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator,
+            SagaStateMachine<TInstance> stateMachine)
         {
             _configurator.StateMachineSagaConfigured(configurator, stateMachine);
         }
@@ -188,7 +183,8 @@ namespace MassTransit.RabbitMqTransport.Hosting
             return _configurator.ConnectActivityConfigurationObserver(observer);
         }
 
-        void IActivityConfigurationObserver.ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
+        void IActivityConfigurationObserver.ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator,
+            Uri compensateAddress)
         {
             _configurator.ActivityConfigured(configurator, compensateAddress);
         }

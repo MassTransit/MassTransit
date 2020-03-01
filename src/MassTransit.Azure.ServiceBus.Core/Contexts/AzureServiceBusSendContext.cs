@@ -34,7 +34,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
 
     public class AzureServiceBusSendContext<T> :
-        BaseSendContext<T>,
+        MessageSendContext<T>,
         ServiceBusSendContext<T>
         where T : class
     {

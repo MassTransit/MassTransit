@@ -83,6 +83,14 @@ namespace MassTransit.Saga.InMemoryRepository
             if (_sagasLocked)
             {
                 saga = _sagas[correlationId];
+                if (saga == null)
+                    return default;
+
+                if (saga.IsRemoved)
+                {
+                    saga.Release();
+                    return default;
+                }
 
                 _sagas.Release();
                 _sagasLocked = false;
@@ -93,20 +101,20 @@ namespace MassTransit.Saga.InMemoryRepository
                 try
                 {
                     saga = _sagas[correlationId];
+
+                    if (saga == null)
+                        return default;
+
+                    if (saga.IsRemoved)
+                    {
+                        saga.Release();
+                        return default;
+                    }
                 }
                 finally
                 {
                     _sagas.Release();
                 }
-            }
-
-            if (saga == null)
-                return default;
-
-            if (saga.IsRemoved)
-            {
-                saga.Release();
-                return default;
             }
 
             return await _factory.CreateSagaConsumeContext(_sagas, _context, saga.Instance, SagaConsumeContextMode.Load).ConfigureAwait(false);

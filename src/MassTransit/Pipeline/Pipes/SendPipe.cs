@@ -11,7 +11,6 @@ namespace MassTransit.Pipeline.Pipes
     public class SendPipe :
         ISendPipe
     {
-        public static readonly ISendPipe Empty = new SendPipe(new SendPipeSpecification());
         readonly ConcurrentDictionary<Type, IMessagePipe> _outputPipes;
         readonly ISendPipeSpecification _specification;
 
@@ -35,13 +34,7 @@ namespace MassTransit.Pipeline.Pipes
         [DebuggerStepThrough]
         Task ISendContextPipe.Send<T>(SendContext<T> context)
         {
-            return GetPipe<T>().Send(context);
-        }
-
-        IMessagePipe GetPipe<T>()
-            where T : class
-        {
-            return _outputPipes.GetOrAdd(typeof(T), x => new MessagePipe<T>(_specification.GetMessageSpecification<T>()));
+            return _outputPipes.GetOrAdd(typeof(T), x => new MessagePipe<T>(_specification.GetMessageSpecification<T>())).Send(context);
         }
 
 

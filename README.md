@@ -59,7 +59,7 @@ MassTransit Nuget Packages
 ## Getting started with MassTransit
 
 In order to get started with MassTransit, you can have a look at the
-documentation, which is located at [http://masstransit-project.com/MassTransit](http://masstransit-project.com/MassTransit).
+documentation, which is located at [http://masstransit-project.com/](http://masstransit-project.com/).
 
 ### Simplest possible thing:
 
@@ -174,7 +174,7 @@ MassTransit is built on [AppVeyor](https://ci.appveyor.com/project/phatboyg/mass
 * .Net 4.6.1 or .NET Standard 2.0
 
 # CREDITS
-Logo Design by [The Agile Badger](http://www.theagilebadger.com)
+Logo Design by _The Agile Badger_
 
 [MassTransit.nuget]: https://www.nuget.org/packages/MassTransit
 [Host.nuget]: https://www.nuget.org/packages/MassTransit.Host

@@ -17,9 +17,12 @@
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
-            yield return new KeyValuePair<string, object>(MessageHeaders.MessageId, _context.MessageId);
-            yield return new KeyValuePair<string, object>(nameof(_context.CorrelationId), _context.CorrelationId);
-            yield return new KeyValuePair<string, object>("Content-Type", _context.ContentType);
+            if (!string.IsNullOrWhiteSpace(_context.MessageId))
+                yield return new KeyValuePair<string, object>(MessageHeaders.MessageId, _context.MessageId);
+            if (!string.IsNullOrWhiteSpace(_context.CorrelationId))
+                yield return new KeyValuePair<string, object>(nameof(_context.CorrelationId), _context.CorrelationId);
+            if (_context.ContentType != null)
+                yield return new KeyValuePair<string, object>("Content-Type", _context.ContentType);
 
             if (_context.Properties != null)
             {
@@ -38,19 +41,19 @@
             if (nameof(_context.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.MessageId;
-                return true;
+                return !string.IsNullOrWhiteSpace(_context.MessageId);
             }
 
             if (nameof(_context.CorrelationId).Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _context.CorrelationId;
-                return true;
+                return !string.IsNullOrWhiteSpace(_context.CorrelationId);
             }
 
             if ("Content-Type".Equals(key, StringComparison.OrdinalIgnoreCase))
             {
-                value = _context.ContentType.MediaType;
-                return true;
+                value = _context.ContentType?.MediaType;
+                return value != null;
             }
 
             value = default;

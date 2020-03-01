@@ -8,6 +8,7 @@ namespace MassTransit.Context
     using Converters;
     using Events;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using Metadata;
     using Util;
 
@@ -296,19 +297,37 @@ namespace MassTransit.Context
                 await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
         }
 
-        protected virtual async Task<ISendEndpoint> GetResponseEndpoint<T>()
+        protected virtual Task<ISendEndpoint> GetResponseEndpoint<T>()
             where T : class
         {
             if (ResponseAddress != null)
             {
-                var sendEndpoint = await ReceiveContext.SendEndpointProvider.GetSendEndpoint(ResponseAddress).ConfigureAwait(false);
+                var sendEndpointTask = ReceiveContext.SendEndpointProvider.GetSendEndpoint(ResponseAddress);
+                if (sendEndpointTask.IsCompletedSuccessfully())
+                    return Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(sendEndpointTask.Result, this, ConsumeTask, RequestId));
+
+                async Task<ISendEndpoint> GetResponseEndpointAsync()
+                {
+                    var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
+
+                    return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask, RequestId);
+                }
+
+                return GetResponseEndpointAsync();
+            }
+
+            var publishSendEndpointTask = ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>();
+            if (publishSendEndpointTask.IsCompletedSuccessfully())
+                return Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(publishSendEndpointTask.Result, this, ConsumeTask, RequestId));
+
+            async Task<ISendEndpoint> GetPublishEndpointAsync()
+            {
+                var sendEndpoint = await publishSendEndpointTask.ConfigureAwait(false);
 
                 return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask, RequestId);
             }
 
-            var publishSendEndpoint = await ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
-
-            return new ConsumeSendEndpoint(publishSendEndpoint, this, ConsumeTask, RequestId);
+            return GetPublishEndpointAsync();
         }
 
         protected async Task RespondInternal<T>(T message, IPipe<SendContext<T>> pipe = default)
@@ -349,7 +368,7 @@ namespace MassTransit.Context
             return new ConsumeSendEndpoint(publishSendEndpoint, this, ConsumeTask, RequestId);
         }
 
-        protected async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
+        protected virtual async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
             where T : class
         {
             Fault<T> fault = new FaultEvent<T>(context.Message, context.MessageId, HostMetadataCache.Host, exception, context.SupportedMessageTypes.ToArray());

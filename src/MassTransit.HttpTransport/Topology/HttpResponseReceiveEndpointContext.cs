@@ -46,6 +46,10 @@
 
         ISendEndpointProvider ReceiveEndpointContext.SendEndpointProvider => _sendEndpointProvider.Value;
         public Task Dependencies => _context.Dependencies;
+        public IReceivePipeDispatcher CreateReceivePipeDispatcher()
+        {
+            return _context.CreateReceivePipeDispatcher();
+        }
 
         IPublishEndpointProvider ReceiveEndpointContext.PublishEndpointProvider => _context.PublishEndpointProvider;
 

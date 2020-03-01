@@ -21,6 +21,7 @@
         ServiceBusHostSettings _hostSettings;
 
         public ServiceBusHostConfiguration(IServiceBusBusConfiguration busConfiguration, IServiceBusTopologyConfiguration topologyConfiguration)
+            : base(busConfiguration)
         {
             _busConfiguration = busConfiguration;
             _hostSettings = new HostSettings();
@@ -87,11 +88,6 @@
 
             var configuration = new ServiceBusReceiveEndpointConfiguration(this, settings, endpointConfiguration);
 
-            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
-            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
-            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
-            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
-
             configure?.Invoke(configuration);
 
             Observers.EndpointConfigured(configuration);
@@ -131,11 +127,6 @@
                 throw new ArgumentNullException(nameof(endpointConfiguration));
 
             var configuration = new ServiceBusSubscriptionEndpointConfiguration(this, settings, endpointConfiguration);
-
-            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
-            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
-            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
-            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
 
             configure?.Invoke(configuration);
 

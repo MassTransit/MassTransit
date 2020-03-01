@@ -1,21 +1,10 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Mime;
+    using GreenPipes;
     using Serialization;
 
 
@@ -25,14 +14,17 @@ namespace MassTransit.Configuration
         readonly Lazy<IMessageDeserializer> _deserializer;
         readonly IDictionary<string, DeserializerFactory> _deserializerFactories;
         readonly Lazy<IMessageSerializer> _serializer;
-        readonly IDictionary<string, DeserializerFactory> _sourceDeserializerFactories;
+        string _defaultContentType;
         SerializerFactory _serializerFactory;
+        IDictionary<string, DeserializerFactory> _sourceDeserializerFactories;
 
         public SerializationConfiguration()
         {
             _serializerFactory = () => new JsonMessageSerializer();
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
             _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
+
+            _defaultContentType = JsonMessageSerializer.JsonContentType.MediaType;
 
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
 
@@ -46,6 +38,8 @@ namespace MassTransit.Configuration
             _serializerFactory = () => source.Serializer;
             _serializer = new Lazy<IMessageSerializer>(CreateSerializer);
             _deserializer = new Lazy<IMessageDeserializer>(CreateDeserializer);
+
+            _defaultContentType = source._defaultContentType;
 
             _sourceDeserializerFactories = source._deserializerFactories;
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
@@ -79,11 +73,32 @@ namespace MassTransit.Configuration
         public void ClearDeserializers()
         {
             _deserializerFactories.Clear();
+            _sourceDeserializerFactories = null;
+            _defaultContentType = default;
+        }
+
+        public ContentType DefaultContentType
+        {
+            set => _defaultContentType = value?.MediaType;
         }
 
         public ISerializationConfiguration CreateSerializationConfiguration()
         {
             return new SerializationConfiguration(this);
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            IEnumerable<KeyValuePair<string, DeserializerFactory>> deserializerFactories = _sourceDeserializerFactories != null
+                ? deserializerFactories = _deserializerFactories.Concat(_sourceDeserializerFactories)
+                : _deserializerFactories;
+
+            List<string> mediaTypes = deserializerFactories.Select(x => x.Key).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (mediaTypes.Count == 0)
+                yield return this.Failure("Deserializers", "must specify at least one deserializer");
+
+            if (string.IsNullOrWhiteSpace(_defaultContentType) && mediaTypes.Count > 1)
+                yield return this.Failure("DefaultContentType", "must be specified when more than one deserializer is supported");
         }
 
         IMessageSerializer CreateSerializer()
@@ -104,7 +119,10 @@ namespace MassTransit.Configuration
 
             IMessageDeserializer[] deserializers = _deserializerFactories.Values.Select(x => x()).ToArray();
 
-            return new SupportedMessageDeserializers(deserializers);
+            if (string.IsNullOrWhiteSpace(_defaultContentType) && _deserializerFactories.Count == 1)
+                _defaultContentType = _deserializerFactories.Single().Key;
+
+            return new SupportedMessageDeserializers(_defaultContentType, deserializers);
         }
     }
 }

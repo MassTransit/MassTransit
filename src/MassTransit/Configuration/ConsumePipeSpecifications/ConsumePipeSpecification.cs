@@ -10,8 +10,8 @@ namespace MassTransit.ConsumePipeSpecifications
     using Courier;
     using GreenPipes;
     using GreenPipes.Builders;
+    using GreenPipes.Configurators;
     using GreenPipes.Filters;
-    using Metadata;
     using Pipeline;
     using Pipeline.Pipes;
     using Saga;
@@ -22,7 +22,7 @@ namespace MassTransit.ConsumePipeSpecifications
         IConsumePipeConfigurator,
         IConsumePipeSpecification
     {
-        readonly IList<IPipeSpecification<ConsumeContext>> _consumeContextSpecifications;
+        readonly IBuildPipeConfigurator<ConsumeContext> _consumePipeConfigurator;
         readonly ConsumerConfigurationObservable _consumerObservers;
         readonly HandlerConfigurationObservable _handlerObservers;
         readonly object _lock = new object();
@@ -35,7 +35,7 @@ namespace MassTransit.ConsumePipeSpecifications
         public ConsumePipeSpecification()
         {
             _specifications = new List<IPipeSpecification<ConsumeContext>>();
-            _consumeContextSpecifications = new List<IPipeSpecification<ConsumeContext>>();
+            _consumePipeConfigurator = new PipeConfigurator<ConsumeContext>();
             _messageSpecifications = new ConcurrentDictionary<Type, IMessageConsumePipeSpecification>();
             _observers = new ConsumePipeSpecificationObservable();
 
@@ -88,7 +88,7 @@ namespace MassTransit.ConsumePipeSpecifications
 
         public void AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _consumeContextSpecifications.Add(specification);
+            _consumePipeConfigurator.AddPipeSpecification(specification);
         }
 
         public bool AutoStart { get; set; }
@@ -155,6 +155,7 @@ namespace MassTransit.ConsumePipeSpecifications
         public IEnumerable<ValidationResult> Validate()
         {
             return _specifications.SelectMany(x => x.Validate())
+                .Concat(_consumePipeConfigurator.Validate())
                 .Concat(_messageSpecifications.Values.SelectMany(x => x.Validate()));
         }
 
@@ -175,13 +176,9 @@ namespace MassTransit.ConsumePipeSpecifications
         {
             var filter = new DynamicFilter<ConsumeContext, Guid>(new ConsumeContextConverterFactory(), GetRequestId);
 
-            var builder = new PipeBuilder<ConsumeContext>();
-            foreach (IPipeSpecification<ConsumeContext> specification in _consumeContextSpecifications)
-                specification.Apply(builder);
+            _consumePipeConfigurator.UseFilter(filter);
 
-            builder.AddFilter(filter);
-
-            return new ConsumePipe(filter, builder.Build(), AutoStart);
+            return new ConsumePipe(filter, _consumePipeConfigurator.Build(), AutoStart);
         }
 
         static Guid GetRequestId(ConsumeContext context)
@@ -194,39 +191,12 @@ namespace MassTransit.ConsumePipeSpecifications
         {
             var specification = new MessageConsumePipeSpecification<T>();
 
-            foreach (IPipeSpecification<ConsumeContext> pipeSpecification in _specifications)
-                specification.AddPipeSpecification(pipeSpecification);
+            for (var index = 0; index < _specifications.Count; index++)
+                specification.AddPipeSpecification(_specifications[index]);
 
             _observers.MessageSpecificationCreated(specification);
 
-            var connector = new ImplementedMessageTypeConnector<T>(this, specification);
-
-            ImplementedMessageTypeCache<T>.EnumerateImplementedTypes(connector);
-
             return specification;
-        }
-
-
-        class ImplementedMessageTypeConnector<TMessage> :
-            IImplementedMessageType
-            where TMessage : class
-        {
-            readonly MessageConsumePipeSpecification<TMessage> _messageSpecification;
-            readonly IConsumePipeSpecification _specification;
-
-            public ImplementedMessageTypeConnector(IConsumePipeSpecification specification, MessageConsumePipeSpecification<TMessage> messageSpecification)
-            {
-                _specification = specification;
-                _messageSpecification = messageSpecification;
-            }
-
-            public void ImplementsMessageType<T>(bool direct)
-                where T : class
-            {
-                IMessageConsumePipeSpecification<T> implementedTypeSpecification = _specification.GetMessageSpecification<T>();
-
-                _messageSpecification.AddImplementedMessageSpecification(implementedTypeSpecification);
-            }
         }
     }
 }

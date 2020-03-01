@@ -37,8 +37,6 @@ namespace MassTransit.Transports.InMemory.Configurators
 
             var builder = new ConfigurationBusBuilder(_busConfiguration, busReceiveEndpointConfiguration);
 
-            ApplySpecifications(builder);
-
             return builder.Build();
         }
 

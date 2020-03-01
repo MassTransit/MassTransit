@@ -18,7 +18,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
 
     public class TransportActiveMqSendContext<T> :
-        BaseSendContext<T>,
+        MessageSendContext<T>,
         ActiveMqSendContext<T>
         where T : class
     {

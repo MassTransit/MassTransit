@@ -46,6 +46,26 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton(context => context.GetRequiredService<IBus>().CreateClientFactory());
         }
 
+        public void AddMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure = null)
+        {
+            IMediator MediatorFactory(IServiceProvider serviceProvider)
+            {
+                var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
+
+                ConfigureLogContext(provider);
+
+                return Bus.Factory.CreateMediator(cfg =>
+                {
+                    configure?.Invoke(serviceProvider, cfg);
+
+                    ConfigureMediator(cfg, provider);
+                });
+            }
+
+            Collection.TryAddSingleton(MediatorFactory);
+            Collection.AddSingleton<IClientFactory>(provider => provider.GetRequiredService<IMediator>());
+        }
+
         static void AddMassTransitComponents(IServiceCollection collection)
         {
             collection.AddScoped<ScopedConsumeContextProvider>();

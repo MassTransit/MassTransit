@@ -8,8 +8,7 @@ namespace MassTransit.Transports.InMemory.Builders
 
 
     public class InMemoryReceiveEndpointBuilder :
-        ReceiveEndpointBuilder,
-        IReceiveEndpointBuilder
+        ReceiveEndpointBuilder
     {
         readonly IInMemoryHostControl _host;
         readonly IInMemoryReceiveEndpointConfiguration _configuration;

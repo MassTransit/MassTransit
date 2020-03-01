@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
@@ -16,6 +16,7 @@ namespace MassTransit
     using ConsumeConfigurators;
     using ConsumeConnectors;
     using GreenPipes;
+    using GreenPipes.Builders;
     using Pipeline;
 
 
@@ -33,7 +34,7 @@ namespace MassTransit
             where T : class
         {
             var handlerConfigurator = new HandlerConfigurator<T>(handler, configurator);
-            
+
             configure?.Invoke(handlerConfigurator);
 
             configurator.AddEndpointSpecification(handlerConfigurator);
@@ -44,13 +45,13 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T">The message type to handle, often inferred from the callback specified</typeparam>
         /// <param name="connector"></param>
-        /// <param name="handler">The callback to invoke when messages of the specified type arrive on the service bus</param>
-        /// <param name="specifications"></param>
+        /// <param name="handler">The callback to invoke when messages of the specified type arrive at the service bus</param>
+        /// <param name="configurator"></param>
         public static ConnectHandle ConnectHandler<T>(this IConsumePipeConnector connector, MessageHandler<T> handler,
-            params IPipeSpecification<ConsumeContext<T>>[] specifications)
+            IBuildPipeConfigurator<ConsumeContext<T>> configurator = null)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.ConnectHandler(connector, handler, specifications);
+            return HandlerConnectorCache<T>.Connector.ConnectHandler(connector, handler, configurator);
         }
 
         /// <summary>
@@ -60,13 +61,13 @@ namespace MassTransit
         /// <param name="connector"></param>
         /// <param name="requestId"></param>
         /// <param name="handler"></param>
-        /// <param name="specifications"></param>
+        /// <param name="configurator"></param>
         /// <returns></returns>
         public static ConnectHandle ConnectRequestHandler<T>(this IRequestPipeConnector connector, Guid requestId, MessageHandler<T> handler,
-            params IPipeSpecification<ConsumeContext<T>>[] specifications)
+            IBuildPipeConfigurator<ConsumeContext<T>> configurator)
             where T : class
         {
-            return HandlerConnectorCache<T>.Connector.ConnectRequestHandler(connector, requestId, handler, specifications);
+            return HandlerConnectorCache<T>.Connector.ConnectRequestHandler(connector, requestId, handler, configurator);
         }
     }
 }

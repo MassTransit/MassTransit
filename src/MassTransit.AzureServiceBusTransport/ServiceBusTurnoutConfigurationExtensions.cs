@@ -42,7 +42,7 @@
                     // configure the input queue endpoint
                     busFactoryConfigurator.ReceiveEndpoint(queueName, commandEndpointConfigurator =>
                     {
-                        commandEndpointConfigurator.SubscribeMessageTopics = false;
+                        commandEndpointConfigurator.SubscribeMessageTopics = true;
 
                         commandEndpointConfigurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutEndpointConfigurator, expiredEndpointConfigurator,
                             configure);

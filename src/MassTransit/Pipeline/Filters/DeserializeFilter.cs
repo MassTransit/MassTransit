@@ -34,7 +34,8 @@ namespace MassTransit.Pipeline.Filters
         [DebuggerNonUserCode]
         public async Task Send(ReceiveContext context, IPipe<ReceiveContext> next)
         {
-            ConsumeContext consumeContext = _deserializer.Deserialize(context);
+            if (!context.TryGetPayload(out ConsumeContext consumeContext))
+                consumeContext = _deserializer.Deserialize(context);
 
             if (context.TryGetPayload<StartedActivityContext>(out var activityContext))
                 activityContext.AddConsumeContextHeaders(consumeContext);

@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public RabbitMqReceiveEndpointConfiguration(IRabbitMqHostConfiguration hostConfiguration, RabbitMqReceiveSettings settings,
             IRabbitMqEndpointConfiguration endpointConfiguration)
-            : base(endpointConfiguration)
+            : base(hostConfiguration, endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
             _settings = settings;
@@ -221,7 +221,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.EnablePriority(maxPriority);
         }
 
-        public void ConnectManagementEndpoint(IManagementEndpointConfigurator management)
+        public void ConnectManagementEndpoint(IReceiveEndpointConfigurator management)
         {
             var consumer = new SetPrefetchCountManagementConsumer(_managementPipe, _settings.QueueName);
             management.Instance(consumer);

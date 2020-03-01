@@ -169,27 +169,21 @@
         Task<Response<T>> Response<T>(MessageHandler<T> handler = null, Action<IHandlerConfigurator<T>> configure = null)
             where T : class
         {
-            lock (_responseHandlers)
-            {
-                if (_responseHandlers.ContainsKey(typeof(T)))
-                    throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
-            }
+            if (_responseHandlers.ContainsKey(typeof(T)))
+                throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
 
             var configurator = new ResponseHandlerConfigurator<T>(_taskScheduler, handler, _send);
 
             configure?.Invoke(configurator);
 
-            lock (_responseHandlers)
-            {
-                if (_cancellationToken.IsCancellationRequested)
-                    return TaskUtil.Cancelled<Response<T>>();
+            if (_cancellationToken.IsCancellationRequested)
+                return TaskUtil.Cancelled<Response<T>>();
 
-                HandlerConnectHandle<T> handle = configurator.Connect(_context, _requestId);
+            HandlerConnectHandle<T> handle = configurator.Connect(_context, _requestId);
 
-                _responseHandlers.Add(typeof(T), handle);
+            _responseHandlers.Add(typeof(T), handle);
 
-                return handle.Task;
-            }
+            return handle.Task;
         }
 
         async Task HandleFault()
@@ -235,13 +229,10 @@
 
                 _message.TrySetException(exception);
 
-                lock (_responseHandlers)
+                foreach (var handle in _responseHandlers.Values)
                 {
-                    foreach (var handle in _responseHandlers.Values)
-                    {
-                        handle.TrySetException(exception);
-                        handle.Disconnect();
-                    }
+                    handle.TrySetException(exception);
+                    handle.Disconnect();
                 }
             }
 
@@ -262,13 +253,10 @@
 
             _message.TrySetCanceled();
 
-            lock (_responseHandlers)
+            foreach (var handle in _responseHandlers.Values)
             {
-                foreach (var handle in _responseHandlers.Values)
-                {
-                    handle.TrySetCanceled();
-                    handle.Disconnect();
-                }
+                handle.TrySetCanceled();
+                handle.Disconnect();
             }
         }
 

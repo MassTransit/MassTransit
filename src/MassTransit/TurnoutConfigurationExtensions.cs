@@ -24,8 +24,6 @@ namespace MassTransit
 
             specification.ManagementAddress = turnoutEndpointConfigurator.InputAddress;
 
-            busFactoryConfigurator.AddBusFactorySpecification(specification);
-
             var partitioner = busFactoryConfigurator.CreatePartitioner(specification.PartitionCount);
 
             expiredEndpointConfigurator.Consumer(() => new JobCustodian<T>(specification.JobRegistry), x =>
@@ -43,7 +41,7 @@ namespace MassTransit
 
             configurator.Consumer(() => new JobProducer<T>(specification.Service, jobFactory));
 
-            busFactoryConfigurator.BusObserver(() => new JobServiceBusObserver(specification.Service));
+            busFactoryConfigurator.ConnectBusObserver(new JobServiceBusObserver(specification.Service));
         }
 
         /// <summary>

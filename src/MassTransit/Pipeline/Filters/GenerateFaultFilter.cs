@@ -50,7 +50,7 @@ namespace MassTransit.Pipeline.Filters
                 requestId = context.TransportHeaders.Get("RequestId", default(Guid?));
             }
 
-            ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType.MediaType, messageId, messageTypes);
+            ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType?.MediaType, messageId, messageTypes);
 
             var faultEndpoint = await GetFaultEndpoint(context, consumeContext, requestId).ConfigureAwait(false);
 

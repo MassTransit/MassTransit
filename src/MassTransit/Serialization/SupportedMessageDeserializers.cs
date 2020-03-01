@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Serialization
+﻿namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
@@ -23,10 +11,16 @@ namespace MassTransit.Serialization
     public class SupportedMessageDeserializers :
         IMessageDeserializer
     {
+        readonly string _defaultContentType;
         readonly IDictionary<string, IMessageDeserializer> _deserializers;
 
-        public SupportedMessageDeserializers(params IMessageDeserializer[] deserializers)
+        public SupportedMessageDeserializers(string defaultContentType, params IMessageDeserializer[] deserializers)
         {
+            if (string.IsNullOrWhiteSpace(defaultContentType))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(defaultContentType));
+
+            _defaultContentType = defaultContentType;
+
             _deserializers = new Dictionary<string, IMessageDeserializer>(StringComparer.OrdinalIgnoreCase);
 
             foreach (IMessageDeserializer deserializer in deserializers)
@@ -44,8 +38,7 @@ namespace MassTransit.Serialization
 
         public ConsumeContext Deserialize(ReceiveContext receiveContext)
         {
-            IMessageDeserializer deserializer;
-            if (!TryGetSerializer(receiveContext.ContentType, out deserializer))
+            if (!TryGetSerializer(receiveContext.ContentType, out var deserializer))
             {
                 throw new SerializationException(
                     $"No deserializer was registered for the message content type: {receiveContext.ContentType}. Supported content types include {string.Join(", ", _deserializers.Values.Select(x => x.ContentType))}");
@@ -56,12 +49,12 @@ namespace MassTransit.Serialization
 
         bool TryGetSerializer(ContentType contentType, out IMessageDeserializer deserializer)
         {
-            if (contentType == null)
-                throw new ArgumentNullException(nameof(contentType));
-            if (string.IsNullOrWhiteSpace(contentType.MediaType))
+            string mediaType = contentType?.MediaType ?? _defaultContentType;
+
+            if (string.IsNullOrWhiteSpace(mediaType))
                 throw new ArgumentException("The media type must be specified", nameof(contentType));
 
-            return _deserializers.TryGetValue(contentType.MediaType, out deserializer);
+            return _deserializers.TryGetValue(mediaType, out deserializer);
         }
 
         void AddSerializer(IMessageDeserializer deserializer)
@@ -69,9 +62,9 @@ namespace MassTransit.Serialization
             if (deserializer == null)
                 throw new ArgumentNullException(nameof(deserializer));
 
-            string contentType = deserializer.ContentType.MediaType;
+            string mediaType = deserializer.ContentType.MediaType;
 
-            _deserializers[contentType] = deserializer;
+            _deserializers[mediaType] = deserializer;
         }
     }
 }

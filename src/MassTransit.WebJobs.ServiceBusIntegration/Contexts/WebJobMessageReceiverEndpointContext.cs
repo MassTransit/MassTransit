@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.WebJobs.ServiceBusIntegration.Contexts
 {
+    using System;
     using System.Threading;
     using Context;
     using MassTransit.Configuration;
@@ -15,11 +16,14 @@
         readonly CancellationToken _cancellationToken;
         readonly IPublishTopology _publishTopology;
 
-        public WebJobMessageReceiverEndpointContext(IReceiveEndpointConfiguration configuration, IBinder binder, CancellationToken cancellationToken)
+        public WebJobMessageReceiverEndpointContext(IReceiveEndpointConfiguration configuration, Uri inputAddress, IBinder binder,
+            CancellationToken cancellationToken)
             : base(configuration)
         {
             _binder = binder;
             _cancellationToken = cancellationToken;
+
+            InputAddress = inputAddress ?? configuration.InputAddress;
 
             _publishTopology = configuration.Topology.Publish;
         }

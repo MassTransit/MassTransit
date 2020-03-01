@@ -30,17 +30,17 @@ namespace MassTransit.Transports.InMemory
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            var context = new InMemorySendContext<T>(message, cancellationToken);
+            var context = new MessageSendContext<T>(message, cancellationToken);
 
             await pipe.Send(context).ConfigureAwait(false);
 
             var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
             try
             {
-                var messageId = context.MessageId ?? NewId.NextGuid();
-
                 if (_context.SendObservers.Count > 0)
                     await _context.SendObservers.PreSend(context).ConfigureAwait(false);
+
+                var messageId = context.MessageId ?? NewId.NextGuid();
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 

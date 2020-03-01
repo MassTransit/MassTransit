@@ -15,22 +15,23 @@
     public class Using_a_concurrency_limit_on_a_receive_endpoint :
         RabbitMqTestFixture
     {
-        IManagementEndpointConfigurator _management;
         ConsumerTestHarness<TestConsumer> _consumerA;
+        IRabbitMqBusFactoryConfigurator _configurator;
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            _management = configurator.ManagementEndpoint(host);
+            _configurator = configurator;
             _consumerA = RabbitMqTestHarness.Consumer<TestConsumer>();
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureRabbitMqReceiveEndpoint(configurator);
+            _configurator.ManagementEndpoint(mc =>
+            {
+                configurator.ConnectManagementEndpoint(mc);
 
-            configurator.ConnectManagementEndpoint(_management);
-
-            configurator.UseConcurrencyLimit(32, _management);
+                configurator.UseConcurrencyLimit(32, mc);
+            });
         }
 
 

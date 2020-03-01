@@ -10,8 +10,8 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Logging;
     using Topology;
+    using Transports;
     using Transports.Metrics;
     using Util;
 
@@ -25,32 +25,30 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         DeliveryMetrics
     {
         readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly Uri _inputAddress;
         readonly ClientContext _client;
         readonly ConcurrentDictionary<string, AmazonSqsReceiveContext> _pending;
         readonly ReceiveSettings _receiveSettings;
         readonly SqsReceiveEndpointContext _context;
-        readonly IDeliveryTracker _tracker;
+        readonly IReceivePipeDispatcher _dispatcher;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
         /// </summary>
         /// <param name="client">The model context for the consumer</param>
-        /// <param name="inputAddress">The input address for messages received by the consumer</param>
         /// <param name="context">The topology</param>
-        public AmazonSqsBasicConsumer(ClientContext client, Uri inputAddress, SqsReceiveEndpointContext context)
+        public AmazonSqsBasicConsumer(ClientContext client, SqsReceiveEndpointContext context)
         {
             _client = client;
-            _inputAddress = inputAddress;
             _context = context;
-
-            _tracker = new DeliveryTracker(HandleDeliveryComplete);
 
             _receiveSettings = client.GetPayload<ReceiveSettings>();
 
             _pending = new ConcurrentDictionary<string, AmazonSqsReceiveContext>();
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
+
+            _dispatcher = context.CreateReceivePipeDispatcher();
+            _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
             SetReady();
         }
@@ -64,59 +62,39 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
         public async Task HandleMessage(Message message)
         {
-            if (IsStopping)
+            await Task.Run(async () =>
             {
-                await WaitAndAbandonMessage().ConfigureAwait(false);
-                return;
-            }
+                if (IsStopping)
+                {
+                    await WaitAndAbandonMessage().ConfigureAwait(false);
+                    return;
+                }
 
-            var redelivered = message.Attributes.TryGetValue("ApproximateReceiveCount", out var receiveCountStr)
-                && int.TryParse(receiveCountStr, out var receiveCount) && receiveCount > 1;
+                var redelivered = message.Attributes.TryGetValue("ApproximateReceiveCount", out var receiveCountStr)
+                    && int.TryParse(receiveCountStr, out var receiveCount) && receiveCount > 1;
 
-            var delivery = _tracker.BeginDelivery();
-
-            var context = new AmazonSqsReceiveContext(message, redelivered, _context, _receiveSettings, _client, _client.ConnectionContext);
-
-            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
-            try
-            {
+                var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
                 if (!_pending.TryAdd(message.MessageId, context))
                     LogContext.Error?.Log("Duplicate message: {MessageId}", message.MessageId);
 
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
+                try
+                {
+                    await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
+                }
+                finally
+                {
+                    _pending.TryRemove(message.MessageId, out _);
 
-                await _context.ReceivePipe.Send(context).ConfigureAwait(false);
-
-                await context.ReceiveCompleted.ConfigureAwait(false);
-
-                await _client.DeleteMessage(_receiveSettings.EntityName, message.ReceiptHandle).ConfigureAwait(false);
-
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
-            }
-            finally
-            {
-                activity?.Stop();
-
-                delivery.Dispose();
-
-                _pending.TryRemove(message.MessageId, out _);
-
-                context.Dispose();
-            }
+                    context.Dispose();
+                }
+            });
         }
 
-        long DeliveryMetrics.DeliveryCount => _tracker.DeliveryCount;
+        long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
 
-        int DeliveryMetrics.ConcurrentDeliveryCount => _tracker.MaxConcurrentDeliveryCount;
+        int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
 
-        void HandleDeliveryComplete()
+        Task HandleDeliveryComplete()
         {
             if (IsStopping)
             {
@@ -124,6 +102,8 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
                 _deliveryComplete.TrySetResult(true);
             }
+
+            return TaskUtil.Completed;
         }
 
         async Task WaitAndAbandonMessage()
@@ -151,7 +131,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         {
             await Task.WhenAll(context.Agents.Select(x => Completed)).OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
-            if (_tracker.ActiveDeliveryCount > 0)
+            if (_dispatcher.ActiveDispatchCount > 0)
             {
                 try
                 {

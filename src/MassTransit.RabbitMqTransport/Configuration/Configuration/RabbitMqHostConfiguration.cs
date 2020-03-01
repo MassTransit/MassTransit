@@ -21,6 +21,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         RabbitMqHostSettings _hostSettings;
 
         public RabbitMqHostConfiguration(IRabbitMqBusConfiguration busConfiguration, IRabbitMqTopologyConfiguration topologyConfiguration)
+            : base(busConfiguration)
         {
             _busConfiguration = busConfiguration;
             _topologyConfiguration = topologyConfiguration;
@@ -69,11 +70,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 throw new ArgumentNullException(nameof(endpointConfiguration));
 
             var configuration = new RabbitMqReceiveEndpointConfiguration(this, settings, endpointConfiguration);
-
-            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
-            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
-            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
-            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
 
             configure?.Invoke(configuration);
 

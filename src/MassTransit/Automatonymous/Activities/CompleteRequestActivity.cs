@@ -61,12 +61,12 @@ namespace Automatonymous.Activities
         {
             string body = Encoding.UTF8.GetString(context.ReceiveContext.GetBody());
 
-            if (string.Compare(context.ReceiveContext.ContentType.MediaType, JsonMessageSerializer.JsonContentType.MediaType,
-                StringComparison.OrdinalIgnoreCase) == 0)
+            var mediaType = context.ReceiveContext.ContentType?.MediaType;
+
+            if (JsonMessageSerializer.JsonContentType.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))
                 return TranslateJsonBody(body, requestState);
 
-            if (string.Compare(context.ReceiveContext.ContentType.MediaType, XmlMessageSerializer.XmlContentType.MediaType,
-                StringComparison.OrdinalIgnoreCase) == 0)
+            if (XmlMessageSerializer.XmlContentType.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))
                 return TranslateXmlBody(body, requestState);
 
             throw new InvalidOperationException("Only JSON and XML messages can be scheduled");

@@ -12,8 +12,7 @@
 
 
     public class ActiveMqReceiveEndpointBuilder :
-        ReceiveEndpointBuilder,
-        IReceiveEndpointBuilder
+        ReceiveEndpointBuilder
     {
         readonly IActiveMqHostControl _host;
         readonly IActiveMqReceiveEndpointConfiguration _configuration;

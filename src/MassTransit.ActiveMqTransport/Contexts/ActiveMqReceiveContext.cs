@@ -1,15 +1,20 @@
 ﻿namespace MassTransit.ActiveMqTransport.Contexts
 {
+    using System;
     using System.IO;
     using System.Text;
+    using System.Threading.Tasks;
     using Apache.NMS;
     using Context;
     using Metadata;
+    using Transports;
+    using Util;
 
 
     public sealed class ActiveMqReceiveContext :
         BaseReceiveContext,
-        ActiveMqMessageContext
+        ActiveMqMessageContext,
+        ReceiveLockContext
     {
         readonly IMessage _transportMessage;
         byte[] _body;
@@ -43,6 +48,23 @@
         public override Stream GetBodyStream()
         {
             return new MemoryStream(GetBody());
+        }
+
+        public Task Complete()
+        {
+            _transportMessage.Acknowledge();
+
+            return TaskUtil.Completed;
+        }
+
+        public Task Faulted(Exception exception)
+        {
+            return TaskUtil.Completed;
+        }
+
+        public Task ValidateLockStatus()
+        {
+            return TaskUtil.Completed;
         }
     }
 }

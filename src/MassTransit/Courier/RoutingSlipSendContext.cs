@@ -9,7 +9,7 @@
 
 
     public class RoutingSlipSendContext<T> :
-        BaseSendContext<T>
+        MessageSendContext<T>
         where T : class
     {
         public RoutingSlipSendContext(T message, CancellationToken cancellationToken, Uri destinationAddress)

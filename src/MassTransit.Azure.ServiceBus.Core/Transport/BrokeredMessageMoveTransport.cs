@@ -31,7 +31,7 @@
                 {
                     var message = new Message(messageBodyStream.ReadAsBytes())
                     {
-                        ContentType = context.ContentType.MediaType,
+                        ContentType = context.ContentType?.MediaType,
                         TimeToLive = messageContext.TimeToLive,
                         CorrelationId = messageContext.CorrelationId,
                         MessageId = messageContext.MessageId,

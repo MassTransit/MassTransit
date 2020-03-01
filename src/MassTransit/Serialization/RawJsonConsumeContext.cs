@@ -4,18 +4,15 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using System.Threading.Tasks;
     using Context;
     using Metadata;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Util;
 
 
     public class RawJsonConsumeContext :
         DeserializerConsumeContext
     {
-        readonly PendingTaskCollection _consumeTasks;
         readonly JsonSerializer _deserializer;
         readonly JToken _messageToken;
         readonly IDictionary<Type, ConsumeContext> _messageTypes;
@@ -27,14 +24,11 @@ namespace MassTransit.Serialization
 
             _deserializer = deserializer;
             _messageTypes = new Dictionary<Type, ConsumeContext>();
-            _consumeTasks = new PendingTaskCollection(4);
 
             MessageId = receiveContext.TransportHeaders.Get<Guid>(nameof(MessageContext.MessageId));
             CorrelationId = receiveContext.TransportHeaders.Get<Guid>(nameof(MessageContext.CorrelationId));
             RequestId = receiveContext.TransportHeaders.Get<Guid>(nameof(MessageContext.RequestId));
         }
-
-        public override Task ConsumeCompleted => _consumeTasks.Completed(CancellationToken);
 
         public override Guid? MessageId { get; }
 
@@ -111,11 +105,6 @@ namespace MassTransit.Serialization
                     return false;
                 }
             }
-        }
-
-        public override void AddConsumeTask(Task task)
-        {
-            _consumeTasks.Add(task);
         }
     }
 }

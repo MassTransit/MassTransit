@@ -141,5 +141,11 @@ namespace MassTransit
         /// </summary>
         /// <param name="busFactory"></param>
         void AddBus(Func<TContainerContext, IBusControl> busFactory);
+
+        /// <summary>
+        /// Add a mediator to the container
+        /// </summary>
+        /// <param name="configure">Optionally configure the pipeline used by the mediator</param>
+        void AddMediator(Action<TContainerContext, IReceiveEndpointConfigurator> configure = null);
     }
 }

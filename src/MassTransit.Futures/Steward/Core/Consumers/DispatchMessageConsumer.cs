@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Steward.Core.Consumers
 {
     using System;
@@ -20,7 +8,6 @@ namespace MassTransit.Steward.Core.Consumers
     using System.Threading.Tasks;
     using System.Xml.Linq;
     using Contracts;
-    using Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Serialization;
@@ -38,15 +25,13 @@ namespace MassTransit.Steward.Core.Consumers
 
         public async Task Consume(ConsumeContext<DispatchMessage> context)
         {
-
             string body = Encoding.UTF8.GetString(context.ReceiveContext.GetBody());
 
-            if (string.Compare(context.ReceiveContext.ContentType.MediaType, JsonMessageSerializer.JsonContentType.MediaType,
-                StringComparison.OrdinalIgnoreCase)
-                == 0)
+            var mediaType = context.ReceiveContext.ContentType?.MediaType;
+            if (JsonMessageSerializer.JsonContentType.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))
                 body = TranslateJsonBody(body, context.Message.Destination.ToString());
-            else if (string.Compare(context.ReceiveContext.ContentType.MediaType, XmlMessageSerializer.XmlContentType.MediaType,
-                StringComparison.OrdinalIgnoreCase) == 0)
+
+            else if (XmlMessageSerializer.XmlContentType.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))
                 body = TranslateXmlBody(body, context.Message.Destination.ToString());
             else
                 throw new InvalidOperationException("Only JSON and XML messages can be scheduled");

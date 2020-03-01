@@ -9,8 +9,6 @@ namespace MassTransit.Transports.InMemory
     using Fabric;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
-    using Metrics;
 
 
     /// <summary>
@@ -25,7 +23,7 @@ namespace MassTransit.Transports.InMemory
         readonly Uri _inputAddress;
         readonly IInMemoryQueue _queue;
         readonly ReceiveEndpointContext _context;
-        readonly IDeliveryTracker _tracker;
+        readonly IReceivePipeDispatcher _dispatcher;
 
         public InMemoryReceiveTransport(Uri inputAddress, IInMemoryQueue queue, ReceiveEndpointContext context)
         {
@@ -33,7 +31,7 @@ namespace MassTransit.Transports.InMemory
             _queue = queue;
             _context = context;
 
-            _tracker = new DeliveryTracker(HandleDeliveryComplete);
+            _dispatcher = context.CreateReceivePipeDispatcher();
         }
 
         public async Task Consume(InMemoryTransportMessage message, CancellationToken cancellationToken)
@@ -45,34 +43,17 @@ namespace MassTransit.Transports.InMemory
             LogContext.Current = _context.LogContext;
 
             var context = new InMemoryReceiveContext(message, _context);
-            var delivery = _tracker.BeginDelivery();
-
-            var activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
             try
             {
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.PreReceive(context).ConfigureAwait(false);
-
-                await _context.ReceivePipe.Send(context).ConfigureAwait(false);
-
-                await context.ReceiveCompleted.ConfigureAwait(false);
-
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.PostReceive(context).ConfigureAwait(false);
+                await _dispatcher.Dispatch(context).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                if (_context.ReceiveObservers.Count > 0)
-                    await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
-
                 message.DeliveryCount++;
+                context.LogTransportFaulted(exception);
             }
             finally
             {
-                activity?.Stop();
-
-                delivery.Dispose();
-
                 context.Dispose();
             }
         }
@@ -127,10 +108,6 @@ namespace MassTransit.Transports.InMemory
             return _context.ConnectSendObserver(observer);
         }
 
-        void HandleDeliveryComplete()
-        {
-        }
-
 
         class Handle :
             ReceiveTransportHandle
@@ -152,7 +129,7 @@ namespace MassTransit.Transports.InMemory
 
                 _consumerHandle.Disconnect();
 
-                var completed = new ReceiveTransportCompletedEvent(_transport._inputAddress, _transport._tracker.GetDeliveryMetrics());
+                var completed = new ReceiveTransportCompletedEvent(_transport._inputAddress, _transport._dispatcher.GetDeliveryMetrics());
 
                 await _transport._context.TransportObservers.Completed(completed).ConfigureAwait(false);
             }

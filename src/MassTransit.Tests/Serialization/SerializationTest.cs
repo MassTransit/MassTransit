@@ -4,6 +4,7 @@ namespace MassTransit.Tests.Serialization
     using System.Diagnostics;
     using System.IO;
     using System.Text;
+    using Context;
     using MassTransit.Serialization;
     using MassTransit.Transports.InMemory.Contexts;
     using MassTransit.Transports.InMemory.Fabric;
@@ -123,7 +124,7 @@ namespace MassTransit.Tests.Serialization
         {
             using (var output = new MemoryStream())
             {
-                var sendContext = new InMemorySendContext<T>(obj);
+                var sendContext = new MessageSendContext<T>(obj);
 
                 sendContext.SourceAddress = _sourceAddress;
                 sendContext.DestinationAddress = _destinationAddress;

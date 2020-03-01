@@ -78,6 +78,28 @@ namespace MassTransit.AutofacIntegration.Registration
                 .SingleInstance();
         }
 
+        public void AddMediator(Action<IComponentContext, IReceiveEndpointConfigurator> configure = null)
+        {
+            IMediator MediatorFactory(IComponentContext context)
+            {
+                var provider = context.Resolve<IConfigurationServiceProvider>();
+
+                ConfigureLogContext(provider);
+
+                return Bus.Factory.CreateMediator(cfg =>
+                {
+                    configure?.Invoke(context, cfg);
+
+                    ConfigureMediator(cfg, provider);
+                });
+            }
+
+            _builder.Register(MediatorFactory)
+                .As<IMediator>()
+                .As<IClientFactory>()
+                .SingleInstance();
+        }
+
         IConsumerScopeProvider CreateConsumerScopeProvider(IComponentContext context)
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());

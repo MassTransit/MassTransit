@@ -55,8 +55,8 @@ namespace MassTransit.Registration
 
         IActivityDefinition<TActivity, TArguments, TLog> GetActivityDefinition(IConfigurationServiceProvider provider)
         {
-            return _definition ?? (_definition = provider.GetService<IActivityDefinition<TActivity, TArguments, TLog>>()
-                ?? new DefaultActivityDefinition<TActivity, TArguments, TLog>());
+            return _definition ??= provider.GetService<IActivityDefinition<TActivity, TArguments, TLog>>()
+                ?? new DefaultActivityDefinition<TActivity, TArguments, TLog>();
         }
 
         void ConfigureCompensate(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)

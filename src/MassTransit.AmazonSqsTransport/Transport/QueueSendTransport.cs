@@ -70,6 +70,9 @@
                 var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
                 try
                 {
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
+
                     var request = clientContext.CreateSendRequest(_context.EntityName, context.Body);
 
                     _context.SqsSetHeaderAdapter.Set(request.MessageAttributes, context.Headers);
@@ -85,9 +88,6 @@
 
                     if (context.DelaySeconds.HasValue)
                         request.DelaySeconds = context.DelaySeconds.Value;
-
-                    if (_context.SendObservers.Count > 0)
-                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
                     await clientContext.SendMessage(request, context.CancellationToken).ConfigureAwait(false);
 

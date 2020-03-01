@@ -183,7 +183,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             {
                 context.SetRoutingKey(_queueName);
 
-                return _pipe?.Send(context) ?? TaskUtil.Completed;
+                return _pipe.IsNotEmpty() ? _pipe.Send(context) : TaskUtil.Completed;
             }
 
             public Task Send<T>(SendContext<T> context)

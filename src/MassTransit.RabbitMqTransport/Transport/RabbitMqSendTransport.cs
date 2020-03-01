@@ -100,6 +100,9 @@
                 var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
                 try
                 {
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
+
                     byte[] body = context.Body;
 
                     if (context.TryGetPayload(out PublishContext publishContext))
@@ -127,9 +130,6 @@
 
                     if (context.RequestId.HasValue && (context.ResponseAddress?.AbsolutePath?.EndsWith(RabbitMqExchangeNames.ReplyTo) ?? false))
                         context.BasicProperties.ReplyTo = RabbitMqExchangeNames.ReplyTo;
-
-                    if (_context.SendObservers.Count > 0)
-                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
                     var publishTask = modelContext.BasicPublishAsync(exchange, context.RoutingKey ?? "", context.Mandatory, context.BasicProperties, body,
                         context.AwaitAck);

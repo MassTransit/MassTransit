@@ -34,13 +34,7 @@ namespace MassTransit.Pipeline.Pipes
         [DebuggerStepThrough]
         Task IPublishPipe.Send<T>(PublishContext<T> context)
         {
-            return GetPipe<T>().Send(context);
-        }
-
-        IMessagePipe GetPipe<T>()
-            where T : class
-        {
-            return _outputPipes.GetOrAdd(typeof(T), x => new MessagePipe<T>(_specification.GetMessageSpecification<T>()));
+            return _outputPipes.GetOrAdd(typeof(T), x => new MessagePipe<T>(_specification.GetMessageSpecification<T>())).Send(context);
         }
 
 
@@ -60,7 +54,6 @@ namespace MassTransit.Pipeline.Pipes
             readonly IMessagePublishPipeSpecification<TMessage> _specification;
 
             public MessagePipe(IMessagePublishPipeSpecification<TMessage> specification)
-
             {
                 _output = new Lazy<IMessagePublishPipe<TMessage>>(CreateFilter);
 

@@ -49,23 +49,18 @@ The bindings for using MassTransit with Azure Service Bus are shown below.
 
 ```csharp
 [FunctionName("SubmitOrder")]
-public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue")] Message message, IBinder binder, Microsoft.Extensions.Logging.ILogger logger,
+public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue")] Message message, IBinder binder, ILogger logger,
     CancellationToken cancellationToken)
 {
-    LogContext.ConfigureCurrentLogContext(logger);
-
-    LogContext.Info?.Log("Creating brokered message receiver");
-
-    var handler = Bus.Factory.CreateBrokeredMessageReceiver(binder, cfg =>
+    var receiver = binder.CreateBrokeredMessageReceiver(logger, cancellationToken, cfg =>
     {
-        cfg.CancellationToken = cancellationToken;
-        cfg.InputAddress = new Uri("sb://<namespace>.servicebus.windows.net/<input-queue-name>");
+        cfg.InputAddress = new Uri("sb://masstransit-build.servicebus.windows.net/input-queue");
 
         cfg.UseRetry(x => x.Intervals(10, 100, 500, 1000));
         cfg.Consumer(() => new SubmitOrderConsumer());
     });
 
-    return handler.Handle(message);
+    return receiver.Handle(message);
 }
 ```
 
@@ -75,23 +70,18 @@ The bindings for using MassTransit with Azure Event Hub are shown below.
 
 ```csharp
 [FunctionName("AuditOrder")]
-public static Task AuditOrderAsync([EventHubTrigger("input-hub")] EventData message, IBinder binder, Microsoft.Extensions.Logging.ILogger logger,
+public static Task AuditOrderAsync([EventHubTrigger("input-hub")] EventData message, IBinder binder, ILogger logger,
     CancellationToken cancellationToken)
 {
-    LogContext.ConfigureCurrentLogContext(logger);
-
-    LogContext.Info?.Log("Creating event hub receiver");
-
-    var handler = Bus.Factory.CreateEventDataReceiver(binder, cfg =>
+    var receiver = binder.CreateEventDataReceiver(logger, cancellationToken, cfg =>
     {
-        cfg.CancellationToken = cancellationToken;
-        cfg.InputAddress = new Uri("sb://<namespace>.servicebus.windows.net/<input-hub-name>");
+        cfg.InputAddress = new Uri("sb://masstransit-eventhub.servicebus.windows.net/input-hub");
 
         cfg.UseRetry(x => x.Intervals(10, 100, 500, 1000));
         cfg.Consumer(() => new AuditOrderConsumer());
     });
 
-    return handler.Handle(message);
+    return receiver.Handle(message);
 }
 ```
 

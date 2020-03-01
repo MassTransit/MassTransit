@@ -11,6 +11,7 @@
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Quartz;
+    using Quartz.Util;
     using Scheduling;
     using Serialization;
 
@@ -32,28 +33,27 @@
 
             var jobKey = new JobKey(correlationId);
 
-            LogContext.Debug?.Log("ScheduleMessage: {Id} at {ScheduledTime}", jobKey, context.Message.ScheduledTime);
-
             var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
+            var triggerKey = new TriggerKey(correlationId);
             var trigger = TriggerBuilder.Create()
                 .ForJob(jobDetail)
                 .StartAt(context.Message.ScheduledTime)
                 .WithSchedule(SimpleScheduleBuilder.Create().WithMisfireHandlingInstructionFireNow())
-                .WithIdentity(new TriggerKey(correlationId))
+                .WithIdentity(triggerKey)
                 .Build();
 
             if (await _scheduler.CheckExists(trigger.Key, context.CancellationToken).ConfigureAwait(false))
                 await _scheduler.UnscheduleJob(trigger.Key, context.CancellationToken).ConfigureAwait(false);
 
             await _scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
+
+            LogContext.Debug?.Log("Scheduled: {Key} {Schedule}", jobKey, trigger.GetNextFireTimeUtc());
         }
 
         public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
         {
             var jobKey = new JobKey(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
-
-            LogContext.Debug?.Log("Schedule recurring message: {Id}", jobKey);
 
             var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
 
@@ -65,13 +65,15 @@
                 await _scheduler.UnscheduleJob(triggerKey, context.CancellationToken).ConfigureAwait(false);
 
             await _scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
+
+            LogContext.Debug?.Log("Scheduled: {Key} {Schedule}", jobKey, trigger.GetNextFireTimeUtc());
         }
 
         ITrigger CreateTrigger(RecurringSchedule schedule, IJobDetail jobDetail, TriggerKey triggerKey)
         {
             var tz = TimeZoneInfo.Local;
             if (!string.IsNullOrWhiteSpace(schedule.TimeZoneId) && schedule.TimeZoneId != tz.Id)
-                tz = TimeZoneInfo.FindSystemTimeZoneById(schedule.TimeZoneId);
+                tz = TimeZoneUtil.FindTimeZoneById(schedule.TimeZoneId);
 
             var triggerBuilder = TriggerBuilder.Create()
                 .ForJob(jobDetail)
@@ -103,11 +105,11 @@
         {
             string body = Encoding.UTF8.GetString(context.ReceiveContext.GetBody());
 
-            if (string.Compare(context.ReceiveContext.ContentType.MediaType, JsonMessageSerializer.JsonContentType.MediaType,
-                StringComparison.OrdinalIgnoreCase) == 0)
+            var mediaType = context.ReceiveContext.ContentType?.MediaType;
+
+            if (JsonMessageSerializer.JsonContentType.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))
                 body = TranslateJsonBody(body, destination.ToString());
-            else if (string.Compare(context.ReceiveContext.ContentType.MediaType, XmlMessageSerializer.XmlContentType.MediaType,
-                StringComparison.OrdinalIgnoreCase) == 0)
+            else if (XmlMessageSerializer.XmlContentType.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))
                 body = TranslateXmlBody(body, destination.ToString());
             else
                 throw new InvalidOperationException("Only JSON and XML messages can be scheduled");
@@ -119,7 +121,7 @@
                 .UsingJobData("ResponseAddress", ToString(context.ResponseAddress))
                 .UsingJobData("FaultAddress", ToString(context.FaultAddress))
                 .UsingJobData("Body", body)
-                .UsingJobData("ContentType", context.ReceiveContext.ContentType.MediaType);
+                .UsingJobData("ContentType", mediaType);
 
             if (context.MessageId.HasValue)
                 builder = builder.UsingJobData("MessageId", context.MessageId.Value.ToString());

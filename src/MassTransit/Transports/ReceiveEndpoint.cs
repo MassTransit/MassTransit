@@ -51,7 +51,7 @@ namespace MassTransit.Transports
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveTransport.ConnectReceiveObserver(observer);
+            return _context.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
@@ -85,12 +85,12 @@ namespace MassTransit.Transports
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveTransport.ConnectPublishObserver(observer);
+            return _context.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            return _receiveTransport.ConnectSendObserver(observer);
+            return _context.ConnectSendObserver(observer);
         }
 
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)

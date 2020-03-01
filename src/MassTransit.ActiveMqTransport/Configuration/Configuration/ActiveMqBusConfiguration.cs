@@ -10,25 +10,23 @@
         ActiveMqEndpointConfiguration,
         IActiveMqBusConfiguration
     {
-        readonly IActiveMqEndpointConfiguration _busEndpointConfiguration;
         readonly BusObservable _busObservers;
-        readonly IActiveMqHostConfiguration _hostConfiguration;
 
         public ActiveMqBusConfiguration(IActiveMqTopologyConfiguration topologyConfiguration)
             : base(topologyConfiguration)
         {
-            _hostConfiguration = new ActiveMqHostConfiguration(this, topologyConfiguration);
-            _busEndpointConfiguration = CreateEndpointConfiguration();
+            HostConfiguration = new ActiveMqHostConfiguration(this, topologyConfiguration);
+            BusEndpointConfiguration = CreateEndpointConfiguration();
 
             _busObservers = new BusObservable();
         }
 
-        IHostConfiguration IBusConfiguration.HostConfiguration => _hostConfiguration;
-        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
+        IHostConfiguration IBusConfiguration.HostConfiguration => HostConfiguration;
+        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => BusEndpointConfiguration;
         IBusObserver IBusConfiguration.BusObservers => _busObservers;
 
-        IActiveMqEndpointConfiguration IActiveMqBusConfiguration.BusEndpointConfiguration => _busEndpointConfiguration;
-        IActiveMqHostConfiguration IActiveMqBusConfiguration.HostConfiguration => _hostConfiguration;
+        public IActiveMqEndpointConfiguration BusEndpointConfiguration { get; }
+        public IActiveMqHostConfiguration HostConfiguration { get; }
 
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
@@ -37,7 +35,7 @@
 
         public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
-            return _hostConfiguration.ConnectEndpointConfigurationObserver(observer);
+            return HostConfiguration.ConnectEndpointConfigurationObserver(observer);
         }
     }
 }

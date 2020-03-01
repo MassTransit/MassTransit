@@ -33,15 +33,17 @@ namespace MassTransit.Context
                 _headers[key] = value;
         }
 
-        void SendHeaders.Set(string key, object value)
+        void SendHeaders.Set(string key, object value, bool overwrite)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
             if (value == null)
                 _headers.Remove(key);
-            else
+            else if (overwrite)
                 _headers[key] = value;
+            else if (!_headers.ContainsKey(key))
+                _headers.Add(key, value);
         }
 
         bool Headers.TryGetHeader(string key, out object value)

@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Net.Mime;
     using Automatonymous;
-    using Builders;
     using ConsumeConfigurators;
     using Courier;
     using GreenPipes;
@@ -14,8 +13,8 @@
 
 
     public class TurnoutServiceSpecification<TCommand> :
-        IBusFactorySpecification,
-        ITurnoutServiceConfigurator<TCommand>
+        ITurnoutServiceConfigurator<TCommand>,
+        ISpecification
         where TCommand : class
     {
         readonly IReceiveEndpointConfigurator _configurator;
@@ -57,10 +56,6 @@
 
             if (PartitionCount < 1)
                 yield return this.Failure("PartitionCount", "must be > 0");
-        }
-
-        public void Apply(IBusBuilder builder)
-        {
         }
 
         public TimeSpan SuperviseInterval { private get; set; }
@@ -209,6 +204,21 @@
             where TLog : class
         {
             _configurator.CompensateActivityConfigured(configurator);
+        }
+
+        void IReceivePipelineConfigurator.ConfigureReceive(Action<IReceivePipeConfigurator> callback)
+        {
+            _configurator.ConfigureReceive(callback);
+        }
+
+        void IReceivePipelineConfigurator.ConfigureDeadLetter(Action<IPipeConfigurator<ReceiveContext>> callback)
+        {
+            _configurator.ConfigureDeadLetter(callback);
+        }
+
+        void IReceivePipelineConfigurator.ConfigureError(Action<IPipeConfigurator<ExceptionReceiveContext>> callback)
+        {
+            _configurator.ConfigureError(callback);
         }
     }
 }

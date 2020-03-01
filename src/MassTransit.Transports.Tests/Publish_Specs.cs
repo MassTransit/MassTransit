@@ -89,10 +89,10 @@ namespace MassTransit.Transports.Tests
 
                 await Harness.Start();
 
-                _publish = new PublishObserver();
+                _publish = new PublishObserver(Harness);
                 Harness.Bus.ConnectPublishObserver(_publish);
 
-                _send = new SendObserver();
+                _send = new SendObserver(Harness);
                 Harness.Bus.ConnectSendObserver(_send);
 
                 _correlationId = NewId.NextGuid();

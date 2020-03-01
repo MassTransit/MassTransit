@@ -19,6 +19,7 @@
         Uri _hostAddress;
 
         public InMemoryHostConfiguration(IInMemoryBusConfiguration busConfiguration, Uri baseAddress, IInMemoryTopologyConfiguration topologyConfiguration)
+            : base(busConfiguration)
         {
             _busConfiguration = busConfiguration;
             _topologyConfiguration = topologyConfiguration;
@@ -63,11 +64,6 @@
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(queueName));
 
             var configuration = new InMemoryReceiveEndpointConfiguration(this, queueName, endpointConfiguration);
-
-            configuration.ConnectConsumerConfigurationObserver(_busConfiguration);
-            configuration.ConnectSagaConfigurationObserver(_busConfiguration);
-            configuration.ConnectHandlerConfigurationObserver(_busConfiguration);
-            configuration.ConnectActivityConfigurationObserver(_busConfiguration);
 
             configure?.Invoke(configuration);
 

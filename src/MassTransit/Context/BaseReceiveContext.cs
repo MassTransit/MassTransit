@@ -8,7 +8,6 @@ namespace MassTransit.Context
     using System.Threading.Tasks;
     using GreenPipes;
     using Metadata;
-    using Serialization;
     using Topology;
     using Transports;
     using Util;
@@ -19,7 +18,6 @@ namespace MassTransit.Context
         ReceiveContext,
         IDisposable
     {
-        static readonly ContentType DefaultContentType = JsonMessageSerializer.JsonContentType;
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly Lazy<ContentType> _contentType;
         readonly Lazy<Headers> _headers;
@@ -133,7 +131,7 @@ namespace MassTransit.Context
                     return new ContentType(contentTypeString);
             }
 
-            return DefaultContentType;
+            return default;
         }
 
         public void Cancel()

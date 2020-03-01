@@ -112,7 +112,7 @@
         /// <param name="consumeContext"></param>
         public static void TransferConsumeContextHeaders(this SendContext sendContext, ConsumeContext consumeContext)
         {
-            sendContext.AddOrUpdatePayload(() => consumeContext, _ => consumeContext);
+            sendContext.GetOrAddPayload(() => consumeContext);
 
             sendContext.SourceAddress = consumeContext.ReceiveContext.InputAddress;
 
@@ -124,16 +124,14 @@
             else if (consumeContext.RequestId.HasValue)
                 sendContext.InitiatorId = consumeContext.RequestId;
 
+            var headers = sendContext.Headers;
+
             foreach (KeyValuePair<string, object> header in consumeContext.Headers.GetAll())
             {
                 if (header.Key.StartsWith("MT-"))
                     continue;
 
-                // do not overwrite headers which have already been set
-                if (sendContext.Headers.TryGetHeader(header.Key, out _))
-                    continue;
-
-                sendContext.Headers.Set(header.Key, header.Value);
+                headers.Set(header.Key, header.Value, false);
             }
         }
     }

@@ -2,7 +2,6 @@ namespace MassTransit.Util
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes.Internals.Extensions;
@@ -38,14 +37,19 @@ namespace MassTransit.Util
 
         async Task ReceiveTasksCompleted(CancellationToken cancellationToken)
         {
-            Task[] tasks = null;
+            Task[] tasks;
             do
             {
                 lock (_tasks)
-                    tasks = _tasks.Values.Where(x => !x.IsCompletedSuccessfully()).ToArray();
+                {
+                    if (_tasks.Count == 0)
+                        return;
 
-                if (tasks.Length == 0)
-                    break;
+                    tasks = new Task[_tasks.Count];
+                    _tasks.Values.CopyTo(tasks, 0);
+
+                    _tasks.Clear();
+                }
 
                 var whenAll = Task.WhenAll(tasks);
 
