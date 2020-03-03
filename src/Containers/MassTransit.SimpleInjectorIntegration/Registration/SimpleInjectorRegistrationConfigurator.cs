@@ -54,7 +54,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             Container.Register(GetPublishEndpoint, _hybridLifestyle);
 
-            Container.RegisterSingleton(() => Container.GetInstance<IBus>().CreateClientFactory());
+            Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IConfigurationServiceProvider>()));
         }
 
         public void AddMediator(Action<Container, IReceiveEndpointConfigurator> configure = null)

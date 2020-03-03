@@ -1,23 +1,20 @@
 namespace MassTransit.Contracts
 {
-    using System;
-
-
     /// <summary>
     /// Announces that a service endpoint is down and no longer available to accept that specified message type
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface Down<T>
-        where T : class
+    /// <typeparam name="TMessage"></typeparam>
+    public interface Down<TMessage>
+        where TMessage : class
     {
         /// <summary>
-        /// The address where consumers, etc. are actually hosted
+        /// The service description, including the service address
         /// </summary>
-        Uri ServiceAddress { get; }
+        ServiceInfo Service { get; }
 
         /// <summary>
-        /// The endpoint info of the service endpoint
+        /// The instance that produced the event
         /// </summary>
-        EndpointInfo Endpoint { get; }
+        InstanceInfo Instance { get; }
     }
 }

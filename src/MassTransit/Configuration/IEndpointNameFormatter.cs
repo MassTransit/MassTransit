@@ -26,5 +26,13 @@ namespace MassTransit
         string CompensateActivity<T, TLog>()
             where T : class, ICompensateActivity<TLog>
             where TLog : class;
+
+        /// <summary>
+        /// Clean up a name so that it matches the formatting.
+        /// For instance, SubmitOrderControl -> submit-order-control (kebab case)
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        string SanitizeName(string name);
     }
 }

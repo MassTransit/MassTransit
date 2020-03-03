@@ -25,30 +25,30 @@ namespace MassTransit.Tests.Conductor
         [Test]
         public void Should_initialize_with_the_same_results()
         {
-            EndpointInfo endpointA = new Endpoint() {EndpointId = NewId.NextGuid()};
-            EndpointInfo endpointB = new Endpoint() {EndpointId = NewId.NextGuid()};
-            EndpointInfo endpointC = new Endpoint() {EndpointId = NewId.NextGuid()};
+            InstanceInfo nodeA = new Node() {InstanceId = NewId.NextGuid()};
+            InstanceInfo nodeB = new Node() {InstanceId = NewId.NextGuid()};
+            InstanceInfo nodeC = new Node() {InstanceId = NewId.NextGuid()};
 
-            var serverA = new ConsistentHashDistributionStrategy<EndpointInfo>(new Murmur3AUnsafeHashGenerator(), x => x.EndpointId.ToByteArray());
-            serverA.Init(Enumerable.Empty<EndpointInfo>());
+            var serverA = new ConsistentHashDistributionStrategy<InstanceInfo>(new Murmur3AUnsafeHashGenerator(), x => x.InstanceId.ToByteArray());
+            serverA.Init(Enumerable.Empty<InstanceInfo>());
 
-            serverA.Add(endpointA);
-            serverA.Add(endpointB);
-            serverA.Add(endpointC);
+            serverA.Add(nodeA);
+            serverA.Add(nodeB);
+            serverA.Add(nodeC);
 
-            var serverB = new ConsistentHashDistributionStrategy<EndpointInfo>(new Murmur3AUnsafeHashGenerator(), x => x.EndpointId.ToByteArray());
-            serverB.Init(Enumerable.Empty<EndpointInfo>());
+            var serverB = new ConsistentHashDistributionStrategy<InstanceInfo>(new Murmur3AUnsafeHashGenerator(), x => x.InstanceId.ToByteArray());
+            serverB.Init(Enumerable.Empty<InstanceInfo>());
 
-            serverB.Add(endpointB);
-            serverB.Add(endpointA);
-            serverB.Add(endpointC);
+            serverB.Add(nodeB);
+            serverB.Add(nodeA);
+            serverB.Add(nodeC);
 
-            var serverC = new ConsistentHashDistributionStrategy<EndpointInfo>(new Murmur3AUnsafeHashGenerator(), x => x.EndpointId.ToByteArray());
-            serverC.Init(Enumerable.Empty<EndpointInfo>());
+            var serverC = new ConsistentHashDistributionStrategy<InstanceInfo>(new Murmur3AUnsafeHashGenerator(), x => x.InstanceId.ToByteArray());
+            serverC.Init(Enumerable.Empty<InstanceInfo>());
 
-            serverC.Add(endpointC);
-            serverC.Add(endpointB);
-            serverC.Add(endpointA);
+            serverC.Add(nodeC);
+            serverC.Add(nodeB);
+            serverC.Add(nodeA);
 
             byte[] key = NewId.NextGuid().ToByteArray();
 
@@ -56,8 +56,8 @@ namespace MassTransit.Tests.Conductor
             var resultB = serverB.GetNode(key);
             var resultC = serverC.GetNode(key);
 
-            Assert.That(resultA.EndpointId, Is.EqualTo(resultB.EndpointId));
-            Assert.That(resultA.EndpointId, Is.EqualTo(resultC.EndpointId));
+            Assert.That(resultA.InstanceId, Is.EqualTo(resultB.InstanceId));
+            Assert.That(resultA.InstanceId, Is.EqualTo(resultC.InstanceId));
 
             key = Guid.NewGuid().ToByteArray();
 
@@ -65,18 +65,19 @@ namespace MassTransit.Tests.Conductor
             resultB = serverB.GetNode(key);
             resultC = serverC.GetNode(key);
 
-            Assert.That(resultA.EndpointId, Is.EqualTo(resultB.EndpointId));
-            Assert.That(resultA.EndpointId, Is.EqualTo(resultC.EndpointId));
+            Assert.That(resultA.InstanceId, Is.EqualTo(resultB.InstanceId));
+            Assert.That(resultA.InstanceId, Is.EqualTo(resultC.InstanceId));
         }
 
 
-        class Endpoint :
-            EndpointInfo
+        class Node :
+            InstanceInfo
         {
-            public Guid EndpointId { get; set; }
-            public DateTime Started { get; set; }
-            public Uri InstanceAddress { get; set; }
-            public Uri EndpointAddress { get; set; }
+            public Guid InstanceId { get; set; }
+            public DateTime? Started { get; set; }
+            public ServiceCapability[] Capabilities { get; set; }
+            public Uri Address { get; set; }
+            public Uri ServiceAddress { get; set; }
         }
 
 

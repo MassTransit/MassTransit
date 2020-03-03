@@ -29,7 +29,7 @@ namespace MassTransit.Definition
 
         public new static IEndpointNameFormatter Instance { get; } = new SnakeCaseEndpointNameFormatter();
 
-        protected override string SanitizeName(string name)
+        public override string SanitizeName(string name)
         {
             return _pattern.Replace(name, m => _separator + m.Value).ToLowerInvariant();
         }

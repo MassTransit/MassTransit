@@ -130,6 +130,18 @@ namespace MassTransit
         /// <typeparam name="T">The request message type</typeparam>
         void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
             where T : class;
+
+        /// <summary>
+        /// Adds the service client, which enables service discovery via Conductor
+        /// </summary>
+        /// <param name="configure">Configure the service client</param>
+        void AddServiceClient(Action<IServiceClientConfigurator> configure = default);
+
+        /// <summary>
+        /// Set the default endpoint name formatter used for endpoint names
+        /// </summary>
+        /// <param name="endpointNameFormatter"></param>
+        void SetEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter);
     }
 
 

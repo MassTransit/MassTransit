@@ -18,7 +18,7 @@ namespace MassTransit.Definition
 
         public new static IEndpointNameFormatter Instance { get; } = new KebabCaseEndpointNameFormatter();
 
-        protected override string SanitizeName(string name)
+        public override string SanitizeName(string name)
         {
             return base.SanitizeName(name).Replace('_', '-');
         }

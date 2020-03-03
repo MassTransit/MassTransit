@@ -82,8 +82,13 @@ namespace MassTransit.Definition
             return $"{activityName}_compensate";
         }
 
+        public virtual string SanitizeName(string name)
+        {
+            return name;
+        }
+
         string GetConsumerName(Type type)
-        {            
+        {
             if (type.IsGenericType)
             {
                 return SanitizeName(type.GetGenericArguments()[0].Name);
@@ -118,11 +123,6 @@ namespace MassTransit.Definition
                 activityName = activityName.Substring(0, activityName.Length - activity.Length);
 
             return SanitizeName(activityName);
-        }
-
-        protected virtual string SanitizeName(string name)
-        {
-            return name;
         }
     }
 }

@@ -3,6 +3,7 @@ namespace MassTransit
     using System;
     using System.Linq;
     using Castle.Windsor;
+    using Conductor.Configuration;
     using ConsumeConfigurators;
     using Definition;
     using Metadata;
@@ -75,6 +76,32 @@ namespace MassTransit
             registration.ConfigureEndpoints(configurator, endpointNameFormatter);
 
             container.Release(registration);
+        }
+
+        /// <summary>
+        /// Configure service endpoints for all defined consumer, saga, and activity types using an optional
+        /// endpoint name formatter. If no endpoint name formatter is specified, and an <see cref="IEndpointNameFormatter"/>
+        /// is registered in the container, it is resolved from the container. Otherwise, the <see cref="DefaultEndpointNameFormatter"/>
+        /// is used.
+        /// </summary>
+        /// <param name="configurator">The <see cref="IBusFactoryConfigurator"/> for the bus being configured</param>
+        /// <param name="container">The container reference</param>
+        /// <param name="options">The service instance options</param>
+        /// <typeparam name="TEndpointConfigurator">The ReceiveEndpointConfigurator type for the transport</typeparam>
+        public static void ConfigureServiceEndpoints<TEndpointConfigurator>(this IReceiveConfigurator<TEndpointConfigurator> configurator,
+            IWindsorContainer container, ServiceInstanceOptions options = null)
+            where TEndpointConfigurator : IReceiveEndpointConfigurator
+        {
+            var registration = container.Resolve<IRegistration>();
+
+            options ??= new ServiceInstanceOptions();
+            if (options.EndpointNameFormatter is DefaultEndpointNameFormatter && container.Kernel.HasComponent(typeof(IEndpointNameFormatter)))
+                options.SetEndpointNameFormatter(container.Kernel.Resolve<IEndpointNameFormatter>());
+
+            configurator.ServiceInstance(options, instanceConfigurator =>
+            {
+                registration.ConfigureEndpoints(instanceConfigurator, instanceConfigurator.EndpointNameFormatter);
+            });
         }
 
         /// <summary>

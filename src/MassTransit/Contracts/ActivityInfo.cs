@@ -1,18 +1,11 @@
 ﻿namespace MassTransit.Contracts
 {
     /// <summary>
-    /// Describes an activity
+    /// Activity description
     /// </summary>
-    public interface ActivityInfo
+    public interface ActivityInfo :
+        ExecuteActivityInfo
     {
-        string Name { get; }
-
-        string ActivityType { get; }
-
-        ArgumentInfo Argument { get; }
-
         LogInfo Log { get; }
-
-        VariableInfo[] OutputVariables { get; }
     }
 }

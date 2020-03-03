@@ -4,6 +4,7 @@ namespace MassTransit.Conductor.Configuration.Configurators
     using Definition;
     using EndpointConfigurators;
     using GreenPipes;
+    using MassTransit.Definition;
     using Server;
 
 
@@ -13,62 +14,82 @@ namespace MassTransit.Conductor.Configuration.Configurators
     {
         readonly IReceiveConfigurator<TEndpointConfigurator> _configurator;
         readonly IServiceInstance _instance;
+        readonly ServiceInstanceOptions _options;
+        readonly TEndpointConfigurator _instanceEndpointConfigurator;
+        readonly IServiceInstanceTransportConfigurator<TEndpointConfigurator> _transportConfigurator;
 
-        public ServiceInstanceConfigurator(IReceiveConfigurator<TEndpointConfigurator> configurator, IServiceInstance instance)
+        public ServiceInstanceConfigurator(IReceiveConfigurator<TEndpointConfigurator> configurator,
+            IServiceInstanceTransportConfigurator<TEndpointConfigurator> transportConfigurator,
+            IServiceInstance instance,
+            ServiceInstanceOptions options,
+            TEndpointConfigurator instanceEndpointConfigurator = default)
         {
             _configurator = configurator;
+            _transportConfigurator = transportConfigurator;
             _instance = instance;
+            _options = options;
+            _instanceEndpointConfigurator = instanceEndpointConfigurator;
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter
-            endpointNameFormatter, Action<TEndpointConfigurator> configureEndpoint)
-        {
-            _configurator.ReceiveEndpoint(definition, endpointNameFormatter, endpointConfigurator =>
-            {
-                var instanceDefinition = new InstanceEndpointDefinition(definition, _instance);
-
-                _configurator.ReceiveEndpoint(instanceDefinition, endpointNameFormatter, instanceEndpointConfigurator =>
-                {
-                    ConfigureInstanceEndpoint(instanceEndpointConfigurator);
-
-                    IServiceEndpoint serviceEndpoint = new ServiceEndpoint(_instance, endpointConfigurator, instanceEndpointConfigurator);
-
-                    ConfigureServiceEndpoint(serviceEndpoint, endpointConfigurator, configureEndpoint);
-                    ConfigureServiceEndpoint(serviceEndpoint, instanceEndpointConfigurator, configureEndpoint);
-                });
-            });
-        }
-
-        public void ReceiveEndpoint(string queueName, Action<TEndpointConfigurator> configureEndpoint)
-        {
-            string instanceEndpointName = ServiceEndpointNameFormatter.Instance.EndpointName(_instance.InstanceId, queueName);
-
-            _configurator.ReceiveEndpoint(queueName, endpointConfigurator =>
-            {
-                _configurator.ReceiveEndpoint(instanceEndpointName, instanceEndpointConfigurator =>
-                {
-                    ConfigureInstanceEndpoint(instanceEndpointConfigurator);
-
-                    var serviceEndpoint = new ServiceEndpoint(_instance, endpointConfigurator, instanceEndpointConfigurator);
-
-                    ConfigureServiceEndpoint(serviceEndpoint, endpointConfigurator, configureEndpoint);
-                    ConfigureServiceEndpoint(serviceEndpoint, instanceEndpointConfigurator, configureEndpoint);
-                });
-            });
-        }
-
-        void ConfigureServiceEndpoint(IServiceEndpoint serviceEndpoint, TEndpointConfigurator endpointConfigurator,
-            Action<TEndpointConfigurator> configureEndpoint)
-        {
-            ConfigureServiceEndpoint(endpointConfigurator);
-
-            serviceEndpoint.ConnectConfigurationObserver(endpointConfigurator);
-            configureEndpoint(endpointConfigurator);
-        }
+        public IEndpointNameFormatter EndpointNameFormatter => _options.EndpointNameFormatter;
 
         ConnectHandle IEndpointConfigurationObserverConnector.ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
             return _configurator.ConnectEndpointConfigurationObserver(observer);
+        }
+
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<TEndpointConfigurator> configureEndpoint)
+        {
+            endpointNameFormatter ??= EndpointNameFormatter;
+
+            if (_instanceEndpointConfigurator != null)
+            {
+                _configurator.ReceiveEndpoint(definition, endpointNameFormatter, endpointConfigurator =>
+                {
+                    _transportConfigurator.ConfigureServiceEndpoint(endpointConfigurator);
+                    endpointConfigurator.AddDependency(_instanceEndpointConfigurator);
+
+                    ConfigureServiceEndpoint(endpointConfigurator, _instanceEndpointConfigurator, configureEndpoint);
+                });
+            }
+            else
+            {
+                var controlEndpointDefinition = new ServiceControlEndpointDefinition(definition);
+
+                _configurator.ReceiveEndpoint(controlEndpointDefinition, endpointNameFormatter, controlEndpointConfigurator =>
+                {
+                    _transportConfigurator.ConfigureControlEndpoint(controlEndpointConfigurator);
+
+                    _configurator.ReceiveEndpoint(definition, endpointNameFormatter, endpointConfigurator =>
+                    {
+                        endpointConfigurator.AddDependency(controlEndpointConfigurator);
+
+                        _transportConfigurator.ConfigureServiceEndpoint(endpointConfigurator);
+
+                        ConfigureServiceEndpoint(endpointConfigurator, controlEndpointConfigurator, configureEndpoint);
+                    });
+                });
+            }
+
+            if (_options.InstanceServiceEndpointEnabled)
+            {
+                var instanceServiceEndpointDefinition = new InstanceServiceEndpointDefinition(definition, _instance);
+
+                _configurator.ReceiveEndpoint(instanceServiceEndpointDefinition, endpointNameFormatter, endpointConfigurator =>
+                {
+                    _transportConfigurator.ConfigureInstanceServiceEndpoint(endpointConfigurator);
+
+                    ConfigureServiceEndpoint(endpointConfigurator, configureEndpoint);
+                });
+            }
+        }
+
+        public void ReceiveEndpoint(string queueName, Action<TEndpointConfigurator> configureEndpoint)
+        {
+            var endpointDefinition = new NamedEndpointDefinition(queueName);
+
+            ReceiveEndpoint(endpointDefinition, EndpointNameFormatter, configureEndpoint);
         }
 
         void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
@@ -82,12 +103,20 @@ namespace MassTransit.Conductor.Configuration.Configurators
             ReceiveEndpoint(queueName, x => configureEndpoint(x));
         }
 
-        public virtual void ConfigureInstanceEndpoint(TEndpointConfigurator configurator)
+        void ConfigureServiceEndpoint(TEndpointConfigurator endpointConfigurator, TEndpointConfigurator controlEndpointConfigurator,
+            Action<TEndpointConfigurator> configureEndpoint)
         {
+            var configurator = new ServiceEndpointConfigurator(_instance, _configurator, endpointConfigurator,
+                controlEndpointConfigurator);
+
+            configureEndpoint(endpointConfigurator);
         }
 
-        protected virtual void ConfigureServiceEndpoint(TEndpointConfigurator configurator)
+        void ConfigureServiceEndpoint(TEndpointConfigurator endpointConfigurator, Action<TEndpointConfigurator> configureEndpoint)
         {
+            var configurator = new ServiceEndpointConfigurator(_instance, _configurator, endpointConfigurator);
+
+            configureEndpoint(endpointConfigurator);
         }
     }
 }

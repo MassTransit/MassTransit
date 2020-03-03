@@ -6,6 +6,7 @@ namespace MassTransit.Conductor.Client
     using System.Threading;
     using System.Threading.Tasks;
     using Clients;
+    using Consumers;
     using Context;
     using GreenPipes;
     using GreenPipes.Caching;
@@ -17,25 +18,31 @@ namespace MassTransit.Conductor.Client
     public class ServiceClient :
         IServiceClient
     {
-        readonly ICache<IMessageClient> _cache;
-        readonly IIndex<Type, IMessageClient> _index;
+        readonly ICache<IServiceClientMessageCache> _cache;
+        readonly IIndex<Type, IServiceClientMessageCache> _index;
         readonly IClientFactory _clientFactory;
         readonly CancellationTokenSource _disposed;
         readonly HashSet<ConnectHandle> _handles;
         readonly Guid _clientId;
+        readonly IServiceInstanceCache _instanceCache;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
 
-        public ServiceClient(IClientFactory clientFactory)
+        public ServiceClient(IClientFactory clientFactory, IPublishEndpointProvider publishEndpointProvider)
         {
             _clientFactory = clientFactory;
+            _publishEndpointProvider = publishEndpointProvider;
 
             _clientId = NewId.NextGuid();
 
             _disposed = new CancellationTokenSource();
             _handles = new HashSet<ConnectHandle>();
 
-            var cacheSettings = new CacheSettings(1000, TimeSpan.FromSeconds(1), TimeSpan.FromMinutes(30));
-            _cache = new GreenCache<IMessageClient>(cacheSettings);
+            _cache = new GreenCache<IServiceClientMessageCache>(ServiceClientCacheDefaults.Settings);
             _index = _cache.AddIndex("messageType", x => x.MessageType);
+
+            _instanceCache = new ServiceInstanceCache();
+
+            ConnectConsumers();
         }
 
         public IRequestSendEndpoint<T> CreateRequestSendEndpoint<T>(ConsumeContext consumeContext)
@@ -44,7 +51,7 @@ namespace MassTransit.Conductor.Client
             if (consumeContext == null)
                 throw new ArgumentNullException(nameof(consumeContext));
 
-            Task<IMessageClient<T>> messageClient = GetMessageClient<T>();
+            Task<IServiceClientMessageCache<T>> messageClient = GetMessageClient<T>();
 
             return new ServiceClientRequestSendEndpoint<T>(messageClient, _clientFactory.Context, consumeContext);
         }
@@ -52,7 +59,7 @@ namespace MassTransit.Conductor.Client
         public IRequestSendEndpoint<T> CreateRequestSendEndpoint<T>()
             where T : class
         {
-            Task<IMessageClient<T>> messageClient = GetMessageClient<T>();
+            Task<IServiceClientMessageCache<T>> messageClient = GetMessageClient<T>();
 
             return new ServiceClientRequestSendEndpoint<T>(messageClient, _clientFactory.Context);
         }
@@ -63,13 +70,13 @@ namespace MassTransit.Conductor.Client
 
             var clients = _cache.GetAll();
 
-            async Task DisposeClient(Task<IMessageClient> client)
+            async Task DisposeClient(Task<IServiceClientMessageCache> client)
             {
                 try
                 {
                     var messageClient = await client.ConfigureAwait(false);
 
-                    await messageClient.DisposeAsync(cancellationToken).ConfigureAwait(false);
+                    await messageClient.UnlinkClient(_publishEndpointProvider).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
@@ -87,7 +94,7 @@ namespace MassTransit.Conductor.Client
             await _clientFactory.DisposeAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        async Task<IMessageClient<T>> GetMessageClient<T>()
+        async Task<IServiceClientMessageCache<T>> GetMessageClient<T>()
             where T : class
         {
             if (_disposed.IsCancellationRequested)
@@ -95,13 +102,13 @@ namespace MassTransit.Conductor.Client
 
             var client = await _index.Get(typeof(T), type => CreateMessageClient<T>(_disposed.Token)).ConfigureAwait(false);
 
-            return client as IMessageClient<T>;
+            return client as IServiceClientMessageCache<T>;
         }
 
-        async Task<IMessageClient> CreateMessageClient<T>(CancellationToken cancellationToken)
+        async Task<IServiceClientMessageCache> CreateMessageClient<T>(CancellationToken cancellationToken)
             where T : class
         {
-            var messageClient = new MessageClient<T>(_clientFactory, _clientId);
+            var messageClient = new ServiceClientMessageCache<T>(_clientFactory, _clientId, _instanceCache);
 
             var handle = _clientFactory.Context.ConnectInstance(messageClient);
             try
@@ -117,6 +124,11 @@ namespace MassTransit.Conductor.Client
                 handle.Disconnect();
                 throw;
             }
+        }
+
+        void ConnectConsumers()
+        {
+            _handles.Add(_clientFactory.Context.ConnectConsumer(() => new InstanceDownConsumer(_instanceCache)));
         }
     }
 }

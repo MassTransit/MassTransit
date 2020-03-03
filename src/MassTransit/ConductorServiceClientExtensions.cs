@@ -15,7 +15,7 @@ namespace MassTransit
         {
             var clientFactory = bus.CreateClientFactory(timeout);
 
-            var serviceClient = new ServiceClient(clientFactory);
+            var serviceClient = new ServiceClient(clientFactory, bus);
             var serviceClientFactory = new ServiceClientFactory(serviceClient, clientFactory);
 
             return serviceClientFactory;

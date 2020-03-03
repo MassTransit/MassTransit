@@ -7,6 +7,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
     namespace ConductorTests
     {
+        using Conductor.Configuration;
         using Contracts;
 
 
@@ -69,13 +70,77 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 configurator.ServiceInstance(instance =>
                 {
-                    var serviceEndpointName = KebabCaseEndpointNameFormatter.Instance.Consumer<DeployPayloadConsumer>();
+                    var serviceEndpointName = instance.EndpointNameFormatter.Consumer<DeployPayloadConsumer>();
 
                     instance.ReceiveEndpoint(serviceEndpointName, x =>
                     {
                         x.Consumer<DeployPayloadConsumer>();
                     });
                 });
+            }
+        }
+
+
+        [TestFixture]
+        public class Linking_a_service_that_later_gets_a_second_instance :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async Task Should_work()
+            {
+                var instanceA = await CreateInstance();
+                try
+                {
+                    var serviceClient = Bus.CreateServiceClient();
+                    var requestClient = serviceClient.CreateRequestClient<DeployPayload>();
+
+                    var response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "A"});
+
+                    Assert.That(response.Message.Target, Is.EqualTo("A"));
+
+                    var instanceB = await CreateInstance();
+                    try
+                    {
+                        await instanceA.StopAsync();
+
+                        response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "B"});
+
+                        Assert.That(response.Message.Target, Is.EqualTo("B"));
+                    }
+                    finally
+                    {
+                        await instanceB.StopAsync();
+                    }
+                }
+                finally
+                {
+                    await instanceA.StopAsync();
+                }
+            }
+
+            async Task<IBusControl> CreateInstance()
+            {
+                var bus = MassTransit.Bus.Factory.CreateUsingRabbitMq(cfg =>
+                {
+                    cfg.Host(HostAddress);
+
+                    var options = new ServiceInstanceOptions()
+                        .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);
+
+                    cfg.ServiceInstance(options, instance =>
+                    {
+                        var serviceEndpointName = instance.EndpointNameFormatter.Consumer<DeployPayloadConsumer>();
+
+                        instance.ReceiveEndpoint(serviceEndpointName, x =>
+                        {
+                            x.Consumer<DeployPayloadConsumer>();
+                        });
+                    });
+                });
+
+                await bus.StartAsync();
+
+                return bus;
             }
         }
     }
