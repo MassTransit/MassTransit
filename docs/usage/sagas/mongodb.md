@@ -2,13 +2,14 @@
 
 MongoDB is an easy to use saga repository, because setup is easy. There is no need for class mapping, the saga instances can be persisted easily using a MongoDB collection.
 
-To use MongoDB, an additional interface and property are required on saga instances. The interface, `IVersionedSaga`, contains a `Version` property that is used to support optimistic concurrency versioning.
+To use MongoDB, an additional interface, property, and data annotation are required on saga instances. The interface, `IVersionedSaga`, contains a `Version` property that is used to support optimistic concurrency versioning. The annotation `[BsonId]` configures the CorrelationId property as the id property in MongoDB.
 
 ```cs {3,10}
 public class OrderState :
     SagaStateMachineInstance,
     IVersionedSaga
 {
+    [BsonId]
     public Guid CorrelationId { get; set; }
     public string CurrentState { get; set; }
 

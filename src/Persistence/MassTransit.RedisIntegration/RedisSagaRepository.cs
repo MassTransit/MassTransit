@@ -20,7 +20,7 @@
             string keyPrefix = "")
         {
             var options = new RedisSagaRepositoryOptions<TSaga>(optimistic ? ConcurrencyMode.Optimistic : ConcurrencyMode.Pessimistic, lockTimeout, null,
-                keyPrefix);
+                keyPrefix, SelectDefaultDatabase);
 
             var consumeContextFactory = new RedisSagaConsumeContextFactory<TSaga>();
 
@@ -49,6 +49,11 @@
             IPipe<SagaConsumeContext<TSaga, T>> next)
         {
             return _repository.SendQuery(context, query, policy, next);
+        }
+
+        static IDatabase SelectDefaultDatabase(IConnectionMultiplexer multiplexer)
+        {
+            return multiplexer.GetDatabase();
         }
     }
 }

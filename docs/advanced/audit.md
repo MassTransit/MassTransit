@@ -59,7 +59,8 @@ busControl.ConnectConsumeAuditObserver(auditStore);
 ```
 
 There, the `auditStore` is the audit persistent store. Currently available stores include:
-* [Entity Framework](ef.md)
+* [Entity Framework](../usage/sagas/ef.md)
+* [Entity Framework Core](../usage/sagas/efcore.md)
 
 Please remember that observers need to be configured before the bus starts.
 

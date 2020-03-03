@@ -12,7 +12,6 @@ namespace MassTransit.RedisIntegration.Contexts
         ISagaRepositoryContextFactory<TSaga>
         where TSaga : class, IVersionedSaga
     {
-        readonly ConnectionMultiplexer _multiplexer;
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;
         readonly RedisSagaRepositoryOptions<TSaga> _options;
         readonly Func<IDatabase> _databaseFactory;
@@ -20,8 +19,8 @@ namespace MassTransit.RedisIntegration.Contexts
         public RedisSagaRepositoryContextFactory(ConnectionMultiplexer multiplexer, ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory,
             RedisSagaRepositoryOptions<TSaga> options)
         {
-            _multiplexer = multiplexer;
-            _databaseFactory = GetDatabase;
+            IDatabase DatabaseFactory() => options.DatabaseSelector(multiplexer);
+            _databaseFactory = DatabaseFactory;
 
             _factory = factory;
             _options = options;
@@ -39,11 +38,6 @@ namespace MassTransit.RedisIntegration.Contexts
         public void Probe(ProbeContext context)
         {
             context.Add("persistence", "redis");
-        }
-
-        IDatabase GetDatabase()
-        {
-            return _multiplexer.GetDatabase();
         }
 
         public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)

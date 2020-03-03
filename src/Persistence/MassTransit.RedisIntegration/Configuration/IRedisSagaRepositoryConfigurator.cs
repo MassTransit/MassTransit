@@ -40,6 +40,12 @@ namespace MassTransit.RedisIntegration
         /// </summary>
         /// <param name="connectionFactory"></param>
         void ConnectionFactory(Func<IConfigurationServiceProvider, ConnectionMultiplexer> connectionFactory);
+
+        /// <summary>
+        /// Select a database other than the default to be used (optional)
+        /// </summary>
+        /// <param name="databaseSelector"></param>
+        void SelectDatabase(SelectDatabase databaseSelector);
     }
 
 

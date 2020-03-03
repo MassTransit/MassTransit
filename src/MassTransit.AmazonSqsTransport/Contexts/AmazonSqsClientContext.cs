@@ -309,23 +309,19 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         /// <returns></returns>
         async Task<List<Message>> PollMessages(string queueUrl, ReceiveSettings receiveSettings)
         {
-            var messages = new List<Message>();
-            var remainingNumMessagesToPoll = receiveSettings.PrefetchCount;
-            while (remainingNumMessagesToPoll > 0)
+            const int awsMax = 10;
+
+            var remaining = receiveSettings.PrefetchCount % awsMax;
+            var receives = Enumerable.Repeat(awsMax, receiveSettings.PrefetchCount / awsMax).ToList();
+
+            if (remaining > 0)
             {
-                var numMessagesToPoll = Math.Min(remainingNumMessagesToPoll, 10);
-                var response = await ReceiveMessages(receiveSettings, queueUrl, numMessagesToPoll).ConfigureAwait(false);
-                var numMessagesReceived = response.Messages.Count;
-
-                messages.AddRange(response.Messages);
-
-                if (numMessagesReceived == 0)
-                    break;
-
-                remainingNumMessagesToPoll -= numMessagesReceived;
+                receives.Add(remaining);
             }
 
-            return messages;
+            var responses = await Task.WhenAll(receives.Select(numberOfMessages => ReceiveMessages(receiveSettings, queueUrl, numberOfMessages))).ConfigureAwait(false);
+
+            return responses.SelectMany(r => r.Messages).ToList();
         }
 
         async Task<ReceiveMessageResponse> ReceiveMessages(ReceiveSettings receiveSettings, string queueUrl, int maxNumberOfMessages)
