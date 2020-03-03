@@ -1,11 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../netfx.props"/>
   <Import Project="../signing.props"/>
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -13,6 +12,10 @@
     <PackageTags>MassTransit</PackageTags>
     <Description>$(Description)</Description>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+
+    <!-- Override the Directory.build.props and disable a snupkg from being created -->
+    <EmbedUntrackedSources>false</EmbedUntrackedSources>
+    <IncludeSymbols>false</IncludeSymbols>
   </PropertyGroup>
 
   <ItemGroup>
