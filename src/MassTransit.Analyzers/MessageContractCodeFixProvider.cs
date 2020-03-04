@@ -57,11 +57,11 @@ namespace MassTransit.Analyzers
 
             if (anonymousObject.Parent is ArgumentSyntax argumentSyntax &&
                 argumentSyntax.IsActivator(semanticModel, out var typeArgument) &&
-                typeArgument.HasMessageContract(out var messageContractType))
+                typeArgument.HasMessageContract(out var contractType))
             {
                 var dictionary = new Dictionary<AnonymousObjectCreationExpressionSyntax, ITypeSymbol>();
 
-                await FindAnonymousTypesWithMessageContractsInTree(dictionary, anonymousObject, messageContractType, semanticModel).ConfigureAwait(false);
+                await FindAnonymousTypesWithMessageContractsInTree(dictionary, anonymousObject, contractType, semanticModel).ConfigureAwait(false);
 
                 var newRoot = AddMissingProperties(root, dictionary);
 
@@ -75,55 +75,61 @@ namespace MassTransit.Analyzers
         }
 
         static async Task FindAnonymousTypesWithMessageContractsInTree(IDictionary<AnonymousObjectCreationExpressionSyntax, ITypeSymbol> dictionary,
-            AnonymousObjectCreationExpressionSyntax anonymousObject, ITypeSymbol messageContractType, SemanticModel semanticModel)
+            AnonymousObjectCreationExpressionSyntax anonymousObject, ITypeSymbol contractType, SemanticModel semanticModel)
         {
-            List<IPropertySymbol> messageContractProperties = GetMessageContractProperties(messageContractType);
+            List<IPropertySymbol> contractProperties = GetContractProperties(contractType);
 
             foreach (var initializer in anonymousObject.Initializers)
             {
                 var name = GetName(initializer);
 
-                var messageContractProperty = messageContractProperties.FirstOrDefault(p => p.Name == name);
+                var contractProperty = contractProperties.FirstOrDefault(p => p.Name == name);
 
-                if (messageContractProperty != null)
+                if (contractProperty != null)
                 {
                     if (initializer.Expression is ImplicitArrayCreationExpressionSyntax implicitArrayCreationExpressionSyntax)
                     {
-                        if (messageContractProperty.Type.IsImmutableArray(out var messageContractPropertyTypeArgument) ||
-                            messageContractProperty.Type.IsReadOnlyList(out messageContractPropertyTypeArgument) ||
-                            messageContractProperty.Type.IsArray(out messageContractPropertyTypeArgument))
+                        if (contractProperty.Type.IsImmutableArray(out var contractElementType) ||
+                            contractProperty.Type.IsList(out contractElementType) ||
+                            contractProperty.Type.IsArray(out contractElementType))
                         {
                             SeparatedSyntaxList<ExpressionSyntax> expressions = implicitArrayCreationExpressionSyntax.Initializer.Expressions;
                             foreach (var expression in expressions)
                             {
                                 if (expression is AnonymousObjectCreationExpressionSyntax anonymousObjectArrayInitializer)
+                                {
                                     await FindAnonymousTypesWithMessageContractsInTree(dictionary, anonymousObjectArrayInitializer,
-                                        messageContractPropertyTypeArgument, semanticModel).ConfigureAwait(false);
+                                        contractElementType, semanticModel).ConfigureAwait(false);
+                                }
                             }
                         }
                     }
                     else if (initializer.Expression is AnonymousObjectCreationExpressionSyntax anonymousObjectProperty)
-                        await FindAnonymousTypesWithMessageContractsInTree(dictionary, anonymousObjectProperty, messageContractProperty.Type, semanticModel)
+                    {
+                        await FindAnonymousTypesWithMessageContractsInTree(dictionary, anonymousObjectProperty, contractProperty.Type, semanticModel)
                             .ConfigureAwait(false);
+                    }
                     else if (initializer.Expression is InvocationExpressionSyntax invocationExpressionSyntax
                         && semanticModel.GetSymbolInfo(invocationExpressionSyntax).Symbol is IMethodSymbol method
                         && method.ReturnType.IsList(out var methodReturnTypeArgument)
                         && methodReturnTypeArgument.IsAnonymousType)
                     {
-                        if (messageContractProperty.Type.IsImmutableArray(out var messageContractPropertyTypeArgument) ||
-                            messageContractProperty.Type.IsReadOnlyList(out messageContractPropertyTypeArgument) ||
-                            messageContractProperty.Type.IsArray(out messageContractPropertyTypeArgument))
+                        if (contractProperty.Type.IsImmutableArray(out var contractElementType) ||
+                            contractProperty.Type.IsList(out contractElementType) ||
+                            contractProperty.Type.IsArray(out contractElementType))
                         {
                             var syntax = await methodReturnTypeArgument.DeclaringSyntaxReferences[0].GetSyntaxAsync().ConfigureAwait(false);
                             if (syntax is AnonymousObjectCreationExpressionSyntax anonymousObjectTypeArgument)
-                                await FindAnonymousTypesWithMessageContractsInTree(dictionary, anonymousObjectTypeArgument, messageContractPropertyTypeArgument,
+                            {
+                                await FindAnonymousTypesWithMessageContractsInTree(dictionary, anonymousObjectTypeArgument, contractElementType,
                                     semanticModel).ConfigureAwait(false);
+                            }
                         }
                     }
                 }
             }
 
-            dictionary.Add(anonymousObject, messageContractType);
+            dictionary.Add(anonymousObject, contractType);
         }
 
         static string GetName(AnonymousObjectMemberDeclaratorSyntax initializer)
@@ -140,12 +146,12 @@ namespace MassTransit.Analyzers
             return name;
         }
 
-        static List<IPropertySymbol> GetMessageContractProperties(ITypeSymbol messageContractType)
+        static List<IPropertySymbol> GetContractProperties(ITypeSymbol contractType)
         {
-            var messageContractTypes = new List<ITypeSymbol> {messageContractType};
-            messageContractTypes.AddRange(messageContractType.AllInterfaces);
+            var contractTypes = new List<ITypeSymbol> {contractType};
+            contractTypes.AddRange(contractType.AllInterfaces);
 
-            return messageContractTypes.SelectMany(i => i.GetMembers().OfType<IPropertySymbol>()).ToList();
+            return contractTypes.SelectMany(i => i.GetMembers().OfType<IPropertySymbol>()).ToList();
         }
 
         static SyntaxNode AddMissingProperties(SyntaxNode root, IDictionary<AnonymousObjectCreationExpressionSyntax, ITypeSymbol> dictionary)
@@ -155,26 +161,23 @@ namespace MassTransit.Analyzers
             foreach (KeyValuePair<AnonymousObjectCreationExpressionSyntax, ITypeSymbol> keyValuePair in dictionary)
             {
                 var anonymousObject = newRoot.GetCurrentNode(keyValuePair.Key);
-                var messageContractType = keyValuePair.Value;
-                newRoot = AddMissingProperties(newRoot, anonymousObject, messageContractType);
+                var contractType = keyValuePair.Value;
+                newRoot = AddMissingProperties(newRoot, anonymousObject, contractType);
             }
 
             return newRoot;
         }
 
-        static SyntaxNode AddMissingProperties(SyntaxNode root,
-            AnonymousObjectCreationExpressionSyntax anonymousObject, ITypeSymbol messageContractType)
+        static SyntaxNode AddMissingProperties(SyntaxNode root, AnonymousObjectCreationExpressionSyntax anonymousObject, ITypeSymbol contractType)
         {
             var newRoot = root;
 
-            List<IPropertySymbol> messageContractProperties = GetMessageContractProperties(messageContractType);
+            List<IPropertySymbol> contractProperties = GetContractProperties(contractType);
 
             var propertiesToAdd = new List<AnonymousObjectMemberDeclaratorSyntax>();
-            foreach (var messageContractProperty in messageContractProperties)
+            foreach (var messageContractProperty in contractProperties)
             {
-                var initializer =
-                    anonymousObject.Initializers.FirstOrDefault(i => GetName(i) == messageContractProperty.Name);
-
+                var initializer = anonymousObject.Initializers.FirstOrDefault(i => GetName(i) == messageContractProperty.Name);
                 if (initializer == null)
                 {
                     var propertyToAdd = CreateProperty(messageContractProperty);
@@ -193,35 +196,35 @@ namespace MassTransit.Analyzers
             return newRoot;
         }
 
-        static AnonymousObjectMemberDeclaratorSyntax[] CreateProperties(ITypeSymbol messageContractType)
+        static AnonymousObjectMemberDeclaratorSyntax[] CreateProperties(ITypeSymbol contractType)
         {
-            List<IPropertySymbol> messageContractProperties = GetMessageContractProperties(messageContractType);
+            List<IPropertySymbol> contractProperties = GetContractProperties(contractType);
 
             var propertiesToAdd = new List<AnonymousObjectMemberDeclaratorSyntax>();
-            foreach (var messageContractProperty in messageContractProperties)
+            foreach (var contractProperty in contractProperties)
             {
-                var propertyToAdd = CreateProperty(messageContractProperty);
+                var propertyToAdd = CreateProperty(contractProperty);
                 propertiesToAdd.Add(propertyToAdd);
             }
 
             return propertiesToAdd.ToArray();
         }
 
-        static AnonymousObjectMemberDeclaratorSyntax CreateProperty(IPropertySymbol messageContractProperty)
+        static AnonymousObjectMemberDeclaratorSyntax CreateProperty(IPropertySymbol contractProperty)
         {
             ExpressionSyntax expression;
-            if (messageContractProperty.Type.IsImmutableArray(out var messageContractPropertyTypeArgument) ||
-                messageContractProperty.Type.IsReadOnlyList(out messageContractPropertyTypeArgument) ||
-                messageContractProperty.Type.IsArray(out messageContractPropertyTypeArgument))
-                expression = CreateImplicitArray(messageContractPropertyTypeArgument);
-            else if (messageContractProperty.Type.TypeKind == TypeKind.Interface)
-                expression = CreateAnonymousObject(messageContractProperty.Type);
-            else if (messageContractProperty.Type.IsNullable(out var nullableTypeArgument))
+            if (contractProperty.Type.IsImmutableArray(out var contractElementType) ||
+                contractProperty.Type.IsList(out contractElementType) ||
+                contractProperty.Type.IsArray(out contractElementType))
+                expression = CreateImplicitArray(contractElementType);
+            else if (contractProperty.Type.TypeKind == TypeKind.Interface)
+                expression = CreateAnonymousObject(contractProperty.Type);
+            else if (contractProperty.Type.IsNullable(out var nullableTypeArgument))
                 expression = CreateDefaultNullable(nullableTypeArgument);
             else
-                expression = CreateDefault(messageContractProperty.Type);
+                expression = CreateDefault(contractProperty.Type);
 
-            return SyntaxFactory.AnonymousObjectMemberDeclarator(SyntaxFactory.NameEquals(messageContractProperty.Name), expression)
+            return SyntaxFactory.AnonymousObjectMemberDeclarator(SyntaxFactory.NameEquals(contractProperty.Name), expression)
                 .WithAdditionalAnnotations(Formatter.Annotation)
                 .WithLeadingTrivia(SyntaxFactory.CarriageReturnLineFeed);
         }
@@ -234,7 +237,7 @@ namespace MassTransit.Analyzers
             else
                 node = CreateDefault(type);
 
-            var nodes = new[] {node};
+            ExpressionSyntax[] nodes = new[] {node};
             var initializer = SyntaxFactory.InitializerExpression(SyntaxKind.ArrayInitializerExpression)
                 .WithExpressions(SyntaxFactory.SeparatedList(nodes));
             return SyntaxFactory.ImplicitArrayCreationExpression(initializer)

@@ -1,7 +1,8 @@
-using System.Collections.Generic;
-
 namespace MassTransit.Analyzers.Helpers
 {
+    using System.Collections.Generic;
+
+
     class NodeTable<T>
     {
         readonly IDictionary<T, int> _nodes;

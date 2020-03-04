@@ -1,14 +1,15 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
-
 namespace MassTransit.Analyzers.Helpers
 {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.CodeAnalysis;
+
+
     public class TypeConversionHelper
     {
-        readonly NodeList<ITypeSymbol> _typeSymbols;
         readonly SemanticModel _semanticModel;
+        readonly NodeList<ITypeSymbol> _typeSymbols;
         INamedTypeSymbol _taskTypeSymbol;
 
         public TypeConversionHelper(SemanticModel semanticModel)
@@ -148,6 +149,9 @@ namespace MassTransit.Analyzers.Helpers
                     continue;
                 }
 
+                if (sourceSymbol.InheritsFromType(symbol))
+                    return true;
+
                 return _typeSymbols.Contains(symbol, sourceSymbol);
             }
         }
@@ -177,7 +181,7 @@ namespace MassTransit.Analyzers.Helpers
     {
         public static void Add(this NodeList<ITypeSymbol> table, SemanticModel semanticModel, ITypeSymbol symbol, params SpecialType[] types)
         {
-            var typeSymbols = types.Select(type => semanticModel.Compilation.GetSpecialType(type)).Cast<ITypeSymbol>().ToArray();
+            ITypeSymbol[] typeSymbols = types.Select(type => semanticModel.Compilation.GetSpecialType(type)).Cast<ITypeSymbol>().ToArray();
 
             table.Add(symbol, typeSymbols);
         }
@@ -185,7 +189,7 @@ namespace MassTransit.Analyzers.Helpers
         public static void Add(this NodeList<ITypeSymbol> table, SemanticModel semanticModel, SpecialType specialType, params SpecialType[] types)
         {
             var specialTypeSymbol = semanticModel.Compilation.GetSpecialType(specialType);
-            var typeSymbols = types.Select(type => semanticModel.Compilation.GetSpecialType(type)).Cast<ITypeSymbol>().ToArray();
+            ITypeSymbol[] typeSymbols = types.Select(type => semanticModel.Compilation.GetSpecialType(type)).Cast<ITypeSymbol>().ToArray();
 
             table.Add(specialTypeSymbol, typeSymbols);
         }

@@ -23,6 +23,8 @@ namespace MassTransit.Analyzers
             Category, DiagnosticSeverity.Warning, true,
             "MassTransit method is not awaited or captured");
 
+        static readonly HashSet<string> _awaitableMethods = InitializeAwaitableMethods();
+
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(MissingAwaitRule);
 
         public override void Initialize(AnalysisContext context)
@@ -56,8 +58,6 @@ namespace MassTransit.Analyzers
                 }
             }
         }
-
-        static readonly HashSet<string> _awaitableMethods = InitializeAwaitableMethods();
 
         static HashSet<string> InitializeAwaitableMethods()
         {

@@ -1,5 +1,7 @@
 namespace MassTransit.Analyzers
 {
+    using System.Collections.Generic;
+    using System.Collections.Immutable;
     using System.Linq;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -39,26 +41,26 @@ namespace MassTransit.Analyzers
         static bool IsGenericInitializerMethod(IMethodSymbol method)
         {
             return method != null
-                   && method.ContainingType.ContainingAssembly.Name == "MassTransit"
-                   && (method.Name == "Publish" && method.ContainingType.Name == "IPublishEndpoint"
-                       || method.Name == "Send" && method.ContainingType.Name == "ISendEndpoint"
-                       || method.Name == "Create" && method.ContainingType.Name == "IRequestClient"
-                       || method.Name == "Init" && method.ContainingType.Name == "MessageInitializerExtensions"
-                       || method.Name == "RespondAsync" && method.ContainingType.Name == "ConsumeContext");
+                && method.ContainingType.ContainingAssembly.Name == "MassTransit"
+                && (method.Name == "Publish" && method.ContainingType.Name == "IPublishEndpoint"
+                    || method.Name == "Send" && method.ContainingType.Name == "ISendEndpoint"
+                    || method.Name == "Create" && method.ContainingType.Name == "IRequestClient"
+                    || method.Name == "Init" && method.ContainingType.Name == "MessageInitializerExtensions"
+                    || method.Name == "RespondAsync" && method.ContainingType.Name == "ConsumeContext");
         }
 
         static bool IsInitializerMethod(IMethodSymbol method)
         {
             return method != null
-                   && method.ContainingType.ContainingAssembly.Name == "MassTransit"
-                   && method.ContainingType.Name == "IRequestClient" && (method.Name == "Create" || method.Name == "GetResponse");
+                && method.ContainingType.ContainingAssembly.Name == "MassTransit"
+                && method.ContainingType.Name == "IRequestClient" && (method.Name == "Create" || method.Name == "GetResponse");
         }
 
-        public static bool HasMessageContract(this ITypeSymbol typeArgument, out ITypeSymbol messageContractType)
+        public static bool HasMessageContract(this ITypeSymbol typeArgument, out ITypeSymbol contractType)
         {
             if (typeArgument.TypeKind == TypeKind.Interface)
             {
-                messageContractType = typeArgument;
+                contractType = typeArgument;
                 return true;
             }
 
@@ -67,11 +69,11 @@ namespace MassTransit.Analyzers
                 typeParameter.ConstraintTypes.Length == 1 &&
                 typeParameter.ConstraintTypes[0].TypeKind == TypeKind.Interface)
             {
-                messageContractType = typeParameter.ConstraintTypes[0];
+                contractType = typeParameter.ConstraintTypes[0];
                 return true;
             }
 
-            messageContractType = null;
+            contractType = null;
             return false;
         }
 
@@ -92,16 +94,17 @@ namespace MassTransit.Analyzers
             return false;
         }
 
-        public static bool IsReadOnlyList(this ITypeSymbol type, out ITypeSymbol typeArgument)
+        public static bool IsList(this ITypeSymbol type, out ITypeSymbol typeArgument)
         {
-            if (type.TypeKind == TypeKind.Interface &&
-                type.Name == "IReadOnlyList" &&
-                type.ContainingNamespace.ToString() == "System.Collections.Generic" &&
-                type is INamedTypeSymbol readOnlyListType &&
-                readOnlyListType.IsGenericType &&
-                readOnlyListType.TypeArguments.Length == 1)
+            if ((type.TypeKind == TypeKind.Class && type.Name == "List"
+                    || type.TypeKind == TypeKind.Interface && type.Name == "IReadOnlyList"
+                    || type.TypeKind == TypeKind.Interface && type.Name == "IList")
+                && type.ContainingNamespace.ToString() == "System.Collections.Generic"
+                && type is INamedTypeSymbol listType
+                && listType.IsGenericType
+                && listType.TypeArguments.Length == 1)
             {
-                typeArgument = readOnlyListType.TypeArguments[0];
+                typeArgument = listType.TypeArguments[0];
                 return true;
             }
 
@@ -109,20 +112,23 @@ namespace MassTransit.Analyzers
             return false;
         }
 
-        public static bool IsList(this ITypeSymbol type, out ITypeSymbol typeArgument)
+        public static bool IsDictionary(this ITypeSymbol type, out ITypeSymbol keyType, out ITypeSymbol valueType)
         {
-            if (type.TypeKind == TypeKind.Class &&
-                type.Name == "List" &&
-                type.ContainingNamespace.ToString() == "System.Collections.Generic" &&
-                type is INamedTypeSymbol listType &&
-                listType.IsGenericType &&
-                listType.TypeArguments.Length == 1)
+            if ((type.TypeKind == TypeKind.Class && type.Name == "Dictionary"
+                    || type.TypeKind == TypeKind.Interface && type.Name == "IReadOnlyDictionary"
+                    || type.TypeKind == TypeKind.Interface && type.Name == "IDictionary")
+                && type.ContainingNamespace.ToString() == "System.Collections.Generic"
+                && type is INamedTypeSymbol dictionaryType
+                && dictionaryType.IsGenericType
+                && dictionaryType.TypeArguments.Length == 2)
             {
-                typeArgument = listType.TypeArguments[0];
+                keyType = dictionaryType.TypeArguments[0];
+                valueType = dictionaryType.TypeArguments[1];
                 return true;
             }
 
-            typeArgument = null;
+            keyType = null;
+            valueType = null;
             return false;
         }
 
@@ -173,6 +179,53 @@ namespace MassTransit.Analyzers
 
             inVarType = null;
             return false;
+        }
+
+        public static IEnumerable<INamedTypeSymbol> GetAllInterfaces(this ITypeSymbol type)
+        {
+            ImmutableArray<INamedTypeSymbol> allInterfaces = type.AllInterfaces;
+            if (type is INamedTypeSymbol namedType && namedType.TypeKind == TypeKind.Interface && !allInterfaces.Contains(namedType))
+            {
+                var result = new List<INamedTypeSymbol>(allInterfaces.Length + 1) {namedType};
+                result.AddRange(allInterfaces);
+                return result;
+            }
+
+            return allInterfaces;
+        }
+
+        /// <summary>
+        /// Return the type, and any base types
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static IEnumerable<ITypeSymbol> GetAllTypes(this ITypeSymbol type)
+        {
+            var current = type;
+            while (current != null)
+            {
+                yield return current;
+                current = current.BaseType;
+            }
+        }
+
+        public static bool ImplementsInterface(this ITypeSymbol symbol, ITypeSymbol type)
+        {
+            return symbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, type));
+        }
+
+        public static bool InheritsFromType(this ITypeSymbol symbol, ITypeSymbol type)
+        {
+            return GetAllTypes(symbol).Any(x => SymbolEqualityComparer.Default.Equals(x, type));
+        }
+
+        public static bool ImplementsType(this ITypeSymbol type, ITypeSymbol otherType)
+        {
+            IEnumerable<ITypeSymbol> types = GetAllTypes(type);
+            IEnumerable<INamedTypeSymbol> interfaces = GetAllInterfaces(type);
+
+            return types.Any(baseType => SymbolEqualityComparer.Default.Equals(baseType, otherType))
+                || interfaces.Any(baseInterfaceType => SymbolEqualityComparer.Default.Equals(baseInterfaceType, otherType));
         }
     }
 }

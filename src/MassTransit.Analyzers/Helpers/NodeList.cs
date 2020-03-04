@@ -1,11 +1,12 @@
-using System.Collections.Generic;
-
 namespace MassTransit.Analyzers.Helpers
 {
+    using System.Collections.Generic;
+
+
     class NodeList<T>
     {
-        readonly NodeTable<T> _nodeTable;
         readonly IList<HashSet<int>> _nodes;
+        readonly NodeTable<T> _nodeTable;
 
         public NodeList(int capacity)
         {
@@ -15,11 +16,9 @@ namespace MassTransit.Analyzers.Helpers
 
         public void Add(T key, params T[] values)
         {
-            var hashSet = _nodes[Index(key) - 1];
-            for (int i = 0; i < values.Length; i++)
-            {
+            HashSet<int> hashSet = _nodes[Index(key) - 1];
+            for (var i = 0; i < values.Length; i++)
                 hashSet.Add(Index(values[i]));
-            }
         }
 
         public bool Contains(T key, T value)
@@ -34,7 +33,7 @@ namespace MassTransit.Analyzers.Helpers
         /// <returns>The index</returns>
         int Index(T key)
         {
-            int index = _nodeTable[key];
+            var index = _nodeTable[key];
 
             if (index <= _nodes.Count)
                 return index;
