@@ -1,3 +1,6 @@
+using System.Collections.Concurrent;
+using MassTransit.Analyzers.Helpers;
+
 namespace MassTransit.Analyzers
 {
     using System;
@@ -11,7 +14,7 @@ namespace MassTransit.Analyzers
 
 
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class MessageContractAnalyzerAnalyzer :
+    public class MessageContractAnalyzer :
         DiagnosticAnalyzer
     {
         public const string StructurallyCompatibleRuleId = "MCA0001";
@@ -41,6 +44,9 @@ namespace MassTransit.Analyzers
             Category, DiagnosticSeverity.Info, true,
             "Anonymous type misses properties that are in the message contract");
 
+        ConcurrentDictionary<SemanticModel, Lazy<TypeConversionHelper>> _typeConverterHelpers =
+            new ConcurrentDictionary<SemanticModel, Lazy<TypeConversionHelper>>();
+
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
             ImmutableArray.Create(StructurallyCompatibleRule, ValidMessageContractStructureRule, MissingPropertiesRule);
 
@@ -51,14 +57,18 @@ namespace MassTransit.Analyzers
 
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
+
             // TODO: Consider registering other actions that act on syntax instead of or in addition to symbols
             // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/Analyzer%20Actions%20Semantics.md for more information
-            context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.AnonymousObjectCreationExpression);
+            context.RegisterSyntaxNodeAction(AnalyzeAnonymousObjectCreationNode, SyntaxKind.AnonymousObjectCreationExpression);
         }
 
-        static void AnalyzeNode(SyntaxNodeAnalysisContext context)
+        void AnalyzeAnonymousObjectCreationNode(SyntaxNodeAnalysisContext context)
         {
-            var anonymousObject = (AnonymousObjectCreationExpressionSyntax)context.Node;
+            var typeConverterHelper =
+                _typeConverterHelpers.GetOrAdd(context.SemanticModel, model => new Lazy<TypeConversionHelper>(() => new TypeConversionHelper(model))).Value;
+
+            var anonymousObject = (AnonymousObjectCreationExpressionSyntax) context.Node;
 
             if (anonymousObject.Parent is ArgumentSyntax argumentSyntax &&
                 argumentSyntax.IsActivator(context.SemanticModel, out var typeArgument))
@@ -68,7 +78,7 @@ namespace MassTransit.Analyzers
                     var anonymousType = context.SemanticModel.GetTypeInfo(anonymousObject).Type;
 
                     var incompatibleProperties = new List<string>();
-                    if (!TypesAreStructurallyCompatible(anonymousType, messageContractType, string.Empty, incompatibleProperties))
+                    if (!TypesAreStructurallyCompatible(typeConverterHelper, anonymousType, messageContractType, string.Empty, incompatibleProperties))
                     {
                         var diagnostic = Diagnostic.Create(StructurallyCompatibleRule, anonymousType.Locations[0],
                             messageContractType.Name, string.Join(", ", incompatibleProperties));
@@ -91,7 +101,8 @@ namespace MassTransit.Analyzers
             }
         }
 
-        static bool TypesAreStructurallyCompatible(ITypeSymbol messageType, ITypeSymbol messageContractType, string path,
+        static bool TypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, ITypeSymbol messageType, ITypeSymbol messageContractType,
+            string path,
             ICollection<string> incompatibleProperties)
         {
             if (SymbolEqualityComparer.Default.Equals(messageType, messageContractType))
@@ -108,17 +119,19 @@ namespace MassTransit.Analyzers
 
                 if (messageContractProperty == null)
                 {
-                    incompatibleProperties.Add(Append(path, messageProperty.Name));
-                    result = false;
+                    if (!IsHeaderProperty(typeConverterHelper, messageProperty))
+                    {
+                        incompatibleProperties.Add(Append(path, messageProperty.Name));
+                        result = false;
+                    }
                 }
-                else if (!SymbolEqualityComparer.Default.Equals(messageProperty.Type, messageContractProperty.Type)
-                    && !(messageProperty.Type.IsInVar(out var inVarType) && SymbolEqualityComparer.Default.Equals(inVarType, messageContractProperty.Type)))
+                else if (!typeConverterHelper.CanConvert(messageContractProperty.Type, messageProperty.Type))
                 {
                     if (messageProperty.Type.IsAnonymousType)
                     {
                         if (messageContractProperty.Type.TypeKind == TypeKind.Interface)
                         {
-                            if (!TypesAreStructurallyCompatible(messageProperty.Type, messageContractProperty.Type,
+                            if (!TypesAreStructurallyCompatible(typeConverterHelper, messageProperty.Type, messageContractProperty.Type,
                                 Append(path, messageProperty.Name), incompatibleProperties))
                                 result = false;
                         }
@@ -129,19 +142,19 @@ namespace MassTransit.Analyzers
                         }
                     }
                     else if (messageProperty.Type.IsImmutableArray(out var messagePropertyTypeArgument) ||
-                        messageProperty.Type.IsReadOnlyList(out messagePropertyTypeArgument) ||
-                        messageProperty.Type.IsList(out messagePropertyTypeArgument) ||
-                        messageProperty.Type.IsArray(out messagePropertyTypeArgument))
+                             messageProperty.Type.IsReadOnlyList(out messagePropertyTypeArgument) ||
+                             messageProperty.Type.IsList(out messagePropertyTypeArgument) ||
+                             messageProperty.Type.IsArray(out messagePropertyTypeArgument))
                     {
                         if (messageContractProperty.Type.IsImmutableArray(out var messageContractPropertyTypeArgument) ||
                             messageContractProperty.Type.IsReadOnlyList(out messageContractPropertyTypeArgument) ||
                             messageContractProperty.Type.IsArray(out messageContractPropertyTypeArgument))
                         {
-                            if (!SymbolEqualityComparer.Default.Equals(messagePropertyTypeArgument, messageContractPropertyTypeArgument))
+                            if (!typeConverterHelper.CanConvert(messageContractPropertyTypeArgument, messagePropertyTypeArgument))
                             {
                                 if (messageContractPropertyTypeArgument.TypeKind == TypeKind.Interface)
                                 {
-                                    if (!TypesAreStructurallyCompatible(messagePropertyTypeArgument, messageContractPropertyTypeArgument,
+                                    if (!TypesAreStructurallyCompatible(typeConverterHelper, messagePropertyTypeArgument, messageContractPropertyTypeArgument,
                                         Append(path, messageProperty.Name), incompatibleProperties))
                                         result = false;
                                 }
@@ -169,6 +182,32 @@ namespace MassTransit.Analyzers
             return result;
         }
 
+        static bool IsHeaderProperty(TypeConversionHelper typeConverterHelper, IPropertySymbol messageProperty)
+        {
+            if (!messageProperty.Name.StartsWith("__"))
+                return false;
+
+            if (messageProperty.Name.StartsWith("__Header_"))
+                return true;
+
+            return messageProperty.Name switch
+            {
+                "__SourceAddress" => typeConverterHelper.CanConvert(typeof(Uri), messageProperty.Type),
+                "__DestinationAddress" => typeConverterHelper.CanConvert(typeof(Uri), messageProperty.Type),
+                "__ResponseAddress" => typeConverterHelper.CanConvert(typeof(Uri), messageProperty.Type),
+                "__FaultAddress" => typeConverterHelper.CanConvert(typeof(Uri), messageProperty.Type),
+                "__RequestId" => typeConverterHelper.CanConvert(typeof(Guid), messageProperty.Type),
+                "__MessageId" => typeConverterHelper.CanConvert(typeof(Guid), messageProperty.Type),
+                "__ConversationId" => typeConverterHelper.CanConvert(typeof(Guid), messageProperty.Type),
+                "__CorrelationId" => typeConverterHelper.CanConvert(typeof(Guid), messageProperty.Type),
+                "__InitiatorId" => typeConverterHelper.CanConvert(typeof(Guid), messageProperty.Type),
+                "__ScheduledMessageId" => typeConverterHelper.CanConvert(typeof(Guid), messageProperty.Type),
+                "__TimeToLive" => typeConverterHelper.CanConvert(typeof(TimeSpan), messageProperty.Type),
+                "__Durable" => typeConverterHelper.CanConvert(typeof(bool), messageProperty.Type),
+                _ => false
+            };
+        }
+
         static bool HasMissingProperties(ITypeSymbol messageType, ITypeSymbol messageContractType, string path, ICollection<string> missingProperties)
         {
             List<IPropertySymbol> messageContractProperties = GetMessageContractProperties(messageContractType);
@@ -186,8 +225,8 @@ namespace MassTransit.Analyzers
                     result = true;
                 }
                 else if (messageContractProperty.Type.IsImmutableArray(out var messageContractPropertyTypeArgument) ||
-                    messageContractProperty.Type.IsReadOnlyList(out messageContractPropertyTypeArgument) ||
-                    messageContractProperty.Type.IsArray(out messageContractPropertyTypeArgument))
+                         messageContractProperty.Type.IsReadOnlyList(out messageContractPropertyTypeArgument) ||
+                         messageContractProperty.Type.IsArray(out messageContractPropertyTypeArgument))
                 {
                     if (messageContractPropertyTypeArgument.TypeKind == TypeKind.Interface)
                     {
@@ -220,7 +259,7 @@ namespace MassTransit.Analyzers
 
         static List<IPropertySymbol> GetMessageProperties(ITypeSymbol messageType)
         {
-            return messageType.GetMembers().OfType<IPropertySymbol>().Where(p => !p.Name.StartsWith("__")).ToList();
+            return messageType.GetMembers().OfType<IPropertySymbol>().ToList();
         }
 
         static List<IPropertySymbol> GetMessageContractProperties(ITypeSymbol messageContractType)

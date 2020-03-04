@@ -39,18 +39,19 @@ namespace MassTransit.Analyzers
         static bool IsGenericInitializerMethod(IMethodSymbol method)
         {
             return method != null
-                && method.ContainingType.ContainingAssembly.Name == "MassTransit"
-                && (method.Name == "Publish" && method.ContainingType.Name == "IPublishEndpoint"
-                    || method.Name == "Send" && method.ContainingType.Name == "ISendEndpoint"
-                    || method.Name == "Create" && method.ContainingType.Name == "IRequestClient"
-                    || method.Name == "RespondAsync" && method.ContainingType.Name == "ConsumeContext");
+                   && method.ContainingType.ContainingAssembly.Name == "MassTransit"
+                   && (method.Name == "Publish" && method.ContainingType.Name == "IPublishEndpoint"
+                       || method.Name == "Send" && method.ContainingType.Name == "ISendEndpoint"
+                       || method.Name == "Create" && method.ContainingType.Name == "IRequestClient"
+                       || method.Name == "Init" && method.ContainingType.Name == "MessageInitializerExtensions"
+                       || method.Name == "RespondAsync" && method.ContainingType.Name == "ConsumeContext");
         }
 
         static bool IsInitializerMethod(IMethodSymbol method)
         {
             return method != null
-                && method.ContainingType.ContainingAssembly.Name == "MassTransit"
-                && method.Name == "Create" && method.ContainingType.Name == "IRequestClient";
+                   && method.ContainingType.ContainingAssembly.Name == "MassTransit"
+                   && method.ContainingType.Name == "IRequestClient" && (method.Name == "Create" || method.Name == "GetResponse");
         }
 
         public static bool HasMessageContract(this ITypeSymbol typeArgument, out ITypeSymbol messageContractType)

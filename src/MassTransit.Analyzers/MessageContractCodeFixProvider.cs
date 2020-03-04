@@ -15,13 +15,14 @@ namespace MassTransit.Analyzers
     using Microsoft.CodeAnalysis.Simplification;
 
 
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MessageContractAnalyzerCodeFixProvider))]
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MessageContractCodeFixProvider))]
     [Shared]
-    public class MessageContractAnalyzerCodeFixProvider : CodeFixProvider
+    public class MessageContractCodeFixProvider :
+        CodeFixProvider
     {
         const string Title = "Add missing properties";
 
-        public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(MessageContractAnalyzerAnalyzer.MissingPropertiesRuleId);
+        public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(MessageContractAnalyzer.MissingPropertiesRuleId);
 
         public sealed override FixAllProvider GetFixAllProvider()
         {

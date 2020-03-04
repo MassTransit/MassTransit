@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../netfx.props"/>
-  <Import Project="../signing.props"/>
+  <Import Project="../netfx.props" />
+  <Import Project="../signing.props" />
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -19,14 +19,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.8" PrivateAssets="all"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.4.0" PrivateAssets="all"/>
-    <PackageReference Update="NETStandard.Library" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.8" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.4.0" PrivateAssets="all" />
+    <PackageReference Update="NETStandard.Library" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="tools\*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath=""/>
-    <None Include="$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    <None Update="tools\*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath="" />
+    <None Include="$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
 </Project>
