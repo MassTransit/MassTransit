@@ -21,9 +21,6 @@ namespace MassTransit.Context
         static LogContext()
         {
             _current = new AsyncLocal<ILogContext>();
-
-            Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
-            Activity.ForceDefaultIdFormat = true;
         }
 
         /// <summary>
