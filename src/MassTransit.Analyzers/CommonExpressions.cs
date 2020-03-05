@@ -3,12 +3,52 @@ namespace MassTransit.Analyzers
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Linq;
+    using System.Threading.Tasks;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 
     public static class CommonExpressions
     {
+        static readonly HashSet<string> _producerMethods = InitializeProducerMethods();
+        static readonly string _taskNamespace = typeof(Task).Namespace;
+
+        static HashSet<string> InitializeProducerMethods()
+        {
+            return new HashSet<string>
+            {
+                "MassTransit.ISendEndpoint.Send",
+                "MassTransit.IPublishEndpoint.Publish",
+                "MassTransit.ConsumeContext.RespondAsync",
+                "MassTransit.ConsumeContextExtensions.Forward",
+                "MassTransit.ConsumeContextSelfSchedulerExtensions.ScheduleSend",
+                "MassTransit.EndpointConventionExtensions.Send",
+                "MassTransit.IRequestClient.Create",
+                "MassTransit.IRequestClient.Request",
+                "MassTransit.IRequestClient.GetResponse",
+                "MassTransit.MessageInitializerExtensions.Init",
+                "MassTransit.PublishContextExecuteExtensions.Publish",
+                "MassTransit.RequestHandle.GetResponse",
+                "MassTransit.PublishEndpointRecurringSchedulerExtensions.ScheduleRecurringSend",
+                "MassTransit.PublishEndpointSchedulerExtensions.ScheduleSend",
+                "MassTransit.RedeliverExtensions.Redeliver",
+                "MassTransit.RequestClientExtensions.Request",
+                "MassTransit.RequestExtensions.Request",
+                "MassTransit.RespondAsyncExecuteExtensions.RespondAsync",
+                "MassTransit.SendContextExecuteExtensions.Send",
+                "MassTransit.SendEndpointExtensions.Send",
+                "MassTransit.SendEndpointRecurringSchedulerExtensions.ScheduleRecurringSend",
+                "MassTransit.SendEndpointSchedulerExtensions.ScheduleSend",
+                "MassTransit.TimeSpanContextScheduleExtensions.ScheduleSend",
+                "MassTransit.TimeSpanScheduleExtensions.ScheduleSend"
+            };
+        }
+
+        public static bool IsProducerMethod(this IMethodSymbol method)
+        {
+            return _producerMethods.Contains($"{method.ContainingNamespace}.{method.ContainingType.Name}.{method.Name}");
+        }
+
         public static bool IsActivator(this ArgumentSyntax argumentSyntax, SemanticModel semanticModel, out ITypeSymbol typeArgument)
         {
             if (argumentSyntax != null
@@ -16,18 +56,16 @@ namespace MassTransit.Analyzers
                 && argumentListSyntax.Parent is InvocationExpressionSyntax invocationExpressionSyntax
                 && invocationExpressionSyntax.Expression is MemberAccessExpressionSyntax memberAccessExpressionSyntax
                 && semanticModel.GetSymbolInfo(memberAccessExpressionSyntax).Symbol is IMethodSymbol method
+                && IsProducerMethod(method)
                 && method.Parameters[0].Type.SpecialType == SpecialType.System_Object)
             {
-                if (method.TypeArguments.Length == 1
-                    && IsGenericInitializerMethod(method))
+                if (method.TypeArguments.Length == 1)
                 {
                     typeArgument = method.TypeArguments[0];
                     return true;
                 }
 
-                if (method.ContainingType.IsGenericType
-                    && method.ContainingType.TypeArguments.Length == 1
-                    && IsInitializerMethod(method))
+                if (method.ContainingType.IsGenericType && method.ContainingType.TypeArguments.Length == 1)
                 {
                     typeArgument = method.ContainingType.TypeArguments[0];
                     return true;
@@ -36,24 +74,6 @@ namespace MassTransit.Analyzers
 
             typeArgument = null;
             return false;
-        }
-
-        static bool IsGenericInitializerMethod(IMethodSymbol method)
-        {
-            return method != null
-                && method.ContainingType.ContainingAssembly.Name == "MassTransit"
-                && (method.Name == "Publish" && method.ContainingType.Name == "IPublishEndpoint"
-                    || method.Name == "Send" && method.ContainingType.Name == "ISendEndpoint"
-                    || method.Name == "Create" && method.ContainingType.Name == "IRequestClient"
-                    || method.Name == "Init" && method.ContainingType.Name == "MessageInitializerExtensions"
-                    || method.Name == "RespondAsync" && method.ContainingType.Name == "ConsumeContext");
-        }
-
-        static bool IsInitializerMethod(IMethodSymbol method)
-        {
-            return method != null
-                && method.ContainingType.ContainingAssembly.Name == "MassTransit"
-                && method.ContainingType.Name == "IRequestClient" && (method.Name == "Create" || method.Name == "GetResponse");
         }
 
         public static bool HasMessageContract(this ITypeSymbol typeArgument, out ITypeSymbol contractType)
@@ -179,6 +199,11 @@ namespace MassTransit.Analyzers
 
             inVarType = null;
             return false;
+        }
+
+        public static bool ReturnsTask(this IMethodSymbol method)
+        {
+            return method.ReturnType.Name == nameof(Task) && method.ReturnType.ContainingNamespace.ToString() == _taskNamespace;
         }
 
         public static IEnumerable<INamedTypeSymbol> GetAllInterfaces(this ITypeSymbol type)

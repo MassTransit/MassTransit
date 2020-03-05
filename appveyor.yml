@@ -1,4 +1,4 @@
-version: 6.2.1.{build}
+version: 6.2.2.{build}
 
 branches:
   only:
@@ -12,6 +12,7 @@ skip_commits:
     - docs/**/*
     - package.json
     - docs.yml
+    - readme.md
 
 image:
   - Visual Studio 2019

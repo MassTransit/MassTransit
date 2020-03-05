@@ -192,6 +192,31 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
+        [Test]
+        public void Calling_Create()
+        {
+            var test = Usings + MessageContracts + @"
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static async Task Main()
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+
+            var client = bus.CreateRequestClient<SubmitOrder>();
+            client.Create(new
+            {
+                Id = NewId.NextGuid(),
+                CustomerId = ""427"",
+            });
+        }
+    }
+}
+";
+            VerifyCSharpDiagnostic(test);
+        }
+
         protected override CodeFixProvider GetCSharpCodeFixProvider()
         {
             return new MessageContractCodeFixProvider();
