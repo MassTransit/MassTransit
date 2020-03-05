@@ -52,7 +52,7 @@ namespace MassTransit.Pipeline.Filters
             {
                 await Task.Yield();
 
-                await _instancePipe.Send(context.PushConsumer(_instance)).ConfigureAwait(false);
+                await _instancePipe.Send(new ConsumerConsumeContextScope<TConsumer, TMessage>(context, _instance)).ConfigureAwait(false);
 
                 await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TConsumer>.ShortName).ConfigureAwait(false);
 

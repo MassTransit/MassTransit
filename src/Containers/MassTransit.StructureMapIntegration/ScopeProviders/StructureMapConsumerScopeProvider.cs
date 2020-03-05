@@ -7,7 +7,6 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
     using Scoping;
     using Scoping.ConsumerContexts;
     using StructureMap;
-    using Util;
 
 
     public class StructureMapConsumerScopeProvider :
@@ -72,7 +71,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumer(consumer);
+                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer);
 
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext);
             }
@@ -84,7 +83,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, nestedContainer);
+                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer, nestedContainer);
 
                 return new CreatedConsumerScopeContext<IContainer, TConsumer, T>(nestedContainer, consumerContext);
             }

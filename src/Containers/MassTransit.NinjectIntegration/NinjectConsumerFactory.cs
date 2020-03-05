@@ -1,10 +1,10 @@
 namespace MassTransit.NinjectIntegration
 {
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
     using Metadata;
     using Ninject;
-    using Util;
 
 
     public class NinjectConsumerFactory<TConsumer> :
@@ -27,7 +27,7 @@ namespace MassTransit.NinjectIntegration
 
             try
             {
-                await next.Send(context.PushConsumer(consumer)).ConfigureAwait(false);
+                await next.Send(new ConsumerConsumeContextScope<TConsumer, T>(context, consumer)).ConfigureAwait(false);
             }
             finally
             {

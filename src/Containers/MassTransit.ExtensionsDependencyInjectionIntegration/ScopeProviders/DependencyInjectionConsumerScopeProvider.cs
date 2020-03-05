@@ -7,7 +7,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
     using Microsoft.Extensions.DependencyInjection;
     using Scoping;
     using Scoping.ConsumerContexts;
-    using Util;
 
 
     public class DependencyInjectionConsumerScopeProvider :
@@ -64,7 +63,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumer(consumer);
+                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer);
 
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext);
             }
@@ -81,7 +80,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, serviceScope, serviceScope.ServiceProvider);
+                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer, serviceScope, serviceScope.ServiceProvider);
 
                 return new CreatedConsumerScopeContext<IServiceScope, TConsumer, T>(serviceScope, consumerContext);
             }

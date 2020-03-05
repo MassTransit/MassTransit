@@ -8,7 +8,6 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
     using Metadata;
     using Scoping;
     using Scoping.ConsumerContexts;
-    using Util;
 
 
     public class WindsorConsumerScopeProvider :
@@ -66,7 +65,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumer(consumer);
+                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer);
 
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext, ReleaseComponent);
             }
@@ -78,7 +77,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, _kernel);
+                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer, _kernel);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(consumerContext);
