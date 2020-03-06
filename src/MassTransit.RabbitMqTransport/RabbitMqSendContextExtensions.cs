@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit
+﻿namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
@@ -59,6 +47,20 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Sets the priority of a message sent to the broker
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="priority"></param>
+        public static bool TrySetPriority(this SendContext context, byte priority)
+        {
+            if (!context.TryGetPayload(out RabbitMqSendContext sendContext))
+                return false;
+
+            sendContext.BasicProperties.Priority = priority;
+            return true;
+        }
+
+        /// <summary>
         /// Sets whether the send should wait for the ack from the broker, or if it should
         /// return immediately after the message is sent by the client.
         /// </summary>
@@ -73,6 +75,21 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Sets whether the send should wait for the ack from the broker, or if it should
+        /// return immediately after the message is sent by the client.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="awaitAck"></param>
+        public static bool TrySetAwaitAck(this SendContext context, bool awaitAck)
+        {
+            if (!context.TryGetPayload(out RabbitMqSendContext sendContext))
+                return false;
+
+            sendContext.AwaitAck = awaitAck;
+            return true;
+        }
+
+        /// <summary>
         /// Sets the routing key for this message
         /// </summary>
         /// <param name="context"></param>
@@ -83,6 +100,20 @@ namespace MassTransit
                 throw new ArgumentException("The RabbitMqSendContext was not available");
 
             sendContext.RoutingKey = routingKey;
+        }
+
+        /// <summary>
+        /// Sets the routing key for this message
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="routingKey">The routing key for this message</param>
+        public static bool TrySetRoutingKey(this SendContext context, string routingKey)
+        {
+            if (!context.TryGetPayload(out RabbitMqSendContext sendContext))
+                return false;
+
+            sendContext.RoutingKey = routingKey;
+            return true;
         }
     }
 }
