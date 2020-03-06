@@ -46,3 +46,16 @@ public class ScheduleNotificationConsumer :
 This will schedule the message to be delivered to the consumer endpoint at the specified time.
 
 > If the message should be sent to a different endpoint, the destination address can be specified as an additional parameter.
+
+### Scheduling without a consumer
+
+To schedule a message outside of a consumer, an instance of the message scheduler must be created (using `IBus`, or more specifically `ISendEndpointProvider` which is included in `IBus`).
+
+```cs
+var busControl = Bus.Factory.CreateUsingAzureServiceBus(...);
+await busControl.StartAsync();
+
+IMessageScheduler scheduler = new MessageScheduler(new ServiceBusScheduleMessageProvider(busControl));
+
+await scheduler.ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
+```

@@ -133,7 +133,6 @@ module.exports = {
                   '/advanced/middleware/receive',
                   '/advanced/middleware/circuit-breaker',
                   '/advanced/middleware/rate-limiter',
-                  '/advanced/middleware/latest',
                   '/advanced/middleware/transactions',
                   '/advanced/middleware/custom'
                 ]
