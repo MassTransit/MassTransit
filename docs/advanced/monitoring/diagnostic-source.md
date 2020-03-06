@@ -21,9 +21,12 @@ public static async Task Main(string[] args)
 }
 ```
 
-That's it! Magic is done. Now you need to choose your Trace provider (for example: [Application Insights](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-create-new-resource#create-an-application-insights-resource-1), [OpenTrace](https://github.com/opentracing-contrib/csharp-netcore)) and configure to read metrics from your `DiagnosticSource`.
+That's it! Magic is done. Now you need to choose your Trace provider (for example: [Application Insights](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-create-new-resource#create-an-application-insights-resource-1), [OpenTracing](https://github.com/opentracing-contrib/csharp-netcore)) and configure to read metrics from your `DiagnosticSource`.
 
-`OpenTrace` subscribes to every diagnostic source under the hood it doesn't require any interaction from your side.
+The `OpenTracing.Contrib.NetCore` library subscribes to every diagnostic source under the hood it doesn't require any interaction from your side,
+however it neither propagates the remote context nor injects the current context to message headers, so the trace will be
+limited to local operations. Also, it won't use `TraceId` and `SpanId` from the `Activity` even when you set the activity default id format to `W3C`,
+those ids will be random and cannot be associated with `ActivityId`.
 
 To enable `Application Insights`, add it to the `Startup`:
 
@@ -35,6 +38,38 @@ public void ConfigureServices(IServiceCollection services)
     services.AddApplicationInsightsTelemetry("InstrumentationKey");
 }
 ```
+
+### Available diagnostic events
+
+You can subscribe to different types of diagnostic events produced by MassTransit. 
+Below is the list of names of MassTransit diagnostic sources. Keep in mind that each
+operation produces `Start` and `Stop` events using the `Activity`. So, when a message is
+consumed, you get `MassTransit.Consumer.Consume.Start` event before the consumer is executed and
+`MassTransit.Consumer.Consume.Stop` after the message is consumed.
+
+#### Transport
+
+- MassTransit.Transport.Send
+- MassTransit.Transport.Receive
+
+#### Consumer
+
+- MassTransit.Consumer.Consume
+- MassTransit.Consumer.Handle
+
+#### Saga
+
+- MassTransit.Saga.Send
+- MassTransit.Saga.SendQuery
+- MassTransit.Saga.Initiate
+- MassTransit.Saga.Orchestrate
+- MassTransit.Saga.Observe
+- MassTransit.Saga.RaiseEvent
+
+#### Courier
+
+- MassTransit.Activity.Execute
+- MassTransit.Activity.Compensate
 
 ### Additional resources
 
