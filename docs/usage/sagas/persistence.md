@@ -33,7 +33,7 @@ container.AddMassTransit(cfg =>
 
 The saga repository is always registered with a singleton container lifecycle.
 
-If the container registration is not be used, the InMemory saga repository can be created manually and specified on receive endpoint.
+If the container registration is not being used, the InMemory saga repository can be created manually and specified on receive endpoint.
 
 ```cs
 var orderStateMachine = new OrderStateMachine();
