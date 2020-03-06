@@ -1,8 +1,9 @@
 ﻿namespace MassTransit
 {
-    using MassTransit.Transactions;
     using Microsoft.Extensions.Logging;
     using StructureMapIntegration;
+    using Transactions;
+
 
     public static class StructureMapTransactionOutboxExtensions
     {

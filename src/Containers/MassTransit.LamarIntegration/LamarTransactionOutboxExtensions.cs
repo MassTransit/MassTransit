@@ -2,8 +2,8 @@ namespace MassTransit
 {
     using Lamar;
     using LamarIntegration;
-    using MassTransit.Transactions;
     using Microsoft.Extensions.Logging;
+    using Transactions;
 
 
     public static class LamarTransactionOutboxExtensions
