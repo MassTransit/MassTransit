@@ -44,7 +44,7 @@ namespace MassTransit.Analyzers
             {
                 var methodSymbol = (IMethodSymbol)symbol.Symbol;
 
-                if (methodSymbol.IsProducerMethod() && methodSymbol.ReturnsTask())
+                if (methodSymbol.IsProducerMethod(out _) && methodSymbol.ReturnsTask())
                 {
                     if (invocationExpression.Parent is ExpressionStatementSyntax)
                     {

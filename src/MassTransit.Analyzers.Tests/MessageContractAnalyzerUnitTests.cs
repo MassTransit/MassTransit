@@ -62,6 +62,28 @@ namespace ConsoleApplication1
 }
 ";
 
+        readonly string GenericMessageContracts = @"
+namespace ConsoleApplication1
+{
+    public interface Command
+    {
+    }
+
+    public interface Up<T>
+        where T : class
+    {
+        Guid InstanceId { get; }
+        Uri InstanceAddress { get; }
+    }
+
+    public interface Link<T>
+        where T : class
+    {
+        Guid ClientId { get; }
+    }
+}
+";
+
         readonly string MessageContractsDifferentNamespace = @"
 namespace ConsoleApplication1.Messages
 {
@@ -257,6 +279,64 @@ namespace ConsoleApplication1
             };
 
             VerifyCSharpDiagnostic(test, expected);
+        }
+
+        [Test]
+        public void WhenCreateRequestTypesAreStructurallyCompatibleAndMissingProperty_ShouldHaveTheRightDiagnostic()
+        {
+            var test = Usings + GenericMessageContracts + @"
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static async Task Main<TMessage>()
+            where TMessage : class
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+            var requestClient = bus.CreateRequestClient<Link<TMessage>>();
+
+            var response = await requestClient.GetResponse<Up<TMessage>>(new{});
+            var result = response.Message;
+        }
+    }
+}
+";
+            var expected = new DiagnosticResult
+            {
+                Id = "MCA0003",
+                Message = "Anonymous type is missing properties that are in the message contract 'Link'. The following properties are missing: ClientId",
+                Severity = DiagnosticSeverity.Info,
+                Locations =
+                    new[] {
+                            new DiagnosticResultLocation("Test0.cs", 38, 74)
+                        }
+            };
+
+            VerifyCSharpDiagnostic(test, expected);
+        }
+
+        [Test]
+        public void WhenCreateRequestTypesAreStructurallyCompatibleAndMissingProperty_ShouldHaveTheNoDiagnostic()
+        {
+            var test = Usings + GenericMessageContracts + @"
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static async Task Main<TMessage>()
+            where TMessage : class
+        {
+            Guid ClientId = NewId.NextGuid();
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+            var requestClient = bus.CreateRequestClient<Link<TMessage>>();
+
+            var response = await requestClient.GetResponse<Up<TMessage>>(new{ClientId});
+            var result = response.Message;
+        }
+    }
+}
+";
+            VerifyCSharpDiagnostic(test);
         }
 
         [Test]

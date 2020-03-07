@@ -5,8 +5,6 @@
     using Context;
     using MassTransit.Configuration;
     using Microsoft.Azure.WebJobs;
-    using Topology;
-    using Transports;
 
 
     public class WebJobMessageReceiverEndpointContext :
@@ -14,7 +12,6 @@
     {
         readonly IBinder _binder;
         readonly CancellationToken _cancellationToken;
-        readonly IPublishTopology _publishTopology;
 
         public WebJobMessageReceiverEndpointContext(IReceiveEndpointConfiguration configuration, Uri inputAddress, IBinder binder,
             CancellationToken cancellationToken)
@@ -24,23 +21,6 @@
             _cancellationToken = cancellationToken;
 
             InputAddress = inputAddress ?? configuration.InputAddress;
-
-            _publishTopology = configuration.Topology.Publish;
-        }
-
-        protected override ISendEndpointProvider CreateSendEndpointProvider()
-        {
-            ISendTransportProvider sendTransportProvider = new ServiceBusAttributeSendTransportProvider(_binder, _cancellationToken);
-
-            return new SendEndpointProvider(sendTransportProvider, SendObservers, Serializer, InputAddress, SendPipe);
-        }
-
-        protected override IPublishEndpointProvider CreatePublishEndpointProvider()
-        {
-            var publishTransportProvider = new ServiceBusAttributePublishTransportProvider(_binder, _cancellationToken);
-
-            return new PublishEndpointProvider(publishTransportProvider, HostAddress, PublishObservers, Serializer, InputAddress, PublishPipe,
-                _publishTopology);
         }
 
         protected override ISendTransportProvider CreateSendTransportProvider()
