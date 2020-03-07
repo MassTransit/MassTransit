@@ -20,7 +20,7 @@ namespace MassTransit
         IBus
     {
         /// <summary>
-        /// Starts the bus (assuming the battery isn't dead). Once the bus has been started, it cannot be started again, even after is has been stopped.
+        /// Starts the bus (assuming the battery isn't dead). Once the bus has been started it cannot be started again, even after it has been stopped.
         /// </summary>
         /// <returns>The BusHandle for the started bus. This is no longer needed, as calling Stop on the IBusControl will stop the bus equally well.</returns>
         Task<BusHandle> StartAsync(CancellationToken cancellationToken = default);
