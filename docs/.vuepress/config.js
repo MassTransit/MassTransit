@@ -137,6 +137,14 @@ module.exports = {
                   '/advanced/middleware/custom'
                 ]
               },
+              {
+                title: 'Conductor',
+                path: '/advanced/conductor/',
+                collapsable: true,
+                children: [
+                  '/advanced/conductor/configuration'
+                ]
+              },
               '/usage/mediator',
               '/usage/message-data',
               {
