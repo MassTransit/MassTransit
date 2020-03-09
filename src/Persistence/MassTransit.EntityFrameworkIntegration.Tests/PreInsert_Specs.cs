@@ -110,7 +110,7 @@
         }
 
 
-        [TestFixture]
+        [TestFixture, Explicit]
         public class When_pre_inserting_the_state_machine_instance_using_ef :
             InMemoryTestFixture
         {
