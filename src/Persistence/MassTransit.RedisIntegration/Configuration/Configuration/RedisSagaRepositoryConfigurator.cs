@@ -32,6 +32,7 @@ namespace MassTransit.RedisIntegration.Configuration
         public string LockSuffix { get; set; }
         public TimeSpan LockTimeout { get; set; }
         public TimeSpan LockRetryTimeout { get; set; }
+        public TimeSpan? Expiry { get; set; }
 
         public void DatabaseConfiguration(string configuration)
         {
@@ -74,7 +75,7 @@ namespace MassTransit.RedisIntegration.Configuration
             where T : class, IVersionedSaga
         {
             configurator.RegisterSingleInstance(_connectionFactory);
-            configurator.RegisterSingleInstance(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _databaseSelector));
+            configurator.RegisterSingleInstance(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _databaseSelector, Expiry));
             configurator.RegisterSagaRepository<T, DatabaseContext<T>, RedisSagaConsumeContextFactory<T>, RedisSagaRepositoryContextFactory<T>>();
         }
 

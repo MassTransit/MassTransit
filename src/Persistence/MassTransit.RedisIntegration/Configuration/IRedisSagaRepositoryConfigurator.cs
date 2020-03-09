@@ -17,6 +17,8 @@ namespace MassTransit.RedisIntegration
 
         TimeSpan LockRetryTimeout { set; }
 
+        TimeSpan? Expiry { set; }
+
         /// <summary>
         /// Set the database factory using configuration, which caches a <see cref="ConnectionMultiplexer"/> under the hood.
         /// </summary>
