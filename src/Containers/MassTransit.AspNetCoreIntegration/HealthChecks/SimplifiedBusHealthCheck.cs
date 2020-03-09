@@ -1,10 +1,12 @@
 namespace MassTransit.AspNetCoreIntegration.HealthChecks
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 
+    [Obsolete("Use AddMassTransitHostedService, which requires registered the proper bus health check")]
     public class SimplifiedBusHealthCheck :
         IHealthCheck
     {
@@ -17,9 +19,14 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
                 : new HealthCheckResult(context.Registration.FailureStatus, "Bus not yet started"));
         }
 
-        public void ReportBusStarted()
+        internal void ReportBusStarted()
         {
             _busStarted = true;
+        }
+
+        internal void ReportBusStopped()
+        {
+            _busStarted = false;
         }
     }
 }

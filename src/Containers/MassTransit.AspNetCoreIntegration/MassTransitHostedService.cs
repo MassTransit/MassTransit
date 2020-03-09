@@ -1,5 +1,6 @@
 namespace MassTransit.AspNetCoreIntegration
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using HealthChecks;
@@ -13,10 +14,17 @@ namespace MassTransit.AspNetCoreIntegration
         readonly SimplifiedBusHealthCheck _simplifiedBusCheck;
         readonly ReceiveEndpointHealthCheck _receiveEndpointCheck;
 
+        [Obsolete("Use the constructor that doesn't require SimplifiedBusHealthCheck")]
         public MassTransitHostedService(IBusControl bus, SimplifiedBusHealthCheck simplifiedBusCheck, ReceiveEndpointHealthCheck receiveEndpointCheck)
         {
             _bus = bus;
             _simplifiedBusCheck = simplifiedBusCheck;
+            _receiveEndpointCheck = receiveEndpointCheck;
+        }
+
+        public MassTransitHostedService(IBusControl bus, ReceiveEndpointHealthCheck receiveEndpointCheck)
+        {
+            _bus = bus;
             _receiveEndpointCheck = receiveEndpointCheck;
         }
 
@@ -26,12 +34,14 @@ namespace MassTransit.AspNetCoreIntegration
 
             await _bus.StartAsync(cancellationToken).ConfigureAwait(false);
 
-            _simplifiedBusCheck.ReportBusStarted();
+            _simplifiedBusCheck?.ReportBusStarted();
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            return _bus.StopAsync(cancellationToken);
+            await _bus.StopAsync(cancellationToken).ConfigureAwait(false);
+
+            _simplifiedBusCheck?.ReportBusStopped();
         }
     }
 }

@@ -18,6 +18,7 @@
         /// <param name="createBus">Bus factory that loads consumers and sagas from IServiceProvider</param>
         /// <param name="configureHealthChecks">Optional, allows you to specify custom health check names</param>
         /// <returns></returns>
+        [Obsolete("Use AddMassTransitHostedService")]
         public static IServiceCollection AddMassTransit(this IServiceCollection services, Func<IServiceProvider, IBusControl> createBus,
             Action<HealthCheckOptions> configureHealthChecks = null)
         {
@@ -40,6 +41,7 @@
         /// <param name="configureHealthChecks">Optional, allows you to specify custom health check names</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
+        [Obsolete("Use AddMassTransitHostedService")]
         public static IServiceCollection AddMassTransit(this IServiceCollection services, Func<IServiceProvider, IBusControl> createBus,
             Action<IServiceCollectionConfigurator> configure, Action<HealthCheckOptions> configureHealthChecks = null)
         {
@@ -66,6 +68,7 @@
         /// <param name="loggerFactory">Optional: ASP.NET Core logger factory instance</param>
         /// <param name="configureHealthChecks">Optional, allows you to specify custom health check names</param>
         /// <returns></returns>
+        [Obsolete("Use AddMassTransitHostedService")]
         public static IServiceCollection AddMassTransit(this IServiceCollection services, IBusControl bus, ILoggerFactory loggerFactory = null,
             Action<HealthCheckOptions> configureHealthChecks = null)
         {
