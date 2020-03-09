@@ -1,8 +1,8 @@
 ﻿namespace MassTransit
 {
     using Castle.MicroKernel.Registration;
-    using MassTransit.Transactions;
     using Microsoft.Extensions.Logging;
+    using Transactions;
     using WindsorIntegration;
 
 

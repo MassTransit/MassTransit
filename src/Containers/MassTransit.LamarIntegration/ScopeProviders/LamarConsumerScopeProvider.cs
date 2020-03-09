@@ -6,7 +6,6 @@ namespace MassTransit.LamarIntegration.ScopeProviders
     using Metadata;
     using Scoping;
     using Scoping.ConsumerContexts;
-    using Util;
 
 
     public class LamarConsumerScopeProvider :
@@ -59,7 +58,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumer(consumer);
+                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer);
 
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext);
             }
@@ -71,7 +70,7 @@ namespace MassTransit.LamarIntegration.ScopeProviders
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                ConsumerConsumeContext<TConsumer, T> consumerContext = context.PushConsumerScope(consumer, nestedContainer);
+                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer, nestedContainer);
 
                 return new CreatedConsumerScopeContext<INestedContainer, TConsumer, T>(nestedContainer, consumerContext);
             }

@@ -43,7 +43,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton<ISendEndpointProvider>(provider => provider.GetRequiredService<IBusControl>());
             Collection.AddSingleton<IPublishEndpoint>(provider => provider.GetRequiredService<IBusControl>());
 
-            Collection.AddSingleton(context => context.GetRequiredService<IBus>().CreateClientFactory());
+            Collection.AddSingleton(provider => ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>()));
         }
 
         public void AddMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure = null)

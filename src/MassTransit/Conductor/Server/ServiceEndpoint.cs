@@ -1,163 +1,176 @@
 namespace MassTransit.Conductor.Server
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
+    using Consumers;
     using Context;
+    using Contexts;
     using Contracts;
     using GreenPipes;
-    using GreenPipes.Util;
-    using Observers;
+    using GreenPipes.Internals.Extensions;
+    using GreenPipes.Specifications;
+    using Pipeline;
+    using Util;
 
 
     public class ServiceEndpoint :
         IServiceEndpoint
     {
         readonly IServiceInstance _instance;
-        readonly Lazy<EndpointInfo> _endpointInfo;
-        readonly IList<ConnectHandle> _configurationHandles;
-        readonly Lazy<Uri> _instanceServiceEndpointAddress;
-        readonly IDictionary<Type, IMessageEndpoint> _messageTypes;
-        readonly Lazy<Uri> _serviceEndpointAddress;
+        readonly TaskCompletionSource<InstanceInfo> _instanceInfo;
+        readonly TaskCompletionSource<IPublishEndpointProvider> _publishEndpointProvider;
+        readonly TaskCompletionSource<ISendEndpointProvider> _sendEndpointProvider;
+        readonly Lazy<Uri> _serviceAddress;
+        readonly TaskCompletionSource<ServiceInfo> _serviceInfo;
 
-        public ServiceEndpoint(IServiceInstance instance, IReceiveEndpointConfigurator endpointConfigurator,
-            IReceiveEndpointConfigurator instanceEndpointConfigurator)
+        public ServiceEndpoint(IServiceInstance instance, IReceiveEndpointConfigurator endpointConfigurator, IServiceEndpointClientCache clientCache)
         {
             _instance = instance;
 
-            _configurationHandles = new List<ConnectHandle>();
-            _messageTypes = new Dictionary<Type, IMessageEndpoint>();
+            endpointConfigurator.ConnectReceiveEndpointObserver(new ServiceEndpointObserver(this));
 
-            endpointConfigurator.ConnectReceiveEndpointObserver(new UpDownObserver(this));
+            _sendEndpointProvider = TaskUtil.GetTask<ISendEndpointProvider>();
+            _publishEndpointProvider = TaskUtil.GetTask<IPublishEndpointProvider>();
 
-            _serviceEndpointAddress = new Lazy<Uri>(() => endpointConfigurator.InputAddress);
-            _instanceServiceEndpointAddress = new Lazy<Uri>(() => instanceEndpointConfigurator.InputAddress);
-            _endpointInfo = new Lazy<EndpointInfo>(CreateEndpointInfo);
-        }
+            _serviceAddress = new Lazy<Uri>(() => endpointConfigurator.InputAddress);
+            _serviceInfo = TaskUtil.GetTask<ServiceInfo>();
+            _instanceInfo = TaskUtil.GetTask<InstanceInfo>();
 
-        public Uri ServiceAddress => _serviceEndpointAddress.Value;
-        public EndpointInfo EndpointInfo => _endpointInfo.Value;
-
-        public IMessageEndpoint<T> GetMessageEndpoint<T>()
-            where T : class
-        {
-            if (!_messageTypes.TryGetValue(typeof(T), out var endpoint))
-            {
-                var messageEndpoint = new MessageEndpoint<T>(this);
-
-                _messageTypes.Add(typeof(T), messageEndpoint);
-
-                _instance.ConfigureMessageEndpoint(messageEndpoint);
-
-                return messageEndpoint;
-            }
-
-            return endpoint as IMessageEndpoint<T>;
-        }
-
-        public void ConnectConfigurationObserver(IConsumePipeConfigurator configurator)
-        {
-            var configurationObserver = new ServiceEndpointConfigurationObserver(configurator, this);
-
-            _configurationHandles.Add(configurator.ConnectConsumerConfigurationObserver(configurationObserver));
-            _configurationHandles.Add(configurator.ConnectHandlerConfigurationObserver(configurationObserver));
-            _configurationHandles.Add(configurator.ConnectSagaConfigurationObserver(configurationObserver));
-            _configurationHandles.Add(configurator.ConnectActivityConfigurationObserver(configurationObserver));
-        }
-
-        EndpointInfo CreateEndpointInfo()
-        {
-            return new Endpoint
-            {
-                EndpointId = _instance.EndpointId,
-                Started = Started ?? DateTime.UtcNow,
-                InstanceAddress = _instance.InstanceAddress,
-                EndpointAddress = _instanceServiceEndpointAddress.Value
-            };
+            ClientCache = clientCache;
         }
 
         DateTime? Started { get; set; }
 
-        void DisconnectConfigurationObservers()
-        {
-            foreach (var handle in _configurationHandles)
-            {
-                handle.Disconnect();
-            }
+        IServiceEndpointClientCache ClientCache { get; }
+        public Task<InstanceInfo> InstanceInfo => _instanceInfo.Task;
+        public Task<ServiceInfo> ServiceInfo => _serviceInfo.Task;
 
-            _configurationHandles.Clear();
+        public void ConfigureServiceEndpoint<T>(IConsumePipeConfigurator configurator)
+            where T : class
+        {
+            var messageCache = ClientCache.GetMessageCache<T>();
+
+            IFilter<ConsumeContext<T>> filter = new ServiceEndpointMessageFilter<T>(messageCache);
+
+            configurator.AddPipeSpecification(new FilterPipeSpecification<ConsumeContext<T>>(filter));
         }
 
-        async Task NotifyUp()
+        public void ConfigureControlEndpoint<T>(IReceiveEndpointConfigurator configurator)
+            where T : class
         {
+            var messageCache = ClientCache.GetMessageCache<T>();
+
+            configurator.Consumer(new LinkConsumerFactory<T>(this, messageCache));
+            configurator.Consumer(new UnlinkConsumerFactory<T>(messageCache));
+        }
+
+        public async Task NotifyEndpointReady(IReceiveEndpoint receiveEndpoint)
+        {
+            Started = DateTime.UtcNow;
+
+            _sendEndpointProvider.TrySetResult(receiveEndpoint);
+            _publishEndpointProvider.TrySetResult(receiveEndpoint);
+
+            var serviceInfo = new ServiceEndpointServiceInfo(_serviceAddress.Value);
+            _serviceInfo.TrySetResult(serviceInfo);
+
+            var instanceInfo = new ServiceEndpointInstanceInfo(_instance.InstanceId, Started);
+            _instanceInfo.TrySetResult(instanceInfo);
+
             try
             {
-                await Task.WhenAll(_messageTypes.Values.Select(x => x.NotifyUp(_instance))).ConfigureAwait(false);
+                await ClientCache.NotifyEndpointReady(receiveEndpoint, instanceInfo, serviceInfo).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
-                LogContext.Warning?.Log(exception, "Failed to notify service endpoint up: {InstanceAddress}", EndpointInfo.InstanceAddress);
+                LogContext.Warning?.Log(exception, "Failed to notify service endpoint down: {ServiceAddress} {InstanceId}", serviceInfo.ServiceAddress,
+                    instanceInfo.InstanceId);
             }
         }
 
-        async Task NotifyDown()
+        public async Task NotifyDown()
         {
             try
             {
-                await Task.WhenAll(_messageTypes.Values.Select(x => x.NotifyDown(_instance))).ConfigureAwait(false);
+                var instanceInfo = _instanceInfo.Task.IsCompletedSuccessfully() ? _instanceInfo.Task.Result : await _instanceInfo.Task.ConfigureAwait(false);
+                var serviceInfo = _serviceInfo.Task.IsCompletedSuccessfully() ? _serviceInfo.Task.Result : await _serviceInfo.Task.ConfigureAwait(false);
+
+                var message = new InstanceDownMessage(instanceInfo, serviceInfo);
+
+                await NotifyClients<InstanceDown>(message).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
-                LogContext.Warning?.Log(exception, "Failed to notify service endpoint down: {InstanceAddress}", EndpointInfo.InstanceAddress);
+                LogContext.Warning?.Log(exception, "Failed to notify service endpoint down: {ServiceAddress}", _serviceAddress.Value);
+            }
+        }
+
+        Task NotifyClients<T>(T message)
+        {
+            return ClientCache.ForEachAsync(client => NotifyClient(message, client));
+        }
+
+        async Task NotifyClient<T>(T message, Task<ServiceClientContext> asyncContext)
+        {
+            ServiceClientContext clientContext = null;
+            try
+            {
+                clientContext = await asyncContext.ConfigureAwait(false);
+
+                var sendEndpointProvider = await _sendEndpointProvider.Task.ConfigureAwait(false);
+
+                var endpoint = await sendEndpointProvider.GetSendEndpoint(clientContext.Address).ConfigureAwait(false);
+
+                await endpoint.Send(message).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                if (clientContext != null)
+                    ClientCache.NotifyFaulted(clientContext, exception);
             }
         }
 
 
-        class UpDownObserver :
-            IReceiveEndpointObserver
+        class InstanceDownMessage :
+            InstanceDown
         {
-            readonly ServiceEndpoint _serviceEndpoint;
-
-            public UpDownObserver(ServiceEndpoint serviceEndpoint)
+            public InstanceDownMessage(InstanceInfo instance, ServiceInfo service)
             {
-                _serviceEndpoint = serviceEndpoint;
+                Instance = instance;
+                Service = service;
             }
 
-            public Task Ready(ReceiveEndpointReady ready)
-            {
-                _serviceEndpoint.Started = DateTime.UtcNow;
-                _serviceEndpoint.DisconnectConfigurationObservers();
-
-                return _serviceEndpoint.NotifyUp();
-            }
-
-            public Task Stopping(ReceiveEndpointStopping stopping)
-            {
-                return _serviceEndpoint.NotifyDown();
-            }
-
-            public Task Completed(ReceiveEndpointCompleted completed)
-            {
-                return TaskUtil.Completed;
-            }
-
-            public Task Faulted(ReceiveEndpointFaulted faulted)
-            {
-                _serviceEndpoint.DisconnectConfigurationObservers();
-
-                return TaskUtil.Completed;
-            }
+            public InstanceInfo Instance { get; }
+            public ServiceInfo Service { get; }
         }
 
 
-        class Endpoint :
-            EndpointInfo
+        class ServiceEndpointServiceInfo :
+            ServiceInfo
         {
-            public Guid EndpointId { get; set; }
-            public DateTime Started { get; set; }
-            public Uri InstanceAddress { get; set; }
-            public Uri EndpointAddress { get; set; }
+            public ServiceEndpointServiceInfo(Uri serviceAddress)
+            {
+                ServiceAddress = serviceAddress;
+            }
+
+            public Uri ServiceAddress { get; }
+
+            public ServiceCapability[] Capabilities => default;
+        }
+
+
+        class ServiceEndpointInstanceInfo :
+            InstanceInfo
+        {
+            public ServiceEndpointInstanceInfo(Guid instanceId, DateTime? started)
+            {
+                InstanceId = instanceId;
+                Started = started;
+            }
+
+            public Guid InstanceId { get; }
+
+            public DateTime? Started { get; }
         }
     }
 }

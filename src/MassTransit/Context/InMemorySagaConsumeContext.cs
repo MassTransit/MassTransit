@@ -16,8 +16,7 @@
         readonly IndexedSagaDictionary<TSaga> _sagas;
         readonly SagaInstance<TSaga> _instance;
 
-        public InMemorySagaConsumeContext(ConsumeContext<TMessage> context, SagaInstance<TSaga>
-            instance, IndexedSagaDictionary<TSaga> sagas)
+        public InMemorySagaConsumeContext(ConsumeContext<TMessage> context, SagaInstance<TSaga> instance, IndexedSagaDictionary<TSaga> sagas)
             : base(context)
         {
             _sagas = sagas;

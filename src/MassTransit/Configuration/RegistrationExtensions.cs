@@ -363,6 +363,20 @@ namespace MassTransit
                 configurator.AddExecuteActivity(executeActivity.ActivityType, executeActivity.DefinitionType);
         }
 
+        public static void SetSnakeCaseEndpointNameFormatter(this IRegistrationConfigurator configurator)
+        {
+            configurator.SetEndpointNameFormatter(SnakeCaseEndpointNameFormatter.Instance);
+        }
+
+        /// <summary>
+        /// Configure the Kebab Case endpoint name formatter
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void SetKebabCaseEndpointNameFormatter(this IRegistrationConfigurator configurator)
+        {
+            configurator.SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);
+        }
+
         static IEnumerable<Type> FindTypesInNamespace(Type type, Func<Type, bool> typeFilter)
         {
             bool Filter(Type candidate)

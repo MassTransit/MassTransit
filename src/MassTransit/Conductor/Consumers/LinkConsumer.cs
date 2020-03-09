@@ -3,31 +3,37 @@ namespace MassTransit.Conductor.Consumers
     using System.Threading.Tasks;
     using Context;
     using Contracts;
+    using Messages;
+    using Metadata;
     using Server;
 
 
-    public class LinkConsumer<T> :
-        IConsumer<Link<T>>
-        where T : class
+    public class LinkConsumer<TMessage> :
+        IConsumer<Link<TMessage>>
+        where TMessage : class
     {
-        readonly IMessageEndpoint<T> _messageEndpoint;
+        readonly IServiceEndpointMessageClientCache _clientCache;
+        readonly ServiceInfo _serviceInfo;
+        readonly InstanceInfo _instanceInfo;
 
-        public LinkConsumer(IMessageEndpoint<T> messageEndpoint)
+        public LinkConsumer(IServiceEndpointMessageClientCache clientCache, ServiceInfo serviceInfo, InstanceInfo instanceInfo)
         {
-            _messageEndpoint = messageEndpoint;
+            _clientCache = clientCache;
+            _serviceInfo = serviceInfo;
+            _instanceInfo = instanceInfo;
         }
 
-        public async Task Consume(ConsumeContext<Link<T>> context)
+        public async Task Consume(ConsumeContext<Link<TMessage>> context)
         {
-            LogContext.Debug?.Log("Linking Client: {Id}", context.Message.ClientId);
+            LogContext.Debug?.Log("Link: {ClientId}", context.Message.ClientId);
 
-            await _messageEndpoint.Link(context.Message.ClientId, context.SourceAddress).ConfigureAwait(false);
+            var clientAddress = context.ResponseAddress ?? context.SourceAddress;
 
-            await context.RespondAsync<Up<T>>(new
-            {
-                _messageEndpoint.ServiceAddress,
-                Endpoint = _messageEndpoint.EndpointInfo,
-            }).ConfigureAwait(false);
+            var clientContext = await _clientCache.Link(context.Message.ClientId, clientAddress).ConfigureAwait(false);
+
+            clientContext.NotifyConsumed(context);
+
+            await context.RespondAsync<Up<TMessage>>(new UpMessage<TMessage>(_serviceInfo, _instanceInfo, _clientCache.MessageInfo)).ConfigureAwait(false);
         }
     }
 }

@@ -2,40 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
-    using Context;
     using GreenPipes;
 
 
     public static class ConsumeContextExtensions
     {
-        public static ConsumerConsumeContext<TConsumer, T> PushConsumer<TConsumer, T>(this ConsumeContext<T> context, TConsumer consumer)
-            where T : class
-            where TConsumer : class
-        {
-            return new ConsumerConsumeContextScope<TConsumer, T>(context, consumer);
-        }
-
-        public static ConsumerConsumeContext<TConsumer, TMessage> PushConsumerScope<TConsumer, TMessage, T>(this ConsumeContext<TMessage> context,
-            TConsumer consumer, T scope, params object[] payloads)
-            where TMessage : class
-            where TConsumer : class
-            where T : class
-        {
-            if (payloads != null && payloads.Length > 0)
-                return new ConsumerConsumeContextScope<TConsumer, TMessage>(context, consumer, new object[] {scope}.Concat(payloads));
-
-            return new ConsumerConsumeContextScope<TConsumer, TMessage>(context, consumer, scope);
-        }
-
-        public static ConsumeContext<T> CreateScope<T, TScope>(this ConsumeContext<T> context, TScope scope)
-            where T : class
-            where TScope : class
-        {
-            return new ConsumeContextScope<T>(context, scope);
-        }
-
         public static Task Forward<T>(this ConsumeContext<T> context, ISendEndpoint endpoint)
             where T : class
         {

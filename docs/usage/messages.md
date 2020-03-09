@@ -63,8 +63,7 @@ Example Events:
 
 ## Message Headers
 
-MassTransit encapsulates every sent or published message in a message envelope (described by the [Envelope Wrapper](https://www.enterpriseintegrationpatterns.com/patterns/messaging/EnvelopeWrapper.html) pattern). The envelope includes the message along with additional message headers, including:
-
+MassTransit encapsulates every sent or published message in a message envelope (described by the [Envelope Wrapper](https://www.enterpriseintegrationpatterns.com/patterns/messaging/EnvelopeWrapper.html) pattern). The envelope adds a series of message headers, including:
 
 | Property | Type | Description |
 | :---------------- |:------:| :--------------------------------------- |
@@ -83,6 +82,7 @@ MassTransit encapsulates every sent or published message in a message envelope (
 | Host              |Auto   | The host information of the machine that sent or published the message.|
 | Headers           |User   | Additional headers, which can be added by the user, middleware, or diagnostic trace filters.|
 
+Message headers can be read using the `ConsumeContext` interface and specified using the `SendContext` interface.
 
 ## Message Correlation
 

@@ -1,10 +1,11 @@
 ﻿namespace MassTransit
 {
-    using MassTransit.ExtensionsDependencyInjectionIntegration;
-    using MassTransit.Transactions;
+    using ExtensionsDependencyInjectionIntegration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
+    using Transactions;
+
 
     public static class DependencyInjectionTransactionOutboxExtensions
     {

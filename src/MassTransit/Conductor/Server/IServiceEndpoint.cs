@@ -1,18 +1,19 @@
 namespace MassTransit.Conductor.Server
 {
-    using System;
+    using System.Threading.Tasks;
     using Contracts;
 
 
     public interface IServiceEndpoint
     {
-        Uri ServiceAddress { get; }
-
-        EndpointInfo EndpointInfo { get; }
-
-        IMessageEndpoint<T> GetMessageEndpoint<T>()
+        void ConfigureServiceEndpoint<T>(IConsumePipeConfigurator configurator)
             where T : class;
 
-        void ConnectConfigurationObserver(IConsumePipeConfigurator configurator);
+        void ConfigureControlEndpoint<T>(IReceiveEndpointConfigurator configurator)
+            where T : class;
+
+        Task<ServiceInfo> ServiceInfo { get; }
+
+        Task<InstanceInfo> InstanceInfo { get; }
     }
 }

@@ -1,9 +1,9 @@
 ﻿namespace MassTransit
 {
-    using MassTransit.Transactions;
     using Microsoft.Extensions.Logging;
     using SimpleInjector;
     using SimpleInjectorIntegration;
+    using Transactions;
 
 
     public static class SimpleInjectorTransactionOutboxExtensions
@@ -16,7 +16,7 @@
         public static void AddTransactionOutbox(this ISimpleInjectorConfigurator builder)
         {
             builder.Container
-                .RegisterSingleton(()=>
+                .RegisterSingleton(() =>
                 {
                     var busControl = builder.Container.GetInstance<IBusControl>();
 

@@ -70,7 +70,7 @@ namespace MassTransit.LamarIntegration.Registration
                 .Scoped();
 
             _registry.For<IClientFactory>()
-                .Use(context => context.GetInstance<IBus>().CreateClientFactory())
+                .Use(context => ClientFactoryProvider(context.GetInstance<IConfigurationServiceProvider>()))
                 .Singleton();
         }
 

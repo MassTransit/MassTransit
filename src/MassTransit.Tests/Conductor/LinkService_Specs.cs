@@ -7,6 +7,7 @@ namespace MassTransit.Tests.Conductor
     using Contracts;
     using Definition;
     using GreenPipes;
+    using MassTransit.Conductor.Configuration;
     using NUnit.Framework;
     using TestFramework;
     using TestService;
@@ -24,7 +25,9 @@ namespace MassTransit.Tests.Conductor
         {
             var result = await _upHandled;
 
-            Assert.That(result.Message.ServiceAddress.AbsolutePath.Trim('/'), Is.EqualTo(_serviceEndpointName));
+            Assert.That(result.Message.Service.ServiceAddress.AbsolutePath.Trim('/'), Is.EqualTo(_serviceEndpointName));
+
+            Console.WriteLine(Bus.GetProbeResult().ToJsonString());
         }
 
         [Test]
@@ -42,7 +45,7 @@ namespace MassTransit.Tests.Conductor
 
             var response = await upHandler;
 
-            Assert.That(response.Message.ServiceAddress.AbsolutePath.Trim('/'), Is.EqualTo(_serviceEndpointName));
+            Assert.That(response.Message.Service.ServiceAddress.AbsolutePath.Trim('/'), Is.EqualTo(_serviceEndpointName));
         }
 
         [Test]
@@ -61,7 +64,7 @@ namespace MassTransit.Tests.Conductor
 
             var upContext = await upHandler;
 
-            var client = Bus.CreateRequestClient<DeployPayload>(upContext.Message.ServiceAddress);
+            var client = Bus.CreateRequestClient<DeployPayload>(upContext.Message.Service.ServiceAddress);
 
             var request = client.Create(new
             {
@@ -75,7 +78,7 @@ namespace MassTransit.Tests.Conductor
             Assert.That(response.Message.Target, Is.EqualTo("Bogey"));
         }
 
-        [Test]
+        [Test, Explicit("NotYetImplemented")]
         public async Task Should_fault_if_clientId_is_not_specified()
         {
             var upHandler = SubscribeHandler<Up<DeployPayload>>();
@@ -91,7 +94,7 @@ namespace MassTransit.Tests.Conductor
 
             var upContext = await upHandler;
 
-            var client = Bus.CreateRequestClient<DeployPayload>(upContext.Message.ServiceAddress);
+            var client = Bus.CreateRequestClient<DeployPayload>(upContext.Message.Service.ServiceAddress);
 
             Assert.That(async () => await client.GetResponse<PayloadDeployed>(new {Target = "Bogey"}), Throws.TypeOf<RequestFaultException>());
         }
@@ -163,10 +166,13 @@ namespace MassTransit.Tests.Conductor
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            _serviceEndpointName = KebabCaseEndpointNameFormatter.Instance.Consumer<DeployPayloadConsumer>();
+            var options = new ServiceInstanceOptions()
+                .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);
 
-            configurator.ServiceInstance(instance =>
+            configurator.ServiceInstance(options, instance =>
             {
+                _serviceEndpointName = instance.EndpointNameFormatter.Consumer<DeployPayloadConsumer>();
+
                 instance.ReceiveEndpoint(_serviceEndpointName, x =>
                 {
                     x.Consumer<DeployPayloadConsumer>();
@@ -193,93 +199,18 @@ namespace MassTransit.Tests.Conductor
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.ServiceInstance(instance =>
+            var options = new ServiceInstanceOptions()
+                .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);
+
+            configurator.ServiceInstance(options, instance =>
             {
-                var serviceEndpointName = KebabCaseEndpointNameFormatter.Instance.Consumer<DeployPayloadConsumer>();
+                var serviceEndpointName = instance.EndpointNameFormatter.Consumer<DeployPayloadConsumer>();
 
                 instance.ReceiveEndpoint(serviceEndpointName, x =>
                 {
                     x.Consumer<DeployPayloadConsumer>();
                 });
             });
-        }
-    }
-
-
-    [TestFixture, Explicit("Future")]
-    public class Linking_a_service_that_later_gets_a_second_instance
-    {
-        [Test]
-        public async Task Should_work()
-        {
-            var bus = await CreateClientBus();
-            try
-            {
-                var instanceA = await CreateInstance();
-                try
-                {
-                    var serviceClient = bus.CreateServiceClient();
-
-                    var requestClient = serviceClient.CreateRequestClient<DeployPayload>();
-
-                    var response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "A"});
-
-                    Assert.That(response.Message.Target, Is.EqualTo("A"));
-
-                    var instanceB = await CreateInstance();
-                    try
-                    {
-                        await instanceA.StopAsync();
-
-                        response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "B"});
-
-                        Assert.That(response.Message.Target, Is.EqualTo("B"));
-                    }
-                    finally
-                    {
-                        await instanceB.StopAsync();
-                    }
-                }
-                finally
-                {
-                    //                    await instanceA.StopAsync();
-                }
-            }
-            finally
-            {
-                await bus.StopAsync();
-            }
-        }
-
-        static async Task<IBusControl> CreateInstance()
-        {
-            var bus = Bus.Factory.CreateUsingInMemory(cfg =>
-            {
-                cfg.ServiceInstance(instance =>
-                {
-                    var serviceEndpointName = KebabCaseEndpointNameFormatter.Instance.Consumer<DeployPayloadConsumer>();
-
-                    instance.ReceiveEndpoint(serviceEndpointName, x =>
-                    {
-                        x.Consumer<DeployPayloadConsumer>();
-                    });
-                });
-            });
-
-            await bus.StartAsync();
-
-            return bus;
-        }
-
-        static async Task<IBusControl> CreateClientBus()
-        {
-            var bus = Bus.Factory.CreateUsingInMemory(cfg =>
-            {
-            });
-
-            await bus.StartAsync();
-
-            return bus;
         }
     }
 

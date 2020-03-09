@@ -1,10 +1,11 @@
-﻿using Autofac;
-using MassTransit.AutofacIntegration;
-using MassTransit.Transactions;
-using Microsoft.Extensions.Logging;
-
-namespace MassTransit
+﻿namespace MassTransit
 {
+    using Autofac;
+    using AutofacIntegration;
+    using Microsoft.Extensions.Logging;
+    using Transactions;
+
+
     public static class AutofacTransactionOutboxExtensions
     {
         /// <summary>

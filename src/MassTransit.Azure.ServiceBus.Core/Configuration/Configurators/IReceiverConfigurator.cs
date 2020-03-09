@@ -9,6 +9,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
         /// <summary>
         /// Set the input address of the receiver
         /// </summary>
-        new Uri InputAddress { get; set; }
+        new Uri InputAddress { set; }
     }
 }

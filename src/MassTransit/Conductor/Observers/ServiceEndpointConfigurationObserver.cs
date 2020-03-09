@@ -1,24 +1,21 @@
 namespace MassTransit.Conductor.Observers
 {
+    using Configuration.Configurators;
     using ConsumeConfigurators;
     using Courier.Contracts;
-    using GreenPipes;
-    using GreenPipes.Specifications;
     using PipeConfigurators;
-    using Pipeline;
-    using Server;
 
 
     public class ServiceEndpointConfigurationObserver :
         ConfigurationObserver,
         IMessageConfigurationObserver
     {
-        readonly IServiceEndpoint _endpoint;
+        readonly IServiceEndpointConfigurator _endpointConfigurator;
 
-        public ServiceEndpointConfigurationObserver(IConsumePipeConfigurator configurator, IServiceEndpoint endpoint)
+        public ServiceEndpointConfigurationObserver(IConsumePipeConfigurator configurator, IServiceEndpointConfigurator endpointConfigurator)
             : base(configurator)
         {
-            _endpoint = endpoint;
+            _endpointConfigurator = endpointConfigurator;
 
             Connect(this);
         }
@@ -30,9 +27,7 @@ namespace MassTransit.Conductor.Observers
             if (typeof(TMessage) == typeof(RoutingSlip))
                 return;
 
-            IFilter<ConsumeContext<TMessage>> filter = new ConductorMessageFilter<TMessage>(_endpoint.GetMessageEndpoint<TMessage>());
-
-            configurator.AddPipeSpecification(new FilterPipeSpecification<ConsumeContext<TMessage>>(filter));
+            _endpointConfigurator.ConfigureMessage<TMessage>(configurator);
         }
     }
 }

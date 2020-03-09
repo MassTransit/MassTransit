@@ -4,32 +4,32 @@ namespace MassTransit.Conductor.Configuration.Definition
     using Server;
 
 
+    /// <summary>
+    /// Instance-specific address for a service endpoint
+    /// </summary>
     public class InstanceEndpointDefinition :
         IEndpointDefinition
     {
-        readonly IEndpointDefinition _definition;
         readonly IServiceInstance _instance;
 
-        public InstanceEndpointDefinition(IEndpointDefinition definition, IServiceInstance instance)
+        public InstanceEndpointDefinition(IServiceInstance instance)
         {
-            _definition = definition;
             _instance = instance;
         }
 
-        bool IEndpointDefinition.IsTemporary => _definition.IsTemporary;
+        bool IEndpointDefinition.IsTemporary => true;
 
-        int? IEndpointDefinition.PrefetchCount => _definition.PrefetchCount;
+        int? IEndpointDefinition.PrefetchCount => default;
 
-        int? IEndpointDefinition.ConcurrentMessageLimit => _definition.ConcurrentMessageLimit;
+        int? IEndpointDefinition.ConcurrentMessageLimit => default;
 
         string IEndpointDefinition.GetEndpointName(IEndpointNameFormatter formatter)
         {
-            return ServiceEndpointNameFormatter.Instance.EndpointName(_instance.InstanceId, _definition.GetEndpointName(formatter));
+            return ServiceEndpointNameFormatter.Instance.InstanceEndpointName(_instance.InstanceName, formatter);
         }
 
         void IEndpointDefinition.Configure<T>(T configurator)
         {
-            _definition.Configure(configurator);
         }
     }
 }

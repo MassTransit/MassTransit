@@ -64,7 +64,7 @@ namespace MassTransit.WindsorIntegration.Registration
                     .UsingFactoryMethod(GetCurrentPublishEndpoint)
                     .LifestyleTransient(),
                 Component.For<IClientFactory>()
-                    .UsingFactoryMethod(kernel => kernel.Resolve<IBus>().CreateClientFactory())
+                    .UsingFactoryMethod(kernel => ClientFactoryProvider(kernel.Resolve<IConfigurationServiceProvider>()))
                     .LifestyleSingleton()
             );
         }

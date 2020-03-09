@@ -11,7 +11,7 @@ namespace MassTransit.Internals.Reflection
     using Metadata;
 
 
-    public class ContractCache
+    public static class ContractCache
     {
         public static IMessageFactory GetMessageFactory(Contract contract)
         {

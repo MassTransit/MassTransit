@@ -1,46 +1,22 @@
-﻿using MassTransit.Util;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Transactions;
-
-namespace MassTransit.Transactions
+﻿namespace MassTransit.Transactions
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using System.Transactions;
+    using Microsoft.Extensions.Logging;
+    using Util;
+
+
     public class TransactionOutboxEnlistment : IEnlistmentNotification
     {
-        private readonly ILogger<TransactionOutboxEnlistment> _logger;
+        readonly ILogger<TransactionOutboxEnlistment> _logger;
         readonly List<Func<Task>> _pendingActions;
 
-        public TransactionOutboxEnlistment(
-            ILoggerFactory loggerFactory)
+        public TransactionOutboxEnlistment(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory?.CreateLogger<TransactionOutboxEnlistment>();
             _pendingActions = new List<Func<Task>>();
-        }
-
-        public void Add(Func<Task> method)
-        {
-            lock (_pendingActions)
-                _pendingActions.Add(method);
-        }
-
-        private void ExecutePendingActions()
-        {
-            Func<Task>[] pendingActions;
-            lock (_pendingActions)
-                pendingActions = _pendingActions.ToArray();
-
-            foreach (var action in pendingActions)
-            {
-                TaskUtil.Await(action);
-            }
-        }
-
-        private void DiscardPendingActions()
-        {
-            lock (_pendingActions)
-                _pendingActions.Clear();
         }
 
         public void Prepare(PreparingEnlistment preparingEnlistment)
@@ -56,10 +32,11 @@ namespace MassTransit.Transactions
             }
             catch (Exception e)
             {
-                _logger?.LogError(e, "MASSTRANSIT: Error executing pending actions");
-                // We can't stop any messages that might have been already published, but we can stop the rest from publishing
-                // But with a message broker, you should support idempotence, and so retry is a valid mechanism to handle this
-                // scenario
+                _logger?.LogError(e, "MassTransit: Error executing pending actions");
+
+                // We can't stop any messages that might have been already published, but we can stop the rest from publishing.
+                // With a message broker, you should support idempotence, and so retry is a valid mechanism to handle this scenario
+
                 preparingEnlistment.ForceRollback();
             }
         }
@@ -89,6 +66,28 @@ namespace MassTransit.Transactions
             DiscardPendingActions();
 
             enlistment.Done();
+        }
+
+        public void Add(Func<Task> method)
+        {
+            lock (_pendingActions)
+                _pendingActions.Add(method);
+        }
+
+        void ExecutePendingActions()
+        {
+            Func<Task>[] pendingActions;
+            lock (_pendingActions)
+                pendingActions = _pendingActions.ToArray();
+
+            foreach (Func<Task> action in pendingActions)
+                TaskUtil.Await(action);
+        }
+
+        void DiscardPendingActions()
+        {
+            lock (_pendingActions)
+                _pendingActions.Clear();
         }
     }
 }

@@ -1,19 +1,22 @@
-﻿using GreenPipes;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Transactions;
-
-namespace MassTransit.Transactions
+﻿namespace MassTransit.Transactions
 {
-    public class TransactionOutbox : IPublishEndpoint, ISendEndpointProvider
+    using System;
+    using System.Collections.Concurrent;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Transactions;
+    using GreenPipes;
+    using Microsoft.Extensions.Logging;
+
+
+    public class TransactionOutbox :
+        IPublishEndpoint,
+        ISendEndpointProvider
     {
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly IPublishEndpoint _publishEndpoint;
-        private readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly ILoggerFactory _loggerFactory;
         readonly ConcurrentDictionary<Transaction, TransactionOutboxEnlistment> _pendingActions;
+        readonly IPublishEndpoint _publishEndpoint;
+        readonly ISendEndpointProvider _sendEndpointProvider;
 
         public TransactionOutbox(IPublishEndpoint publishEndpoint, ISendEndpointProvider sendEndpointProvider, ILoggerFactory loggerFactory)
         {
@@ -23,19 +26,82 @@ namespace MassTransit.Transactions
             _pendingActions = new ConcurrentDictionary<Transaction, TransactionOutboxEnlistment>();
         }
 
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _publishEndpoint.ConnectPublishObserver(observer);
+        }
+
+        public Task Publish<T>(T message, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return Outbox(() => _publishEndpoint.Publish(message, cancellationToken));
+        }
+
+        public Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return Outbox(() => _publishEndpoint.Publish(message, publishPipe, cancellationToken));
+        }
+
+        public Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return Outbox(() => _publishEndpoint.Publish(message, publishPipe, cancellationToken));
+        }
+
+        public Task Publish(object message, CancellationToken cancellationToken = default)
+        {
+            return Outbox(() => _publishEndpoint.Publish(message, cancellationToken));
+        }
+
+        public Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
+        {
+            return Outbox(() => _publishEndpoint.Publish(message, publishPipe, cancellationToken));
+        }
+
+        public Task Publish(object message, Type messageType, CancellationToken cancellationToken = default)
+        {
+            return Outbox(() => _publishEndpoint.Publish(message, messageType, cancellationToken));
+        }
+
+        public Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
+        {
+            return Outbox(() => _publishEndpoint.Publish(message, messageType, publishPipe, cancellationToken));
+        }
+
+        public Task Publish<T>(object values, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return Outbox(() => _publishEndpoint.Publish<T>(values, cancellationToken));
+        }
+
+        public Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return Outbox(() => _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken));
+        }
+
+        public Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return Outbox(() => _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken));
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendEndpointProvider.ConnectSendObserver(observer);
+        }
+
+        public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        {
+            return new TransactionOutboxSendEndpoint(this, await _sendEndpointProvider.GetSendEndpoint(address));
+        }
+
         public void ClearTransaction(Transaction transaction)
         {
             if (_pendingActions.TryRemove(transaction, out var transactionOutboxEnlistment))
-            {
                 transaction.TransactionCompleted -= TransactionCompleted;
-            }
         }
-
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
-            => _publishEndpoint.ConnectPublishObserver(observer);
-
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
-            => _sendEndpointProvider.ConnectSendObserver(observer);
 
         public Task Outbox(Func<Task> action)
         {
@@ -49,40 +115,7 @@ namespace MassTransit.Transactions
             return Task.CompletedTask;
         }
 
-        public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
-            => new TransactionOutboxSendEndpoint(this, await _sendEndpointProvider.GetSendEndpoint(address));
-
-        public Task Publish<T>(T message, CancellationToken cancellationToken = default) where T : class
-            => Outbox(() => _publishEndpoint.Publish<T>(message, cancellationToken));
-
-        public Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = default) where T : class
-            => Outbox(() => _publishEndpoint.Publish<T>(message, publishPipe, cancellationToken));
-
-        public Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default) where T : class
-            => Outbox(() => _publishEndpoint.Publish<T>(message, publishPipe, cancellationToken));
-
-        public Task Publish(object message, CancellationToken cancellationToken = default)
-            => Outbox(() => _publishEndpoint.Publish(message, cancellationToken));
-
-        public Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
-            => Outbox(() => _publishEndpoint.Publish(message, publishPipe, cancellationToken));
-
-        public Task Publish(object message, Type messageType, CancellationToken cancellationToken = default)
-            => Outbox(() => _publishEndpoint.Publish(message, messageType, cancellationToken));
-
-        public Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
-            => Outbox(() => _publishEndpoint.Publish(message, messageType, publishPipe, cancellationToken));
-
-        public Task Publish<T>(object values, CancellationToken cancellationToken = default) where T : class
-            => Outbox(() => _publishEndpoint.Publish<T>(values, cancellationToken));
-
-        public Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = default) where T : class
-            => Outbox(() => _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken));
-
-        public Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default) where T : class
-            => Outbox(() => _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken));
-
-        private TransactionOutboxEnlistment GetOrCreateEnlistment()
+        TransactionOutboxEnlistment GetOrCreateEnlistment()
         {
             return _pendingActions.GetOrAdd(Transaction.Current, transaction =>
             {
@@ -95,7 +128,7 @@ namespace MassTransit.Transactions
             });
         }
 
-        private void TransactionCompleted(object sender, TransactionEventArgs e)
+        void TransactionCompleted(object sender, TransactionEventArgs e)
         {
             ClearTransaction(e.Transaction);
         }

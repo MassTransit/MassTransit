@@ -25,6 +25,8 @@ namespace MassTransit.Registration
         readonly ConcurrentDictionary<Type, ISagaRegistration> _sagaRegistrations;
         readonly ConcurrentDictionary<Type, IEndpointRegistration> _endpointRegistrations;
 
+        protected Func<IConfigurationServiceProvider, IClientFactory> ClientFactoryProvider { get; set; } = BusClientFactoryProvider;
+
         public RegistrationConfigurator(IContainerRegistrar containerRegistrar = null)
         {
             _containerRegistrar = containerRegistrar ?? new NullContainerRegistrar();
@@ -215,11 +217,35 @@ namespace MassTransit.Registration
             _containerRegistrar.RegisterRequestClient<T>(destinationAddress, timeout);
         }
 
+        public void AddServiceClient(Action<IServiceClientConfigurator> configure = default)
+        {
+            ServiceClientOptions options = new ServiceClientOptions();
+
+            _containerRegistrar.RegisterSingleInstance(options);
+
+            ClientFactoryProvider = ServiceClientClientFactoryProvider;
+        }
+
+        public void SetEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter)
+        {
+            _containerRegistrar.RegisterSingleInstance(endpointNameFormatter);
+        }
+
         public IRegistration CreateRegistration(IConfigurationServiceProvider configurationServiceProvider)
         {
             return new Registration(configurationServiceProvider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),
                 _sagaRegistrations.ToDictionary(x => x.Key, x => x.Value), _executeActivityRegistrations.ToDictionary(x => x.Key, x => x.Value),
                 _activityRegistrations.ToDictionary(x => x.Key, x => x.Value), _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value));
+        }
+
+        static IClientFactory BusClientFactoryProvider(IConfigurationServiceProvider provider)
+        {
+            return provider.GetRequiredService<IBus>().CreateClientFactory();
+        }
+
+        static IClientFactory ServiceClientClientFactoryProvider(IConfigurationServiceProvider provider)
+        {
+            return provider.GetRequiredService<IBus>().CreateServiceClient();
         }
     }
 }

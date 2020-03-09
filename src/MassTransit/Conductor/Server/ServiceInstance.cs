@@ -1,120 +1,29 @@
 namespace MassTransit.Conductor.Server
 {
     using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Consumers;
-    using Contracts;
-    using Initializers;
-    using Metadata;
-    using Util;
 
 
     public class ServiceInstance :
         IServiceInstance
     {
-        readonly IReceiveEndpointConfigurator _configurator;
-        readonly Lazy<Uri> _instanceAddress;
-        readonly IDictionary<Type, IMessageEndpoint> _messageTypes;
-        readonly TaskCompletionSource<IReceiveEndpoint> _receiveEndpoint;
+        readonly IServiceInstanceClientCache _clientCache;
 
-        public ServiceInstance(NewId instanceId, IReceiveEndpointConfigurator configurator)
+        public ServiceInstance()
         {
-            InstanceId = instanceId;
-            _configurator = configurator;
+            var instanceId = NewId.Next();
 
-            EndpointId = instanceId.ToGuid();
-            _instanceAddress = new Lazy<Uri>(() => configurator.InputAddress);
+            InstanceId = instanceId.ToGuid();
+            InstanceName = instanceId.ToString(Util.FormatUtil.Formatter);
 
-            _messageTypes = new Dictionary<Type, IMessageEndpoint>();
-            _receiveEndpoint = TaskUtil.GetTask<IReceiveEndpoint>();
-
-            configurator.ConnectReceiveEndpointObserver(new InstanceReadyObserver(_receiveEndpoint));
+            _clientCache = new ServiceInstanceClientCache();
         }
 
-        public NewId InstanceId { get; }
-        public Guid EndpointId { get; }
-        public Uri InstanceAddress => _instanceAddress.Value;
+        public Guid InstanceId { get; }
+        public string InstanceName { get; }
 
-        public void ConfigureMessageEndpoint<T>(IMessageEndpoint<T> endpoint)
-            where T : class
+        public IServiceEndpoint CreateServiceEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            if (_messageTypes.ContainsKey(typeof(T)))
-                throw new ArgumentException($"The message type was already added by another service endpoint: {TypeMetadataCache<T>.ShortName}", nameof(T));
-
-            _messageTypes.Add(typeof(T), endpoint);
-
-            _configurator.Consumer(() => new LinkConsumer<T>(endpoint));
-        }
-
-        public async Task NotifyUp<T>(IMessageEndpoint<T> endpoint)
-            where T : class
-        {
-            var receiveEndpoint = await _receiveEndpoint.Task.ConfigureAwait(false);
-
-            var sendEndpoint = await receiveEndpoint.GetPublishSendEndpoint<Up<T>>().ConfigureAwait(false);
-
-            await sendEndpoint.Send<Up<T>>(new
-            {
-                __CorrelationId = NewId.NextGuid(),
-                endpoint.ServiceAddress,
-                Endpoint = endpoint.EndpointInfo
-            }).ConfigureAwait(false);
-        }
-
-        public async Task NotifyDown<T>(IMessageEndpoint<T> endpoint)
-            where T : class
-        {
-            var receiveEndpoint = await _receiveEndpoint.Task.ConfigureAwait(false);
-
-            var initializeContext = await MessageInitializerCache<Down<T>>.Initialize(new
-            {
-                __CorrelationId = NewId.NextGuid(),
-                endpoint.ServiceAddress,
-                Endpoint = endpoint.EndpointInfo
-            }).ConfigureAwait(false);
-
-            var publishSendEndpoint = await receiveEndpoint.GetPublishSendEndpoint<Down<T>>().ConfigureAwait(false);
-
-            await publishSendEndpoint.Send(initializeContext.Message).ConfigureAwait(false);
-
-            await endpoint.NotifyClients(receiveEndpoint, initializeContext.Message).ConfigureAwait(false);
-        }
-
-
-        class InstanceReadyObserver :
-            IReceiveEndpointObserver
-        {
-            readonly TaskCompletionSource<IReceiveEndpoint> _receiveEndpoint;
-
-            public InstanceReadyObserver(TaskCompletionSource<IReceiveEndpoint> receiveEndpoint)
-            {
-                _receiveEndpoint = receiveEndpoint;
-            }
-
-            public Task Ready(ReceiveEndpointReady ready)
-            {
-                _receiveEndpoint.TrySetResult(ready.ReceiveEndpoint);
-
-                return TaskUtil.Completed;
-            }
-
-            public Task Stopping(ReceiveEndpointStopping stopping)
-            {
-                return TaskUtil.Completed;
-            }
-
-            public Task Completed(ReceiveEndpointCompleted completed)
-            {
-                return TaskUtil.Completed;
-            }
-
-            public Task Faulted(ReceiveEndpointFaulted faulted)
-            {
-                _receiveEndpoint.TrySetException(faulted.Exception);
-
-                return TaskUtil.Completed;
-            }
+            return new ServiceEndpoint(this, configurator, new ServiceEndpointClientCache(_clientCache));
         }
     }
 }

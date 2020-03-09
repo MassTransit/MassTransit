@@ -46,7 +46,7 @@ namespace ConsoleApplication1
     public interface Product
     {
         string Name { get; }
-        string Category { get; }
+        Uri Category { get; }
     }
 
     public interface CheckOrderStatus
@@ -58,6 +58,28 @@ namespace ConsoleApplication1
     {
         Guid OrderId { get; }
         string Status { get; }
+    }
+}
+";
+
+        readonly string GenericMessageContracts = @"
+namespace ConsoleApplication1
+{
+    public interface Command
+    {
+    }
+
+    public interface Up<T>
+        where T : class
+    {
+        Guid InstanceId { get; }
+        Uri InstanceAddress { get; }
+    }
+
+    public interface Link<T>
+        where T : class
+    {
+        Guid ClientId { get; }
     }
 }
 ";
@@ -90,7 +112,7 @@ namespace ConsoleApplication1.Messages
     public interface Product
     {
         string Name { get; }
-        string Category { get; }
+        Uri Category { get; }
     }
 
     public interface CheckOrderStatus
@@ -259,6 +281,93 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
+        [Test]
+        public void WhenCreateRequestTypesAreStructurallyCompatibleAndMissingProperty_ShouldHaveTheRightDiagnostic()
+        {
+            var test = Usings + GenericMessageContracts + @"
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static async Task Main<TMessage>()
+            where TMessage : class
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+            var requestClient = bus.CreateRequestClient<Link<TMessage>>();
+
+            var response = await requestClient.GetResponse<Up<TMessage>>(new{});
+            var result = response.Message;
+        }
+    }
+}
+";
+            var expected = new DiagnosticResult
+            {
+                Id = "MCA0003",
+                Message = "Anonymous type is missing properties that are in the message contract 'Link'. The following properties are missing: ClientId",
+                Severity = DiagnosticSeverity.Info,
+                Locations =
+                    new[] {
+                            new DiagnosticResultLocation("Test0.cs", 38, 74)
+                        }
+            };
+
+            VerifyCSharpDiagnostic(test, expected);
+        }
+
+        [Test]
+        public void WhenCreateRequestTypesAreStructurallyCompatibleAndMissingProperty_ShouldHaveTheNoDiagnostic()
+        {
+            var test = Usings + GenericMessageContracts + @"
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static async Task Main<TMessage>()
+            where TMessage : class
+        {
+            Guid ClientId = NewId.NextGuid();
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+            var requestClient = bus.CreateRequestClient<Link<TMessage>>();
+
+            var response = await requestClient.GetResponse<Up<TMessage>>(new{ClientId});
+            var result = response.Message;
+        }
+    }
+}
+";
+            VerifyCSharpDiagnostic(test);
+        }
+
+        [Test]
+        public void WhenCreateRequestTypesAreStructurallyCompatibleAndNoMissingProperty_ShouldHaveDiagnostic()
+        {
+            var test = Usings + MessageContracts + @"
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static async Task Main()
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+            var requestClient = bus.CreateRequestClient<CheckOrderStatus>(null);
+
+            using (var request = requestClient.Create(new
+            {
+                OrderId = ""3F70AEF5-F840-4BF8-8012-F2CC55697EB0""
+            }))
+            {
+                var response = await request.GetResponse<OrderStatusResult>();
+                var result = response.Message;
+            }
+        }
+    }
+}
+";
+
+            VerifyCSharpDiagnostic(test);
+        }
+
 
         [Test]
         public void WhenTypeNotValidStructure_ShouldHaveDiagnostic()
@@ -284,7 +393,7 @@ namespace ConsoleApplication1
                         Product = new
                         {
                             Name = ""Product"",
-                            Category = ""Category""
+                            Category = ""category:General""
                         },
                         Quantity = 10,
                         Price = 10.0m
@@ -365,7 +474,7 @@ namespace ConsoleApplication1
 
             await bus.Publish<OrderSubmitted>(new
             {
-                Id = NewId.NextGuid(),
+                Id = 27,
                 CustomerId = 1,
                 OrderItems = new[]
                 {
@@ -389,7 +498,7 @@ namespace ConsoleApplication1
             var expected = new DiagnosticResult
             {
                 Id = "MCA0001",
-                Message = "Anonymous type does not map to message contract 'OrderSubmitted'. The following properties of the anonymous type are incompatible: CustomerId",
+                Message = "Anonymous type does not map to message contract 'OrderSubmitted'. The following properties of the anonymous type are incompatible: Id",
                 Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {
@@ -398,6 +507,44 @@ namespace ConsoleApplication1
             };
 
             VerifyCSharpDiagnostic(test, expected);
+        }
+
+        [Test]
+        public void WhenTypesAreStructurallyCompatibleWithAsyncAndNoMissingProperties_ShouldHaveNoDiagnostic()
+        {
+            var test = Usings + MessageContracts + @"
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static async Task Main()
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+
+            await bus.Publish<OrderSubmitted>(new
+            {
+                Id = NewId.NextGuid(),
+                CustomerId = 1,
+                OrderItems = new[]
+                {
+                    new
+                    {
+                        Id = Task.FromResult<Guid>(NewId.NextGuid()),
+                        Product = new
+                        {
+                            Name = ""Product"",
+                            Category = ""Category""
+                        },
+                        Quantity = 10,
+                        Price = 10.0m
+                    }
+                }
+            });
+        }
+    }
+}
+";
+            VerifyCSharpDiagnostic(test);
         }
 
         [Test]
@@ -686,7 +833,7 @@ namespace ConsoleApplication1
             var expected = new DiagnosticResult
             {
                 Id = "MCA0001",
-                Message = "Anonymous type does not map to message contract 'OrderSubmitted'. The following properties of the anonymous type are incompatible: CustomerId, OrderItems.Product.Category, OrderItems.Price",
+                Message = "Anonymous type does not map to message contract 'OrderSubmitted'. The following properties of the anonymous type are incompatible: OrderItems.Product.Category, OrderItems.Price",
                 Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {
@@ -850,7 +997,7 @@ namespace ConsoleApplication1
                         {
                             Name = ""Product""
 ,
-Category = default(string) },
+Category = default(Uri) },
                         Quantity = 10,
                         Price = 10.0m
                     }
@@ -1010,7 +1157,7 @@ namespace ConsoleApplication1
                         Price = 10.0m
 ,
 Product = new { Name = default(string),
-Category = default(string) } }
+Category = default(Uri) } }
                 }
             });
         }
@@ -1075,7 +1222,7 @@ namespace ConsoleApplication1
                         Product = new
                         {
                             Name = default(string),
-                            Category = default(string)
+                            Category = default(Uri)
                         },
                         Quantity = default(int),
                         Price = default(decimal)
@@ -1155,7 +1302,7 @@ namespace ConsoleApplication1
                         {
                             Name = ""Product""
 ,
-Category = default(string) },
+Category = default(Uri) },
                         Quantity = 10
 ,
 Price = default(decimal) }
@@ -1395,7 +1542,7 @@ namespace ConsoleApplication1
                     {
                         item.Product.Name
 ,
-                        Category = default(string)
+                        Category = default(Uri)
                     },
                     item.Quantity
 ,
@@ -1613,8 +1760,8 @@ namespace ConsoleApplication1
 
             await bus.Publish<Messages.OrderSubmitted>(new
             {
-                Id = NewId.NextGuid(),
-                CustomerId = 1,
+                Id = 42,
+                CustomerId = ""27"",
                 OrderItems = new[]
                 {
                     new
@@ -1637,7 +1784,7 @@ namespace ConsoleApplication1
             var expected = new DiagnosticResult
             {
                 Id = "MCA0001",
-                Message = "Anonymous type does not map to message contract 'OrderSubmitted'. The following properties of the anonymous type are incompatible: CustomerId",
+                Message = "Anonymous type does not map to message contract 'OrderSubmitted'. The following properties of the anonymous type are incompatible: Id",
                 Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {
@@ -1714,7 +1861,7 @@ namespace ConsoleApplication1
                         {
                             Name = ""Product""
 ,
-Category = default(string) },
+Category = default(Uri) },
                         Quantity = 10
 ,
 Price = default(decimal) }
@@ -2102,12 +2249,12 @@ namespace ConsoleApplication1
 
         protected override CodeFixProvider GetCSharpCodeFixProvider()
         {
-            return new MessageContractAnalyzerCodeFixProvider();
+            return new MessageContractCodeFixProvider();
         }
 
         protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
         {
-            return new MessageContractAnalyzerAnalyzer();
+            return new MessageContractAnalyzer();
         }
     }
 }

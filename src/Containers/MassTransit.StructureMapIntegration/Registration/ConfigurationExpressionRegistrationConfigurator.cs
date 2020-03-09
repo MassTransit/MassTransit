@@ -59,7 +59,7 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .ContainerScoped();
 
             _expression.For<IClientFactory>()
-                .Use(context => context.GetInstance<IBus>().CreateClientFactory(default))
+                .Use(context => ClientFactoryProvider(context.GetInstance<IConfigurationServiceProvider>()))
                 .Singleton();
         }
 

@@ -55,7 +55,7 @@ namespace MassTransit.Definition
         public string Consumer<T>()
             where T : class, IConsumer
         {
-            return GetConsumerName(typeof(T).Name);
+            return GetConsumerName(typeof(T));
         }
 
         public string Saga<T>()
@@ -82,11 +82,21 @@ namespace MassTransit.Definition
             return $"{activityName}_compensate";
         }
 
-        string GetConsumerName(string typeName)
+        public virtual string SanitizeName(string name)
         {
-            const string consumer = "Consumer";
+            return name;
+        }
 
-            var consumerName = typeName;
+        string GetConsumerName(Type type)
+        {
+            if (type.IsGenericType)
+            {
+                return SanitizeName(type.GetGenericArguments()[0].Name);
+            }
+
+            const string consumer = "Consumer";
+            var consumerName = type.Name;
+
             if (consumerName.EndsWith(consumer, StringComparison.InvariantCultureIgnoreCase))
                 consumerName = consumerName.Substring(0, consumerName.Length - consumer.Length);
 
@@ -113,11 +123,6 @@ namespace MassTransit.Definition
                 activityName = activityName.Substring(0, activityName.Length - activity.Length);
 
             return SanitizeName(activityName);
-        }
-
-        protected virtual string SanitizeName(string name)
-        {
-            return name;
         }
     }
 }

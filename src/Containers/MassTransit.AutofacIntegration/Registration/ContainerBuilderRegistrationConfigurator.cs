@@ -73,7 +73,7 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IPublishEndpoint>()
                 .InstancePerLifetimeScope();
 
-            _builder.Register(context => context.Resolve<IBus>().CreateClientFactory())
+            _builder.Register(context => ClientFactoryProvider(context.Resolve<IConfigurationServiceProvider>()))
                 .As<IClientFactory>()
                 .SingleInstance();
         }

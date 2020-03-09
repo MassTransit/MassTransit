@@ -1,6 +1,7 @@
 namespace MassTransit.AutofacIntegration
 {
     using Autofac;
+    using Context;
     using GreenPipes;
     using Metadata;
 
@@ -16,7 +17,7 @@ namespace MassTransit.AutofacIntegration
             if (consumer == null)
                 throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-            return consumeContext.PushConsumer(consumer);
+            return new ConsumerConsumeContextScope<TConsumer, TMessage>(consumeContext, consumer);
         }
 
         public static ConsumerConsumeContext<TConsumer, TMessage> GetConsumerScope<TConsumer, TMessage>(this ILifetimeScope lifetimeScope,
@@ -28,7 +29,7 @@ namespace MassTransit.AutofacIntegration
             if (consumer == null)
                 throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-            return consumeContext.PushConsumerScope(consumer, lifetimeScope);
+            return new ConsumerConsumeContextScope<TConsumer, TMessage>(consumeContext, consumer, lifetimeScope);
         }
 
         public static ILifetimeScope GetLifetimeScope<TMessage, TId>(this ILifetimeScopeRegistry<TId> registry, ConsumeContext<TMessage> context)
