@@ -11,7 +11,6 @@ namespace MassTransit.Conductor.Client
     using Distribution;
     using GreenPipes.Caching;
     using GreenPipes.Internals.Extensions;
-    using Messages;
     using Metadata;
     using Util;
 
@@ -109,7 +108,7 @@ namespace MassTransit.Conductor.Client
 
             var client = _clientFactory.CreateRequestClient<Link<TMessage>>();
 
-            var response = await client.GetResponse<Up<TMessage>>(new LinkMessage<TMessage>(ClientId), cancellationToken).ConfigureAwait(false);
+            var response = await client.GetResponse<Up<TMessage>>(new {ClientId}, cancellationToken).ConfigureAwait(false);
 
             var serviceAddress = response.Message.Service.ServiceAddress;
 

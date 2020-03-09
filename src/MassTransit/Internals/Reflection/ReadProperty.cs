@@ -11,6 +11,7 @@
 
     public class ReadProperty<T, TProperty> :
         IReadProperty<T, TProperty>
+        where T : class
     {
         Func<T, TProperty> _getMethod;
 
@@ -19,14 +20,9 @@
             if (propertyInfo == null)
                 throw new ArgumentNullException(nameof(propertyInfo));
 
-            if (typeof(T).GetTypeInfo().IsValueType)
-                throw new ArgumentException("The message type must be a reference type");
-
             var getMethod = propertyInfo.GetGetMethod(true);
             if (getMethod == null)
                 throw new ArgumentException("The property does not have an accessible get method");
-
-            Name = propertyInfo.Name;
 
             TProperty GetUsingReflection(T entity) => (TProperty)getMethod.Invoke(entity, null);
 
@@ -34,21 +30,13 @@
             {
                 Interlocked.Exchange(ref _getMethod, GetUsingReflection);
 
-                Task.Factory.StartNew(() => GenerateExpressionGetMethod(getMethod),
-                    CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+                Task.Run(() => GenerateExpressionGetMethod(getMethod));
 
                 return GetUsingReflection(entity);
             }
 
             _getMethod = Initialize;
         }
-
-        public ReadProperty(string propertyName)
-            : this(typeof(T).GetProperty(propertyName) ?? throw new ArgumentException("The implementation does not have a property named: " + propertyName))
-        {
-        }
-
-        public string Name { get; }
 
         public TProperty Get(T content)
         {
@@ -57,8 +45,6 @@
 
         async Task GenerateExpressionGetMethod(MethodInfo getMethod)
         {
-            await Task.Yield();
-
             try
             {
                 var method = CompileGetMethod(getMethod);

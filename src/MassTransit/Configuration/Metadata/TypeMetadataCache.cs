@@ -15,6 +15,8 @@
 
     public static class TypeMetadataCache
     {
+        static readonly object _typeCacheLock = new object();
+
         static CachedType GetOrAdd(Type type)
         {
             return Cached.Instance.GetOrAdd(type, _ => (CachedType)Activator.CreateInstance(typeof(CachedType<>).MakeGenericType(type)));
@@ -43,6 +45,14 @@
         public static bool HasConsumerInterfaces(Type type)
         {
             return GetOrAdd(type).HasConsumerInterfaces;
+        }
+
+        public static Type GetImplementationType(Type type)
+        {
+            lock (_typeCacheLock)
+            {
+                return GreenPipes.Internals.Extensions.TypeCache.GetImplementationType(type);
+            }
         }
 
         /// <summary>
@@ -174,7 +184,7 @@
             _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
             _hasConsumerInterfaces = new Lazy<bool>(() => !_hasSagaInterfaces.Value && ScanForConsumerInterfaces(), LazyThreadSafetyMode.PublicationOnly);
 
-            List<PropertyInfo> PropertyListFactory() =>
+            static List<PropertyInfo> PropertyListFactory() =>
                 typeof(T).GetAllProperties()
                     .GroupBy(x => x.Name)
                     .Select(x => x.Last())
@@ -186,12 +196,11 @@
             _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T).GetTypeInfo()));
             _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
-            _diagnosticAddress = new Lazy<string>(() => GetDiagnosticAddress());
-            _implementationType = new Lazy<Type>(() => GreenPipes.Internals.Extensions.TypeCache.GetImplementationType(typeof(T)));
+            _diagnosticAddress = new Lazy<string>(GetDiagnosticAddress);
+            _implementationType = new Lazy<Type>(() => TypeMetadataCache.GetImplementationType(typeof(T)));
         }
 
         public static string ShortName => Cached.Metadata.Value.ShortName;
-
         public static string DiagnosticAddress => Cached.Metadata.Value.DiagnosticAddress;
         public static bool HasSagaInterfaces => Cached.Metadata.Value.HasSagaInterfaces;
         public static bool HasConsumerInterfaces => Cached.Metadata.Value.HasConsumerInterfaces;

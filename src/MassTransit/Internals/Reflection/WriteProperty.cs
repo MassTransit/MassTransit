@@ -11,25 +11,17 @@
 
     public class WriteProperty<T, TProperty> :
         IWriteProperty<T, TProperty>
+        where T : class
     {
         Action<T, TProperty> _setMethod;
 
         public WriteProperty(Type implementationType, PropertyInfo propertyInfo)
         {
-            if (typeof(T).GetTypeInfo().IsValueType)
-                throw new ArgumentException("The message type must be a reference type");
-
-            var implementationPropertyInfo = implementationType.GetProperty(propertyInfo.Name);
-            if (implementationPropertyInfo == null)
-                throw new ArgumentException("The implementation does not have a property named: " + propertyInfo.Name);
-
-            var setMethod = implementationPropertyInfo.GetSetMethod(true);
+            var setMethod = propertyInfo.GetSetMethod(true);
             if (setMethod == null)
-                throw new ArgumentException($"The property does not have an accessible set method: {implementationPropertyInfo.Name}");
+                throw new ArgumentException($"The property does not have an accessible set method: {propertyInfo.Name}");
 
             // look for <Address>k__BackingField and use a field setter if available
-
-            Name = propertyInfo.Name;
 
             void SetUsingReflection(T entity, TProperty property) => setMethod.Invoke(entity, new object[] {property});
 
@@ -39,20 +31,11 @@
 
                 SetUsingReflection(entity, property);
 
-                Task.Factory.StartNew(() => GenerateExpressionSetMethod(implementationType, setMethod),
-                    CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
+                Task.Run(() => GenerateExpressionSetMethod(implementationType, setMethod));
             }
 
             _setMethod = Initialize;
         }
-
-        public WriteProperty(Type implementationType, string propertyName)
-            : this(implementationType, typeof(T).GetProperty(propertyName) ?? throw new ArgumentException("The implementation does not have a property named: "
-                + propertyName))
-        {
-        }
-
-        public string Name { get; }
 
         public void Set(T content, TProperty value)
         {
@@ -61,8 +44,6 @@
 
         async Task GenerateExpressionSetMethod(Type implementationType, MethodInfo setMethod)
         {
-            await Task.Yield();
-
             try
             {
                 var fastSetMethod = CompileSetMethod(implementationType, setMethod);
@@ -73,7 +54,7 @@
             catch (Exception)
             {
             }
-            #else
+        #else
             catch (Exception ex)
             {
                 if (Trace.Listeners.Count > 0)

@@ -40,6 +40,7 @@
         /// <param name="propertyExpression"></param>
         public static IRegistrationBuilder<ILifetimeScopeIdAccessor<TInput, T>, ConcreteReflectionActivatorData, SingleRegistrationStyle>
             RegisterLifetimeScopeIdAccessor<TInput, T>(this ContainerBuilder builder, Expression<Func<TInput, T>> propertyExpression)
+            where TInput : class
         {
             if (propertyExpression == null)
                 throw new ArgumentNullException(nameof(propertyExpression));

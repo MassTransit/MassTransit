@@ -6,7 +6,6 @@ namespace MassTransit.Conductor.Server
     using Contexts;
     using Contracts;
     using GreenPipes.Caching;
-    using Messages;
     using Metadata;
 
 
@@ -48,7 +47,12 @@ namespace MassTransit.Conductor.Server
             {
                 var endpoint = await receiveEndpoint.GetPublishSendEndpoint<Up<TMessage>>().ConfigureAwait(false);
 
-                await endpoint.Send<Up<TMessage>>(new UpMessage<TMessage>(serviceInfo, instanceInfo, MessageInfo)).ConfigureAwait(false);
+                await endpoint.Send<Up<TMessage>>(new
+                {
+                    Service = serviceInfo,
+                    Instance = instanceInfo,
+                    Message = MessageInfo
+                }).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

@@ -3,9 +3,10 @@
     using System.Reflection;
 
 
-    public interface IReadPropertyCache<in TEntity>
+    public interface IReadPropertyCache<in T>
+        where T : class
     {
-        IReadProperty<TEntity, TProperty> GetProperty<TProperty>(string name);
-        IReadProperty<TEntity, TProperty> GetProperty<TProperty>(PropertyInfo propertyInfo);
+        IReadProperty<T, TProperty> GetProperty<TProperty>(string name);
+        IReadProperty<T, TProperty> GetProperty<TProperty>(PropertyInfo propertyInfo);
     }
 }

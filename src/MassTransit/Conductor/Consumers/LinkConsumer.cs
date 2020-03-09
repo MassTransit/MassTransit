@@ -3,8 +3,6 @@ namespace MassTransit.Conductor.Consumers
     using System.Threading.Tasks;
     using Context;
     using Contracts;
-    using Messages;
-    using Metadata;
     using Server;
 
 
@@ -33,7 +31,12 @@ namespace MassTransit.Conductor.Consumers
 
             clientContext.NotifyConsumed(context);
 
-            await context.RespondAsync<Up<TMessage>>(new UpMessage<TMessage>(_serviceInfo, _instanceInfo, _clientCache.MessageInfo)).ConfigureAwait(false);
+            await context.RespondAsync<Up<TMessage>>(new
+            {
+                Service = _serviceInfo,
+                Instance = _instanceInfo,
+                Message = _clientCache.MessageInfo
+            }).ConfigureAwait(false);
         }
     }
 }

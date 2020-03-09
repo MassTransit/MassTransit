@@ -6,6 +6,7 @@
 
     public class MessageLifetimeScopeIdAccessor<TMessage, TId> :
         ILifetimeScopeIdAccessor<TMessage, TId>
+        where TMessage : class
     {
         readonly IReadProperty<TMessage, TId> _property;
 

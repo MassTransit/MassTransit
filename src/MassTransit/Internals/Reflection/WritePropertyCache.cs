@@ -2,71 +2,90 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
+    using Extensions;
     using Metadata;
 
 
     public class WritePropertyCache<T> :
         IWritePropertyCache<T>
+        where T : class
     {
         readonly Type _implementationType;
         readonly IDictionary<string, IWriteProperty<T>> _properties;
+        readonly IDictionary<string, PropertyInfo> _propertyIndex;
 
         WritePropertyCache()
         {
-            _implementationType = TypeMetadataCache<T>.IsValidMessageType && typeof(T).GetTypeInfo().IsInterface
-                ? TypeMetadataCache<T>.ImplementationType
-                : typeof(T);
+            if (TypeMetadataCache<T>.IsValidMessageType && typeof(T).GetTypeInfo().IsInterface)
+            {
+                _implementationType = TypeMetadataCache<T>.ImplementationType;
+                _propertyIndex = _implementationType.GetAllProperties()
+                    .GroupBy(x => x.Name)
+                    .Select(x => x.Last())
+                    .ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
+            }
+            else
+            {
+                _implementationType = typeof(T);
+                _propertyIndex = TypeMetadataCache<T>.Properties
+                    .ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
+            }
 
             _properties = new Dictionary<string, IWriteProperty<T>>(StringComparer.OrdinalIgnoreCase);
         }
 
         IWriteProperty<T, TProperty> IWritePropertyCache<T>.GetProperty<TProperty>(string name)
         {
-            lock (_properties)
-            {
-                if (_properties.TryGetValue(name, out var property))
-                    return property as IWriteProperty<T, TProperty>;
-
-                var writeProperty = new WriteProperty<T, TProperty>(_implementationType, name);
-
-                _properties[name] = writeProperty;
-
-                return writeProperty;
-            }
+            return GetWriteProperty<TProperty>(name);
         }
 
         IWriteProperty<T, TProperty> IWritePropertyCache<T>.GetProperty<TProperty>(PropertyInfo propertyInfo)
         {
+            var name = propertyInfo?.Name ?? throw new ArgumentNullException(nameof(propertyInfo));
+
+            return GetWriteProperty<TProperty>(name);
+        }
+
+        IWriteProperty<T, TProperty> GetWriteProperty<TProperty>(string name)
+        {
             lock (_properties)
             {
-                var name = propertyInfo?.Name ?? throw new ArgumentNullException(nameof(propertyInfo));
-
                 if (_properties.TryGetValue(name, out var property))
                     return property as IWriteProperty<T, TProperty>;
 
-                var writeProperty = new WriteProperty<T, TProperty>(_implementationType, propertyInfo);
+                if (_propertyIndex.TryGetValue(name, out var propertyInfo))
+                {
+                    if (propertyInfo.PropertyType != typeof(TProperty))
+                        throw new ArgumentException(
+                            $"Property type mismatch, {TypeMetadataCache<TProperty>.ShortName} != {TypeMetadataCache.GetShortName(propertyInfo.PropertyType)}");
 
-                _properties[name] = writeProperty;
+                    var writeProperty = new WriteProperty<T, TProperty>(_implementationType, propertyInfo);
 
-                return writeProperty;
+                    _properties[name] = writeProperty;
+
+                    return writeProperty;
+                }
             }
+
+            throw new ArgumentException($"{TypeMetadataCache<T>.ShortName} does not contain the property: {name}", nameof(name));
         }
 
         public static IWriteProperty<T, TProperty> GetProperty<TProperty>(string name)
         {
-            return Cached.PropertyCache.GetProperty<TProperty>(name);
+            return Cached.PropertyCache.Value.GetProperty<TProperty>(name);
         }
 
         public static IWriteProperty<T, TProperty> GetProperty<TProperty>(PropertyInfo propertyInfo)
         {
-            return Cached.PropertyCache.GetProperty<TProperty>(propertyInfo);
+            return Cached.PropertyCache.Value.GetProperty<TProperty>(propertyInfo);
         }
 
 
         static class Cached
         {
-            internal static readonly IWritePropertyCache<T> PropertyCache = new WritePropertyCache<T>();
+            internal static readonly Lazy<IWritePropertyCache<T>> PropertyCache = new Lazy<IWritePropertyCache<T>>(() => new WritePropertyCache<T>());
         }
     }
 }
