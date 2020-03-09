@@ -17,10 +17,10 @@
         readonly RedisSagaRepositoryContextFactory<TSaga> _repositoryContextFactory;
 
         public RedisSagaRepository(Func<IDatabase> redisDbFactory, bool optimistic = true, TimeSpan? lockTimeout = null, TimeSpan? lockRetryTimeout = null,
-            string keyPrefix = "")
+            string keyPrefix = "", TimeSpan? expiry = null)
         {
             var options = new RedisSagaRepositoryOptions<TSaga>(optimistic ? ConcurrencyMode.Optimistic : ConcurrencyMode.Pessimistic, lockTimeout, null,
-                keyPrefix, SelectDefaultDatabase);
+                keyPrefix, SelectDefaultDatabase, expiry);
 
             var consumeContextFactory = new RedisSagaConsumeContextFactory<TSaga>();
 

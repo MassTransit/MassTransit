@@ -17,6 +17,7 @@ namespace MassTransit.RedisIntegration.Contexts
     {
         readonly IDatabase _database;
         readonly RedisSagaRepositoryOptions<TSaga> _options;
+
         IAsyncDisposable _lock;
 
         public RedisDatabaseContext(IDatabase database, RedisSagaRepositoryOptions<TSaga> options)
@@ -150,7 +151,7 @@ namespace MassTransit.RedisIntegration.Contexts
 
         Task Put(TSaga instance)
         {
-            return _database.StringSetAsync(_options.FormatSagaKey(instance.CorrelationId), SagaSerializer.Serialize(instance));
+            return _database.StringSetAsync(_options.FormatSagaKey(instance.CorrelationId), SagaSerializer.Serialize(instance), _options.Expiry);
         }
 
         Task Delete(Guid correlationId)
