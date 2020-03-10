@@ -59,7 +59,6 @@ MassTransit uses a temporary non-durable queue and has a consumer to handle resp
 
 #### Reading
 
-http://www.udidahan.com/2008/01/30/podcast-message-priority-you-arent-gonna-need-it/
 http://lostechies.com/jimmybogard/2010/11/18/queues-are-still-queues/
 
 ### I want to know if another bus is subscribed to my message.
