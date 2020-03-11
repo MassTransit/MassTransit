@@ -12,8 +12,10 @@
 
         static ExceptionUtil()
         {
-            _cleanup = new Regex(
-                @"--- End of stack trace.* ---.*\n\s+(at System\.Runtime\.CompilerServices\.TaskAwaiter.*\s*|at System\.Runtime\.ExceptionServices\.ExceptionDispatchInfo.*\s*)+",
+            const string awaiter = @"at System\.Runtime\.CompilerServices\.TaskAwaiter.*";
+            const string exception = @"at System\.Runtime\.ExceptionServices\.ExceptionDispatchInfo.*";
+
+            _cleanup = new Regex(@"\n\s+(" + string.Join("|", awaiter, exception) + ")+",
                 RegexOptions.Multiline | RegexOptions.Compiled);
         }
 

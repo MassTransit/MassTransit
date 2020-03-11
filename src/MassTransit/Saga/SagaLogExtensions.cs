@@ -1,92 +1,90 @@
 namespace MassTransit.Saga
 {
     using System;
+    using System.Runtime.CompilerServices;
     using Context;
     using Metadata;
+    using Microsoft.Extensions.Logging;
 
 
     public static class SagaLogExtensions
     {
+        static readonly LogMessage<string, Guid?, string> _logUsed = LogContext.Define<string, Guid?, string>(LogLevel.Debug,
+            "SAGA:{SagaType}:{CorrelationId} Used {MessageType}");
+
+        static readonly LogMessage<string, Guid?, string> _logAdded = LogContext.Define<string, Guid?, string>(LogLevel.Debug,
+            "SAGA:{SagaType}:{CorrelationId} Added {MessageType}");
+
+        static readonly LogMessage<string, Guid?, string> _logCreated = LogContext.Define<string, Guid?, string>(LogLevel.Debug,
+            "SAGA:{SagaType}:{CorrelationId} Created {MessageType}");
+
+        static readonly LogMessage<string, Guid?, string> _logInserted = LogContext.Define<string, Guid?, string>(LogLevel.Debug,
+            "SAGA:{SagaType}:{CorrelationId} Used {MessageType}");
+
+        static readonly LogMessage<string, Guid?, string> _logInsertFaulted = LogContext.Define<string, Guid?, string>(LogLevel.Debug,
+            "SAGA:{SagaType}:{CorrelationId} Dupe {MessageType}");
+
+        static readonly LogMessage<string, Guid?, string> _logRemoved = LogContext.Define<string, Guid?, string>(LogLevel.Debug,
+            "SAGA:{SagaType}:{CorrelationId} Removed {MessageType}");
+
+        static readonly LogMessage<string, Guid?, string> _logFaulted = LogContext.Define<string, Guid?, string>(LogLevel.Error,
+            "SAGA:{SagaType}:{CorrelationId} Fault {MessageType}");
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogUsed<TSaga, TMessage>(this SagaConsumeContext<TSaga, TMessage> context, Guid? correlationId = default)
             where TSaga : class, ISaga
             where TMessage : class
         {
-            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Used {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
+            _logUsed(TypeMetadataCache<TSaga>.ShortName, context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogAdded<TSaga, TMessage>(this SagaConsumeContext<TSaga, TMessage> context, Guid? correlationId = default)
             where TSaga : class, ISaga
             where TMessage : class
         {
-            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Added {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
+            _logAdded(TypeMetadataCache<TSaga>.ShortName, context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogCreated<TSaga, TMessage>(this SagaConsumeContext<TSaga, TMessage> context, Guid? correlationId = default)
             where TSaga : class, ISaga
             where TMessage : class
         {
-            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Created {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
+            _logCreated(TypeMetadataCache<TSaga>.ShortName, context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogInsert<TSaga, TMessage>(this ConsumeContext<TMessage> context, Guid? correlationId = default)
             where TSaga : class, ISaga
             where TMessage : class
         {
-            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Added {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
+            _logInserted(TypeMetadataCache<TSaga>.ShortName, context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogInsertFault<TSaga, TMessage>(this ConsumeContext<TMessage> context, Exception exception,
             Guid? correlationId = default)
             where TSaga : class, ISaga
             where TMessage : class
         {
-            LogContext.Debug?.Log(exception, "SAGA:{SagaType}:{CorrelationId} Dupe {MessageType}", TypeMetadataCache<TSaga>.ShortName, correlationId,
-                TypeMetadataCache<TMessage>.ShortName);
+            _logInsertFaulted(TypeMetadataCache<TSaga>.ShortName, context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName, exception);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogRemoved<TSaga, TMessage>(this SagaConsumeContext<TSaga, TMessage> context, Guid? correlationId = default)
             where TSaga : class, ISaga
             where TMessage : class
         {
-            LogContext.Debug?.Log("SAGA:{SagaType}:{CorrelationId} Removed {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
+            _logRemoved(TypeMetadataCache<TSaga>.ShortName, context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
         }
 
-        public static void LogRemoved<TSaga, TMessage>(this SagaConsumeContext<TSaga, TMessage> context, Exception exception, Guid? correlationId = default)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void LogFault<TSaga, TMessage>(this ConsumeContext<TMessage> context, Exception exception, Guid? correlationId = default)
             where TSaga : class, ISaga
             where TMessage : class
         {
-            LogContext.Error?.Log(exception, "SAGA:{SagaType}:{CorrelationId} Removed(Fault) {MessageType}", TypeMetadataCache<TSaga>.ShortName,
-                context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName);
-        }
-
-        public static void LogFault<TSaga, TMessage>(this ConsumeContext<TMessage> context, ISagaRepository<TSaga> repository, Exception exception,
-            Guid? correlationId = default)
-            where TSaga : class, ISaga
-            where TMessage : class
-        {
-            LogContext.Error?.Log(exception, "SAGA:{SagaType}:{CorrelationId} Fault {MessageType}", TypeMetadataCache<TSaga>.ShortName, correlationId,
-                TypeMetadataCache<TMessage>.ShortName);
-        }
-
-        public static void LogFault<TSaga, TMessage>(this SagaQueryConsumeContext<TSaga, TMessage> context, Exception exception, Guid? correlationId = default)
-            where TSaga : class, ISaga
-            where TMessage : class
-        {
-            LogContext.Error?.Log(exception, "SAGA:{SagaType}:{CorrelationId} Fault {MessageType}", TypeMetadataCache<TSaga>.ShortName, correlationId,
-                TypeMetadataCache<TMessage>.ShortName);
-        }
-
-        public static void LogFault<TSaga, TMessage>(this SagaConsumeContext<TSaga, TMessage> context, Exception exception, Guid? correlationId = default)
-            where TSaga : class, ISaga
-            where TMessage : class
-        {
-            LogContext.Error?.Log(exception, "SAGA:{SagaType}:{CorrelationId} Fault {MessageType}", TypeMetadataCache<TSaga>.ShortName, correlationId,
-                TypeMetadataCache<TMessage>.ShortName);
+            _logFaulted(TypeMetadataCache<TSaga>.ShortName, context.CorrelationId ?? correlationId, TypeMetadataCache<TMessage>.ShortName, exception);
         }
     }
 }

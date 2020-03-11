@@ -41,58 +41,20 @@ namespace MassTransit.Saga
             return _repositoryContextFactory.Execute<IEnumerable<Guid>>(async context => await context.Query(query).ConfigureAwait(false));
         }
 
-        public async Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
+        public Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
             var correlationId = context.CorrelationId ??
                 throw new SagaException("The CorrelationId was not specified", typeof(TSaga), typeof(T));
 
-            try
-            {
-                await _repositoryContextFactory.Send(context, new SendSagaPipe<TSaga, T>(policy, next, correlationId)).ConfigureAwait(false);
-            }
-            catch (SagaException exception)
-            {
-                context.LogFault(this, exception);
-                throw;
-            }
-            catch (DataException exception)
-            {
-                context.LogFault(this, exception);
-                throw;
-            }
-            catch (Exception exception)
-            {
-                context.LogFault(this, exception);
-
-                throw new SagaException(exception.Message, typeof(TSaga), typeof(T), Guid.Empty, exception);
-            }
+            return _repositoryContextFactory.Send(context, new SendSagaPipe<TSaga, T>(policy, next, correlationId));
         }
 
-        public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
+        public Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next)
             where T : class
         {
-            try
-            {
-                await _repositoryContextFactory.SendQuery(context, query, new SendQuerySagaPipe<TSaga, T>(policy, next)).ConfigureAwait(false);
-            }
-            catch (SagaException exception)
-            {
-                context.LogFault(this, exception);
-                throw;
-            }
-            catch (DataException exception)
-            {
-                context.LogFault(this, exception);
-                throw;
-            }
-            catch (Exception exception)
-            {
-                context.LogFault(this, exception);
-
-                throw new SagaException(exception.Message, typeof(TSaga), typeof(T), Guid.Empty, exception);
-            }
+            return _repositoryContextFactory.SendQuery(context, query, new SendQuerySagaPipe<TSaga, T>(policy, next));
         }
     }
 }
