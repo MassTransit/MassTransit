@@ -284,7 +284,7 @@
                 {
                     _faulted = faulted;
 
-                    if (_cancellationToken.IsCancellationRequested)
+                    if (_cancellationToken.IsCancellationRequested || IsUnrecoverable(faulted.Exception))
                     {
                         _handle.Disconnect();
 
@@ -293,6 +293,13 @@
 
                     return TaskUtil.Completed;
                 }
+
+                static bool IsUnrecoverable(Exception exception) =>
+                    exception switch
+                    {
+                        ConnectionException connectionException => !connectionException.IsTransient,
+                        _ => false
+                    };
             }
         }
     }
