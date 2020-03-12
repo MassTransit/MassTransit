@@ -20,10 +20,25 @@ namespace MassTransit.Internals.Extensions
 
             await Task.WhenAny(supervisorTask, asyncContext.Context).ConfigureAwait(false);
 
-            if (supervisorTask.IsFaulted)
-                await asyncContext.CreateFaulted(supervisorTask.Exception).ConfigureAwait(false);
-            else if (supervisorTask.IsCanceled)
-                await asyncContext.CreateCanceled().ConfigureAwait(false);
+            async Task HandleSupervisorTask()
+            {
+                try
+                {
+                    await supervisorTask.ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    await asyncContext.CreateCanceled().ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    await asyncContext.CreateFaulted(exception).ConfigureAwait(false);
+                }
+            }
+
+        #pragma warning disable 4014
+            HandleSupervisorTask();
+        #pragma warning restore 4014
 
             return await asyncContext.Context.ConfigureAwait(false);
         }

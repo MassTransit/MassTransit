@@ -35,6 +35,7 @@
             _connectionRetryPolicy = Retry.CreatePolicy(x =>
             {
                 x.Handle<RabbitMqConnectionException>();
+                x.Ignore<AuthenticationFailureException>();
 
                 x.Exponential(1000, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
             });

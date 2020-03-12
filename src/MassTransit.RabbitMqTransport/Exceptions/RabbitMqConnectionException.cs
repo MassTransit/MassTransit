@@ -34,10 +34,10 @@
             {
                 BrokerUnreachableException bue => bue.InnerException switch
                 {
-                    AuthenticationFailureException _ => true,
-                    _ => false
+                    AuthenticationFailureException _ => false,
+                    _ => true
                 },
-                _ => false
+                _ => true
             };
         }
     }
