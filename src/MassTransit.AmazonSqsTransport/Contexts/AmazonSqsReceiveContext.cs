@@ -24,8 +24,8 @@
         byte[] _body;
 
         public AmazonSqsReceiveContext(Message transportMessage, bool redelivered, SqsReceiveEndpointContext context,
-            ClientContext clientContext, ReceiveSettings receiveSettings, params object[] payloads)
-            : base(redelivered, context, payloads)
+            ClientContext clientContext, ReceiveSettings receiveSettings, ConnectionContext connectionContext)
+            : base(redelivered, context, receiveSettings, clientContext, connectionContext)
         {
             _clientContext = clientContext;
             _receiveSettings = receiveSettings;
