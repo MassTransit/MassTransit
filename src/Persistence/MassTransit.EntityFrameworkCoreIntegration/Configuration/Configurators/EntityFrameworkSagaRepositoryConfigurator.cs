@@ -76,6 +76,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Configurators
             };
         }
 
+        public void ExistingDbContext<TContext>()
+            where TContext : DbContext
+        {
+            _configureDbContext = configurator =>
+            {
+                configurator.Register<ISagaDbContextFactory<TSaga>, ContainerSagaDbContextFactory<TContext, TSaga>>();
+            };
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             if (_configureDbContext == null)
@@ -95,7 +104,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Configurators
                 EntityFrameworkSagaRepositoryContextFactory<TSaga>>();
         }
 
-        void AddDbContext<TContext, TImplementation>(IContainerRegistrar registrar,
+        static void AddDbContext<TContext, TImplementation>(IContainerRegistrar registrar,
             Action<IConfigurationServiceProvider, DbContextOptionsBuilder<TImplementation>> optionsAction)
             where TImplementation : DbContext, TContext
             where TContext : DbContext

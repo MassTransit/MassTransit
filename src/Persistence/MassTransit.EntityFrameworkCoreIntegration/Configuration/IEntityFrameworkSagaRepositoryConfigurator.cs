@@ -35,6 +35,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         /// </summary>
         /// <param name="databaseFactory"></param>
         void DatabaseFactory(Func<IConfigurationServiceProvider, Func<DbContext>> databaseFactory);
+
+        /// <summary>
+        /// Use an existing (already configured in the container) DbContext that will be resolved
+        /// within the container scope
+        /// </summary>
+        /// <typeparam name="TContext"></typeparam>
+        void ExistingDbContext<TContext>()
+            where TContext : DbContext;
     }
 
 
