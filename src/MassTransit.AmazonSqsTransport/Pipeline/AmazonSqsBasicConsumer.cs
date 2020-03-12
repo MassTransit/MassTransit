@@ -79,6 +79,10 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             {
                 await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
             }
+            catch (Exception exception)
+            {
+                context.LogTransportFaulted(exception);
+            }
             finally
             {
                 _pending.TryRemove(message.MessageId, out _);
