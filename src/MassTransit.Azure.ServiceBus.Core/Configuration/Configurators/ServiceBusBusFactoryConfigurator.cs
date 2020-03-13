@@ -29,10 +29,7 @@
 
             var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
 
-            _queueConfigurator = new QueueConfigurator(queueName)
-            {
-                AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle
-            };
+            _queueConfigurator = new QueueConfigurator(queueName) {AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle};
 
             _settings = new ReceiveEndpointSettings(queueName, _queueConfigurator);
         }
@@ -98,6 +95,16 @@
         public void OverrideDefaultBusEndpointQueueName(string value)
         {
             _queueConfigurator.Path = value;
+        }
+
+        public void SetNamespaceSeparatorToTilde()
+        {
+            _hostConfiguration.SetNamespaceSeparatorToTilde();
+        }
+
+        public void SetNamespaceSeparatorTo(string separator)
+        {
+            _hostConfiguration.SetNamespaceSeparatorTo(separator);
         }
 
         public bool DeployTopologyOnly

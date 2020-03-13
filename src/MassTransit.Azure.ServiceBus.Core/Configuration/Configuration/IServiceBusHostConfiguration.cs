@@ -30,5 +30,9 @@
             where T : class;
 
         void SubscriptionEndpoint(string subscriptionName, string topicPath, Action<IServiceBusSubscriptionEndpointConfigurator> configure);
+
+        void SetNamespaceSeparatorToTilde();
+
+        void SetNamespaceSeparatorTo(string separator);
     }
 }

@@ -169,7 +169,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         [SetUp]
         public void Setup()
         {
-            _nameFormatter = new ServiceBusMessageNameFormatter();
+            _nameFormatter = new ServiceBusMessageNameFormatter(false);
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
             _consumeTopology = new ServiceBusConsumeTopology(AzureBusFactory.MessageTopology, new ServiceBusPublishTopology(AzureBusFactory.MessageTopology));
 
@@ -229,7 +229,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         [SetUp]
         public void Setup()
         {
-            _nameFormatter = new ServiceBusMessageNameFormatter();
+            _nameFormatter = new ServiceBusMessageNameFormatter(false);
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
             _publishTopology = new ServiceBusPublishTopology(AzureBusFactory.MessageTopology);
 
@@ -316,7 +316,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         [SetUp]
         public void Setup()
         {
-            _nameFormatter = new ServiceBusMessageNameFormatter();
+            _nameFormatter = new ServiceBusMessageNameFormatter(false);
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
             _publishTopology = new ServiceBusPublishTopology(AzureBusFactory.MessageTopology);
 
