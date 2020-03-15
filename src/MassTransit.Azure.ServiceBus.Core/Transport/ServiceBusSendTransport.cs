@@ -74,9 +74,9 @@
 
                 var context = new AzureServiceBusSendContext<T>(_message, _cancellationToken);
 
-                CopyIncomingIdentifiersIfPresent(context);
-
                 await _pipe.Send(context).ConfigureAwait(false);
+
+                CopyIncomingIdentifiersIfPresent(context);
 
                 var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context,
                     (nameof(context.PartitionKey), context.PartitionKey),
