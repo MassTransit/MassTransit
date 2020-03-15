@@ -47,6 +47,22 @@
 
         public int TransportConcurrencyLimit { get; set; }
 
+        public void ApplyEndpointDefinition(IInMemoryReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
+        {
+            int? concurrencyLimit = definition.PrefetchCount;
+
+            if (definition.PrefetchCount.HasValue)
+                concurrencyLimit = definition.PrefetchCount.Value;
+
+            if (definition.ConcurrentMessageLimit.HasValue)
+                concurrencyLimit = definition.ConcurrentMessageLimit;
+
+            if (concurrencyLimit.HasValue)
+                configurator.ConcurrencyLimit = concurrencyLimit.Value;
+
+            definition.Configure(configurator);
+        }
+
         public IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IInMemoryReceiveEndpointConfigurator> configure)
         {
@@ -91,7 +107,11 @@
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
 
-            ReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+            ReceiveEndpoint(queueName, configurator =>
+            {
+                ApplyEndpointDefinition(configurator, definition);
+                configureEndpoint?.Invoke(configurator);
+            });
         }
 
         public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)

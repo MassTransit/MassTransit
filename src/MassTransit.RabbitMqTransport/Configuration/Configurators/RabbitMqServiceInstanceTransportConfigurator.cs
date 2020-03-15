@@ -9,12 +9,11 @@ namespace MassTransit.RabbitMqTransport.Configurators
     {
         public void ConfigureServiceEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            configurator.BindMessageExchanges = false;
         }
 
         public void ConfigureInstanceServiceEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            configurator.BindMessageExchanges = false;
+            configurator.ConfigureConsumeTopology = false;
         }
 
         public void ConfigureControlEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

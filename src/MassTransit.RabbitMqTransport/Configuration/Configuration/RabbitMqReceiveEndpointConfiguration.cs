@@ -41,8 +41,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             _endpointConfiguration = endpointConfiguration;
 
-            BindMessageExchanges = true;
-
             _managementPipe = new ManagementPipe();
             _connectionConfigurator = new PipeConfigurator<ConnectionContext>();
             _modelConfigurator = new PipeConfigurator<ModelContext>();
@@ -57,9 +55,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
             }
         }
 
-        public IRabbitMqReceiveEndpointConfigurator Configurator => this;
-
-        public bool BindMessageExchanges { get; set; }
+        public bool BindMessageExchanges
+        {
+            set => ConfigureConsumeTopology = value;
+        }
 
         public ReceiveSettings Settings => _settings;
 

@@ -3,6 +3,7 @@
     using System;
     using Configurators;
     using Definition;
+    using GreenPipes;
     using Hosting;
     using Topology;
     using Transport;
@@ -31,6 +32,16 @@
         {
             get => _hostSettings;
             set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        public void ApplyEndpointDefinition(IHttpReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
+        {
+            if (definition.ConcurrentMessageLimit.HasValue)
+            {
+                configurator.UseConcurrencyLimit(definition.ConcurrentMessageLimit.Value);
+            }
+
+            definition.Configure(configurator);
         }
 
         public IHttpReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string pathMatch, Action<IHttpReceiveEndpointConfigurator> configure)
@@ -73,7 +84,11 @@
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
 
-            ReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+            ReceiveEndpoint(queueName, x =>
+            {
+                ApplyEndpointDefinition(x, definition);
+                configureEndpoint?.Invoke(x);
+            });
         }
 
         public void ReceiveEndpoint(string queueName, Action<IHttpReceiveEndpointConfigurator> configureEndpoint)

@@ -9,7 +9,6 @@ namespace MassTransit
     using LamarIntegration;
     using LamarIntegration.Registration;
     using Metadata;
-    using Microsoft.Extensions.DependencyInjection;
     using Saga;
 
 
@@ -68,8 +67,9 @@ namespace MassTransit
         /// <param name="container">The container reference</param>
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        public static void ConfigureEndpoints<T>(this T configurator, IContainer container, IEndpointNameFormatter endpointNameFormatter = null)
-            where T : IReceiveConfigurator
+        public static void ConfigureEndpoints<T>(this IReceiveConfigurator<T> configurator, IContainer container,
+            IEndpointNameFormatter endpointNameFormatter = null)
+            where T : IReceiveEndpointConfigurator
         {
             var registration = container.GetInstance<IRegistration>();
 
@@ -86,8 +86,9 @@ namespace MassTransit
         /// <param name="context">The container reference</param>
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        public static void ConfigureEndpoints<T>(this T configurator, IServiceContext context, IEndpointNameFormatter endpointNameFormatter = null)
-            where T : IReceiveConfigurator
+        public static void ConfigureEndpoints<T>(this IReceiveConfigurator<T> configurator, IServiceContext context,
+            IEndpointNameFormatter endpointNameFormatter = null)
+            where T : IReceiveEndpointConfigurator
         {
             var registration = context.GetInstance<IRegistration>();
 

@@ -67,8 +67,9 @@ namespace MassTransit
         /// <param name="container">The container reference</param>
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        public static void ConfigureEndpoints<T>(this T configurator, IContainer container, IEndpointNameFormatter endpointNameFormatter = null)
-            where T : IReceiveConfigurator
+        public static void ConfigureEndpoints<T>(this IReceiveConfigurator<T> configurator, IContainer container,
+            IEndpointNameFormatter endpointNameFormatter = null)
+            where T : IReceiveEndpointConfigurator
         {
             var registration = container.GetInstance<IRegistration>();
 
@@ -85,15 +86,16 @@ namespace MassTransit
         /// <param name="context">The container reference</param>
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        public static void ConfigureEndpoints<T>(this T configurator, IContext context, IEndpointNameFormatter endpointNameFormatter = null)
-            where T : IReceiveConfigurator
+        public static void ConfigureEndpoints<T>(this IReceiveConfigurator<T> configurator, IContext context,
+            IEndpointNameFormatter endpointNameFormatter = null)
+            where T : IReceiveEndpointConfigurator
         {
             var registration = context.GetInstance<IRegistration>();
 
             registration.ConfigureEndpoints(configurator, endpointNameFormatter);
         }
 
-         /// <summary>
+        /// <summary>
         /// Configure service endpoints for all defined consumer, saga, and activity types using an optional
         /// endpoint name formatter. If no endpoint name formatter is specified, and an <see cref="IEndpointNameFormatter"/>
         /// is registered in the container, it is resolved from the container. Otherwise, the <see cref="DefaultEndpointNameFormatter"/>
@@ -152,6 +154,7 @@ namespace MassTransit
                 registration.ConfigureEndpoints(instanceConfigurator, instanceConfigurator.EndpointNameFormatter);
             });
         }
+
         /// <summary>
         /// Configure a consumer (or consumers) on the receive endpoint
         /// </summary>

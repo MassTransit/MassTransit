@@ -213,7 +213,7 @@ namespace MassTransit.Transports.Tests
             public A_serialization_exception(Type harnessType)
                 : base(harnessType)
             {
-                Subscribe = false;
+                ConfigureConsumeTopology = false;
             }
         }
     }

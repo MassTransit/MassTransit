@@ -30,7 +30,7 @@
 
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            if (_configuration.SubscribeMessageTopics)
+            if (_configuration.ConfigureConsumeTopology)
             {
                 _configuration.Topology.Consume
                     .GetMessageTopology<T>()

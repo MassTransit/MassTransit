@@ -36,7 +36,7 @@
         {
             void ConfigureBusEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
-                configurator.BindMessageExchanges = false;
+                configurator.ConfigureConsumeTopology = false;
             }
 
             var busReceiveEndpointConfiguration = _busConfiguration.HostConfiguration

@@ -33,7 +33,7 @@
         {
             void ConfigureBusEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
             {
-                configurator.SubscribeMessageTopics = false;
+                configurator.ConfigureConsumeTopology = false;
             }
 
             var busReceiveEndpointConfiguration = _busConfiguration.HostConfiguration

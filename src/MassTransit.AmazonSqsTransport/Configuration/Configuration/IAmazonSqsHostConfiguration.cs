@@ -19,6 +19,13 @@
         IAmazonSqsHost Proxy { get; }
 
         /// <summary>
+        /// Apply the endpoint definition to the receive endpoint configurator
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="definition"></param>
+        void ApplyEndpointDefinition(IAmazonSqsReceiveEndpointConfigurator configurator, IEndpointDefinition definition);
+
+        /// <summary>
         /// Create a receive endpoint configuration using the specified host
         /// </summary>
         /// <returns></returns>

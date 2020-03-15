@@ -21,6 +21,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
 
         public Uri InputAddress { get; set; }
 
+        public bool ConfigureConsumeTopology
+        {
+            set { }
+        }
+
         public void AddDependency(IReceiveEndpointObserverConnector connector)
         {
         }

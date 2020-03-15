@@ -38,7 +38,7 @@
         {
             void ConfigureBusEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
             {
-                configurator.SubscribeMessageTopics = false;
+                configurator.ConfigureConsumeTopology = false;
             }
 
             if (Activity.DefaultIdFormat != ActivityIdFormat.Hierarchical)

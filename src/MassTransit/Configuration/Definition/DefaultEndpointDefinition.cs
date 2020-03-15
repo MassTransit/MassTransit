@@ -11,6 +11,8 @@ namespace MassTransit.Definition
             IsTemporary = isTemporary;
         }
 
+        public virtual bool ConfigureConsumeTopology => true;
+
         public abstract string GetEndpointName(IEndpointNameFormatter formatter);
 
         public virtual bool IsTemporary { get; }

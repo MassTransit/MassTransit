@@ -166,7 +166,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
-                configurator.BindMessageExchanges = false;
+                configurator.ConfigureConsumeTopology = false;
 
                 _a = Handled<A>(configurator);
                 _b = Handled<B>(configurator);

@@ -114,7 +114,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             configurator.ReceiveEndpoint(host, "input_queue_error", x =>
             {
-                x.BindMessageTopics = false;
+                x.ConfigureConsumeTopology = false;
 
                 _errorHandler = Handled<PingMessage>(x);
             });

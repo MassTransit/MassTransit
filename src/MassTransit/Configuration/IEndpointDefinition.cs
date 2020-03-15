@@ -25,6 +25,11 @@ namespace MassTransit
         int? ConcurrentMessageLimit { get; }
 
         /// <summary>
+        /// If true, configure the broker topology, which may include binding exchanges, subscribing to topics, etc.
+        /// </summary>
+        bool ConfigureConsumeTopology { get; }
+
+        /// <summary>
         /// Return the endpoint name for the consumer, using the specified formatter if necessary.
         /// </summary>
         /// <param name="formatter"></param>

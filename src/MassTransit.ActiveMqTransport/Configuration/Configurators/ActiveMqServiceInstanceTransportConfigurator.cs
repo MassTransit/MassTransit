@@ -9,12 +9,11 @@ namespace MassTransit.ActiveMqTransport.Configurators
     {
         public void ConfigureServiceEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
-            configurator.BindMessageTopics = false;
         }
 
         public void ConfigureInstanceServiceEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
-            configurator.BindMessageTopics = false;
+            configurator.ConfigureConsumeTopology = false;
         }
 
         public void ConfigureControlEndpoint(IActiveMqReceiveEndpointConfigurator configurator)

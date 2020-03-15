@@ -9,10 +9,12 @@ namespace MassTransit
         readonly string _tag;
         string _name;
 
-        public TemporaryEndpointDefinition(string tag = default, int? concurrentMessageLimit = default, int? prefetchCount = default)
+        public TemporaryEndpointDefinition(string tag = default, int? concurrentMessageLimit = default, int? prefetchCount = default,
+            bool configureConsumeTopology = true)
         {
             ConcurrentMessageLimit = concurrentMessageLimit;
             PrefetchCount = prefetchCount;
+            ConfigureConsumeTopology = configureConsumeTopology;
 
             _tag = tag ?? "endpoint";
         }
@@ -25,6 +27,7 @@ namespace MassTransit
         public bool IsTemporary => true;
         public int? PrefetchCount { get; }
         public int? ConcurrentMessageLimit { get; }
+        public bool ConfigureConsumeTopology { get; }
 
         public void Configure<T>(T configurator)
             where T : IReceiveEndpointConfigurator

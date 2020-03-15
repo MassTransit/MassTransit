@@ -33,7 +33,7 @@
         {
             void ConfigureBusEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
             {
-                configurator.BindMessageTopics = false;
+                configurator.ConfigureConsumeTopology = false;
             }
 
             var busReceiveEndpointConfiguration = _busConfiguration.HostConfiguration

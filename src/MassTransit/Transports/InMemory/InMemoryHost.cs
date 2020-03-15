@@ -63,7 +63,11 @@ namespace MassTransit.Transports.InMemory
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
 
-            return ConnectReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+            return ConnectReceiveEndpoint(queueName, configurator =>
+            {
+                _hostConfiguration.ApplyEndpointDefinition(configurator, definition);
+                configureEndpoint?.Invoke(configurator);
+            });
         }
 
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null)

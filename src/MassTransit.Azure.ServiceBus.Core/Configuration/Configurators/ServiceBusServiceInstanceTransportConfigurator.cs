@@ -8,12 +8,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
     {
         public void ConfigureServiceEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
-            configurator.SubscribeMessageTopics = false;
         }
 
         public void ConfigureInstanceServiceEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
-            configurator.SubscribeMessageTopics = false;
+            configurator.ConfigureConsumeTopology = false;
         }
 
         public void ConfigureControlEndpoint(IServiceBusReceiveEndpointConfigurator configurator)

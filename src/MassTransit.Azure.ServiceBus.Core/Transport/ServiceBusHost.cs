@@ -92,7 +92,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
 
-            return ConnectReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+            return ConnectReceiveEndpoint(queueName, configurator =>
+            {
+                _hostConfiguration.ApplyEndpointDefinition(configurator, definition);
+                configureEndpoint?.Invoke(configurator);
+            });
         }
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configure = null)

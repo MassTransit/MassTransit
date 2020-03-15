@@ -29,7 +29,7 @@
 
             configurator.ReceiveEndpoint(AlternateQueueName, x =>
             {
-                x.BindMessageExchanges = false;
+                x.ConfigureConsumeTopology = false;
 
                 x.Bind(AlternateExchangeName);
 

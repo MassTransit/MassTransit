@@ -60,7 +60,7 @@
             var queueName = $"Stock-{key}";
             var handle = Host.ConnectReceiveEndpoint(queueName, x =>
             {
-                x.BindMessageExchanges = false;
+                x.ConfigureConsumeTopology = false;
                 x.Consumer<Consumer>();
 
                 x.Bind<Message>(e =>

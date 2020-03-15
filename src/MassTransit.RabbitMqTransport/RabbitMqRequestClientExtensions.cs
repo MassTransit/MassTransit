@@ -43,6 +43,7 @@
             public bool IsTemporary => false;
             public int? PrefetchCount { get; }
             public int? ConcurrentMessageLimit { get; }
+            public bool ConfigureConsumeTopology => false;
 
             public void Configure<T>(T configurator)
                 where T : IReceiveEndpointConfigurator

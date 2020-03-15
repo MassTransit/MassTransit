@@ -25,6 +25,13 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         IRabbitMqHost Proxy { get; }
 
+        /// <summary>
+        /// Apply the endpoint definition to the receive endpoint configurator
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="definition"></param>
+        void ApplyEndpointDefinition(IRabbitMqReceiveEndpointConfigurator configurator, IEndpointDefinition definition);
+
         IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
 

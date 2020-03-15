@@ -32,12 +32,13 @@
 
             _settings.QueueConfigurator.BasePath = hostConfiguration.BasePath;
 
-            SubscribeMessageTopics = true;
-
             _inputAddress = new Lazy<Uri>(FormatInputAddress);
         }
 
-        public bool SubscribeMessageTopics { get; set; }
+        public bool SubscribeMessageTopics
+        {
+            set => ConfigureConsumeTopology = value;
+        }
 
         public ReceiveSettings Settings => _settings;
 
@@ -93,7 +94,7 @@
         {
             base.SelectBasicTier();
 
-            SubscribeMessageTopics = false;
+            ConfigureConsumeTopology = false;
         }
 
         Uri FormatInputAddress()

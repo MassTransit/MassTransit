@@ -9,5 +9,9 @@ namespace MassTransit.Registration
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
+        public CompensateActivityEndpointRegistrationConfigurator()
+        {
+            ConfigureConsumeTopology = false;
+        }
     }
 }

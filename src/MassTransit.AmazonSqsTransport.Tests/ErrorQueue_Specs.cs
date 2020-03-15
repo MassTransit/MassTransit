@@ -149,7 +149,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
         {
             configurator.ReceiveEndpoint(host, "input_queue_error", x =>
             {
-                x.SubscribeMessageTopics = false;
+                x.ConfigureConsumeTopology = false;
 
                 _errorHandler = Handled<PingMessage>(x);
             });

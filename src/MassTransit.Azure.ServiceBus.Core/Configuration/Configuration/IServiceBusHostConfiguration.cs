@@ -17,6 +17,13 @@
 
         IServiceBusHost Proxy { get; }
 
+        /// <summary>
+        /// Apply the endpoint definition to the receive endpoint configurator
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="definition"></param>
+        void ApplyEndpointDefinition(IServiceBusReceiveEndpointConfigurator configurator, IEndpointDefinition definition);
+
         IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IServiceBusReceiveEndpointConfigurator> configure = null);
 

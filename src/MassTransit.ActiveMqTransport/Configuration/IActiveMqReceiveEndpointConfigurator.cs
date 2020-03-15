@@ -15,6 +15,7 @@
         /// If true, creates message consumers for the message types in consumers, handlers, etc.
         /// With ActiveMQ, these are virtual consumers tied to the virtual topics
         /// </summary>
+        [Obsolete("Use ConfigureConsumeTopology instead. In the meantime, this property sets that property as well.")]
         bool BindMessageTopics { set; }
 
         /// <summary>

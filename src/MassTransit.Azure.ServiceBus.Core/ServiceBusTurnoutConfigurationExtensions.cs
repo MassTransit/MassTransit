@@ -24,13 +24,13 @@
             // configure the message expiration endpoint, so it's available at startup
             busFactoryConfigurator.ReceiveEndpoint(expiredQueueName, expiredEndpointConfigurator =>
             {
-                expiredEndpointConfigurator.SubscribeMessageTopics = false;
+                expiredEndpointConfigurator.ConfigureConsumeTopology = false;
 
                 // configure the turnout management endpoint
                 busFactoryConfigurator.ReceiveEndpoint(new TurnoutEndpointDefinition(),null, turnoutEndpointConfigurator =>
                 {
                     turnoutEndpointConfigurator.PrefetchCount = 100;
-                    turnoutEndpointConfigurator.SubscribeMessageTopics = false;
+                    turnoutEndpointConfigurator.ConfigureConsumeTopology = false;
 
                     turnoutEndpointConfigurator.EnableDeadLetteringOnMessageExpiration = true;
                     turnoutEndpointConfigurator.ForwardDeadLetteredMessagesTo = expiredEndpointConfigurator.InputAddress.AbsolutePath.Trim('/');
@@ -41,7 +41,7 @@
                     // configure the input queue endpoint
                     busFactoryConfigurator.ReceiveEndpoint(queueName, commandEndpointConfigurator =>
                     {
-                        commandEndpointConfigurator.SubscribeMessageTopics = false;
+                        commandEndpointConfigurator.ConfigureConsumeTopology = false;
 
                         commandEndpointConfigurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutEndpointConfigurator, expiredEndpointConfigurator,
                             configure);

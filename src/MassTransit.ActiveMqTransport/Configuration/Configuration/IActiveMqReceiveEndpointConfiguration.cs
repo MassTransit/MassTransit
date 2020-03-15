@@ -8,8 +8,6 @@
         IReceiveEndpointConfiguration,
         IActiveMqEndpointConfiguration
     {
-        bool BindMessageTopics { get; set; }
-
         ReceiveSettings Settings { get; }
 
         void Build(IActiveMqHostControl host);

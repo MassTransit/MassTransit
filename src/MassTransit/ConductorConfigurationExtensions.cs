@@ -35,7 +35,7 @@ namespace MassTransit
             ServiceInstanceOptions options, Action<IServiceInstanceConfigurator<TEndpointConfigurator>> configure)
             where TEndpointConfigurator : IReceiveEndpointConfigurator
         {
-            var transportConfigurator = GetServiceInstanceTransportConfigurator<TEndpointConfigurator>();
+            var transportConfigurator = Cached<TEndpointConfigurator>.Instance;
 
             var instance = new ServiceInstance();
 
@@ -58,19 +58,28 @@ namespace MassTransit
             }
         }
 
-        static IServiceInstanceTransportConfigurator<TEndpointConfigurator> GetServiceInstanceTransportConfigurator<TEndpointConfigurator>()
+
+        static class Cached<TEndpointConfigurator>
             where TEndpointConfigurator : IReceiveEndpointConfigurator
         {
-            var assembly = typeof(TEndpointConfigurator).Assembly;
+            internal static IServiceInstanceTransportConfigurator<TEndpointConfigurator> Instance => _configurator.Value;
 
-            var transportConfiguratorType = AssemblyTypeCache
-                .FindTypes(assembly, TypeClassification.Concrete, x => x.HasInterface<IServiceInstanceTransportConfigurator<TEndpointConfigurator>>())
-                .GetAwaiter().GetResult().FirstOrDefault();
+            static readonly Lazy<IServiceInstanceTransportConfigurator<TEndpointConfigurator>> _configurator =
+                new Lazy<IServiceInstanceTransportConfigurator<TEndpointConfigurator>>(GetServiceInstanceTransportConfigurator);
 
-            if (transportConfiguratorType == null)
-                throw new ArgumentException($"Type not found: {TypeMetadataCache<IServiceInstanceTransportConfigurator<TEndpointConfigurator>>.ShortName}");
+            static IServiceInstanceTransportConfigurator<TEndpointConfigurator> GetServiceInstanceTransportConfigurator()
+            {
+                var assembly = typeof(TEndpointConfigurator).Assembly;
 
-            return (IServiceInstanceTransportConfigurator<TEndpointConfigurator>)Activator.CreateInstance(transportConfiguratorType);
+                var transportConfiguratorType = AssemblyTypeCache
+                    .FindTypes(assembly, TypeClassification.Concrete, x => x.HasInterface<IServiceInstanceTransportConfigurator<TEndpointConfigurator>>())
+                    .GetAwaiter().GetResult().FirstOrDefault();
+
+                if (transportConfiguratorType == null)
+                    throw new ArgumentException($"Type not found: {TypeMetadataCache<IServiceInstanceTransportConfigurator<TEndpointConfigurator>>.ShortName}");
+
+                return (IServiceInstanceTransportConfigurator<TEndpointConfigurator>)Activator.CreateInstance(transportConfiguratorType);
+            }
         }
     }
 }

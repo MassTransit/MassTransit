@@ -21,6 +21,13 @@
         IActiveMqHost Proxy { get; }
 
         /// <summary>
+        /// Apply the endpoint definition to the receive endpoint configurator
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="definition"></param>
+        void ApplyEndpointDefinition(IActiveMqReceiveEndpointConfigurator configurator, IEndpointDefinition definition);
+
+        /// <summary>
         /// Create a receive endpoint configuration for the default host
         /// </summary>
         /// <param name="queueName"></param>

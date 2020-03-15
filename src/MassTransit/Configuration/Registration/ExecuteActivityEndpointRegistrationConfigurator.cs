@@ -9,5 +9,9 @@ namespace MassTransit.Registration
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
+        public ExecuteActivityEndpointRegistrationConfigurator()
+        {
+            ConfigureConsumeTopology = false;
+        }
     }
 }

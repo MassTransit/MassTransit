@@ -14,6 +14,7 @@
         /// <summary>
         /// If true, adds subscriptions for the message types to the related topics.
         /// </summary>
+        [Obsolete("Use ConfigureConsumeTopology instead. In the meantime, this property sets that property as well.")]
         bool SubscribeMessageTopics { set; }
 
         /// <summary>

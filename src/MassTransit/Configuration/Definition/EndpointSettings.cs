@@ -11,5 +11,7 @@ namespace MassTransit.Definition
         public int? PrefetchCount { get; set; }
 
         public int? ConcurrentMessageLimit { get; set; }
+
+        public bool ConfigureConsumeTopology { get; set; }
     }
 }

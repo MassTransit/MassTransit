@@ -17,6 +17,8 @@
 
         Uri InputAddress { get; }
 
+        bool ConfigureConsumeTopology { get; }
+
         ReceiveEndpointObservable EndpointObservers { get; }
         ReceiveObservable ReceiveObservers { get; }
         ReceiveTransportObservable TransportObservers { get; }

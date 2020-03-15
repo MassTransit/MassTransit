@@ -35,7 +35,7 @@ namespace MassTransit.Transports.Tests
         {
             HarnessType = harnessType;
 
-            Subscribe = true;
+            ConfigureConsumeTopology = true;
         }
 
         protected BusTestHarness Harness { get; private set; }
@@ -43,7 +43,7 @@ namespace MassTransit.Transports.Tests
         /// <summary>
         /// Set to False if the receive endpoint should not subscribe to message topics/exchanges
         /// </summary>
-        protected bool Subscribe { private get; set; }
+        protected bool ConfigureConsumeTopology { private get; set; }
 
         [OneTimeSetUp]
         public void CreateHarness()
@@ -56,7 +56,7 @@ namespace MassTransit.Transports.Tests
 
                 Harness = harness;
 
-                harness.OnConfigureRabbitMqReceiveEndpoint += x => x.BindMessageExchanges = Subscribe;
+                harness.OnConfigureRabbitMqReceiveEndpoint += x => x.ConfigureConsumeTopology = ConfigureConsumeTopology;
             }
             else if (HarnessType == typeof(ActiveMqTestHarness))
             {
@@ -64,7 +64,7 @@ namespace MassTransit.Transports.Tests
 
                 Harness = harness;
 
-                harness.OnConfigureActiveMqReceiveEndpoint += x => x.BindMessageTopics = Subscribe;
+                harness.OnConfigureActiveMqReceiveEndpoint += x => x.ConfigureConsumeTopology = ConfigureConsumeTopology;
             }
             else if (HarnessType == typeof(AzureServiceBusTestHarness))
             {
@@ -74,7 +74,7 @@ namespace MassTransit.Transports.Tests
 
                 Harness = harness;
 
-                harness.OnConfigureServiceBusReceiveEndpoint += x => x.SubscribeMessageTopics = Subscribe;
+                harness.OnConfigureServiceBusReceiveEndpoint += x => x.ConfigureConsumeTopology = ConfigureConsumeTopology;
             }
             else if (HarnessType == typeof(AmazonSqsTestHarness))
             {
@@ -82,7 +82,7 @@ namespace MassTransit.Transports.Tests
 
                 Harness = harness;
 
-                harness.OnConfigureAmazonSqsReceiveEndpoint += x => x.SubscribeMessageTopics = Subscribe;
+                harness.OnConfigureAmazonSqsReceiveEndpoint += x => x.ConfigureConsumeTopology = ConfigureConsumeTopology;
             }
             else
             {

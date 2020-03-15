@@ -94,8 +94,8 @@ namespace MassTransit.Registration
             activity.Configure(executeEndpointConfigurator, compensateEndpointConfigurator, _configurationServiceProvider);
         }
 
-        public void ConfigureEndpoints<T>(T configurator, IEndpointNameFormatter endpointNameFormatter)
-            where T : IReceiveConfigurator
+        public void ConfigureEndpoints<T>(IReceiveConfigurator<T> configurator, IEndpointNameFormatter endpointNameFormatter)
+            where T : IReceiveEndpointConfigurator
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
@@ -202,7 +202,7 @@ namespace MassTransit.Registration
                                 configurator.ReceiveEndpoint(compensateDefinition, endpointNameFormatter, compensateEndpointConfigurator =>
                                 {
                                     LogContext.Debug?.Log("Configuring receive endpoint {Endpoint}", ToEndpointString(compensateEndpointName,
-                                    compensateDefinition));
+                                        compensateDefinition));
 
                                     LogContext.Debug?.Log("Configuring activity {ActivityType} on {ExecuteEndpoint} / {CompensateEndpoint}",
                                         TypeMetadataCache.GetShortName(activity.ActivityType), endpoint.Name, compensateEndpointName);

@@ -23,6 +23,8 @@ namespace MassTransit.Conductor.Configuration.Definition
 
         int? IEndpointDefinition.ConcurrentMessageLimit => default;
 
+        public bool ConfigureConsumeTopology => true;
+
         string IEndpointDefinition.GetEndpointName(IEndpointNameFormatter formatter)
         {
             return ServiceEndpointNameFormatter.Instance.InstanceEndpointName(_instance.InstanceName, formatter);

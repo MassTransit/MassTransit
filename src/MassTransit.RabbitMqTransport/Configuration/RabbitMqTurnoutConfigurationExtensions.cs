@@ -25,7 +25,7 @@
             // configure the message expiration endpoint, so it's available at startup
             busFactoryConfigurator.ReceiveEndpoint(expiredQueueName, expiredEndpointConfigurator =>
             {
-                expiredEndpointConfigurator.BindMessageExchanges = false;
+                expiredEndpointConfigurator.ConfigureConsumeTopology = false;
 
                 // configure the turnout management endpoint
                 busFactoryConfigurator.ReceiveEndpoint(new TurnoutEndpointDefinition(), null, turnoutEndpointConfigurator =>

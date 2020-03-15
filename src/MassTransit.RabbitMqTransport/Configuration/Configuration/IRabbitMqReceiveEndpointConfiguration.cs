@@ -9,10 +9,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IReceiveEndpointConfiguration,
         IRabbitMqEndpointConfiguration
     {
-        IRabbitMqReceiveEndpointConfigurator Configurator { get; }
-
-        bool BindMessageExchanges { get; }
-
         ReceiveSettings Settings { get; }
 
         void Build(IRabbitMqHostControl host);

@@ -3,6 +3,7 @@
     using System;
     using Configurators;
     using Definition;
+    using GreenPipes;
     using MassTransit.Configurators;
     using Topology.Settings;
     using Topology.Topologies;
@@ -39,6 +40,43 @@
         {
             get => _hostSettings;
             set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        public void ApplyEndpointDefinition(IActiveMqReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
+        {
+            configurator.ConfigureConsumeTopology = definition.ConfigureConsumeTopology;
+
+            if (definition.IsTemporary)
+            {
+                configurator.AutoDelete = true;
+                configurator.Durable = false;
+            }
+
+            if (definition.PrefetchCount.HasValue)
+            {
+                configurator.PrefetchCount = (ushort)definition.PrefetchCount.Value;
+            }
+
+            if (definition.ConcurrentMessageLimit.HasValue)
+            {
+                var concurrentMessageLimit = definition.ConcurrentMessageLimit.Value;
+
+                // if there is a prefetchCount, and it is greater than the concurrent message limit, we need a filter
+                if (!definition.PrefetchCount.HasValue || definition.PrefetchCount.Value > concurrentMessageLimit)
+                {
+                    configurator.UseConcurrencyLimit(concurrentMessageLimit);
+
+                    // we should determine a good value to use based upon the concurrent message limit
+                    if (definition.PrefetchCount.HasValue == false)
+                    {
+                        var calculatedPrefetchCount = concurrentMessageLimit * 12 / 10;
+
+                        configurator.PrefetchCount = (ushort)calculatedPrefetchCount;
+                    }
+                }
+            }
+
+            definition.Configure(configurator);
         }
 
         public IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
@@ -85,7 +123,11 @@
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
 
-            ReceiveEndpoint(queueName, x => x.Apply(definition, configureEndpoint));
+            ReceiveEndpoint(queueName, configurator =>
+            {
+                ApplyEndpointDefinition(configurator, definition);
+                configureEndpoint?.Invoke(configurator);
+            });
         }
 
         public void ReceiveEndpoint(string queueName, Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint)

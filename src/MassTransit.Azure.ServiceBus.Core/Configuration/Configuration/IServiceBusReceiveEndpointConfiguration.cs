@@ -6,8 +6,6 @@
     public interface IServiceBusReceiveEndpointConfiguration :
         IServiceBusEntityEndpointConfiguration
     {
-        bool SubscribeMessageTopics { get; }
-
         ReceiveSettings Settings { get; }
     }
 }

@@ -68,8 +68,9 @@ namespace MassTransit
         /// <param name="container">The container reference</param>
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        public static void ConfigureEndpoints<T>(this T configurator, IWindsorContainer container, IEndpointNameFormatter endpointNameFormatter = null)
-            where T : IReceiveConfigurator
+        public static void ConfigureEndpoints<T>(this IReceiveConfigurator<T> configurator, IWindsorContainer container,
+            IEndpointNameFormatter endpointNameFormatter = null)
+            where T : IReceiveEndpointConfigurator
         {
             var registration = container.Resolve<IRegistration>();
 

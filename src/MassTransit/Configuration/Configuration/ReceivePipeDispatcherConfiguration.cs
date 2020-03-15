@@ -28,6 +28,11 @@ namespace MassTransit.Configuration
 
         public Uri InputAddress { get; }
 
+        public bool ConfigureConsumeTopology
+        {
+            set { }
+        }
+
         public void AddDependency(IReceiveEndpointObserverConnector connector)
         {
         }

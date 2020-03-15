@@ -35,8 +35,6 @@
         {
             _settings = settings;
 
-            BindMessageTopics = true;
-
             _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
 
@@ -46,7 +44,11 @@
             _inputAddress = new Lazy<Uri>(FormatInputAddress);
         }
 
-        public bool BindMessageTopics { get; set; }
+        public bool BindMessageTopics
+        {
+            set => ConfigureConsumeTopology = value;
+        }
+
         public ReceiveSettings Settings => _settings;
         public override Uri HostAddress => _hostConfiguration.HostAddress;
         public override Uri InputAddress => _inputAddress.Value;

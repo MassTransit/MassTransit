@@ -82,6 +82,11 @@
             return _configurator.ConnectConsumerConfigurationObserver(observer);
         }
 
+        public bool ConfigureConsumeTopology
+        {
+            set => _configurator.ConfigureConsumeTopology = value;
+        }
+
         void IReceiveEndpointConfigurator.AddEndpointSpecification(IReceiveEndpointSpecification configurator)
         {
             _configurator.AddEndpointSpecification(configurator);

@@ -128,7 +128,7 @@ namespace MassTransit.Transports.Tests
             public A_published_fault(Type harnessType)
                 : base(harnessType)
             {
-                Subscribe = false;
+                ConfigureConsumeTopology = false;
             }
         }
     }
