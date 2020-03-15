@@ -13,6 +13,8 @@ namespace MassTransit.Definition
     {
         string _compensateEndpointName;
 
+        public IEndpointDefinition<ICompensateActivity<TLog>> CompensateEndpointDefinition { private get; set; }
+
         /// <summary>
         /// Specify the endpoint name (which may be a queue, or a subscription, depending upon the transport) on which the saga
         /// should be configured. Setting to null will use the supplied <see cref="IEndpointNameFormatter"/> to generate the
@@ -33,9 +35,9 @@ namespace MassTransit.Definition
 
         string IActivityDefinition.GetCompensateEndpointName(IEndpointNameFormatter formatter)
         {
-            return !string.IsNullOrWhiteSpace(_compensateEndpointName)
-                ? _compensateEndpointName
-                : _compensateEndpointName = formatter.CompensateActivity<TActivity, TLog>();
+            return string.IsNullOrWhiteSpace(_compensateEndpointName)
+                ? _compensateEndpointName = CompensateEndpointDefinition?.GetEndpointName(formatter) ?? formatter.CompensateActivity<TActivity, TLog>()
+                : _compensateEndpointName;
         }
 
         Type IActivityDefinition.LogType => typeof(TLog);

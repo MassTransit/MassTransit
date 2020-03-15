@@ -13,6 +13,12 @@ namespace MassTransit.Definition
         int? _concurrentMessageLimit;
         string _executeEndpointName;
 
+        protected ExecuteActivityDefinition()
+        {
+        }
+
+        public IEndpointDefinition<IExecuteActivity<TArguments>> ExecuteEndpointDefinition { private get; set; }
+
         /// <summary>
         /// Specify the endpoint name (which may be a queue, or a subscription, depending upon the transport) on which the saga
         /// should be configured. Setting to null will use the supplied <see cref="IEndpointNameFormatter"/> to generate the
@@ -42,9 +48,9 @@ namespace MassTransit.Definition
 
         string IExecuteActivityDefinition.GetExecuteEndpointName(IEndpointNameFormatter formatter)
         {
-            return !string.IsNullOrWhiteSpace(_executeEndpointName)
-                ? _executeEndpointName
-                : _executeEndpointName = formatter.ExecuteActivity<TActivity, TArguments>();
+            return string.IsNullOrWhiteSpace(_executeEndpointName)
+                ? _executeEndpointName = ExecuteEndpointDefinition?.GetEndpointName(formatter) ?? formatter.ExecuteActivity<TActivity, TArguments>()
+                : _executeEndpointName;
         }
 
         Type IExecuteActivityDefinition.ActivityType => typeof(TActivity);

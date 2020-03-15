@@ -11,15 +11,10 @@ namespace MassTransit.Registration
         where TArguments : class
     {
         readonly IRegistrationConfigurator _configurator;
-        readonly IExecuteActivityRegistration _registration;
-        readonly IContainerRegistrar _registrar;
 
-        public ExecuteActivityRegistrationConfigurator(IRegistrationConfigurator configurator, IExecuteActivityRegistration registration,
-            IContainerRegistrar registrar)
+        public ExecuteActivityRegistrationConfigurator(IRegistrationConfigurator configurator)
         {
             _configurator = configurator;
-            _registration = registration;
-            _registrar = registrar;
         }
 
         public void Endpoint(Action<IExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>> configure)
@@ -29,8 +24,6 @@ namespace MassTransit.Registration
             configure?.Invoke(configurator);
 
             _configurator.AddEndpoint<ExecuteActivityEndpointDefinition<TActivity, TArguments>, IExecuteActivity<TArguments>>(configurator.Settings);
-
-            _registrar.RegisterExecuteActivityDefinition<EndpointExecuteActivityDefinition<TActivity, TArguments>, TActivity, TArguments>();
         }
     }
 }

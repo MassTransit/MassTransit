@@ -12,15 +12,10 @@ namespace MassTransit.Registration
         where TLog : class
     {
         readonly IRegistrationConfigurator _configurator;
-        readonly IActivityRegistration _registration;
-        readonly IContainerRegistrar _registrar;
 
-        public ActivityRegistrationConfigurator(IRegistrationConfigurator configurator, IActivityRegistration registration,
-            IContainerRegistrar registrar)
+        public ActivityRegistrationConfigurator(IRegistrationConfigurator configurator)
         {
             _configurator = configurator;
-            _registration = registration;
-            _registrar = registrar;
         }
 
         public void Endpoints(Action<IExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>> configureExecute,
@@ -37,8 +32,6 @@ namespace MassTransit.Registration
             configureCompensate?.Invoke(compensateConfigurator);
 
             _configurator.AddEndpoint<CompensateActivityEndpointDefinition<TActivity, TLog>, ICompensateActivity<TLog>>(compensateConfigurator.Settings);
-
-            _registrar.RegisterActivityDefinition<EndpointActivityDefinition<TActivity, TArguments, TLog>, TActivity, TArguments, TLog>();
         }
     }
 }

@@ -29,6 +29,11 @@ namespace MassTransit.Definition
         where TArguments : class
     {
         /// <summary>
+        /// Sets the endpoint definition, if available
+        /// </summary>
+        IEndpointDefinition<ICompensateActivity<TLog>> CompensateEndpointDefinition { set; }
+
+        /// <summary>
         /// Configure the compensate activity
         /// </summary>
         /// <param name="endpointConfigurator"></param>

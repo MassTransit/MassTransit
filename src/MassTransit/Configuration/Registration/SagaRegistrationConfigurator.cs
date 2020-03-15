@@ -10,13 +10,11 @@ namespace MassTransit.Registration
         where TSaga : class, ISaga
     {
         readonly IRegistrationConfigurator _configurator;
-        readonly ISagaRegistration _registration;
         readonly IContainerRegistrar _registrar;
 
-        public SagaRegistrationConfigurator(IRegistrationConfigurator configurator, ISagaRegistration registration, IContainerRegistrar registrar)
+        public SagaRegistrationConfigurator(IRegistrationConfigurator configurator, IContainerRegistrar registrar)
         {
             _configurator = configurator;
-            _registration = registration;
             _registrar = registrar;
         }
 
@@ -27,8 +25,6 @@ namespace MassTransit.Registration
             configure?.Invoke(configurator);
 
             _configurator.AddEndpoint<SagaEndpointDefinition<TSaga>, TSaga>(configurator.Settings);
-
-            _registrar.RegisterSagaDefinition<EndpointSagaDefinition<TSaga>, TSaga>();
 
             return this;
         }

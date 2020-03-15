@@ -24,14 +24,6 @@ namespace MassTransit.Definition
             _sagaDefinition = sagaDefinition;
         }
 
-        public Type SagaType => typeof(TSaga);
-
-        public Type MessageType => typeof(TMessage);
-
-        public void Configure(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<TSaga> sagaConfigurator)
-        {
-        }
-
         /// <summary>
         /// Set the concurrent message limit for the saga, which limits how many saga instances are able to concurrently
         /// consume messages.
@@ -40,6 +32,14 @@ namespace MassTransit.Definition
         {
             get => _concurrentMessageLimit;
             protected set => _concurrentMessageLimit = value;
+        }
+
+        public Type SagaType => typeof(TSaga);
+
+        public Type MessageType => typeof(TMessage);
+
+        public void Configure(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<TSaga> sagaConfigurator)
+        {
         }
 
         void ISagaMessageDefinition<TSaga, TMessage>.Configure(IReceiveEndpointConfigurator endpointConfigurator, ISagaMessageConfigurator<TSaga, TMessage>

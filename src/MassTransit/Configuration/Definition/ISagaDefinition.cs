@@ -26,6 +26,11 @@ namespace MassTransit.Definition
         where TSaga : class, ISaga
     {
         /// <summary>
+        /// Sets the endpoint definition, if available
+        /// </summary>
+        IEndpointDefinition<TSaga> EndpointDefinition { set; }
+
+        /// <summary>
         /// Configure the consumer on the receive endpoint
         /// </summary>
         /// <param name="endpointConfigurator">The receive endpoint configurator for the consumer</param>

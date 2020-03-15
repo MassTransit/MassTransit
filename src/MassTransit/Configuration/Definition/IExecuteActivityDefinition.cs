@@ -32,6 +32,11 @@ namespace MassTransit.Definition
         where TArguments : class
     {
         /// <summary>
+        /// Sets the endpoint definition, if available
+        /// </summary>
+        IEndpointDefinition<IExecuteActivity<TArguments>> ExecuteEndpointDefinition { set; }
+
+        /// <summary>
         /// Configure the execute activity
         /// </summary>
         /// <param name="endpointConfigurator"></param>

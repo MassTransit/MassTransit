@@ -51,8 +51,17 @@ namespace MassTransit.Registration
 
         IExecuteActivityDefinition<TActivity, TArguments> GetActivityDefinition(IConfigurationServiceProvider provider)
         {
-            return _definition ??= provider.GetService<IExecuteActivityDefinition<TActivity, TArguments>>()
+            if (_definition != null)
+                return _definition;
+
+            _definition = provider.GetService<IExecuteActivityDefinition<TActivity, TArguments>>()
                 ?? new DefaultExecuteActivityDefinition<TActivity, TArguments>();
+
+            var executeEndpointDefinition = provider.GetService<IEndpointDefinition<IExecuteActivity<TArguments>>>();
+            if (executeEndpointDefinition != null)
+                _definition.ExecuteEndpointDefinition = executeEndpointDefinition;
+
+            return _definition;
         }
     }
 }

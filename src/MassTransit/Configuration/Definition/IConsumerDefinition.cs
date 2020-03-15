@@ -26,6 +26,11 @@ namespace MassTransit.Definition
         where TConsumer : class, IConsumer
     {
         /// <summary>
+        /// Sets the endpoint definition, if available
+        /// </summary>
+        IEndpointDefinition<TConsumer> EndpointDefinition { set; }
+
+        /// <summary>
         /// Configure the consumer on the receive endpoint
         /// </summary>
         /// <param name="endpointConfigurator">The receive endpoint configurator for the consumer</param>

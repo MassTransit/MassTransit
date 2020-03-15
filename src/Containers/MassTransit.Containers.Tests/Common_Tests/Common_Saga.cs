@@ -110,10 +110,30 @@ namespace MassTransit.Containers.Tests.Common_Tests
             foundId.HasValue.ShouldBe(true);
         }
 
+        [Test]
+        public async Task Should_use_custom_endpoint_and_definition_together()
+        {
+            Guid sagaId = NewId.NextGuid();
+
+            var message = new FirstSagaMessage {CorrelationId = sagaId};
+
+            var sendEndpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/custom-second-saga"));
+
+            await sendEndpoint.Send(message);
+
+            Guid? foundId = await GetSagaRepository<SecondSimpleSaga>().ShouldContainSaga(message.CorrelationId, TestTimeout);
+
+            foundId.HasValue.ShouldBe(true);
+        }
+
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
         {
             configurator.AddSaga<SimpleSaga>()
                 .Endpoint(e => e.Name = "custom-endpoint-name")
+                .InMemoryRepository();
+
+            configurator.AddSaga<SecondSimpleSaga>(typeof(SecondSimpleSagaDefinition))
+                .Endpoint(e => e.Temporary = true)
                 .InMemoryRepository();
 
             configurator.AddBus(provider => BusControl);

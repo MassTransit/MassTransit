@@ -1,22 +1,37 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Registration
 {
+    using Courier.Contracts;
+
+
     public interface IEndpointRegistrationConfigurator
     {
+        /// <summary>
+        /// Set the endpoint name, overriding the default endpoint name formatter
+        /// </summary>
         string Name { set; }
+
+        /// <summary>
+        /// True if the endpoint should be removed after the endpoint is stopped
+        /// </summary>
         bool Temporary { set; }
+
+        /// <summary>
+        /// Only specify when required, use <see cref="ConcurrentMessageLimit"/> first and
+        /// only specific a <see cref="PrefetchCount"/> when the default is not appropriate
+        /// </summary>
         int? PrefetchCount { set; }
+
+        /// <summary>
+        /// The maximum number of concurrent messages processing at one time on the endpoint. Is
+        /// used to configure the transport efficiently.
+        /// </summary>
         int? ConcurrentMessageLimit { set; }
+
+        /// <summary>
+        /// Defaults to true, which connects topics/exchanges/etc. to the endpoint queue at the broker.
+        /// If set to false, no broker topology is configured (automatically set to false for courier
+        /// activities since <see cref="RoutingSlip"/> should never be published).
+        /// </summary>
+        bool ConfigureConsumeTopology { set; }
     }
 }
