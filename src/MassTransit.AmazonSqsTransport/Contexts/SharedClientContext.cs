@@ -28,12 +28,12 @@
 
         ConnectionContext ClientContext.ConnectionContext => _context.ConnectionContext;
 
-        Task<string> ClientContext.CreateTopic(Topology.Entities.Topic topic)
+        Task<TopicInfo> ClientContext.CreateTopic(Topology.Entities.Topic topic)
         {
             return _context.CreateTopic(topic);
         }
 
-        Task<string> ClientContext.CreateQueue(Queue queue)
+        Task<QueueInfo> ClientContext.CreateQueue(Queue queue)
         {
             return _context.CreateQueue(queue);
         }
@@ -58,7 +58,7 @@
             return _context.BasicConsume(receiveSettings, consumer);
         }
 
-        PublishRequest ClientContext.CreatePublishRequest(string topicName, byte[] body)
+        Task<PublishRequest> ClientContext.CreatePublishRequest(string topicName, byte[] body)
         {
             return _context.CreatePublishRequest(topicName, body);
         }
@@ -78,7 +78,7 @@
             return _context.PurgeQueue(queueName, cancellationToken);
         }
 
-        SendMessageRequest ClientContext.CreateSendRequest(string queueName, byte[] body)
+        Task<SendMessageRequest> ClientContext.CreateSendRequest(string queueName, byte[] body)
         {
             return _context.CreateSendRequest(queueName, body);
         }

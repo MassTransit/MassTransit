@@ -11,8 +11,8 @@
     public interface AmazonSqsSendContext :
         SendContext
     {
-        string GroupId { get; set; }
-        string DeduplicationId { get; set; }
-        int? DelaySeconds { get; set; }
+        string GroupId { set; }
+        string DeduplicationId { set; }
+        int? DelaySeconds { set; }
     }
 }

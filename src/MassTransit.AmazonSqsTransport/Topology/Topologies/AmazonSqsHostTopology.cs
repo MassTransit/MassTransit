@@ -62,11 +62,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         {
             var address = new AmazonSqsEndpointAddress(_hostAddress, new Uri($"topic:{topicName}"));
 
-            var sendSettings = new TopicPublishSettings(address);
+            var publishSettings = new TopicPublishSettings(address);
 
-            configure?.Invoke(sendSettings);
+            configure?.Invoke(publishSettings);
 
-            return sendSettings.GetSendAddress(_hostAddress);
+            return publishSettings.GetSendAddress(_hostAddress);
         }
 
         public Uri GetDestinationAddress(Type messageType, Action<ITopicConfigurator> configure = null)
@@ -75,11 +75,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             var isTemporary = TypeMetadataCache.IsTemporaryMessageType(messageType);
             var address = new AmazonSqsEndpointAddress(_hostAddress, new Uri($"topic:{topicName}?temporary={isTemporary}"));
 
-            var settings = new TopicPublishSettings(address);
+            var publishSettings = new TopicPublishSettings(address);
 
-            configure?.Invoke(settings);
+            configure?.Invoke(publishSettings);
 
-            return settings.GetSendAddress(_hostAddress);
+            return publishSettings.GetSendAddress(_hostAddress);
         }
 
         public override string CreateTemporaryQueueName(string prefix)

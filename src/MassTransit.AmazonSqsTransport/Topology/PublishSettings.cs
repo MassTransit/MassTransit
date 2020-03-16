@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Topology
 {
     using System;
-    using Builders;
 
 
     public interface PublishSettings :
@@ -13,11 +12,5 @@
         /// <param name="hostAddress"></param>
         /// <returns></returns>
         Uri GetSendAddress(Uri hostAddress);
-
-        /// <summary>
-        /// Return the BrokerTopology to apply at startup (to create exchange and queue if binding is specified)
-        /// </summary>
-        /// <returns></returns>
-        BrokerTopology GetBrokerTopology();
     }
 }

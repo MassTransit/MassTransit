@@ -44,7 +44,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Specifications
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
-            var topicHandle = builder.CreateTopic(EntityName, Durable, AutoDelete);
+            var topicHandle = builder.CreateTopic(EntityName, Durable, AutoDelete, TopicAttributes, TopicSubscriptionAttributes, Tags);
 
             var topicSubscriptionHandle = builder.CreateQueueSubscription(topicHandle, builder.Queue);
         }

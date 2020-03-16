@@ -22,7 +22,7 @@
         {
             IAsyncPipeContextAgent<ClientContext> asyncContext = supervisor.AddAsyncContext<ClientContext>();
 
-            CreateModel(asyncContext, supervisor.Stopped);
+            CreateClientContext(asyncContext, supervisor.Stopped);
 
             return asyncContext;
         }
@@ -30,17 +30,17 @@
         IActivePipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<ClientContext> context, CancellationToken cancellationToken)
         {
-            return supervisor.AddActiveContext(context, CreateSharedSession(context.Context, cancellationToken));
+            return supervisor.AddActiveContext(context, CreateSharedClientContext(context.Context, cancellationToken));
         }
 
-        async Task<ClientContext> CreateSharedSession(Task<ClientContext> context, CancellationToken cancellationToken)
+        async Task<ClientContext> CreateSharedClientContext(Task<ClientContext> context, CancellationToken cancellationToken)
         {
             var modelContext = await context.ConfigureAwait(false);
 
             return new SharedClientContext(modelContext, cancellationToken);
         }
 
-        void CreateModel(IAsyncPipeContextAgent<ClientContext> asyncContext, CancellationToken cancellationToken)
+        void CreateClientContext(IAsyncPipeContextAgent<ClientContext> asyncContext, CancellationToken cancellationToken)
         {
             IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
             {

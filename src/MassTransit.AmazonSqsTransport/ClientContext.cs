@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService.Model;
     using Amazon.SQS.Model;
+    using Contexts;
     using GreenPipes;
     using Pipeline;
     using Topology;
@@ -16,9 +17,9 @@
     {
         ConnectionContext ConnectionContext { get; }
 
-        Task<string> CreateTopic(Topology.Entities.Topic topic);
+        Task<TopicInfo> CreateTopic(Topology.Entities.Topic topic);
 
-        Task<string> CreateQueue(Queue queue);
+        Task<QueueInfo> CreateQueue(Queue queue);
 
         Task CreateQueueSubscription(Topology.Entities.Topic topic, Queue queue);
 
@@ -28,11 +29,11 @@
 
         Task BasicConsume(ReceiveSettings receiveSettings, IBasicConsumer consumer);
 
-        PublishRequest CreatePublishRequest(string topicName, byte[] body);
+        Task<PublishRequest> CreatePublishRequest(string topicName, byte[] body);
 
         Task Publish(PublishRequest request, CancellationToken cancellationToken = default);
 
-        SendMessageRequest CreateSendRequest(string queueName, byte[] body);
+        Task<SendMessageRequest> CreateSendRequest(string queueName, byte[] body);
 
         Task SendMessage(SendMessageRequest request, CancellationToken cancellationToken);
 

@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 {
     using System;
@@ -23,7 +11,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
     using MassTransit.Topology.Topologies;
     using Metadata;
     using Settings;
-    using Util;
 
 
     public class AmazonSqsMessagePublishTopology<TMessage> :
@@ -66,6 +53,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         IDictionary<string, object> ITopicConfigurator.TopicAttributes => _topic.TopicAttributes;
         IDictionary<string, object> ITopicConfigurator.TopicSubscriptionAttributes => _topic.TopicSubscriptionAttributes;
         IDictionary<string, string> ITopicConfigurator.TopicTags => _topic.TopicTags;
+
         public AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
         {
             return _topic.GetEndpointAddress(hostAddress);
@@ -79,16 +67,10 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
         {
-            var topicHandle = builder.CreateTopic(_topic.EntityName, _topic.Durable, _topic.AutoDelete);
+            var topicHandle = builder.CreateTopic(_topic.EntityName, _topic.Durable, _topic.AutoDelete, _topic.TopicAttributes, _topic
+                .TopicSubscriptionAttributes, _topic.Tags);
 
-            if (builder.Topic != null)
-            {
-                // builder.ExchangeBind(builder.Exchange, exchangeHandle, "", new Dictionary<string, object>());
-            }
-            else
-            {
-                // builder.Exchange = exchangeHandle;
-            }
+            builder.Topic ??= topicHandle;
 
             foreach (IAmazonSqsMessagePublishTopology configurator in _implementedMessageTypes)
                 configurator.Apply(builder);

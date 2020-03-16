@@ -25,7 +25,7 @@
 
             await _topologyFilter.Send(clientContext, Pipe.Empty<ClientContext>()).ConfigureAwait(false);
 
-            var message = clientContext.CreateSendRequest(_destination, context.GetBody());
+            var message = await clientContext.CreateSendRequest(_destination, context.GetBody()).ConfigureAwait(false);
 
             CopyReceivedMessageHeaders(context, message.MessageAttributes);
 

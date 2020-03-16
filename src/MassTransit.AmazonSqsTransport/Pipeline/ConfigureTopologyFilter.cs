@@ -1,8 +1,11 @@
 namespace MassTransit.AmazonSqsTransport.Pipeline
 {
+    using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Context;
+    using Contexts;
     using GreenPipes;
     using Topology;
     using Topology.Builders;
@@ -54,11 +57,11 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             var queues = _brokerTopology.Queues.Select(queue => Declare(context, queue));
 
-            var subscriptions = _brokerTopology.QueueSubscriptions.Select(queue => Declare(context, queue));
+            await Task.WhenAll(topics).ConfigureAwait(false);
+            await Task.WhenAll(queues).ConfigureAwait(false);
 
-            await Task.WhenAll(topics.Concat(queues)).ConfigureAwait(false);
-            foreach (var task in subscriptions)
-                await task;
+            var subscriptions = _brokerTopology.QueueSubscriptions.Select(subscription => Declare(context, subscription));
+            await Task.WhenAll(subscriptions).ConfigureAwait(false);
         }
 
         async Task DeleteAutoDelete(ClientContext context)
@@ -70,11 +73,14 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             await Task.WhenAll(topics.Concat(queues)).ConfigureAwait(false);
         }
 
-        Task Declare(ClientContext context, Topic topic)
+        async Task<TopicInfo> Declare(ClientContext context, Topic topic)
         {
-            LogContext.Debug?.Log("Create topic {Topic}", topic);
+            TopicInfo topicInfo = await context.CreateTopic(topic).ConfigureAwait(false);
+            topicInfo = await context.CreateTopic(topic).ConfigureAwait(false);
 
-            return context.CreateTopic(topic);
+            LogContext.Debug?.Log("Created topic {Topic} {TopicArn}", topicInfo.EntityName, topicInfo.Arn);
+
+            return topicInfo;
         }
 
         Task Declare(ClientContext context, QueueSubscription subscription)
@@ -84,11 +90,16 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             return context.CreateQueueSubscription(subscription.Source, subscription.Destination);
         }
 
-        Task Declare(ClientContext context, Queue queue)
+        async Task<QueueInfo> Declare(ClientContext context, Queue queue)
         {
-            LogContext.Debug?.Log("Create queue {Queue}", queue);
+            // Why? I don't know, but damn, it takes two times, or it doesn't catch properly
+            QueueInfo queueInfo = await context.CreateQueue(queue).ConfigureAwait(false);
 
-            return context.CreateQueue(queue);
+            queueInfo = await context.CreateQueue(queue).ConfigureAwait(false);
+
+            LogContext.Debug?.Log("Created queue {Queue} {QueueArn} {QueueUrl}", queueInfo.EntityName, queueInfo.Arn, queueInfo.Url);
+
+            return queueInfo;
         }
 
         Task Delete(ClientContext context, Topic topic)

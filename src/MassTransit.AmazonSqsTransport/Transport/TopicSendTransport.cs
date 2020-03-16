@@ -73,7 +73,7 @@
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
-                    var request = clientContext.CreatePublishRequest(_context.EntityName, context.Body);
+                    var request = await clientContext.CreatePublishRequest(_context.EntityName, context.Body).ConfigureAwait(false);
 
                     _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, context.Headers);
 

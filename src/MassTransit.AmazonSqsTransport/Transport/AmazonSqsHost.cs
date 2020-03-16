@@ -49,8 +49,7 @@
             {
                 Type = "AmazonSQS",
                 Settings.Region,
-                Settings.AccessKey,
-                Password = new string('*', Settings.SecretKey.Length)
+                Settings.AccessKey
             });
 
             ConnectionContextSupervisor.Probe(context);

@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Topology.Builders
 {
     using System.Collections.Generic;
@@ -21,10 +9,10 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
     public abstract class BrokerTopologyBuilder
     {
         long _nextId;
-        protected NamedEntityCollection<QueueSubscriptionEntity, QueueSubscriptionHandle> QueueSubscriptions;
-        protected NamedEntityCollection<TopicSubscriptionEntity, TopicSubscriptionHandle> TopicSubscriptions;
-        protected NamedEntityCollection<TopicEntity, TopicHandle> Topics;
-        protected NamedEntityCollection<QueueEntity, QueueHandle> Queues;
+        protected readonly NamedEntityCollection<QueueSubscriptionEntity, QueueSubscriptionHandle> QueueSubscriptions;
+        protected readonly NamedEntityCollection<TopicSubscriptionEntity, TopicSubscriptionHandle> TopicSubscriptions;
+        protected readonly NamedEntityCollection<TopicEntity, TopicHandle> Topics;
+        protected readonly NamedEntityCollection<QueueEntity, QueueHandle> Queues;
 
         protected BrokerTopologyBuilder()
         {
