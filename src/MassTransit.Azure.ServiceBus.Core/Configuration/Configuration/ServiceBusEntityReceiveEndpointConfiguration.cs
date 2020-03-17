@@ -43,12 +43,7 @@
 
         public int MaxConcurrentCalls
         {
-            set
-            {
-                _settings.MaxConcurrentCalls = value;
-                if (_settings.MaxConcurrentCalls > _settings.PrefetchCount)
-                    _settings.PrefetchCount = _settings.MaxConcurrentCalls;
-            }
+            set => _settings.MaxConcurrentCalls = value;
         }
 
         public int PrefetchCount
