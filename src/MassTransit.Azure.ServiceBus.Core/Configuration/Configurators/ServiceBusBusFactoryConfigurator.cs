@@ -82,7 +82,7 @@
             set
             {
                 _settings.MaxConcurrentCalls = value;
-                if (_settings.MaxConcurrentCalls > _settings.PrefetchCount)
+                if (_settings.PrefetchCount > 0 && _settings.MaxConcurrentCalls > _settings.PrefetchCount)
                     _settings.PrefetchCount = _settings.MaxConcurrentCalls;
             }
         }
