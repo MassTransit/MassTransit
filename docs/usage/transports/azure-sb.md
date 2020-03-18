@@ -43,6 +43,8 @@ The functions [host.json](https://docs.microsoft.com/en-us/azure/azure-functions
 }
 ```
 
+>Please be aware that when hosted in Azure Functions using Azure Service Bus as the transport, MassTransint won't create the topology for you, so this needs to be tackled by you either manually or at deployment time.
+
 ### Azure Service Bus
 
 The bindings for using MassTransit with Azure Service Bus are shown below.
