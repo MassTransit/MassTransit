@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using Audit;
@@ -34,16 +35,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
         public async Task Should_have_consume_audit_records()
         {
             var consumed = _harness.Consumed;
-            await Task.Delay(500);
-            (await GetAuditRecords("Consume")).ShouldBe(consumed.Count());
+            await Task.Delay(2000);
+            (await GetAuditRecords("Consume", consumed.Count(), TimeSpan.FromSeconds(10))).ShouldBe(consumed.Count());
         }
 
         [Test]
         public async Task Should_have_send_audit_record()
         {
             var sent = _harness.Sent;
-            await Task.Delay(500);
-            (await GetAuditRecords("Send")).ShouldBe(sent.Count());
+            await Task.Delay(2000);
+            (await GetAuditRecords("Send", sent.Count(), TimeSpan.FromSeconds(10))).ShouldBe(sent.Count());
         }
 
         [SetUp]
@@ -93,20 +94,32 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
             }
         }
 
-        async Task<int> GetAuditRecords(string contextType)
+        async Task<int> GetAuditRecords(string contextType, int expected, TimeSpan timeout)
         {
-            using (var dbContext = this._store.AuditContext)
-                return await dbContext.Set<AuditRecord>()
-                    .Where(x => x.ContextType == contextType)
-                    .CountAsync();
+            DateTime giveUpAt = DateTime.Now + timeout;
+
+            int count = 0;
+            while (DateTime.Now < giveUpAt)
+            {
+                await using (var dbContext = _store.AuditContext)
+                    count = await dbContext.Set<AuditRecord>()
+                        .Where(x => x.ContextType == contextType)
+                        .CountAsync();
+
+                if (count == expected)
+                    return count;
+
+                await Task.Delay(100).ConfigureAwait(false);
+            }
+
+            return count;
         }
 
 
         class TestConsumer : IConsumer<A>,
             IConsumer<B>
         {
-            public async Task Consume(ConsumeContext<A> context) =>
-                await context.RespondAsync(new B());
+            public async Task Consume(ConsumeContext<A> context) => await context.RespondAsync(new B());
 
             public Task Consume(ConsumeContext<B> context)
             {
