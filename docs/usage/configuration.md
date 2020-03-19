@@ -112,11 +112,13 @@ public class Startup
         // local function to configure consumers
         void ConfigureMassTransit(IServiceCollectionConfigurator configurator)
         {
+            configurator.AddBus(CreateBus);
             configurator.AddConsumer<OrderConsumer>();
         }
 
         // configures MassTransit to integrate with the built-in dependency injection
-        services.AddMassTransit(CreateBus, ConfigureMassTransit);
+        services.AddMassTransit(ConfigureMassTransit);
+        services.AddMassTransitHostedService();
     }
 }
 ```
