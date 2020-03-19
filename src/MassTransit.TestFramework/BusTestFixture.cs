@@ -16,6 +16,7 @@ namespace MassTransit.TestFramework
         AsyncTestFixture
     {
         static int _subscribedObserver;
+        static readonly bool _enableDiagnostics = !bool.TryParse(Environment.GetEnvironmentVariable("CI"), out var isBuildServer) || !isBuildServer;
 
         protected BusTestFixture(BusTestHarness harness)
             : base(harness)
@@ -32,8 +33,11 @@ namespace MassTransit.TestFramework
 
             LogContext.ConfigureCurrentLogContext(loggerFactory);
 
-            if (Interlocked.CompareExchange(ref _subscribedObserver, 1, 0) == 0)
-                DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
+            if (_enableDiagnostics)
+            {
+                if (Interlocked.CompareExchange(ref _subscribedObserver, 1, 0) == 0)
+                    DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
+            }
         }
 
         protected BusTestHarness BusTestHarness { get; }
