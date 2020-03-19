@@ -39,7 +39,7 @@ namespace MassTransit.AspNetCoreIntegration
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            await _bus.StopAsync(cancellationToken).ConfigureAwait(false);
+            await _bus.StopAsync().ConfigureAwait(false);
 
             _simplifiedBusCheck?.ReportBusStopped();
         }
