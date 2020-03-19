@@ -7,6 +7,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Microsoft.Azure.ServiceBus;
 
 
@@ -59,9 +60,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
         async Task<MessagingFactoryContext> CreateSharedConnection(Task<MessagingFactoryContext> context, CancellationToken cancellationToken)
         {
-            var connectionContext = await context.ConfigureAwait(false);
-
-            return new SharedMessagingFactoryContext(connectionContext, cancellationToken);
+            return context.IsCompletedSuccessfully()
+                ? new SharedMessagingFactoryContext(context.Result, cancellationToken)
+                : new SharedMessagingFactoryContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
         async Task<MessagingFactoryContext> CreateConnection(ISupervisor supervisor)

@@ -10,13 +10,16 @@ namespace MassTransit.Context
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
     using Metadata;
+    using Transports;
     using Util;
 
 
     public abstract class BaseConsumeContext :
+        PublishEndpoint,
         ConsumeContext
     {
         protected BaseConsumeContext(ReceiveContext receiveContext)
+            : base(receiveContext?.PublishEndpointProvider)
         {
             ReceiveContext = receiveContext;
         }
@@ -144,7 +147,7 @@ namespace MassTransit.Context
         public virtual Task RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe)
             where T : class
         {
-            return ConsumeTask(RespondInternal<T>(values, sendPipe));
+            return ConsumeTask(RespondInternal(values, sendPipe));
         }
 
         public virtual Task RespondAsync<T>(object values, IPipe<SendContext> sendPipe)
@@ -163,7 +166,7 @@ namespace MassTransit.Context
         {
             var sendEndpoint = await ReceiveContext.SendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
 
-            return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask, default);
+            return new ConsumeSendEndpoint(sendEndpoint, this, RequestId);
         }
 
         public virtual Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
@@ -180,86 +183,6 @@ namespace MassTransit.Context
             await ReceiveContext.NotifyFaulted(context, duration, consumerType, exception).ConfigureAwait(false);
         }
 
-        public virtual Task Publish<T>(T message, CancellationToken cancellationToken)
-            where T : class
-        {
-            return ConsumeTask(PublishInternal(cancellationToken, message));
-        }
-
-        public virtual Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
-            where T : class
-        {
-            return ConsumeTask(PublishInternal(cancellationToken, message, publishPipe));
-        }
-
-        public virtual Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-            where T : class
-        {
-            return ConsumeTask(PublishInternal(cancellationToken, message, publishPipe));
-        }
-
-        public virtual Task Publish(object message, CancellationToken cancellationToken)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            var messageType = message.GetType();
-
-            return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
-        }
-
-        public virtual Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            var messageType = message.GetType();
-
-            return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
-        }
-
-        public virtual Task Publish(object message, Type messageType, CancellationToken cancellationToken)
-        {
-            return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
-        }
-
-        public virtual Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-        {
-            return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
-        }
-
-        public virtual Task Publish<T>(object values, CancellationToken cancellationToken)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            return ConsumeTask(PublishInternal<T>(cancellationToken, values));
-        }
-
-        public virtual Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            return ConsumeTask(PublishInternal<T>(cancellationToken, values, publishPipe));
-        }
-
-        public virtual Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            return ConsumeTask(PublishInternal<T>(cancellationToken, values, publishPipe));
-        }
-
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
-        {
-            return ReceiveContext.PublishEndpointProvider.ConnectPublishObserver(observer);
-        }
-
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return ReceiveContext.SendEndpointProvider.ConnectSendObserver(observer);
@@ -267,105 +190,56 @@ namespace MassTransit.Context
 
         public abstract void AddConsumeTask(Task task);
 
-        protected virtual async Task<ISendEndpoint> GetPublishSendEndpoint<T>()
+        Task RespondInternal<T>(T message, IPipe<SendContext<T>> pipe = default)
             where T : class
         {
-            var publishSendEndpoint = await ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
-
-            return new ConsumeSendEndpoint(publishSendEndpoint, this, ConsumeTask, default);
-        }
-
-        protected async Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>> pipe = default)
-            where T : class
-        {
-            var sendEndpoint = await GetPublishSendEndpoint<T>().ConfigureAwait(false);
-
-            if (pipe.IsNotEmpty())
-                await sendEndpoint.Send(message, new PublishPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
-            else
-                await sendEndpoint.Send(message, cancellationToken).ConfigureAwait(false);
-        }
-
-        protected async Task PublishInternal<T>(CancellationToken cancellationToken, object values, IPipe<PublishContext<T>> pipe = default)
-            where T : class
-        {
-            var sendEndpoint = await GetPublishSendEndpoint<T>().ConfigureAwait(false);
-
-            if (pipe.IsNotEmpty())
-                await sendEndpoint.Send(values, new PublishPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
-            else
-                await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
-        }
-
-        protected virtual Task<ISendEndpoint> GetResponseEndpoint<T>()
-            where T : class
-        {
-            if (ResponseAddress != null)
+            Task<ISendEndpoint> sendEndpointTask = this.GetResponseEndpoint<T>();
+            if (sendEndpointTask.IsCompletedSuccessfully())
             {
-                var sendEndpointTask = ReceiveContext.SendEndpointProvider.GetSendEndpoint(ResponseAddress);
-                if (sendEndpointTask.IsCompletedSuccessfully())
-                    return Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(sendEndpointTask.Result, this, ConsumeTask, RequestId));
+                var sendEndpoint = sendEndpointTask.Result;
 
-                async Task<ISendEndpoint> GetResponseEndpointAsync()
-                {
-                    var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
-
-                    return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask, RequestId);
-                }
-
-                return GetResponseEndpointAsync();
+                return pipe.IsNotEmpty()
+                    ? sendEndpoint.Send(message, pipe, CancellationToken)
+                    : sendEndpoint.Send(message, CancellationToken);
             }
 
-            var publishSendEndpointTask = ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>();
-            if (publishSendEndpointTask.IsCompletedSuccessfully())
-                return Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(publishSendEndpointTask.Result, this, ConsumeTask, RequestId));
-
-            async Task<ISendEndpoint> GetPublishEndpointAsync()
+            async Task RespondAsync()
             {
-                var sendEndpoint = await publishSendEndpointTask.ConfigureAwait(false);
+                var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
 
-                return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask, RequestId);
+                if (pipe.IsNotEmpty())
+                    await sendEndpoint.Send(message, pipe, CancellationToken).ConfigureAwait(false);
+                else
+                    await sendEndpoint.Send(message, CancellationToken).ConfigureAwait(false);
             }
 
-            return GetPublishEndpointAsync();
+            return RespondAsync();
         }
 
-        protected async Task RespondInternal<T>(T message, IPipe<SendContext<T>> pipe = default)
+        Task RespondInternal<T>(object values, IPipe<SendContext<T>> pipe = default)
             where T : class
         {
-            var responseEndpoint = await GetResponseEndpoint<T>().ConfigureAwait(false);
-
-            if (pipe.IsNotEmpty())
-                await responseEndpoint.Send(message, pipe, CancellationToken).ConfigureAwait(false);
-            else
-                await responseEndpoint.Send(message, CancellationToken).ConfigureAwait(false);
-        }
-
-        protected async Task RespondInternal<T>(object values, IPipe<SendContext<T>> pipe = default)
-            where T : class
-        {
-            var responseEndpoint = await GetResponseEndpoint<T>().ConfigureAwait(false);
-
-            if (pipe.IsNotEmpty())
-                await responseEndpoint.Send(values, pipe, CancellationToken).ConfigureAwait(false);
-            else
-                await responseEndpoint.Send<T>(values, CancellationToken).ConfigureAwait(false);
-        }
-
-        protected virtual async Task<ISendEndpoint> GetFaultEndpoint<T>()
-            where T : class
-        {
-            var destinationAddress = FaultAddress ?? ResponseAddress;
-            if (destinationAddress != null)
+            Task<ISendEndpoint> sendEndpointTask = this.GetResponseEndpoint<T>();
+            if (sendEndpointTask.IsCompletedSuccessfully())
             {
-                var sendEndpoint = await ReceiveContext.SendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+                var sendEndpoint = sendEndpointTask.Result;
 
-                return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask, RequestId);
+                return pipe.IsNotEmpty()
+                    ? sendEndpoint.Send(values, pipe, CancellationToken)
+                    : sendEndpoint.Send<T>(values, CancellationToken);
             }
 
-            var publishSendEndpoint = await ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<Fault<T>>().ConfigureAwait(false);
+            async Task RespondAsync()
+            {
+                var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
 
-            return new ConsumeSendEndpoint(publishSendEndpoint, this, ConsumeTask, RequestId);
+                if (pipe.IsNotEmpty())
+                    await sendEndpoint.Send(values, pipe, CancellationToken).ConfigureAwait(false);
+                else
+                    await sendEndpoint.Send<T>(values, CancellationToken).ConfigureAwait(false);
+            }
+
+            return RespondAsync();
         }
 
         protected virtual async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
@@ -375,7 +249,7 @@ namespace MassTransit.Context
 
             var faultPipe = new FaultPipe<T>(context);
 
-            var faultEndpoint = await GetFaultEndpoint<T>().ConfigureAwait(false);
+            var faultEndpoint = await this.GetFaultEndpoint<T>().ConfigureAwait(false);
 
             await faultEndpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
         }
@@ -387,29 +261,11 @@ namespace MassTransit.Context
             return task;
         }
 
-
-        readonly struct PublishPipe<T> :
-            IPipe<SendContext<T>>
-            where T : class
+        protected override async Task<ISendEndpoint> GetPublishSendEndpoint<T>()
         {
-            readonly IPipe<PublishContext<T>> _pipe;
+            var publishSendEndpoint = await base.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
-            public PublishPipe(IPipe<PublishContext<T>> pipe)
-            {
-                _pipe = pipe;
-            }
-
-            void IProbeSite.Probe(ProbeContext context)
-            {
-                _pipe.Probe(context);
-            }
-
-            public Task Send(SendContext<T> context)
-            {
-                var publishContext = context.GetPayload<PublishContext<T>>();
-
-                return _pipe.Send(publishContext);
-            }
+            return new ConsumeSendEndpoint(publishSendEndpoint, this, RequestId);
         }
     }
 

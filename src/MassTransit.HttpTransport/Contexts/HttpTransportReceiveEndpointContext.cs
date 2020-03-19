@@ -11,12 +11,12 @@
         BaseReceiveEndpointContext,
         HttpReceiveEndpointContext
     {
-        readonly IHttpHostControl _host;
+        readonly HttpTransportProvider _transportProvider;
 
         public HttpTransportReceiveEndpointContext(IHttpHostControl host, IHttpReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
-            _host = host;
+            _transportProvider = new HttpTransportProvider(host, this);
         }
 
         public ReceiveEndpointContext CreateResponseEndpointContext(HttpContext httpContext)
@@ -26,12 +26,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new HttpSendTransportProvider(_host, this);
+            return _transportProvider;
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(SendTransportProvider);
+            return _transportProvider;
         }
     }
 }

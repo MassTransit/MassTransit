@@ -1,6 +1,7 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Converters;
@@ -14,19 +15,14 @@ namespace MassTransit.Context
     public class ConsumeSendEndpoint :
         ISendEndpoint
     {
-        public delegate Task ConsumeTaskTracker(Task task);
-
-
         readonly ConsumeContext _context;
         readonly ISendEndpoint _endpoint;
-        readonly ConsumeTaskTracker _tracker;
         readonly Guid? _requestId;
 
-        public ConsumeSendEndpoint(ISendEndpoint endpoint, ConsumeContext context, ConsumeTaskTracker tracker, Guid? requestId)
+        public ConsumeSendEndpoint(ISendEndpoint endpoint, ConsumeContext context, Guid? requestId)
         {
             _endpoint = endpoint;
             _context = context;
-            _tracker = tracker;
             _requestId = requestId;
         }
 
@@ -43,7 +39,7 @@ namespace MassTransit.Context
 
             var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, _requestId);
 
-            return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
+            return ConsumeTask(_endpoint.Send(message, sendContextPipe, cancellationToken));
         }
 
         public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -57,7 +53,7 @@ namespace MassTransit.Context
 
             var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, pipe, _requestId);
 
-            return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
+            return ConsumeTask(_endpoint.Send(message, sendContextPipe, cancellationToken));
         }
 
         public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -71,7 +67,7 @@ namespace MassTransit.Context
 
             var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, pipe, _requestId);
 
-            return _tracker(_endpoint.Send(message, sendContextPipe, cancellationToken));
+            return ConsumeTask(_endpoint.Send(message, sendContextPipe, cancellationToken));
         }
 
         public Task Send(object message, CancellationToken cancellationToken)
@@ -159,6 +155,13 @@ namespace MassTransit.Context
             var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
             return initializer.Send(this, initializer.Create(_context), values, pipe);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        Task ConsumeTask(Task task)
+        {
+            _context.AddConsumeTask(task);
+            return task;
         }
     }
 }

@@ -33,12 +33,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendTransportProvider(_host, ModelContextSupervisor);
+            return new RabbitMqSendTransportProvider(_host, ModelContextSupervisor);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_host, ModelContextSupervisor);
+            return new RabbitMqPublishTransportProvider(_host, ModelContextSupervisor);
         }
     }
 }

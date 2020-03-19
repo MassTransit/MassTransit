@@ -5,12 +5,12 @@
     using Transports;
 
 
-    public class SendTransportProvider :
+    public class ActiveMqSendTransportProvider :
         ISendTransportProvider
     {
         readonly IActiveMqHostControl _host;
 
-        public SendTransportProvider(IActiveMqHostControl host)
+        public ActiveMqSendTransportProvider(IActiveMqHostControl host)
         {
             _host = host;
         }

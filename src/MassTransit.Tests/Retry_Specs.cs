@@ -528,6 +528,143 @@
 
 
     [TestFixture]
+    public class When_observing_retries :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_call_the_observer()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            await _completed.Task;
+
+            await _observed.Task;
+
+            Assert.That(_attempts, Is.EqualTo(4));
+
+            var payload = await _payload.Task;
+
+            Assert.That(payload.PostCreateCount, Is.EqualTo(0), "PostCreateCount");
+            Assert.That(payload.RetryCompletedCount, Is.EqualTo(1), "RetryCompletedCount");
+            Assert.That(payload.PreRetryCount, Is.EqualTo(1), "PreRetryCount");
+            Assert.That(payload.PostFaultCount, Is.EqualTo(1), "PostFaultCount");
+            Assert.That(payload.RetryFaultCount, Is.EqualTo(0), "RetryFaultCount");
+        }
+
+        int _attempts;
+        TaskCompletionSource<PingMessage> _completed;
+        TaskCompletionSource<RetryContext> _observed;
+        TaskCompletionSource<RetryPayload> _payload;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            _observed = GetTask<RetryContext>();
+            _payload = GetTask<RetryPayload>();
+            configurator.UseRetry(x =>
+            {
+                x.Immediate(5);
+                x.ConnectRetryObserver(new RetryObserver(_observed, _payload));
+            });
+
+            base.ConfigureInMemoryBus(configurator);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _completed = GetTask<PingMessage>();
+
+            Handler<PingMessage>(configurator, context =>
+            {
+                var attempt = Interlocked.Increment(ref _attempts);
+
+                if (attempt <= 3)
+                    throw new IntentionalTestException();
+
+                _completed.TrySetResult(context.Message);
+
+                return TaskUtil.Completed;
+            });
+        }
+
+
+        class RetryPayload
+        {
+            public int PostCreateCount;
+            public int RetryFaultCount;
+            public int PostFaultCount;
+            public int RetryCompletedCount;
+            public int PreRetryCount;
+        }
+
+
+        class RetryObserver :
+            IRetryObserver
+        {
+            readonly TaskCompletionSource<RetryContext> _completionSource;
+            readonly TaskCompletionSource<RetryPayload> _payload;
+
+            public RetryObserver(TaskCompletionSource<RetryContext> completionSource, TaskCompletionSource<RetryPayload> payload)
+            {
+                _completionSource = completionSource;
+                _payload = payload;
+            }
+
+            public Task PostCreate<T>(RetryPolicyContext<T> context)
+                where T : class, PipeContext
+            {
+                var payload = context.Context.GetOrAddPayload(() => new RetryPayload());
+                payload.PostCreateCount++;
+
+                return TaskUtil.Completed;
+            }
+
+            public Task PostFault<T>(RetryContext<T> context)
+                where T : class, PipeContext
+            {
+                var payload = context.Context.GetOrAddPayload(() => new RetryPayload());
+                payload.PostFaultCount++;
+
+                return TaskUtil.Completed;
+            }
+
+            public Task PreRetry<T>(RetryContext<T> context)
+                where T : class, PipeContext
+            {
+                var payload = context.Context.GetOrAddPayload(() => new RetryPayload());
+                payload.PreRetryCount++;
+
+                return TaskUtil.Completed;
+            }
+
+            public Task RetryFault<T>(RetryContext<T> context)
+                where T : class, PipeContext
+            {
+                var payload = context.Context.GetOrAddPayload(() => new RetryPayload());
+                payload.RetryFaultCount++;
+
+                return TaskUtil.Completed;
+            }
+
+            public Task RetryComplete<T>(RetryContext<T> context)
+                where T : class, PipeContext
+            {
+                _completionSource.TrySetResult(context);
+
+                if (context.Context.TryGetPayload(out RetryPayload payload))
+                {
+                    payload.RetryCompletedCount++;
+                    _payload.TrySetResult(payload);
+                }
+                else
+                    _payload.TrySetException(new PayloadNotFoundException());
+
+                return TaskUtil.Completed;
+            }
+        }
+    }
+
+
+    [TestFixture]
     public class When_you_say_deuces_and_stop_the_bus :
         InMemoryTestFixture
     {

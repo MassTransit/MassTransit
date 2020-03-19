@@ -3,10 +3,11 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
 
 
     public class SessionContextFactory :
@@ -34,63 +35,36 @@
             return supervisor.AddActiveContext(context, CreateSharedSession(context.Context, cancellationToken));
         }
 
-        async Task<SessionContext> CreateSharedSession(Task<SessionContext> context, CancellationToken cancellationToken)
+        static async Task<SessionContext> CreateSharedSession(Task<SessionContext> context, CancellationToken cancellationToken)
         {
-            var sessionContext = await context.ConfigureAwait(false);
-
-            return new SharedSessionContext(sessionContext, cancellationToken);
+            return context.IsCompletedSuccessfully()
+                ? new SharedSessionContext(context.Result, cancellationToken)
+                : new SharedSessionContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
         void CreateSession(IAsyncPipeContextAgent<SessionContext> asyncContext, CancellationToken cancellationToken)
         {
-            IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
+            async Task<SessionContext> CreateSessionContext(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
-                try
+                var session = await connectionContext.CreateSession(createCancellationToken).ConfigureAwait(false);
+
+                void HandleConnectionException(Exception exception)
                 {
-                    var session = await connectionContext.CreateSession(cancellationToken).ConfigureAwait(false);
-
-                    LogContext.Debug?.Log("Created session: {Host}", connectionContext.Description);
-
-                    void HandleConnectionException(Exception exception)
-                    {
-                        // ReSharper disable once MethodSupportsCancellation
-                        asyncContext.Stop($"Connection Exception: {exception}");
-                    }
-
-                    connectionContext.Connection.ExceptionListener += HandleConnectionException;
-
-                #pragma warning disable 4014
                     // ReSharper disable once MethodSupportsCancellation
-                    asyncContext.Completed.ContinueWith(_ => connectionContext.Connection.ExceptionListener -= HandleConnectionException);
-                #pragma warning restore 4014
-
-                    var sessionContext = new ActiveMqSessionContext(connectionContext, session, cancellationToken);
-
-                    await asyncContext.Created(sessionContext).ConfigureAwait(false);
-
-                    await asyncContext.Completed.ConfigureAwait(false);
+                    asyncContext.Stop($"Connection Exception: {exception}");
                 }
-                catch (OperationCanceledException)
-                {
-                    await asyncContext.CreateCanceled().ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    LogContext.Error?.Log(exception, "Create session failed: {Host}", connectionContext.Description);
 
-                    await asyncContext.CreateFaulted(exception).ConfigureAwait(false);
-                }
-            });
+                connectionContext.Connection.ExceptionListener += HandleConnectionException;
 
-            var connectionTask = _connectionContextSupervisor.Send(connectionPipe, cancellationToken);
+            #pragma warning disable 4014
+                // ReSharper disable once MethodSupportsCancellation
+                asyncContext.Completed.ContinueWith(_ => connectionContext.Connection.ExceptionListener -= HandleConnectionException);
+            #pragma warning restore 4014
 
-            Task NotifyCreateCanceled(Task task) => asyncContext.CreateCanceled();
+                return new ActiveMqSessionContext(connectionContext, session, createCancellationToken);
+            }
 
-            connectionTask.ContinueWith(NotifyCreateCanceled, TaskContinuationOptions.OnlyOnCanceled);
-
-            Task NotifyCreateFaulted(Task task) => asyncContext.CreateFaulted(task.Exception);
-
-            connectionTask.ContinueWith(NotifyCreateFaulted, TaskContinuationOptions.OnlyOnFaulted);
+            _connectionContextSupervisor.CreateAgent(asyncContext, CreateSessionContext, cancellationToken);
         }
     }
 }

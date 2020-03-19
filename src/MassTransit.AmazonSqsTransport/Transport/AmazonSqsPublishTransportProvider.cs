@@ -1,16 +1,16 @@
-﻿namespace MassTransit.ActiveMqTransport.Transport
+﻿namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
     using Transports;
 
 
-    public class PublishTransportProvider :
+    public class AmazonSqsPublishTransportProvider :
         IPublishTransportProvider
     {
-        readonly IActiveMqHostControl _host;
+        readonly IAmazonSqsHostControl _host;
 
-        public PublishTransportProvider(IActiveMqHostControl host)
+        public AmazonSqsPublishTransportProvider(IAmazonSqsHostControl host)
         {
             _host = host;
         }

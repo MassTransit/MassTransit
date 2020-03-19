@@ -5,6 +5,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using Transport;
 
 
@@ -32,9 +33,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
         protected override async Task<ClientContext> CreateSharedContext(Task<ClientContext> context, CancellationToken cancellationToken)
         {
-            var clientContext = await context.ConfigureAwait(false);
-
-            return new SharedClientContext(clientContext, cancellationToken);
+            return context.IsCompletedSuccessfully()
+                ? new SharedClientContext(context.Result, cancellationToken)
+                : new SharedClientContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
     }
 }

@@ -9,6 +9,7 @@
     using Exceptions;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Policies;
     using Topology;
     using Transports;
@@ -49,13 +50,11 @@
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));
         }
 
-        async Task<ConnectionContext> CreateSharedConnection(Task<ConnectionContext> context, CancellationToken cancellationToken)
+        static async Task<ConnectionContext> CreateSharedConnection(Task<ConnectionContext> context, CancellationToken cancellationToken)
         {
-            var connectionContext = await context.ConfigureAwait(false);
-
-            var sharedConnection = new SharedConnectionContext(connectionContext, cancellationToken);
-
-            return sharedConnection;
+            return context.IsCompletedSuccessfully()
+                ? new SharedConnectionContext(context.Result, cancellationToken)
+                : new SharedConnectionContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
         async Task<ConnectionContext> CreateConnection(IAsyncPipeContextAgent<ConnectionContext> asyncContext, IAgent supervisor)

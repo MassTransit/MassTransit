@@ -5,12 +5,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using Transports;
 
 
-    public class SendEndpointSendTransportProvider :
+    public class ServiceBusSendTransportProvider :
         ISendTransportProvider
     {
         readonly IServiceBusHostControl _host;
 
-        public SendEndpointSendTransportProvider(IServiceBusHostControl host)
+        public ServiceBusSendTransportProvider(IServiceBusHostControl host)
         {
             _host = host;
         }

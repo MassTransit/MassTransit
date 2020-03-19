@@ -2,10 +2,10 @@
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Internals.Extensions;
     using RabbitMQ.Client;
 
@@ -48,22 +48,18 @@
             return supervisor.AddActiveContext(context, CreateSharedModel(context.Context, cancellationToken));
         }
 
-        async Task<ModelContext> CreateSharedModel(Task<ModelContext> context, CancellationToken cancellationToken)
+        static async Task<ModelContext> CreateSharedModel(Task<ModelContext> context, CancellationToken cancellationToken)
         {
-            var modelContext = await context.ConfigureAwait(false);
-
-            return new ScopeModelContext(modelContext, cancellationToken);
+            return context.IsCompletedSuccessfully()
+                ? new ScopeModelContext(context.Result, cancellationToken)
+                : new ScopeModelContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
         Task<ModelContext> CreateModel(IAsyncPipeContextAgent<ModelContext> asyncContext, CancellationToken cancellationToken)
         {
-            async Task<ModelContext> CreateModelContext(ConnectionContext connectionContext, CancellationToken createCancellationToken)
+            static Task<ModelContext> CreateModelContext(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
-                var modelContext = await connectionContext.CreateModelContext(createCancellationToken).ConfigureAwait(false);
-
-                LogContext.Debug?.Log("Created model: {ChannelNumber} {Host}", modelContext.Model.ChannelNumber, connectionContext.Description);
-
-                return modelContext;
+                return connectionContext.CreateModelContext(createCancellationToken);
             }
 
             return _supervisor.CreateAgent(asyncContext, CreateModelContext, cancellationToken);

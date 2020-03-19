@@ -5,12 +5,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using Transports;
 
 
-    public class PublishTransportProvider :
+    public class ServiceBusPublishTransportProvider :
         IPublishTransportProvider
     {
         readonly IServiceBusHostControl _host;
 
-        public PublishTransportProvider(IServiceBusHostControl host)
+        public ServiceBusPublishTransportProvider(IServiceBusHostControl host)
         {
             _host = host;
         }
