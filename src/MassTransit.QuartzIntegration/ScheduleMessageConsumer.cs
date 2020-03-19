@@ -144,8 +144,11 @@
             if (tokenId.HasValue)
                 builder = builder.UsingJobData("TokenId", tokenId.Value.ToString("N"));
 
+            var headers = context.Headers.GetAll();
+            if (headers.Any())
+                builder = builder.UsingJobData("HeadersAsJson", JsonConvert.SerializeObject(headers));
+
             var jobDetail = builder
-                .UsingJobData("HeadersAsJson", JsonConvert.SerializeObject(context.Headers.GetAll()))
                 .Build();
 
             return jobDetail;
