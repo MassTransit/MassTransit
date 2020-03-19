@@ -138,7 +138,7 @@ namespace MassTransit.ActiveMqTransport
         {
             string name = $"{Name}_delay";
 
-            return new ActiveMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, Durable, AutoDelete);
+            return new ActiveMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, Durable, AutoDelete, Type);
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out int? port, out string virtualHost)
@@ -185,7 +185,7 @@ namespace MassTransit.ActiveMqTransport
                 yield return $"{AutoDeleteKey}=true";
 
             if (Type != AddressType.Queue)
-                yield return $"{TypeKey}=Topic";
+                yield return $"{TypeKey}=topic";
         }
     }
 }

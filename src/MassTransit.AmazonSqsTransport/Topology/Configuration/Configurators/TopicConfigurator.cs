@@ -29,5 +29,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
         public IDictionary<string, string> TopicTags { get; private set; }
 
         public IDictionary<string, string> Tags => TopicTags;
+
+        protected override AmazonSqsEndpointAddress.AddressType AddressType => AmazonSqsEndpointAddress.AddressType.Topic;
     }
 }

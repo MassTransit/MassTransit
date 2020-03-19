@@ -1,7 +1,6 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
 {
     using System;
-    using System.Collections.Generic;
 
 
     public abstract class EntityConfigurator
@@ -17,18 +16,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
         public bool AutoDelete { get; set; }
         public string EntityName { get; set; }
 
-        protected virtual IEnumerable<string> GetQueryStringOptions()
-        {
-            if (!Durable)
-                yield return "durable=false";
-
-            if (AutoDelete)
-                yield return "autodelete=true";
-        }
+        protected abstract AmazonSqsEndpointAddress.AddressType AddressType { get; }
 
         public virtual AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
         {
-            return new AmazonSqsEndpointAddress(hostAddress, EntityName, Durable, AutoDelete);
+            return new AmazonSqsEndpointAddress(hostAddress, EntityName, Durable, AutoDelete, AddressType);
         }
     }
 }

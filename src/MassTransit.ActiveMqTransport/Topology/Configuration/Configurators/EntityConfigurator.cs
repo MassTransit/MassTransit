@@ -16,9 +16,11 @@ namespace MassTransit.ActiveMqTransport.Topology.Configurators
         public bool AutoDelete { get; set; }
         public string EntityName { get; }
 
-        public virtual ActiveMqEndpointAddress GetEndpointAddress(Uri hostAddress)
+        protected abstract ActiveMqEndpointAddress.AddressType AddressType { get; }
+
+        public ActiveMqEndpointAddress GetEndpointAddress(Uri hostAddress)
         {
-            return new ActiveMqEndpointAddress(hostAddress, EntityName, Durable, AutoDelete);
+            return new ActiveMqEndpointAddress(hostAddress, EntityName, Durable, AutoDelete, AddressType);
         }
     }
 }

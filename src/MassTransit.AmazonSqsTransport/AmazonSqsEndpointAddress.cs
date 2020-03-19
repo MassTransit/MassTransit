@@ -3,6 +3,8 @@ namespace MassTransit.AmazonSqsTransport
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using Initializers;
+    using Initializers.TypeConverters;
     using Topology;
     using Util;
 
@@ -13,6 +15,17 @@ namespace MassTransit.AmazonSqsTransport
         const string AutoDeleteKey = "autodelete";
         const string DurableKey = "durable";
         const string TemporaryKey = "temporary";
+        const string TypeKey = "type";
+
+
+        public enum AddressType
+        {
+            Queue = 0,
+            Topic = 1
+        }
+
+
+        static readonly ITypeConverter<AddressType, string> _parseConverter = new EnumTypeConverter<AddressType>();
 
         public readonly string Scheme;
         public readonly string Host;
@@ -21,6 +34,7 @@ namespace MassTransit.AmazonSqsTransport
         public readonly string Name;
         public readonly bool AutoDelete;
         public readonly bool Durable;
+        public readonly AddressType Type;
 
         public AmazonSqsEndpointAddress(Uri hostAddress, Uri address)
         {
@@ -30,6 +44,7 @@ namespace MassTransit.AmazonSqsTransport
 
             Durable = true;
             AutoDelete = false;
+            Type = AddressType.Queue;
 
             var scheme = address.Scheme.ToLowerInvariant();
             switch (scheme)
@@ -51,6 +66,7 @@ namespace MassTransit.AmazonSqsTransport
                     ParseLeft(hostAddress, out Scheme, out Host, out Scope);
 
                     Name = address.AbsolutePath;
+                    Type = AddressType.Topic;
                     break;
 
                 default:
@@ -75,11 +91,15 @@ namespace MassTransit.AmazonSqsTransport
                     case AutoDeleteKey when bool.TryParse(value, out var result):
                         AutoDelete = result;
                         break;
+
+                    case TypeKey when _parseConverter.TryConvert(value, out AddressType result):
+                        Type = result;
+                        break;
                 }
             }
         }
 
-        public AmazonSqsEndpointAddress(Uri hostAddress, string name, bool durable = true, bool autoDelete = false)
+        public AmazonSqsEndpointAddress(Uri hostAddress, string name, bool durable = true, bool autoDelete = false, AddressType type = AddressType.Queue)
         {
             ParseLeft(hostAddress, out Scheme, out Host, out Scope);
 
@@ -87,6 +107,7 @@ namespace MassTransit.AmazonSqsTransport
 
             Durable = durable;
             AutoDelete = autoDelete;
+            Type = type;
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out string scope)
@@ -103,7 +124,7 @@ namespace MassTransit.AmazonSqsTransport
             {
                 Scheme = address.Scheme,
                 Host = address.Host,
-                Path = address.Scope == "/"
+                Path = address.Scope == "/" || address.Type == AddressType.Topic
                     ? $"/{address.Name}"
                     : $"/{address.Scope}/{address.Name}"
             };
@@ -121,6 +142,9 @@ namespace MassTransit.AmazonSqsTransport
                 yield return $"{DurableKey}=false";
             if (AutoDelete)
                 yield return $"{AutoDeleteKey}=true";
+
+            if (Type != AddressType.Queue)
+                yield return $"{TypeKey}=topic";
         }
     }
 }

@@ -30,7 +30,7 @@
         /// </summary>
         /// <param name="topicName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Subscribe(string topicName, Action<ITopicSubscriptionConfigurator> callback);
+        void Subscribe(string topicName, Action<ITopicSubscriptionConfigurator> callback = default);
 
         void ConfigureClient(Action<IPipeConfigurator<ClientContext>> configure);
 
