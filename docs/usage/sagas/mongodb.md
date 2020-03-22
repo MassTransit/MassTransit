@@ -2,7 +2,7 @@
 
 MongoDB is an easy to use saga repository, because setup is easy. There is no need for class mapping, the saga instances can be persisted easily using a MongoDB collection.
 
-To use MongoDB, an additional interface, property, and data annotation are required on saga instances. The interface, `IVersionedSaga`, contains a `Version` property that is used to support optimistic concurrency versioning. The annotation `[BsonId]` configures the CorrelationId property as the id property in MongoDB.
+To use MongoDB, an additional interface, property, and data annotation are required on saga instances. The interface, `IVersionedSaga`, contains a `Version` property that is used to support optimistic concurrency versioning. The annotation `[BsonId]` configures the `CorrelationId` property as the id property in MongoDB.
 
 ```cs {3,10}
 public class OrderState :
@@ -21,7 +21,7 @@ public class OrderState :
 
 ### Container Integration
 
-To configure MongoDB as the saga repository for a saga, use the code shown below using the _AddMassTransit_ container extension. This will configure MongoDB to connect to the local MongoDB instance on the default port using Optimistic concurrency.
+To configure MongoDB as the saga repository for a saga, use the code shown below using the _AddMassTransit_ container extension. This will configure MongoDB to connect to the local MongoDB instance on the default port using Optimistic concurrency. The annotation `[BsonId]` is redundant, `CorrelationId` property will be automatically mapped.
 
 ```cs {4}
 container.AddMassTransit(cfg =>
