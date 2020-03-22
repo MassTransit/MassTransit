@@ -10,7 +10,7 @@ namespace MassTransit.MartenIntegration.Configurators
     using Saga.Context;
 
 
-    public class MartenSagaRepositoryConfigurator<TSaga> :
+    class MartenSagaRepositoryConfigurator<TSaga> :
         IMartenSagaRepositoryConfigurator<TSaga>,
         ISpecification
         where TSaga : class, ISaga

@@ -8,7 +8,7 @@ namespace MassTransit.RedisIntegration.Configuration
     using StackExchange.Redis;
 
 
-    public class RedisSagaRepositoryConfigurator<TSaga> :
+    class RedisSagaRepositoryConfigurator<TSaga> :
         IRedisSagaRepositoryConfigurator<TSaga>,
         ISpecification
         where TSaga : class, IVersionedSaga

@@ -6,9 +6,9 @@ namespace MassTransit
     using EntityFrameworkCoreIntegration.Configurators;
     using EntityFrameworkCoreIntegration.Mappings;
     using EntityFrameworkCoreIntegration.Saga.Configuration;
-    using Saga;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
+    using Saga;
 
 
     public static class EntityFrameworkCoreSagaRepositoryRegistrationExtensions
@@ -49,9 +49,7 @@ namespace MassTransit
             Action<EntityTypeBuilder<TSaga>> configureSagaMapping = null)
             where TSaga : class, ISaga
         {
-            //return configurator.EntityFrameworkRepository(sagaRepository, configure, new ActionSagaClassMap<TSaga>(configureSagaMapping));
-
-            return configurator;
+            return configurator.EntityFrameworkRepository(sagaRepository, configure, new ActionSagaClassMap<TSaga>(configureSagaMapping));
         }
 
         /// <summary>
@@ -64,7 +62,7 @@ namespace MassTransit
         /// <typeparam name="TSaga"></typeparam>
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<TSaga> EntityFrameworkRepository<TSaga>(this ISagaRegistrationConfigurator<TSaga> configurator,
-            IEntityFrameworkSagaRepository sagaRepository, Action<IEntityFrameworkSagaRepositoryConfigurator> configure = null,
+            IEntityFrameworkSagaRepository sagaRepository, Action<IEntityFrameworkSagaRepositoryConfigurator<TSaga>> configure = null,
             ISagaClassMap<TSaga> sagaClassMap = null)
             where TSaga : class, ISaga
         {

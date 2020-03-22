@@ -13,7 +13,7 @@ namespace MassTransit.DocumentDbIntegration.Configuration
     using Saga.Context;
 
 
-    public class DocumentDbSagaRepositoryConfigurator<TSaga> :
+    class DocumentDbSagaRepositoryConfigurator<TSaga> :
         IDocumentDbSagaRepositoryConfigurator<TSaga>,
         ISpecification
         where TSaga : class, IVersionedSaga

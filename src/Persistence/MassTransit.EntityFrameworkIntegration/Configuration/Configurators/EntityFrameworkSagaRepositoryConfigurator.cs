@@ -12,7 +12,7 @@ namespace MassTransit.EntityFrameworkIntegration.Configurators
     using Saga.Context;
 
 
-    public class EntityFrameworkSagaRepositoryConfigurator<TSaga> :
+    class EntityFrameworkSagaRepositoryConfigurator<TSaga> :
         IEntityFrameworkSagaRepositoryConfigurator<TSaga>,
         ISpecification
         where TSaga : class, ISaga

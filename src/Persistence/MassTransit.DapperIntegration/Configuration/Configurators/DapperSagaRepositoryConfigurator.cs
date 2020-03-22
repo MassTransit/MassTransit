@@ -7,7 +7,7 @@ namespace MassTransit.DapperIntegration.Configurators
     using Saga;
 
 
-    public class DapperSagaRepositoryConfigurator<TSaga> :
+    class DapperSagaRepositoryConfigurator<TSaga> :
         IDapperSagaRepositoryConfigurator<TSaga>,
         ISpecification
         where TSaga : class, ISaga
