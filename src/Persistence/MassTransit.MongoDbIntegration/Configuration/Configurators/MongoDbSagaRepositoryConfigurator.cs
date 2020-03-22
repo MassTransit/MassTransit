@@ -3,6 +3,7 @@ namespace MassTransit.MongoDbIntegration.Configurators
     using System;
     using System.Collections.Generic;
     using GreenPipes;
+    using MongoDB.Bson.Serialization;
     using MongoDB.Driver;
     using Registration;
     using Saga;
@@ -82,6 +83,13 @@ namespace MassTransit.MongoDbIntegration.Configurators
         {
             IMongoCollection<TSaga> MongoCollectionFactory(IConfigurationServiceProvider provider)
             {
+                if (!BsonClassMap.IsClassMapRegistered(typeof(TSaga)))
+                    BsonClassMap.RegisterClassMap<TSaga>(cfg =>
+                    {
+                        cfg.AutoMap();
+                        cfg.MapIdProperty(x => x.CorrelationId);
+                    });
+
                 var database = _databaseFactory(provider);
                 var collectionNameFormatter = _collectionNameFormatterFactory(provider);
                 return database.GetCollection<TSaga>(collectionNameFormatter);

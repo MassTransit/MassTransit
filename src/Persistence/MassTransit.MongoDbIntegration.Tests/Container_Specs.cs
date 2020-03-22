@@ -7,7 +7,6 @@ namespace MassTransit.MongoDbIntegration.Tests
         using Automatonymous;
         using GreenPipes;
         using Microsoft.Extensions.DependencyInjection;
-        using MongoDB.Bson.Serialization.Attributes;
         using MongoDbIntegration.Saga;
         using NUnit.Framework;
         using TestFramework;
@@ -80,7 +79,6 @@ namespace MassTransit.MongoDbIntegration.Tests
             SagaStateMachineInstance,
             IVersionedSaga
         {
-            [BsonId]
             public Guid CorrelationId { get; set; }
             public int Version { get; set; }
 
