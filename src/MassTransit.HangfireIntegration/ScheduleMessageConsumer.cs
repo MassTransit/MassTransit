@@ -1,6 +1,5 @@
 namespace MassTransit.HangfireIntegration
 {
-    using System;
     using System.Threading.Tasks;
     using Hangfire;
     using Scheduling;
@@ -9,9 +8,9 @@ namespace MassTransit.HangfireIntegration
     public class ScheduleMessageConsumer :
         IConsumer<ScheduleMessage>
     {
-        readonly Func<IBackgroundJobClient> _backgroundJobClient;
+        readonly IBackgroundJobClient _backgroundJobClient;
 
-        public ScheduleMessageConsumer(Func<IBackgroundJobClient> backgroundJobClient)
+        public ScheduleMessageConsumer(IBackgroundJobClient backgroundJobClient)
         {
             _backgroundJobClient = backgroundJobClient;
         }
@@ -19,7 +18,9 @@ namespace MassTransit.HangfireIntegration
         public async Task Consume(ConsumeContext<ScheduleMessage> context)
         {
             var message = HangfireSerializedMessage.Create(context);
-            _backgroundJobClient().Schedule<ScheduleJob>(x => x.SendMessage(message), context.Message.ScheduledTime);
+            _backgroundJobClient.Schedule<ScheduleJob>(
+                x => x.SendMessage(message).ConfigureAwait(false),
+                context.Message.ScheduledTime);
         }
     }
 }

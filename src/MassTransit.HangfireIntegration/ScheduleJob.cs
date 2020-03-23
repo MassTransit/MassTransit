@@ -7,7 +7,7 @@ namespace MassTransit.HangfireIntegration
     using Serialization;
 
 
-    public class ScheduleJob
+    class ScheduleJob
     {
         readonly IBus _bus;
 
@@ -16,7 +16,7 @@ namespace MassTransit.HangfireIntegration
             _bus = bus;
         }
 
-        public async Task SendMessage(SerializedMessage serializedMessage)
+        public async Task SendMessage(HangfireSerializedMessage serializedMessage)
         {
             try
             {
@@ -38,12 +38,14 @@ namespace MassTransit.HangfireIntegration
             }
         }
 
-        static IPipe<SendContext> CreateMessageContext(SerializedMessage serializedMessage, Uri sourceAddress)
+        static IPipe<SendContext> CreateMessageContext(HangfireSerializedMessage serializedMessage, Uri sourceAddress)
         {
             IPipe<SendContext> sendPipe = Pipe.New<SendContext>(x =>
             {
                 x.UseExecute(context =>
                 {
+                    if (!string.IsNullOrEmpty(serializedMessage.JobKey))
+                        context.Headers.Set(MessageHeaders.QuartzTriggerKey, serializedMessage.JobKey);
                 });
             });
 

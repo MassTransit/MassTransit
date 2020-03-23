@@ -1,32 +1,25 @@
 ﻿namespace MassTransit
 {
     using System;
-    using System.Threading;
     using GreenPipes;
-    using Hangfire;
     using HangfireIntegration;
     using Scheduling;
 
 
     public static class HangfireIntegrationExtensions
     {
-        static readonly Lazy<IBackgroundJobClient> Cached =
-            new Lazy<IBackgroundJobClient>(() => new BackgroundJobClient(), LazyThreadSafetyMode.PublicationOnly);
-
-        static readonly Func<IBackgroundJobClient> ClientFactory = () => Cached.Value;
-
         public static Uri UseHangfireScheduler(this IBusFactoryConfigurator configurator, string queueName = "hangfire")
         {
-            return configurator.UseHangfireScheduler(ClientFactory, queueName);
+            return configurator.UseHangfireScheduler(DefaultHangfireComponentResolver.Instance.Value, queueName);
         }
 
-        public static Uri UseHangfireScheduler(this IBusFactoryConfigurator configurator, Func<IBackgroundJobClient> backgroundJobClient,
+        public static Uri UseHangfireScheduler(this IBusFactoryConfigurator configurator, IHangfireComponentResolver hangfireComponentResolver,
             string queueName = "hangfire")
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (backgroundJobClient == null)
-                throw new ArgumentNullException(nameof(backgroundJobClient));
+            if (hangfireComponentResolver == null)
+                throw new ArgumentNullException(nameof(hangfireComponentResolver));
 
             Uri inputAddress = null;
 
@@ -34,8 +27,10 @@
             {
                 var partitioner = configurator.CreatePartitioner(Environment.ProcessorCount);
 
-                e.Consumer(() => new ScheduleMessageConsumer(backgroundJobClient), x =>
+                e.Consumer(() => new ScheduleMessageConsumer(hangfireComponentResolver.BackgroundJobClient), x =>
                     x.Message<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
+                e.Consumer(() =>
+                    new ScheduleRecurringMessageConsumer(hangfireComponentResolver.RecurringJobManager, hangfireComponentResolver.TimeZoneResolver));
                 //
                 // e.Consumer(() => new CancelScheduledMessageConsumer(schedulerInstance), x =>
                 //     x.Message<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));

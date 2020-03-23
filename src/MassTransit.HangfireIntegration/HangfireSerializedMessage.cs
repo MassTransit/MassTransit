@@ -20,6 +20,8 @@ namespace MassTransit.HangfireIntegration
 
         public string ExpirationTime { get; set; }
 
+        public string JobKey { get; set; }
+
         public string ResponseAddress { get; set; }
 
         public string FaultAddress { get; set; }
@@ -45,7 +47,12 @@ namespace MassTransit.HangfireIntegration
             return Extract(context, context.Message.Destination);
         }
 
-        static HangfireSerializedMessage Extract(ConsumeContext context, Uri destination)
+        public static HangfireSerializedMessage Create(ConsumeContext<ScheduleRecurringMessage> context, string jobKey)
+        {
+            return Extract(context, context.Message.Destination, jobKey);
+        }
+
+        static HangfireSerializedMessage Extract(ConsumeContext context, Uri destination, string jobKey = null)
         {
             var message = new HangfireSerializedMessage
             {
@@ -73,6 +80,9 @@ namespace MassTransit.HangfireIntegration
 
             if (context.ExpirationTime.HasValue)
                 message.ExpirationTime = context.ExpirationTime.Value.ToString("O");
+
+            if (!string.IsNullOrEmpty(jobKey))
+                message.JobKey = jobKey;
 
             IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll();
             if (headers.Any())
