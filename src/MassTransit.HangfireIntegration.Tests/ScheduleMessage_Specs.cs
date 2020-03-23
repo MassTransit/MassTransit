@@ -69,7 +69,7 @@
         {
             _first = Handler<FirstMessage>(configurator, async context =>
             {
-                await context.ScheduleSend(TimeSpan.FromSeconds(10), new SecondMessage(),
+                await context.ScheduleSend(TimeSpan.FromSeconds(5), new SecondMessage(),
                     Pipe.Execute<SendContext>(x => x.TimeToLive = TimeSpan.FromSeconds(30)));
             });
 
@@ -99,7 +99,7 @@
             var second = await _second;
 
             Assert.That(second.ExpirationTime.HasValue, Is.True);
-            Assert.That(second.ExpirationTime.Value, Is.GreaterThan(DateTime.UtcNow + TimeSpan.FromSeconds(20)));
+            Assert.That(second.ExpirationTime.Value, Is.GreaterThan(DateTime.UtcNow + TimeSpan.FromSeconds(25)));
         }
     }
 }

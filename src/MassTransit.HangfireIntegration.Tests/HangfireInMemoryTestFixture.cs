@@ -46,6 +46,7 @@
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseMemoryStorage();
+
             _quartzEndpoint = await GetSendEndpoint(QuartzAddress);
             _server = new BackgroundJobServer(new BackgroundJobServerOptions
             {

@@ -27,13 +27,12 @@
             {
                 var partitioner = configurator.CreatePartitioner(Environment.ProcessorCount);
 
-                e.Consumer(() => new ScheduleMessageConsumer(hangfireComponentResolver.BackgroundJobClient), x =>
-                    x.Message<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
-                e.Consumer(() =>
-                    new ScheduleRecurringMessageConsumer(hangfireComponentResolver.RecurringJobManager, hangfireComponentResolver.TimeZoneResolver));
-                //
-                // e.Consumer(() => new CancelScheduledMessageConsumer(schedulerInstance), x =>
-                //     x.Message<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
+                e.Consumer(() => new ScheduleMessageConsumer(hangfireComponentResolver), x =>
+                {
+                    x.Message<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId));
+                    x.Message<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId));
+                });
+                e.Consumer(() => new ScheduleRecurringMessageConsumer(hangfireComponentResolver));
 
                 configurator.UseMessageScheduler(e.InputAddress);
 

@@ -3,6 +3,7 @@ namespace MassTransit.HangfireIntegration
     using System;
     using System.Threading;
     using Hangfire;
+    using Hangfire.Common;
 
 
     public interface IHangfireComponentResolver
@@ -27,9 +28,11 @@ namespace MassTransit.HangfireIntegration
 
         DefaultHangfireComponentResolver()
         {
-            _backgroundJobClient = new Lazy<IBackgroundJobClient>(() => new BackgroundJobClient(), LazyThreadSafetyMode.PublicationOnly);
-            _recurringJobManager = new Lazy<IRecurringJobManager>(() => new RecurringJobManager(), LazyThreadSafetyMode.PublicationOnly);
+            _backgroundJobClient = new Lazy<IBackgroundJobClient>(
+                () => new BackgroundJobClient(JobStorage.Current, JobFilterProviders.Providers), LazyThreadSafetyMode.PublicationOnly);
             _timeZoneResolver = new Lazy<ITimeZoneResolver>(() => new DefaultTimeZoneResolver(), LazyThreadSafetyMode.PublicationOnly);
+            _recurringJobManager = new Lazy<IRecurringJobManager>(
+                () => new RecurringJobManager(JobStorage.Current, JobFilterProviders.Providers, TimeZoneResolver), LazyThreadSafetyMode.PublicationOnly);
         }
 
         public IBackgroundJobClient BackgroundJobClient => _backgroundJobClient.Value;
