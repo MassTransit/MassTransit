@@ -110,6 +110,7 @@ module.exports = {
                   '/advanced/scheduling/azure-sb-scheduler',
                   '/advanced/scheduling/amazonsqs-scheduler',
                   '/advanced/scheduling/rabbitmq-delayed',
+                  '/advanced/scheduling/hangfire',
                   '/advanced/scheduling/redeliver'
                 ]
               },
