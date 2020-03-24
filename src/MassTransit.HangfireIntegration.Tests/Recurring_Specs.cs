@@ -39,7 +39,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             var scheduleId = Guid.NewGuid().ToString();
 
-            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new Done { Name = "Joe" });
+            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new Done { Name = "Joe" });
             var scheduledRecurringMessage = await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MyCancelableSchedule(scheduleId), new Interval { Name = "Joe" });
 
             await _done;
@@ -49,38 +49,16 @@ namespace MassTransit.HangfireIntegration.Tests
 
             await Bus.CancelScheduledRecurringSend(scheduledRecurringMessage);
 
-            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new DoneAgain { Name = "Joe" });
+            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new DoneAgain { Name = "Joe" });
 
             await _doneAgain;
 
             Assert.AreEqual(countBeforeCancel, _count, "Expected to see the count matches.");
         }
 
-        [Test, Explicit]
-        public async Task Should_contain_additional_headers_that_provide_time_domain_context()
-        {
-            var scheduleId = Guid.NewGuid().ToString();
-
-            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new Done { Name = "Joe" });
-            var scheduledRecurringMessage = await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(), new Interval { Name = "Joe" });
-
-            await _done;
-
-            Assert.Greater(_count, 0, "Expected to see at least one interval");
-
-
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.Scheduled, null));
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.Sent, null));
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.NextScheduled, null));
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.PreviousSent, null));
-
-            Console.WriteLine("{0}", _lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.NextScheduled, null));
-        }
-
         Task<ConsumeContext<Done>> _done;
         Task<ConsumeContext<DoneAgain>> _doneAgain;
         int _count;
-        ConsumeContext<Interval> _lastInterval;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -88,7 +66,6 @@ namespace MassTransit.HangfireIntegration.Tests
             configurator.Handler<Interval>(async context =>
             {
                 Interlocked.Increment(ref _count);
-                _lastInterval = context;
             });
 
             _done = Handled<Done>(configurator);

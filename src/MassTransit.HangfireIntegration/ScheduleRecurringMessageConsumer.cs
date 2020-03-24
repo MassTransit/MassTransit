@@ -1,5 +1,6 @@
 namespace MassTransit.HangfireIntegration
 {
+    using System;
     using System.Threading.Tasks;
     using Context;
     using Hangfire;
@@ -29,11 +30,15 @@ namespace MassTransit.HangfireIntegration
         public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
         {
             var jobKey = GetJobKey(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
-            var message = HangfireSerializedMessage.Create(context, jobKey);
-            var tz = _timeZoneResolver.GetTimeZoneById(context.Message.Schedule.TimeZoneId);
+            var message = HangfireRecurringScheduledMessageData.Create(context, jobKey);
+
+            var tz = TimeZoneInfo.Local;
+            if (!string.IsNullOrWhiteSpace(context.Message.Schedule.TimeZoneId) && context.Message.Schedule.TimeZoneId != tz.Id)
+                tz = _timeZoneResolver.GetTimeZoneById(context.Message.Schedule.TimeZoneId);
+
             _recurringJobManager.AddOrUpdate<ScheduleJob>(
                 jobKey,
-                x => x.SendMessage(message, context.Message.Schedule.StartTime, context.Message.Schedule.EndTime, null),
+                x => x.SendMessage(message, null),
                 context.Message.Schedule.CronExpression,
                 tz);
 

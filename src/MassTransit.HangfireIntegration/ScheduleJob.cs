@@ -17,13 +17,13 @@ namespace MassTransit.HangfireIntegration
             _bus = bus;
         }
 
-        public async Task SendMessage(HangfireSerializedMessage message, PerformContext performContext)
+        public async Task SendMessage(HangfireScheduledMessageData messageData, PerformContext performContext)
         {
             try
             {
-                IPipe<SendContext> sendPipe = CreateMessageContext(message, _bus.Address, message.JobKey);
+                IPipe<SendContext> sendPipe = CreateMessageContext(messageData, _bus.Address);
 
-                var endpoint = await _bus.GetSendEndpoint(message.Destination).ConfigureAwait(false);
+                var endpoint = await _bus.GetSendEndpoint(messageData.Destination).ConfigureAwait(false);
 
                 var scheduled = new Scheduled();
 
@@ -35,38 +35,38 @@ namespace MassTransit.HangfireIntegration
             catch (Exception ex)
             {
                 LogContext.Error?.Log(ex, "Failed to send scheduled message: {JobId}, created at: {CreatedAt}, destination: {DestinationAddress}",
-                    performContext.BackgroundJob.Id, message.Destination, performContext.BackgroundJob.CreatedAt);
+                    performContext.BackgroundJob.Id, messageData.Destination, performContext.BackgroundJob.CreatedAt);
 
                 throw new JobPerformanceException("Job Execution exception", ex);
             }
         }
 
-        [DateIntervalAttribute]
-        public async Task SendMessage(HangfireSerializedMessage message, DateTimeOffset startDate, DateTimeOffset? endDate, PerformContext performContext)
+        [RecurringScheduleDateTimeInterval]
+        public async Task SendMessage(HangfireRecurringScheduledMessageData messageData, PerformContext performContext)
         {
             try
             {
-                IPipe<SendContext> sendPipe = CreateMessageContext(message, _bus.Address, message.JobKey);
+                IPipe<SendContext> sendPipe = CreateMessageContext(messageData, _bus.Address, messageData.JobKey);
 
-                var endpoint = await _bus.GetSendEndpoint(message.Destination).ConfigureAwait(false);
+                var endpoint = await _bus.GetSendEndpoint(messageData.Destination).ConfigureAwait(false);
 
                 var scheduled = new Scheduled();
 
                 await endpoint.Send(scheduled, sendPipe, performContext.CancellationToken.ShutdownToken).ConfigureAwait(false);
 
-                LogContext.Debug?.Log("Schedule Executed: {JobId}, created at: {CreatedAt}, with range: {StartDate}-{EndDate}", performContext.BackgroundJob.Id,
-                    performContext.BackgroundJob.CreatedAt, startDate, endDate);
+                LogContext.Debug?.Log("Schedule Executed: {JobId}, created at: {CreatedAt}, with range: {StartTime}-{EndTime}", performContext.BackgroundJob.Id,
+                    performContext.BackgroundJob.CreatedAt, messageData.StartTime, messageData.EndTime);
             }
             catch (Exception ex)
             {
                 LogContext.Error?.Log(ex, "Failed to send scheduled message: {JobId}, created at: {CreatedAt}, destination: {DestinationAddress}",
-                    performContext.BackgroundJob.Id, message.Destination, performContext.BackgroundJob.CreatedAt);
+                    performContext.BackgroundJob.Id, messageData.Destination, performContext.BackgroundJob.CreatedAt);
 
                 throw new JobPerformanceException("Job Execution exception", ex);
             }
         }
 
-        static IPipe<SendContext> CreateMessageContext(SerializedMessage message, Uri sourceAddress, string jobKey)
+        static IPipe<SendContext> CreateMessageContext(SerializedMessage message, Uri sourceAddress, string jobKey = null)
         {
             IPipe<SendContext> sendPipe = Pipe.New<SendContext>(x =>
             {

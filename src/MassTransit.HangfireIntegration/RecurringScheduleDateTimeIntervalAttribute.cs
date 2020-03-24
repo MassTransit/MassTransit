@@ -8,19 +8,18 @@ namespace MassTransit.HangfireIntegration
     using Hangfire.Server;
 
 
-    class DateIntervalAttribute : JobFilterAttribute,
+    class RecurringScheduleDateTimeIntervalAttribute : JobFilterAttribute,
         IClientFilter,
         IServerFilter
     {
         public void OnCreating(CreatingContext filterContext)
         {
             var now = DateTimeOffset.Now;
-            DateTimeOffset notBefore = filterContext.Job.Args.OfType<DateTimeOffset>().First();
-            DateTimeOffset? notAfter = filterContext.Job.Args.OfType<DateTimeOffset?>().LastOrDefault();
+            var data = filterContext.Job.Args.OfType<HangfireRecurringScheduledMessageData>().Single();
 
-            if (notBefore > now)
+            if (data.StartTime > now)
                 filterContext.Canceled = true;
-            else if (notAfter.HasValue && notAfter.Value < now)
+            else if (data.EndTime.HasValue && data.EndTime.Value < now)
             {
                 filterContext.Canceled = true;
                 if (!filterContext.Parameters.TryGetValue("RecurringJobId", out var recurringJobId))
@@ -36,12 +35,11 @@ namespace MassTransit.HangfireIntegration
         public void OnPerforming(PerformingContext filterContext)
         {
             var now = DateTimeOffset.Now;
-            DateTimeOffset notBefore = filterContext.BackgroundJob.Job.Args.OfType<DateTimeOffset>().First();
-            DateTimeOffset? notAfter = filterContext.BackgroundJob.Job.Args.OfType<DateTimeOffset?>().LastOrDefault();
+            var data = filterContext.BackgroundJob.Job.Args.OfType<HangfireRecurringScheduledMessageData>().Single();
 
-            if (notBefore > now)
+            if (data.StartTime > now)
                 filterContext.Canceled = true;
-            else if (notAfter.HasValue && notAfter.Value < now)
+            else if (data.EndTime.HasValue && data.EndTime.Value < now)
                 filterContext.Canceled = true;
         }
 

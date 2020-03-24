@@ -12,53 +12,30 @@ namespace MassTransit.HangfireIntegration
     using Serialization;
 
 
-    class HangfireSerializedMessage : SerializedMessage
+    class HangfireScheduledMessageData : SerializedMessage
     {
-        public Uri Destination { get; set; }
-
+        public string DestinationAddress { get; set; }
+        public Uri Destination => new Uri(DestinationAddress);
         public string ContentType { get; set; }
-
         public string ExpirationTime { get; set; }
-
-        public string JobKey { get; set; }
-
         public string ResponseAddress { get; set; }
-
         public string FaultAddress { get; set; }
-
         public string Body { get; set; }
-
         public string MessageId { get; set; }
-
         public string RequestId { get; set; }
-
         public string CorrelationId { get; set; }
-
         public string ConversationId { get; set; }
-
         public string InitiatorId { get; set; }
-
         public string HeadersAsJson { get; set; }
-
         public string PayloadMessageHeadersAsJson { get; set; }
 
-        public static HangfireSerializedMessage Create(ConsumeContext<ScheduleMessage> context)
+        public static HangfireScheduledMessageData Create(ConsumeContext<ScheduleMessage> context)
         {
-            return Extract(context, context.Message.Destination);
-        }
-
-        public static HangfireSerializedMessage Create(ConsumeContext<ScheduleRecurringMessage> context, string jobKey)
-        {
-            return Extract(context, context.Message.Destination, jobKey);
-        }
-
-        static HangfireSerializedMessage Extract(ConsumeContext context, Uri destination, string jobKey = null)
-        {
-            var message = new HangfireSerializedMessage
+            var message = new HangfireScheduledMessageData
             {
-                Destination = destination,
+                DestinationAddress = context.Message.Destination?.ToString() ?? "",
                 ContentType = context.ReceiveContext.ContentType?.MediaType,
-                Body = ExtractBody(context.ReceiveContext.ContentType?.MediaType, context.ReceiveContext.GetBody(), destination),
+                Body = ExtractBody(context.ReceiveContext.ContentType?.MediaType, context.ReceiveContext.GetBody(), context.Message.Destination),
                 FaultAddress = context.FaultAddress?.ToString() ?? "",
                 ResponseAddress = context.ResponseAddress?.ToString() ?? ""
             };
@@ -81,9 +58,6 @@ namespace MassTransit.HangfireIntegration
             if (context.ExpirationTime.HasValue)
                 message.ExpirationTime = context.ExpirationTime.Value.ToString("O");
 
-            if (!string.IsNullOrEmpty(jobKey))
-                message.JobKey = jobKey;
-
             IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll();
             if (headers.Any())
                 message.HeadersAsJson = JsonConvert.SerializeObject(headers);
@@ -91,7 +65,7 @@ namespace MassTransit.HangfireIntegration
             return message;
         }
 
-        static string ExtractBody(string mediaType, byte[] bytes, Uri destination)
+        protected static string ExtractBody(string mediaType, byte[] bytes, Uri destination)
         {
             var body = Encoding.UTF8.GetString(bytes);
             if (JsonMessageSerializer.JsonContentType.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))

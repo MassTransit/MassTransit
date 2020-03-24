@@ -24,7 +24,7 @@ namespace MassTransit.HangfireIntegration
 
         public async Task Consume(ConsumeContext<ScheduleMessage> context)
         {
-            var message = HangfireSerializedMessage.Create(context);
+            var message = HangfireScheduledMessageData.Create(context);
             var jobId = _backgroundJobClient.Schedule<ScheduleJob>(
                 x => x.SendMessage(message, null),
                 context.Message.ScheduledTime);
