@@ -1,6 +1,5 @@
 namespace MassTransit.HangfireIntegration
 {
-    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Hangfire;
@@ -27,7 +26,7 @@ namespace MassTransit.HangfireIntegration
         {
             var message = HangfireSerializedMessage.Create(context);
             var jobId = _backgroundJobClient.Schedule<ScheduleJob>(
-                x => x.SendMessage(message, CancellationToken.None),
+                x => x.SendMessage(message, null),
                 context.Message.ScheduledTime);
 
             LogContext.Debug?.Log("Scheduled: {Id}", jobId);

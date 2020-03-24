@@ -1,6 +1,5 @@
 namespace MassTransit.HangfireIntegration
 {
-    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Hangfire;
@@ -34,7 +33,7 @@ namespace MassTransit.HangfireIntegration
             var tz = _timeZoneResolver.GetTimeZoneById(context.Message.Schedule.TimeZoneId);
             _recurringJobManager.AddOrUpdate<ScheduleJob>(
                 jobKey,
-                x => x.SendMessage(message, CancellationToken.None),
+                x => x.SendMessage(message, context.Message.Schedule.StartTime, context.Message.Schedule.EndTime, null),
                 context.Message.Schedule.CronExpression,
                 tz);
 
