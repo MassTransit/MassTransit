@@ -25,7 +25,10 @@ namespace MassTransit.HangfireIntegration
         {
         }
 
-        static string GetJobKey(string scheduleId, string scheduleGroup) => $"{scheduleId}-{scheduleGroup}";
+        static string GetJobKey(string scheduleId, string scheduleGroup) =>
+            string.IsNullOrEmpty(scheduleGroup)
+                ? scheduleId
+                : $"{scheduleId}-{scheduleGroup}";
 
         public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
         {

@@ -26,8 +26,9 @@ namespace MassTransit.HangfireIntegration.Tests
         [Test, Explicit]
         public async Task Should_handle_now_properly()
         {
-            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(20), new Done { Name = "Joe" });
-            await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(), new Interval { Name = "Joe" });
+            var scheduleId = NewId.NextGuid().ToString("N");
+            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(20), new Done {Name = "Joe"});
+            await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(scheduleId), new Interval {Name = "Joe"});
 
             await _done;
 
@@ -39,8 +40,9 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             var scheduleId = Guid.NewGuid().ToString();
 
-            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new Done { Name = "Joe" });
-            var scheduledRecurringMessage = await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MyCancelableSchedule(scheduleId), new Interval { Name = "Joe" });
+            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new Done {Name = "Joe"});
+            var scheduledRecurringMessage =
+                await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MyCancelableSchedule(scheduleId), new Interval {Name = "Joe"});
 
             await _done;
 
@@ -49,7 +51,7 @@ namespace MassTransit.HangfireIntegration.Tests
 
             await Bus.CancelScheduledRecurringSend(scheduledRecurringMessage);
 
-            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new DoneAgain { Name = "Joe" });
+            await QuartzEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new DoneAgain {Name = "Joe"});
 
             await _doneAgain;
 
@@ -70,25 +72,35 @@ namespace MassTransit.HangfireIntegration.Tests
 
             _done = Handled<Done>(configurator);
             _doneAgain = Handled<DoneAgain>(configurator);
-
         }
 
+
         class MySchedule :
-            DefaultRecurringSchedule
+            RecurringSchedule
         {
-            public MySchedule()
+            public MySchedule(string scheduleId)
             {
+                ScheduleId = scheduleId;
                 CronExpression = "0/1 * * * * ?";
 
                 StartTime = DateTime.Now + TimeSpan.FromSeconds(3);
                 EndTime = StartTime + TimeSpan.FromSeconds(8);
-
                 Description = "my description";
             }
+
+            public string TimeZoneId { get; private set; }
+            public DateTimeOffset StartTime { get; private set; }
+            public DateTimeOffset? EndTime { get; private set; }
+            public string ScheduleId { get; private set; }
+            public string ScheduleGroup { get; private set; }
+            public string CronExpression { get; private set; }
+            public string Description { get; private set; }
+            public MissedEventPolicy MisfirePolicy { get; private set; }
         }
 
+
         class MyCancelableSchedule :
-          RecurringSchedule
+            RecurringSchedule
         {
             public MyCancelableSchedule(string scheduleId)
             {
@@ -98,7 +110,6 @@ namespace MassTransit.HangfireIntegration.Tests
                 StartTime = DateTime.Now + TimeSpan.FromSeconds(3);
                 EndTime = StartTime + TimeSpan.FromSeconds(20);
             }
-
 
             public MissedEventPolicy MisfirePolicy { get; protected set; }
             public string TimeZoneId { get; protected set; }
@@ -110,6 +121,7 @@ namespace MassTransit.HangfireIntegration.Tests
             public string Description { get; protected set; }
         }
 
+
         public class Interval
         {
             public string Name { get; set; }
@@ -120,6 +132,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             public string Name { get; set; }
         }
+
 
         public class DoneAgain
         {
