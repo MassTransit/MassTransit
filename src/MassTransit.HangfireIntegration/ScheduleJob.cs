@@ -21,7 +21,7 @@ namespace MassTransit.HangfireIntegration
         {
             try
             {
-                IPipe<SendContext> sendPipe = CreateMessageContext(messageData, _bus.Address);
+                IPipe<SendContext> sendPipe = CreateMessageContext(messageData, _bus.Address, performContext);
 
                 var endpoint = await _bus.GetSendEndpoint(messageData.Destination).ConfigureAwait(false);
 
@@ -46,7 +46,7 @@ namespace MassTransit.HangfireIntegration
         {
             try
             {
-                IPipe<SendContext> sendPipe = CreateMessageContext(messageData, _bus.Address, messageData.JobKey);
+                IPipe<SendContext> sendPipe = CreateMessageContext(messageData, _bus.Address, performContext, messageData.JobKey);
 
                 var endpoint = await _bus.GetSendEndpoint(messageData.Destination).ConfigureAwait(false);
 
@@ -66,7 +66,7 @@ namespace MassTransit.HangfireIntegration
             }
         }
 
-        static IPipe<SendContext> CreateMessageContext(SerializedMessage message, Uri sourceAddress, string jobKey = null)
+        static IPipe<SendContext> CreateMessageContext(SerializedMessage message, Uri sourceAddress, PerformContext performContext, string jobKey = null)
         {
             IPipe<SendContext> sendPipe = Pipe.New<SendContext>(x =>
             {
@@ -74,6 +74,8 @@ namespace MassTransit.HangfireIntegration
                 {
                     if (!string.IsNullOrEmpty(jobKey))
                         context.Headers.Set(MessageHeaders.QuartzTriggerKey, jobKey);
+                    context.Headers.Set(MessageHeaders.Quartz.Scheduled, performContext.BackgroundJob.CreatedAt.ToString("O"));
+                    context.Headers.Set(MessageHeaders.Quartz.Sent, ((DateTime)InVar.Timestamp).ToString("O"));
                 });
             });
 

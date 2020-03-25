@@ -21,7 +21,7 @@
             _first = Handler<FirstMessage>(configurator, async context =>
             {
                 _firstActivityId = Activity.Current?.Id;
-                await context.ScheduleSend(TimeSpan.FromSeconds(10), new SecondMessage());
+                await context.ScheduleSend(TimeSpan.FromSeconds(5), new SecondMessage());
             });
 
             _second = Handler<SecondMessage>(configurator, async context =>
@@ -48,41 +48,12 @@
 
             await _first;
 
-            AdvanceTime(TimeSpan.FromSeconds(10));
-
             await _second;
 
             if (_secondActivityId != null && _firstActivityId != null)
                 Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
         }
     }
-
-
-    [TestFixture]
-    public class CancelScheduleMessage_Specs :
-        HangfireInMemoryTestFixture
-    {
-        Task<ConsumeContext<FirstMessage>> _first;
-
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            _first = Handled<FirstMessage>(configurator);
-        }
-
-
-        public class FirstMessage
-        {
-        }
-
-
-        [Test]
-        public async Task Should_cancel()
-        {
-
-        }
-
-    }
-
 
     [TestFixture]
     public class Specifying_an_expiration_time :
@@ -120,12 +91,10 @@
 
             await _first;
 
-            AdvanceTime(TimeSpan.FromSeconds(10));
-
             var second = await _second;
 
             Assert.That(second.ExpirationTime.HasValue, Is.True);
-            Assert.That(second.ExpirationTime.Value, Is.GreaterThan(DateTime.UtcNow + TimeSpan.FromSeconds(25)));
+            Assert.That(second.ExpirationTime.Value, Is.GreaterThan(DateTime.UtcNow + TimeSpan.FromSeconds(24)));
         }
     }
 }

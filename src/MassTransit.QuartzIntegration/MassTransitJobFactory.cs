@@ -24,7 +24,6 @@ namespace MassTransit.QuartzIntegration
     using Newtonsoft.Json;
     using Quartz;
     using Quartz.Spi;
-    using Util;
 
 
     public class MassTransitJobFactory :
@@ -103,23 +102,23 @@ namespace MassTransit.QuartzIntegration
         {
         }
 
-        void SetObjectProperties(T job, JobDataMap jobData)
+        static void SetObjectProperties(T job, JobDataMap jobData)
         {
             foreach (var key in jobData.Keys)
             {
-                if (TypeCache<T>.ReadWritePropertyCache.TryGetProperty(key, out ReadWriteProperty<T> property))
-                {
-                    var value = jobData[key];
+                if (!TypeCache<T>.ReadWritePropertyCache.TryGetProperty(key, out ReadWriteProperty<T> property))
+                    continue;
 
-                    if (property.Property.PropertyType == typeof(Uri))
-                        value = new Uri(value.ToString());
+                var value = jobData[key];
 
-                    property.Set(job, value);
-                }
+                if (property.Property.PropertyType == typeof(Uri))
+                    value = new Uri(value.ToString());
+
+                property.Set(job, value);
             }
         }
 
-        Func<IBus, T> CreateConstructor()
+        static Func<IBus, T> CreateConstructor()
         {
             var ctor = typeof(T).GetConstructor(new[] {typeof(IBus)});
             if (ctor != null)
@@ -132,7 +131,7 @@ namespace MassTransit.QuartzIntegration
             throw new SchedulerException($"The job class does not have a supported constructor: {TypeMetadataCache<T>.ShortName}");
         }
 
-        Func<IBus, T> CreateDefaultConstructor(ConstructorInfo constructorInfo)
+        static Func<IBus, T> CreateDefaultConstructor(ConstructorInfo constructorInfo)
         {
             var bus = Expression.Parameter(typeof(IBus), "bus");
             var @new = Expression.New(constructorInfo);
@@ -140,7 +139,7 @@ namespace MassTransit.QuartzIntegration
             return Expression.Lambda<Func<IBus, T>>(@new, bus).CompileFast();
         }
 
-        Func<IBus, T> CreateServiceBusConstructor(ConstructorInfo constructorInfo)
+        static Func<IBus, T> CreateServiceBusConstructor(ConstructorInfo constructorInfo)
         {
             var bus = Expression.Parameter(typeof(IBus), "bus");
             var @new = Expression.New(constructorInfo, bus);
@@ -154,7 +153,7 @@ namespace MassTransit.QuartzIntegration
         /// These values are being serialized as ISO-8601 round trip string
         /// </summary>
         /// <param name="bundle"></param>
-        string CreatePayloadHeaderString(TriggerFiredBundle bundle)
+        static string CreatePayloadHeaderString(TriggerFiredBundle bundle)
         {
             var timeHeaders = new Dictionary<string, DateTimeOffset?> {{MessageHeaders.Quartz.Sent, bundle.FireTimeUtc}};
             if (bundle.ScheduledFireTimeUtc.HasValue)

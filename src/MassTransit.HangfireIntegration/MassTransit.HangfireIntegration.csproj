@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../netfx.props"/>
-  <Import Project="../signing.props"/>
+  <Import Project="../netfx.props" />
+  <Import Project="../signing.props" />
 
   <PropertyGroup>
     <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
@@ -14,12 +14,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj"/>
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hangfire.Core" Version="1.7.9"/>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+    <PackageReference Include="Hangfire.Core" Version="1.7.9" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
