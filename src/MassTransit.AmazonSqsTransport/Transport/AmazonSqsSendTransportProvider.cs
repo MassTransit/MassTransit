@@ -5,12 +5,12 @@
     using Transports;
 
 
-    public class SendTransportProvider :
+    public class AmazonSqsSendTransportProvider :
         ISendTransportProvider
     {
         readonly IAmazonSqsHostControl _host;
 
-        public SendTransportProvider(IAmazonSqsHostControl host)
+        public AmazonSqsSendTransportProvider(IAmazonSqsHostControl host)
         {
             _host = host;
         }

@@ -3,7 +3,6 @@ namespace MassTransit.Pipeline.Filters
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Context;
     using Events;
     using GreenPipes;
     using Metadata;
@@ -52,33 +51,9 @@ namespace MassTransit.Pipeline.Filters
 
             ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType?.MediaType, messageId, messageTypes);
 
-            var faultEndpoint = await GetFaultEndpoint(context, consumeContext, requestId).ConfigureAwait(false);
+            var faultEndpoint = await context.GetReceiveFaultEndpoint(consumeContext, requestId).ConfigureAwait(false);
 
             await faultEndpoint.Send(fault).ConfigureAwait(false);
-        }
-
-        static async Task<ISendEndpoint> GetFaultEndpoint(ReceiveContext context, ConsumeContext consumeContext, Guid? requestId)
-        {
-            Task ConsumeTask(Task task)
-            {
-                context.AddReceiveTask(task);
-                return task;
-            }
-
-            var destinationAddress = consumeContext?.FaultAddress ?? consumeContext?.ResponseAddress;
-            if (destinationAddress != null)
-            {
-                var sendEndpoint = await context.SendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
-
-                return new ConsumeSendEndpoint(sendEndpoint, consumeContext, ConsumeTask, requestId);
-            }
-
-            var publishSendEndpoint = await context.PublishEndpointProvider.GetPublishSendEndpoint<ReceiveFault>().ConfigureAwait(false);
-
-            if (consumeContext != null)
-                return new ConsumeSendEndpoint(publishSendEndpoint, consumeContext, ConsumeTask, requestId);
-
-            return publishSendEndpoint;
         }
     }
 }

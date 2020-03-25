@@ -45,7 +45,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Configurators
 
         public ConcurrencyMode ConcurrencyMode
         {
-            set => _concurrencyMode = value;
+            set
+            {
+                _concurrencyMode = value;
+                if (_concurrencyMode == ConcurrencyMode.Optimistic && _isolationLevel == IsolationLevel.Serializable)
+                    _isolationLevel = IsolationLevel.ReadCommitted;
+            }
         }
 
         public ILockStatementProvider LockStatementProvider

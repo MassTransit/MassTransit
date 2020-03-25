@@ -6,13 +6,14 @@
     using Transports;
 
 
-    public class HttpSendTransportProvider :
-        ISendTransportProvider
+    public class HttpTransportProvider :
+        ISendTransportProvider,
+        IPublishTransportProvider
     {
         readonly IHttpHostControl _host;
         readonly ReceiveEndpointContext _receiveEndpointContext;
 
-        public HttpSendTransportProvider(IHttpHostControl host, ReceiveEndpointContext receiveEndpointContext)
+        public HttpTransportProvider(IHttpHostControl host, ReceiveEndpointContext receiveEndpointContext)
         {
             _host = host;
             _receiveEndpointContext = receiveEndpointContext;
@@ -28,5 +29,10 @@
             return address;
         }
 
+        public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
+            where T : class
+        {
+            return _host.CreateSendTransport(publishAddress, _receiveEndpointContext);
+        }
     }
 }

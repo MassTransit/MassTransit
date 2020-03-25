@@ -3,6 +3,7 @@ namespace MassTransit.Transports
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using Metadata;
     using Pipeline;
     using Pipeline.Observables;
@@ -31,7 +32,7 @@ namespace MassTransit.Transports
             _publishTopology = publishTopology;
             _publishObservers = publishObservers;
 
-            _sendPipe = new SendPipe(publishPipe);
+            _sendPipe = new PipeAdapter(publishPipe);
 
             _cache = new SendEndpointCache<Type>();
         }
@@ -47,7 +48,7 @@ namespace MassTransit.Transports
             return _publishObservers.Connect(observer);
         }
 
-        async Task<ISendEndpoint> CreateSendEndpoint<T>()
+        Task<ISendEndpoint> CreateSendEndpoint<T>()
             where T : class
         {
             IMessagePublishTopology<T> messageTopology = _publishTopology.GetMessageTopology<T>();
@@ -55,20 +56,36 @@ namespace MassTransit.Transports
             if (!messageTopology.TryGetPublishAddress(_hostAddress, out var publishAddress))
                 throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
 
-            var sendTransport = await _transportProvider.GetPublishTransport<T>(publishAddress).ConfigureAwait(false);
+            Task<ISendTransport> sendTransportTask = _transportProvider.GetPublishTransport<T>(publishAddress);
+            if (sendTransportTask.IsCompletedSuccessfully())
+            {
+                var sendTransport = sendTransportTask.Result;
 
-            var handle = sendTransport.ConnectSendObserver(_publishObservers);
+                var sendEndpoint = new SendEndpoint(sendTransport, _serializer, publishAddress, _sourceAddress, _sendPipe,
+                    sendTransport.ConnectSendObserver(_publishObservers));
 
-            return new SendEndpoint(sendTransport, _serializer, publishAddress, _sourceAddress, _sendPipe, handle);
+                return Task.FromResult<ISendEndpoint>(sendEndpoint);
+            }
+
+            async Task<ISendEndpoint> CreateAsync()
+            {
+                var sendTransport = await sendTransportTask.ConfigureAwait(false);
+
+                var handle = sendTransport.ConnectSendObserver(_publishObservers);
+
+                return new SendEndpoint(sendTransport, _serializer, publishAddress, _sourceAddress, _sendPipe, handle);
+            }
+
+            return CreateAsync();
         }
 
 
-        class SendPipe :
+        class PipeAdapter :
             ISendPipe
         {
             readonly IPublishPipe _publishPipe;
 
-            public SendPipe(IPublishPipe publishPipe)
+            public PipeAdapter(IPublishPipe publishPipe)
             {
                 _publishPipe = publishPipe;
             }

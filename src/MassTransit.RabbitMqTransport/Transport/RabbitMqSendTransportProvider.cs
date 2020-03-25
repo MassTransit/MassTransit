@@ -6,13 +6,13 @@ namespace MassTransit.RabbitMqTransport.Transport
     using Transports;
 
 
-    public class SendTransportProvider :
+    public class RabbitMqSendTransportProvider :
         ISendTransportProvider
     {
         readonly IRabbitMqHostControl _host;
         readonly IModelContextSupervisor _modelContextSupervisor;
 
-        public SendTransportProvider(IRabbitMqHostControl host, IModelContextSupervisor modelContextSupervisor)
+        public RabbitMqSendTransportProvider(IRabbitMqHostControl host, IModelContextSupervisor modelContextSupervisor)
         {
             _host = host;
             _modelContextSupervisor = modelContextSupervisor;

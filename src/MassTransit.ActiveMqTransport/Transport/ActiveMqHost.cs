@@ -105,7 +105,8 @@
 
             var configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
 
-            return CreateSendTransport(sessionContextSupervisor, configureTopology, settings.EntityName, DestinationType.Queue);
+            return CreateSendTransport(sessionContextSupervisor, configureTopology, settings.EntityName,
+                address.Type == ActiveMqEndpointAddress.AddressType.Queue ? DestinationType.Queue : DestinationType.Topic);
         }
 
         public Task<ISendTransport> CreatePublishTransport<T>()

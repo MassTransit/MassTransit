@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.HttpTransport.Transport
+﻿namespace MassTransit.HttpTransport.Transport
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -18,6 +6,7 @@ namespace MassTransit.HttpTransport.Transport
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
 
 
     public class HttpHostContextFactory :
@@ -32,7 +21,6 @@ namespace MassTransit.HttpTransport.Transport
 
         IPipeContextAgent<HttpHostContext> IPipeContextFactory<HttpHostContext>.CreateContext(ISupervisor supervisor)
         {
-
             HttpHostContext hostContext = new KestrelHttpHostContext(_configuration, supervisor.Stopped);
 
             hostContext.GetOrAddPayload(() => _configuration);
@@ -49,13 +37,11 @@ namespace MassTransit.HttpTransport.Transport
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));
         }
 
-        async Task<HttpHostContext> CreateSharedConnection(Task<HttpHostContext> context, CancellationToken cancellationToken)
+        static async Task<HttpHostContext> CreateSharedConnection(Task<HttpHostContext> context, CancellationToken cancellationToken)
         {
-            var connectionContext = await context.ConfigureAwait(false);
-
-            var sharedConnection = new SharedHttpHttpHostContext(connectionContext, cancellationToken);
-
-            return sharedConnection;
+            return context.IsCompletedSuccessfully()
+                ? new SharedHttpHttpHostContext(context.Result, cancellationToken)
+                : new SharedHttpHttpHostContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
     }
 }

@@ -24,12 +24,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendTransportProvider(_host);
+            return new ActiveMqSendTransportProvider(_host);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_host);
+            return new ActiveMqPublishTransportProvider(_host);
         }
     }
 }

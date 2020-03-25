@@ -78,7 +78,7 @@
         public Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            return Outbox(() => _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken));
+            return Outbox(() => _publishEndpoint.Publish(values, publishPipe, cancellationToken));
         }
 
         public Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)

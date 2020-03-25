@@ -25,12 +25,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new SendEndpointSendTransportProvider(_host);
+            return new ServiceBusSendTransportProvider(_host);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new PublishTransportProvider(_host);
+            return new ServiceBusPublishTransportProvider(_host);
         }
     }
 }

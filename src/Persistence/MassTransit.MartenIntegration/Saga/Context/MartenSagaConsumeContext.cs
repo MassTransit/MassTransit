@@ -35,8 +35,6 @@
 
             if (_mode == SagaConsumeContextMode.Add)
                 _session.Store(Saga);
-            else
-                _session.Update(Saga);
 
             return _session.SaveChangesAsync(cancellationToken);
         }

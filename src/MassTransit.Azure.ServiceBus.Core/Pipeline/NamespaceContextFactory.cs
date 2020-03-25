@@ -8,6 +8,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Microsoft.Azure.ServiceBus;
 
 
@@ -59,9 +60,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
         async Task<NamespaceContext> CreateSharedConnection(Task<NamespaceContext> context, CancellationToken cancellationToken)
         {
-            var connectionContext = await context.ConfigureAwait(false);
-
-            return new SharedNamespaceContext(connectionContext, cancellationToken);
+            return context.IsCompletedSuccessfully()
+                ? new SharedNamespaceContext(context.Result, cancellationToken)
+                : new SharedNamespaceContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
         async Task<NamespaceContext> CreateNamespaceContext(ISupervisor supervisor)

@@ -1,11 +1,12 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Transport
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
 
 
     public class ClientContextFactory :
@@ -33,44 +34,21 @@
             return supervisor.AddActiveContext(context, CreateSharedClientContext(context.Context, cancellationToken));
         }
 
-        async Task<ClientContext> CreateSharedClientContext(Task<ClientContext> context, CancellationToken cancellationToken)
+        static async Task<ClientContext> CreateSharedClientContext(Task<ClientContext> context, CancellationToken cancellationToken)
         {
-            var modelContext = await context.ConfigureAwait(false);
-
-            return new SharedClientContext(modelContext, cancellationToken);
+            return context.IsCompletedSuccessfully()
+                ? new SharedClientContext(context.Result, cancellationToken)
+                : new SharedClientContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
         void CreateClientContext(IAsyncPipeContextAgent<ClientContext> asyncContext, CancellationToken cancellationToken)
         {
-            IPipe<ConnectionContext> connectionPipe = Pipe.ExecuteAsync<ConnectionContext>(async connectionContext =>
+            static Task<ClientContext> CreateClientContext(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
-                try
-                {
-                    var clientContext = connectionContext.CreateClientContext(cancellationToken);
+                return Task.FromResult(connectionContext.CreateClientContext(createCancellationToken));
+            }
 
-                    await asyncContext.Created(clientContext).ConfigureAwait(false);
-
-                    await asyncContext.Completed.ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                    await asyncContext.CreateCanceled().ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    await asyncContext.CreateFaulted(exception).ConfigureAwait(false);
-                }
-            });
-
-            var connectionTask = _connectionContextSupervisor.Send(connectionPipe, cancellationToken);
-
-            Task NotifyCreateCanceled(Task task) => asyncContext.CreateCanceled();
-
-            connectionTask.ContinueWith(NotifyCreateCanceled, TaskContinuationOptions.OnlyOnCanceled);
-
-            Task NotifyCreateFaulted(Task task) => asyncContext.CreateFaulted(task.Exception);
-
-            connectionTask.ContinueWith(NotifyCreateFaulted, TaskContinuationOptions.OnlyOnFaulted);
+            _connectionContextSupervisor.CreateAgent(asyncContext, CreateClientContext, cancellationToken);
         }
     }
 }

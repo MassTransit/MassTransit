@@ -52,9 +52,11 @@
 
             await _second;
 
-            Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
+            if (_secondActivityId != null && _firstActivityId != null)
+                Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
         }
     }
+
 
     [TestFixture]
     public class Specifying_an_expiration_time :

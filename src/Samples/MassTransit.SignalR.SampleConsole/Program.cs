@@ -1,16 +1,19 @@
 ﻿namespace MassTransit.SignalR.SampleConsole
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Logging.Abstractions;
-    using Transactions;
+    using Contracts;
+    using Microsoft.AspNetCore.SignalR.Protocol;
+    using Sample.Hubs;
+    using Utils;
 
 
     static class Program
     {
         internal static async Task Main(string[] args)
         {
-            //IReadOnlyList<IHubProtocol> protocols = new IHubProtocol[] { new JsonHubProtocol() };
+            IReadOnlyList<IHubProtocol> protocols = new IHubProtocol[] {new JsonHubProtocol()};
             var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
                 cfg.Host(new Uri("rabbitmq://localhost"), h =>
@@ -32,19 +35,26 @@
                 if ("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
                     break;
 
-                var test = new TransactionOutbox(busControl, busControl, new NullLoggerFactory());
-
-                await test.Publish<MyMessage>(new {Name = "John"});
+                await busControl.Publish<All<ChatHub>>(new
+                {
+                    Messages = protocols.ToProtocolDictionary("broadcastMessage", new object[] {"backend-process", value})
+                });
             }
             while (true);
 
             await busControl.StopAsync();
         }
     }
+}
 
 
-    public class MyMessage
+namespace MassTransit.SignalR.Sample.Hubs
+{
+    using Microsoft.AspNetCore.SignalR;
+
+
+    public class ChatHub : Hub
     {
-        public string Name { get; set; }
+        // Actual implementation in the other project, but MT Needs the hub for the generic message type
     }
 }

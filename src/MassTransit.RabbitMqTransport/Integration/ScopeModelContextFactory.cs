@@ -5,6 +5,7 @@ namespace MassTransit.RabbitMqTransport.Integration
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Internals.Extensions;
     using RabbitMQ.Client;
 
@@ -47,20 +48,18 @@ namespace MassTransit.RabbitMqTransport.Integration
             return supervisor.AddActiveContext(context, CreateSharedModel(context.Context, cancellationToken));
         }
 
-        async Task<ModelContext> CreateSharedModel(Task<ModelContext> context, CancellationToken cancellationToken)
+        static async Task<ModelContext> CreateSharedModel(Task<ModelContext> context, CancellationToken cancellationToken)
         {
-            var modelContext = await context.ConfigureAwait(false);
-
-            var sharedModel = new SharedModelContext(modelContext, cancellationToken);
-
-            return sharedModel;
+            return context.IsCompletedSuccessfully()
+                ? new SharedModelContext(context.Result, cancellationToken)
+                : new SharedModelContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
         Task<ModelContext> CreateModel(IAsyncPipeContextAgent<ModelContext> asyncContext, CancellationToken cancellationToken)
         {
-            async Task<ModelContext> CreateModelContext(ModelContext context, CancellationToken createCancellationToken)
+            static Task<ModelContext> CreateModelContext(ModelContext context, CancellationToken createCancellationToken)
             {
-                return new SharedModelContext(context, cancellationToken);
+                return Task.FromResult<ModelContext>(new SharedModelContext(context, createCancellationToken));
             }
 
             return _supervisor.CreateAgent(asyncContext, CreateModelContext, cancellationToken);

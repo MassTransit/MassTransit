@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 {
     using System;
+    using Builders;
     using Configuration;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
@@ -28,9 +29,19 @@
 
         public SendSettings GetSendSettings(ServiceBusEndpointAddress address)
         {
-            var queueDescription = GetQueueDescription(address);
+            if (address.Type == ServiceBusEndpointAddress.AddressType.Queue)
+            {
+                var queueDescription = GetQueueDescription(address);
 
-            return new QueueSendSettings(queueDescription);
+                return new QueueSendSettings(queueDescription);
+            }
+
+            var topicDescription = GetTopicDescription(address);
+
+            var builder = new PublishEndpointBrokerTopologyBuilder();
+            builder.Topic = builder.CreateTopic(topicDescription);
+
+            return new TopicSendSettings(topicDescription, builder.BuildBrokerTopology());
         }
 
         public SendSettings GetErrorSettings(IQueueConfigurator configurator)
@@ -92,6 +103,16 @@
                 queueDescription.AutoDeleteOnIdle = address.AutoDelete.Value;
 
             return queueDescription;
+        }
+
+        static TopicDescription GetTopicDescription(ServiceBusEndpointAddress address)
+        {
+            var topicDescription = Defaults.CreateTopicDescription(address.Path);
+
+            if (address.AutoDelete.HasValue)
+                topicDescription.AutoDeleteOnIdle = address.AutoDelete.Value;
+
+            return topicDescription;
         }
     }
 }

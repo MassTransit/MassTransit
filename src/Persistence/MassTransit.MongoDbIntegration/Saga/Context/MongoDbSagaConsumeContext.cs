@@ -61,8 +61,8 @@
             Saga.Version++;
             try
             {
-                var result = await _mongoCollection.ReplaceOneAsync(x => x.CorrelationId == Saga.CorrelationId, Saga, (ReplaceOptions)null, CancellationToken)
-                    .ConfigureAwait(false);
+                var result = await _mongoCollection.FindOneAndReplaceAsync(x => x.CorrelationId == Saga.CorrelationId && x.Version < Saga.Version,
+                    Saga, cancellationToken: CancellationToken).ConfigureAwait(false);
 
                 if (result == null)
                     throw new MongoDbConcurrencyException("Unable to update saga. It may not have been found or may have been updated by another process.");

@@ -30,7 +30,7 @@
         /// </summary>
         /// <param name="topicName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Bind(string topicName, Action<ITopicBindingConfigurator> callback);
+        void Bind(string topicName, Action<ITopicBindingConfigurator> callback = null);
 
         void ConfigureSession(Action<IPipeConfigurator<SessionContext>> configure);
         void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure);

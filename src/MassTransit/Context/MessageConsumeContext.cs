@@ -5,7 +5,6 @@ namespace MassTransit.Context
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using GreenPipes.Internals.Extensions;
     using Initializers;
 
 
@@ -205,17 +204,17 @@ namespace MassTransit.Context
 
         Task ConsumeContext.RespondAsync<T>(object values)
         {
-            return RespondAsyncInternal<T>(values);
+            return ResponseAsyncWithMessage<T>(values);
         }
 
         Task ConsumeContext.RespondAsync<T>(object values, IPipe<SendContext<T>> sendPipe)
         {
-            return RespondAsyncInternal<T>(values, sendPipe);
+            return ResponseAsyncWithMessage(values, sendPipe);
         }
 
         Task ConsumeContext.RespondAsync<T>(object values, IPipe<SendContext> sendPipe)
         {
-            return RespondAsyncInternal<T>(values, sendPipe);
+            return ResponseAsyncWithMessage<T>(values, sendPipe);
         }
 
         void ConsumeContext.Respond<T>(T message)
@@ -233,7 +232,11 @@ namespace MassTransit.Context
             return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
-        async Task RespondAsyncInternal<T>(object values, IPipe<SendContext<T>> responsePipe = default)
+        /// <summary>
+        /// Initializes the response with the request message, and then uses the initializer to initialize the
+        /// remaining properties using the <paramref name="values"/> parameter.
+        /// </summary>
+        async Task ResponseAsyncWithMessage<T>(object values, IPipe<SendContext<T>> responsePipe = default)
             where T : class
         {
             if (values == null)
@@ -243,45 +246,12 @@ namespace MassTransit.Context
 
             IMessageInitializer<T> initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
-            var responseEndpoint = await GetResponseEndpoint<T>().ConfigureAwait(false);
+            var responseEndpoint = await this.GetResponseEndpoint<T>().ConfigureAwait(false);
 
             if (responsePipe.IsNotEmpty())
                 await ConsumeTask(initializer.Send(responseEndpoint, context, values, responsePipe)).ConfigureAwait(false);
             else
                 await ConsumeTask(initializer.Send(responseEndpoint, context, values)).ConfigureAwait(false);
-        }
-
-        protected virtual Task<ISendEndpoint> GetResponseEndpoint<T>()
-            where T : class
-        {
-            if (_context.ResponseAddress != null)
-            {
-                var sendEndpointTask = _context.ReceiveContext.SendEndpointProvider.GetSendEndpoint(_context.ResponseAddress);
-                if (sendEndpointTask.IsCompletedSuccessfully())
-                    return Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(sendEndpointTask.Result, this, ConsumeTask, _context.RequestId));
-
-                async Task<ISendEndpoint> GetResponseEndpointAsync()
-                {
-                    var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
-
-                    return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask, _context.RequestId);
-                }
-
-                return GetResponseEndpointAsync();
-            }
-
-            var publishSendEndpointTask = _context.ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>();
-            if (publishSendEndpointTask.IsCompletedSuccessfully())
-                return Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(publishSendEndpointTask.Result, this, ConsumeTask, _context.RequestId));
-
-            async Task<ISendEndpoint> GetPublishEndpointAsync()
-            {
-                var sendEndpoint = await publishSendEndpointTask.ConfigureAwait(false);
-
-                return new ConsumeSendEndpoint(sendEndpoint, this, ConsumeTask, _context.RequestId);
-            }
-
-            return GetPublishEndpointAsync();
         }
 
         Task ConsumeTask(Task task)
