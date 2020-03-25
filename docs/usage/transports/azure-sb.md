@@ -1,7 +1,7 @@
 # Azure Service Bus
 
 ```csharp
-Bus.Factory.CreateUsingAzureServiceBus(x =>
+var busControl = Bus.Factory.CreateUsingAzureServiceBus(x =>
 {
     var host = x.Host(serviceUri, h =>
     {
@@ -18,9 +18,7 @@ Bus.Factory.CreateUsingAzureServiceBus(x =>
 
 ## Azure Functions
 
-Azure Functions is a consumption-based approach to compute which eliminates the need to have a service constantly running, particularly when there isn't any work to be done. Because of this, it's becoming popular for services with low utilization.
-
-MassTransit supports Azure Service Bus and Azure Event Hub when running from an Azure Function.
+Azure Functions is a consumption-based compute solution that only runs code when there is work to be done. MassTransit supports Azure Service Bus and Azure Event Hubs when running as an Azure Function.
 
 > The [Sample Code](https://github.com/MassTransit/MassTransit/tree/develop/src/Samples/Sample.AzureFunctions.ServiceBus) is available
 for reference as well.
@@ -43,14 +41,18 @@ The functions [host.json](https://docs.microsoft.com/en-us/azure/azure-functions
 }
 ```
 
+::: warning
+Azure Functions using Azure Service Bus or Azure Event Hubs will not configure the broker topology. When using Azure Functions, the broker topology must be configured prior to function deployment.
+:::
+
 ### Azure Service Bus
 
 The bindings for using MassTransit with Azure Service Bus are shown below.
 
 ```csharp
 [FunctionName("SubmitOrder")]
-public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue")] Message message, IBinder binder, ILogger logger,
-    CancellationToken cancellationToken)
+public static Task SubmitOrderAsync([ServiceBusTrigger("input-queue")] Message message, 
+    Binder binder, ILogger logger, CancellationToken cancellationToken)
 {
     var receiver = binder.CreateBrokeredMessageReceiver(logger, cancellationToken, cfg =>
     {
@@ -70,8 +72,8 @@ The bindings for using MassTransit with Azure Event Hub are shown below.
 
 ```csharp
 [FunctionName("AuditOrder")]
-public static Task AuditOrderAsync([EventHubTrigger("input-hub")] EventData message, IBinder binder, ILogger logger,
-    CancellationToken cancellationToken)
+public static Task AuditOrderAsync([EventHubTrigger("input-hub")] EventData message,
+    IBinder binder, ILogger logger, CancellationToken cancellationToken)
 {
     var receiver = binder.CreateEventDataReceiver(logger, cancellationToken, cfg =>
     {
