@@ -8,20 +8,18 @@
 
     public static class HangfireIntegrationExtensions
     {
-        public static Uri UseHangfireScheduler(this IBusFactoryConfigurator configurator, string queueName = "hangfire")
+        public static void UseHangfireScheduler(this IBusFactoryConfigurator configurator, string queueName = "hangfire")
         {
-            return configurator.UseHangfireScheduler(DefaultHangfireComponentResolver.Instance.Value, queueName);
+            configurator.UseHangfireScheduler(DefaultHangfireComponentResolver.Instance.Value, queueName);
         }
 
-        public static Uri UseHangfireScheduler(this IBusFactoryConfigurator configurator, IHangfireComponentResolver hangfireComponentResolver,
+        public static void UseHangfireScheduler(this IBusFactoryConfigurator configurator, IHangfireComponentResolver hangfireComponentResolver,
             string queueName = "hangfire")
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
             if (hangfireComponentResolver == null)
                 throw new ArgumentNullException(nameof(hangfireComponentResolver));
-
-            Uri inputAddress = null;
 
             configurator.ReceiveEndpoint(queueName, e =>
             {
@@ -35,14 +33,7 @@
                 e.Consumer(() => new ScheduleRecurringMessageConsumer(hangfireComponentResolver));
 
                 configurator.UseMessageScheduler(e.InputAddress);
-
-                // var observer = new SchedulerBusObserver(schedulerInstance, e.InputAddress);
-                // configurator.ConnectBusObserver(observer);
-
-                inputAddress = e.InputAddress;
             });
-
-            return inputAddress;
         }
     }
 }
