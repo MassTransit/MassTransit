@@ -2,6 +2,7 @@ namespace MassTransit.HangfireIntegration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using Hangfire;
     using Hangfire.Common;
@@ -43,7 +44,7 @@ namespace MassTransit.HangfireIntegration
             _timeZoneResolver = new Lazy<ITimeZoneResolver>(() => new DefaultTimeZoneResolver(), LazyThreadSafetyMode.PublicationOnly);
             _recurringJobManager = new Lazy<IRecurringJobManager>(
                 () => new RecurringJobManager(JobStorage, JobFilterProvider, TimeZoneResolver), LazyThreadSafetyMode.PublicationOnly);
-            BackgroundProcesses = Array.Empty<IBackgroundProcess>();
+            BackgroundProcesses = Enumerable.Empty<IBackgroundProcess>();
         }
 
         public IEnumerable<IBackgroundProcess> BackgroundProcesses { get; }

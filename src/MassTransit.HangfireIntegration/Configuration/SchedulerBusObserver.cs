@@ -10,7 +10,7 @@
     /// <summary>
     /// Used to start and stop an in-memory scheduler using Quartz
     /// </summary>
-    public class SchedulerBusObserver :
+    class SchedulerBusObserver :
         IBusObserver
     {
         readonly IHangfireComponentResolver _hangfireComponentResolver;

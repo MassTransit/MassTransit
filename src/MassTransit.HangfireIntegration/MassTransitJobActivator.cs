@@ -33,11 +33,9 @@ namespace MassTransit.HangfireIntegration
             _typeFactories = new ConcurrentDictionary<Type, IMassTransitJobActivatorFactory>();
         }
 
-        public override object ActivateJob(Type jobType)
-        {
-            return _typeFactories.GetOrAdd(jobType, CreateJobFactory)
+        public override object ActivateJob(Type jobType) =>
+            _typeFactories.GetOrAdd(jobType, CreateJobFactory)
                 .ActivateJob();
-        }
 
         IMassTransitJobActivatorFactory CreateJobFactory(Type type)
         {

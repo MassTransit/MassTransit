@@ -31,14 +31,20 @@ namespace MassTransit.HangfireIntegration
 
         public static HangfireScheduledMessageData Create(ConsumeContext<ScheduleMessage> context)
         {
-            var message = new HangfireScheduledMessageData
-            {
-                DestinationAddress = context.Message.Destination?.ToString() ?? "",
-                ContentType = context.ReceiveContext.ContentType?.MediaType,
-                Body = ExtractBody(context.ReceiveContext.ContentType?.MediaType, context.ReceiveContext.GetBody(), context.Message.Destination),
-                FaultAddress = context.FaultAddress?.ToString() ?? "",
-                ResponseAddress = context.ResponseAddress?.ToString() ?? ""
-            };
+            var message = new HangfireScheduledMessageData();
+
+            SetBaseProperties(message, context, context.Message.Destination);
+
+            return message;
+        }
+
+        protected static void SetBaseProperties(HangfireScheduledMessageData message, ConsumeContext context, Uri destination)
+        {
+            message.DestinationAddress = destination?.ToString() ?? "";
+            message.Body = ExtractBody(context.ReceiveContext.ContentType?.MediaType, context.ReceiveContext.GetBody(), destination);
+            message.ContentType = context.ReceiveContext.ContentType?.MediaType;
+            message.FaultAddress = context.FaultAddress?.ToString() ?? "";
+            message.ResponseAddress = context.ResponseAddress?.ToString() ?? "";
 
             if (context.MessageId.HasValue)
                 message.MessageId = context.MessageId.Value.ToString();
@@ -61,8 +67,6 @@ namespace MassTransit.HangfireIntegration
             IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll();
             if (headers.Any())
                 message.HeadersAsJson = JsonConvert.SerializeObject(headers);
-
-            return message;
         }
 
         protected static string ExtractBody(string mediaType, byte[] bytes, Uri destination)
