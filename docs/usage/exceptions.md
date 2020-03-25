@@ -247,3 +247,63 @@ Event(() => SubmitOrderFaulted, x => x
 
 public Event<Fault<SubmitOrder>> SubmitOrderFaulted { get; private set; }
 ```
+
+## Customize the Error Pipe
+
+By default, MassTransit will move faulted messages to the *_error* queue. This behavior can be customized for each receive endpoint.
+
+To discard faulted messages so that they are _not_ moved to the *_error* queue:
+
+```cs
+cfg.ReceiveEndpoint("input-queue", ec =>
+{
+    ec.DiscardFaultedMessages();
+});
+```
+
+Beyond that built-in customization, the individual filters can be added/configured as well. Shown below are the default filters, as an example.
+
+> This is by default, do _NOT_ configure this unless you have a reason to change the behavior.
+
+```cs
+cfg.ReceiveEndpoint("input-queue", ec =>
+{
+    ec..ConfigureError(x =>
+    {
+        x.UseFilter(new GenerateFaultFilter());
+        x.UseFilter(new ErrorTransportFilter());
+    });
+});
+```
+
+## Customize the Dead-Letter Pipe
+
+By default, MassTransit will move skipped messages to the *_skipped* queue. This behavior can be customized for each receive endpoint.
+
+> Skipped messages are messages that are read from the receive endpoint queue that do not have a matching handler, consumer, saga, etc. configured. For instance, receiving a _SubmitOrder_ message on a receive endpoint that only has a consumer for the _UpdateOrder_ message would cause that _SubmitOrder_ message to end up in the *_skipped* queue.
+
+To discard skipped messages so they are _not_ moved to the *_skipped* queue:
+
+```cs
+cfg.ReceiveEndpoint("input-queue", ec =>
+{
+    ec.DiscardSkippedMessages();
+});
+```
+
+Beyond that built-in customization, the individual filters can be added/configured as well. Shown below are the default filters, as an example.
+
+> This is by default, do _NOT_ configure this unless you have a reason to change the behavior.
+
+```cs
+cfg.ReceiveEndpoint("input-queue", ec =>
+{
+    ec..ConfigureDeadLetter(x =>
+    {
+        x.UseFilter(new DeadLetterTransportFilter());
+    });
+});
+```
+
+
+
