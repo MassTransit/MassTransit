@@ -45,7 +45,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             base.ConfigureInMemoryBus(configurator);
 
-            configurator.UseMessageScheduler(QuartzAddress);
+            configurator.UseMessageScheduler(HangfireAddress);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -97,7 +97,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             base.ConfigureInMemoryBus(configurator);
 
-            configurator.UseMessageScheduler(QuartzAddress);
+            configurator.UseMessageScheduler(HangfireAddress);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -175,7 +175,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             base.ConfigureInMemoryBus(configurator);
 
-            configurator.UseMessageScheduler(QuartzAddress);
+            configurator.UseMessageScheduler(HangfireAddress);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -256,7 +256,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             base.ConfigureInMemoryBus(configurator);
 
-            configurator.UseMessageScheduler(QuartzAddress);
+            configurator.UseMessageScheduler(HangfireAddress);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -315,7 +315,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             base.ConfigureInMemoryBus(configurator);
 
-            configurator.UseMessageScheduler(QuartzAddress);
+            configurator.UseMessageScheduler(HangfireAddress);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

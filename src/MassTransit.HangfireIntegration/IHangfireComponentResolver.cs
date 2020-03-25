@@ -11,6 +11,7 @@ namespace MassTransit.HangfireIntegration
         IBackgroundJobClient BackgroundJobClient { get; }
         IRecurringJobManager RecurringJobManager { get; }
         ITimeZoneResolver TimeZoneResolver { get; }
+        JobStorage JobStorage { get; }
     }
 
 
@@ -19,6 +20,7 @@ namespace MassTransit.HangfireIntegration
         readonly Lazy<IBackgroundJobClient> _backgroundJobClient;
         readonly Lazy<IRecurringJobManager> _recurringJobManager;
         readonly Lazy<ITimeZoneResolver> _timeZoneResolver;
+        readonly Lazy<JobStorage> _jobStorage;
         public static readonly Lazy<IHangfireComponentResolver> Instance;
 
         static DefaultHangfireComponentResolver()
@@ -33,10 +35,12 @@ namespace MassTransit.HangfireIntegration
             _timeZoneResolver = new Lazy<ITimeZoneResolver>(() => new DefaultTimeZoneResolver(), LazyThreadSafetyMode.PublicationOnly);
             _recurringJobManager = new Lazy<IRecurringJobManager>(
                 () => new RecurringJobManager(JobStorage.Current, JobFilterProviders.Providers, TimeZoneResolver), LazyThreadSafetyMode.PublicationOnly);
+            _jobStorage = new Lazy<JobStorage>(() => JobStorage.Current, LazyThreadSafetyMode.PublicationOnly);
         }
 
         public IBackgroundJobClient BackgroundJobClient => _backgroundJobClient.Value;
         public IRecurringJobManager RecurringJobManager => _recurringJobManager.Value;
         public ITimeZoneResolver TimeZoneResolver => _timeZoneResolver.Value;
+        public JobStorage JobStorage => _jobStorage.Value;
     }
 }

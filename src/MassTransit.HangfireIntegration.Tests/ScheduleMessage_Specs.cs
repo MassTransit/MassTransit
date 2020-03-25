@@ -59,6 +59,32 @@
 
 
     [TestFixture]
+    public class CancelScheduleMessage_Specs :
+        HangfireInMemoryTestFixture
+    {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _first = Handled<FirstMessage>(configurator);
+        }
+
+
+        public class FirstMessage
+        {
+        }
+
+
+        [Test]
+        public async Task Should_cancel()
+        {
+
+        }
+
+    }
+
+
+    [TestFixture]
     public class Specifying_an_expiration_time :
         HangfireInMemoryTestFixture
     {

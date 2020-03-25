@@ -11,7 +11,6 @@
     public class HangfireInMemoryTestFixture :
         InMemoryTestFixture
     {
-        ISendEndpoint _quartzEndpoint;
         TimeSpan _testOffset;
         readonly string _queueName;
         BackgroundJobServer _server;
@@ -19,13 +18,13 @@
         public HangfireInMemoryTestFixture()
         {
             _queueName = "hangfire";
-            QuartzAddress = new Uri($"loopback://localhost/{_queueName}");
+            HangfireAddress = new Uri($"loopback://localhost/{_queueName}");
             _testOffset = TimeSpan.Zero;
         }
 
-        protected Uri QuartzAddress { get; }
+        protected Uri HangfireAddress { get; }
 
-        protected ISendEndpoint QuartzEndpoint => _quartzEndpoint;
+        protected ISendEndpoint HangfireEndpoint { get; private set; }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -47,7 +46,7 @@
                 .UseRecommendedSerializerSettings()
                 .UseMemoryStorage();
 
-            _quartzEndpoint = await GetSendEndpoint(QuartzAddress);
+            HangfireEndpoint = await GetSendEndpoint(HangfireAddress);
             _server = new BackgroundJobServer(new BackgroundJobServerOptions
             {
                 Activator = new BusJobActivator(Bus),

@@ -86,7 +86,7 @@
 
                 _repository = new InMemorySagaRepository<TestState>();
 
-                var settings = new RequestSettingsImpl(ServiceQueueAddress, QuartzAddress, TestTimeout);
+                var settings = new RequestSettingsImpl(ServiceQueueAddress, HangfireAddress, TestTimeout);
 
                 _machine = new TestStateMachine(settings);
 
