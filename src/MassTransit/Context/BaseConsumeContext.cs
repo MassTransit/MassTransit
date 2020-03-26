@@ -288,7 +288,11 @@ namespace MassTransit.Context
             context.CorrelationId = _context.CorrelationId;
             context.RequestId = _context.RequestId;
 
-            if (_context.TryGetPayload(out ConsumeRetryContext retryContext) && retryContext.RetryCount > 0)
+            if (_context.TryGetPayload(out ConsumeRetryContext consumeRetryContext) && consumeRetryContext.RetryCount > 0)
+            {
+                context.Headers.Set(MessageHeaders.FaultRetryCount, consumeRetryContext.RetryCount);
+            }
+            else if (_context.TryGetPayload(out RetryContext retryContext) && retryContext.RetryCount > 0)
             {
                 context.Headers.Set(MessageHeaders.FaultRetryCount, retryContext.RetryCount);
             }

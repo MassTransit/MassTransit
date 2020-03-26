@@ -59,13 +59,15 @@
 
                     if (!policyContext.CanRetry(exception, out RetryContext<TContext> retryContext))
                     {
-                        await retryContext.RetryFaulted(exception).ConfigureAwait(false);
-
-                        if (_observers.Count > 0)
-                            await _observers.RetryFault(retryContext).ConfigureAwait(false);
-
                         if (_retryPolicy.IsHandled(exception))
+                        {
                             context.GetOrAddPayload(() => retryContext);
+
+                            await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+
+                            if (_observers.Count > 0)
+                                await _observers.RetryFault(retryContext).ConfigureAwait(false);
+                        }
 
                         throw;
                     }
@@ -75,13 +77,15 @@
                     {
                         if (!retryContext.CanRetry(exception, out retryContext))
                         {
-                            await retryContext.RetryFaulted(exception).ConfigureAwait(false);
-
-                            if (_observers.Count > 0)
-                                await _observers.RetryFault(retryContext).ConfigureAwait(false);
-
                             if (_retryPolicy.IsHandled(exception))
+                            {
                                 context.GetOrAddPayload(() => retryContext);
+
+                                await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+
+                                if (_observers.Count > 0)
+                                    await _observers.RetryFault(retryContext).ConfigureAwait(false);
+                            }
 
                             throw;
                         }
