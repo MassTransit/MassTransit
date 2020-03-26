@@ -49,7 +49,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2C8A15
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Host", "MassTransit.Host\MassTransit.Host.csproj", "{D1172BB0-EF5F-4D56-9A3F-13A63DBD4D22}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Quartz", "Quartz", "{FDC1A760-D4E5-44F4-B0D9-C19F2E14253A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scheduling", "Scheduling", "{FDC1A760-D4E5-44F4-B0D9-C19F2E14253A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.QuartzIntegration", "MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj", "{2F7DB49B-B650-4B57-BB9D-5D1B913CCACC}"
 EndProject

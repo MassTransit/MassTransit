@@ -56,6 +56,7 @@
   * [Large payloads](usage/message-data.md)
   * [Schedule messages](usage/scheduling/README.md)
     * [Scheduling API](usage/scheduling/scheduling-api.md)
+    * [Hangfire](usage/scheduling/hangfirei.md)
     * [In-memory scheduling](usage/scheduling/in-memory.md)
     * [ActiveMQ Delay and Schedule Message Delivery](usage/scheduling/activemq-delayed.md)
     * [Azure Service Bus](usage/scheduling/azure-sb-scheduler.md)
