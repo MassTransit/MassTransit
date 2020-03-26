@@ -298,7 +298,7 @@ Beyond that built-in customization, the individual filters can be added/configur
 ```cs
 cfg.ReceiveEndpoint("input-queue", ec =>
 {
-    ec..ConfigureDeadLetter(x =>
+    ec.ConfigureDeadLetter(x =>
     {
         x.UseFilter(new DeadLetterTransportFilter());
     });
