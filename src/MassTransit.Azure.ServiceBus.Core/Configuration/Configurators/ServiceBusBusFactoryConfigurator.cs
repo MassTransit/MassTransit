@@ -4,7 +4,6 @@
     using System.Diagnostics;
     using BusConfigurators;
     using Configuration;
-    using Context;
     using MassTransit.Builders;
     using Settings;
     using Topology.Configuration;
@@ -43,8 +42,6 @@
 
             if (Activity.DefaultIdFormat != ActivityIdFormat.Hierarchical)
             {
-                LogContext.Warning?.Log("Azure ServiceBus requires the hierarchical activity id format, MassTransit will change it globally");
-
                 Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
                 Activity.ForceDefaultIdFormat = true;
             }
