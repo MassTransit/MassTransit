@@ -3,8 +3,10 @@ namespace MassTransit.AspNetCoreIntegration
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using GreenPipes.Internals.Extensions;
     using HealthChecks;
     using Microsoft.Extensions.Hosting;
+    using Util;
 
 
     public class MassTransitHostedService :
@@ -13,6 +15,7 @@ namespace MassTransit.AspNetCoreIntegration
         readonly IBusControl _bus;
         readonly SimplifiedBusHealthCheck _simplifiedBusCheck;
         readonly ReceiveEndpointHealthCheck _receiveEndpointCheck;
+        Task<BusHandle> _startTask;
 
         [Obsolete("Use the constructor that doesn't require SimplifiedBusHealthCheck")]
         public MassTransitHostedService(IBusControl bus, SimplifiedBusHealthCheck simplifiedBusCheck, ReceiveEndpointHealthCheck receiveEndpointCheck)
@@ -28,13 +31,24 @@ namespace MassTransit.AspNetCoreIntegration
             _receiveEndpointCheck = receiveEndpointCheck;
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
             _bus.ConnectReceiveEndpointObserver(_receiveEndpointCheck);
 
-            await _bus.StartAsync(cancellationToken).ConfigureAwait(false);
+            _startTask = _bus.StartAsync(cancellationToken);
 
-            _simplifiedBusCheck?.ReportBusStarted();
+            if (_startTask.IsCompleted)
+            {
+                if (_startTask.IsCompletedSuccessfully())
+                    _simplifiedBusCheck?.ReportBusStarted();
+
+                return _startTask;
+            }
+
+            if (_simplifiedBusCheck != null)
+                _startTask.ContinueWith(task => _simplifiedBusCheck?.ReportBusStarted(), TaskContinuationOptions.OnlyOnRanToCompletion);
+
+            return TaskUtil.Completed;
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

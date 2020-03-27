@@ -30,43 +30,25 @@ namespace MassTransit
         /// Use it together with <see cref="UseHealthCheck"/> to get more detailed diagnostics.
         /// </summary>
         /// <param name="collection"></param>
-        public static IServiceCollection AddMassTransitHostedService(this IServiceCollection collection)
+        /// <param name="bus">The bus instance to add. If not specified, the bus will be resolved from the service collection.</param>
+        public static IServiceCollection AddMassTransitHostedService(this IServiceCollection collection, IBusControl bus = null)
         {
-            var receiveEndpointCheck = collection.AddAndGetHealthChecks();
+            var endpointHealthCheck = collection.AddAndGetHealthChecks();
 
-            return collection.AddSingleton<IHostedService>(p =>
-            {
-                var bus = p.GetRequiredService<IBusControl>();
-
-                return new MassTransitHostedService(bus, receiveEndpointCheck);
-            });
-        }
-
-        /// <summary>
-        /// Adds the MassTransit <see cref="IHostedService"/>, which includes a bus and endpoint health check, for a specific bus instance.
-        /// Use it together with <see cref="UseHealthCheck"/> to get more detailed diagnostics.
-        /// </summary>
-        /// <param name="collection"></param>
-        /// <param name="bus">Configured bus instance</param>
-        public static IServiceCollection AddMassTransitHostedService(this IServiceCollection collection, IBusControl bus)
-        {
-            var receiveEndpointCheck = collection.AddAndGetHealthChecks();
-
-            return collection.AddSingleton<IHostedService>(new MassTransitHostedService(bus, receiveEndpointCheck));
+            return collection.AddSingleton<IHostedService>(p => new MassTransitHostedService(bus ?? p.GetRequiredService<IBusControl>(), endpointHealthCheck));
         }
 
         static ReceiveEndpointHealthCheck AddAndGetHealthChecks(this IServiceCollection collection)
         {
-            var busCheck = new BusHealthCheck();
-            var receiveEndpointCheck = new ReceiveEndpointHealthCheck();
+            var busHealthCheck = new BusHealthCheck();
+            var endpointHealthCheck = new ReceiveEndpointHealthCheck();
 
-            collection.AddSingleton(busCheck);
-
+            collection.AddSingleton(busHealthCheck);
             collection.AddHealthChecks()
-                .AddBusHealthCheck("bus", busCheck)
-                .AddBusHealthCheck("endpoint", receiveEndpointCheck);
+                .AddBusHealthCheck("bus", busHealthCheck)
+                .AddBusHealthCheck("endpoint", endpointHealthCheck);
 
-            return receiveEndpointCheck;
+            return endpointHealthCheck;
         }
 
         static IHealthChecksBuilder AddBusHealthCheck(this IHealthChecksBuilder builder, string suffix, IHealthCheck healthCheck)

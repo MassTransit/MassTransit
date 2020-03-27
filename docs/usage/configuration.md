@@ -85,18 +85,21 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        // Add framework services
         services.AddHealthChecks();
         services.AddMvc();
         
         // Consumer dependencies should be scoped
         services.AddScoped<SomeConsumerDependency>()
 
-        // local function to create the bus
-        IBusControl CreateBus(IServiceProvider serviceProvider)
+        services.AddMassTransit(x =>
         {
-            return Bus.Factory.CreateUsingRabbitMq(cfg =>
+            x.AddConsumer<OrderConsumer>();
+
+            x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
+                // configure health checks for this bus instance
+                cfg.UseHealthCheck(serviceProvider);
+
                 cfg.Host("rabbitmq://localhost");
 
                 cfg.ReceiveEndpoint("submit-order", ep =>
@@ -106,15 +109,7 @@ public class Startup
 
                     ep.ConfigureConsumer<OrderConsumer>(serviceProvider);
                 });
-            });
-        }
-
-        // configures MassTransit to integrate with the built-in dependency injection
-        services.AddMassTransit(cfg =>
-        {
-            configurator.AddConsumer<OrderConsumer>();
-
-            configurator.AddBus(CreateBus);
+            }));
         });
 
         services.AddMassTransitHostedService();
@@ -124,61 +119,38 @@ public class Startup
 
 Remember, however, that it is perfectly fine to set up all the required dependencies in the `Startup`, which serves as the bootstrap code for your application. By doing that you can avoid weird cases when you have two dependencies that implement the same interface and then you cannot properly register them both, since only the last one will count.
 
-Here is how you can avoid using the container:
+To make the health checks work, remember to add this line to the `Configure` method in the `Startup.cs` file. The `endpoints.MapControllers()` call is included by default, the `MapHealthChecks` is the only addition required.
 
 ```csharp
-public class Startup
+public void Configure(IApplicationBuilder app)
 {
-    IConfiguration Configuration { get; }
-    ILoggerFactory LoggerFactory { get; }
-
-    public Startup(IConfiguration configuration, ILoggerFactory loggerFactory)
+    app.UseEndpoints(endpoints =>
     {
-        Configuration = configuration;
-        LoggerFactory = loggerFactory;
-    }
+        endpoints.MapControllers();
 
-    public void ConfigureServices(IServiceCollection services)
-    {
-        // Add framework services
-        services.AddHealthChecks();
-
-        services.AddMvc();
-        
-        // Using factory delegates for transient dependencies
-        var someDependencyFactory = 
-            () => new SomeDependency(Configuration["connectionStrings:mySqlDatabase"]);
-
-        // Using instances for singletons
-        var anotherDependency = 
-            new SomeDocumentStore(Configuration["connectionString:documentStore"]);
-
-        // Register MassTransit. Here we need to send the logger factory.
-        services.AddMassTransit(ConfigureBus(), LoggerFactory);
-    }
-
-    IBusControl ConfigureBus() => Bus.Factory.CreateUsingRabbitMq(cfg =>
-    {
-        cfg.Host("localhost");
-
-        cfg.ReceiveEndpoint("submit-order", ep =>
+        // The readiness check uses all registered checks with the 'ready' tag.
+        endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions()
         {
-            ep.PrefetchCount = 16;
-            ep.UseMessageRetry(x => x.Interval(2, 100));
+            Predicate = (check) => check.Tags.Contains("ready"),
+        });
 
-            ep.Consumer(() => new OrderConsumer(someDependency(), anotherDependency));
+        endpoints.MapHealthChecks("/health/live", new HealthCheckOptions()
+        {
+            // Exclude all checks and return a 200-Ok.
+            Predicate = (_) => false
         });
     });
 }
 ```
 
-To make the health checks work, remember to add this line to the `Configure` method in the `Startup.cs` file:
+To enable a separate readiness check from the health check, the services can be configured to separate the two.
 
-```csharp
-public void Configure(IApplicationBuilder app)
+```cs
+ services.Configure<HealthCheckPublisherOptions>(options =>
 {
-    app.UseHealthChecks("/health", new HealthCheckOptions {Predicate = check => check.Tags.Contains("ready")});
-}
+    options.Delay = TimeSpan.FromSeconds(2);
+    options.Predicate = (check) => check.Tags.Contains("ready");
+});
 ```
 
 Also, as an obvious requirement, you need to use .NET Core 2.2 (or higher) and have those two package references in your project file:
