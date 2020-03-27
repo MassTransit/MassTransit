@@ -1,21 +1,10 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using NUnit.Framework;
     using MassTransit.Hosting;
     using System;
     using Hosting;
+
 
     [TestFixture]
     public class WithSettings
@@ -26,10 +15,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [SetUp]
         public void Init()
         {
-            _settings = new TestRabbitMqSettings
-            {
-                Host = "localhost"
-            };
+            _settings = new TestRabbitMqSettings {Host = "localhost"};
         }
 
         [Test]
@@ -39,7 +25,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             _factory = new RabbitMqHostBusFactory(new TestSettingsProvider(_settings));
 
-            var bus = _factory.CreateBus(new TestBusServiceConfiguartor(), "UnitTest");
+            var bus = _factory.CreateBus(new TestBusServiceConfigurator(), "UnitTest");
 
             Assert.IsNotNull(bus);
         }
@@ -51,7 +37,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             _factory = new RabbitMqHostBusFactory(new TestSettingsProvider(_settings));
 
-            var bus = _factory.CreateBus(new TestBusServiceConfiguartor(), "UnitTest");
+            var bus = _factory.CreateBus(new TestBusServiceConfigurator(), "UnitTest");
 
             Assert.IsNotNull(bus);
         }
@@ -61,11 +47,12 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _factory = new RabbitMqHostBusFactory(new TestSettingsProvider(_settings));
 
-            var bus = _factory.CreateBus(new TestBusServiceConfiguartor(), "UnitTest");
+            var bus = _factory.CreateBus(new TestBusServiceConfigurator(), "UnitTest");
 
             Assert.IsNotNull(bus);
         }
     }
+
 
     class TestSettingsProvider : ISettingsProvider
     {
@@ -76,18 +63,21 @@ namespace MassTransit.RabbitMqTransport.Tests
             _settings = settings;
         }
 
-        public bool TryGetSettings<T>(out T settings) where T : ISettings
+        public bool TryGetSettings<T>(out T settings)
+            where T : ISettings
         {
             throw new NotImplementedException();
         }
 
-        public bool TryGetSettings<T>(string prefix, out T settings) where T : ISettings
+        public bool TryGetSettings<T>(string prefix, out T settings)
+            where T : ISettings
         {
             settings = (T)_settings;
 
             return true;
         }
     }
+
 
     class TestRabbitMqSettings : RabbitMqSettings
     {
@@ -106,7 +96,9 @@ namespace MassTransit.RabbitMqTransport.Tests
         public string VirtualHost { get; set; }
     }
 
-    class TestBusServiceConfiguartor : IBusServiceConfigurator
+
+    class TestBusServiceConfigurator :
+        IBusServiceConfigurator
     {
         public void Configure(IServiceConfigurator configurator)
         {

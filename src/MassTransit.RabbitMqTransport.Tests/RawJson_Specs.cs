@@ -1,7 +1,6 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using Initializers;
@@ -51,8 +50,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             try
             {
                 var connectionFactory = host.Settings.GetConnectionFactory();
-                using var connection = host.Settings.ClusterMembers?.Any() ?? false
-                    ? connectionFactory.CreateConnection(host.Settings.ClusterMembers, host.Settings.Host)
+
+                using var connection = host.Settings.EndpointResolver != null
+                    ? connectionFactory.CreateConnection(host.Settings.EndpointResolver, host.Settings.Host)
                     : connectionFactory.CreateConnection();
 
                 using var model = connection.CreateModel();

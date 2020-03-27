@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.RabbitMqTransport.Testing
 {
     using System;
-    using System.Linq;
     using MassTransit.Testing;
     using RabbitMQ.Client;
     using Transports;
@@ -124,38 +123,38 @@
             try
             {
                 var connectionFactory = host.Settings.GetConnectionFactory();
-                using (
-                    var connection = host.Settings.ClusterMembers?.Any() ?? false
-                        ? connectionFactory.CreateConnection(host.Settings.ClusterMembers, host.Settings.Host)
-                        : connectionFactory.CreateConnection())
-                using (var model = connection.CreateModel())
-                {
-                    model.ExchangeDelete("input_queue");
-                    model.QueueDelete("input_queue");
 
-                    model.ExchangeDelete("input_queue_skipped");
-                    model.QueueDelete("input_queue_skipped");
+                using var connection = host.Settings.EndpointResolver != null
+                    ? connectionFactory.CreateConnection(host.Settings.EndpointResolver, host.Settings.Host)
+                    : connectionFactory.CreateConnection();
 
-                    model.ExchangeDelete("input_queue_error");
-                    model.QueueDelete("input_queue_error");
+                using var model = connection.CreateModel();
 
-                    model.ExchangeDelete("input_queue_delay");
-                    model.QueueDelete("input_queue_delay");
+                model.ExchangeDelete("input_queue");
+                model.QueueDelete("input_queue");
 
-                    model.ExchangeDelete(InputQueueName);
-                    model.QueueDelete(InputQueueName);
+                model.ExchangeDelete("input_queue_skipped");
+                model.QueueDelete("input_queue_skipped");
 
-                    model.ExchangeDelete(InputQueueName + "_skipped");
-                    model.QueueDelete(InputQueueName + "_skipped");
+                model.ExchangeDelete("input_queue_error");
+                model.QueueDelete("input_queue_error");
 
-                    model.ExchangeDelete(InputQueueName + "_error");
-                    model.QueueDelete(InputQueueName + "_error");
+                model.ExchangeDelete("input_queue_delay");
+                model.QueueDelete("input_queue_delay");
 
-                    model.ExchangeDelete(InputQueueName + "_delay");
-                    model.QueueDelete(InputQueueName + "_delay");
+                model.ExchangeDelete(InputQueueName);
+                model.QueueDelete(InputQueueName);
 
-                    CleanupVirtualHost(model);
-                }
+                model.ExchangeDelete(InputQueueName + "_skipped");
+                model.QueueDelete(InputQueueName + "_skipped");
+
+                model.ExchangeDelete(InputQueueName + "_error");
+                model.QueueDelete(InputQueueName + "_error");
+
+                model.ExchangeDelete(InputQueueName + "_delay");
+                model.QueueDelete(InputQueueName + "_delay");
+
+                CleanupVirtualHost(model);
             }
             catch (Exception exception)
             {

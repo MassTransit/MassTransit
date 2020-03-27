@@ -99,14 +99,9 @@
         RemoteCertificateValidationCallback CertificateValidationCallback { get; set; }
 
         /// <summary>
-        /// When using a RabbitMQ cluster, this contains the host names which make up the cluster. In the event of a connection failure, the next host in the array will be connected to.
-        /// </summary>
-        string[] ClusterMembers { get; }
-
-        /// <summary>
         /// The host name selector if used to choose which server to connect
         /// </summary>
-        IRabbitMqEndpointResolver HostNameSelector { get; }
+        IRabbitMqEndpointResolver EndpointResolver { get; }
 
         /// <summary>
         /// The client-provided name for the connection (displayed in RabbitMQ admin panel)

@@ -91,9 +91,9 @@
                 {
                     LogContext.Debug?.Log("Connecting: {Host}", _description);
 
-                    if (_configuration.Settings.ClusterMembers?.Any() ?? false)
+                    if (_configuration.Settings.EndpointResolver != null)
                     {
-                        connection = _connectionFactory.Value.CreateConnection(_configuration.Settings.ClusterMembers,
+                        connection = _connectionFactory.Value.CreateConnection(_configuration.Settings.EndpointResolver,
                             _configuration.Settings.ClientProvidedName);
                     }
                     else

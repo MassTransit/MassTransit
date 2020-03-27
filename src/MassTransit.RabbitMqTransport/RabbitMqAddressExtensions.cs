@@ -1,7 +1,6 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using System.Linq;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Net.Security;
@@ -11,7 +10,6 @@ namespace MassTransit.RabbitMqTransport
     using RabbitMQ.Client;
     using Topology;
     using Topology.Settings;
-    using Transport;
 
 
     public static class RabbitMqAddressExtensions
@@ -50,10 +48,10 @@ namespace MassTransit.RabbitMqTransport
                 RequestedChannelMax = settings.RequestedChannelMax
             };
 
-            if (settings.ClusterMembers != null && settings.ClusterMembers.Any())
+            if (settings.EndpointResolver != null)
             {
                 factory.HostName = null;
-                factory.EndpointResolverFactory = x => new SequentialEndpointResolver(settings.ClusterMembers);
+                factory.EndpointResolverFactory = x => settings.EndpointResolver;
             }
 
             if (settings.UseClientCertificateAsAuthenticationIdentity)

@@ -86,8 +86,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
             var configurator = new RabbitMqClusterConfigurator();
             configureCluster(configurator);
 
-            _settings.ClusterMembers = configurator.ClusterMembers;
-            _settings.HostNameSelector = configurator.GetHostNameSelector();
+            _settings.EndpointResolver = configurator.GetEndpointResolver();
         }
 
         public void RequestedChannelMax(ushort value)

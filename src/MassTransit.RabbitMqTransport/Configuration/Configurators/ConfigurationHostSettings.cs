@@ -44,8 +44,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public bool UseClientCertificateAsAuthenticationIdentity { get; set; }
         public LocalCertificateSelectionCallback CertificateSelectionCallback { get; set; }
         public RemoteCertificateValidationCallback CertificateValidationCallback { get; set; }
-        public string[] ClusterMembers { get; set; }
-        public IRabbitMqEndpointResolver HostNameSelector { get; set; }
+        public IRabbitMqEndpointResolver EndpointResolver { get; set; }
         public string ClientProvidedName { get; set; }
         public bool PublisherConfirmation { get; set; }
         public Uri HostAddress => _hostAddress.Value;

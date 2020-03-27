@@ -21,6 +21,6 @@ namespace MassTransit.RabbitMqTransport
         /// <summary>
         /// Returns the last host selected by the selector
         /// </summary>
-        string LastHost { get; }
+        ClusterNode LastHost { get; }
     }
 }

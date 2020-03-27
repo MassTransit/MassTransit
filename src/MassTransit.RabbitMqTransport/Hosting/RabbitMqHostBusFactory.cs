@@ -8,7 +8,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
     public class RabbitMqHostBusFactory :
         IHostBusFactory
     {
-        readonly RabbitMqHostSettings _hostSettings;
+        readonly ConfigurationHostSettings _hostSettings;
 
         public RabbitMqHostBusFactory(ISettingsProvider settingsProvider)
         {
@@ -23,15 +23,23 @@ namespace MassTransit.RabbitMqTransport.Hosting
                 Username = settings.Username ?? "guest",
                 Password = settings.Password ?? "guest",
                 Heartbeat = settings.Heartbeat ?? 0,
-                ClusterMembers = settings.ClusterMembers?.Split(',')
             };
+
+            if (!string.IsNullOrWhiteSpace(settings.ClusterMembers))
+            {
+                var configurator = new RabbitMqClusterConfigurator();
+                foreach (var nodeAddress in settings.ClusterMembers.Split(','))
+                    configurator.Node(nodeAddress);
+
+                _hostSettings.EndpointResolver = configurator.GetEndpointResolver();
+            }
         }
 
         public IBusControl CreateBus(IBusServiceConfigurator busServiceConfigurator, string serviceName)
         {
             return RabbitMqBusFactory.Create(configurator =>
             {
-                var host = configurator.Host(_hostSettings);
+                configurator.Host(_hostSettings);
 
                 LogContext.Info?.Log("Configuring Host: {Host}", _hostSettings.ToDescription());
 

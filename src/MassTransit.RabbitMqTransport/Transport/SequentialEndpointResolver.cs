@@ -2,51 +2,40 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using Context;
     using RabbitMQ.Client;
 
 
-    /// <summary>
-    /// Creates an IHostnameSelector which sequentially chooses the next host name from the provided list based on index
-    /// </summary>
     public class SequentialEndpointResolver :
         IRabbitMqEndpointResolver
     {
-        readonly string[] _hostNames;
-        string _lastHost;
+        readonly ClusterNode[] _nodes;
+        ClusterNode _lastNode;
         int _nextHostIndex;
 
-        public SequentialEndpointResolver(string[] hostNames)
+        public SequentialEndpointResolver(ClusterNode[] nodes)
         {
-            if (hostNames == null)
-                throw new ArgumentNullException(nameof(hostNames));
-            if (hostNames.Length == 0)
-                throw new ArgumentException("At least one host name must be specified", nameof(hostNames));
-            if (hostNames.All(string.IsNullOrWhiteSpace))
-                throw new ArgumentException("At least one non-blank host name must be specified", nameof(hostNames));
+            if (nodes == null)
+                throw new ArgumentNullException(nameof(nodes));
+            if (nodes.Length == 0)
+                throw new ArgumentException("At least one cluster node must be specified", nameof(nodes));
 
-            _hostNames = hostNames;
+            _nodes = nodes;
             _nextHostIndex = 0;
-            _lastHost = "";
         }
 
-        public string LastHost => _lastHost;
+        public ClusterNode LastHost => _lastNode;
 
         public IEnumerable<AmqpTcpEndpoint> All()
         {
-            do
-            {
-                _lastHost = _hostNames[_nextHostIndex % _hostNames.Length];
-            }
-            while (string.IsNullOrWhiteSpace(_lastHost));
+            _lastNode = _nodes[_nextHostIndex % _nodes.Length];
 
-            LogContext.Debug?.Log("Returning next host: {Host}", _lastHost);
+            LogContext.Debug?.Log("Returning next host: {Host}", _lastNode);
 
             Interlocked.Increment(ref _nextHostIndex);
 
-            yield return new AmqpTcpEndpoint(_lastHost);
+            yield return new AmqpTcpEndpoint(_lastNode.HostName, _lastNode.Port);
         }
     }
 }
