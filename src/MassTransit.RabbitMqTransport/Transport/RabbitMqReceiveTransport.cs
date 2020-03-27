@@ -8,7 +8,6 @@
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Integration;
     using Policies;
     using RabbitMQ.Client.Exceptions;
     using Topology;

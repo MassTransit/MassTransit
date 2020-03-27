@@ -80,27 +80,34 @@
         {
             while (!IsStopping)
             {
-                await _host.ConnectionRetryPolicy.Retry(async () =>
+                try
                 {
-                    if (IsStopping)
-                        return;
-
-                    try
+                    await _host.ConnectionRetryPolicy.Retry(async () =>
                     {
-                        await _context.OnTransportStartup(_host.ConnectionContextSupervisor, Stopping).ConfigureAwait(false);
                         if (IsStopping)
                             return;
 
-                        await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception ex)
-                    {
-                        throw await ConvertToAmazonSqsConnectionException(ex, "ReceiveTransport Faulted, Restarting ").ConfigureAwait(false);
-                    }
-                }, Stopping).ConfigureAwait(false);
+                        try
+                        {
+                            await _context.OnTransportStartup(_host.ConnectionContextSupervisor, Stopping).ConfigureAwait(false);
+                            if (IsStopping)
+                                return;
+
+                            await _host.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                        }
+                        catch (Exception ex)
+                        {
+                            throw await ConvertToAmazonSqsConnectionException(ex, "ReceiveTransport Faulted, Restarting ").ConfigureAwait(false);
+                        }
+                    }, Stopping).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // i said, nothing to see here
+                }
             }
         }
 

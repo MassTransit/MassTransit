@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
@@ -15,6 +14,7 @@
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
     using Topology;
+    using Transports;
 
 
     public class ConnectionContextFactory :
@@ -89,7 +89,7 @@
                 IConnection connection = null;
                 try
                 {
-                    LogContext.Debug?.Log("Connecting: {Host}", _description);
+                    TransportLogMessages.ConnectHost(_description);
 
                     if (_configuration.Settings.EndpointResolver != null)
                     {
@@ -98,7 +98,7 @@
                     }
                     else
                     {
-                        List<string> hostNames = Enumerable.Repeat(_configuration.Settings.Host, 1).ToList();
+                        var hostNames = new List<string>(1) {_configuration.Settings.Host};
 
                         connection = _connectionFactory.Value.CreateConnection(hostNames, _configuration.Settings.ClientProvidedName);
                     }

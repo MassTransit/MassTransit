@@ -37,11 +37,23 @@
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
-            IAsyncPipeContextAgent<ConnectionContext> asyncContext = supervisor.AddAsyncContext<ConnectionContext>();
+            var context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopping);
 
-            Task.Run(() => CreateConnection(asyncContext, supervisor), supervisor.Stopping);
+            IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 
-            return asyncContext;
+            void HandleConnectionException(Exception exception)
+            {
+                contextHandle.Stop($"Connection Exception: {exception}");
+            }
+
+            context.ContinueWith(task =>
+            {
+                task.Result.Connection.ExceptionListener += HandleConnectionException;
+
+                contextHandle.Completed.ContinueWith(_ => task.Result.Connection.ExceptionListener -= HandleConnectionException);
+            }, TaskContinuationOptions.OnlyOnRanToCompletion);
+
+            return contextHandle;
         }
 
         IActivePipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
@@ -57,7 +69,7 @@
                 : new SharedConnectionContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
-        async Task<ConnectionContext> CreateConnection(IAsyncPipeContextAgent<ConnectionContext> asyncContext, IAgent supervisor)
+        async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
         {
             return await _connectionRetryPolicy.Retry(async () =>
             {
@@ -71,44 +83,29 @@
 
                     connection = _configuration.Settings.CreateConnection();
 
-                    void HandleConnectionException(Exception exception)
-                    {
-                        asyncContext.Stop($"Connection Exception: {exception}");
-                    }
-
-                    connection.ExceptionListener += HandleConnectionException;
-
-                #pragma warning disable 4014
-                    asyncContext.Completed.ContinueWith(_ => connection.ExceptionListener -= HandleConnectionException);
-                #pragma warning restore 4014
-
                     connection.Start();
 
-                    LogContext.Debug?.Log("Connected: {Host} (client-id: {ClientId}, version: {Version})", _configuration.Description, connection.ClientId,
-                        connection.MetaData.NMSVersion);
+                    LogContext.Debug?.Log("Connected: {Host} (client-id: {ClientId}, version: {Version})", _configuration.Description,
+                        connection.ClientId, connection.MetaData.NMSVersion);
 
-                    var connectionContext = new ActiveMqConnectionContext(connection, _configuration, _hostTopology, supervisor.Stopped);
-
-                    await asyncContext.Created(connectionContext).ConfigureAwait(false);
-
-                    return connectionContext;
+                    return new ActiveMqConnectionContext(connection, _configuration, _hostTopology, supervisor.Stopped);
                 }
                 catch (OperationCanceledException)
                 {
-                    await asyncContext.CreateCanceled().ConfigureAwait(false);
+                    connection?.Dispose();
                     throw;
                 }
                 catch (NMSConnectionException ex)
                 {
-                    LogContext.Error?.Log(ex, "ActiveMQ connection failed");
-
-                    await asyncContext.CreateFaulted(ex).ConfigureAwait(false);
-
                     connection?.Dispose();
-
-                    throw new ActiveMqConnectException("Connect failed: " + _configuration.Description, ex);
+                    throw new ActiveMqConnectException("Connection exception: " + _configuration.Description, ex);
                 }
-            });
+                catch (Exception ex)
+                {
+                    connection?.Dispose();
+                    throw new ActiveMqConnectException("Create Connection Faulted: " + _configuration.Description, ex);
+                }
+            }, supervisor.Stopping).ConfigureAwait(false);
         }
     }
 }

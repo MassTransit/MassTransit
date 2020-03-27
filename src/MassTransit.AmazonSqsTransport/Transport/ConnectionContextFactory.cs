@@ -4,7 +4,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration.Configuration;
-    using Context;
     using Contexts;
     using Exceptions;
     using GreenPipes;
@@ -37,11 +36,11 @@
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
-            IAsyncPipeContextAgent<ConnectionContext> asyncContext = supervisor.AddAsyncContext<ConnectionContext>();
+            var context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopping);
 
-            Task.Run(() => CreateConnection(asyncContext, supervisor), supervisor.Stopping);
+            IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 
-            return asyncContext;
+            return contextHandle;
         }
 
         IActivePipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
@@ -57,13 +56,12 @@
                 : new SharedConnectionContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
-        async Task<ConnectionContext> CreateConnection(IAsyncPipeContextAgent<ConnectionContext> asyncContext, IAgent supervisor)
+        async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
         {
             return await _connectionRetryPolicy.Retry(async () =>
             {
                 if (supervisor.Stopping.IsCancellationRequested)
                     throw new OperationCanceledException($"The connection is stopping and cannot be used: {_configuration.HostAddress}");
-
 
                 IConnection connection = null;
                 try
@@ -72,26 +70,17 @@
 
                     connection = _configuration.Settings.CreateConnection();
 
-                    var connectionContext = new AmazonSqsConnectionContext(connection, _configuration, _hostTopology, supervisor.Stopped);
-
-                    await asyncContext.Created(connectionContext).ConfigureAwait(false);
-
-                    return connectionContext;
+                    return new AmazonSqsConnectionContext(connection, _configuration, _hostTopology, supervisor.Stopped);
                 }
                 catch (OperationCanceledException)
                 {
-                    await asyncContext.CreateCanceled().ConfigureAwait(false);
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    LogContext.Error?.Log(ex, "Amazon SQS connection failed");
-
-                    await asyncContext.CreateFaulted(ex).ConfigureAwait(false);
-
                     throw new AmazonSqsConnectException("Connect failed: " + _configuration.Settings, ex);
                 }
-            });
+            }, supervisor.Stopping).ConfigureAwait(false);
         }
     }
 }
