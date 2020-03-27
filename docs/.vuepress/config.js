@@ -17,7 +17,7 @@ module.exports = {
       indexName: 'masstransit'
     },
     nav: [
-      { text: "Blog", link: "/updates/" },
+      { text: "Updates", link: "/updates/" },
       { text: "Discord", link: "/discord" },
       { text: 'NuGet', link: 'https://nuget.org/packages/MassTransit' }
     ],
@@ -28,6 +28,7 @@ module.exports = {
         path: '/getting-started/',
         collapsable: false,
         children: [
+          '/getting-started/live-coding',
           '/getting-started/upgrade-v6'
         ]
       },

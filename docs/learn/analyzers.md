@@ -2,6 +2,7 @@
 
 MassTransit has a code analyzer which detects and provides code fixes which can be helpful to identify potential issues.
 
+> Package: [MassTransit.Analyzers](https://www.nuget.org/packages/MassTransit.Analyzers)
 
 ## Message Initializers
 

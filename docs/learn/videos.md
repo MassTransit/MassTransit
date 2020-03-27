@@ -1,6 +1,8 @@
 # Videos
 
-There are several videos of presentations featuring MassTransit.
+The best videos to learn MassTransit are in the [Live Coding](/getting-started/live-coding) section. These are the most up-to-date videos detailing how to build applications using MassTransit. 
+
+Beyond those videos, there are several other video presentations featuring MassTransit.
 
 [Event Driven Architecture][1]
 Presented at the North Dallas .NET User Group in February, 2010 by Chris Patterson.

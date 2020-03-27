@@ -248,7 +248,7 @@ Event(() => SubmitOrderFaulted, x => x
 public Event<Fault<SubmitOrder>> SubmitOrderFaulted { get; private set; }
 ```
 
-## Customize the Error Pipe
+## Error Pipe
 
 By default, MassTransit will move faulted messages to the *_error* queue. This behavior can be customized for each receive endpoint.
 
@@ -276,7 +276,7 @@ cfg.ReceiveEndpoint("input-queue", ec =>
 });
 ```
 
-## Customize the Dead-Letter Pipe
+## Dead-Letter Pipe
 
 By default, MassTransit will move skipped messages to the *_skipped* queue. This behavior can be customized for each receive endpoint.
 
