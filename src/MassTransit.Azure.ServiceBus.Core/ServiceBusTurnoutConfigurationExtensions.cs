@@ -41,8 +41,6 @@
                     // configure the input queue endpoint
                     busFactoryConfigurator.ReceiveEndpoint(queueName, commandEndpointConfigurator =>
                     {
-                        commandEndpointConfigurator.ConfigureConsumeTopology = false;
-
                         commandEndpointConfigurator.ConfigureTurnoutEndpoints(busFactoryConfigurator, turnoutEndpointConfigurator, expiredEndpointConfigurator,
                             configure);
                     });
