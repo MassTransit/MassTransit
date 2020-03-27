@@ -126,7 +126,8 @@
                         properties.CorrelationId = context.CorrelationId.ToString();
 
                     if (context.TimeToLive.HasValue)
-                        properties.Expiration = context.TimeToLive.Value.TotalMilliseconds.ToString("F0", CultureInfo.InvariantCulture);
+                        properties.Expiration = (context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1)).TotalMilliseconds
+                            .ToString("F0", CultureInfo.InvariantCulture);
 
                     if (context.RequestId.HasValue && (context.ResponseAddress?.AbsolutePath?.EndsWith(RabbitMqExchangeNames.ReplyTo) ?? false))
                         context.BasicProperties.ReplyTo = RabbitMqExchangeNames.ReplyTo;

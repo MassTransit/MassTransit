@@ -193,7 +193,7 @@
                 brokeredMessage.UserProperties.Set(context.Headers);
 
                 if (context.TimeToLive.HasValue)
-                    brokeredMessage.TimeToLive = context.TimeToLive.Value;
+                    brokeredMessage.TimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);
 
                 if (context.MessageId.HasValue)
                     brokeredMessage.MessageId = context.MessageId.Value.ToString("N");

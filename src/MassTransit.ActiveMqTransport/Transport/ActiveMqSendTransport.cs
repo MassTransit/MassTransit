@@ -108,7 +108,7 @@
                         transportMessage.NMSCorrelationID = context.CorrelationId.ToString();
 
                     if (context.TimeToLive.HasValue)
-                        transportMessage.NMSTimeToLive = context.TimeToLive.Value;
+                        transportMessage.NMSTimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);
 
                     if (context.Priority.HasValue)
                         transportMessage.NMSPriority = context.Priority.Value;
