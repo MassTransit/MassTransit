@@ -103,6 +103,16 @@ namespace MassTransit.Courier.Contexts
             return _context.Faulted(exception);
         }
 
+        ExecutionResult ExecuteContext.FaultedWithVariables(Exception exception, object variables)
+        {
+            return _context.FaultedWithVariables(exception, variables);
+        }
+
+        ExecutionResult ExecuteContext.FaultedWithVariables(Exception exception, IEnumerable<KeyValuePair<string, object>> variables)
+        {
+            return _context.FaultedWithVariables(exception, variables);
+        }
+
         ExecutionResult ExecuteContext.Result
         {
             get => _context.Result;
