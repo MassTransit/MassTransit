@@ -56,6 +56,15 @@ namespace MassTransit.Pipeline.Filters
 
                 await next.Send(context).ConfigureAwait(false);
             }
+            catch (OperationCanceledException exception)
+            {
+                await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName, exception).ConfigureAwait(false);
+
+                if (exception.CancellationToken == context.CancellationToken)
+                    throw;
+
+                throw new ConsumerCanceledException($"The operation was cancelled by the consumer: {TypeMetadataCache<MessageHandler<TMessage>>.ShortName}");
+            }
             catch (Exception ex)
             {
                 await context.NotifyFaulted(timer.Elapsed, TypeMetadataCache<MessageHandler<TMessage>>.ShortName, ex).ConfigureAwait(false);
