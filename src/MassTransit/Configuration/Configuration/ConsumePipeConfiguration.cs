@@ -1,6 +1,8 @@
 ﻿namespace MassTransit.Configuration
 {
     using ConsumePipeSpecifications;
+    using Topology;
+    using Topology.Observers;
 
 
     public class ConsumePipeConfiguration :
@@ -8,14 +10,15 @@
     {
         readonly ConsumePipeSpecification _specification;
 
-        public ConsumePipeConfiguration()
+        public ConsumePipeConfiguration(IConsumeTopology consumeTopology)
         {
             _specification = new ConsumePipeSpecification();
+            _specification.ConnectConsumePipeSpecificationObserver(new TopologyConsumePipeSpecificationObserver(consumeTopology));
         }
 
         public ConsumePipeConfiguration(IConsumePipeSpecification parentSpecification)
-            : this()
         {
+            _specification = new ConsumePipeSpecification();
             _specification.ConnectConsumePipeSpecificationObserver(new ParentConsumePipeSpecificationObserver(parentSpecification));
         }
 

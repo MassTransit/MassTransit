@@ -4,7 +4,6 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
-    using ConsumePipeSpecifications;
     using Context;
     using EndpointConfigurators;
     using Events;
@@ -21,7 +20,6 @@ namespace MassTransit
     {
         readonly IBusObserver _busObservable;
         readonly IConsumePipe _consumePipe;
-        readonly IConsumePipeSpecification _consumePipeSpecification;
         readonly IBusHostControl _host;
         readonly ILogContext _logContext;
         readonly IPublishEndpoint _publishEndpoint;
@@ -32,7 +30,6 @@ namespace MassTransit
         {
             Address = endpointConfiguration.InputAddress;
             _consumePipe = endpointConfiguration.ConsumePipe;
-            _consumePipeSpecification = endpointConfiguration.Consume.Specification;
             _host = host;
             _busObservable = busObservable;
             _receiveEndpoint = endpointConfiguration.ReceiveEndpoint;
@@ -46,9 +43,7 @@ namespace MassTransit
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            IPipe<ConsumeContext<T>> messagePipe = _consumePipeSpecification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
-
-            var handle = _consumePipe.ConnectConsumePipe(messagePipe);
+            var handle = _consumePipe.ConnectConsumePipe(pipe);
 
             if (_busHandle != null && !_receiveEndpoint.Started.IsCompletedSuccessfully())
                 TaskUtil.Await(_receiveEndpoint.Started);
@@ -58,9 +53,7 @@ namespace MassTransit
 
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
-            IPipe<ConsumeContext<T>> messagePipe = _consumePipeSpecification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
-
-            var handle = _consumePipe.ConnectRequestPipe(requestId, messagePipe);
+            var handle = _consumePipe.ConnectRequestPipe(requestId, pipe);
 
             if (_busHandle != null && !_receiveEndpoint.Started.IsCompletedSuccessfully())
                 TaskUtil.Await(_receiveEndpoint.Started);

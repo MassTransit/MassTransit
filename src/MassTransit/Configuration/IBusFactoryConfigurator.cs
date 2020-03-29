@@ -22,9 +22,8 @@ namespace MassTransit
         IBusObserverConnector
     {
         IMessageTopologyConfigurator MessageTopology { get; }
-
+        IConsumeTopologyConfigurator ConsumeTopology { get; }
         ISendTopologyConfigurator SendTopology { get; }
-
         IPublishTopologyConfigurator PublishTopology { get; }
 
         /// <summary>

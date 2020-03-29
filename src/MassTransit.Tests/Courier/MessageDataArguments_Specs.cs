@@ -25,7 +25,6 @@ namespace MassTransit.Tests.Courier
         [OneTimeSetUp]
         public async Task Should_properly_load()
         {
-
             _completed = SubscribeHandler<RoutingSlipCompleted>();
             _faulted = SubscribeHandler<RoutingSlipFaulted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
@@ -45,17 +44,20 @@ namespace MassTransit.Tests.Courier
 
             await Task.WhenAny(_completed, _faulted);
 
-            if(_faulted.IsCompleted)
+            if (_faulted.IsCompleted)
                 Console.WriteLine(string.Join(",", _faulted.Result.Message.ActivityExceptions.Select(x => x.ExceptionInfo.Message)));
 
             Assert.That(_completed.Status, Is.EqualTo(TaskStatus.RanToCompletion));
         }
 
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseMessageData(_repository);
+        }
+
         protected override void SetupActivities(BusTestHarness testHarness)
         {
             var context = AddActivityContext<SetLargeVariableActivity, SetLargeVariableArguments>(() => new SetLargeVariableActivity());
-
-            context.OnConfigureExecuteReceiveEndpoint += configurator => configurator.UseMessageData(_repository);
         }
 
         [Test]

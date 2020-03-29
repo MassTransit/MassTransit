@@ -66,5 +66,6 @@ namespace MassTransit.Topology
     public interface IMessageConsumeTopologyConfigurator :
         ISpecification
     {
+        void AddConvention(IConsumeTopologyConvention convention);
     }
 }

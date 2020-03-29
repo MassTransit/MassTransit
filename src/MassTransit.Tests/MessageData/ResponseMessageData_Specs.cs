@@ -17,7 +17,11 @@ namespace MassTransit.Tests.MessageData
         {
             IRequestClient<Request> client = CreateRequestClient<Request>();
 
-            Response<Response> response = await client.GetResponse<Response>(new {Key = "Hello"});
+            Response<Response> response = await client.GetResponse<Response>(new
+            {
+                InVar.CorrelationId,
+                Key = "Hello"
+            });
 
             Assert.That(await response.Message.Value.Value, Is.Not.Empty);
         }
@@ -27,7 +31,11 @@ namespace MassTransit.Tests.MessageData
         {
             IRequestClient<Request> client = await ConnectRequestClient<Request>();
 
-            Response<Response> response = await client.GetResponse<Response>(new {Key = "Hello"});
+            Response<Response> response = await client.GetResponse<Response>(new
+            {
+                InVar.CorrelationId,
+                Key = "Hello"
+            });
 
             Assert.That(await response.Message.Value.Value, Is.Not.Empty);
         }
@@ -39,7 +47,7 @@ namespace MassTransit.Tests.MessageData
         {
             configurator.UseRetry<Response>(r => r.Immediate(1));
 
-            configurator.UseMessageData<Response>(_repository);
+            configurator.UseMessageData(_repository);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -59,6 +67,7 @@ namespace MassTransit.Tests.MessageData
 
         public interface Request
         {
+            Guid CorrelationId { get; }
             string Key { get; }
         }
 

@@ -178,7 +178,7 @@ namespace MassTransit.ConsumePipeSpecifications
 
             _consumePipeConfigurator.UseFilter(filter);
 
-            return new ConsumePipe(filter, _consumePipeConfigurator.Build(), AutoStart);
+            return new ConsumePipe(this, filter, _consumePipeConfigurator.Build(), AutoStart);
         }
 
         static Guid GetRequestId(ConsumeContext context)

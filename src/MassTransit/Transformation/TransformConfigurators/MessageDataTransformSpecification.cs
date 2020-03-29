@@ -8,9 +8,11 @@ namespace MassTransit.Transformation.TransformConfigurators
     using Initializers;
     using Internals.Extensions;
     using MessageData;
+    using MessageData.Conventions;
     using Metadata;
     using Pipeline.Filters;
     using PropertyProviders;
+    using Topology;
 
 
     public class MessageDataTransformSpecification<TMessage> :
@@ -60,6 +62,20 @@ namespace MassTransit.Transformation.TransformConfigurators
 
                 builder.AddFilter(new TransformFilter<TMessage>(initializer));
             }
+        }
+
+        public bool TryGetConsumeTopology(out IMessageConsumeTopology<TMessage> topology)
+        {
+            if (Count > 0)
+            {
+                IMessageInitializer<TMessage> initializer = Build();
+
+                topology = new MessageDataMessageConsumeTopology<TMessage>(initializer);
+                return true;
+            }
+
+            topology = default;
+            return false;
         }
 
         public bool TryGetConverter(out IPropertyConverter<TMessage, TMessage> converter)

@@ -17,9 +17,7 @@ namespace MassTransit.Builders
         public virtual ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
             where T : class
         {
-            IPipe<ConsumeContext<T>> messagePipe = _configuration.Consume.Specification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
-
-            return _configuration.ConsumePipe.ConnectConsumePipe(messagePipe);
+            return _configuration.ConsumePipe.ConnectConsumePipe(pipe);
         }
     }
 }

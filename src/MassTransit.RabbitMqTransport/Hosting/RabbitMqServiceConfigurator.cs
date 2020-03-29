@@ -64,9 +64,8 @@ namespace MassTransit.RabbitMqTransport.Hosting
         }
 
         public IMessageTopologyConfigurator MessageTopology => _configurator.MessageTopology;
-
+        public IConsumeTopologyConfigurator ConsumeTopology => _configurator.ConsumeTopology;
         public ISendTopologyConfigurator SendTopology => _configurator.SendTopology;
-
         public IPublishTopologyConfigurator PublishTopology => _configurator.PublishTopology;
 
         public void Message<T>(Action<IMessageTopologyConfigurator<T>> configureTopology)

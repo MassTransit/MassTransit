@@ -19,7 +19,7 @@
         {
             Topology = topology;
 
-            Consume = new ConsumePipeConfiguration();
+            Consume = new ConsumePipeConfiguration(topology.Consume);
             Send = new SendPipeConfiguration(topology.Send);
             Publish = new PublishPipeConfiguration(topology.Publish);
             Receive = new ReceivePipeConfiguration();
@@ -31,7 +31,7 @@
         {
             Topology = topology;
 
-            Consume = new ConsumePipeConfiguration();
+            Consume = new ConsumePipeConfiguration(busConfiguration.Consume.Specification);
             Send = new SendPipeConfiguration(busConfiguration.Send.Specification);
             Publish = new PublishPipeConfiguration(busConfiguration.Publish.Specification);
             Receive = new ReceivePipeConfiguration();

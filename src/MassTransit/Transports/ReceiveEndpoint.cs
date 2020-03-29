@@ -71,16 +71,12 @@ namespace MassTransit.Transports
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            IPipe<ConsumeContext<T>> messagePipe = _context.ConsumePipeSpecification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
-
-            return _context.ReceivePipe.ConnectConsumePipe(messagePipe);
+            return _context.ReceivePipe.ConnectConsumePipe(pipe);
         }
 
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
-            IPipe<ConsumeContext<T>> messagePipe = _context.ConsumePipeSpecification.GetMessageSpecification<T>().BuildMessagePipe(pipe);
-
-            return _context.ReceivePipe.ConnectRequestPipe(requestId, messagePipe);
+            return _context.ReceivePipe.ConnectRequestPipe(requestId, pipe);
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)

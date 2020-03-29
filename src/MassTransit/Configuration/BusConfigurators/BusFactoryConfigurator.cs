@@ -36,6 +36,7 @@
         }
 
         public IMessageTopologyConfigurator MessageTopology => _busConfiguration.Topology.Message;
+        public IConsumeTopologyConfigurator ConsumeTopology => _busConfiguration.Topology.Consume;
         public ISendTopologyConfigurator SendTopology => _busConfiguration.Topology.Send;
         public IPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 

@@ -24,13 +24,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
+            configurator.UseMessageData(_repository);
             configurator.ConnectBusObserver(_repository);
         }
 
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
-            configurator.UseMessageData(_repository);
-
             _handler = Handler<DataMessage>(configurator, async context =>
             {
                 _data = await context.Message.Data.Value;

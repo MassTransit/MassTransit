@@ -52,7 +52,7 @@
             string _receivedBody;
             byte[] _receivedBytesArray;
 
-            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
                 string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -63,13 +63,14 @@
                 _repository = new FileSystemMessageDataRepository(dataDirectory);
 
                 configurator.UseMessageData(_repository);
+            }
 
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
                 _received = Handler<MessageWithBigData>(configurator, async context =>
                 {
                     _receivedBody = await context.Message.Body.Value;
                 });
-
-                configurator.UseMessageData(_repository);
 
                 _receivedBytes = Handler<MessageWithByteArray>(configurator, async context =>
                 {
@@ -117,7 +118,7 @@
             string _receivedBody;
             byte[] _receivedBytesArray;
 
-            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
                 string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -132,13 +133,14 @@
                 _repository = new EncryptedMessageDataRepository(fileRepository, cryptoStreamProvider);
 
                 configurator.UseMessageData(_repository);
+            }
 
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
                 _received = Handler<MessageWithBigData>(configurator, async context =>
                 {
                     _receivedBody = await context.Message.Body.Value;
                 });
-
-                configurator.UseMessageData(_repository);
 
                 _receivedBytes = Handler<MessageWithByteArray>(configurator, async context =>
                 {
@@ -172,16 +174,18 @@
             }
 
             IMessageDataRepository _messageDataRepository;
-
             Task<ConsumeContext<MessageWithBigData>> _received;
             string _receivedBody;
 
-            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
                 _messageDataRepository = new InMemoryMessageDataRepository();
 
                 configurator.UseMessageData(_messageDataRepository);
+            }
 
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
                 _received = Handler<MessageWithBigData>(configurator, async context =>
                 {
                     _receivedBody = await context.Message.Body.Value;
@@ -265,12 +269,15 @@
             MessageData<byte[]> _bodyFirst;
             MessageData<byte[]> _bodySecond;
 
-            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
                 _messageDataRepository = new InMemoryMessageDataRepository();
 
                 configurator.UseMessageData(_messageDataRepository);
+            }
 
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
                 _received = Handler<IMessage>(configurator, async context =>
                 {
                     _body = context.Message.Document.Body;
@@ -313,12 +320,15 @@
             Task<ConsumeContext<MessageWithByteArray>> _received;
             byte[] _receivedBytesArray;
 
-            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
                 _messageDataRepository = new InMemoryMessageDataRepository();
 
                 configurator.UseMessageData(_messageDataRepository);
+            }
 
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
                 _received = Handler<MessageWithByteArray>(configurator, async context =>
                 {
                     _receivedBytesArray = await context.Message.Bytes.Value;
@@ -338,12 +348,15 @@
 
             IMessageDataRepository _messageDataRepository;
 
-            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
                 _messageDataRepository = new InMemoryMessageDataRepository();
 
                 configurator.UseMessageData(_messageDataRepository);
+            }
 
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
                 Handled<IHaveNoMessageData>(configurator);
             }
         }

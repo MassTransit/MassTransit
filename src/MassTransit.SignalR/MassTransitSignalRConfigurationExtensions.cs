@@ -69,9 +69,9 @@
             }
             else
             {
+                configurator.UseMessageData(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
                 configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
                 {
-                    e.UseMessageData(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
                     configureEndpoint?.Invoke(e);
 
                     e.ConfigureConsumer<AllMessageDataConsumer<THub>>(serviceProvider);
@@ -79,7 +79,6 @@
 
                 configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
                 {
-                    e.UseMessageData(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
                     configureEndpoint?.Invoke(e);
 
                     e.ConfigureConsumer<ConnectionMessageDataConsumer<THub>>(serviceProvider);
@@ -87,7 +86,6 @@
 
                 configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
                 {
-                    e.UseMessageData(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
                     configureEndpoint?.Invoke(e);
 
                     e.ConfigureConsumer<GroupMessageDataConsumer<THub>>(serviceProvider);
@@ -95,7 +93,6 @@
 
                 configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
                 {
-                    e.UseMessageData(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
                     configureEndpoint?.Invoke(e);
 
                     e.ConfigureConsumer<UserMessageDataConsumer<THub>>(serviceProvider);

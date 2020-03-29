@@ -8,13 +8,14 @@ namespace MassTransit.Transformation.TransformConfigurators
     using PipeConfigurators;
 
 
-    public class MessageDataConfigurationObserver :
+    public class CourierMessageDataConfigurationObserver :
         ConfigurationObserver,
         IMessageConfigurationObserver
     {
         readonly IMessageDataRepository _repository;
+        readonly bool _includeMessages;
 
-        public MessageDataConfigurationObserver(IConsumePipeConfigurator configurator, IMessageDataRepository repository)
+        public CourierMessageDataConfigurationObserver(IConsumePipeConfigurator configurator, IMessageDataRepository repository, bool includeMessages)
             : base(configurator)
         {
             if (configurator == null)
@@ -23,6 +24,7 @@ namespace MassTransit.Transformation.TransformConfigurators
                 throw new ArgumentNullException(nameof(repository));
 
             _repository = repository;
+            _includeMessages = includeMessages;
 
             Connect(this);
         }
@@ -51,6 +53,9 @@ namespace MassTransit.Transformation.TransformConfigurators
         public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
             where TMessage : class
         {
+            if (!_includeMessages)
+                return;
+
             IPipeSpecification<ConsumeContext<TMessage>> specification = new MessageDataTransformSpecification<TMessage>(_repository);
 
             configurator.AddPipeSpecification(specification);

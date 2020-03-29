@@ -5,9 +5,7 @@
     using System.Linq;
     using Context;
     using GreenPipes;
-    using GreenPipes.Pipes;
     using GreenPipes.Specifications;
-    using GreenPipes.Util;
     using Metadata;
     using PipeBuilders;
 
@@ -41,16 +39,6 @@
             throw new ArgumentException($"The expected message type was invalid: {TypeMetadataCache<T>.ShortName}");
         }
 
-        public ConnectHandle Connect(IPipeConnector connector)
-        {
-            IPipe<ConsumeContext<TMessage>> messagePipe = BuildMessagePipe();
-
-            if (messagePipe is EmptyPipe<ConsumeContext<TMessage>>)
-                return new EmptyConnectHandle();
-
-            return connector.ConnectPipe(messagePipe);
-        }
-
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext<TMessage>> specification)
         {
             _specifications.Add(specification);
@@ -63,11 +51,12 @@
 
         public void Apply(ISpecificationPipeBuilder<ConsumeContext<TMessage>> builder)
         {
-            if (!builder.IsDelegated && _parentMessageSpecifications.Count > 0)
+            var parentCount = _parentMessageSpecifications.Count;
+            if (parentCount > 0)
             {
                 ISpecificationPipeBuilder<ConsumeContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
-                for (var index = 0; index < _parentMessageSpecifications.Count; index++)
+                for (var index = 0; index < parentCount; index++)
                     _parentMessageSpecifications[index].Apply(delegatedBuilder);
             }
 
@@ -83,15 +72,6 @@
                     split.Apply(builder);
                 }
             }
-        }
-
-        public IPipe<ConsumeContext<TMessage>> BuildMessagePipe()
-        {
-            var pipeBuilder = new SpecificationPipeBuilder<ConsumeContext<TMessage>>();
-
-            Apply(pipeBuilder);
-
-            return pipeBuilder.Build();
         }
 
         public IPipe<ConsumeContext<TMessage>> BuildMessagePipe(IPipe<ConsumeContext<TMessage>> pipe)
