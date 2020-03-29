@@ -97,6 +97,8 @@ public class Startup
         {
             return Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
+                cfg.UseHealthCheck(serviceProvider);
+
                 cfg.Host("rabbitmq://localhost");
 
                 cfg.ReceiveEndpoint("submit-order", ep =>
