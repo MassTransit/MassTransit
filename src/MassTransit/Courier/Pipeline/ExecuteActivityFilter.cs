@@ -27,7 +27,12 @@
 
             var result = context.Result ?? context.Faulted(new ActivityExecutionException("The activity execute did not return a result"));
             if (result.IsFaulted(out var exception))
-                throw new AggregateException(exception);
+            {
+                var ex = exception is ExceptionWithVariables exceptionWithVariables ?
+                    new AggregateExceptionWithVariables(exceptionWithVariables, exceptionWithVariables.Variables) :
+                    new AggregateException(exception);
+                throw ex;
+            }
 
             await next.Send(context).ConfigureAwait(false);
         }

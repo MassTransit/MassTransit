@@ -50,38 +50,38 @@ namespace MassTransit.Courier.Results
 
         public async Task Evaluate()
         {
+            RoutingSlipBuilder builder = CreateRoutingSlipBuilder(_routingSlip);
+
+            Build(builder);
+
+            RoutingSlip routingSlip = builder.Build();
+
             await _publisher.PublishRoutingSlipActivityFaulted(_executeContext.ActivityName, _executeContext.ExecutionId, _executeContext.Timestamp,
-                _elapsed, _exceptionInfo, _routingSlip.Variables, _activity.Arguments).ConfigureAwait(false);
+                _elapsed, _exceptionInfo, routingSlip.Variables, _activity.Arguments).ConfigureAwait(false);
 
-            if (HasCompensationLogs())
+            if (HasCompensationLogs(routingSlip))
             {
-                RoutingSlipBuilder builder = CreateRoutingSlipBuilder(_routingSlip);
-
-                Build(builder);
-
-                RoutingSlip routingSlip = builder.Build();
-
                 await _executeContext.Forward(routingSlip.GetNextCompensateAddress(), routingSlip).ConfigureAwait(false);
             }
             else
             {
                 DateTime faultedTimestamp = _executeContext.Timestamp + _elapsed;
-                TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
+                TimeSpan faultedDuration = faultedTimestamp - routingSlip.CreateTimestamp;
 
-                await _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, _routingSlip.Variables,
+                await _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, routingSlip.Variables,
                     _activityException).ConfigureAwait(false);
             }
         }
 
-        public bool IsFaulted(out Exception exception)
+        public virtual bool IsFaulted(out Exception exception)
         {
             exception = _exception;
             return true;
         }
 
-        bool HasCompensationLogs()
+        bool HasCompensationLogs(RoutingSlip routingSlip)
         {
-            return _routingSlip.CompensateLogs != null && _routingSlip.CompensateLogs.Count > 0;
+            return routingSlip.CompensateLogs != null && routingSlip.CompensateLogs.Count > 0;
         }
 
         protected virtual void Build(RoutingSlipBuilder builder)

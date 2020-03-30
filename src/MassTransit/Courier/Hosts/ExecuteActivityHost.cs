@@ -48,6 +48,10 @@ namespace MassTransit.Courier.Hosts
 
                     await result.Evaluate().ConfigureAwait(false);
                 }
+                catch (AggregateExceptionWithVariables ex)
+                {
+                    await executeContext.FaultedWithVariables(ex, ex.Variables).Evaluate().ConfigureAwait(false);
+                }
                 catch (Exception ex)
                 {
                     await executeContext.Faulted(ex).Evaluate().ConfigureAwait(false);
