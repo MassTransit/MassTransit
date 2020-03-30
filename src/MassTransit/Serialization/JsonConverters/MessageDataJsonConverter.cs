@@ -2,10 +2,9 @@
 {
     using System;
     using Internals.Extensions;
-    using MessageData;
+    using MessageData.Values;
     using Metadata;
     using Newtonsoft.Json;
-    using Util;
 
 
     public class MessageDataJsonConverter :
@@ -13,13 +12,16 @@
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var messageData = value as IMessageData;
-            if (messageData == null)
-                return;
+            if (value is IMessageData messageData && messageData.HasValue)
+            {
+                var reference = new MessageDataReference {Reference = messageData.Address};
 
-            var reference = new MessageDataReference {Reference = messageData.Address};
-
-            serializer.Serialize(writer, reference);
+                serializer.Serialize(writer, reference);
+            }
+            else
+            {
+                writer.WriteNull();
+            }
         }
 
         protected override IConverter ValueFactory(Type objectType)

@@ -31,21 +31,21 @@ namespace MassTransit.Transformation.TransformConfigurators
 
         public override void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
         {
-            IPipeSpecification<ExecuteContext<TArguments>> specification = new MessageDataTransformSpecification<TArguments>(_repository);
+            IPipeSpecification<ExecuteContext<TArguments>> specification = new GetMessageDataTransformSpecification<TArguments>(_repository);
 
             configurator.Arguments(x => x.AddPipeSpecification(specification));
         }
 
         public override void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
         {
-            IPipeSpecification<ExecuteContext<TArguments>> specification = new MessageDataTransformSpecification<TArguments>(_repository);
+            IPipeSpecification<ExecuteContext<TArguments>> specification = new GetMessageDataTransformSpecification<TArguments>(_repository);
 
             configurator.Arguments(x => x.AddPipeSpecification(specification));
         }
 
         public override void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
         {
-            IPipeSpecification<CompensateContext<TLog>> specification = new MessageDataTransformSpecification<TLog>(_repository);
+            IPipeSpecification<CompensateContext<TLog>> specification = new GetMessageDataTransformSpecification<TLog>(_repository);
 
             configurator.Log(x => x.AddPipeSpecification(specification));
         }
@@ -56,7 +56,7 @@ namespace MassTransit.Transformation.TransformConfigurators
             if (!_includeMessages)
                 return;
 
-            IPipeSpecification<ConsumeContext<TMessage>> specification = new MessageDataTransformSpecification<TMessage>(_repository);
+            IPipeSpecification<ConsumeContext<TMessage>> specification = new GetMessageDataTransformSpecification<TMessage>(_repository);
 
             configurator.AddPipeSpecification(specification);
         }

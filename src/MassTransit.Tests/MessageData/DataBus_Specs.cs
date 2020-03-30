@@ -8,6 +8,7 @@
         using System.Text;
         using System.Threading.Tasks;
         using MassTransit.MessageData;
+        using MassTransit.MessageData.Values;
         using MassTransit.Serialization;
         using NUnit.Framework;
         using Shouldly;
@@ -164,7 +165,7 @@
                     dataAddress = await _messageDataRepository.Put(stream);
                 }
 
-                var message = new SendMessageWithBigData {Body = new ConstantMessageData<string>(dataAddress, data)};
+                var message = new SendMessageWithBigData {Body = new StoredMessageData<string>(dataAddress, data)};
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -211,14 +212,14 @@
 
                 var message = new Message
                 {
-                    Document = new Document() {Body = new ConstantMessageData<byte[]>(dataAddress, buffer)},
+                    Document = new Document() {Body = new StoredMessageData<byte[]>(dataAddress, buffer)},
                     Documents = new IDocument[]
                     {
                         new Document()
                         {
                             Title = "Hello, World",
                             PageCount = 27,
-                            Body = new ConstantMessageData<byte[]>(dataAddress, buffer)
+                            Body = new StoredMessageData<byte[]>(dataAddress, buffer)
                         }
                     },
                     DocumentList = new List<IDocument>()
@@ -227,13 +228,13 @@
                         {
                             Title = "Hello, World",
                             PageCount = 44,
-                            Body = new ConstantMessageData<byte[]>(dataAddress, buffer)
+                            Body = new StoredMessageData<byte[]>(dataAddress, buffer)
                         }
                     },
                     DocumentIndex = new Dictionary<string, IDocument>()
                     {
-                        {"First", new Document {Body = new ConstantMessageData<byte[]>(dataAddress, buffer)}},
-                        {"Second", new Document {Body = new ConstantMessageData<byte[]>(dataAddress, buffer)}},
+                        {"First", new Document {Body = new StoredMessageData<byte[]>(dataAddress, buffer)}},
+                        {"Second", new Document {Body = new StoredMessageData<byte[]>(dataAddress, buffer)}},
                     }
                 };
 
@@ -305,7 +306,7 @@
                     dataAddress = await _messageDataRepository.Put(stream);
                 }
 
-                var message = new MessageWithByteArrayImpl {Bytes = new ConstantMessageData<byte[]>(dataAddress, nextGuid.ToByteArray())};
+                var message = new MessageWithByteArrayImpl {Bytes = new StoredMessageData<byte[]>(dataAddress, nextGuid.ToByteArray())};
 
                 await InputQueueSendEndpoint.Send(message);
 

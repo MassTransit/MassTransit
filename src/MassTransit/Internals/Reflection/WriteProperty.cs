@@ -17,6 +17,8 @@
 
         public WriteProperty(Type implementationType, PropertyInfo propertyInfo)
         {
+            TargetType = implementationType;
+
             var setMethod = propertyInfo.GetSetMethod(true);
             if (setMethod == null)
                 throw new ArgumentException($"The property does not have an accessible set method: {propertyInfo.Name}");
@@ -36,6 +38,8 @@
 
             _setMethod = Initialize;
         }
+
+        public Type TargetType { get; }
 
         public void Set(T content, TProperty value)
         {

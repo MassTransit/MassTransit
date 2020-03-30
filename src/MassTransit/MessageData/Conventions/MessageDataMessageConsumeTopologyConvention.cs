@@ -24,7 +24,7 @@ namespace MassTransit.MessageData.Conventions
 
         bool IMessageConsumeTopologyConvention<TMessage>.TryGetMessageConsumeTopology(out IMessageConsumeTopology<TMessage> messageConsumeTopology)
         {
-            var specification = new MessageDataTransformSpecification<TMessage>(_repository);
+            var specification = new GetMessageDataTransformSpecification<TMessage>(_repository);
             if (specification.TryGetConsumeTopology(out messageConsumeTopology))
                 return true;
 

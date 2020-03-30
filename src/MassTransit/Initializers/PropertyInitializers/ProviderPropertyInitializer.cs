@@ -39,7 +39,8 @@ namespace MassTransit.Initializers.PropertyInitializers
             var propertyTask = _propertyProvider.GetProperty(context);
             if (propertyTask.IsCompleted)
             {
-                _messageProperty.Set(context.Message, propertyTask.Result);
+                if (_messageProperty.TargetType == context.MessageType)
+                    _messageProperty.Set(context.Message, propertyTask.Result);
                 return TaskUtil.Completed;
             }
 
@@ -47,7 +48,8 @@ namespace MassTransit.Initializers.PropertyInitializers
             {
                 var propertyValue = await propertyTask.ConfigureAwait(false);
 
-                _messageProperty.Set(context.Message, propertyValue);
+                if (_messageProperty.TargetType == context.MessageType)
+                    _messageProperty.Set(context.Message, propertyValue);
             }
 
             return ApplyAsync();

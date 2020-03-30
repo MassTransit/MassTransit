@@ -3,7 +3,6 @@ namespace MassTransit.Transformation.TransformConfigurators
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Courier;
     using GreenPipes;
     using Initializers;
     using Internals.Extensions;
@@ -15,14 +14,12 @@ namespace MassTransit.Transformation.TransformConfigurators
     using Topology;
 
 
-    public class MessageDataTransformSpecification<TMessage> :
+    public class PutMessageDataTransformSpecification<TMessage> :
         TransformSpecification<TMessage>,
-        IConsumeTransformSpecification<TMessage>,
-        IExecuteTransformSpecification<TMessage>,
-        ICompensateTransformSpecification<TMessage>
+        ISendTransformSpecification<TMessage>
         where TMessage : class
     {
-        public MessageDataTransformSpecification(IMessageDataRepository repository, IEnumerable<Type> knownTypes = null)
+        public PutMessageDataTransformSpecification(IMessageDataRepository repository, IEnumerable<Type> knownTypes = null)
         {
             if (repository == null)
                 throw new ArgumentNullException(nameof(repository));
@@ -34,7 +31,7 @@ namespace MassTransit.Transformation.TransformConfigurators
             AddMessageDataProperties(repository, types);
         }
 
-        void IPipeSpecification<CompensateContext<TMessage>>.Apply(IPipeBuilder<CompensateContext<TMessage>> builder)
+        void IPipeSpecification<SendContext<TMessage>>.Apply(IPipeBuilder<SendContext<TMessage>> builder)
         {
             if (Count > 0)
             {
@@ -44,33 +41,13 @@ namespace MassTransit.Transformation.TransformConfigurators
             }
         }
 
-        void IPipeSpecification<ConsumeContext<TMessage>>.Apply(IPipeBuilder<ConsumeContext<TMessage>> builder)
+        public bool TryGetSendTopology(out IMessageSendTopology<TMessage> topology)
         {
             if (Count > 0)
             {
                 IMessageInitializer<TMessage> initializer = Build();
 
-                builder.AddFilter(new TransformFilter<TMessage>(initializer));
-            }
-        }
-
-        void IPipeSpecification<ExecuteContext<TMessage>>.Apply(IPipeBuilder<ExecuteContext<TMessage>> builder)
-        {
-            if (Count > 0)
-            {
-                IMessageInitializer<TMessage> initializer = Build();
-
-                builder.AddFilter(new TransformFilter<TMessage>(initializer));
-            }
-        }
-
-        public bool TryGetConsumeTopology(out IMessageConsumeTopology<TMessage> topology)
-        {
-            if (Count > 0)
-            {
-                IMessageInitializer<TMessage> initializer = Build();
-
-                topology = new MessageDataMessageConsumeTopology<TMessage>(initializer);
+                topology = new MessageDataMessageSendTopology<TMessage>(initializer);
                 return true;
             }
 
@@ -101,7 +78,7 @@ namespace MassTransit.Transformation.TransformConfigurators
                     if (!IsUnknownObjectType(knownTypes, valueType))
                         return;
 
-                    var providerType = typeof(LoadMessageDataObjectDictionaryTransformConfiguration<,,,>)
+                    var providerType = typeof(PutMessageDataObjectDictionaryTransformConfiguration<,,,>)
                         .MakeGenericType(typeof(TMessage), propertyType, keyType, valueType);
                     var configuration = (IMessageDataTransformConfiguration<TMessage>)Activator.CreateInstance(providerType, repository, knownTypes,
                         propertyInfo);
@@ -114,7 +91,7 @@ namespace MassTransit.Transformation.TransformConfigurators
                     if (!IsUnknownObjectType(knownTypes, elementType))
                         return;
 
-                    var providerType = typeof(LoadMessageDataObjectArrayTransformConfiguration<,,>)
+                    var providerType = typeof(PutMessageDataObjectArrayTransformConfiguration<,,>)
                         .MakeGenericType(typeof(TMessage), propertyType, elementType);
                     var configuration = (IMessageDataTransformConfiguration<TMessage>)Activator.CreateInstance(providerType, repository, knownTypes,
                         propertyInfo);
@@ -124,7 +101,7 @@ namespace MassTransit.Transformation.TransformConfigurators
 
                 if (propertyType.ClosesType(typeof(MessageData<>), out Type[] types))
                 {
-                    var providerType = typeof(LoadMessageDataTransformConfiguration<,>).MakeGenericType(typeof(TMessage), types[0]);
+                    var providerType = typeof(PutMessageDataTransformConfiguration<,>).MakeGenericType(typeof(TMessage), types[0]);
                     var configuration = (IMessageDataTransformConfiguration<TMessage>)Activator.CreateInstance(providerType, repository, propertyInfo);
 
                     configuration.Apply(this);
@@ -156,7 +133,7 @@ namespace MassTransit.Transformation.TransformConfigurators
                 }
                 else if (IsUnknownObjectType(knownTypes, propertyType))
                 {
-                    var providerType = typeof(LoadMessageDataObjectTransformConfiguration<,>).MakeGenericType(typeof(TMessage), propertyType);
+                    var providerType = typeof(PutMessageDataObjectTransformConfiguration<,>).MakeGenericType(typeof(TMessage), propertyType);
                     var configuration = (IMessageDataTransformConfiguration<TMessage>)Activator.CreateInstance(providerType, repository, knownTypes,
                         propertyInfo);
 

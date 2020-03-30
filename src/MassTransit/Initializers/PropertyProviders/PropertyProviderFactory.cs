@@ -61,10 +61,13 @@ namespace MassTransit.Initializers.PropertyProviders
             if (type.IsNullable(out var underlyingType))
                 return (IProviderFactory)Activator.CreateInstance(typeof(NullableResult<>).MakeGenericType(typeof(TInput), underlyingType), this);
 
+            if (type.ClosesType(typeof(MessageData<>), out Type[] types))
+                return (IProviderFactory)Activator.CreateInstance(typeof(MessageDataResult<,>).MakeGenericType(typeof(TInput), propertyType, types[0]), this);
+
             if (propertyType.IsNullable(out underlyingType))
                 return (IProviderFactory)Activator.CreateInstance(typeof(NullableProperty<>).MakeGenericType(typeof(TInput), underlyingType), this);
 
-            if (propertyType.ClosesType(typeof(IInitializerVariable<>), out Type[] types))
+            if (propertyType.ClosesType(typeof(IInitializerVariable<>), out types))
                 return (IProviderFactory)Activator.CreateInstance(typeof(VariableProperty<,>).MakeGenericType(typeof(TInput), propertyType, types[0]), this);
 
             if (propertyType.IsValueTypeOrObject())
@@ -318,6 +321,60 @@ namespace MassTransit.Initializers.PropertyProviders
                     {
                         converter = new ToNullablePropertyConverter<TValue, TProperty>(propertyConverter) as IPropertyConverter<T, TProperty>;
                         return converter != default;
+                    }
+                }
+
+                converter = default;
+                return false;
+            }
+        }
+
+
+        class MessageDataResult<TSource, TValue> :
+            IProviderFactory
+        {
+            readonly IPropertyProviderFactory<TInput> _factory;
+
+            public MessageDataResult(IPropertyProviderFactory<TInput> factory)
+            {
+                _factory = factory;
+            }
+
+            bool IProviderFactory.TryGetProvider<T>(PropertyInfo propertyInfo, out IPropertyProvider<TInput, T> provider)
+            {
+                if (TryGetConverter(out IPropertyConverter<T, TSource> propertyConverter))
+                {
+                    var inputValuePropertyProvider = new InputPropertyProvider<TInput, TSource>(propertyInfo);
+
+                    provider = new PropertyConverterPropertyProvider<TInput, T, TSource>(propertyConverter, inputValuePropertyProvider);
+                    return true;
+                }
+
+                provider = default;
+                return false;
+            }
+
+            public bool TryGetConverter<T, TProperty>(out IPropertyConverter<T, TProperty> converter)
+            {
+                if (typeof(TValue) == typeof(string) || typeof(TValue) == typeof(byte[]))
+                {
+                    if (typeof(T).ClosesType(typeof(MessageData<>), out Type[] types) && types[0] == typeof(string))
+                    {
+                        if (typeof(TProperty) == typeof(string) || typeof(TProperty) == typeof(MessageData<string>))
+                        {
+                            converter = new MessageDataPropertyConverter() as IPropertyConverter<T, TProperty>;
+                            return converter != null;
+                        }
+                    }
+
+                    if (typeof(T).ClosesType(typeof(MessageData<>), out types) && types[0] == typeof(byte[]))
+                    {
+                        if (typeof(TProperty) == typeof(string) || typeof(TProperty) == typeof(MessageData<string>)
+                            || typeof(TProperty) == typeof(byte[]) || typeof(TProperty) == typeof(MessageData<byte[]>))
+                        {
+                            converter = new MessageDataPropertyConverter() as IPropertyConverter<T, TProperty>;
+                            return converter != null;
+                        }
                     }
                 }
 

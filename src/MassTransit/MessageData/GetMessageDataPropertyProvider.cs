@@ -3,16 +3,17 @@
     using System.Threading.Tasks;
     using Initializers;
     using Util;
+    using Values;
 
 
-    public class LoadMessageDataPropertyProvider<TInput, TValue> :
+    public class GetMessageDataPropertyProvider<TInput, TValue> :
         IPropertyProvider<TInput, MessageData<TValue>>
         where TInput : class
     {
         readonly IPropertyProvider<TInput, MessageData<TValue>> _inputProvider;
         readonly IMessageDataRepository _repository;
 
-        public LoadMessageDataPropertyProvider(IPropertyProvider<TInput, MessageData<TValue>> inputProvider, IMessageDataRepository repository = default)
+        public GetMessageDataPropertyProvider(IPropertyProvider<TInput, MessageData<TValue>> inputProvider, IMessageDataRepository repository = default)
         {
             _repository = repository;
             _inputProvider = inputProvider;

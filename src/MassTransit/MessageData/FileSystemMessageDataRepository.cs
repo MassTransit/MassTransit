@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.MessageData
 {
     using System;
@@ -39,14 +27,15 @@ namespace MassTransit.MessageData
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException("The file was not found", fullPath);
 
-            using (var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous))
-            {
-                var memoryStream = new MemoryStream();
-                await stream.CopyToAsync(memoryStream, DefaultBufferSize, cancellationToken).ConfigureAwait(false);
-                
-                memoryStream.Position = 0;
-                return memoryStream;
-            }
+            using var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous);
+
+            var memoryStream = new MemoryStream();
+
+            await stream.CopyToAsync(memoryStream, DefaultBufferSize, cancellationToken).ConfigureAwait(false);
+
+            memoryStream.Position = 0;
+
+            return memoryStream;
         }
 
         async Task<Uri> IMessageDataRepository.Put(Stream stream, TimeSpan? timeToLive, CancellationToken cancellationToken)
@@ -57,10 +46,9 @@ namespace MassTransit.MessageData
 
             VerifyDirectory(fullPath);
 
-            using (var fileStream = new FileStream(fullPath, FileMode.CreateNew, FileAccess.Write, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous))
-            {
-                await stream.CopyToAsync(fileStream, DefaultBufferSize, cancellationToken).ConfigureAwait(false);
-            }
+            using var fileStream = new FileStream(fullPath, FileMode.CreateNew, FileAccess.Write, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous);
+
+            await stream.CopyToAsync(fileStream, DefaultBufferSize, cancellationToken).ConfigureAwait(false);
 
             return new Uri($"urn:file:{filePath.Replace(Path.DirectorySeparatorChar, ':')}");
         }

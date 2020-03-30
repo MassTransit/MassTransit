@@ -44,5 +44,13 @@
         /// <param name="property"></param>
         /// <param name="propertyProvider"></param>
         void Set<TProperty>(PropertyInfo property, Initializers.IPropertyProvider<TInput, TProperty> propertyProvider);
+
+        /// <summary>
+        /// Transform the property, but leave it unchanged on the input
+        /// </summary>
+        /// <typeparam name="TProperty"></typeparam>
+        /// <param name="property"></param>
+        /// <param name="propertyProvider"></param>
+        void Transform<TProperty>(PropertyInfo property, Initializers.IPropertyProvider<TInput, TProperty> propertyProvider);
     }
 }

@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.Initializers.Contexts
 {
+    using System;
     using GreenPipes;
 
 
@@ -12,12 +13,14 @@
             : base(context)
         {
             Message = message;
+            MessageType = message.GetType();
 
             Depth = context.Depth + 1;
             Parent = context;
         }
 
         public TMessage Message { get; }
+        public Type MessageType { get; }
 
         public int Depth { get; }
 

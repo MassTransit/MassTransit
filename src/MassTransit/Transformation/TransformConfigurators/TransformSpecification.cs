@@ -15,6 +15,7 @@ namespace MassTransit.Transformation.TransformConfigurators
     using Initializers.PropertyInitializers;
     using Initializers.PropertyProviders;
     using Internals.Extensions;
+    using PropertyInitializers;
     using PropertyProviders;
 
 
@@ -71,6 +72,13 @@ namespace MassTransit.Transformation.TransformConfigurators
         public void Set<TProperty>(PropertyInfo propertyInfo, IPropertyProvider<TMessage, TProperty> propertyProvider)
         {
             var initializer = new ProviderPropertyInitializer<TMessage, TMessage, TProperty>(propertyProvider, propertyInfo);
+
+            _convention.Add(propertyInfo.Name, initializer);
+        }
+
+        public void Transform<TProperty>(PropertyInfo propertyInfo, IPropertyProvider<TMessage, TProperty> propertyProvider)
+        {
+            var initializer = new TransformPropertyInitializer<TMessage, TMessage, TProperty>(propertyProvider, propertyInfo);
 
             _convention.Add(propertyInfo.Name, initializer);
         }

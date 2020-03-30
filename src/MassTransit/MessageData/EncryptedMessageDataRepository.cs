@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.MessageData
+﻿namespace MassTransit.MessageData
 {
     using System;
     using System.Collections.Specialized;
@@ -43,8 +31,7 @@ namespace MassTransit.MessageData
         {
             var stream = await _repository.Get(address, cancellationToken).ConfigureAwait(false);
 
-            string keyId;
-            address.TryGetValueFromQueryString("keyId", out keyId);
+            address.TryGetValueFromQueryString("keyId", out var keyId);
 
             return _streamProvider.GetDecryptStream(stream, keyId, CryptoStreamMode.Read);
         }
@@ -52,38 +39,38 @@ namespace MassTransit.MessageData
         public async Task<Uri> Put(Stream stream, TimeSpan? timeToLive = null, CancellationToken cancellationToken = new CancellationToken())
         {
             string keyId = null;
-            using (Stream cryptoStream = _streamProvider.GetEncryptStream(stream, keyId, CryptoStreamMode.Read))
+
+            using var cryptoStream = _streamProvider.GetEncryptStream(stream, keyId, CryptoStreamMode.Read);
+
+            var address = await _repository.Put(cryptoStream, timeToLive, cancellationToken).ConfigureAwait(false);
+
+            var addressBuilder = new UriBuilder(address);
+
+            var parameters = new NameValueCollection();
+            if (!string.IsNullOrWhiteSpace(addressBuilder.Query))
             {
-                var address = await _repository.Put(cryptoStream, timeToLive, cancellationToken).ConfigureAwait(false);
+                var query = addressBuilder.Query;
 
-                var addressBuilder = new UriBuilder(address);
-
-                NameValueCollection parameters = new NameValueCollection();
-                if (!string.IsNullOrWhiteSpace(addressBuilder.Query))
+                if (query.Contains("?"))
                 {
-                    var query = addressBuilder.Query;
-
-                    if (query.Contains("?"))
-                    {
-                        query = query.Substring(query.IndexOf('?') + 1);
-                    }
-
-                    foreach (string parameter in query.Split('&'))
-                    {
-                        if (string.IsNullOrWhiteSpace(parameter))
-                            continue;
-
-                        string[] pair = parameter.Split('=');
-
-                        parameters.Add(pair[0], pair.Length == 2 ? pair[1] : "");
-                    }
+                    query = query.Substring(query.IndexOf('?') + 1);
                 }
 
-                parameters["keyId"] = "";
-                addressBuilder.Query = parameters.ToString();
+                foreach (string parameter in query.Split('&'))
+                {
+                    if (string.IsNullOrWhiteSpace(parameter))
+                        continue;
 
-                return addressBuilder.Uri;
+                    string[] pair = parameter.Split('=');
+
+                    parameters.Add(pair[0], pair.Length == 2 ? pair[1] : "");
+                }
             }
+
+            parameters["keyId"] = "";
+            addressBuilder.Query = parameters.ToString();
+
+            return addressBuilder.Uri;
         }
     }
 }

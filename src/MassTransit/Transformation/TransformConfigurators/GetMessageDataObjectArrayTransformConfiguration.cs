@@ -9,19 +9,19 @@ namespace MassTransit.Transformation.TransformConfigurators
     using MessageData;
 
 
-    public class LoadMessageDataObjectArrayTransformConfiguration<TInput, TProperty, TElement> :
+    public class GetMessageDataObjectArrayTransformConfiguration<TInput, TProperty, TElement> :
         IMessageDataTransformConfiguration<TInput>
         where TInput : class
         where TElement : class
     {
         readonly PropertyInfo _property;
-        readonly MessageDataTransformSpecification<TElement> _transformConfigurator;
+        readonly GetMessageDataTransformSpecification<TElement> _transformConfigurator;
 
-        public LoadMessageDataObjectArrayTransformConfiguration(IMessageDataRepository repository, IEnumerable<Type> knownTypes, PropertyInfo property)
+        public GetMessageDataObjectArrayTransformConfiguration(IMessageDataRepository repository, IEnumerable<Type> knownTypes, PropertyInfo property)
         {
             _property = property;
 
-            _transformConfigurator = new MessageDataTransformSpecification<TElement>(repository, knownTypes);
+            _transformConfigurator = new GetMessageDataTransformSpecification<TElement>(repository, knownTypes);
         }
 
         public void Apply(ITransformConfigurator<TInput> configurator)

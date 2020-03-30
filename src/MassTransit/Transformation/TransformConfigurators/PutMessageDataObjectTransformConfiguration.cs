@@ -7,19 +7,19 @@ namespace MassTransit.Transformation.TransformConfigurators
     using MessageData;
 
 
-    public class LoadMessageDataObjectTransformConfiguration<TInput, TProperty> :
+    public class PutMessageDataObjectTransformConfiguration<TInput, TProperty> :
         IMessageDataTransformConfiguration<TInput>
         where TInput : class
         where TProperty : class
     {
         readonly PropertyInfo _property;
-        readonly MessageDataTransformSpecification<TProperty> _transformConfigurator;
+        readonly PutMessageDataTransformSpecification<TProperty> _transformConfigurator;
 
-        public LoadMessageDataObjectTransformConfiguration(IMessageDataRepository repository, IEnumerable<Type> knownTypes, PropertyInfo property)
+        public PutMessageDataObjectTransformConfiguration(IMessageDataRepository repository, IEnumerable<Type> knownTypes, PropertyInfo property)
         {
             _property = property;
 
-            _transformConfigurator = new MessageDataTransformSpecification<TProperty>(repository, knownTypes);
+            _transformConfigurator = new PutMessageDataTransformSpecification<TProperty>(repository, knownTypes);
         }
 
         public void Apply(ITransformConfigurator<TInput> configurator)
@@ -30,7 +30,7 @@ namespace MassTransit.Transformation.TransformConfigurators
 
                 var provider = new PropertyConverterPropertyProvider<TInput, TProperty, TProperty>(converter, inputPropertyProvider);
 
-                configurator.Set(_property, provider);
+                configurator.Transform(_property, provider);
             }
         }
     }

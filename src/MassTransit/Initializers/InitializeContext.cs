@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.Initializers
 {
+    using System;
     using GreenPipes;
 
 
@@ -33,6 +34,8 @@
     {
         InitializeContext<TMessage, T> CreateInputContext<T>(T input)
             where T : class;
+
+        Type MessageType { get; }
 
         /// <summary>
         /// The message being initialized

@@ -1,29 +1,20 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit
+﻿namespace MassTransit
 {
     using System.Threading.Tasks;
 
 
     /// <summary>
-    /// A big property is a message property that is stored outside the message transport
+    /// MessageData is used when a property size may be larger than what should be sent via the message
+    /// transport. This would includes attachments such as images, documents, videos, etc. Using MessageData,
+    /// it is possible to include large properties without sending them in the actual message. The claim check
+    /// pattern is the common reference.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">The type used to access the message data, valid types include stream, string, and byte[].</typeparam>
     public interface MessageData<T> :
         IMessageData
     {
         /// <summary>
-        /// Returns the value of the property, which may be loaded asynchronously from the big storage
+        /// The property value, which may be loaded asynchronously from the message data repository.
         /// </summary>
         Task<T> Value { get; }
     }

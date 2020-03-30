@@ -28,6 +28,7 @@ namespace MassTransit
         public static void UseMessageData(this IBusFactoryConfigurator configurator, IMessageDataRepository repository)
         {
             configurator.ConsumeTopology.AddConvention(new MessageDataConsumeTopologyConvention(repository));
+            configurator.SendTopology.AddConvention(new MessageDataSendTopologyConvention(repository));
 
             // Courier does not use ConsumeContext, so it needs to be special
             var observer = new CourierMessageDataConfigurationObserver(configurator, repository, false);
@@ -46,7 +47,7 @@ namespace MassTransit
             Action<ITransformConfigurator<T>> configure = null)
             where T : class
         {
-            var transformSpecification = new MessageDataTransformSpecification<T>(repository);
+            var transformSpecification = new GetMessageDataTransformSpecification<T>(repository);
 
             configure?.Invoke(transformSpecification);
 
@@ -68,7 +69,7 @@ namespace MassTransit
             Action<ITransformConfigurator<T>> configure = null)
             where T : class
         {
-            var transformSpecification = new MessageDataTransformSpecification<T>(repository);
+            var transformSpecification = new GetMessageDataTransformSpecification<T>(repository);
 
             configure?.Invoke(transformSpecification);
 

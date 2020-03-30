@@ -6,14 +6,14 @@ namespace MassTransit.Transformation.TransformConfigurators
     using MessageData;
 
 
-    public class LoadMessageDataTransformConfiguration<TInput, TValue> :
+    public class GetMessageDataTransformConfiguration<TInput, TValue> :
         IMessageDataTransformConfiguration<TInput>
         where TInput : class
     {
         readonly PropertyInfo _property;
         readonly IMessageDataRepository _repository;
 
-        public LoadMessageDataTransformConfiguration(IMessageDataRepository repository, PropertyInfo property)
+        public GetMessageDataTransformConfiguration(IMessageDataRepository repository, PropertyInfo property)
         {
             if (repository == null)
                 throw new ArgumentNullException(nameof(repository));
@@ -26,7 +26,7 @@ namespace MassTransit.Transformation.TransformConfigurators
         {
             var inputPropertyProvider = new InputPropertyProvider<TInput, MessageData<TValue>>(_property);
 
-            var provider = new LoadMessageDataPropertyProvider<TInput, TValue>(inputPropertyProvider, _repository);
+            var provider = new GetMessageDataPropertyProvider<TInput, TValue>(inputPropertyProvider, _repository);
 
             configurator.Set(_property, provider);
         }
