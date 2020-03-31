@@ -16,7 +16,7 @@
         [Test]
         public async Task Should_generate_the_folder_and_file()
         {
-            var property = await _repository.PutString("Hello, World.");
+            var property = await _repository.PutString(new string('8', 10000));
 
             Console.WriteLine(property.Address);
 
@@ -26,8 +26,7 @@
         [Test]
         public async Task Should_generate_time_based_folder()
         {
-            var property = await _repository.PutString("Hello, World.", TimeSpan.FromDays(30));
-
+            var property = await _repository.PutString(new string('8', 10000), TimeSpan.FromDays(30));
 
             var loaded = await _repository.GetString(property.Address);
 

@@ -22,12 +22,20 @@ namespace MassTransit.Initializers.PropertyConverters
                 : TaskUtil.Default<MessageData<byte[]>>();
         }
 
-        Task<MessageData<byte[]>> IPropertyConverter<MessageData<byte[]>, MessageData<string>>.Convert<T>(InitializeContext<T> context,
+        async Task<MessageData<byte[]>> IPropertyConverter<MessageData<byte[]>, MessageData<string>>.Convert<T>(InitializeContext<T> context,
             MessageData<string> input)
         {
-            return input != null
-                ? Task.FromResult<MessageData<byte[]>>(new ToByteArrayMessageData(input))
-                : TaskUtil.Default<MessageData<byte[]>>();
+            if (input == null || !input.HasValue)
+                return default;
+
+            var text = await input.Value.ConfigureAwait(false);
+
+            byte[] bytes = Encoding.UTF8.GetBytes(text);
+
+            if (bytes.Length < MessageDataDefaults.Threshold)
+                return new BytesInlineMessageData(bytes, input.Address);
+
+            return new StoredMessageData<byte[]>(input.Address, bytes);
         }
 
         Task<MessageData<string>> IPropertyConverter<MessageData<string>, MessageData<string>>.Convert<T>(InitializeContext<T> context,
@@ -38,24 +46,32 @@ namespace MassTransit.Initializers.PropertyConverters
 
         Task<MessageData<string>> IPropertyConverter<MessageData<string>, string>.Convert<T>(InitializeContext<T> context, string input)
         {
-            return input != null
-                ? Task.FromResult<MessageData<string>>(new PutMessageData<string>(input))
-                : TaskUtil.Default<MessageData<string>>();
+            if (input == null)
+                return TaskUtil.Default<MessageData<string>>();
+
+            return Task.FromResult<MessageData<string>>(new PutMessageData<string>(input));
         }
 
         Task<MessageData<byte[]>> IPropertyConverter<MessageData<byte[]>, string>.Convert<T>(InitializeContext<T> context, string input)
         {
-            return input != null
-                ? Task.FromResult<MessageData<byte[]>>(new PutMessageData<byte[]>(Encoding.UTF8.GetBytes(input)))
-                : TaskUtil.Default<MessageData<byte[]>>();
+            if (input == null)
+                return TaskUtil.Default<MessageData<byte[]>>();
+
+            byte[] bytes = Encoding.UTF8.GetBytes(input);
+
+            if (bytes.Length < MessageDataDefaults.Threshold)
+                return Task.FromResult<MessageData<byte[]>>(new BytesInlineMessageData(bytes));
+
+            return Task.FromResult<MessageData<byte[]>>(new PutMessageData<byte[]>(bytes));
         }
 
         public Task<MessageData<byte[]>> Convert<T>(InitializeContext<T> context, byte[] input)
             where T : class
         {
-            return input != null
-                ? Task.FromResult<MessageData<byte[]>>(new PutMessageData<byte[]>(input))
-                : TaskUtil.Default<MessageData<byte[]>>();
+            if (input == null)
+                return TaskUtil.Default<MessageData<byte[]>>();
+
+            return Task.FromResult<MessageData<byte[]>>(new PutMessageData<byte[]>(input));
         }
     }
 }

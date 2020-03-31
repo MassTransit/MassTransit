@@ -1,4 +1,4 @@
-﻿namespace MassTransit.MessageData
+﻿namespace MassTransit.MessageData.PropertyProviders
 {
     public static class MessageDataConverter
     {

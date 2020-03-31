@@ -1,4 +1,4 @@
-namespace MassTransit.MessageData
+namespace MassTransit.MessageData.PropertyProviders
 {
     using System;
     using System.Threading.Tasks;
@@ -33,9 +33,10 @@ namespace MassTransit.MessageData
             {
                 MessageData<TValue> messageData = inputTask.Result;
                 if (messageData is PutMessageData<TValue> putMessageData && putMessageData.HasValue)
-                {
                     return Put(context, putMessageData.Value);
-                }
+
+                if (messageData is IInlineMessageData && messageData.HasValue && messageData.Address == null)
+                    return Put(context, messageData.Value);
 
                 return Task.FromResult(messageData);
             }
@@ -45,9 +46,7 @@ namespace MassTransit.MessageData
                 MessageData<TValue> messageData = await inputTask.ConfigureAwait(false);
 
                 if (messageData is PutMessageData<TValue> putMessageData && putMessageData.HasValue)
-                {
                     return await Put(context, putMessageData.Value);
-                }
 
                 return messageData;
             }
@@ -64,9 +63,11 @@ namespace MassTransit.MessageData
                 if (context.TryGetPayload(out SendContext sendContext) && sendContext.TimeToLive.HasValue)
                     timeToLive = sendContext.TimeToLive;
 
-                // For safety, to avoid flooding the storage with a bunch of super short lives values
-                if (timeToLive.HasValue && timeToLive.Value <= TimeSpan.FromSeconds(30))
-                    timeToLive = TimeSpan.FromSeconds(30);
+                if (timeToLive.HasValue && MessageDataDefaults.ExtraTimeToLive.HasValue)
+                    timeToLive += MessageDataDefaults.ExtraTimeToLive;
+
+                if (!timeToLive.HasValue && MessageDataDefaults.TimeToLive.HasValue)
+                    timeToLive = MessageDataDefaults.TimeToLive.Value;
 
                 var value = await valueTask.ConfigureAwait(false);
                 if (value is string stringValue)

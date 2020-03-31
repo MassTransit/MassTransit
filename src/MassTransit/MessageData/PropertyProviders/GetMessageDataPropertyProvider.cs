@@ -1,4 +1,4 @@
-﻿namespace MassTransit.MessageData
+﻿namespace MassTransit.MessageData.PropertyProviders
 {
     using System.Threading.Tasks;
     using Initializers;
@@ -29,6 +29,8 @@
             if (inputTask.IsCompleted)
             {
                 MessageData<TValue> messageData = inputTask.Result;
+                if (messageData is IInlineMessageData)
+                    return Task.FromResult(messageData);
 
                 if (messageData?.Address != null)
                 {
@@ -37,12 +39,14 @@
                         return Task.FromResult(MessageDataFactory.Load<TValue>(repository, messageData.Address, context.CancellationToken));
                 }
 
-                return Task.FromResult<MessageData<TValue>>(new EmptyMessageData<TValue>());
+                return Task.FromResult(EmptyMessageData<TValue>.Instance);
             }
 
             async Task<MessageData<TValue>> GetPropertyAsync()
             {
                 MessageData<TValue> messageData = await inputTask.ConfigureAwait(false);
+                if (messageData is IInlineMessageData)
+                    return messageData;
 
                 if (messageData?.Address != null)
                 {
@@ -51,7 +55,7 @@
                         return MessageDataFactory.Load<TValue>(repository, messageData.Address, context.CancellationToken);
                 }
 
-                return new EmptyMessageData<TValue>();
+                return EmptyMessageData<TValue>.Instance;
             }
 
             return GetPropertyAsync();

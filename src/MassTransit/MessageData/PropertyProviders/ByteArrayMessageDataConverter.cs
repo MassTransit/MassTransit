@@ -1,4 +1,4 @@
-﻿namespace MassTransit.MessageData
+﻿namespace MassTransit.MessageData.PropertyProviders
 {
     using System.IO;
     using System.Threading;

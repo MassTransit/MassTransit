@@ -22,7 +22,7 @@
             [Test]
             public async Task Should_load_the_data_from_the_repository()
             {
-                string data = NewId.NextGuid().ToString();
+                string data = new string('*', 10000);
 
                 var message = new SendMessageWithBigData {Body = await _repository.PutString(data)};
 
@@ -36,7 +36,7 @@
             [Test]
             public async Task Should_be_able_to_write_bytes_too()
             {
-                byte[] data = NewId.NextGuid().ToByteArray();
+                byte[] data = new byte[10000];
 
                 var message = new MessageWithByteArrayImpl {Bytes = await _repository.PutBytes(data)};
 
@@ -88,7 +88,7 @@
             [Test]
             public async Task Should_load_the_data_from_the_repository()
             {
-                string data = NewId.NextGuid().ToString();
+                string data = new string('*', 10000);
 
                 var message = new SendMessageWithBigData {Body = await _repository.PutString(data)};
 
@@ -102,7 +102,7 @@
             [Test]
             public async Task Should_be_able_to_write_bytes_too()
             {
-                byte[] data = NewId.NextGuid().ToByteArray();
+                byte[] data = new byte[10000];
 
                 var message = new MessageWithByteArrayImpl {Bytes = await _repository.PutBytes(data)};
 

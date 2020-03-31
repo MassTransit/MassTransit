@@ -17,11 +17,19 @@
             if (repository == null)
                 throw new ArgumentNullException(nameof(repository));
             if (value == null)
-                return new EmptyMessageData<string>();
+                return EmptyMessageData<string>.Instance;
 
-            using var ms = new MemoryStream(Encoding.UTF8.GetBytes(value), false);
+            if (value.Length < MessageDataDefaults.Threshold && !MessageDataDefaults.AlwaysWriteToRepository)
+                return new StringInlineMessageData(value);
+
+            byte[] bytes = Encoding.UTF8.GetBytes(value);
+
+            using var ms = new MemoryStream(bytes, false);
 
             Uri address = await repository.Put(ms, default, cancellationToken).ConfigureAwait(false);
+
+            if (value.Length < MessageDataDefaults.Threshold)
+                return new StringInlineMessageData(value, address);
 
             return new StoredMessageData<string>(address, value);
         }
@@ -31,10 +39,18 @@
         {
             if (repository == null)
                 throw new ArgumentNullException(nameof(repository));
+            if (bytes == null)
+                return EmptyMessageData<byte[]>.Instance;
+
+            if (bytes.Length < MessageDataDefaults.Threshold && !MessageDataDefaults.AlwaysWriteToRepository)
+                return new BytesInlineMessageData(bytes);
 
             using var ms = new MemoryStream(bytes, false);
 
             Uri address = await repository.Put(ms, default, cancellationToken).ConfigureAwait(false);
+
+            if (bytes.Length < MessageDataDefaults.Threshold)
+                return new BytesInlineMessageData(bytes, address);
 
             return new StoredMessageData<byte[]>(address, bytes);
         }
@@ -45,11 +61,19 @@
             if (repository == null)
                 throw new ArgumentNullException(nameof(repository));
             if (value == null)
-                return new EmptyMessageData<string>();
+                return EmptyMessageData<string>.Instance;
 
-            using var ms = new MemoryStream(Encoding.UTF8.GetBytes(value), false);
+            if (value.Length < MessageDataDefaults.Threshold && !MessageDataDefaults.AlwaysWriteToRepository)
+                return new StringInlineMessageData(value);
+
+            byte[] bytes = Encoding.UTF8.GetBytes(value);
+
+            using var ms = new MemoryStream(bytes, false);
 
             Uri address = await repository.Put(ms, timeToLive, cancellationToken).ConfigureAwait(false);
+
+            if (value.Length < MessageDataDefaults.Threshold)
+                return new StringInlineMessageData(value, address);
 
             return new StoredMessageData<string>(address, value);
         }
@@ -59,10 +83,18 @@
         {
             if (repository == null)
                 throw new ArgumentNullException(nameof(repository));
+            if (bytes == null)
+                return EmptyMessageData<byte[]>.Instance;
+
+            if (bytes.Length < MessageDataDefaults.Threshold && !MessageDataDefaults.AlwaysWriteToRepository)
+                return new BytesInlineMessageData(bytes);
 
             using var ms = new MemoryStream(bytes, false);
 
             Uri address = await repository.Put(ms, timeToLive, cancellationToken).ConfigureAwait(false);
+
+            if (bytes.Length < MessageDataDefaults.Threshold)
+                return new BytesInlineMessageData(bytes, address);
 
             return new StoredMessageData<byte[]>(address, bytes);
         }

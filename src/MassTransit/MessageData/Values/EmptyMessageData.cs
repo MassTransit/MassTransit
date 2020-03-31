@@ -7,6 +7,12 @@
     public class EmptyMessageData<T> :
         MessageData<T>
     {
+        public static readonly MessageData<T> Instance = new EmptyMessageData<T>();
+
+        EmptyMessageData()
+        {
+        }
+
         public Uri Address => throw new MessageDataException("The message data is empty");
 
         public bool HasValue => false;

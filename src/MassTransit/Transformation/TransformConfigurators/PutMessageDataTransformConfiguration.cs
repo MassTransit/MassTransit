@@ -4,6 +4,7 @@ namespace MassTransit.Transformation.TransformConfigurators
     using System.Reflection;
     using Initializers.PropertyProviders;
     using MessageData;
+    using MessageData.PropertyProviders;
     using Metadata;
 
 
