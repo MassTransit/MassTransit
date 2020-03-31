@@ -64,8 +64,7 @@ byte[] document = new byte[100000]; // get byte array, or a big string
 await endpoint.Send<IndexDocumentContent>(new
 {
     DocumentId = documentId,
-    Document = document,
-    __TimeToLive = TimeSpan.FromDays(1)
+    Document = document
 });
 ```
 
@@ -90,6 +89,43 @@ await endpoint.Send<IndexDocumentContent>(new IndexDocumentContentMessage
 ```
 
 The message data is stored, and the reference added to the outbound message.
+
+## Configuration
+
+There are several configuration settings available to adjust message data behavior.
+
+### Time To Live
+
+By default, there is no default message data time-to-live. To specify a default time-to-live, set the default as shown.
+
+```cs
+MessageDataDefaults.TimeToLive = TimeSpan.FromDays(2);
+```
+
+This settings simply specifies the default value when calling the repository, it is up to the repository to apply any time-to-live values to the actual message data.
+
+If the `SendContext` has specified a time-to-live value, that value is applied to the message data automatically (when using message initializers). To add extra time, perhaps to account for system latency or differences in time, extra time can be added.
+
+```cs
+MessageDataDefaults.ExtraTimeToLive = TimeSpan.FromMinutes(5);
+```
+
+### Inline Threshold
+
+Newly added is the ability to specify a threshold for message data so that smaller values are included in the actual message body. This eliminates the need to read the data from storage, which increases performance. The message data can also be configured to _not_ write that data to the repository if it is under the threshold. By default (for now), data is written to the repository to support services that have not yet upgraded to the latest MassTransit.
+
+> If you know your systems are upgraded, you can change the default so that data sizes under the threshold are not written to the repository.
+
+To configure the threshold, and to optionally turn off storage of data sizes under the threshold:
+
+```cs
+// the default value is 4096
+MessageDataDefaults.Threshold = 8192;
+
+// to disable writing to the repository for sizes under the threshold
+// defaults to false, which may change to true in a future release
+MessageDataDefaults.AlwaysWriteToRepository = false;
+```
 
 ## Repositories
 
