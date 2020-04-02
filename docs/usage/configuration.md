@@ -98,7 +98,7 @@ public class Startup
             x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
                 // configure health checks for this bus instance
-                cfg.UseHealthCheck(serviceProvider);
+                cfg.UseHealthCheck(provider);
 
                 cfg.Host("rabbitmq://localhost");
 
@@ -107,7 +107,7 @@ public class Startup
                     ep.PrefetchCount = 16;
                     ep.UseMessageRetry(r => r.Interval(2, 100));
 
-                    ep.ConfigureConsumer<OrderConsumer>(serviceProvider);
+                    ep.ConfigureConsumer<OrderConsumer>(provider);
                 });
             }));
         });
