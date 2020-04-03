@@ -2,7 +2,7 @@
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Autofac;
     using Autofac.Core;
     using Autofac.Core.Lifetime;
@@ -17,6 +17,7 @@
         readonly ILifetimeScope _parentScope;
         readonly ConcurrentDictionary<TId, RegisteredLifetimeScope> _scopes;
         readonly object _tag;
+        bool _disposed;
 
         public LifetimeScopeRegistry(ILifetimeScope parentScope, object tag)
             : this(parentScope, tag, new DefaultScopeIdProvider())
@@ -33,9 +34,9 @@
             _defaultScope = new Lazy<ILifetimeScope>(() => _parentScope.BeginLifetimeScope());
         }
 
-        public object ResolveComponent(IComponentRegistration registration, IEnumerable<Parameter> parameters)
+        public object ResolveComponent(ResolveRequest request)
         {
-            return GetCurrentScope().ResolveComponent(registration, parameters);
+            return GetCurrentScope().ResolveComponent(request);
         }
 
         public IComponentRegistry ComponentRegistry => GetCurrentScope().ComponentRegistry;
@@ -109,11 +110,25 @@
 
         public void Dispose()
         {
+            if (_disposed)
+                return;
+
             foreach (var scope in _scopes.Values)
                 scope.Dispose();
 
             if (_defaultScope.IsValueCreated)
                 _defaultScope.Value.Dispose();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            foreach (var scope in _scopes.Values)
+                await scope.DisposeAsync().ConfigureAwait(false);
+
+            if (_defaultScope.IsValueCreated)
+                await _defaultScope.Value.DisposeAsync().ConfigureAwait(false);
+
+            _disposed = true;
         }
 
         ILifetimeScope GetOrAddLifetimeScope(TId id)
@@ -127,8 +142,7 @@
         /// <returns></returns>
         ILifetimeScope GetCurrentScope()
         {
-            TId scopeId;
-            if (_currentScopeIdProvider.TryGetScopeId(out scopeId))
+            if (_currentScopeIdProvider.TryGetScopeId(out var scopeId))
                 return GetLifetimeScope(scopeId);
 
             return _defaultScope.Value;
@@ -147,7 +161,7 @@
 
 
         class RegisteredLifetimeScope :
-            IDisposable
+            IAsyncDisposable
         {
             readonly LifetimeScopeConfigurator<TId> _configurator;
             readonly TId _id;
@@ -184,6 +198,12 @@
 
             static void DefaultConfigurator(TId id, ContainerBuilder containerBuilder)
             {
+            }
+
+            public async ValueTask DisposeAsync()
+            {
+                if (_scope.IsValueCreated)
+                    await _scope.Value.DisposeAsync().ConfigureAwait(false);
             }
         }
     }
