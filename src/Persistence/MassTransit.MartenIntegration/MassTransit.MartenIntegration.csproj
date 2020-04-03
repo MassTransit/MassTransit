@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-        <PackageReference Include="Marten" Version="3.10.0" />
+        <PackageReference Include="Marten" Version="3.11.0" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
         <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
