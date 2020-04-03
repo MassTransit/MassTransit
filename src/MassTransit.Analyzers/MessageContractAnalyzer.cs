@@ -43,7 +43,7 @@ namespace MassTransit.Analyzers
             Category, DiagnosticSeverity.Info, true,
             "Anonymous type misses properties that are in the message contract");
 
-        ConcurrentDictionary<SemanticModel, Lazy<TypeConversionHelper>> _typeConverterHelpers =
+        readonly ConcurrentDictionary<SemanticModel, Lazy<TypeConversionHelper>> _typeConverterHelpers =
             new ConcurrentDictionary<SemanticModel, Lazy<TypeConversionHelper>>();
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>

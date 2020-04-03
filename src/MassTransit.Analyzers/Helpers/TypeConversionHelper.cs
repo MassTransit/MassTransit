@@ -149,6 +149,32 @@ namespace MassTransit.Analyzers.Helpers
                     continue;
                 }
 
+                if (IsMessageData(symbol, out var messageDataType))
+                {
+                    if (messageDataType.IsArray(out var arrayType) && arrayType.SpecialType == SpecialType.System_Byte)
+                    {
+                        if (IsMessageData(sourceSymbol, out var sourceMessageDataType))
+                        {
+                            if (sourceMessageDataType.IsArray(out var sourceDataArrayType) && sourceDataArrayType.SpecialType == SpecialType.System_Byte)
+                                return true;
+
+                            if (sourceMessageDataType.SpecialType == SpecialType.System_String)
+                                return true;
+                        }
+
+                        if (sourceSymbol.IsArray(out var sourceArrayType) && sourceArrayType.SpecialType == SpecialType.System_Byte)
+                            return true;
+
+                        if (sourceSymbol.SpecialType == SpecialType.System_String)
+                            return true;
+                    }
+
+                    if (messageDataType.SpecialType == SpecialType.System_String && sourceSymbol.SpecialType == SpecialType.System_String)
+                        return true;
+
+                    return false;
+                }
+
                 if (sourceSymbol.InheritsFromType(symbol))
                     return true;
 
@@ -168,6 +194,23 @@ namespace MassTransit.Analyzers.Helpers
                 && taskTypeSymbol.TypeArguments.Length == 1)
             {
                 result = taskTypeSymbol.TypeArguments[0];
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        static bool IsMessageData(ITypeSymbol symbol, out ITypeSymbol result)
+        {
+            if (symbol.TypeKind == TypeKind.Interface
+                && symbol.Name == "MessageData"
+                && symbol.ContainingNamespace.Name == "MassTransit"
+                && symbol is INamedTypeSymbol messageDataTypeSymbol
+                && messageDataTypeSymbol.IsGenericType
+                && messageDataTypeSymbol.TypeArguments.Length == 1)
+            {
+                result = messageDataTypeSymbol.TypeArguments[0];
                 return true;
             }
 

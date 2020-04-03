@@ -23,7 +23,7 @@ namespace MassTransit.Analyzers
                 {"MassTransit.ConsumeContextExtensions.Forward", 0},
                 {"MassTransit.ConsumeContextSelfSchedulerExtensions.ScheduleSend", 0},
                 {"MassTransit.EndpointConventionExtensions.Send", 0},
-                {"MassTransit.IRequestClient.Create", 0},
+                {"MassTransit.IRequestClient.Create", -1},
                 {"MassTransit.IRequestClient.Request", 0},
                 {"MassTransit.IRequestClient.GetResponse", -1},
                 {"MassTransit.MessageInitializerExtensions.Init", 0},
