@@ -75,6 +75,12 @@
             configure(specification);
         }
 
+        public T Options<T>(Action<T> configure = null)
+            where T : IOptions, new()
+        {
+            return _specification.Options(configure);
+        }
+
         public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TInstance>> specification)
         {
             _specification.AddPipeSpecification(specification);

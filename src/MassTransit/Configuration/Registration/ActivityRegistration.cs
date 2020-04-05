@@ -2,8 +2,10 @@ namespace MassTransit.Registration
 {
     using System;
     using System.Collections.Generic;
+    using Context;
     using Courier;
     using Definition;
+    using Metadata;
     using PipeConfigurators;
     using Scoping;
 
@@ -80,6 +82,9 @@ namespace MassTransit.Registration
 
             var specification = new CompensateActivityHostSpecification<TActivity, TLog>(activityFactory, configurator);
 
+            LogContext.Debug?.Log("Configuring {Endpoint}, Compensate Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
+                TypeMetadataCache<TActivity>.ShortName);
+
             GetActivityDefinition(configurationServiceProvider)
                 .Configure(configurator, specification);
 
@@ -96,6 +101,9 @@ namespace MassTransit.Registration
             var activityFactory = new ScopeExecuteActivityFactory<TActivity, TArguments>(activityScopeProvider);
 
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(activityFactory, compensateAddress, configurator);
+
+            LogContext.Debug?.Log("Configuring {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
+                TypeMetadataCache<TActivity>.ShortName);
 
             GetActivityDefinition(configurationServiceProvider)
                 .Configure(configurator, specification);

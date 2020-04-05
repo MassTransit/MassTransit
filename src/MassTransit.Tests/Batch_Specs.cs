@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests
+﻿namespace MassTransit.Tests
 {
     using System;
     using System.Linq;
@@ -117,6 +105,94 @@ namespace MassTransit.Tests
             });
         }
     }
+
+
+    [TestFixture]
+    public class Receiving_a_single_message_in_a_batch_by_convention :
+        InMemoryTestFixture
+    {
+        TestBatchConsumer _consumer;
+
+        [Test]
+        public async Task Should_receive_the_message_batch()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            Batch<PingMessage> batch = await _consumer.Completed;
+
+            Assert.That(batch.Length, Is.EqualTo(1));
+        }
+
+        [Test, Explicit]
+        public async Task Should_show_me_the_pipe()
+        {
+            Console.WriteLine(Bus.GetProbeResult().ToJsonString());
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new TestBatchConsumer(GetTask<Batch<PingMessage>>());
+
+            configurator.UseMessageRetry(r => r.Immediate(2));
+
+            configurator.Consumer(() => _consumer, cc => cc.Options<BatchOptions>(x => x.SetTimeLimit(500).SetMessageLimit(2)));
+        }
+    }
+
+
+    [TestFixture]
+    public class Receiving_a_bunch_of_messages_in_a_batch_by_convention :
+        InMemoryTestFixture
+    {
+        TestBatchConsumer _consumer;
+
+        [Test]
+        public async Task Should_receive_the_message_batch()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            Batch<PingMessage> batch = await _consumer.Completed;
+
+            Assert.That(batch.Length, Is.EqualTo(4));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new TestBatchConsumer(GetTask<Batch<PingMessage>>());
+
+            configurator.Consumer(() => _consumer);
+        }
+    }
+
+
+    [TestFixture]
+    public class Receiving_a_bunch_of_messages_in_a_batch_by_convention_using_mediator :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_receive_the_message_batch()
+        {
+            var consumer = new TestBatchConsumer(GetTask<Batch<PingMessage>>());
+
+            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+            {
+                cfg.Consumer(() => consumer);
+            });
+
+            await Task.WhenAll(mediator.Send(new PingMessage()),
+                mediator.Send(new PingMessage()),
+                mediator.Send(new PingMessage()),
+                mediator.Send(new PingMessage()));
+
+            Batch<PingMessage> batch = await consumer.Completed;
+
+            Assert.That(batch.Length, Is.EqualTo(4));
+        }
+    }
+
 
     [TestFixture, Explicit]
     public class Using_a_batch_consumer :

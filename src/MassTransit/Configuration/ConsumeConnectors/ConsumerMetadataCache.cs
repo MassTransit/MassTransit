@@ -3,7 +3,6 @@ namespace MassTransit.ConsumeConnectors
     using System;
     using System.Linq;
     using System.Threading;
-    using Util;
 
 
     public class ConsumerMetadataCache<T> :
@@ -16,7 +15,8 @@ namespace MassTransit.ConsumeConnectors
         {
             _consumerTypes = ConsumerConventionCache.GetConventions<T>()
                 .SelectMany(x => x.GetMessageTypes())
-                .Distinct((x, y) => x.MessageType == y.MessageType)
+                .GroupBy(x => x.MessageType)
+                .Select(x => x.Last())
                 .ToArray();
         }
 

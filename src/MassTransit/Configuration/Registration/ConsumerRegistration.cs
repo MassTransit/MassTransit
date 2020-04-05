@@ -3,7 +3,9 @@ namespace MassTransit.Registration
     using System;
     using System.Collections.Generic;
     using ConsumeConfigurators;
+    using Context;
     using Definition;
+    using Metadata;
     using Scoping;
 
 
@@ -36,6 +38,8 @@ namespace MassTransit.Registration
             var scopeProvider = configurationServiceProvider.GetRequiredService<IConsumerScopeProvider>();
             var consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, configurator);
+
+            LogContext.Debug?.Log("Configuring {Endpoint}, Saga: {SagaType}", configurator.InputAddress.GetLastPart(), TypeMetadataCache<TConsumer>.ShortName);
 
             GetConsumerDefinition(configurationServiceProvider)
                 .Configure(configurator, consumerConfigurator);

@@ -2,7 +2,9 @@ namespace MassTransit.Registration
 {
     using System;
     using System.Collections.Generic;
+    using Context;
     using Definition;
+    using Metadata;
     using Saga;
     using SagaConfigurators;
 
@@ -35,6 +37,8 @@ namespace MassTransit.Registration
             var repositoryFactory = configurationServiceProvider.GetRequiredService<ISagaRepositoryFactory>();
             ISagaRepository<TSaga> sagaRepository = repositoryFactory.CreateSagaRepository<TSaga>();
             var sagaConfigurator = new SagaConfigurator<TSaga>(sagaRepository, configurator);
+
+            LogContext.Debug?.Log("Configuring {Endpoint}, Saga: {SagaType}", configurator.InputAddress.GetLastPart(), TypeMetadataCache<TSaga>.ShortName);
 
             GetSagaDefinition(configurationServiceProvider)
                 .Configure(configurator, sagaConfigurator);

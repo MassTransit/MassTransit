@@ -1,19 +1,6 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.ConsumeConfigurators
+﻿namespace MassTransit.ConsumeConfigurators
 {
     using System;
-    using ConsumeConnectors;
 
 
     public class BatchConfigurator<TMessage> :
@@ -36,16 +23,14 @@ namespace MassTransit.ConsumeConfigurators
         void IBatchConfigurator<TMessage>.Consumer<TConsumer>(IConsumerFactory<TConsumer> consumerFactory,
             Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure)
         {
-            var specification = ConsumerConnectorCache<TConsumer>.Connector.CreateConsumerSpecification<TConsumer>();
-            specification.ConnectConsumerConfigurationObserver(_configurator);
+            var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, _configurator);
+            consumerConfigurator.ConnectConsumerConfigurationObserver(_configurator);
 
-            var messageSpecification = specification.GetMessageSpecification<Batch<TMessage>>();
+            consumerConfigurator.Options<BatchOptions>(options => options.SetMessageLimit(MessageLimit).SetTimeLimit(TimeLimit));
 
-            configure?.Invoke(messageSpecification);
+            consumerConfigurator.ConsumerMessage(configure);
 
-            var batchSpecification = new BatchConsumerSpecification<TConsumer, TMessage>(messageSpecification, consumerFactory, MessageLimit, TimeLimit);
-
-            _configurator.AddEndpointSpecification(batchSpecification);
+            _configurator.AddEndpointSpecification(consumerConfigurator);
         }
     }
 }
