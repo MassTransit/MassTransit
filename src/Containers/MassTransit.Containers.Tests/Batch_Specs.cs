@@ -2,10 +2,11 @@ namespace MassTransit.Containers.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using ConsumeConfigurators;
+    using Definition;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework;
-    using TestFramework.Messages;
     using Util;
 
 
@@ -30,32 +31,138 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_receive_the_message_batch()
         {
-            var finished = ConnectPublishHandler<PongMessage>();
+            var finished = ConnectPublishHandler<BatchResult>();
 
-            await InputQueueSendEndpoint.Send(new PingMessage());
-            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
 
-            await finished;
+            var finishedContext = await finished;
+
+            Assert.That(finishedContext.Message.Count, Is.EqualTo(2));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.Batch<PingMessage>(x =>
-            {
-                x.MessageLimit = 2;
+            configurator.ConfigureConsumers(_provider);
+        }
+    }
 
-                x.Consumer<TestBatchConsumer, PingMessage>(_provider);
+
+    [TestFixture]
+    public class When_a_batch_limit_is_configured :
+        InMemoryTestFixture
+    {
+        readonly IServiceProvider _provider;
+
+        public When_a_batch_limit_is_configured()
+        {
+            var collection = new ServiceCollection();
+            collection.AddMassTransit(x =>
+            {
+                x.AddConsumer<TestBatchConsumer>(c =>
+                    c.Options<BatchOptions>(o => o.SetMessageLimit(5).SetTimeLimit(2000)));
+
+                x.AddBus(provider => BusControl);
             });
+
+            _provider = collection.BuildServiceProvider(true);
+        }
+
+        [Test]
+        public async Task Should_receive_the_message_batch()
+        {
+            var finished = ConnectPublishHandler<BatchResult>();
+
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+
+            var finishedContext = await finished;
+
+            Assert.That(finishedContext.Message.Count, Is.EqualTo(5));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.ConfigureConsumers(_provider);
+        }
+    }
+
+
+    [TestFixture]
+    public class When_a_batch_limit_is_configured_using_a_definition :
+        InMemoryTestFixture
+    {
+        readonly IServiceProvider _provider;
+
+        public When_a_batch_limit_is_configured_using_a_definition()
+        {
+            var collection = new ServiceCollection();
+            collection.AddMassTransit(x =>
+            {
+                x.AddConsumer<TestBatchConsumer>(typeof(TestBatchConsumerDefinition));
+
+                x.AddBus(provider => BusControl);
+            });
+
+            _provider = collection.BuildServiceProvider(true);
+        }
+
+        [Test]
+        public async Task Should_receive_the_message_batch()
+        {
+            var finished = ConnectPublishHandler<BatchResult>();
+
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+
+            var finishedContext = await finished;
+
+            Assert.That(finishedContext.Message.Count, Is.EqualTo(5));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.ConfigureConsumers(_provider);
+        }
+    }
+
+
+    class BatchItem
+    {
+    }
+
+
+    class BatchResult
+    {
+        public int Count { get; set; }
+    }
+
+
+    class TestBatchConsumerDefinition :
+        ConsumerDefinition<TestBatchConsumer>
+    {
+        protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
+            IConsumerConfigurator<TestBatchConsumer> consumerConfigurator)
+        {
+            consumerConfigurator.Options<BatchOptions>(o => o.SetMessageLimit(5).SetTimeLimit(2000));
         }
     }
 
 
     class TestBatchConsumer :
-        IConsumer<Batch<PingMessage>>
+        IConsumer<Batch<BatchItem>>
     {
-        public Task Consume(ConsumeContext<Batch<PingMessage>> context)
+        public Task Consume(ConsumeContext<Batch<BatchItem>> context)
         {
-            context.Respond(new PongMessage());
+            context.Respond(new BatchResult {Count = context.Message.Length});
 
             return TaskUtil.Completed;
         }

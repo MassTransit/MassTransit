@@ -1,19 +1,8 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.ConsumeConnectors
 {
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
+
 
     public static class ConsumerConventionCache
     {
@@ -21,37 +10,45 @@ namespace MassTransit.ConsumeConnectors
         {
             ConsumerConvention.Register<AsyncConsumerConvention>();
             ConsumerConvention.Register<LegacyConsumerConvention>();
+            ConsumerConvention.Register<BatchConsumerConvention>();
         }
 
-        public static void Add(string conventionName, IConsumerConvention convention)
+        public static void Add<T>(T convention)
+            where T : IConsumerConvention
         {
-            Cached.Instance.AddOrUpdate(conventionName, add => convention, (_, update) => convention);
+            Cached.Registered.Add(convention);
         }
 
-        public static void Remove(string conventionName)
+        public static bool Remove<T>()
+            where T : IConsumerConvention
         {
-            IConsumerConvention _;
-            Cached.Instance.TryRemove(conventionName, out _);
+            for (int i = 0; i < Cached.Registered.Count; i++)
+            {
+                if (Cached.Registered[i] is T)
+                {
+                    Cached.Registered.RemoveAt(i);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
         /// Returns the conventions registered for identifying message consumer types
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The consumer type</typeparam>
         /// <returns></returns>
         public static IEnumerable<IConsumerMessageConvention> GetConventions<T>()
             where T : class
         {
-            foreach (var convention in Cached.Instance.Values)
-            {
-                yield return convention.GetConsumerMessageConvention<T>();
-            }
+            return Cached.Registered.Select(convention => convention.GetConsumerMessageConvention<T>());
         }
 
 
         static class Cached
         {
-            internal static readonly ConcurrentDictionary<string, IConsumerConvention> Instance = new ConcurrentDictionary<string, IConsumerConvention>();
+            internal static readonly IList<IConsumerConvention> Registered = new List<IConsumerConvention>();
         }
     }
 }

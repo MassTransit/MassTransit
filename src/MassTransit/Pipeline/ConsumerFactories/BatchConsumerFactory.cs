@@ -65,6 +65,9 @@
         {
             var scope = context.CreateConsumerFactoryScope<IConsumer<TMessage>>("batch");
 
+            scope.Add("timeLimit", _timeLimit);
+            scope.Add("messageLimit", _messageLimit);
+
             _consumerFactory.Probe(scope);
             _consumerPipe.Probe(scope);
         }

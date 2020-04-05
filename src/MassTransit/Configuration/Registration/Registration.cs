@@ -4,7 +4,6 @@ namespace MassTransit.Registration
     using System.Collections.Generic;
     using System.Linq;
     using ConsumeConfigurators;
-    using Context;
     using Definition;
     using Metadata;
 
@@ -177,17 +176,12 @@ namespace MassTransit.Registration
                     if (endpoint.Consumers != null)
                         foreach (var consumer in endpoint.Consumers)
                         {
-                            LogContext.Debug?.Log("Configuring consumer {ConsumerType} on {Endpoint}", TypeMetadataCache.GetShortName(consumer.ConsumerType),
-                                endpoint.Name);
-
                             ConfigureConsumer(consumer.ConsumerType, cfg);
                         }
 
                     if (endpoint.Sagas != null)
                         foreach (var saga in endpoint.Sagas)
                         {
-                            LogContext.Debug?.Log("Configuring saga {SagaType} on {Endpoint}", TypeMetadataCache.GetShortName(saga.SagaType), endpoint.Name);
-
                             ConfigureSaga(saga.SagaType, cfg);
                         }
 
@@ -201,12 +195,6 @@ namespace MassTransit.Registration
                             {
                                 configurator.ReceiveEndpoint(compensateDefinition, endpointNameFormatter, compensateEndpointConfigurator =>
                                 {
-                                    LogContext.Debug?.Log("Configuring receive endpoint {Endpoint}", ToEndpointString(compensateEndpointName,
-                                        compensateDefinition));
-
-                                    LogContext.Debug?.Log("Configuring activity {ActivityType} on {ExecuteEndpoint} / {CompensateEndpoint}",
-                                        TypeMetadataCache.GetShortName(activity.ActivityType), endpoint.Name, compensateEndpointName);
-
                                     ConfigureActivity(activity.ActivityType, cfg, compensateEndpointConfigurator);
                                 });
                             }
@@ -214,9 +202,6 @@ namespace MassTransit.Registration
                             {
                                 configurator.ReceiveEndpoint(compensateEndpointName, compensateEndpointConfigurator =>
                                 {
-                                    LogContext.Debug?.Log("Configuring activity {ActivityType} on {ExecuteEndpoint} / {CompensateEndpoint}",
-                                        TypeMetadataCache.GetShortName(activity.ActivityType), endpoint.Name, compensateEndpointName);
-
                                     ConfigureActivity(activity.ActivityType, cfg, compensateEndpointConfigurator);
                                 });
                             }
@@ -225,28 +210,10 @@ namespace MassTransit.Registration
                     if (endpoint.ExecuteActivities != null)
                         foreach (var activity in endpoint.ExecuteActivities)
                         {
-                            LogContext.Debug?.Log("Configuring activity {ActivityType} on {ExecuteEndpoint}",
-                                TypeMetadataCache.GetShortName(activity.ActivityType), endpoint.Name);
-
                             ConfigureExecuteActivity(activity.ActivityType, cfg);
                         }
                 });
             }
-        }
-
-        string ToEndpointString(string name, IEndpointDefinition definition)
-        {
-            return string.Join(", ", new[]
-            {
-                $"name: {name}",
-                definition.IsTemporary ? "temporary" : "",
-                definition.ConcurrentMessageLimit.HasValue
-                    ? $"concurrent-message-limit: {definition.ConcurrentMessageLimit}"
-                    : "",
-                definition.PrefetchCount.HasValue
-                    ? $"prefect-count: {definition.PrefetchCount}"
-                    : "",
-            }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
     }
 }

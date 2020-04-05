@@ -25,11 +25,6 @@
             _handles = _messageTypes.Values.Select(x => x.ConnectSagaConfigurationObserver(Observers)).ToArray();
         }
 
-        void ISagaConfigurator<TSaga>.ConfigureMessage<T>(Action<ISagaMessageConfigurator<T>> configure)
-        {
-            Message(configure);
-        }
-
         public void Message<T>(Action<ISagaMessageConfigurator<T>> configure)
             where T : class
         {
@@ -52,7 +47,8 @@
             configure(specification);
         }
 
-        public ISagaMessageSpecification<TSaga, T> GetMessageSpecification<T>() where T : class
+        public ISagaMessageSpecification<TSaga, T> GetMessageSpecification<T>()
+            where T : class
         {
             if (!_messageTypes.TryGetValue(typeof(T), out ISagaMessageSpecification<TSaga> specification))
             {
