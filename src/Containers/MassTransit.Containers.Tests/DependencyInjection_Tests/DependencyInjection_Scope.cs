@@ -25,12 +25,12 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
         protected override ISendEndpointProvider GetSendEndpointProvider()
         {
-            return _provider.GetRequiredService<ISendEndpointProvider>();
+            return _provider.GetRequiredService<IBus>();
         }
 
         protected override IPublishEndpoint GetPublishEndpoint()
         {
-            return _provider.GetRequiredService<IPublishEndpoint>();
+            return _provider.GetRequiredService<IBus>();
         }
     }
 }

@@ -27,7 +27,7 @@ namespace MassTransit.Registration
         readonly ConcurrentDictionary<Type, ISagaRegistration> _sagaRegistrations;
         readonly ConcurrentDictionary<Type, IEndpointRegistration> _endpointRegistrations;
 
-        protected Func<IConfigurationServiceProvider, IClientFactory> ClientFactoryProvider { get; set; } = BusClientFactoryProvider;
+        protected Func<IConfigurationServiceProvider, IClientFactory> ClientFactoryProvider { get; private set; } = BusClientFactoryProvider;
 
         public RegistrationConfigurator(IContainerRegistrar containerRegistrar = null)
         {
