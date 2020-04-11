@@ -16,6 +16,7 @@ namespace MassTransit.PrometheusIntegration
         static bool _isConfigured;
         static string _serviceLabel;
         static Gauge _busInstances;
+        static Gauge _endpointInstances;
         static Counter _receiveTotal;
         static Counter _receiveFaultTotal;
         static Gauge _receiveInProgress;
@@ -43,9 +44,23 @@ namespace MassTransit.PrometheusIntegration
             _busInstances.WithLabels(_serviceLabel).Dec();
         }
 
+        public static void EndpointReady(ReceiveEndpointReady ready)
+        {
+            var endpointLabel = GetEndpointLabel(ready.InputAddress);
+
+            _endpointInstances.WithLabels(_serviceLabel, endpointLabel).Inc();
+        }
+
+        public static void EndpointCompleted(ReceiveEndpointCompleted completed)
+        {
+            var endpointLabel = GetEndpointLabel(completed.InputAddress);
+
+            _endpointInstances.WithLabels(_serviceLabel, endpointLabel).Dec();
+        }
+
         public static void MeasureReceived(ReceiveContext context, Exception exception = default)
         {
-            var endpointLabel = GetEndpointLabel(context);
+            var endpointLabel = GetEndpointLabel(context.InputAddress);
 
             _receiveTotal.Labels(_serviceLabel, endpointLabel).Inc();
             _receiveDuration.Labels(_serviceLabel, endpointLabel).Observe(context.ElapsedTime.TotalSeconds);
@@ -112,7 +127,7 @@ namespace MassTransit.PrometheusIntegration
 
         public static IDisposable TrackReceiveInProgress(ReceiveContext context)
         {
-            var endpointLabel = GetEndpointLabel(context);
+            var endpointLabel = GetEndpointLabel(context.InputAddress);
 
             return _receiveInProgress.Labels(_serviceLabel, endpointLabel).TrackInProgress();
         }
@@ -177,9 +192,9 @@ namespace MassTransit.PrometheusIntegration
             return _consumerTypeCache.GetOrAdd(consumerType, type => type.Split('.', '+').Last().Replace("<", "_").Replace(">", "_"));
         }
 
-        static string GetEndpointLabel(ReceiveContext context)
+        static string GetEndpointLabel(Uri inputAddress)
         {
-            return context.InputAddress?.AbsolutePath.Split('/').LastOrDefault();
+            return inputAddress?.AbsolutePath.Split('/').LastOrDefault()?.Replace(".", "_").Replace("/", "_");
         }
 
         public static void TryConfigure(string serviceName, PrometheusMetricsOptions options)
@@ -191,8 +206,8 @@ namespace MassTransit.PrometheusIntegration
 
             string[] serviceLabels = {options.ServiceNameLabel};
 
-            string[] receiveLabels = {options.ServiceNameLabel, options.EndpointLabel};
-            string[] receiveFaultLabels = {options.ServiceNameLabel, options.EndpointLabel, options.ExceptionTypeLabel};
+            string[] endpointLabels = {options.ServiceNameLabel, options.EndpointLabel};
+            string[] endpointFaultLabels = {options.ServiceNameLabel, options.EndpointLabel, options.ExceptionTypeLabel};
 
             string[] messageLabels = {options.ServiceNameLabel, options.MessageTypeLabel,};
             string[] messageFaultLabels = {options.ServiceNameLabel, options.MessageTypeLabel, options.ExceptionTypeLabel};
@@ -205,12 +220,12 @@ namespace MassTransit.PrometheusIntegration
             _receiveTotal = Metrics.CreateCounter(
                 options.ReceiveTotal,
                 "Total number of messages received",
-                new CounterConfiguration {LabelNames = receiveLabels});
+                new CounterConfiguration {LabelNames = endpointLabels});
 
             _receiveFaultTotal = Metrics.CreateCounter(
                 options.ReceiveFaultTotal,
                 "Total number of messages receive faults",
-                new CounterConfiguration {LabelNames = receiveFaultLabels});
+                new CounterConfiguration {LabelNames = endpointFaultLabels});
 
             _messageConsumeTotal = Metrics.CreateCounter(
                 options.MessageConsumeTotal,
@@ -239,7 +254,7 @@ namespace MassTransit.PrometheusIntegration
 
             _messageSendFaultTotal = Metrics.CreateCounter(
                 options.MessageSendFaultTotal,
-                "Total number of message send fault",
+                "Total number of message send faults",
                 new CounterConfiguration {LabelNames = messageFaultLabels});
 
             // Gauges
@@ -249,10 +264,15 @@ namespace MassTransit.PrometheusIntegration
                 "Number of bus instances",
                 new GaugeConfiguration {LabelNames = serviceLabels});
 
+            _endpointInstances = Metrics.CreateGauge(
+                options.EndpointInstances,
+                "Number of receive endpoint instances",
+                new GaugeConfiguration {LabelNames = endpointLabels});
+
             _receiveInProgress = Metrics.CreateGauge(
                 options.ReceiveInProgress,
                 "Number of messages being received",
-                new GaugeConfiguration {LabelNames = receiveLabels});
+                new GaugeConfiguration {LabelNames = endpointLabels});
 
             _handlerInProgress = Metrics.CreateGauge(
                 options.HandlerInProgress,
@@ -278,10 +298,10 @@ namespace MassTransit.PrometheusIntegration
 
             _receiveDuration = Metrics.CreateHistogram(
                 options.ReceiveDuration,
-                "Elapsed time spent receiving messages, in seconds",
+                "Elapsed time spent receiving a message, in seconds",
                 new HistogramConfiguration
                 {
-                    LabelNames = receiveLabels,
+                    LabelNames = endpointLabels,
                     Buckets = options.HistogramBuckets
                 });
 

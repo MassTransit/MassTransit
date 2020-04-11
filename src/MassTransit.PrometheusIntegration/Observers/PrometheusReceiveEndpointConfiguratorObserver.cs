@@ -13,6 +13,8 @@ namespace MassTransit.PrometheusIntegration.Observers
             var specification = new PrometheusReceiveSpecification();
 
             configurator.ConfigureReceive(r => r.AddPipeSpecification(specification));
+
+            configurator.ConnectReceiveEndpointObserver(new PrometheusReceiveEndpointObserver());
         }
     }
 }

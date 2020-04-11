@@ -23,6 +23,7 @@ namespace MassTransit.PrometheusIntegration
         public string MessageSendFaultTotal { get; set; }
 
         public string BusInstances { get; set; }
+        public string EndpointInstances { get; set; }
         public string ConsumerInProgress { get; set; }
         public string HandlerInProgress { get; set; }
         public string SagaInProgress { get; set; }
@@ -34,7 +35,7 @@ namespace MassTransit.PrometheusIntegration
         public static PrometheusMetricsOptions CreateDefault() =>
             new PrometheusMetricsOptions
             {
-                EndpointLabel = "endpoint",
+                EndpointLabel = "endpoint_address",
                 ConsumerTypeLabel = "consumer_type",
                 ExceptionTypeLabel = "exception_type",
                 MessageTypeLabel = "message_type",
@@ -44,19 +45,20 @@ namespace MassTransit.PrometheusIntegration
                 ReceiveFaultTotal = "mt_receive_fault_total",
                 ReceiveDuration = "mt_receive_duration_seconds",
                 ReceiveInProgress = "mt_receive_in_progress",
-                MessageConsumeTotal = "mt_message_consume_total",
-                MessageConsumeFaultTotal = "mt_message_consume_fault_total",
-                MessagePublishTotal = "mt_message_publish_total",
-                MessagePublishFaultTotal = "mt_message_publish_fault_total",
-                MessageSendTotal = "mt_message_send_total",
-                MessageSendFaultTotal = "mt_message_send_fault_total",
+                MessageConsumeTotal = "mt_consume_total",
+                MessageConsumeFaultTotal = "mt_consume_fault_total",
+                MessageConsumeDuration = "mt_consume_duration_seconds",
+                MessageDeliveryDuration = "mt_delivery_duration_seconds",
+                MessagePublishTotal = "mt_publish_total",
+                MessagePublishFaultTotal = "mt_publish_fault_total",
+                MessageSendTotal = "mt_send_total",
+                MessageSendFaultTotal = "mt_send_fault_total",
                 BusInstances = "mt_bus",
+                EndpointInstances = "mt_endpoint",
                 ConsumerInProgress = "mt_consumer_in_progress",
                 HandlerInProgress = "mt_handler_in_progress",
                 SagaInProgress = "mt_saga_in_progress",
                 ActivityInProgress = "mt_activity_in_progress",
-                MessageConsumeDuration = "mt_message_consume_duration_seconds",
-                MessageDeliveryDuration = "mt_message_delivery_duration_seconds",
             };
     }
 }

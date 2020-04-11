@@ -165,6 +165,7 @@ module.exports = {
                 collapsable: true,
                 children: [
                   '/advanced/monitoring/diagnostic-source',
+                  '/advanced/monitoring/prometheus',
                   '/advanced/monitoring/applications-insights',
                   '/advanced/monitoring/perfcounters',
                 ]
