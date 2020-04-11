@@ -1,0 +1,25 @@
+namespace MassTransit.PrometheusIntegration.Pipeline
+{
+    using System.Threading.Tasks;
+    using Courier;
+    using GreenPipes;
+
+
+    public class PrometheusExecuteActivityFilter<TActivity, TArguments> :
+        IFilter<ExecuteActivityContext<TActivity, TArguments>>
+        where TActivity : class, IExecuteActivity<TArguments>
+        where TArguments : class
+    {
+        public async Task Send(ExecuteActivityContext<TActivity, TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
+        {
+            using var inProgress = PrometheusMetrics.TrackExecuteActivityInProgress<TActivity, TArguments>();
+
+            await next.Send(context).ConfigureAwait(false);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            context.CreateFilterScope("prometheus");
+        }
+    }
+}
