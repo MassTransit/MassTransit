@@ -133,6 +133,11 @@ namespace MassTransit.Registration
                 {
                     Definition = x,
                     Name = x.GetEndpointName(endpointNameFormatter)
+                })
+                .GroupBy(x => x.Name, (name,values) => new
+                {
+                    Name = name,
+                    Definition = values.Select(x => x.Definition).Combine()
                 });
 
             var endpointNames = consumersByEndpoint.Select(x => x.Key)
@@ -154,10 +159,10 @@ namespace MassTransit.Registration
                 from ea in eas.DefaultIfEmpty()
                 join ep in endpointsWithName on e equals ep.Name into eps
                 from ep in eps.Select(x => x.Definition)
-                    .DefaultIfEmpty(c?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).SingleOrDefault()
-                        ?? s?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).SingleOrDefault()
-                        ?? a?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).SingleOrDefault()
-                        ?? ea?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).SingleOrDefault()
+                    .DefaultIfEmpty(c?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).Combine()
+                        ?? s?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).Combine()
+                        ?? a?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).Combine()
+                        ?? ea?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).Combine()
                         ?? new NamedEndpointDefinition(e))
                 select new
                 {

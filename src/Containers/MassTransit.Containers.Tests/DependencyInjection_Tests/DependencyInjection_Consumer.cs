@@ -75,4 +75,24 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             configurator.ConfigureEndpoints(_provider);
         }
     }
+
+
+    [TestFixture]
+    public class DependencyInjection_Consumers_Endpoint :
+        Common_Consumers_Endpoint
+    {
+        readonly IServiceProvider _provider;
+
+        public DependencyInjection_Consumers_Endpoint()
+        {
+            _provider = new ServiceCollection()
+                .AddMassTransit(ConfigureRegistration)
+                .BuildServiceProvider();
+        }
+
+        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigureEndpoints(_provider);
+        }
+    }
 }

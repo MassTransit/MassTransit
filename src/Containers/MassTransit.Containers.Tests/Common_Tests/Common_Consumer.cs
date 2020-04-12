@@ -14,12 +14,14 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Definition;
     using GreenPipes.Internals.Extensions;
     using NUnit.Framework;
     using Scenarios;
     using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
+    using Util;
 
 
     public abstract class Common_Consumer :
@@ -83,6 +85,66 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
+    public abstract class Common_Consumers_Endpoint :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_receive_on_the_custom_endpoint()
+        {
+        }
+
+        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+        {
+            configurator.AddConsumer<ConsumerA>(typeof(ConsumerADefinition))
+                .Endpoint(x => x.Name = "shared");
+
+            configurator.AddConsumer<ConsumerB>(typeof(ConsumerBDefinition))
+                .Endpoint(x => x.Name = "shared");
+
+            configurator.AddBus(provider => BusControl);
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            ConfigureEndpoints(configurator);
+        }
+
+        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
+
+
+        class ConsumerA :
+            IConsumer<PingMessage>
+        {
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                return TaskUtil.Completed;
+            }
+        }
+
+
+        class ConsumerADefinition :
+            ConsumerDefinition<ConsumerA>
+        {
+        }
+
+
+        class ConsumerB :
+            IConsumer<PongMessage>
+        {
+            public Task Consume(ConsumeContext<PongMessage> context)
+            {
+                return TaskUtil.Completed;
+            }
+        }
+
+
+        class ConsumerBDefinition :
+            ConsumerDefinition<ConsumerB>
+        {
+        }
+    }
+
+
     public abstract class Common_Consumer_ServiceEndpoint :
         InMemoryTestFixture
     {
@@ -103,7 +165,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public void Should_just_startup()
         {
-
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

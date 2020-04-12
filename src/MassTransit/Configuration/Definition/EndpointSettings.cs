@@ -4,6 +4,11 @@ namespace MassTransit.Definition
         IEndpointSettings<T>
         where T : class
     {
+        public EndpointSettings()
+        {
+            ConfigureConsumeTopology = true;
+        }
+
         public string Name { get; set; }
 
         public bool IsTemporary { get; set; }
