@@ -25,7 +25,7 @@ namespace MassTransit.Azure.Storage.MessageData
             _credentials = credentials;
             _nameGenerator = nameGenerator;
 
-            _containerUri = new Uri(storageEndpoint, containerName);
+            _containerUri = new Uri($"{storageEndpoint}/{containerName}");
         }
 
         public async Task<Stream> Get(Uri address, CancellationToken cancellationToken = default)
