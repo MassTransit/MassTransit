@@ -12,7 +12,7 @@ namespace MassTransit.PrometheusIntegration.Pipeline
     {
         public async Task Send(CompensateActivityContext<TActivity, TLog> context, IPipe<CompensateActivityContext<TActivity, TLog>> next)
         {
-            using var inProgress = PrometheusMetrics.TrackCompensateActivityInProgress<TActivity, TLog>();
+            using var inProgress = PrometheusMetrics.TrackCompensateActivityInProgress(context);
 
             await next.Send(context).ConfigureAwait(false);
         }

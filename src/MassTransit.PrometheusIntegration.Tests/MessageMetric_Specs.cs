@@ -40,10 +40,10 @@ namespace MassTransit.PrometheusIntegration.Tests
 
             Console.WriteLine(text);
 
-            Assert.That(text.Contains("mt_publish_total{service_name=\"unit_test\",message_type=\"PingMessage\"} 3"));
-            Assert.That(text.Contains("mt_send_total{service_name=\"unit_test\",message_type=\"PingMessage\"} 5"));
-            Assert.That(text.Contains("mt_receive_total{service_name=\"unit_test\",endpoint=\"input_queue\"} 8"));
-            Assert.That(text.Contains("mt_consume_total{service_name=\"unit_test\",message_type=\"PingMessage\",consumer_type=\"TestConsumer\"} 8"));
+            Assert.That(text.Contains("mt_publish_total{service_name=\"unit_test\",message_type=\"PingMessage\"} 3"), "publish");
+            Assert.That(text.Contains("mt_send_total{service_name=\"unit_test\",message_type=\"PingMessage\"} 5"), "send");
+            Assert.That(text.Contains("mt_receive_total{service_name=\"unit_test\",endpoint_address=\"input_queue\"} 8"), "receive");
+            Assert.That(text.Contains("mt_consume_total{service_name=\"unit_test\",message_type=\"PingMessage\",consumer_type=\"TestConsumer\"} 8"), "consume");
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

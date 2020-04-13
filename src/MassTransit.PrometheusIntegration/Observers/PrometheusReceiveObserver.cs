@@ -22,7 +22,7 @@ namespace MassTransit.PrometheusIntegration.Observers
         public Task PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class
         {
-            PrometheusMetrics.MeasureConsumed(context, duration, consumerType);
+            PrometheusMetrics.MeasureConsume(context, duration, consumerType);
 
             return Task.CompletedTask;
         }
@@ -30,7 +30,7 @@ namespace MassTransit.PrometheusIntegration.Observers
         public Task ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            PrometheusMetrics.MeasureConsumed(context, duration, consumerType, exception);
+            PrometheusMetrics.MeasureConsume(context, duration, consumerType, exception);
 
             return Task.CompletedTask;
         }

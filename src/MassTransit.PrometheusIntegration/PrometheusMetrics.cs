@@ -11,7 +11,7 @@ namespace MassTransit.PrometheusIntegration
 
     public static class PrometheusMetrics
     {
-        static readonly ConcurrentDictionary<string, string> _consumerTypeCache = new ConcurrentDictionary<string, string>();
+        static readonly ConcurrentDictionary<string, string> _labelCache = new ConcurrentDictionary<string, string>();
 
         static bool _isConfigured;
         static string _serviceLabel;
@@ -21,18 +21,26 @@ namespace MassTransit.PrometheusIntegration
         static Counter _receiveFaultTotal;
         static Gauge _receiveInProgress;
         static Histogram _receiveDuration;
-        static Counter _messageConsumeTotal;
-        static Counter _messageConsumeFaultTotal;
-        static Counter _messagePublishTotal;
-        static Counter _messagePublishFaultTotal;
-        static Counter _messageSendTotal;
-        static Counter _messageSendFaultTotal;
+        static Counter _consumeTotal;
+        static Counter _consumeFaultTotal;
+        static Counter _consumeRetryTotal;
+        static Counter _publishTotal;
+        static Counter _publishFaultTotal;
+        static Counter _sendTotal;
+        static Counter _sendFaultTotal;
+        static Counter _executeTotal;
+        static Counter _executeFaultTotal;
+        static Counter _compensateTotal;
+        static Counter _compensateFailureTotal;
         static Gauge _consumerInProgress;
         static Gauge _handlerInProgress;
         static Gauge _sagaInProgress;
-        static Gauge _activityInProgress;
-        static Histogram _messageConsumeDuration;
-        static Histogram _messageDeliveryDuration;
+        static Gauge _executeInProgress;
+        static Gauge _compensateInProgress;
+        static Histogram _consumeDuration;
+        static Histogram _deliveryDuration;
+        static Histogram _executeDuration;
+        static Histogram _compensateDuration;
 
         public static void BusStarted()
         {
@@ -72,20 +80,24 @@ namespace MassTransit.PrometheusIntegration
             }
         }
 
-        public static void MeasureConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception = default)
+        public static void MeasureConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception = default)
             where T : class
         {
             var messageType = GetMessageTypeLabel<T>();
             var cleanConsumerType = GetConsumerTypeLabel(consumerType);
 
-            _messageConsumeTotal.Labels(_serviceLabel, messageType, cleanConsumerType).Inc();
-            _messageConsumeDuration.Labels(_serviceLabel, messageType, cleanConsumerType).Observe(duration.TotalSeconds);
+            _consumeTotal.Labels(_serviceLabel, messageType, cleanConsumerType).Inc();
+            _consumeDuration.Labels(_serviceLabel, messageType, cleanConsumerType).Observe(duration.TotalSeconds);
 
             if (exception != null)
             {
                 var exceptionType = exception.GetType().Name;
-                _messageConsumeFaultTotal.Labels(_serviceLabel, messageType, cleanConsumerType, exceptionType).Inc();
+                _consumeFaultTotal.Labels(_serviceLabel, messageType, cleanConsumerType, exceptionType).Inc();
             }
+
+            var retryAttempt = context.GetRetryAttempt();
+            if (retryAttempt > 0)
+                _consumeRetryTotal.Inc(retryAttempt);
 
             if (!context.SentTime.HasValue)
                 return;
@@ -94,34 +106,66 @@ namespace MassTransit.PrometheusIntegration
             if (deliveryDuration < TimeSpan.Zero)
                 deliveryDuration = TimeSpan.Zero;
 
-            _messageDeliveryDuration.Labels(_serviceLabel, messageType, cleanConsumerType).Observe(deliveryDuration.TotalSeconds);
+            _deliveryDuration.Labels(_serviceLabel, messageType, cleanConsumerType).Observe(deliveryDuration.TotalSeconds);
         }
 
-        public static void MeasurePublished<T>(Exception exception = default)
-            where T : class
+        public static void MeasureExecute<TActivity, TArguments>(ExecuteActivityContext<TActivity, TArguments> context, Exception exception = default)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
         {
-            var messageType = GetMessageTypeLabel<T>();
+            var argumentType = GetArgumentTypeLabel<TArguments>();
 
-            _messagePublishTotal.Labels(_serviceLabel, messageType).Inc();
+            _executeTotal.Labels(_serviceLabel, context.ActivityName, argumentType).Inc();
+            _executeDuration.Labels(_serviceLabel, context.ActivityName, argumentType).Observe(context.Elapsed.TotalSeconds);
 
             if (exception != null)
             {
                 var exceptionType = exception.GetType().Name;
-                _messagePublishFaultTotal.Labels(_serviceLabel, messageType, exceptionType).Inc();
+                _executeFaultTotal.Labels(_serviceLabel, context.ActivityName, argumentType, exceptionType).Inc();
             }
         }
 
-        public static void MeasureSent<T>(Exception exception = default)
-            where T : class
+        public static void MeasureCompensate<TActivity, TLog>(CompensateActivityContext<TActivity, TLog> context, Exception exception = default)
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
         {
-            var messageType = GetMessageTypeLabel<T>();
+            var logType = GetLogTypeLabel<TLog>();
 
-            _messageSendTotal.Labels(_serviceLabel, messageType).Inc();
+            _compensateTotal.Labels(_serviceLabel, context.ActivityName, logType).Inc();
+            _compensateDuration.Labels(_serviceLabel, context.ActivityName, logType).Observe(context.Elapsed.TotalSeconds);
 
             if (exception != null)
             {
                 var exceptionType = exception.GetType().Name;
-                _messageSendFaultTotal.Labels(_serviceLabel, messageType, exceptionType).Inc();
+                _compensateFailureTotal.Labels(_serviceLabel, context.ActivityName, logType, exceptionType).Inc();
+            }
+        }
+
+        public static void MeasurePublish<T>(Exception exception = default)
+            where T : class
+        {
+            var messageType = GetMessageTypeLabel<T>();
+
+            _publishTotal.Labels(_serviceLabel, messageType).Inc();
+
+            if (exception != null)
+            {
+                var exceptionType = exception.GetType().Name;
+                _publishFaultTotal.Labels(_serviceLabel, messageType, exceptionType).Inc();
+            }
+        }
+
+        public static void MeasureSend<T>(Exception exception = default)
+            where T : class
+        {
+            var messageType = GetMessageTypeLabel<T>();
+
+            _sendTotal.Labels(_serviceLabel, messageType).Inc();
+
+            if (exception != null)
+            {
+                var exceptionType = exception.GetType().Name;
+                _sendFaultTotal.Labels(_serviceLabel, messageType, exceptionType).Inc();
             }
         }
 
@@ -152,24 +196,22 @@ namespace MassTransit.PrometheusIntegration
             return _sagaInProgress.Labels(_serviceLabel, messageType, cleanConsumerType).TrackInProgress();
         }
 
-        public static IDisposable TrackExecuteActivityInProgress<TActivity, TArguments>()
+        public static IDisposable TrackExecuteActivityInProgress<TActivity, TArguments>(ExecuteActivityContext<TActivity, TArguments> context)
             where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
-            var messageType = GetMessageTypeLabel<TArguments>();
-            var cleanConsumerType = GetConsumerTypeLabel(TypeMetadataCache<TActivity>.ShortName);
+            var argumentType = GetArgumentTypeLabel<TArguments>();
 
-            return _activityInProgress.Labels(_serviceLabel, messageType, cleanConsumerType).TrackInProgress();
+            return _executeInProgress.Labels(_serviceLabel, context.ActivityName, argumentType).TrackInProgress();
         }
 
-        public static IDisposable TrackCompensateActivityInProgress<TActivity, TLog>()
+        public static IDisposable TrackCompensateActivityInProgress<TActivity, TLog>(CompensateActivityContext<TActivity, TLog> context)
             where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
-            var messageType = GetMessageTypeLabel<TLog>();
-            var cleanConsumerType = GetConsumerTypeLabel(TypeMetadataCache<TActivity>.ShortName);
+            var argumentType = GetArgumentTypeLabel<TLog>();
 
-            return _activityInProgress.Labels(_serviceLabel, messageType, cleanConsumerType).TrackInProgress();
+            return _compensateInProgress.Labels(_serviceLabel, context.ActivityName, argumentType).TrackInProgress();
         }
 
         public static IDisposable TrackHandlerInProgress<TMessage>()
@@ -189,7 +231,17 @@ namespace MassTransit.PrometheusIntegration
 
         static string GetConsumerTypeLabel(string consumerType)
         {
-            return _consumerTypeCache.GetOrAdd(consumerType, type => type.Split('.', '+').Last().Replace("<", "_").Replace(">", "_"));
+            return _labelCache.GetOrAdd(consumerType, type => type.Split('.', '+').Last().Replace("<", "_").Replace(">", "_"));
+        }
+
+        static string GetArgumentTypeLabel<TArguments>()
+        {
+            return _labelCache.GetOrAdd(TypeMetadataCache<TArguments>.ShortName, type => typeof(TArguments).Name.Replace("Arguments", ""));
+        }
+
+        static string GetLogTypeLabel<TLog>()
+        {
+            return _labelCache.GetOrAdd(TypeMetadataCache<TLog>.ShortName, type => typeof(TLog).Name.Replace("Log", ""));
         }
 
         static string GetEndpointLabel(Uri inputAddress)
@@ -212,6 +264,12 @@ namespace MassTransit.PrometheusIntegration
             string[] messageLabels = {options.ServiceNameLabel, options.MessageTypeLabel,};
             string[] messageFaultLabels = {options.ServiceNameLabel, options.MessageTypeLabel, options.ExceptionTypeLabel};
 
+            string[] executeLabels = {options.ServiceNameLabel, options.ActivityNameLabel, options.ArgumentTypeLabel,};
+            string[] executeFaultLabels = {options.ServiceNameLabel, options.ActivityNameLabel, options.ArgumentTypeLabel, options.ExceptionTypeLabel};
+
+            string[] compensateLabels = {options.ServiceNameLabel, options.ActivityNameLabel, options.LogTypeLabel,};
+            string[] compensateFailureLabels = {options.ServiceNameLabel, options.ActivityNameLabel, options.LogTypeLabel, options.ExceptionTypeLabel};
+
             string[] consumerLabels = {options.ServiceNameLabel, options.MessageTypeLabel, options.ConsumerTypeLabel};
             string[] consumerFaultLabels = {options.ServiceNameLabel, options.MessageTypeLabel, options.ConsumerTypeLabel, options.ExceptionTypeLabel};
 
@@ -227,35 +285,60 @@ namespace MassTransit.PrometheusIntegration
                 "Total number of messages receive faults",
                 new CounterConfiguration {LabelNames = endpointFaultLabels});
 
-            _messageConsumeTotal = Metrics.CreateCounter(
-                options.MessageConsumeTotal,
+            _consumeTotal = Metrics.CreateCounter(
+                options.ConsumeTotal,
                 "Total number of messages consumed",
                 new CounterConfiguration {LabelNames = consumerLabels});
 
-            _messageConsumeFaultTotal = Metrics.CreateCounter(
-                options.MessageConsumeFaultTotal,
+            _consumeFaultTotal = Metrics.CreateCounter(
+                options.ConsumeFaultTotal,
                 "Total number of message consume faults",
                 new CounterConfiguration {LabelNames = consumerFaultLabels});
 
-            _messagePublishTotal = Metrics.CreateCounter(
-                options.MessagePublishTotal,
+            _consumeRetryTotal = Metrics.CreateCounter(
+                options.ConsumeRetryTotal,
+                "Total number of message consume faults",
+                new CounterConfiguration {LabelNames = consumerFaultLabels});
+
+            _publishTotal = Metrics.CreateCounter(
+                options.PublishTotal,
                 "Total number of messages published",
                 new CounterConfiguration {LabelNames = messageLabels});
 
-            _messagePublishFaultTotal = Metrics.CreateCounter(
-                options.MessagePublishFaultTotal,
+            _publishFaultTotal = Metrics.CreateCounter(
+                options.PublishFaultTotal,
                 "Total number of message publish faults",
                 new CounterConfiguration {LabelNames = messageFaultLabels});
 
-            _messageSendTotal = Metrics.CreateCounter(
-                options.MessageSendTotal,
+            _sendTotal = Metrics.CreateCounter(
+                options.SendTotal,
                 "Total number of messages sent",
                 new CounterConfiguration {LabelNames = messageLabels});
 
-            _messageSendFaultTotal = Metrics.CreateCounter(
-                options.MessageSendFaultTotal,
+            _sendFaultTotal = Metrics.CreateCounter(
+                options.SendFaultTotal,
                 "Total number of message send faults",
                 new CounterConfiguration {LabelNames = messageFaultLabels});
+
+            _executeTotal = Metrics.CreateCounter(
+                options.ActivityExecuteTotal,
+                "Total number of activities executed",
+                new CounterConfiguration {LabelNames = executeLabels});
+
+            _executeFaultTotal = Metrics.CreateCounter(
+                options.ActivityExecuteFaultTotal,
+                "Total number of activity execution faults",
+                new CounterConfiguration {LabelNames = executeFaultLabels});
+
+            _compensateTotal = Metrics.CreateCounter(
+                options.ActivityCompensateTotal,
+                "Total number of activities compensated",
+                new CounterConfiguration {LabelNames = compensateLabels});
+
+            _compensateFailureTotal = Metrics.CreateCounter(
+                options.ActivityCompensateFailureTotal,
+                "Total number of activity compensation failures",
+                new CounterConfiguration {LabelNames = compensateFailureLabels});
 
             // Gauges
 
@@ -289,10 +372,15 @@ namespace MassTransit.PrometheusIntegration
                 "Number of sagas in progress",
                 new GaugeConfiguration {LabelNames = consumerLabels});
 
-            _activityInProgress = Metrics.CreateGauge(
-                options.ActivityInProgress,
-                "Number of activities in progress",
-                new GaugeConfiguration {LabelNames = consumerLabels});
+            _executeInProgress = Metrics.CreateGauge(
+                options.ExecuteInProgress,
+                "Number of activity executions in progress",
+                new GaugeConfiguration {LabelNames = executeLabels});
+
+            _compensateInProgress = Metrics.CreateGauge(
+                options.CompensateInProgress,
+                "Number of activity compensations in progress",
+                new GaugeConfiguration {LabelNames = compensateLabels});
 
             // Histograms
 
@@ -305,8 +393,8 @@ namespace MassTransit.PrometheusIntegration
                     Buckets = options.HistogramBuckets
                 });
 
-            _messageConsumeDuration = Metrics.CreateHistogram(
-                options.MessageConsumeDuration,
+            _consumeDuration = Metrics.CreateHistogram(
+                options.ConsumeDuration,
                 "Elapsed time spent consuming a message, in seconds",
                 new HistogramConfiguration
                 {
@@ -314,12 +402,30 @@ namespace MassTransit.PrometheusIntegration
                     Buckets = options.HistogramBuckets
                 });
 
-            _messageDeliveryDuration = Metrics.CreateHistogram(
-                options.MessageDeliveryDuration,
+            _deliveryDuration = Metrics.CreateHistogram(
+                options.DeliveryDuration,
                 "Elapsed time between when the message was sent and when it was consumed, in seconds.",
                 new HistogramConfiguration
                 {
                     LabelNames = consumerLabels,
+                    Buckets = options.HistogramBuckets
+                });
+
+            _executeDuration = Metrics.CreateHistogram(
+                options.ActivityExecuteDuration,
+                "Elapsed time spent executing an activity, in seconds",
+                new HistogramConfiguration
+                {
+                    LabelNames = executeLabels,
+                    Buckets = options.HistogramBuckets
+                });
+
+            _compensateDuration = Metrics.CreateHistogram(
+                options.ActivityCompensateDuration,
+                "Elapsed time spent compensating an activity, in seconds",
+                new HistogramConfiguration
+                {
+                    LabelNames = compensateLabels,
                     Buckets = options.HistogramBuckets
                 });
 

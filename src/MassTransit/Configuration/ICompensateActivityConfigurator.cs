@@ -3,6 +3,7 @@
     using System;
     using ConsumeConfigurators;
     using Courier;
+    using Courier.Pipeline;
     using GreenPipes;
 
 
@@ -14,6 +15,7 @@
     public interface ICompensateActivityConfigurator<TActivity, TLog> :
         IPipeConfigurator<CompensateActivityContext<TActivity, TLog>>,
         IActivityConfigurationObserverConnector,
+        IActivityObserverConnector,
         IConsumeConfigurator
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class

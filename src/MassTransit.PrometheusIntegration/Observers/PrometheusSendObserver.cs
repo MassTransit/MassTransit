@@ -16,7 +16,7 @@ namespace MassTransit.PrometheusIntegration.Observers
         public Task PostSend<T>(SendContext<T> context)
             where T : class
         {
-            PrometheusMetrics.MeasureSent<T>();
+            PrometheusMetrics.MeasureSend<T>();
 
             return Task.CompletedTask;
         }
@@ -24,7 +24,7 @@ namespace MassTransit.PrometheusIntegration.Observers
         public Task SendFault<T>(SendContext<T> context, Exception exception)
             where T : class
         {
-            PrometheusMetrics.MeasureSent<T>(exception);
+            PrometheusMetrics.MeasureSend<T>(exception);
 
             return Task.CompletedTask;
         }

@@ -1,10 +1,8 @@
 namespace MassTransit.PrometheusIntegration
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
-    using System.Linq;
     using Observers;
 
 
@@ -40,27 +38,5 @@ namespace MassTransit.PrometheusIntegration
                 ? Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().MainModule.FileName)
                 : serviceName;
         }
-
-        static string DefaultMessageTypeParser(IEnumerable<string> supportedMessageTypes)
-        {
-            return ExtractMessageType(supportedMessageTypes.FirstOrDefault() ?? "unknown");
-
-            string ExtractMessageType(string urnMessageTypeName)
-            {
-                if (!urnMessageTypeName.Contains(':'))
-                    return urnMessageTypeName;
-                try
-                {
-                    return urnMessageTypeName.Split(':').Last().Split('.').Last().Replace('+', '.');
-                }
-                catch (Exception)
-                {
-                    return urnMessageTypeName;
-                }
-            }
-        }
     }
-
-
-    public delegate string ParseMessageType(IEnumerable<string> supportedMessageTypes);
 }

@@ -9,6 +9,13 @@ namespace MassTransit.PrometheusIntegration.Observers
     public class PrometheusActivityConfigurationObserver :
         IActivityConfigurationObserver
     {
+        readonly IActivityObserver _observer;
+
+        public PrometheusActivityConfigurationObserver()
+        {
+            _observer = new PrometheusActivityObserver();
+        }
+
         public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
             where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
@@ -16,6 +23,8 @@ namespace MassTransit.PrometheusIntegration.Observers
             var specification = new PrometheusExecuteActivitySpecification<TActivity, TArguments>();
 
             configurator.AddPipeSpecification(specification);
+
+            configurator.ConnectActivityObserver(_observer);
         }
 
         public void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
@@ -25,6 +34,8 @@ namespace MassTransit.PrometheusIntegration.Observers
             var specification = new PrometheusExecuteActivitySpecification<TActivity, TArguments>();
 
             configurator.AddPipeSpecification(specification);
+
+            configurator.ConnectActivityObserver(_observer);
         }
 
         public void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
@@ -34,6 +45,8 @@ namespace MassTransit.PrometheusIntegration.Observers
             var specification = new PrometheusCompensateActivitySpecification<TActivity, TLog>();
 
             configurator.AddPipeSpecification(specification);
+
+            configurator.ConnectActivityObserver(_observer);
         }
     }
 }

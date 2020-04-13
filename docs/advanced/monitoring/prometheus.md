@@ -29,6 +29,10 @@ public void ConfigureServices(IServiceCollection services)
 
 Metrics must be available on an HTTP endpoint, by default it is `/metrics`. Add the ASP.NET Core integration package to get this endpoint out-of-the-box.
 
+::: tip
+To publish metrics so that they can be scraped by Prometheus, an ASP.NET Core Generic Host is recommended, with the Kestrel HTTP server configured.
+:::
+
 ```
 dotnet add package prometheus-net.AspNetCore
 ``` 
@@ -56,6 +60,7 @@ The metrics captured by MassTransit are listed below.
 | mt_receive_in_progress | Number of messages being received
 | mt_consume_total | Total number of messages consumed
 | mt_consume_fault_total | Total number of message consume faults
+| mt_consume_retry_total | Total number of message consume retries
 | mt_consume_duration_seconds | Elapsed time spent consuming a message, in seconds
 | mt_delivery_duration_seconds | Elapsed time between when the message was sent and when it was consumed, in seconds.
 | mt_publish_total | Total number of messages published
@@ -67,7 +72,15 @@ The metrics captured by MassTransit are listed below.
 | mt_consumer_in_progress | Number of consumers in progress
 | mt_handler_in_progress | Number of handlers in progress
 | mt_saga_in_progress | Number of sagas in progress
-| mt_activity_in_progress | Number of activities in progress
+| mt_activity_execute_in_progress | Number of activity executions in progress
+| mt_activity_compensate_in_progress | Number of activity compensations in progress
+| mt_activity_execute_total | Total number of activities executed
+| mt_activity_execute_fault_total | Total number of activity executions faults
+| mt_activity_execute_duration_seconds | Elapsed time spent executing an activity, in seconds
+| mt_activity_compensate_total | Total number of activities compensated
+| mt_activity_compensate_failure_total | Total number of activity compensation failures
+| mt_activity_compensate_duration_seconds | Elapsed time spent compensating an activity, in seconds
+
 
 ### Labels
 
@@ -79,8 +92,8 @@ For the metrics above, labels are specified where appropriate.
 | endpoint_address | The endpoint address
 | message_type | The message type for the metric
 | consumer_type | The consumer, saga, or activity type for the metric
+| activity_name | The activity name
+| argument_type | The activity execute argument type
+| log_type | The activity compensate log type
 | exception_type | The exception type for a fault metric
-
-
-
 

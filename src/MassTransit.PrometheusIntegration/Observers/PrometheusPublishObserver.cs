@@ -16,7 +16,7 @@ namespace MassTransit.PrometheusIntegration.Observers
         public Task PostPublish<T>(PublishContext<T> context)
             where T : class
         {
-            PrometheusMetrics.MeasurePublished<T>();
+            PrometheusMetrics.MeasurePublish<T>();
 
             return Task.CompletedTask;
         }
@@ -24,7 +24,7 @@ namespace MassTransit.PrometheusIntegration.Observers
         public Task PublishFault<T>(PublishContext<T> context, Exception exception)
             where T : class
         {
-            PrometheusMetrics.MeasurePublished<T>(exception);
+            PrometheusMetrics.MeasurePublish<T>(exception);
 
             return Task.CompletedTask;
         }

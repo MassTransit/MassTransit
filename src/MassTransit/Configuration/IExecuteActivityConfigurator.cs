@@ -3,6 +3,7 @@ namespace MassTransit
     using System;
     using ConsumeConfigurators;
     using Courier;
+    using Courier.Pipeline;
     using GreenPipes;
 
 
@@ -14,6 +15,7 @@ namespace MassTransit
     public interface IExecuteActivityConfigurator<TActivity, TArguments> :
         IPipeConfigurator<ExecuteActivityContext<TActivity, TArguments>>,
         IActivityConfigurationObserverConnector,
+        IActivityObserverConnector,
         IConsumeConfigurator
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class

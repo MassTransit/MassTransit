@@ -22,7 +22,8 @@
         readonly IBuildPipeConfigurator<ExecuteActivityContext<TActivity, TArguments>> _activityPipeConfigurator;
         readonly IBuildPipeConfigurator<ExecuteContext<TArguments>> _executePipeConfigurator;
         readonly RoutingSlipConfigurator _routingSlipConfigurator;
-        readonly ActivityConfigurationObservable _observers;
+        readonly ActivityConfigurationObservable _configurationObservers;
+        readonly ActivityObservable _observers;
 
         public ExecuteActivityHostSpecification(IExecuteActivityFactory<TActivity, TArguments> activityFactory, IActivityConfigurationObserver observer)
         {
@@ -31,9 +32,10 @@
             _activityPipeConfigurator = new PipeConfigurator<ExecuteActivityContext<TActivity, TArguments>>();
             _executePipeConfigurator = new PipeConfigurator<ExecuteContext<TArguments>>();
             _routingSlipConfigurator = new RoutingSlipConfigurator();
-            _observers = new ActivityConfigurationObservable();
+            _observers = new ActivityObservable();
 
-            _observers.Connect(observer);
+            _configurationObservers = new ActivityConfigurationObservable();
+            _configurationObservers.Connect(observer);
         }
 
         public ExecuteActivityHostSpecification(IExecuteActivityFactory<TActivity, TArguments> activityFactory, Uri compensateAddress,
@@ -74,7 +76,7 @@
             foreach (var result in _activityPipeConfigurator.Validate())
                 yield return result;
 
-            _observers.All(observer =>
+            _configurationObservers.All(observer =>
             {
                 if (_compensateAddress == null)
                     observer.ExecuteActivityConfigured(this);
@@ -87,7 +89,7 @@
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            _activityPipeConfigurator.UseFilter(new ExecuteActivityFilter<TActivity, TArguments>());
+            _activityPipeConfigurator.UseFilter(new ExecuteActivityFilter<TActivity, TArguments>(_observers));
 
             IPipe<ExecuteActivityContext<TActivity, TArguments>> executeActivityPipe = _activityPipeConfigurator.Build();
 
@@ -102,6 +104,11 @@
         }
 
         public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return _configurationObservers.Connect(observer);
+        }
+
+        public ConnectHandle ConnectActivityObserver(IActivityObserver observer)
         {
             return _observers.Connect(observer);
         }

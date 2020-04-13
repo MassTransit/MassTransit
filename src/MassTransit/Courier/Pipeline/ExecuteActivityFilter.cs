@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Exceptions;
     using GreenPipes;
+    using Internals.Extensions;
 
 
     /// <summary>
@@ -16,6 +17,13 @@
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
+        readonly ActivityObservable _observers;
+
+        public ExecuteActivityFilter(ActivityObservable observers)
+        {
+            _observers = observers;
+        }
+
         void IProbeSite.Probe(ProbeContext context)
         {
             context.CreateFilterScope("execute");
@@ -23,13 +31,32 @@
 
         public async Task Send(ExecuteActivityContext<TActivity, TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
         {
-            context.Result = await context.Activity.Execute(context).ConfigureAwait(false);
+            try
+            {
+                if (_observers.Count > 0)
+                    await _observers.PreExecute(context).ConfigureAwait(false);
 
-            var result = context.Result ?? context.Faulted(new ActivityExecutionException("The activity execute did not return a result"));
-            if (result.IsFaulted(out var exception))
-                throw new AggregateException(exception);
+                var result = context.Result = await context.Activity.Execute(context).ConfigureAwait(false)
+                    ?? context.Faulted(new ActivityExecutionException("The activity execute did not return a result"));
 
-            await next.Send(context).ConfigureAwait(false);
+                if (result.IsFaulted(out var exception))
+                    exception.Rethrow();
+
+                await next.Send(context).ConfigureAwait(false);
+
+                if (_observers.Count > 0)
+                    await _observers.PostExecute(context).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                if (context.Result == null || !context.Result.IsFaulted(out var faultException) || faultException != exception)
+                    context.Result = context.Faulted(exception);
+
+                if (_observers.Count > 0)
+                    await _observers.ExecuteFault(context, exception).ConfigureAwait(false);
+
+                throw;
+            }
         }
     }
 }

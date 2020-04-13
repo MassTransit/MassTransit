@@ -21,7 +21,8 @@ namespace MassTransit.PipeConfigurators
         readonly IBuildPipeConfigurator<CompensateActivityContext<TActivity, TLog>> _activityPipeConfigurator;
         readonly IBuildPipeConfigurator<CompensateContext<TLog>> _compensatePipeConfigurator;
         readonly RoutingSlipConfigurator _routingSlipConfigurator;
-        readonly ActivityConfigurationObservable _observers;
+        readonly ActivityConfigurationObservable _configurationObservers;
+        readonly ActivityObservable _observers;
 
         public CompensateActivityHostSpecification(ICompensateActivityFactory<TActivity, TLog> activityFactory, IActivityConfigurationObserver observer)
         {
@@ -30,9 +31,10 @@ namespace MassTransit.PipeConfigurators
             _activityPipeConfigurator = new PipeConfigurator<CompensateActivityContext<TActivity, TLog>>();
             _compensatePipeConfigurator = new PipeConfigurator<CompensateContext<TLog>>();
             _routingSlipConfigurator = new RoutingSlipConfigurator();
-            _observers = new ActivityConfigurationObservable();
+            _observers = new ActivityObservable();
 
-            _observers.Connect(observer);
+            _configurationObservers = new ActivityConfigurationObservable();
+            _configurationObservers.Connect(observer);
         }
 
         public void AddPipeSpecification(IPipeSpecification<CompensateActivityContext<TActivity, TLog>> specification)
@@ -66,7 +68,7 @@ namespace MassTransit.PipeConfigurators
             foreach (var result in _activityPipeConfigurator.Validate())
                 yield return result;
 
-            _observers.All(observer =>
+            _configurationObservers.All(observer =>
             {
                 observer.CompensateActivityConfigured(this);
                 return true;
@@ -75,7 +77,7 @@ namespace MassTransit.PipeConfigurators
 
         public void Configure(IReceiveEndpointBuilder builder)
         {
-            _activityPipeConfigurator.UseFilter(new CompensateActivityFilter<TActivity, TLog>());
+            _activityPipeConfigurator.UseFilter(new CompensateActivityFilter<TActivity, TLog>(_observers));
 
             IPipe<CompensateActivityContext<TActivity, TLog>> compensateActivityPipe = _activityPipeConfigurator.Build();
 
@@ -90,6 +92,11 @@ namespace MassTransit.PipeConfigurators
         }
 
         public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return _configurationObservers.Connect(observer);
+        }
+
+        public ConnectHandle ConnectActivityObserver(IActivityObserver observer)
         {
             return _observers.Connect(observer);
         }
