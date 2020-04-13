@@ -11,9 +11,9 @@ namespace MassTransit.ConsumeConnectors
     {
         readonly Lazy<IMessageConnectorFactory> _consumeConnectorFactory;
 
-        public BatchConsumerInterfaceType(Type messageType, Type consumerType)
+        public BatchConsumerInterfaceType(Type batchMessageType, Type messageType, Type consumerType)
         {
-            MessageType = messageType;
+            MessageType = batchMessageType;
 
             _consumeConnectorFactory = new Lazy<IMessageConnectorFactory>(() => (IMessageConnectorFactory)
                 Activator.CreateInstance(typeof(BatchMessageConnectorFactory<,>).MakeGenericType(consumerType, messageType)));

@@ -51,9 +51,6 @@
         {
             int? concurrencyLimit = definition.PrefetchCount;
 
-            if (definition.PrefetchCount.HasValue)
-                concurrencyLimit = definition.PrefetchCount.Value;
-
             if (definition.ConcurrentMessageLimit.HasValue)
                 concurrencyLimit = definition.ConcurrentMessageLimit;
 

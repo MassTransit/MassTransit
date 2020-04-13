@@ -190,6 +190,7 @@ namespace MassTransit.Tests.Conventional
         {
             ConsumerConvention.Register<AsyncConsumerConvention>();
             ConsumerConvention.Register<LegacyConsumerConvention>();
+            ConsumerConvention.Register<BatchConsumerConvention>();
             return TaskUtil.Completed;
         }
 
@@ -202,6 +203,7 @@ namespace MassTransit.Tests.Conventional
 
             ConsumerConvention.Remove<AsyncConsumerConvention>();
             ConsumerConvention.Remove<LegacyConsumerConvention>();
+            ConsumerConvention.Remove<BatchConsumerConvention>();
 
             configurator.Consumer(typeof(DefaultHandlers), type => new DefaultHandlers(_receivedA, _receivedB));
         }

@@ -24,7 +24,7 @@ namespace MassTransit.ConsumerSpecifications
     {
         readonly IBuildPipeConfigurator<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> _batchConfigurator;
         readonly IBuildPipeConfigurator<ConsumeContext<Batch<TMessage>>> _batchMessagePipeConfigurator;
-        readonly ConsumerMessageSpecification<IConsumer<TMessage>, TMessage> _consumerSpecification;
+        readonly ConsumerMessageSpecification<TConsumer, TMessage> _consumerSpecification;
         readonly ConsumerConfigurationObservable _observers;
 
         public BatchConsumerMessageSpecification()
@@ -32,7 +32,7 @@ namespace MassTransit.ConsumerSpecifications
             _batchConfigurator = new PipeConfigurator<ConsumerConsumeContext<TConsumer, Batch<TMessage>>>();
             _batchMessagePipeConfigurator = new PipeConfigurator<ConsumeContext<Batch<TMessage>>>();
 
-            _consumerSpecification = new ConsumerMessageSpecification<IConsumer<TMessage>, TMessage>();
+            _consumerSpecification = new ConsumerMessageSpecification<TConsumer, TMessage>();
             _observers = new ConsumerConfigurationObservable();
         }
 

@@ -24,20 +24,28 @@ namespace MassTransit.ConsumeConnectors
                 var messageType = typeof(T).GetGenericArguments()[0];
                 if (messageType.ClosesType(typeof(Batch<>), out Type[] batchTypes))
                 {
-                    var interfaceType = new BatchConsumerInterfaceType(batchTypes[0], typeof(T));
+                    var interfaceType = new BatchConsumerInterfaceType(messageType, batchTypes[0], typeof(T));
                     if (TypeMetadataCache.IsValidMessageType(interfaceType.MessageType))
                         yield return interfaceType;
                 }
-
             }
 
             IEnumerable<IMessageInterfaceType> types = typeof(T).GetInterfaces()
                 .Where(x => x.GetTypeInfo().IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(IConsumer<>))
-                .Select(x => new { Type = x, MessageType = x.GetGenericArguments()[0]} )
+                .Select(x => new
+                {
+                    Type = x,
+                    MessageType = x.GetGenericArguments()[0]
+                })
                 .Where(x => x.MessageType.ClosesType(typeof(Batch<>)))
-                .Select(x => new { x.Type, MessageType = x.MessageType.GetClosingArgument(typeof(Batch<>))})
-                .Select(x => new BatchConsumerInterfaceType(x.MessageType, typeof(T)))
+                .Select(x => new
+                {
+                    x.Type,
+                    BatchMessageType = x.MessageType,
+                    MessageType = x.MessageType.GetClosingArgument(typeof(Batch<>))
+                })
+                .Select(x => new BatchConsumerInterfaceType(x.BatchMessageType, x.MessageType, typeof(T)))
                 .Where(x => TypeMetadataCache.IsValidMessageType(x.MessageType));
 
             foreach (IMessageInterfaceType type in types)
