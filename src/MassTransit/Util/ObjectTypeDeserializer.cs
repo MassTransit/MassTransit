@@ -34,16 +34,15 @@ namespace MassTransit.Util
 
         T IObjectTypeDeserializer.Deserialize<T>(IDictionary<string, object> dictionary, string key, T defaultValue)
         {
-            if (!dictionary.TryGetValue(key, out var value) && !TryGetValueCamelCase(key, dictionary, out value))
+            if (!dictionary.TryGetValueCaseInsensitive(key, out var value))
                 return defaultValue;
-            //                throw new KeyNotFoundException($"The key was not present: {key}");
 
             return Deserialize<T>(value);
         }
 
         T IObjectTypeDeserializer.Deserialize<T>(IDictionary<string, object> dictionary, string key)
         {
-            if (!dictionary.TryGetValue(key, out var value) && !TryGetValueCamelCase(key, dictionary, out value))
+            if (!dictionary.TryGetValueCaseInsensitive(key, out var value) )
                 throw new KeyNotFoundException($"The key was not present: {key}");
 
             return Deserialize<T>(value);
@@ -61,7 +60,6 @@ namespace MassTransit.Util
         {
             if (!dictionary.TryGetHeader(key, out var value))
                 return defaultValue;
-            //                throw new KeyNotFoundException($"The key was not present: {key}");
 
             return Deserialize<T>(value);
         }
@@ -113,21 +111,6 @@ namespace MassTransit.Util
         public static T Deserialize<T>(object value, T defaultValue)
         {
             return Cached.Instance.Value.Deserialize(value, defaultValue);
-        }
-
-        static bool TryGetValueCamelCase(string key, IDictionary<string, object> dictionary, out object value)
-        {
-            if (char.IsUpper(key[0]))
-            {
-                char[] chars = key.ToCharArray();
-                chars[0] = char.ToLower(chars[0]);
-
-                key = new string(chars);
-                return dictionary.TryGetValue(key, out value);
-            }
-
-            value = null;
-            return false;
         }
 
 

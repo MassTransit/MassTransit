@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -28,6 +28,38 @@ namespace MassTransit
                 return false;
             }
 
+            value = Deserialize<T>(obj);
+            return true;
+        }
+
+        public static bool TryGetValueCaseInsensitive(this IDictionary<string, object> dictionary, string key, out object value)
+        {
+            object obj;
+            if (!dictionary.TryGetValue(key, out obj) && !TryGetValueCamelCase(key, dictionary, out obj))
+            {
+                value = default;
+                return false;
+            }
+
+            value = obj;
+            return true;
+        }
+
+        public static bool TryGetValueCaseInsensitive<T>(this IDictionary<string, object> dictionary, string key, out T value)
+        {
+            object obj;
+            if (!dictionary.TryGetValueCaseInsensitive(key, out obj))
+            {
+                value = default(T);
+                return false;
+            }
+
+            value = Deserialize<T>(obj);
+            return true;
+        }
+
+        static T Deserialize<T>(object obj)
+        {
             var token = obj as JToken ?? new JValue(obj);
 
             if (token.Type == JTokenType.Null)
@@ -35,9 +67,23 @@ namespace MassTransit
 
             using (var jsonReader = new JTokenReader(token))
             {
-                value = (T)JsonMessageSerializer.Deserializer.Deserialize(jsonReader, typeof(T));
-                return true;
+                return (T)JsonMessageSerializer.Deserializer.Deserialize(jsonReader, typeof(T));
             }
+        }
+
+        static bool TryGetValueCamelCase(string key, IDictionary<string, object> dictionary, out object value)
+        {
+            if (char.IsUpper(key[0]))
+            {
+                char[] chars = key.ToCharArray();
+                chars[0] = char.ToLower(chars[0]);
+
+                key = new string(chars);
+                return dictionary.TryGetValue(key, out value);
+            }
+
+            value = null;
+            return false;
         }
     }
 }
