@@ -190,7 +190,8 @@ namespace MassTransit.Transports
 
                 await _publishPipe.Send(publishContext).ConfigureAwait(false);
 
-                await _pipe.Send(context).ConfigureAwait(false);
+                if (_pipe.IsNotEmpty())
+                    await _pipe.Send(context).ConfigureAwait(false);
             }
         }
     }

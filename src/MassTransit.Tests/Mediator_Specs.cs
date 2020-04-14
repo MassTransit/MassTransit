@@ -32,6 +32,22 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public async Task Should_deliver_the_publish()
+        {
+            var multiConsumer = new MultiTestConsumer(TimeSpan.FromSeconds(8));
+            var received = multiConsumer.Consume<PingMessage>();
+
+            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+            {
+                multiConsumer.Configure(cfg);
+            });
+
+            await mediator.Publish(new PingMessage());
+
+            Assert.That(received.Select().Any(), Is.True);
+        }
+
+        [Test]
         public async Task Should_handle_request_response()
         {
             var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
