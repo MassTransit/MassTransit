@@ -37,7 +37,7 @@ namespace MassTransit.Registration
 
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(executeActivityFactory, configurator);
 
-            LogContext.Debug?.Log("Configuring {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
+            LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TActivity>.ShortName);
 
             GetActivityDefinition(configurationServiceProvider)

@@ -3,6 +3,7 @@ namespace MassTransit.Definition
     using System;
     using ConsumeConfigurators;
     using Courier;
+    using Registration;
 
 
     public class ExecuteActivityDefinition<TActivity, TArguments> :
@@ -55,6 +56,19 @@ namespace MassTransit.Definition
 
         Type IExecuteActivityDefinition.ActivityType => typeof(TActivity);
         Type IExecuteActivityDefinition.ArgumentType => typeof(TArguments);
+
+        /// <summary>
+        /// Configure the execute endpoint
+        /// </summary>
+        /// <param name="configure"></param>
+        protected void ExecuteEndpoint(Action<IExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>> configure)
+        {
+            var configurator = new ExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>();
+
+            configure?.Invoke(configurator);
+
+            ExecuteEndpointDefinition = new ExecuteActivityEndpointDefinition<TActivity, TArguments>(configurator.Settings);
+        }
 
         protected void ConfigureConcurrencyLimit(Action<Action<IRoutingSlipConfigurator>> callback)
         {

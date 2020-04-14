@@ -2,6 +2,7 @@ namespace MassTransit.Definition
 {
     using System;
     using Courier;
+    using Registration;
 
 
     public class ActivityDefinition<TActivity, TArguments, TLog> :
@@ -41,6 +42,19 @@ namespace MassTransit.Definition
         }
 
         Type IActivityDefinition.LogType => typeof(TLog);
+
+        /// <summary>
+        /// Configure the compensate endpoint
+        /// </summary>
+        /// <param name="configure"></param>
+        protected void CompensateEndpoint(Action<ICompensateActivityEndpointRegistrationConfigurator<TActivity, TLog>> configure)
+        {
+            var configurator = new CompensateActivityEndpointRegistrationConfigurator<TActivity, TLog>();
+
+            configure?.Invoke(configurator);
+
+            CompensateEndpointDefinition = new CompensateActivityEndpointDefinition<TActivity, TLog>(configurator.Settings);
+        }
 
         /// <summary>
         /// Called when the compensate activity is being configured on the endpoint.

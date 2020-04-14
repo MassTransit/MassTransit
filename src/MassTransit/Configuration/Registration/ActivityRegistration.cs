@@ -82,7 +82,7 @@ namespace MassTransit.Registration
 
             var specification = new CompensateActivityHostSpecification<TActivity, TLog>(activityFactory, configurator);
 
-            LogContext.Debug?.Log("Configuring {Endpoint}, Compensate Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
+            LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Compensate Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TActivity>.ShortName);
 
             GetActivityDefinition(configurationServiceProvider)
@@ -102,7 +102,7 @@ namespace MassTransit.Registration
 
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(activityFactory, compensateAddress, configurator);
 
-            LogContext.Debug?.Log("Configuring {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
+            LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TActivity>.ShortName);
 
             GetActivityDefinition(configurationServiceProvider)

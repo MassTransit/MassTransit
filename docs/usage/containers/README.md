@@ -178,49 +178,7 @@ containerBuilder.AddMassTransit(r =>
 
 Supported saga persistence storage engines are documented in the [saga documentation](/usage/sagas/persistence) section.
 
-> Endpoint configuration is available for all registration types, including consumers, sagas and Courier activities.
-
-## Definition
-
-In addition to registration, MassTransit supports an optional definition for the consumer, which can be specified (or discovered) via a class in the assembly. The syntax is under development, but some basic features are working today.
-
-```csharp
-        public class SubmitOrderConsumerDefinition :
-            ConsumerDefinition<SubmitOrderConsumer>
-        {
-            public SubmitOrderConsumerDefinition()
-            {
-                // override the default endpoint name, for whatever reason
-                EndpointName = "ha-submit-order";
-
-                // limit the number of messages consumed concurrently
-                ConcurrentMessageLimit = 4;
-
-                // this is under development, doesn't do anything yet!
-                // but will eventually be used to define service endpoints
-                // in conductor.
-                Request<SubmitOrder>(x =>
-                {
-                    x.PartitionBy(m => m.CustomerId);
-
-                    x.Publishes<OrderReceived>();
-                    x.Responds<OrderAccepted>();
-                    x.Responds<OrderRejected>();
-                    x.Sends<ProcessOrder>();
-                });
-            }
-
-            protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<DiscoveryPingConsumer> consumerConfigurator)
-            {
-                endpointConfigurator.UseMessageRetry(r => r.Interval(5,1000));
-                endpointConfigurator.UseInMemoryOutbox();
-            }
-        }
-```
-
-There are definitions for all consumer types, including sagas, activities, and saga state machines. They can be registered explicity using the `.AddConsumer(consumer type, consumerDefinitionType)` methods, or can be discovered using the scanning methods, such as `.AddConsumersFromNamespaceContaining<SubmitOrderConsumer>()`. 
-
+> Endpoint configuration is available for all registration types, including consumers, sagas and Courier activities. Endpoint configuration can also be specifed in the definition, and overridden if specified in the .Add/.Endpoint methods.
 
 **Hey! Where is my container??**
 
