@@ -230,5 +230,29 @@ namespace MassTransit.Courier.Contexts
 
             return new FaultedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, exception);
         }
+
+        public ExecutionResult FaultedWithVariables(Exception exception, object variables)
+        {
+            if (exception == null)
+                throw new ArgumentNullException(nameof(exception));
+
+            if (variables == null)
+                throw new ArgumentNullException(nameof(variables));
+
+            return new FaultedWithVariablesExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, exception,
+                RoutingSlipBuilder.GetObjectAsDictionary(variables));
+        }
+
+        public ExecutionResult FaultedWithVariables(Exception exception, IEnumerable<KeyValuePair<string, object>> variables)
+        {
+            if (exception == null)
+                throw new ArgumentNullException(nameof(exception));
+
+            if (variables == null)
+                throw new ArgumentNullException(nameof(variables));
+
+            return new FaultedWithVariablesExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, exception,
+                variables.ToDictionary(x => x.Key, x => x.Value));
+        }
     }
 }

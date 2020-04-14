@@ -48,9 +48,12 @@ namespace MassTransit.Courier.Hosts
 
                     await result.Evaluate().ConfigureAwait(false);
                 }
-                catch (Exception ex)
+                catch (Exception exception)
                 {
-                    await executeContext.Faulted(ex).Evaluate().ConfigureAwait(false);
+                    if (executeContext.Result == null || !executeContext.Result.IsFaulted(out var faultException) || faultException != exception)
+                        executeContext.Result = executeContext.Faulted(exception);
+
+                    await executeContext.Result.Evaluate().ConfigureAwait(false);
                 }
 
                 await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TActivity>.ShortName).ConfigureAwait(false);

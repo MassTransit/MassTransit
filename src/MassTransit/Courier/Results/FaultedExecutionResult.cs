@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier.Results
 {
     using System;
@@ -50,38 +38,37 @@ namespace MassTransit.Courier.Results
 
         public async Task Evaluate()
         {
+            var builder = CreateRoutingSlipBuilder(_routingSlip);
+
+            Build(builder);
+
+            var routingSlip = builder.Build();
+
             await _publisher.PublishRoutingSlipActivityFaulted(_executeContext.ActivityName, _executeContext.ExecutionId, _executeContext.Timestamp,
-                _elapsed, _exceptionInfo, _routingSlip.Variables, _activity.Arguments).ConfigureAwait(false);
+                _elapsed, _exceptionInfo, routingSlip.Variables, _activity.Arguments).ConfigureAwait(false);
 
-            if (HasCompensationLogs())
+            if (HasCompensationLogs(routingSlip))
             {
-                RoutingSlipBuilder builder = CreateRoutingSlipBuilder(_routingSlip);
-
-                Build(builder);
-
-                RoutingSlip routingSlip = builder.Build();
-
                 await _executeContext.Forward(routingSlip.GetNextCompensateAddress(), routingSlip).ConfigureAwait(false);
             }
             else
             {
-                DateTime faultedTimestamp = _executeContext.Timestamp + _elapsed;
-                TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
+                var faultedTimestamp = _executeContext.Timestamp + _elapsed;
+                var faultedDuration = faultedTimestamp - routingSlip.CreateTimestamp;
 
-                await _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, _routingSlip.Variables,
-                    _activityException).ConfigureAwait(false);
+                await _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, routingSlip.Variables, _activityException).ConfigureAwait(false);
             }
         }
 
-        public bool IsFaulted(out Exception exception)
+        public virtual bool IsFaulted(out Exception exception)
         {
             exception = _exception;
             return true;
         }
 
-        bool HasCompensationLogs()
+        static bool HasCompensationLogs(RoutingSlip routingSlip)
         {
-            return _routingSlip.CompensateLogs != null && _routingSlip.CompensateLogs.Count > 0;
+            return routingSlip.CompensateLogs != null && routingSlip.CompensateLogs.Count > 0;
         }
 
         protected virtual void Build(RoutingSlipBuilder builder)
@@ -89,7 +76,7 @@ namespace MassTransit.Courier.Results
             builder.AddActivityException(_activityException);
         }
 
-        protected virtual RoutingSlipBuilder CreateRoutingSlipBuilder(RoutingSlip routingSlip)
+        static RoutingSlipBuilder CreateRoutingSlipBuilder(RoutingSlip routingSlip)
         {
             return new RoutingSlipBuilder(routingSlip, routingSlip.Itinerary, Enumerable.Empty<Activity>());
         }

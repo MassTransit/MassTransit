@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Courier
+﻿namespace MassTransit.Tests.Courier
 {
     using System;
     using System.Threading.Tasks;
@@ -161,6 +149,24 @@ namespace MassTransit.Tests.Courier
             await compensated;
         }
 
+        [Test]
+        public async Task Should_publish_the_faulted_routing_slip_event_and_set_variables()
+        {
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+
+            ActivityTestContext testActivity = GetActivityContext<SetVariablesFaultyActivity>();
+
+            Task<ConsumeContext<RoutingSlipFaulted>> handled = ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
+
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
+
+            await Bus.Execute(builder.Build());
+
+            var context = await handled;
+
+            Assert.AreEqual("Data", context.Message.GetVariable<string>("Test"));
+        }
+
         protected override void SetupActivities(BusTestHarness testHarness)
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
@@ -168,6 +174,7 @@ namespace MassTransit.Tests.Courier
             AddActivityContext<FaultyCompensateActivity, TestArguments, TestLog>(() => new FaultyCompensateActivity());
             AddActivityContext<FaultyActivity, FaultyArguments, FaultyLog>(() => new FaultyActivity());
             AddActivityContext<NastyFaultyActivity, FaultyArguments, FaultyLog>(() => new NastyFaultyActivity());
+            AddActivityContext<SetVariablesFaultyActivity, SetVariablesFaultyArguments>(() => new SetVariablesFaultyActivity());
         }
     }
 }

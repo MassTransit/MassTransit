@@ -125,6 +125,24 @@
         ExecutionResult Faulted(Exception exception);
 
         /// <summary>
+        /// The activity Faulted with no exception, but compensation should be triggered and passing additional variables to set on
+        /// the routing slip
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <param name="variables">An anonymous object of values to add/set as variables on the routing slip</param>
+        /// <returns></returns>
+        ExecutionResult FaultedWithVariables(Exception exception, object variables);
+
+        /// <summary>
+        /// The activity Faulted with no exception, but compensation should be triggered and passing additional variables to set on
+        /// the routing slip
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <param name="variables">An dictionary of values to add/set as variables on the routing slip</param>
+        /// <returns></returns>
+        ExecutionResult FaultedWithVariables(Exception exception, IEnumerable<KeyValuePair<string, object>> variables);
+
+        /// <summary>
         /// Set the execution result, which completes the activity
         /// </summary>
         ExecutionResult Result { get; set; }
