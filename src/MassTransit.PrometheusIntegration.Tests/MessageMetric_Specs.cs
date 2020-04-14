@@ -31,6 +31,8 @@ namespace MassTransit.PrometheusIntegration.Tests
             await Bus.Publish(new PingMessage());
             await Bus.Publish(new PingMessage());
 
+            await Bus.Publish<GenericMessage<LongMessage>>(new {Message = new LongMessage()});
+
             await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
 
             using var stream = new MemoryStream();
@@ -42,7 +44,7 @@ namespace MassTransit.PrometheusIntegration.Tests
 
             Assert.That(text.Contains("mt_publish_total{service_name=\"unit_test\",message_type=\"PingMessage\"} 3"), "publish");
             Assert.That(text.Contains("mt_send_total{service_name=\"unit_test\",message_type=\"PingMessage\"} 5"), "send");
-            Assert.That(text.Contains("mt_receive_total{service_name=\"unit_test\",endpoint_address=\"input_queue\"} 8"), "receive");
+            Assert.That(text.Contains("mt_receive_total{service_name=\"unit_test\",endpoint_address=\"input_queue\"} 9"), "receive");
             Assert.That(text.Contains("mt_consume_total{service_name=\"unit_test\",message_type=\"PingMessage\",consumer_type=\"TestConsumer\"} 8"), "consume");
         }
 
@@ -59,6 +61,29 @@ namespace MassTransit.PrometheusIntegration.Tests
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Consumer(() => new TestConsumer());
+            configurator.Consumer(() => new GenericConsumer<GenericMessage<LongMessage>>());
+        }
+    }
+
+
+    public class LongMessage
+    {
+    }
+
+
+    public interface GenericMessage<out T>
+    {
+        T Message { get; }
+    }
+
+
+    public class GenericConsumer<T> :
+        IConsumer<T>
+        where T : class
+    {
+        public Task Consume(ConsumeContext<T> context)
+        {
+            return Task.CompletedTask;
         }
     }
 
