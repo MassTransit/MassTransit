@@ -15,6 +15,18 @@
 
         public ILifetimeScope LifetimeScope => _scope;
 
+        public ILifetimeScope GetLifetimeScope<T>(SendContext<T> context)
+            where T : class
+        {
+            return _scope;
+        }
+
+        public ILifetimeScope GetLifetimeScope<T>(PublishContext<T> context)
+            where T : class
+        {
+            return _scope;
+        }
+
         public ILifetimeScope GetLifetimeScope(ConsumeContext context)
         {
             return _scope;

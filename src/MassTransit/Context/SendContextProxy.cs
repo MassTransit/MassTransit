@@ -7,7 +7,7 @@ namespace MassTransit.Context
 
     public class SendContextProxy<TMessage> :
         SendContextProxy,
-        PublishContext<TMessage>
+        SendContext<TMessage>
         where TMessage : class
     {
         public SendContextProxy(SendContext context, TMessage message)
@@ -21,8 +21,7 @@ namespace MassTransit.Context
 
 
     public class SendContextProxy :
-        ProxyPipeContext,
-        PublishContext
+        ProxyPipeContext
     {
         readonly SendContext _context;
 

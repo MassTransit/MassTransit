@@ -41,7 +41,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
         public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
-            using var serviceScope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+            using var serviceScope = _serviceProvider.CreateScope();
 
             var factory = serviceScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 
@@ -68,7 +68,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
             async Task CreateScope()
             {
-                using var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+                using var serviceScope = serviceProvider.CreateScope();
 
                 serviceScope.UpdateScope(context);
 
